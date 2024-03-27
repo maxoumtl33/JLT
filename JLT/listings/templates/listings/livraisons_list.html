@@ -1,0 +1,92 @@
+{% extends 'listings/base.html' %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+        <p>{% if user.is_authenticated %}
+            <p style="color: green;"><i class="fa-solid fa-circle" style="color: green;"></i></p>
+        {% else %}
+        <p style="color: red;"><i class="fa-solid fa-circle" style="color: red;"></i></p>
+        {% endif %}</p>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            {% if user.is_authenticated %}
+              <li class="nav-item">
+                <p><a class="nav-link active" href="{% url 'livreur-detail' request.user.id %}"  aria-current="page">Mon Dashboard</a></p>
+              </li>
+              {% endif %}
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Liens formulaires
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="https://discord.com/channels/1174091428876533800/1194755233935523952" target="_blank">PHOTO LIVRAISON <i class="fa-brands fa-discord"></i></a>
+              </li>
+              <li><a class="dropdown-item" href="https://view.forms.app/loicveyre/jeparsenlivraison" target="_blank">JE PARS EN LIVRAISON <i class="fa-solid fa-truck-fast"></i></a>
+              </li>
+              <li><a class="dropdown-item" href="https://view.forms.app/loicveyre/jereviensdelivraison" target="_blank">JE REVIENS DE LIVRAISON <i class="fa-sharp fa-solid fa-truck fa-flip-horizontal"></i></a>
+              </li>
+              <li><a class="dropdown-item" href="https://oakmnxgj.forms.app/recuplivreurs" target="_blank">RECUPERATION <i class="fa-solid fa-dolly"></i></a>
+              </li>
+              <li><a class="dropdown-item" href="https://oakmnxgj.forms.app/essence" target="_blank">ESSENCE <i class="fa-solid fa-gas-pump"></i></a>
+              </li>
+            </ul>
+            <li class="nav-item">
+                <div>
+                  <p>{% if user.is_authenticated %}
+                      <form action="{% url 'logout' %}" method="post">
+                          {% csrf_token %}
+                          <button type="submit" class="btn btn-outline-danger">se déconnecter</button>
+                      </form>
+                      {% else %}
+                          <a href="{% url 'login' %}" class="btn btn-outline-success" >se connecter</a>
+                      {% endif %}</p>
+                  </div>
+              </li>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+<div style="text-align: center;">
+<h1>Feuille de route de la journée</h1>
+<br>
+
+<p>Il y a  {{ livraisons|length }} livraisons aujourd'hui : </p>
+<br>
+<table class="table">
+    <thead class="thead-dark">
+      <tr>
+        
+        <th scope="col">Nom livraison</th>
+        <th scope="col">Route</th>
+        <th scope="col">Heure de départ</th>
+        <th scope="col">Heure de livraison</th>
+        <th scope="col">Livreur</th>
+      </tr>
+    </thead>
+    <tbody>
+        {% for livraison in livraisons %}
+      <tr>
+       
+        
+        <td>{{livraison.nom}}</td>
+        <td>{{ livraison.route }}</td>
+        <td>{{ livraison.heure_depart }}</td>
+        <td>{{ livraison.heure_livraison }}</td>
+        <td>{{livraison.livreur.nom}}</td>
+
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+
+{% endblock %}
+

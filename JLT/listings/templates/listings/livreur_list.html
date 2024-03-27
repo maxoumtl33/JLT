@@ -1,0 +1,12 @@
+{% extends 'listings/base.html' %}
+
+{% block content %}
+
+<h1>Liste des livreurs</h1>
+<ul>
+    {% for livreur in livreurs %}
+    <li><a href="{url 'livreur' livreur.user.id}"></a></li>
+    {% endfor %}
+</ul>
+<p><a href="{% url 'home' %}">Retour à toutes tes livraisons</a></p>
+{% endblock %}
