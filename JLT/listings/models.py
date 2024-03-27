@@ -65,7 +65,7 @@ class Livraison(models.Model):
     client = models.ForeignKey(Client, null=True, on_delete=models.SET_NULL)
     date = models.fields.DateField()
     commentaire = models.fields.CharField(max_length=100)
-    details_commande = models.FileField(upload_to='commandesdetail/')
+    details_commande = models.FileField(upload_to='media/commandesdetail/')
     status = models.fields.CharField(max_length=100)
     livreur = models.ForeignKey(Livreur, null=True, on_delete=models.SET_NULL)
     journee = models.ForeignKey(Journee, null=True, on_delete=models.SET_NULL)
