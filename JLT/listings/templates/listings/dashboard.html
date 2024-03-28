@@ -15,7 +15,6 @@
             <p><a class="nav-link active" href="#listlivraisons"  aria-current="page">Mes livraisons</a></p>
           </li>
         </li>
-        <p><a class="nav-link active" href="#listrecup"  aria-current="page">Mes récuperations</a></p>
       </li>
           <li class="nav-item">
             <p><a class="nav-link active" href="#tachesafaire"  aria-current="page">Mes tâches à faire </a></p>
@@ -62,60 +61,500 @@
 </div>
 <br>
 
-  <h2 style="text-align: center;" id="listlivraisons">LIVRAISONS :</h2>
+  <h2 style="text-align: center;" id="listlivraisons">MES ROUTES <i class="fa-solid fa-arrow-down"></i></h2>
+  <p style="text-align: center;">(les livraisons sont classées par route)</p>
   <br>
-<div style="text-align: center;" >
-    
-    {% for livraison in livraisons %}
-    {% if livraison.date == journee.date and livraison.livreur.nom == livreur.nom%}
-    
-    <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
-        <div class="card-body">
-          <h5 class="card-title">{{livraison}}</h5>
-          <p class="card-text">Heure de départ : {{livraison.heure_depart}}</p>
-          <p class="card-text">Heure de livraison : {{livraison.heure_livraison}}</p>
-          <p class="card-text">Route : {{livraison.route}}</p>
-          <a href="{% url 'livraison-detail' livraison.id %}" class="btn btn-primary" >Voir détail</a>
-        </div>
-      </div>
-     
-      {% endif %}
-      {% endfor %}
+  <hr style="border-width: 9px; background-color: black; color: black;">
+
+        {% for livraison in livraisons %}
+            {% if livraison.date == journee.date and livraison.livreur.nom == livreur.nom and livraison.route == route1 %}
+            <div style="text-align: center;" >
+              <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+                  <div class="card-body">
+                    <h1 class="card-title">ROUTE N°{{livraison.route}}</h1>
+                    <h5 class="card-title">{{livraison}}</h5>
+                    <p class="card-text">Heure de départ : {{livraison.heure_depart}}</p>
+                    <p class="card-text">Heure de livraison : {{livraison.heure_livraison}}</p>
+                    <p class="card-text">Route : {{livraison.route}}</p>
+                    <a href="{% url 'livraison-detail' livraison.id %}" class="btn btn-primary" >Voir détail</a>
+                  </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+                </div>
+                {% for recuperation in recuperations %}
+                {% if recuperation.date == journee.date and recuperation.livreur.nom == livreur.nom and recuperation.route == route1%}
+                <div style="text-align: center;" id="listlivraisons">
+                  <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+                      <div class="card-body" style="background-color: #F1B3DA!important;">
+                        <h1 class="card-title">ROUTE N°{{recuperation.route}}</h1>
+                        <h5 class="card-title">{{recuperation}}</h5>
+                        <p class="card-text">Heure de départ : {{recuperation.heure_depart}}</p>
+                        <p class="card-text">Heure de récuperation : {{recuperation.heure_livraison}}</p>
+                        <a href="{% url 'recuperation-detail' recuperation.id %}" class="btn btn-primary" >Voir détail</a>
+                      </div>
+                    </div>
+                {% endif %}
+                {% endfor %}
+                </div>
       
+
+  
+        {% for livraison in livraisons %}
+            {% if livraison.date == journee.date and livraison.livreur.nom == livreur.nom and livraison.route == route2 %}
+            <div style="text-align: center;" >
+              <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+                  <div class="card-body">
+                    <h1 class="card-title">ROUTE N°{{livraison.route}}</h1>
+                    <h5 class="card-title">{{livraison}}</h5>
+                    <p class="card-text">Heure de départ : {{livraison.heure_depart}}</p>
+                    <p class="card-text">Heure de livraison : {{livraison.heure_livraison}}</p>
+                    <a href="{% url 'livraison-detail' livraison.id %}" class="btn btn-primary" >Voir détail</a>
+                  </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+                </div>
+                {% for recuperation in recuperations %}
+                {% if recuperation.date == journee.date and recuperation.livreur.nom == livreur.nom and recuperation.route == route2%}
+                <div style="text-align: center;" id="listlivraisons">
+                  <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+                      <div class="card-body" style="background-color: #F1B3DA!important;">
+                        <h1 class="card-title">ROUTE N°{{recuperation.route}}</h1>
+                        <h5 class="card-title">{{recuperation}}</h5>
+                        <p class="card-text">Heure de départ : {{recuperation.heure_depart}}</p>
+                        <p class="card-text">Heure de récuperation : {{recuperation.heure_livraison}}</p>
+                        <a href="{% url 'recuperation-detail' recuperation.id %}" class="btn btn-primary" >Voir détail</a>
+                      </div>
+                    </div>
+
+                {% endif %}
+                {% endfor %}
+                </div>
      
+  
+        {% for livraison in livraisons %}
+            {% if livraison.date == journee.date and livraison.livreur.nom == livreur.nom and livraison.route == route3 %}
+            <div style="text-align: center;" >
+              <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+                  <div class="card-body">
+                    <h1 class="card-title">Route N°{{livraison.route}}</h1>
+                    <h5 class="card-title">{{livraison}}</h5>
+                    <p class="card-text">Heure de départ : {{livraison.heure_depart}}</p>
+                    <p class="card-text">Heure de livraison : {{livraison.heure_livraison}}</p>
+                    <a href="{% url 'livraison-detail' livraison.id %}" class="btn btn-primary" >Voir détail</a>
+                  </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+                </div>
+                {% for recuperation in recuperations %}
+                {% if recuperation.date == journee.date and recuperation.livreur.nom == livreur.nom and recuperation.route == route3%}
+                <div style="text-align: center;" id="listlivraisons">
+                  <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+                      <div class="card-body" style="background-color: #F1B3DA!important;">
+                        <h1 class="card-title">Route N°{{recuperation.route}}</h1>
+                        <h5 class="card-title">{{recuperation}}</h5>
+                        <p class="card-text">Heure de départ : {{recuperation.heure_depart}}</p>
+                        <p class="card-text">Heure de récuperation : {{recuperation.heure_livraison}}</p>
+                        <a href="{% url 'recuperation-detail' recuperation.id %}" class="btn btn-primary" >Voir détail</a>
+                      </div>
+                    </div>
 
-      <br>
-      <br>
+                {% endif %}
+                {% endfor %}
+                </div>
+      
+        {% for livraison in livraisons %}
+            {% if livraison.date == journee.date and livraison.livreur.nom == livreur.nom and livraison.route == route4 %}
+            <div style="text-align: center;" >
+              <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+                  <div class="card-body">
+                    <h1 class="card-title">Route N°{{livraison.route}}</h1>
+                    <h5 class="card-title">{{livraison}}</h5>
+                    <p class="card-text">Heure de départ : {{livraison.heure_depart}}</p>
+                    <p class="card-text">Heure de livraison : {{livraison.heure_livraison}}</p>
+                    <a href="{% url 'livraison-detail' livraison.id %}" class="btn btn-primary" >Voir détail</a>
+                  </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+                </div>
+                {% for recuperation in recuperations %}
+                {% if recuperation.date == journee.date and recuperation.livreur.nom == livreur.nom and recuperation.route == route4%}
+                <div style="text-align: center;" id="listlivraisons">
+                  <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+                      <div class="card-body" style="background-color: #F1B3DA!important;">
+                        <h1 class="card-title">Route N°{{recuperation.route}}</h1>
+                        <h5 class="card-title">{{recuperation}}</h5>
+                        <p class="card-text">Heure de départ : {{recuperation.heure_depart}}</p>
+                        <p class="card-text">Heure de récuperation : {{recuperation.heure_livraison}}</p>
+                        <a href="{% url 'recuperation-detail' recuperation.id %}" class="btn btn-primary" >Voir détail</a>
+                      </div>
+                    </div>
+                    
 
-      <h2 style="text-align: center;" id="listrecup">RECUPERATIONS:</h2>
-      <br>
-      <div style="text-align: center;" id="listlivraisons">
-        {% for recuperation in recuperations %}
-            {% if recuperation.date == journee.date and recuperation.livreur.nom == livreur.nom%}
+                {% endif %}
+                {% endfor %}
+                </div>
+     
+        {% for livraison in livraisons %}
+            {% if livraison.date == journee.date and livraison.livreur.nom == livreur.nom and livraison.route == route5 %}
+            <div style="text-align: center;" >
+              <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+                  <div class="card-body">
+                    <h1 class="card-title">Route N°{{livraison.route}}</h1>
+                    <h5 class="card-title">{{livraison}}</h5>
+                    <p class="card-text">Heure de départ : {{livraison.heure_depart}}</p>
+                    <p class="card-text">Heure de livraison : {{livraison.heure_livraison}}</p>
+                    <a href="{% url 'livraison-detail' livraison.id %}" class="btn btn-primary" >Voir détail</a>
+                  </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+                </div>
+                {% for recuperation in recuperations %}
+                {% if recuperation.date == journee.date and recuperation.livreur.nom == livreur.nom and recuperation.route == route5%}
+                <div style="text-align: center;" id="listlivraisons">
+                  <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+                      <div class="card-body" style="background-color: #F1B3DA!important;">
+                        <h1 class="card-title">Route N°{{recuperation.route}}</h1>
+                        <h5 class="card-title">{{recuperation}}</h5>
+                        <p class="card-text">Heure de départ : {{recuperation.heure_depart}}</p>
+                        <p class="card-text">Heure de récuperation : {{recuperation.heure_livraison}}</p>
+                        <a href="{% url 'recuperation-detail' recuperation.id %}" class="btn btn-primary" >Voir détail</a>
+                      </div>
+                    </div>
 
-        <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
-            <div class="card-body">
-              <h5 class="card-title">{{recuperation}}</h5>
-              <p class="card-text">Heure de départ : {{recuperation.heure_depart}}</p>
-              <p class="card-text">Heure de récuperation : {{recuperation.heure_livraison}}</p>
-              <p class="card-text">Route : {{recuperation.route}}</p>
-              <a href="{% url 'recuperation-detail' recuperation.id %}" class="btn btn-primary" >Voir détail</a>
-            </div>
-          </div>
-        {% endif %}
-        {% endfor %}
+                {% endif %}
+                {% endfor %}
+                </div>
+      
+        {% for livraison in livraisons %}
+            {% if livraison.date == journee.date and livraison.livreur.nom == livreur.nom and livraison.route == route6 %}
+            <div style="text-align: center;" >
+              <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+                  <div class="card-body">
+                    <h1 class="card-title">Route N°{{livraison.route}}</h1>
+                    <h5 class="card-title">{{livraison}}</h5>
+                    <p class="card-text">Heure de départ : {{livraison.heure_depart}}</p>
+                    <p class="card-text">Heure de livraison : {{livraison.heure_livraison}}</p>
+                    <a href="{% url 'livraison-detail' livraison.id %}" class="btn btn-primary" >Voir détail</a>
+                  </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+                </div>
+                {% for recuperation in recuperations %}
+                {% if recuperation.date == journee.date and recuperation.livreur.nom == livreur.nom and recuperation.route == route6%}
+                <div style="text-align: center;" id="listlivraisons">
+                  <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+                      <div class="card-body" style="background-color: #F1B3DA!important;">
+                        <h1 class="card-title">Route N°{{recuperation.route}}</h1>
+                        <h5 class="card-title">{{recuperation}}</h5>
+                        <p class="card-text">Heure de départ : {{recuperation.heure_depart}}</p>
+                        <p class="card-text">Heure de récuperation : {{recuperation.heure_livraison}}</p>
+                        <a href="{% url 'recuperation-detail' recuperation.id %}" class="btn btn-primary" >Voir détail</a>
+                      </div>
+                    </div>
+
+                {% endif %}
+                {% endfor %}
+                </div>
+     
+        {% for livraison in livraisons %}
+            {% if livraison.date == journee.date and livraison.livreur.nom == livreur.nom and livraison.route == route7 %}
+            <div style="text-align: center;" >
+              <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+                  <div class="card-body">
+                    <h1 class="card-title">Route N°{{livraison.route}}</h1>
+                    <h5 class="card-title">{{livraison}}</h5>
+                    <p class="card-text">Heure de départ : {{livraison.heure_depart}}</p>
+                    <p class="card-text">Heure de livraison : {{livraison.heure_livraison}}</p>
+                    <a href="{% url 'livraison-detail' livraison.id %}" class="btn btn-primary" >Voir détail</a>
+                  </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+                </div>
+                {% for recuperation in recuperations %}
+                {% if recuperation.date == journee.date and recuperation.livreur.nom == livreur.nom and recuperation.route == route7%}
+                <div style="text-align: center;" id="listlivraisons">
+                  <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+                      <div class="card-body" style="background-color: #F1B3DA!important;">
+                        <h1 class="card-title">Route N°{{recuperation.route}}</h1>
+                        <h5 class="card-title">{{recuperation}}</h5>
+                        <p class="card-text">Heure de départ : {{recuperation.heure_depart}}</p>
+                        <p class="card-text">Heure de récuperation : {{recuperation.heure_livraison}}</p>
+                        <a href="{% url 'recuperation-detail' recuperation.id %}" class="btn btn-primary" >Voir détail</a>
+                      </div>
+                    </div>
+
+                {% endif %}
+                {% endfor %}
+                </div>
+     
+        {% for livraison in livraisons %}
+            {% if livraison.date == journee.date and livraison.livreur.nom == livreur.nom and livraison.route == route8 %}
+            <div style="text-align: center;" >
+              <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+                  <div class="card-body">
+                    <h1 class="card-title">Route N°{{livraison.route}}</h1>
+                    <h5 class="card-title">{{livraison}}</h5>
+                    <p class="card-text">Heure de départ : {{livraison.heure_depart}}</p>
+                    <p class="card-text">Heure de livraison : {{livraison.heure_livraison}}</p>
+                    <a href="{% url 'livraison-detail' livraison.id %}" class="btn btn-primary" >Voir détail</a>
+                  </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+                </div>
+                {% for recuperation in recuperations %}
+                {% if recuperation.date == journee.date and recuperation.livreur.nom == livreur.nom and recuperation.route == route8%}
+                <div style="text-align: center;" id="listlivraisons">
+                  <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+                      <div class="card-body"style="background-color: #F1B3DA!important;">
+                        <h1 class="card-title">Route N°{{recuperation.route}}</h1>
+                        <h5 class="card-title">{{recuperation}}</h5>
+                        <p class="card-text">Heure de départ : {{recuperation.heure_depart}}</p>
+                        <p class="card-text">Heure de récuperation : {{recuperation.heure_livraison}}</p>
+                        <a href="{% url 'recuperation-detail' recuperation.id %}" class="btn btn-primary" >Voir détail</a>
+                      </div>
+                    </div>
+
+                {% endif %}
+                {% endfor %}
+                </div>
+      
+        {% for livraison in livraisons %}
+            {% if livraison.date == journee.date and livraison.livreur.nom == livreur.nom and livraison.route == route9 %}
+            <div style="text-align: center;" >
+              <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+                  <div class="card-body">
+                    <h1 class="card-title">Route N°{{livraison.route}}</h1>
+                    <h5 class="card-title">{{livraison}}</h5>
+                    <p class="card-text">Heure de départ : {{livraison.heure_depart}}</p>
+                    <p class="card-text">Heure de livraison : {{livraison.heure_livraison}}</p>
+                    <a href="{% url 'livraison-detail' livraison.id %}" class="btn btn-primary" >Voir détail</a>
+                  </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+                </div>
+                {% for recuperation in recuperations %}
+                {% if recuperation.date == journee.date and recuperation.livreur.nom == livreur.nom and recuperation.route == route9%}
+                <div style="text-align: center;" id="listlivraisons">
+                  <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+                      <div class="card-body"style="background-color: #F1B3DA!important;">
+                        <h1 class="card-title">Route N°{{recuperation.route}}</h1>
+                        <h5 class="card-title">{{recuperation}}</h5>
+                        <p class="card-text">Heure de départ : {{recuperation.heure_depart}}</p>
+                        <p class="card-text">Heure de récuperation : {{recuperation.heure_livraison}}</p>
+                        <a href="{% url 'recuperation-detail' recuperation.id %}" class="btn btn-primary" >Voir détail</a>
+                      </div>
+                    </div>
+
+                {% endif %}
+                {% endfor %}
+                </div>
+      
+        {% for livraison in livraisons %}
+            {% if livraison.date == journee.date and livraison.livreur.nom == livreur.nom and livraison.route == route10 %}
+            <div style="text-align: center;" >
+              <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+                  <div class="card-body">
+                    <h1 class="card-title">Route N°{{livraison.route}}</h1>
+                    <h5 class="card-title">{{livraison}}</h5>
+                    <p class="card-text">Heure de départ : {{livraison.heure_depart}}</p>
+                    <p class="card-text">Heure de livraison : {{livraison.heure_livraison}}</p>
+                    <a href="{% url 'livraison-detail' livraison.id %}" class="btn btn-primary" >Voir détail</a>
+                  </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+                </div>
+                {% for recuperation in recuperations %}
+                {% if recuperation.date == journee.date and recuperation.livreur.nom == livreur.nom and recuperation.route == route10%}
+                <div style="text-align: center;" id="listlivraisons">
+                  <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+                      <div class="card-body"style="background-color: #F1B3DA!important;">
+                        <h1 class="card-title">Route N°{{recuperation.route}}</h1>
+                        <h5 class="card-title">{{recuperation}}</h5>
+                        <p class="card-text">Heure de départ : {{recuperation.heure_depart}}</p>
+                        <p class="card-text">Heure de récuperation : {{recuperation.heure_livraison}}</p>
+                        <a href="{% url 'recuperation-detail' recuperation.id %}" class="btn btn-primary" >Voir détail</a>
+                      </div>
+                    </div>
+
+                {% endif %}
+                {% endfor %}
+                </div>
+      
+        {% for livraison in livraisons %}
+            {% if livraison.date == journee.date and livraison.livreur.nom == livreur.nom and livraison.route == route11 %}
+            <div style="text-align: center;" >
+              <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+                  <div class="card-body">
+                    <h1 class="card-title">Route N°{{livraison.route}}</h1>
+                    <h5 class="card-title">{{livraison}}</h5>
+                    <p class="card-text">Heure de départ : {{livraison.heure_depart}}</p>
+                    <p class="card-text">Heure de livraison : {{livraison.heure_livraison}}</p>
+                    <a href="{% url 'livraison-detail' livraison.id %}" class="btn btn-primary" >Voir détail</a>
+                  </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+                </div>
+                {% for recuperation in recuperations %}
+                {% if recuperation.date == journee.date and recuperation.livreur.nom == livreur.nom and recuperation.route == route11%}
+                <div style="text-align: center;" id="listlivraisons">
+                  <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+                      <div class="card-body"style="background-color: #F1B3DA!important;">
+                        <h1 class="card-title">Route N°{{recuperation.route}}</h1>
+                        <h5 class="card-title">{{recuperation}}</h5>
+                        <p class="card-text">Heure de départ : {{recuperation.heure_depart}}</p>
+                        <p class="card-text">Heure de récuperation : {{recuperation.heure_livraison}}</p>
+                        <a href="{% url 'recuperation-detail' recuperation.id %}" class="btn btn-primary" >Voir détail</a>
+                      </div>
+                    </div>
+
+                {% endif %}
+                {% endfor %}
+                </div>
+      
+        {% for livraison in livraisons %}
+            {% if livraison.date == journee.date and livraison.livreur.nom == livreur.nom and livraison.route == route12 %}
+            <div style="text-align: center;" >
+              <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+                  <div class="card-body">
+                    <h1 class="card-title">Route N°{{livraison.route}}</h1>
+                    <h5 class="card-title">{{livraison}}</h5>
+                    <p class="card-text">Heure de départ : {{livraison.heure_depart}}</p>
+                    <p class="card-text">Heure de livraison : {{livraison.heure_livraison}}</p>
+                    <a href="{% url 'livraison-detail' livraison.id %}" class="btn btn-primary" >Voir détail</a>
+                  </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+                </div>
+                {% for recuperation in recuperations %}
+                {% if recuperation.date == journee.date and recuperation.livreur.nom == livreur.nom and recuperation.route == route12%}
+                <div style="text-align: center;" id="listlivraisons">
+                  <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+                      <div class="card-body"style="background-color: #F1B3DA!important;">
+                        <h1 class="card-title">Route N°{{recuperation.route}}</h1>
+                        <h5 class="card-title">{{recuperation}}</h5>
+                        <p class="card-text">Heure de départ : {{recuperation.heure_depart}}</p>
+                        <p class="card-text">Heure de récuperation : {{recuperation.heure_livraison}}</p>
+                        <a href="{% url 'recuperation-detail' recuperation.id %}" class="btn btn-primary" >Voir détail</a>
+                      </div>
+                    </div>
+
+                {% endif %}
+                {% endfor %}
+                </div>
+     
+        {% for livraison in livraisons %}
+            {% if livraison.date == journee.date and livraison.livreur.nom == livreur.nom and livraison.route == route13 %}
+            <div style="text-align: center;" >
+              <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+                  <div class="card-body">
+                    <h1 class="card-title">Route N°{{livraison.route}}</h1>
+                    <h5 class="card-title">{{livraison}}</h5>
+                    <p class="card-text">Heure de départ : {{livraison.heure_depart}}</p>
+                    <p class="card-text">Heure de livraison : {{livraison.heure_livraison}}</p>
+                    <a href="{% url 'livraison-detail' livraison.id %}" class="btn btn-primary" >Voir détail</a>
+                  </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+                </div>
+                {% for recuperation in recuperations %}
+                {% if recuperation.date == journee.date and recuperation.livreur.nom == livreur.nom and recuperation.route == route13%}
+                <div style="text-align: center;" id="listlivraisons">
+                  <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+                      <div class="card-body"style="background-color: #F1B3DA!important;">
+                        <h1 class="card-title">Route N°{{recuperation.route}}</h1>
+                        <h5 class="card-title">{{recuperation}}</h5>
+                        <p class="card-text">Heure de départ : {{recuperation.heure_depart}}</p>
+                        <p class="card-text">Heure de récuperation : {{recuperation.heure_livraison}}</p>
+                        <a href="{% url 'recuperation-detail' recuperation.id %}" class="btn btn-primary" >Voir détail</a>
+                      </div>
+                    </div>
+
+                {% endif %}
+                {% endfor %}
+                </div>
+     
+        {% for livraison in livraisons %}
+            {% if livraison.date == journee.date and livraison.livreur.nom == livreur.nom and livraison.route == route14 %}
+            <div style="text-align: center;" >
+              <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+                  <div class="card-body">
+                    <h1 class="card-title">Route N°{{livraison.route}}</h1>
+                    <h5 class="card-title">{{livraison}}</h5>
+                    <p class="card-text">Heure de départ : {{livraison.heure_depart}}</p>
+                    <p class="card-text">Heure de livraison : {{livraison.heure_livraison}}</p>
+                    <a href="{% url 'livraison-detail' livraison.id %}" class="btn btn-primary" >Voir détail</a>
+                  </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+                </div>
+                {% for recuperation in recuperations %}
+                {% if recuperation.date == journee.date and recuperation.livreur.nom == livreur.nom and recuperation.route == route14%}
+                <div style="text-align: center;" id="listlivraisons">
+                  <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+                      <div class="card-body"style="background-color: #F1B3DA!important;">
+                        <h1 class="card-title">Route N°{{recuperation.route}}</h1>
+                        <h5 class="card-title">{{recuperation}}</h5>
+                        <p class="card-text">Heure de départ : {{recuperation.heure_depart}}</p>
+                        <p class="card-text">Heure de récuperation : {{recuperation.heure_livraison}}</p>
+                        <a href="{% url 'recuperation-detail' recuperation.id %}" class="btn btn-primary" >Voir détail</a>
+                      </div>
+                    </div>
 
 
-            
-</div>
-<br>
-<br>
-<br>
+                {% endif %}
+                {% endfor %}
+                </div>
+     
+        {% for livraison in livraisons %}
+            {% if livraison.date == journee.date and livraison.livreur.nom == livreur.nom and livraison.route == route15 %}
+            <div style="text-align: center;" >
+              <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+                  <div class="card-body">
+                    <h1 class="card-title">Route N°{{livraison.route}}</h1>
+                    <h5 class="card-title">{{livraison}}</h5>
+                    <p class="card-text">Heure de départ : {{livraison.heure_depart}}</p>
+                    <p class="card-text">Heure de livraison : {{livraison.heure_livraison}}</p>
+                    <a href="{% url 'livraison-detail' livraison.id %}" class="btn btn-primary" >Voir détail</a>
+                  </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+                </div>
+                {% for recuperation in recuperations %}
+                {% if recuperation.date == journee.date and recuperation.livreur.nom == livreur.nom and recuperation.route == route15%}
+                <div style="text-align: center;" id="listlivraisons">
+                  <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+                      <div class="card-body"style="background-color: #F1B3DA!important;">
+                        <h1 class="card-title">Route N°{{recuperation.route}}</h1>
+                        <h5 class="card-title">{{recuperation}}</h5>
+                        <p class="card-text">Heure de départ : {{recuperation.heure_depart}}</p>
+                        <a href="{% url 'recuperation-detail' recuperation.id %}" class="btn btn-primary" >Voir détail</a>
+                      </div>
+                    </div>
 
+                {% endif %}
+                {% endfor %}
+                </div>
+     
 
 
 <div id="tachesafaire" style="text-align: center;" >
-<h2>TACHES:</h2>
+  <hr>
+<h2>TACHES <i class="fa-solid fa-arrow-down"></i></h2>
 <br>
 <div class="card d-inline-grid" style="width: 18rem;">
     <ul class="list-group list-group-flush">
@@ -135,3 +574,4 @@
 
 
 {% endblock %}
+
