@@ -46,15 +46,18 @@
 
 <br>
 
+<p>{% if user.is_authenticated %}
+  <p>Tu es déjà connecté</p>
+  <p><a class="btn btn-primary" href="{% url 'journees-list'  %}"  aria-current="page">Voir les journées</a></p>
+  <form action="{% url 'logout' %}" method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-outline-danger">se déconnecter</button>
+  </form>
+</p>
+{% else %}
 <p>Connecte toi ici pour continuer :</p>
 <a href="{% url 'login' %}" class="btn btn-outline-success" >se connecter</a>
 <br>
-
+{% endif %}
 
 {% endblock %}
-
-<p>{% if user.is_authenticated %}
-  <p style="color: green;"><i class="fa-solid fa-circle" style="color: green;"></i></p>
-{% else %}
-<p style="color: red;"><i class="fa-solid fa-circle" style="color: red;"></i></p>
-{% endif %}</p>
