@@ -9,11 +9,6 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            {% if user.is_authenticated %}
-              <li class="nav-item">
-                <p><a class="nav-link active" href="{% url 'livreur-detail' request.user.id %}"  aria-current="page">Mon Dashboard</a></p>
-              </li>
-              {% endif %}
           </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -38,8 +33,6 @@
                           {% csrf_token %}
                           <button type="submit" class="btn btn-outline-danger">se déconnecter</button>
                       </form>
-                      {% else %}
-                          <a href="{% url 'login' %}" class="btn btn-outline-success" >se connecter</a>
                       {% endif %}</p>
                   </div>
               </li>
