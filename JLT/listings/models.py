@@ -52,7 +52,8 @@ class Journee(models.Model):
      date = models.DateField()
 
 
-
+class Route(models.Model):
+     nom = models.fields.CharField(max_length=100)
 
 
         
@@ -60,7 +61,7 @@ class Livraison(models.Model):
     nom = models.fields.CharField(max_length=100)
     def __str__(self):
         return f'{self.nom}'
-    route = models.fields.CharField(max_length=100)
+    route = models.ForeignKey(Route, null=True, on_delete=models.SET_NULL)
     heure_depart = models.fields.CharField(max_length=100)
     heure_livraison = models.fields.CharField(max_length=100)
     client = models.ForeignKey(Client, null=True, on_delete=models.SET_NULL)
@@ -72,12 +73,13 @@ class Livraison(models.Model):
     journee = models.ForeignKey(Journee, null=True, on_delete=models.SET_NULL)
     aidelivreur = models.fields.CharField(max_length=100)
     checklist = models.fields.CharField(max_length =3)
+    retourtraiteur = models.fields.CharField(max_length = 3)
 
 class Recuperation(models.Model):
     nom = models.fields.CharField(max_length=100)
     def __str__(self):
         return f'{self.nom}'
-    route = models.fields.CharField(max_length=100)
+    route = models.ForeignKey(Route, null=True, on_delete=models.SET_NULL)
     heure_depart = models.fields.CharField(max_length=100)
     heure_livraison = models.fields.CharField(max_length=100)
     client = models.ForeignKey(Client, null=True, on_delete=models.SET_NULL)
@@ -88,6 +90,8 @@ class Recuperation(models.Model):
     livreur = models.ForeignKey(Livreur, null=True, on_delete=models.SET_NULL)
     journee = models.ForeignKey(Journee, null=True, on_delete=models.SET_NULL)
     aidelivreur = models.fields.CharField(max_length=100)
+    retourtraiteur = models.fields.CharField(max_length = 3)
+
 
 
     
