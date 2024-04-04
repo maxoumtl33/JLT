@@ -42,6 +42,7 @@ class Message(models.Model):
             return f'{self.nom}'
      description = models.fields.CharField(max_length=100)
      livreur = models.ForeignKey(Livreur, null=True, on_delete=models.SET_NULL)
+     
 
 
 class Journee(models.Model):
