@@ -54,6 +54,8 @@ class Journee(models.Model):
 
 class Route(models.Model):
      nom = models.fields.CharField(max_length=100)
+     def __str__(self):
+        return f'{self.nom}'
 
 
         

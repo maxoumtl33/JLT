@@ -16,11 +16,14 @@
           <th scope="col">Livreur</th>
           <th scope="col">Aide livreur</th>
           <th scope="col">Route</th>
+          <th>Retour traiteur</th>
+          <th>lien</th>
+
         </tr>
       </thead>
       <tbody>
           {% for livraison in livraisons %}
-          {% if livraison.date == journee.date %}
+          {% if livraison.date == journee.date and livraison.retourtraiteur == retourtraiteur %}
         <tr>
           <td>{{livraison.nom}}</td>
           <td>{{ livraison.heure_depart }}</td>
@@ -29,9 +32,24 @@
           <td>{{livraison.livreur.nom}}</td>
           <td>{{livraison.aidelivreur}}</td>
           <td>{{ livraison.route }}</td>
+          <td>oui</td>
+          <td><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+        </tr>
+          {% else %}
+          <tr>
+            <td>{{livraison.nom}}</td>
+            <td>{{ livraison.heure_depart }}</td>
+            <td>{{ livraison.heure_livraison }}</td>
+            <td>{{ livraison.checklist }}</td>
+            <td>{{livraison.livreur.nom}}</td>
+            <td>{{livraison.aidelivreur}}</td>
+            <td>{{ livraison.route }}</td>
+            <td>non</td>
+            <td><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+          </tr>
           {% endif %}
         {% endfor %}
-        </tr>
+        
       </tbody>
     </table>
     <table class="table">

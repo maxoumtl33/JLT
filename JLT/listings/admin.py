@@ -6,6 +6,7 @@ from listings.models import Tacheafaire
 from listings.models import Journee
 from listings.models import Recuperation
 from listings.models import Message
+from listings.models import Route
 from django.contrib.auth.models import User, Group
 #from listings.models import Route
 
@@ -23,5 +24,6 @@ admin.site.register(Recuperation)
 admin.site.register(Message)
 admin.site.register(Livreur)
 admin.site.register(Tacheafaire)
+admin.site.register(Route)
 admin.site.register(Client, ClientAdmin)
 #admin.site.register(Route)

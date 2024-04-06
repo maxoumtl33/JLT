@@ -51,10 +51,11 @@ def journee_detail(request, id):  # notez le paramètre id supplémentaire
    livreurs = Livreur.objects.all()
    livraisons  = Livraison.objects.all()
    recuperations = Recuperation.objects.all()
+   retourtraiteur = "oui"
    
    return render(request,
           'listings/journee_detail.html',
-          context={'journee': journee ,'livraisons': livraisons, 'livreurs':livreurs, 'recuperations' : recuperations}) # nous passons l'id au modèle
+          context={'journee': journee ,'livraisons': livraisons, 'livreurs':livreurs, 'recuperations' : recuperations,'retourtraiteur' : retourtraiteur,}) # nous passons l'id au modèle
 
 
 def livreur_list(request):
@@ -88,41 +89,15 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
         taches = Tacheafaire.objects.all()
         recuperations = Recuperation.objects.all()
         journee = Journee.objects.get(id=id)
-        route1 = '1'
-        route2 = '2'
-        route3 = '3'
-        route4 = '4'
-        route5 = '5'
-        route6 = '6'
-        route7 = '7'
-        route8 = '8'
-        route9 = '9'
-        route10 = '10'
-        route11= '11'
-        route12= '12'
-        route13= '13'
-        route14= '14'
-        route15= '15'
+        
+        
         return render(request, "listings/dashboard.html", context={'livreur':livreur,
                                                                 'livraisons' : livraisons,
                                                                 'taches' : taches,
                                                                 'recuperations' : recuperations,
                                                                 'journee' : journee,
-                                                                'route1' : route1,
-                                                                'route2' : route2,
-                                                                'route3' : route3,
-                                                                'route4' : route4,
-                                                                'route5' : route5,
-                                                                'route6' : route6,
-                                                                'route7' : route7,
-                                                                'route8' : route8,
-                                                                'route9' : route9,
-                                                                'route10' : route10,
-                                                                'route11' : route11,
-                                                                'route12' : route12,
-                                                                'route13' : route13,
-                                                                'route14' : route14,
-                                                                'route15' : route15,
+                                                                
+                                                                
 
                                                                 })
     else:
