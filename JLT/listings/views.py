@@ -5,6 +5,7 @@ from .models import Livreur
 from .models import Tacheafaire
 from .models import Journee
 from .models import Route
+from .forms import LivraisonForm
 
 from .models import Recuperation
 
@@ -37,9 +38,14 @@ def livraison_detail(request, id):  # notez le paramètre id supplémentaire
    livraison = Livraison.objects.get(id=id)
    livreur = Livreur.objects.all()
    recuperation = "oui"
+   form = LivraisonForm(request.POST, instance=livraison)
+   if form.is_valid():
+       form.save()
+       
+     
    return render(request,
           'listings/livraison_detail.html',
-          context={'livraison': livraison, 'livreur':livreur, 'recuperation': recuperation}) # nous passons l'id au modèle
+          context={'livraison': livraison, 'livreur':livreur, 'recuperation': recuperation, 'form': form,}) # nous passons l'id au modèle
 
 def recuperation_detail(request, id):  # notez le paramètre id supplémentaire
    recuperations = Recuperation.objects.get(id=id)

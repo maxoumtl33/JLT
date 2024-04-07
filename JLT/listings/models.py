@@ -70,13 +70,15 @@ class Livraison(models.Model):
     date = models.fields.DateField()
     commentaire = models.fields.CharField(max_length=100)
     details_commande = models.FileField(upload_to='media/commandesdetail/')
-    status = models.fields.CharField(max_length=100)
+    infodetail = models.fields.CharField(max_length=100)
     livreur = models.ForeignKey(Livreur, null=True, on_delete=models.SET_NULL)
     journee = models.ForeignKey(Journee, null=True, on_delete=models.SET_NULL)
     aidelivreur = models.fields.CharField(max_length=100)
     checklist = models.fields.CharField(max_length =3)
     retourtraiteur = models.fields.CharField(max_length = 3)
     recuperation = models.fields.CharField(max_length = 3)
+    status = models.BooleanField(default=False)
+
 
 class Recuperation(models.Model):
     nom = models.fields.CharField(max_length=100)
