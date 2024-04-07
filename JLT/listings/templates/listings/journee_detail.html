@@ -3,16 +3,18 @@
 {% block content %}
 
 <div class="body">
-  <h1>Feuille de route {{journee.nom}}</h1>
+  <h1>{{journee.nom}}</h1>
+  <h2>Toutes les livraisons</h2>
   <br>
   <br>
   <table class="table">
       <thead class="thead-dark">
         <tr>
-          <th scope="col">Nom livraison</th>
+          
           <th scope="col">Heure départ</th>
+          <th scope="col">Nom du contrat</th>
+          <th scope="col">Infos</th>
           <th scope="col">Heure livraison</th>
-          <th scope="col">Checklist</th>
           <th scope="col">Livreur</th>
           <th scope="col">Aide livreur</th>
           <th scope="col">Route</th>
@@ -23,62 +25,54 @@
       </thead>
       <tbody>
           {% for livraison in livraisons %}
-          {% if livraison.date == journee.date and livraison.retourtraiteur == retourtraiteur %}
+          {% if livraison.recuperation == recuperation%}
         <tr>
-          <td>{{livraison.nom}}</td>
-          <td>{{ livraison.heure_depart }}</td>
-          <td>{{ livraison.heure_livraison }}</td>
-          <td>{{ livraison.checklist }}</td>
-          <td>{{livraison.livreur.nom}}</td>
-          <td>{{livraison.aidelivreur}}</td>
-          <td>{{ livraison.route }}</td>
-          <td>oui</td>
-          <td><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+          
+          <td style="color: #F1B3DA;">{{ livraison.heure_depart }}</td>
+          <td style="color: #F1B3DA;">{{livraison.nom}}</td>
+          <td style="color: #F1B3DA;">{{livraison.commentaire}}</td>
+          <td style="color: #F1B3DA;">{{ livraison.heure_livraison }}</td>
+          <td style="color: #F1B3DA;">{{livraison.livreur.nom}}</td>
+          <td style="color: #F1B3DA;">{{livraison.aidelivreur}}</td>
+          <td style="color: #F1B3DA;">{{ livraison.route }}</td>
+          <td style="color: #F1B3DA;">oui</td>
+          <td style="color: #F1B3DA;"><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+        
         </tr>
+          {% elif livraison.retourtraiteur == retourtraiteur %}
+          <tr>
+          
+            <td>{{ livraison.heure_depart }}</td>
+            <td>{{livraison.nom}}</td>
+            <td>{{livraison.commentaire}}</td>
+            <td>{{ livraison.heure_livraison }}</td>
+            <td>{{livraison.livreur.nom}}</td>
+            <td>{{livraison.aidelivreur}}</td>
+            <td>{{ livraison.route }}</td>
+            <td>oui</td>
+            <td><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+          
+          </tr>
           {% else %}
           <tr>
-            <td>{{livraison.nom}}</td>
+          
             <td>{{ livraison.heure_depart }}</td>
+            <td>{{livraison.nom}}</td>
+            <td>{{livraison.commentaire}}</td>
             <td>{{ livraison.heure_livraison }}</td>
-            <td>{{ livraison.checklist }}</td>
             <td>{{livraison.livreur.nom}}</td>
             <td>{{livraison.aidelivreur}}</td>
             <td>{{ livraison.route }}</td>
             <td>non</td>
             <td><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+          
           </tr>
           {% endif %}
         {% endfor %}
         
       </tbody>
     </table>
-    <table class="table">
-      <thead class="thead-dark">
-        <tr>
-          
-          <th scope="col">Nom recuperation</th>
-          <th scope="col">Heure départ</th>
-          <th scope="col">Heure récuperation</th>
-          <th scope="col">Livreur</th>
-          <th scope="col">Aide livreur</th>
-          <th scope="col">Route</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for recuperation in recuperations %}
-          {% if recuperation.date == journee.date %}
-        <tr>
-          <td>{{recuperation.nom}}</td>
-          <td>{{ recuperation.heure_depart }}</td>
-          <td>{{ recuperation.heure_livraison }}</td>
-          <td>{{recuperation.livreur.nom}}</td>
-          <td>{{recuperation.aidelivreur}}</td>
-          <td>{{ recuperation.route }}</td>
-          {% endif %}
-        {% endfor %}
-        </tr>
-      </tbody>
-    </table>
+    
   </div>
   <nav class="navbar fixed-bottom navbar-light bg-light">
     <div class="container-fluid">

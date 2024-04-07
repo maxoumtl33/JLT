@@ -1,9 +1,13 @@
 {% extends 'listings/base.html' %}
 
 {% block content %}
-
+{% if livraison.recuperation == recuperation%}
+<h1 style="text-align: center; color: #F1B3DA;">RECUPERATION {{livraison.nom|upper}}</h1>
+  <br>
+  {% else %}
   <h1 style="text-align: center;">LIVRAISON {{livraison.nom|upper}}</h1>
   <br>
+  {% endif %}
   
   <div class="accordion" id="accordionPanelsStayOpenExample">
     <div class="accordion-item">

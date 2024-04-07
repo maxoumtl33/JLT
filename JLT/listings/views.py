@@ -4,6 +4,8 @@ from listings.models import Livraison
 from .models import Livreur
 from .models import Tacheafaire
 from .models import Journee
+from .models import Route
+
 from .models import Recuperation
 
 from django.http import FileResponse, HttpResponseRedirect, HttpResponse
@@ -34,9 +36,10 @@ def journees_list(request):
 def livraison_detail(request, id):  # notez le paramètre id supplémentaire
    livraison = Livraison.objects.get(id=id)
    livreur = Livreur.objects.all()
+   recuperation = "oui"
    return render(request,
           'listings/livraison_detail.html',
-          context={'livraison': livraison, 'livreur':livreur}) # nous passons l'id au modèle
+          context={'livraison': livraison, 'livreur':livreur, 'recuperation': recuperation}) # nous passons l'id au modèle
 
 def recuperation_detail(request, id):  # notez le paramètre id supplémentaire
    recuperations = Recuperation.objects.get(id=id)
@@ -49,13 +52,15 @@ def recuperation_detail(request, id):  # notez le paramètre id supplémentaire
 def journee_detail(request, id):  # notez le paramètre id supplémentaire
    journee = Journee.objects.get(id=id)
    livreurs = Livreur.objects.all()
-   livraisons  = Livraison.objects.all()
+   livraisons  = Livraison.objects.order_by('route')
    recuperations = Recuperation.objects.all()
    retourtraiteur = "oui"
+   retourtraiteurno = "non"
+   recuperation = "oui"
    
    return render(request,
           'listings/journee_detail.html',
-          context={'journee': journee ,'livraisons': livraisons, 'livreurs':livreurs, 'recuperations' : recuperations,'retourtraiteur' : retourtraiteur,}) # nous passons l'id au modèle
+          context={'journee': journee ,'livraisons': livraisons, 'livreurs':livreurs, 'recuperations' : recuperations,'retourtraiteur' : retourtraiteur,'recuperation' : recuperation,'retourtraiteurno': retourtraiteurno}) # nous passons l'id au modèle
 
 
 def livreur_list(request):

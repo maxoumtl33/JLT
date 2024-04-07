@@ -76,6 +76,7 @@ class Livraison(models.Model):
     aidelivreur = models.fields.CharField(max_length=100)
     checklist = models.fields.CharField(max_length =3)
     retourtraiteur = models.fields.CharField(max_length = 3)
+    recuperation = models.fields.CharField(max_length = 3)
 
 class Recuperation(models.Model):
     nom = models.fields.CharField(max_length=100)
