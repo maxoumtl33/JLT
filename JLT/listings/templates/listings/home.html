@@ -1,34 +1,66 @@
 {% extends 'listings/base.html' %}
+{% load static %}
 
 {% block content %}
 
+            
+         
+<nav class="nav container">
+  <a href="#" class="nav__logo">Julien Leblanc Traiteur</a>
 
-  <nav class="navbar fixed-bottom navbar-light bg-light">
-    <div class="container-fluid justify-content-center">
-        <div>
-                  {% if user.is_authenticated %}
-              <form action="{% url 'logout' %}" method="post">
-                {% csrf_token %}
-                <button type="submit" class="btn navbar-brand" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i></i></button>
-            </form>
-            {% else %}
-            <a href="{% url 'login' %}" class="btn navbar-brand" style="color: green;"><i class="fa-regular fa-user"></i></i></a>
-            {% endif %}
-        </div>
-       <div>
-          <button type="button" class="btn navbar-brand" data-bs-toggle="modal" data-bs-target="#exampleModal">
-            <i class="fa-solid fa-link"></i>
-          </button>
-        </div>
+  <div class="nav__menu" id="nav-menu">
+      <ul class="nav__list">
+        {% if user.is_authenticated %}
+          <li class="nav__item">
+            <form action="{% url 'logout' %}" method="post">
+              {% csrf_token %}
+              <a type="submit" class="nav__link active-link" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i></i></a>
+          </form>
+                  <span class="nav__name">Logout</span>
+              </a>
+          </li>
+          {% else %}
+
+          <li class="nav__item">
+            <a href="{% url 'login' %}" class="nav__link" style="color: green;"><i class="fa-regular fa-user"></i></i></a>
+                  <span class="nav__name">Login</span>
+              </a>
+          </li>
+          {% endif %}
+          <li class="nav__item">
+              <a href="#skills" class="nav__link">
+                  <i class='bx bx-book-alt nav__icon'></i>
+                  <span class="nav__name">Skills</span>
+              </a>
+          </li>
+
+          <li class="nav__item">
+              <a href="#portfolio" class="nav__link">
+                  <i class='bx bx-briefcase-alt nav__icon'></i>
+                  <span class="nav__name">Portfolio</span>
+              </a>
+          </li>
+
+          <li class="nav__item">
+              <a href="#contactme" class="nav__link">
+                  <i class='bx bx-message-square-detail nav__icon'></i>
+                  <span class="nav__name">Contactme</span>
+              </a>
+          </li>
       </ul>
-  </nav>
+  </div>
+
+  <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
+</nav>
+
+ 
 
 <div style="text-align: center;">
 
 <br>
 
 <p>{% if user.is_authenticated %}
-  <h1>Tu es déjà connecté</h1>
+  <h1 id="dejaco">Tu es déjà connecté</h1>
   <br>
   <br>
   <p><a class="btn btn-primary" href="{% url 'journees-list'  %}"  aria-current="page">Voir les journées</a></p>

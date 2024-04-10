@@ -1,5 +1,5 @@
 {% extends 'listings/base.html' %}
-
+{% load static %}
 {% block content %}
 
 <div class="body">
@@ -76,33 +76,54 @@
   <br>
   <br>
   <br>
-  <nav class="navbar fixed-bottom navbar-light bg-light">
-    <div class="container-fluid">
-      <ul class="list-group list-group-horizontal">
-        <li class="list-group-item">
-                  {% if user.is_authenticated %}
+  <nav class="nav container">
+    <a href="#" class="nav__logo">Julien Leblanc Traiteur</a>
+  
+    <div class="nav__menu" id="nav-menu">
+        <ul class="nav__list">
+          {% if user.is_authenticated %}
+            <li class="nav__item">
               <form action="{% url 'logout' %}" method="post">
                 {% csrf_token %}
-                <button type="submit" class="btn navbar-brand" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i></i></button>
+                <a type="submit" class="nav__link active-link" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i></i></a>
             </form>
+                    <span class="nav__name">Logout</span>
+                </a>
+            </li>
             {% else %}
-            <a href="{% url 'login' %}" class="btn navbar-brand" ><i class="fa-regular fa-user"></i></i></a>
+  
+            <li class="nav__item">
+              <a href="{% url 'login' %}" class="nav__link" style="color: green;"><i class="fa-regular fa-user"></i></i></a>
+                    <span class="nav__name">Login</span>
+                </a>
+            </li>
             {% endif %}
-        </li>
-        <li class="list-group-item">
-          <button type="button" class="btn navbar-brand" data-bs-toggle="modal" data-bs-target="#exampleModal">
-            <i class="fa-solid fa-link"></i>
-          </button>
-        </li>
-        <li class="list-group-item">
-          <a href="{% url 'dashboard' journee.id request.user.id %}" class="btn navbar-brand" ><i class="fa-regular fa-id-badge"></i></a>
-        </li>
-        <li class="list-group-item">
-          <a href="{% url 'journees-list'  %}" class="btn navbar-brand" ><i class="fa-regular fa-calendar-days"></i></a>
-        </li>
-      </ul>
-      </div>
-      </nav>
+            <li class="nav__item">
+                <a href="#skills" class="nav__link">
+                    <i class='bx bx-book-alt nav__icon'></i>
+                    <span class="nav__name">Skills</span>
+                </a>
+            </li>
+  
+            <li class="nav__item">
+                <a href="#portfolio" class="nav__link">
+                    <i class='bx bx-briefcase-alt nav__icon'></i>
+                    <span class="nav__name">Portfolio</span>
+                </a>
+            </li>
+  
+            <li class="nav__item">
+                <a href="#contactme" class="nav__link">
+                    <i class='bx bx-message-square-detail nav__icon'></i>
+                    <span class="nav__name">Contactme</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+  
+    <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
+  </nav>
+  
       
   
 <!-- Modal -->

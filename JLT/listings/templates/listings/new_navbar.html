@@ -1,25 +1,57 @@
-<nav class="navbar fixed-bottom navbar-light bg-light">
-    <div class="container-fluid">
-      {% if user.is_authenticated %}
-      <form action="{% url 'logout' %}" method="post">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-outline-danger"><i class="fa-solid fa-user"></i></button>
-    </form>
-    {% else %}
-    <a href="{% url 'login' %}" class="btn btn-outline-success" ><i class="fa-solid fa-user"></i></a>
-    {% endif %}
-    </div>
-  </nav>
+<nav>
+  <ul>
+    <li><a href="{% url 'login' %}"  id="login" style="color: green;"><span>Connexion</span><i class="fa-regular fa-user"></i></li>
+    <li><button type="button" id="liens" data-bs-toggle="modal" data-bs-target="#exampleModal"><span>Liens</span>
+      <i class="fa-solid fa-link"></i>
+    </button></li>
+  </ul>
+</nav>
 
-  <nav class="navbar fixed-bottom navbar-light bg-light">
-    <div class="container-fluid">
-      {% if user.is_authenticated %}
-      <form action="{% url 'logout' %}" method="post">
-        {% csrf_token %}
-        <a type="submit" class="navbar-brand"><i class="fa-solid fa-user"></i></a>
-    </form>
-    {% else %}
-    <a href="{% url 'login' %}" class="navbar-brand" ><i class="fa-solid fa-user"></i></a>
-    {% endif %}
+
+<nav class="navbar fixed-bottom navbar-light bg-light">
+  <div class="container-fluid justify-content-center">
+      <div>
+                {% if user.is_authenticated %}
+            <form action="{% url 'logout' %}" method="post">
+              {% csrf_token %}
+              <button type="submit" class="btn navbar-brand" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i></i></button>
+          </form>
+          {% else %}
+          <a href="{% url 'login' %}" class="btn navbar-brand" style="color: green;"><i class="fa-regular fa-user"></i></i></a>
+          {% endif %}
+      </div>
+     <div>
+        <button type="button" class="btn navbar-brand" data-bs-toggle="modal" data-bs-target="#exampleModal">
+          <i class="fa-solid fa-link"></i>
+        </button>
+      </div>
+    </ul>
+</nav>
+
+<nav class="navbar fixed-bottom navbar-light bg-light">
+  <div class="container-fluid">
+    <ul class="list-group list-group-horizontal">
+      <li class="list-group-item">
+                {% if user.is_authenticated %}
+            <form action="{% url 'logout' %}" method="post">
+              {% csrf_token %}
+              <button type="submit" class="btn navbar-brand" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i></i></button>
+          </form>
+          {% else %}
+          <a href="{% url 'login' %}" class="btn navbar-brand" ><i class="fa-regular fa-user"></i></i></a>
+          {% endif %}
+      </li>
+      <li class="list-group-item">
+        <button type="button" class="btn navbar-brand" data-bs-toggle="modal" data-bs-target="#exampleModal">
+          <i class="fa-solid fa-link"></i>
+        </button>
+      </li>
+      <li class="list-group-item">
+        <a href="{% url 'dashboard' journee.id request.user.id %}" class="btn navbar-brand" ><i class="fa-regular fa-id-badge"></i></a>
+      </li>
+      <li class="list-group-item">
+        <a href="{% url 'journees-list'  %}" class="btn navbar-brand" ><i class="fa-regular fa-calendar-days"></i></a>
+      </li>
+    </ul>
     </div>
-  </nav>
+    </nav>
