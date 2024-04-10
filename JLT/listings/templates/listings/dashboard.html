@@ -47,6 +47,8 @@
   <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
 </nav>
 
+<br>
+<br>
 <div style="text-align: center;">
     <h2>Salut {{ livreur.nom }}</h2>
     <br>
@@ -54,7 +56,7 @@
 <br>
 
   <br>
-  <h2 style="text-align: center;" id="listlivraisons">EN COURS</h2>
+  <h2 style="text-align: center;" id="listlivraisons">EN COURS <i class="fa-solid fa-circle-check" style="color: orange;"></i></h2>
   
             
             <table class="table table-striped">
@@ -100,7 +102,7 @@
                 <br>
                 <br>
 
-  <h2 style="text-align: center;" id="listlivraisons">TERMINÉ</h2>
+  <h2 style="text-align: center;" id="listlivraisons">TERMINÉ <i class="fa-solid fa-circle-check" style="color: green;"></i></h2>
   <table class="table table-striped">
     <thead class="thead-dark">
       <tr>
@@ -109,7 +111,7 @@
         <th scope="col">Nom du contrat</th>
         <th scope="col">Heure livraison</th>
         <th scope="col">Route</th>
-        <th>Retour traiteur</th>
+        <th>Validé</th>
         <th>lien</th>
 
       </tr>
@@ -119,11 +121,11 @@
             {% if livraison.date == journee.date and livraison.livreur.nom == livreur.nom and livraison.status == True %}
             <tr>
               <td style="color: bdf1b3;">{{ livraison.heure_depart }}</td>
-                  <td style="color: #bdf1b3;">{{livraison.nom}}</td>
-                  <td style="color: #bdf1b3;">{{ livraison.heure_livraison }}</td>
-                  <td style="color: #bdf1b3;">{{ livraison.route }}</td>
-                  <td style="color: #bdf1b3;">{{livraison.retourtraiteur}}</td>
-                  <td style="color: #bdf1b3;"><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+                  <td>{{livraison.nom}}</td>
+                  <td>{{ livraison.heure_livraison }}</td>
+                  <td>{{ livraison.route }}</td>
+                  <td><i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></td>
+                  <td><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
             
             </tr>
     
