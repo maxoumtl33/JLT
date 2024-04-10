@@ -14,38 +14,22 @@
           <li class="nav__item">
             <form action="{% url 'logout' %}" method="post">
               {% csrf_token %}
-              <a type="submit" class="nav__link active-link" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i></i></a>
+              <button type="submit" class="nav__link active-link" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i></i>
           </form>
                   <span class="nav__name">Logout</span>
-              </a>
+        </button>
           </li>
           {% else %}
-
           <li class="nav__item">
-            <a href="{% url 'login' %}" class="nav__link" style="color: green;"><i class="fa-regular fa-user"></i></i></a>
+            <a href="{% url 'login' %}" class="nav__link" style="color: green;"><i class="fa-regular fa-user"></i></i>
                   <span class="nav__name">Login</span>
               </a>
           </li>
           {% endif %}
           <li class="nav__item">
-              <a href="#skills" class="nav__link">
-                  <i class='bx bx-book-alt nav__icon'></i>
-                  <span class="nav__name">Skills</span>
-              </a>
-          </li>
-
-          <li class="nav__item">
-              <a href="#portfolio" class="nav__link">
-                  <i class='bx bx-briefcase-alt nav__icon'></i>
-                  <span class="nav__name">Portfolio</span>
-              </a>
-          </li>
-
-          <li class="nav__item">
-              <a href="#contactme" class="nav__link">
-                  <i class='bx bx-message-square-detail nav__icon'></i>
-                  <span class="nav__name">Contactme</span>
-              </a>
+            <a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
+              <i class="fa-solid fa-link"></i><span class="nav__name">Liens</span>
+            </a>
           </li>
       </ul>
   </div>
@@ -64,28 +48,12 @@
   <br>
   <br>
   <p><a class="btn btn-primary" href="{% url 'journees-list'  %}"  aria-current="page">Voir les journées</a></p>
-  <p><a class="btn btn-primary" href="https://discord.com/channels/1174091428876533800/1194755233935523952" target="_blank">Photo livraison <i class="fa-brands fa-discord"></i></a></p>
-  <p><a href="https://view.forms.app/loicveyre/jeparsenlivraison" target="_blank" class="btn btn-primary">Départ <i class="fa-solid fa-truck-fast"></i></a></p>
-  <p><a href="https://view.forms.app/loicveyre/jereviensdelivraison" target="_blank" class="btn btn-primary">Retour <i class="fa-sharp fa-solid fa-truck fa-flip-horizontal"></i></a></p>
-  <p><a href="https://oakmnxgj.forms.app/recuplivreurs" target="_blank" class="btn btn-primary">Récup <i class="fa-solid fa-dolly"></i></a>
-  </p>
-  <p><a href="https://oakmnxgj.forms.app/essence" target="_blank" class="btn btn-primary">Essence <i class="fa-solid fa-gas-pump"></i></a>
-  </p>
-</p>
 {% else %}
 <h1>Connecte toi pour continuer</h1>
 <br>
 <br>
 <br>
-<p><a class="btn btn-primary" href="https://discord.com/channels/1174091428876533800/1194755233935523952" target="_blank">Photo livraison <i class="fa-brands fa-discord"></i></a></p>
-  <p><a href="https://view.forms.app/loicveyre/jeparsenlivraison" target="_blank" class="btn btn-primary">Départ <i class="fa-solid fa-truck-fast"></i></a></p>
-  <p><a href="https://view.forms.app/loicveyre/jereviensdelivraison" target="_blank" class="btn btn-primary">Retour <i class="fa-sharp fa-solid fa-truck fa-flip-horizontal"></i></a></p>
-  <p><a href="https://oakmnxgj.forms.app/recuplivreurs" target="_blank" class="btn btn-primary">Récup <i class="fa-solid fa-dolly"></i></a>
-  </p>
-  <p><a href="https://oakmnxgj.forms.app/essence" target="_blank" class="btn btn-primary">Essence <i class="fa-solid fa-gas-pump"></i></a>
-  </p>
-</p>
-<br>
+
 {% endif %}
 <br>
 
@@ -95,7 +63,7 @@
 </div>
 
 <!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade modal-lg" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">

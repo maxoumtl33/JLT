@@ -1,9 +1,54 @@
 {% extends 'listings/base.html' %}
 {% load static %}
 {% block content %}
+<nav class="nav container">
+  <a href="#" class="nav__logo">Julien Leblanc Traiteur</a>
 
+  <div class="nav__menu" id="nav-menu">
+      <ul class="nav__list">
+        {% if user.is_authenticated %}
+          <li class="nav__item">
+            <form action="{% url 'logout' %}" method="post">
+              {% csrf_token %}
+              <button type="submit" class="nav__link active-link" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i>
+          </form>
+                  <span class="nav__name">Logout</span>
+        </button>
+          </li>
+          {% else %}
+
+          <li class="nav__item">
+            <a href="{% url 'login' %}" class="nav__link" style="color: green;"><i class="fa-regular fa-user"></i></i></a>
+                  <span class="nav__name">Login</span>
+              </a>
+          </li>
+          {% endif %}
+          <li class="nav__item">
+            <a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
+              <i class="fa-solid fa-link"></i><span class="nav__name">Liens</span>
+            </a>
+          </li>
+
+          <li class="nav__item">
+            <a href="{% url 'dashboard' journee.id request.user.id %}" class="nav__link" ><i class="fa-regular fa-id-badge"></i>
+                  <span class="nav__name">Dashboard</span>
+              </a>
+          </li>
+
+          <li class="nav__item">
+            <a href="{% url 'journees-list'  %}" class="nav__link" ><i class="fa-solid fa-calendar-days"></i>
+                  <span class="nav__name">Journées</span>
+              </a>
+          </li>
+      </ul>
+  </div>
+
+  <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
+</nav>
+<br>
+<br>
 <div class="body">
-  <h1>FEUILLE DE ROUTE {{journee.nom}}</h1>
+  <h1 style="text-align: center;">FEUILLE DE ROUTE {{journee.nom}}</h1>
   <br>
   <br>
   <table class="table table-striped">
@@ -73,61 +118,15 @@
     </table>
     
   </div>
+  
   <br>
   <br>
   <br>
-  <nav class="nav container">
-    <a href="#" class="nav__logo">Julien Leblanc Traiteur</a>
-  
-    <div class="nav__menu" id="nav-menu">
-        <ul class="nav__list">
-          {% if user.is_authenticated %}
-            <li class="nav__item">
-              <form action="{% url 'logout' %}" method="post">
-                {% csrf_token %}
-                <a type="submit" class="nav__link active-link" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i></i></a>
-            </form>
-                    <span class="nav__name">Logout</span>
-                </a>
-            </li>
-            {% else %}
-  
-            <li class="nav__item">
-              <a href="{% url 'login' %}" class="nav__link" style="color: green;"><i class="fa-regular fa-user"></i></i></a>
-                    <span class="nav__name">Login</span>
-                </a>
-            </li>
-            {% endif %}
-            <li class="nav__item">
-                <a href="#skills" class="nav__link">
-                    <i class='bx bx-book-alt nav__icon'></i>
-                    <span class="nav__name">Skills</span>
-                </a>
-            </li>
-  
-            <li class="nav__item">
-                <a href="#portfolio" class="nav__link">
-                    <i class='bx bx-briefcase-alt nav__icon'></i>
-                    <span class="nav__name">Portfolio</span>
-                </a>
-            </li>
-  
-            <li class="nav__item">
-                <a href="#contactme" class="nav__link">
-                    <i class='bx bx-message-square-detail nav__icon'></i>
-                    <span class="nav__name">Contactme</span>
-                </a>
-            </li>
-        </ul>
-    </div>
-  
-    <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
-  </nav>
   
       
   
 <!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade modal-lg" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">

@@ -34,19 +34,20 @@ def journees_list(request):
                                                               'livreurs': livreurs,
                                                               'journees' : journees})
 
-def livraison_detail(request, id):  # notez le paramètre id supplémentaire
-   livraison = Livraison.objects.get(id=id)
+def livraison_detail(request, ip):  # notez le paramètre id supplémentaire
+   livraison = Livraison.objects.get(id=ip)
    livreur = Livreur.objects.all()
+   journee = Journee.objects.all()
    recuperation = "oui"
    form = LivraisonForm(request.POST or None, instance=livraison)
    if form.is_valid():
        form.save()
-       return redirect(journees_list)
+       
        
      
    return render(request,
           'listings/livraison_detail.html',
-          context={'livraison': livraison, 'livreur':livreur, 'recuperation': recuperation, 'form': form,}) # nous passons l'id au modèle
+          context={'livraison': livraison, 'livreur':livreur, 'recuperation': recuperation, 'form': form, 'journee':journee,}) # nous passons l'id au modèle
 
 def recuperation_detail(request, id):  # notez le paramètre id supplémentaire
    recuperations = Recuperation.objects.get(id=id)

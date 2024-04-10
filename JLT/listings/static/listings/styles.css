@@ -248,3 +248,7 @@ img {
     margin-right: auto;
   }
 }
+button{
+    background: transparent;
+    border: none;
+}

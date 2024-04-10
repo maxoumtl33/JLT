@@ -1,7 +1,51 @@
 {% extends 'listings/base.html' %}
-
+{% load static %}
 {% block content %}
+<nav class="nav container">
+  <a href="#" class="nav__logo">Julien Leblanc Traiteur</a>
 
+  <div class="nav__menu" id="nav-menu">
+      <ul class="nav__list">
+        {% if user.is_authenticated %}
+          <li class="nav__item">
+            <form action="{% url 'logout' %}" method="post">
+              {% csrf_token %}
+              <button type="submit" class="nav__link active-link" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i>
+          </form>
+                  <span class="nav__name">Logout</span>
+        </button>
+          </li>
+          {% else %}
+
+          <li class="nav__item">
+            <a href="{% url 'login' %}" class="nav__link" style="color: green;"><i class="fa-regular fa-user"></i></i></a>
+                  <span class="nav__name">Login</span>
+              </a>
+          </li>
+          {% endif %}
+          <li class="nav__item">
+            <a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
+              <i class="fa-solid fa-link"></i><span class="nav__name">Liens</span>
+            </a>
+          </li>
+
+          <li class="nav__item">
+            <button onclick="history.go(-1);" class="nav__link"><i class="fa-regular fa-paste"></i>
+              <span class="nav__name">Feuille de route</span>
+            </button>
+
+          </li>
+
+          <li class="nav__item">
+            <a href="{% url 'journees-list'  %}" class="nav__link" ><i class="fa-solid fa-calendar-days"></i>
+                  <span class="nav__name">Journées</span>
+              </a>
+          </li>
+      </ul>
+  </div>
+
+  <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
+</nav>
 
 <div style="text-align: center;">
     <h2>Salut {{ livreur.nom }}</h2>
@@ -96,33 +140,6 @@
 <br>
 <br>
     
-<nav class="navbar fixed-bottom navbar-light bg-light">
-  <div class="container-fluid justify-content-center">
-    <ul class="list-group list-group-horizontal">
-      <li class="list-group-item">
-                {% if user.is_authenticated %}
-            <form action="{% url 'logout' %}" method="post">
-              {% csrf_token %}
-              <button type="submit" class="btn navbar-brand" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i></i></button>
-          </form>
-          
-          {% else %}
-          <a href="{% url 'login' %}" class="btn navbar-brand" ><i class="fa-regular fa-user"></i></i></a>
-          {% endif %}
-        </li>
-     <li class="list-group-item">
-        <button type="button" class="btn navbar-brand" data-bs-toggle="modal" data-bs-target="#exampleModal">
-          <i class="fa-solid fa-link"></i>
-        </button>
-      </li>
-      <li class="list-group-item">
-        <button onclick="history.go(-1);" class="btn navbar-brand"><i class="fa-regular fa-paste"></i></button>
-      </li>
-      <li class="list-group-item">
-        <a href="{% url 'journees-list'  %}" class="btn navbar-brand" ><i class="fa-regular fa-calendar-days"></i></a>
-      </li>
-    </ul>
-</nav>
 
 <!-- Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">

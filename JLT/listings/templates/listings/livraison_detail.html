@@ -1,6 +1,54 @@
 {% extends 'listings/base.html' %}
-{% load static %}
+{%  load static%}
 {% block content %}
+<nav class="nav container">
+  <a href="#" class="nav__logo">Julien Leblanc Traiteur</a>
+
+  <div class="nav__menu" id="nav-menu">
+      <ul class="nav__list">
+          <li class="nav__item">
+            <a href="javascript:history.back()" class="nav__link" ><i class="fa-solid fa-reply"></i>
+              <span>Retour</span>
+            </a>
+          </li>
+          <li class="nav__item">
+            <a class="nav__link" href="https://view.forms.app/loicveyre/jeparsenlivraison" target="_blank"><i class="fa-solid fa-truck-fast"></i>
+              <span>Départ</span>
+            </a>
+          </li>
+          {% if livraison.recuperation == recuperation%}
+          <li class="nav__item">
+            <a href="https://oakmnxgj.forms.app/recuplivreurs" target="_blank" class="nav__link"><i class="fa-solid fa-dolly"></i>
+            <span>Récupération</span>
+            </a>
+          </li>
+          {% else %}
+          <li class="nav__item">
+            <a class="nav-link" href="https://discord.com/channels/1174091428876533800/1194755233935523952" target="_blank"><i class="fa-solid fa-camera"></i>
+            <span>Photo livraison</span>
+            </a> 
+          </li>
+          {% endif %}
+          {% if livraison.status == False %}
+          <li class="nav__item">
+            <button type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
+              <i class="fa-solid fa-circle-check" style="color: orange;"></i>
+              <span>En cours</span>
+          </button>  
+          </li>
+          {% else %}
+          <li class="nav__item">
+            <button type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
+              <i class="fa-solid fa-circle-check" style="color: green;"></i>
+              <span>Validé</span>
+          </button> 
+          </li>
+          {% endif %}
+      </ul>
+  </div>
+
+  <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
+</nav>
 {% if livraison.recuperation == recuperation%}
 <h1 style="text-align: center; color: #F1B3DA;">RECUPERATION {{livraison.nom|upper}}</h1>
   <br>
@@ -100,53 +148,6 @@
   <br>
   <br>
   <br>
-  <nav class="nav container">
-    <a href="#" class="nav__logo">Julien Leblanc Traiteur</a>
-  
-    <div class="nav__menu" id="nav-menu">
-        <ul class="nav__list">
-          {% if user.is_authenticated %}
-            <li class="nav__item">
-              <form action="{% url 'logout' %}" method="post">
-                {% csrf_token %}
-                <a type="submit" class="nav__link active-link" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i></i></a>
-            </form>
-                    <span class="nav__name">Logout</span>
-                </a>
-            </li>
-            {% else %}
-  
-            <li class="nav__item">
-              <a href="{% url 'login' %}" class="nav__link" style="color: green;"><i class="fa-regular fa-user"></i></i></a>
-                    <span class="nav__name">Login</span>
-                </a>
-            </li>
-            {% endif %}
-            <li class="nav__item">
-                <a href="#skills" class="nav__link">
-                    <i class='bx bx-book-alt nav__icon'></i>
-                    <span class="nav__name">Skills</span>
-                </a>
-            </li>
-  
-            <li class="nav__item">
-                <a href="#portfolio" class="nav__link">
-                    <i class='bx bx-briefcase-alt nav__icon'></i>
-                    <span class="nav__name">Portfolio</span>
-                </a>
-            </li>
-  
-            <li class="nav__item">
-                <a href="#contactme" class="nav__link">
-                    <i class='bx bx-message-square-detail nav__icon'></i>
-                    <span class="nav__name">Contactme</span>
-                </a>
-            </li>
-        </ul>
-    </div>
-  
-    <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
-  </nav>
 
   
 
@@ -178,38 +179,3 @@
 
 {% endblock %}
 
-<nav class="navbar fixed-bottom navbar-light bg-light">
-  <div class="container-fluid">
-    <ul class="list-group list-group-horizontal">
-      <li class="list-group-item">
-        <a href="Javascript:history.go(-1)" class="btn navbar-brand" ><i class="fa-solid fa-reply"></i></i></a>
-      </li>
-      <li class="list-group-item">
-        <a class="btn navbar-brand" href="https://view.forms.app/loicveyre/jeparsenlivraison" target="_blank"><i class="fa-solid fa-truck-fast"></i></a>
-      </li>
-      {% if livraison.recuperation == recuperation%}
-      <li class="list-group-item">
-        <a href="https://oakmnxgj.forms.app/recuplivreurs" target="_blank" class="btn navbar-brand"><i class="fa-solid fa-dolly"></i></a>
-      </li>
-      {% else %}
-      <li class="list-group-item">
-        <a class="btn navbar-brand" href="https://discord.com/channels/1174091428876533800/1194755233935523952" target="_blank"><i class="fa-solid fa-camera"></i></a> 
-      </li>
-      {% endif %}
-      {% if livraison.status == False %}
-      <li class="list-group-item">
-        <button type="button" class="btn navbar-brand" data-bs-toggle="modal" data-bs-target="#exampleModal">
-          <i class="fa-solid fa-circle-check" style="color: orange;"></i> 
-      </button>  
-      </li>
-      {% else %}
-      <li class="list-group-item">
-        <button type="button" class="btn navbar-brand" data-bs-toggle="modal" data-bs-target="#exampleModal">
-          <i class="fa-solid fa-circle-check" style="color: green;"></i> 
-      </button>  
-      </li>
-      {% endif %}
-
-    </ul>
-    </div>
-    </nav>

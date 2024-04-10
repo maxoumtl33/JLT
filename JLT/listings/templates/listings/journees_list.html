@@ -1,16 +1,36 @@
 {% extends 'listings/base.html' %}
-
+{% load static %}
 {% block content %}
-<nav class="navbar fixed-bottom navbar-light bg-light">
-  <div class="container-fluid">
-    {% if user.is_authenticated %}
-    <form action="{% url 'logout' %}" method="post">
-      {% csrf_token %}
-      <button type="submit" class="btn navbar-brand" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i></i></button>  </form>
-  {% else %}
-  <a href="{% url 'login' %}" class="btn btn-outline-success" ><i class="fa-solid fa-user"></i></a>
-  {% endif %}
+<nav class="nav container">
+  <a href="#" class="nav__logo">Julien Leblanc Traiteur</a>
+
+  <div class="nav__menu" id="nav-menu">
+      <ul class="nav__list">
+        {% if user.is_authenticated %}
+          <li class="nav__item">
+            <form action="{% url 'logout' %}" method="post">
+              {% csrf_token %}
+              <button type="submit" class="nav__link active-link" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i></i>
+          </form>
+                  <span class="nav__name">Logout</span>
+        </button>
+          </li>
+          {% else %}
+          <li class="nav__item">
+            <a href="{% url 'login' %}" class="nav__link" style="color: green;"><i class="fa-regular fa-user"></i></i>
+                  <span class="nav__name">Login</span>
+              </a>
+          </li>
+          {% endif %}
+          <li class="nav__item">
+            <a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
+              <i class="fa-solid fa-link"></i><span class="nav__name">Liens</span>
+            </a>
+          </li>
+      </ul>
   </div>
+
+  <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
 </nav>
 
 <h1 style="text-align: center;">Selectionne ta journée</h1>
@@ -25,5 +45,31 @@
       </div>
     {% endfor %}
 </ul>
+
+<!-- Modal -->
+<div class="modal fade modal-lg" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Liens Formulaires</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p><a class="btn btn-primary" href="https://discord.com/channels/1174091428876533800/1194755233935523952" target="_blank">Photo livraison <i class="fa-brands fa-discord"></i></a></p>
+  <p><a href="https://view.forms.app/loicveyre/jeparsenlivraison" target="_blank" class="btn btn-primary">Départ <i class="fa-solid fa-truck-fast"></i></a></p>
+  <p><a href="https://view.forms.app/loicveyre/jereviensdelivraison" target="_blank" class="btn btn-primary">Retour <i class="fa-sharp fa-solid fa-truck fa-flip-horizontal"></i></a></p>
+  <p><a href="https://oakmnxgj.forms.app/recuplivreurs" target="_blank" class="btn btn-primary">Récup <i class="fa-solid fa-dolly"></i></a>
+  </p>
+  <p><a href="https://oakmnxgj.forms.app/essence" target="_blank" class="btn btn-primary">Essence <i class="fa-solid fa-gas-pump"></i></a>
+  </p>
+</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 {% endblock %}
