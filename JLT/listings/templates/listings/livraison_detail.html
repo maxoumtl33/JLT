@@ -60,6 +60,8 @@
   {% endif %}
   
   <ul class="list-group">
+    <li class="list-group-item active" aria-current="true">Route n°</li>
+    <li class="list-group-item"><strong>{{livraison.route}}</strong></li>
     <li class="list-group-item active" aria-current="true">HEURE DEPART</li>
     <li class="list-group-item"><strong>{{livraison.heure_depart}}</strong></li>
     <li class="list-group-item active" aria-current="true">HEURE LIVRAISON (+/- 15min)</li>
@@ -71,10 +73,11 @@
     <i class="fa-solid fa-triangle-exclamation fa-xl" style="color: #fa0000;"></i>
   </p></li>
     <li class="list-group-item"><strong>{{livraison.commentaire}}</strong></li>
-    <li class="list-group-item active" aria-current="true">Checklist</li>
-    <li class="list-group-item"><strong>{{livraison.checklist}}</strong></li>
-    <li class="list-group-item active" aria-current="true">Checklist</li>
-    <li class="list-group-item"><strong>{{livraison.checklist}}</strong></li>
+    <li class="list-group-item active" aria-current="true">Infos Client</li>
+    <li class="list-group-item"><strong>{{livraison.client.nom}}</strong></li>
+    <li class="list-group-item"><strong>{{livraison.client.adresse_lieux}}</strong></li>
+    <li class="list-group-item"><a href="{{livraison.client.adresse_dock}}" target="_blank">Adresse Dock</a></li>
+    <li class="list-group-item"><strong>{{livraison.client.contact}}</strong></li>
   </ul>
   
 
