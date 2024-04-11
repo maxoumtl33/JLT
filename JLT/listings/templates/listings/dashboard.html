@@ -30,9 +30,9 @@
           </li>
 
           <li class="nav__item">
-            <button onclick="history.go(-1);" class="nav__link"><i class="fa-regular fa-paste"></i>
+            <a  href="{% url 'journee-detail' journee.id %}" class="nav__link"><i class="fa-regular fa-paste"></i>
               <span class="nav__name">Feuille de route</span>
-            </button>
+            </a>
 
           </li>
 
@@ -100,6 +100,7 @@
                 
                   
                   {% endif %}
+              
                 {% endfor %}
               </tbody>
             </table>

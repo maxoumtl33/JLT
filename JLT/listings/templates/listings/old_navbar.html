@@ -90,3 +90,84 @@
       </div>
     </div>
   </nav>
+
+  <div class="accordion" id="accordionPanelsStayOpenExample">
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
+            HEURE DEPART
+        </button>
+      </h2>
+      <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show">
+        <div class="accordion-body">
+          <strong>{{livraison.heure_depart}}
+        </div>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false" aria-controls="panelsStayOpen-collapseTwo">
+            HEURE LIVRAISON
+        </button>
+      </h2>
+      <div id="panelsStayOpen-collapseTwo" class="accordion-collapse">
+        <div class="accordion-body">
+          <strong>{{livraison.heure_livraison}} (+/- 15min)
+        </div>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseEight" aria-expanded="false" aria-controls="panelsStayOpen-collapseEight">
+            Checklist
+        </button>
+      </h2>
+      <div id="panelsStayOpen-collapseEight" class="accordion-collapse">
+        <div class="accordion-body">
+          <strong>{{livraison.checklist}}
+        </div>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="false" aria-controls="panelsStayOpen-collapseThree">
+          <div>
+            <p>
+                Important
+              <i class="fa-solid fa-triangle-exclamation fa-xl" style="color: #fa0000;"></i>
+            </p>
+        </button>
+      </h2>
+      <div id="panelsStayOpen-collapseThree" class="accordion-collapse">
+        <div class="accordion-body">
+          <strong>{{livraison.commentaire}}
+        </div>
+      </div>
+      </div>
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseFive" aria-expanded="false" aria-controls="panelsStayOpen-collapseFive">
+              Route n°
+          </button>
+        </h2>
+        <div id="panelsStayOpen-collapseFive" class="accordion-collapse">
+          <div class="accordion-body">
+            <strong>{{livraison.route}}
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseSix" aria-expanded="false" aria-controls="panelsStayOpen-collapseSix">
+              Infos Client
+          </button>
+        </h2>
+        <div id="panelsStayOpen-collapseSix" class="accordion-collapse">
+          <div class="accordion-body">
+            <p>{{livraison.client.nom}}</p>
+            <p>{{livraison.client.adresse_lieux}}</p>
+            <p><a href="{{livraison.client.adresse_dock}}" target="_blank">Adresse Dock</a></p>
+            <p>{{livraison.client.contact}}</p>
+          </div>
+        </div>
+      </div>
