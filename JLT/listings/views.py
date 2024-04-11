@@ -42,6 +42,7 @@ def livraison_detail(request, ip):  # notez le paramètre id supplémentaire
    form = LivraisonForm(request.POST or None, instance=livraison)
    if form.is_valid():
        form.save()
+
        
        
      
@@ -98,16 +99,21 @@ def livreur_detail(request, pk):  # notez le paramètre id supplémentaire
 def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
     if request.user.is_authenticated :
         livreur = Livreur.objects.get(user_id= pk)
-        livraisons  = Livraison.objects.order_by('route')
+        livraisonsroute  = Livraison.objects.order_by('route')
         taches = Tacheafaire.objects.all()
         journee = Journee.objects.get(id=id)
         recuperation = "oui"
+        countlivraisonok = Livraison.objects.filter(status=True)
+        
+       
         
         return render(request, "listings/dashboard.html", context={'livreur':livreur,
-                                                                'livraisons' : livraisons,
+                                                                'livraisonsroute' : livraisonsroute,
                                                                 'taches' : taches,
                                                                 'recuperation' : recuperation,
                                                                 'journee' : journee,
+                                                                'countlivraisonok' : countlivraisonok,
+                                                                
                                                                 
                                                                 
 

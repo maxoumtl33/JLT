@@ -7,7 +7,7 @@
   <div class="nav__menu" id="nav-menu">
       <ul class="nav__list">
           <li class="nav__item">
-            <a href="javascript:history.back()" class="nav__link" ><i class="fa-solid fa-reply"></i>
+            <a href="{% url 'dashboard' livraison.journee.id request.user.id %}" class="nav__link" ><i class="fa-solid fa-reply"></i>
               <span>Retour</span>
             </a>
           </li>
@@ -32,7 +32,7 @@
           {% if livraison.status == False %}
           <li class="nav__item">
             <button type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
-              <i class="fa-solid fa-circle-check" style="color: orange;"></i>
+              <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i>
               <span>En cours</span>
           </button>  
           </li>
@@ -46,9 +46,11 @@
           {% endif %}
       </ul>
   </div>
-
   <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
 </nav>
+<br>
+<br>
+<br>
 {% if livraison.recuperation == recuperation%}
 <h1 style="text-align: center; color: #F1B3DA;">RECUPERATION {{livraison.nom|upper}}</h1>
   <br>
@@ -59,7 +61,6 @@
   
 
   <div class="accordion" id="accordionPanelsStayOpenExample">
-    
     <div class="accordion-item">
       <h2 class="accordion-header">
         <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
@@ -95,7 +96,6 @@
           <strong>{{livraison.checklist}}
         </div>
       </div>
-      
     </div>
     <div class="accordion-item">
       <h2 class="accordion-header">
@@ -105,7 +105,6 @@
                 Important
               <i class="fa-solid fa-triangle-exclamation fa-xl" style="color: #fa0000;"></i>
             </p>
-        </div>
         </button>
       </h2>
       <div id="panelsStayOpen-collapseThree" class="accordion-collapse">
@@ -114,7 +113,6 @@
         </div>
       </div>
       </div>
-    
       <div class="accordion-item">
         <h2 class="accordion-header">
           <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseFive" aria-expanded="false" aria-controls="panelsStayOpen-collapseFive">
@@ -126,9 +124,10 @@
             <strong>{{livraison.route}}
           </div>
         </div>
+      </div>
       <div class="accordion-item">
         <h2 class="accordion-header">
-          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseSix" aria-expanded="false" aria-controls="panelsStayOpen-collapseSix">
+          <button class="" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseSix" aria-expanded="false" aria-controls="panelsStayOpen-collapseSix">
               Infos Client
           </button>
         </h2>
@@ -141,10 +140,8 @@
           </div>
         </div>
       </div>
-
-  </div>
     </div>
-  </div>
+
   <br>
   <br>
   <br>
