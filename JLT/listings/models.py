@@ -29,12 +29,16 @@ class Tacheafaire(models.Model) :
 
 
 class Client(models.Model):
-        nom = models.fields.CharField(max_length=100)
+        nom = models.fields.CharField(null=True, blank=True, max_length=100)
         def __str__(self):
             return f'{self.nom}'
-        adresse_lieux = models.fields.CharField(max_length=100)
-        adresse_dock = models.fields.CharField(max_length=100)
-        contact = models.fields.CharField(max_length=100)
+        adress = models.fields.CharField(null=True, blank=True, max_length=100)
+        zipcode = models.fields.CharField(null=True, blank=True, max_length=100)
+        city = models.fields.CharField(null=True, blank=True, max_length=100)
+        country = models.fields.CharField(null=True, blank=True, max_length=100)
+        adresse_lieux = models.fields.CharField(null=True, blank=True, max_length=100)
+        adresse_dock = models.fields.CharField(null=True, blank=True, max_length=100)
+        contact = models.fields.CharField(null=True, blank=True, max_length=100)
 
 class Message(models.Model):
      nom = models.fields.CharField(max_length=100)
@@ -61,13 +65,13 @@ class Route(models.Model):
 
         
 class Livraison(models.Model):
-    nom = models.fields.CharField(max_length=100)
+    nom = models.fields.CharField(max_length=100, null=True, blank=True,)
     def __str__(self):
         return f'{self.nom}'
     route = models.ForeignKey(Route, null=True, blank=True, on_delete=models.SET_NULL)
     heure_depart = models.fields.CharField(null=True, blank=True, max_length=100)
     heure_livraison = models.fields.CharField(null=True, blank=True, max_length=100)
-    client = models.ForeignKey(Client, null=True, on_delete=models.SET_NULL)
+    client = models.ForeignKey(Client, null=True, blank=True, on_delete=models.SET_NULL)
     date = models.fields.DateField(null=True, blank=True,)
     commentaire = models.fields.CharField(null=True, blank=True, max_length=100)
     details_commande = models.FileField(null=True, blank=True, upload_to='media/commandesdetail/')
@@ -80,6 +84,21 @@ class Livraison(models.Model):
     recuperation = models.fields.CharField(null=True, blank=True, max_length = 3)
     status = models.BooleanField(default=False)
     adresse = models.fields.CharField(null=True, blank=True, max_length =100)
+
+class Distances(models.Model):
+     from_location = models.ForeignKey(Client, related_name="from_location", on_delete=models.CASCADE)
+     to_location = models.ForeignKey(Client, related_name="to", on_delete=models.CASCADE)
+     mode = models.fields.CharField(max_length=100, null=True, blank=True)
+     distance_km = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+     distance_mins = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+     distance_traffic_mins = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+     edited_at = models.DateTimeField(auto_now_add=True)
+
+     def __str__(self):
+          return self.name
+
+
 
 
 class Recuperation(models.Model):

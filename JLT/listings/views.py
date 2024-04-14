@@ -4,13 +4,19 @@ from listings.models import Livraison
 from .models import Livreur
 from .models import Tacheafaire
 from .models import Journee
-from .models import Route
+from .models import Client
+from .models import Distances
 from .forms import LivraisonForm
+from .forms import DistanceForm
 from tablib import Dataset
 from .ressources import LivraisonResource
 from django.utils.timezone import now
 from datetime import datetime, timedelta, time
 from .models import Recuperation
+import googlemaps
+from django.conf import settings
+from django.views import View
+from datetime import datetime
 
 from django.http import FileResponse, HttpResponseRedirect, HttpResponse
 
@@ -39,19 +45,19 @@ def journees_list(request):
 
 def livraison_detail(request, ip):  # notez le paramètre id supplémentaire
    livraison = Livraison.objects.get(id=ip)
+   adresse = Livraison.adresse
    livreur = Livreur.objects.all()
    journee = Journee.objects.all()
    recuperation = "oui"
    form = LivraisonForm(request.POST or None, instance=livraison)
+   gmaps = googlemaps.Client(key = settings.GOOGLE_API_KEY)
+   result = gmaps.geocode(adresse)
    if form.is_valid():
        form.save()
-
        
-       
-     
    return render(request,
           'listings/livraison_detail.html',
-          context={'livraison': livraison, 'livreur':livreur, 'recuperation': recuperation, 'form': form, 'journee':journee,}) # nous passons l'id au modèle
+          context={'livraison': livraison, 'livreur':livreur, 'recuperation': recuperation, 'form': form, 'journee':journee, 'result':result,}) # nous passons l'id au modèle
 
 def recuperation_detail(request, id):  # notez le paramètre id supplémentaire
    recuperations = Recuperation.objects.get(id=id)
@@ -175,4 +181,66 @@ def responsables(request, id):
                                                               'livreurs': livreurs,
                                                               'journee' : journee,
                                                               'recuperation' : recuperation,})
+
+
+
+
+class DistanceView(View):
+
+    def get(self, request):
+        form = DistanceForm
+        distances = Distances.objects.all()
+        context={'form': form,
+                 'distances':distances,
+                                                                    }
+        return render(request, 'listings/distances.html', context)
+
+    def post(self, request):
+        form = DistanceForm(request.POST)
+        if form.is_valid():
+            from_location = form.cleaned_data['from_location']
+            from_location_info = Client.objects.get(nom=from_location)
+            from_adress_string = str(from_location_info.adress)+", "+str(from_location_info.zipcode)+", "+str(from_location_info.city)+", "+str(from_location_info.country)
+
+            to_location = form.cleaned_data['to_location']
+            to_location_info = Client.objects.get(nom=to_location)
+            to_adress_string = str(to_location_info.adress)+", "+str(to_location_info.zipcode)+", "+str(to_location_info.city)+", "+str(to_location_info.country)
+
+            mode = form.cleaned_data['mode']
+            now = datetime.now()
+
+            gmaps = googlemaps.Client(key= settings.GOOGLE_API_KEY)
+            calculate = gmaps.distance_matrix(
+                from_adress_string,
+                to_adress_string,
+                mode = mode,
+                departure_time = now
+            )
+            print(calculate)
+
+            duration_secons = calculate['rows'][0]['elements'][0]['duration']['value']
+            duration_minutes = duration_secons/60
+
+            distance_meters = calculate['rows'][0]['elements'][0]['distance']['value']
+            distance_km = distance_meters/1000
+
+            if 'duration_in_traffic' in calculate['rows'][0]['elements'][0]:
+                duration_in_traffic_seconds = calculate['rows'][0]['elements'][0]['duration_in_traffic']['value']
+                duration_in_traffic_minutes = duration_in_traffic_seconds/60
+            else:
+                duration_in_traffic_minutes = None
+
+            obj = Distances(
+                from_location = Client.objects.get(nom=from_location),
+                to_location = Client.objects.get(nom=to_location),
+                mode = mode,
+                distance_km = distance_km,
+                distance_mins = duration_minutes,
+                distance_traffic_mins = duration_in_traffic_minutes
+            )
+
+            obj.save()
+
+        return redirect('my_distance_view')
+       
 

@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -28,6 +27,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
 
 # Application definition
 
@@ -41,6 +42,8 @@ INSTALLED_APPS = [
     'listings',
     'members',
     'import_export',
+    'crispy_forms',
+    'crispy_bootstrap4',
 ]
 
 MIDDLEWARE = [
@@ -106,6 +109,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
+
+GOOGLE_API_KEY = 'AIzaSyC2GqoZLMIMuAihXl8271sJN3kJ_57smdM'
 
 LANGUAGE_CODE = 'en-us'
 

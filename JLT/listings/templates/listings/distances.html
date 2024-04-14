@@ -1,0 +1,50 @@
+{% extends 'listings/base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<table id="ourtable3" class="table table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th>De</th>
+            <th>Vers</th>
+            <th>Mode</th>
+            <th>Distance km</th>
+            <th>Durée min moyenne</th>
+            <th>Durée mins traffic actuel</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for distance in distances %}
+        <tr>
+            <td>{{ distance.from_location }}</td>
+            <td>{{ distance.to_location }}</td>
+            <td>{{ distance.mode }}</td>
+            <td>{{ distance.distance_km }}</td>
+            <td>{{ distance.distance_mins }}</td>
+            <td>{{ distance.distance_traffic_mins }}</td>
+
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<form method="POST" class="form-inline"></form>
+    {% csrf_token %}
+    <div class="form-group mb-2">
+        <div class="form-control"> {{ form.from_location|as_crispy_field }}</div>
+    </div>
+    <div class="form-group mb-2">
+        <div class="form-control"> {{ form.to_location|as_crispy_field }}</div>
+    </div>
+    <div class="form-group mb-2">
+        <div class="form-control"> {{ form.mode|as_crispy_field }}</div>
+    </div>
+    <button class="btn btn-primary mb-2" type="submit">Calculer</button>
+</form>
+
+{% endblock %}
+
+                  
