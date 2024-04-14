@@ -46,6 +46,7 @@
   <h1 style="text-align: center;">FEUILLE DE ROUTE</h1> <h1 style="text-align: center;"> {{journees}} </h1>
   <br>
   <br>
+  <p style="text-align: center;">{{ livraisons|length }} livraisons aujourd'hui</p>
   <br>
   <table class="table table-striped">
       <thead class="thead-dark">
@@ -70,7 +71,7 @@
           
           <td style="color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
           <td style="color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
-          <td style="color: #F1B3DA;"><strong>{{livraison.commentaire}}</strong></td>
+          <td style="color: #F1B3DA;"><strong>{{livraison.infodetail}}</strong></td>
           <td style="color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
           <td style="color: #F1B3DA;"><strong>{{livraison.livreur.nom}}</strong></td>
           <td style="color: #F1B3DA;"><strong>{{livraison.aidelivreur}}</strong></td>
@@ -84,7 +85,7 @@
           
             <td><strong>{{ livraison.heure_depart }}</strong></td>
             <td><strong>{{livraison.nom}}</strong></td>
-            <td><strong>{{livraison.commentaire}}</strong></td>
+            <td><strong>{{livraison.infodetail}}</strong></td>
             <td><strong>{{ livraison.heure_livraison }}</strong></td>
             <td><strong>{{livraison.livreur.nom}}</strong></td>
             <td><strong>{{livraison.aidelivreur}}</strong></td>

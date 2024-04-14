@@ -73,11 +73,13 @@ class Livraison(models.Model):
     details_commande = models.FileField(null=True, blank=True, upload_to='media/commandesdetail/')
     infodetail = models.fields.CharField(null=True, blank=True, max_length=100)
     livreur = models.ForeignKey(Livreur, null=True, blank=True, on_delete=models.SET_NULL)
+    journee = models.ForeignKey(Journee, null=True, blank=True, on_delete=models.SET_NULL)
     aidelivreur = models.fields.CharField(null=True, blank=True, max_length=100)
     checklist = models.fields.CharField(null=True, blank=True, max_length =3)
     retourtraiteur = models.fields.CharField(null=True, blank=True, max_length = 3)
     recuperation = models.fields.CharField(null=True, blank=True, max_length = 3)
     status = models.BooleanField(default=False)
+    adresse = models.fields.CharField(null=True, blank=True, max_length =100)
 
 
 class Recuperation(models.Model):

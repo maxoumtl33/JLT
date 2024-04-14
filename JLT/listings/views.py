@@ -71,10 +71,11 @@ def journee_detail(request, id):  # notez le paramètre id supplémentaire
    retourtraiteur = "oui"
    retourtraiteurno = "non"
    recuperation = "oui"
+   recuperationo = "non"
    
    return render(request,
           'listings/journee_detail.html',
-          context={'journees': journees ,'livraisonsroute': livraisonsroute, 'livreurs':livreurs, 'recuperations' : recuperations,'retourtraiteur' : retourtraiteur,'recuperation' : recuperation,'retourtraiteurno': retourtraiteurno,'livraisons' : livraisons }) # nous passons l'id au modèle
+          context={'journees': journees ,'livraisonsroute': livraisonsroute, 'livreurs':livreurs, 'recuperations' : recuperations,'retourtraiteur' : retourtraiteur,'recuperation' : recuperation,'retourtraiteurno': retourtraiteurno,'livraisons' : livraisons, 'recuperationo':recuperationo }) # nous passons l'id au modèle
 
 
 def livreur_list(request):
@@ -104,7 +105,8 @@ def livreur_detail(request, pk):  # notez le paramètre id supplémentaire
 def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
     if request.user.is_authenticated :
         livreur = Livreur.objects.get(user_id= pk)
-        livraisonsroute  = Livraison.objects.order_by('route')
+        today = now().date()
+        livraisons = Livraison.objects.order_by('route').filter(date=today)
         taches = Tacheafaire.objects.all()
         journee = Journee.objects.get(id=id)
         recuperation = "oui"
@@ -113,7 +115,7 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
        
         
         return render(request, "listings/dashboard.html", context={'livreur':livreur,
-                                                                'livraisonsroute' : livraisonsroute,
+                                                                'livraisons' : livraisons,
                                                                 'taches' : taches,
                                                                 'recuperation' : recuperation,
                                                                 'journee' : journee,

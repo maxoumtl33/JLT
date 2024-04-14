@@ -53,7 +53,7 @@
 <br>
 
   <br>
-  <h2 style="text-align: center;" id="listlivraisons">EN COURS <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i>
+  <h2 style="text-align: center;" id="listlivraisons">EN COURS<i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i>
 </h2>
   <br>
   
@@ -72,7 +72,7 @@
               </thead>
               <tbody>
                 
-                {% for livraison in livraisonsroute %}
+                {% for livraison in livraisons %}
                 {% if livraison.date == journee.date and livraison.livreur.nom == livreur.nom and livraison.status == False and livraison.recuperation == recuperation %}
           
         
@@ -120,7 +120,7 @@
       </tr>
     </thead>
     <tbody>
-  {% for livraison in livraisonsroute %}
+  {% for livraison in livraisons %}
             {% if livraison.date == journee.date and livraison.livreur.nom == livreur.nom and livraison.status == True %}
             <tr>
               <td><strong>{{ livraison.heure_depart }}</strong></td>
