@@ -6,7 +6,10 @@ from .models import Tacheafaire
 from .models import Journee
 from .models import Route
 from .forms import LivraisonForm
-
+from tablib import Dataset
+from .ressources import LivraisonResource
+from django.utils.timezone import now
+from datetime import datetime, timedelta, time
 from .models import Recuperation
 
 from django.http import FileResponse, HttpResponseRedirect, HttpResponse
@@ -59,9 +62,11 @@ def recuperation_detail(request, id):  # notez le paramètre id supplémentaire
           context={'livraisons': livraisons, 'livreurs':livreurs, 'recuperations':recuperations}) # nous passons l'id au modèle
 
 def journee_detail(request, id):  # notez le paramètre id supplémentaire
-   journee = Journee.objects.get(id=id)
+   journees = Journee.objects.get(id=id)
    livreurs = Livreur.objects.all()
-   livraisons  = Livraison.objects.order_by('route')
+   livraisonsroute  = Livraison.objects.order_by('route')
+   today = now().date()
+   livraisons = Livraison.objects.order_by('route').filter(date=today)
    recuperations = Recuperation.objects.all()
    retourtraiteur = "oui"
    retourtraiteurno = "non"
@@ -69,7 +74,7 @@ def journee_detail(request, id):  # notez le paramètre id supplémentaire
    
    return render(request,
           'listings/journee_detail.html',
-          context={'journee': journee ,'livraisons': livraisons, 'livreurs':livreurs, 'recuperations' : recuperations,'retourtraiteur' : retourtraiteur,'recuperation' : recuperation,'retourtraiteurno': retourtraiteurno}) # nous passons l'id au modèle
+          context={'journees': journees ,'livraisonsroute': livraisonsroute, 'livreurs':livreurs, 'recuperations' : recuperations,'retourtraiteur' : retourtraiteur,'recuperation' : recuperation,'retourtraiteurno': retourtraiteurno,'livraisons' : livraisons }) # nous passons l'id au modèle
 
 
 def livreur_list(request):
@@ -120,3 +125,52 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
                                                                 })
     else:
         return redirect('home')
+    
+def responsableschoixjournee(request):
+
+    if request.method == 'POST':
+        livraison_resource = LivraisonResource()
+        dataset = Dataset()
+        new_livraisons = request.FILES['livraisons_file']
+        imported_data = dataset.load(new_livraisons.read(), format='xlsx')
+        for data in imported_data:
+            value = Livraison(
+                data[0],
+                data[1],
+                data[2],
+                data[3],
+                data[4],
+                data[5],
+                data[6],
+                data[7],
+                data[8],
+                data[9],
+                data[10],
+                data[11],
+                data[12],
+                data[13],
+                data[14],
+                data[15],
+                data[16],
+            )
+            value .save()
+    
+    livraisons  = Livraison.objects.all()
+    livreurs = Livreur.objects.all()
+    journees = Journee.objects.all()
+    return render(request, 'listings/responsableschoixjournee.html', context={'livraisons': livraisons,
+                                                              'livreurs': livreurs,
+                                                              'journees' : journees})
+
+def responsables(request, id):
+    today = datetime.now().date()
+    tomorrow = today + timedelta(1)
+    livraisons  = Livraison.objects.order_by('route').filter(date=tomorrow)
+    livreurs = Livreur.objects.all()
+    journee = Journee.objects.get(id=id)
+    recuperation = "oui"
+    return render(request, 'listings/responsables.html', context={'livraisons': livraisons,
+                                                              'livreurs': livreurs,
+                                                              'journee' : journee,
+                                                              'recuperation' : recuperation,})
+

@@ -50,6 +50,7 @@ class Journee(models.Model):
      def __str__(self):
         return f'{self.nom}'
      date = models.DateField()
+    
 
 
 class Route(models.Model):
@@ -63,20 +64,19 @@ class Livraison(models.Model):
     nom = models.fields.CharField(max_length=100)
     def __str__(self):
         return f'{self.nom}'
-    route = models.ForeignKey(Route, null=True, on_delete=models.SET_NULL)
-    heure_depart = models.fields.CharField(max_length=100)
-    heure_livraison = models.fields.CharField(max_length=100)
+    route = models.ForeignKey(Route, null=True, blank=True, on_delete=models.SET_NULL)
+    heure_depart = models.fields.CharField(null=True, blank=True, max_length=100)
+    heure_livraison = models.fields.CharField(null=True, blank=True, max_length=100)
     client = models.ForeignKey(Client, null=True, on_delete=models.SET_NULL)
-    date = models.fields.DateField()
-    commentaire = models.fields.CharField(max_length=100)
-    details_commande = models.FileField(upload_to='media/commandesdetail/')
-    infodetail = models.fields.CharField(max_length=100)
-    livreur = models.ForeignKey(Livreur, null=True, on_delete=models.SET_NULL)
-    journee = models.ForeignKey(Journee, null=True, on_delete=models.SET_NULL)
-    aidelivreur = models.fields.CharField(max_length=100)
-    checklist = models.fields.CharField(max_length =3)
-    retourtraiteur = models.fields.CharField(max_length = 3)
-    recuperation = models.fields.CharField(max_length = 3)
+    date = models.fields.DateField(null=True, blank=True,)
+    commentaire = models.fields.CharField(null=True, blank=True, max_length=100)
+    details_commande = models.FileField(null=True, blank=True, upload_to='media/commandesdetail/')
+    infodetail = models.fields.CharField(null=True, blank=True, max_length=100)
+    livreur = models.ForeignKey(Livreur, null=True, blank=True, on_delete=models.SET_NULL)
+    aidelivreur = models.fields.CharField(null=True, blank=True, max_length=100)
+    checklist = models.fields.CharField(null=True, blank=True, max_length =3)
+    retourtraiteur = models.fields.CharField(null=True, blank=True, max_length = 3)
+    recuperation = models.fields.CharField(null=True, blank=True, max_length = 3)
     status = models.BooleanField(default=False)
 
 

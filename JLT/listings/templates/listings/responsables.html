@@ -1,0 +1,68 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% block content %}
+<div class="body">
+    <h1 style="text-align: center;">FEUILLE DE ROUTE</h1> <h1 style="text-align: center;"> {{journee.nom}} </h1>
+    <br>
+    <br>
+    <br>
+    <table class="table table-striped">
+        <thead class="thead-dark">
+          <tr>
+            
+            <th scope="col" style="color: #303FBA;">Heure départ</th>
+            <th scope="col" style="color: #303FBA;">Nom du contrat</th>
+            <th scope="col" style="color: #303FBA;">Infos</th>
+            <th scope="col" style="color: #303FBA;">Heure livraison</th>
+            <th scope="col" style="color: #303FBA;">Livreur</th>
+            <th scope="col" style="color: #303FBA;">Aide livreur</th>
+            <th scope="col" style="color: #303FBA;">Route</th>
+  
+          </tr>
+        </thead>
+        <tbody>
+            {% for livraison in livraisons %}
+            {% if livraison.recuperation == recuperation %}
+          <tr>
+            
+            <td style="color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
+            <td style="color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
+            <td style="color: #F1B3DA;"><strong>{{livraison.commentaire}}</strong></td>
+            <td style="color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
+            <td style="color: #F1B3DA;"><strong>{{livraison.livreur.nom}}</strong></td>
+            <td style="color: #F1B3DA;"><strong>{{livraison.aidelivreur}}</strong></td>
+            <td style="color: #F1B3DA;"><strong>{{ livraison.route }}</strong></td>
+          
+          </tr>
+            {% elif livraison.retourtraiteur == retourtraiteur %}
+            <tr>
+            
+              <td><strong>{{ livraison.heure_depart }}</strong></td>
+              <td><strong>{{livraison.nom}}</strong></td>
+              <td><strong>{{livraison.commentaire}}</strong></td>
+              <td><strong>{{ livraison.heure_livraison }}</strong></td>
+              <td><strong>{{livraison.livreur.nom}}</strong></td>
+              <td><strong>{{livraison.aidelivreur}}</strong></td>
+              <td><strong>{{ livraison.route }}</strong></td>
+            
+            </tr>
+            {% else %}
+            <tr>
+            
+              <td><strong>{{ livraison.heure_depart }}</strong></td>
+              <td><strong>{{livraison.nom}}</strong></td>
+              <td><strong>{{livraison.commentaire}}</strong></td>
+              <td><strong>{{ livraison.heure_livraison }}</strong></td>
+              <td><strong>{{livraison.livreur.nom}}</strong></td>
+              <td><strong>{{livraison.aidelivreur}}</strong></td>
+              <td><strong>{{ livraison.route }}</strong></td>
+            
+            </tr>
+            {% endif %}
+          {% endfor %}
+          
+        </tbody>
+      </table>
+      
+    </div>
+    {% endblock %}

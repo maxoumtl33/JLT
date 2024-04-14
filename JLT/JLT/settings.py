@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'listings',
     'members',
+    'import_export',
 ]
 
 MIDDLEWARE = [

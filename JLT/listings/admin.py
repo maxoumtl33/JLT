@@ -8,22 +8,23 @@ from listings.models import Recuperation
 from listings.models import Message
 from listings.models import Route
 from django.contrib.auth.models import User, Group
+from import_export.admin import ImportExportModelAdmin
+from .models import Livraison
 #from listings.models import Route
+
+class LivraisonAdmin(ImportExportModelAdmin):
+    list_display = ('nom', 'date', 'route', 'client', 'heure_livraison')
 
 admin.site.unregister(Group)
 
-class LivraisonAdmin(admin.ModelAdmin): 
-    list_display = ('nom', 'date', 'route', 'client', 'heure_livraison')
+
 
 class ClientAdmin(admin.ModelAdmin): 
     list_display = ('nom', 'adresse_lieux', 'adresse_dock', 'contact')
 
 admin.site.register(Livraison, LivraisonAdmin)
 admin.site.register(Journee)
-admin.site.register(Recuperation)
-admin.site.register(Message)
 admin.site.register(Livreur)
-admin.site.register(Tacheafaire)
 admin.site.register(Route)
 admin.site.register(Client, ClientAdmin)
 #admin.site.register(Route)
