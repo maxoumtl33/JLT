@@ -21,6 +21,8 @@ path('livreur_list/', views.livreur_list, name = 'livreur-list'),
 path('responsables/journee/<int:id>/', views.responsables, name = 'responsables'),
 path('responsableschoixjournee', views.responsableschoixjournee, name = 'responsableschoixjournee'),
 path('distance', DistanceView.as_view(), name = 'my_distance_view'),
+path('map', MapView.as_view(), name = 'my_map_view'),
+path('delete_distance/<str:pk>/', views.deleteDistance, name = 'deletedistance'),
 path('livreur/<int:pk>/', views.livreur_detail, name='livreur-detail'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

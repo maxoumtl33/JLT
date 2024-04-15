@@ -13,6 +13,7 @@
             <th>Distance km</th>
             <th>Durée min moyenne</th>
             <th>Durée mins traffic actuel</th>
+            <th>Supprimer</th>
         </tr>
     </thead>
 
@@ -25,24 +26,22 @@
             <td>{{ distance.distance_km }}</td>
             <td>{{ distance.distance_mins }}</td>
             <td>{{ distance.distance_traffic_mins }}</td>
+            <td><a href="{% url 'deletedistance' distance.id %}">supprimer</a></td>
 
         </tr>
         {% endfor %}
     </tbody>
 </table>
 
-<form method="POST" class="form-inline"></form>
+<form method="POST">
     {% csrf_token %}
-    <div class="form-group mb-2">
-        <div class="form-control"> {{ form.from_location|as_crispy_field }}</div>
+    <div id="linkholder">
+        <div class="form1 ml-3"> {{ form.from_location|as_crispy_field }}</div>
+        <div class="form1 ml-3"> {{ form.to_location|as_crispy_field }}</div>
+        <div class="form1 ml-3"> {{ form.mode|as_crispy_field }}</div>
+        <br>
+        <button  class="btn btn-primary" type="submit">Calculer</button>
     </div>
-    <div class="form-group mb-2">
-        <div class="form-control"> {{ form.to_location|as_crispy_field }}</div>
-    </div>
-    <div class="form-group mb-2">
-        <div class="form-control"> {{ form.mode|as_crispy_field }}</div>
-    </div>
-    <button class="btn btn-primary mb-2" type="submit">Calculer</button>
 </form>
 
 {% endblock %}

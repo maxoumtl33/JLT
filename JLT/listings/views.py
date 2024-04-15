@@ -4,7 +4,6 @@ from listings.models import Livraison
 from .models import Livreur
 from .models import Tacheafaire
 from .models import Journee
-from .models import Client
 from .models import Distances
 from .forms import LivraisonForm
 from .forms import DistanceForm
@@ -45,7 +44,7 @@ def journees_list(request):
 
 def livraison_detail(request, ip):  # notez le paramètre id supplémentaire
    livraison = Livraison.objects.get(id=ip)
-   adresse = Livraison.adresse
+   adresse = Livraison.adress
    livreur = Livreur.objects.all()
    journee = Journee.objects.all()
    recuperation = "oui"
@@ -199,11 +198,11 @@ class DistanceView(View):
         form = DistanceForm(request.POST)
         if form.is_valid():
             from_location = form.cleaned_data['from_location']
-            from_location_info = Client.objects.get(nom=from_location)
+            from_location_info = Livraison.objects.get(nom=from_location)
             from_adress_string = str(from_location_info.adress)+", "+str(from_location_info.zipcode)+", "+str(from_location_info.city)+", "+str(from_location_info.country)
 
             to_location = form.cleaned_data['to_location']
-            to_location_info = Client.objects.get(nom=to_location)
+            to_location_info = Livraison.objects.get(nom=to_location)
             to_adress_string = str(to_location_info.adress)+", "+str(to_location_info.zipcode)+", "+str(to_location_info.city)+", "+str(to_location_info.country)
 
             mode = form.cleaned_data['mode']
@@ -231,8 +230,8 @@ class DistanceView(View):
                 duration_in_traffic_minutes = None
 
             obj = Distances(
-                from_location = Client.objects.get(nom=from_location),
-                to_location = Client.objects.get(nom=to_location),
+                from_location = Livraison.objects.get(nom=from_location),
+                to_location = Livraison.objects.get(nom=to_location),
                 mode = mode,
                 distance_km = distance_km,
                 distance_mins = duration_minutes,
@@ -244,3 +243,22 @@ class DistanceView(View):
         return redirect('my_distance_view')
        
 
+class MapView(View):
+    def get(self, request):
+        key = settings.GOOGLE_API_KEY
+        eligable_locations = Livraison.objects.filter(place_id_isnull=False)
+        context = {'key': key
+
+        }
+        return render(request, 'listings/map.html', context)
+    
+
+
+def deleteDistance(request, pk):
+    distance = Distances.objects.get(id= pk)
+    if request.method == 'POST':
+        distance.delete()
+        return redirect('my_distance_view')
+
+    context = {'distance':distance}
+    return render(request, 'listings/deletedistance.html')

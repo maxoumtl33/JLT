@@ -1,0 +1,36 @@
+{% extends 'listings/base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+<script>
+    let map
+    function initMap(){
+        map = new google.maps.Map(document.getElementById("map"),{
+        center: { lat:  -34.397, lng: 150.644 },
+        zoom: 10,
+    }
+    );
+}
+
+    window.initMap = initMap
+</script>
+<h1>Livraisons sur la carte</h1>
+<br>
+<br>
+<br>
+
+<div class="linkholder">
+    <div class="mapholder" style="height: 500px; width: 100%;">
+        <div id="map" style="height: 100%;">
+        </div>
+            <script async
+                 src="https://maps.googleapis.com/maps/api/js?key={{key}}&loading=async&callback=initMap">
+            </script>
+    </div>
+</div>
+
+
+{% endblock %}
+
+                  

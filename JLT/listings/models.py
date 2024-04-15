@@ -32,10 +32,6 @@ class Client(models.Model):
         nom = models.fields.CharField(null=True, blank=True, max_length=100)
         def __str__(self):
             return f'{self.nom}'
-        adress = models.fields.CharField(null=True, blank=True, max_length=100)
-        zipcode = models.fields.CharField(null=True, blank=True, max_length=100)
-        city = models.fields.CharField(null=True, blank=True, max_length=100)
-        country = models.fields.CharField(null=True, blank=True, max_length=100)
         adresse_lieux = models.fields.CharField(null=True, blank=True, max_length=100)
         adresse_dock = models.fields.CharField(null=True, blank=True, max_length=100)
         contact = models.fields.CharField(null=True, blank=True, max_length=100)
@@ -83,11 +79,14 @@ class Livraison(models.Model):
     retourtraiteur = models.fields.CharField(null=True, blank=True, max_length = 3)
     recuperation = models.fields.CharField(null=True, blank=True, max_length = 3)
     status = models.BooleanField(default=False)
-    adresse = models.fields.CharField(null=True, blank=True, max_length =100)
-
+    adress = models.fields.CharField(null=True, blank=True, max_length=100)
+    zipcode = models.fields.CharField(null=True, blank=True, max_length=100)
+    city = models.fields.CharField(null=True, blank=True, max_length=100, default="Montreal")
+    country = models.fields.CharField(null=True, blank=True, max_length=100, default="Canada")
+    
 class Distances(models.Model):
-     from_location = models.ForeignKey(Client, related_name="from_location", on_delete=models.CASCADE)
-     to_location = models.ForeignKey(Client, related_name="to", on_delete=models.CASCADE)
+     from_location = models.ForeignKey(Livraison, related_name="from_location", on_delete=models.CASCADE)
+     to_location = models.ForeignKey(Livraison, related_name="to", on_delete=models.CASCADE)
      mode = models.fields.CharField(max_length=100, null=True, blank=True)
      distance_km = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
      distance_mins = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
