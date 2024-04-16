@@ -27,6 +27,12 @@
               <i class="fa-solid fa-link"></i><span class="nav__name">Liens</span>
             </a>
           </li>
+          <li class="nav__item">
+            <a  href="{% url 'journees-list' %}" class="nav__link"><i class="fa-regular fa-paste"></i>
+              <span class="nav__name">Retour</span>
+            </a>
+
+          </li>
       </ul>
   </div>
 
@@ -41,7 +47,7 @@
 <br>
     {% for journee in journees %}
     <div style="text-align: center;">
-      <a href="{% url 'responsables' journee.id %}" class="btn btn-primary">Stats journée</a>    
+      <a href="{% url 'responsables' journee.id %}" class="btn btn-primary">Stats journée en cours</a>    
     </div>
     {% endfor %}
 <br>

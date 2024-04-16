@@ -5,6 +5,8 @@ from .models import Livreur
 from .models import Tacheafaire
 from .models import Journee
 from .models import Distances
+from .models import User
+
 from .forms import LivraisonForm
 from .forms import DistanceForm
 from tablib import Dataset
@@ -77,10 +79,12 @@ def journee_detail(request, id):  # notez le paramètre id supplémentaire
    retourtraiteurno = "non"
    recuperation = "oui"
    recuperationo = "non"
+   loic = "Loic"
+   maxime = "Maxime"
    
    return render(request,
           'listings/journee_detail.html',
-          context={'journees': journees ,'livraisonsroute': livraisonsroute, 'livreurs':livreurs, 'recuperations' : recuperations,'retourtraiteur' : retourtraiteur,'recuperation' : recuperation,'retourtraiteurno': retourtraiteurno,'livraisons' : livraisons, 'recuperationo':recuperationo }) # nous passons l'id au modèle
+          context={'journees': journees ,'livraisonsroute': livraisonsroute, 'livreurs':livreurs, 'recuperations' : recuperations,'retourtraiteur' : retourtraiteur,'recuperation' : recuperation,'retourtraiteurno': retourtraiteurno,'livraisons' : livraisons, 'recuperationo':recuperationo, 'loic':loic, 'maxime':maxime }) # nous passons l'id au modèle
 
 
 def livreur_list(request):
@@ -109,22 +113,35 @@ def livreur_detail(request, pk):  # notez le paramètre id supplémentaire
     
 def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
     if request.user.is_authenticated :
+        userid = request.user.id
         livreur = Livreur.objects.get(user_id= pk)
         today = now().date()
-        livraisons = Livraison.objects.order_by('route').filter(date=today)
-        taches = Tacheafaire.objects.all()
+        livraisons  = Livraison.objects.order_by('route').filter(date=today)
+        livraisonstatusok = Livraison.objects.filter(status=True, date=today,recuperation="non", livreur = userid)
+        livraisonstatusko = Livraison.objects.filter(status=False, date=today,recuperation="non", livreur = userid)
+        recuperation = Livraison.objects.filter(recuperation="oui", date=today, livreur = userid)
+        recuperationok = Livraison.objects.filter(recuperation="oui", status=True, date=today, livreur = userid)
+        recuperationko = Livraison.objects.filter(status=False,recuperation="oui", date=today, livreur = userid)
+        livraison = Livraison.objects.filter(recuperation="non", date=today, livreur = userid)
         journee = Journee.objects.get(id=id)
-        recuperation = "oui"
-        countlivraisonok = Livraison.objects.filter(status=True)
+        recuperations = "oui"
         
        
         
         return render(request, "listings/dashboard.html", context={'livreur':livreur,
                                                                 'livraisons' : livraisons,
-                                                                'taches' : taches,
+                                                                'livraisonstatusok':livraisonstatusok,
+                                                                'livraisonstatusko':livraisonstatusko,
                                                                 'recuperation' : recuperation,
                                                                 'journee' : journee,
-                                                                'countlivraisonok' : countlivraisonok,
+                                                                'recuperationok':recuperationok,
+                                                                'recuperationko':recuperationko,
+                                                                'livraison':livraison,
+                                                                'recuperations':recuperations,
+                                                                'userid':userid,
+                                                                
+
+                                                                
                                                                 
                                                                 
                                                                 
@@ -172,14 +189,27 @@ def responsableschoixjournee(request):
 def responsables(request, id):
     today = datetime.now().date()
     tomorrow = today + timedelta(1)
-    livraisons  = Livraison.objects.order_by('route').filter(date=tomorrow)
+    livraisons  = Livraison.objects.order_by('route').filter(date=today)
+    livraisonstatusok = Livraison.objects.filter(status=True, date=today,recuperation="non")
+    livraisonstatusko = Livraison.objects.filter(status=False, date=today,recuperation="non")
+    recuperation = Livraison.objects.filter(recuperation="oui", date=today)
+    recuperationok = Livraison.objects.filter(recuperation="oui", status=True, date=today)
+    recuperationko = Livraison.objects.filter(status=False,recuperation="oui", date=today)
+    livraison = Livraison.objects.filter(recuperation="non", date=today)
     livreurs = Livreur.objects.all()
     journee = Journee.objects.get(id=id)
-    recuperation = "oui"
+    recuperations = "oui"
     return render(request, 'listings/responsables.html', context={'livraisons': livraisons,
                                                               'livreurs': livreurs,
                                                               'journee' : journee,
-                                                              'recuperation' : recuperation,})
+                                                              'recuperations' : recuperations,
+                                                              'livraisonstatusok':livraisonstatusok,
+                                                              'livraisonstatusko':livraisonstatusko,
+                                                              'livraison':livraison,
+                                                              'recuperationok':recuperationok,
+                                                              'recuperationko':recuperationko,
+                                                              'recuperation' : recuperation,
+                                                              })
 
 
 

@@ -34,7 +34,13 @@
                   <span class="nav__name">Dashboard</span>
               </a>
           </li>
-
+          {% if user.username == loic or user.username == maxime %}
+          <li class="nav__item">
+            <a href="{% url 'acceuilresponsables'%}" class="nav__link" ><i class="fa-solid fa-user-ninja"></i>
+                  <span class="nav__name">Acceuil</span>
+              </a>
+          </li>
+          {% endif %}
       </ul>
   </div>
 

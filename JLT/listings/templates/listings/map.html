@@ -1,6 +1,47 @@
 {% extends 'listings/base.html' %}
+
 {% load crispy_forms_tags %}
+{% load static %}
+
 {% block content %}
+<nav class="nav container">
+    <a href="#" class="nav__logo">Julien Leblanc Traiteur</a>
+  
+    <div class="nav__menu" id="nav-menu">
+        <ul class="nav__list">
+          {% if user.is_authenticated %}
+            <li class="nav__item">
+              <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="nav__link active-link" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i></i>
+            </form>
+                    <span class="nav__name">Logout</span>
+          </button>
+            </li>
+            {% else %}
+            <li class="nav__item">
+              <a href="{% url 'login' %}" class="nav__link" style="color: green;"><i class="fa-regular fa-user"></i></i>
+                    <span class="nav__name">Login</span>
+                </a>
+            </li>
+            {% endif %}
+            <li class="nav__item">
+              <a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                <i class="fa-solid fa-link"></i><span class="nav__name">Liens</span>
+              </a>
+            </li>
+            <li class="nav__item">
+              <a  href="{% url 'acceuilresponsables' %}" class="nav__link"><i class="fa-solid fa-user-ninja"></i>
+                <span class="nav__name">Retour</span>
+              </a>
+  
+            </li>
+        </ul>
+    </div>
+  
+    <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
+  </nav>
+  
 <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
 
 <script>

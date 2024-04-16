@@ -52,6 +52,57 @@
 </div>
 <br>
 
+<div class="row row-cols-1 row-cols-md-2 g-4">
+  <div class="col">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Total livraisons</h5>
+        <p class="card-text">{{livraison|length}}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Total récupérations</h5>
+        <p class="card-text">{{recuperation|length}}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Total livraisons validées</h5>
+        <p class="card-text">{{livraisonstatusok|length}}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Total récupérations validées</h5>
+        <p class="card-text">{{recuperationok|length}}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Total livraisons en cours</h5>
+        <p class="card-text">{{livraisonstatusko|length}}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Total récupérations en cours</h5>
+        <p class="card-text">{{recuperationko|length}}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
   <br>
   <h2 style="text-align: center;" id="listlivraisons">EN COURS<i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i>
 </h2>
@@ -73,7 +124,7 @@
               <tbody>
                 
                 {% for livraison in livraisons %}
-                {% if livraison.date == journee.date and livraison.livreur.nom == livreur.nom and livraison.status == False and livraison.recuperation == recuperation %}
+                {% if livraison.date == journee.date and livraison.livreur.nom == livreur.nom and livraison.status == False and livraison.recuperation == recuperations %}
           
         
                 <tr>
@@ -121,7 +172,16 @@
     </thead>
     <tbody>
   {% for livraison in livraisons %}
-            {% if livraison.date == journee.date and livraison.livreur.nom == livreur.nom and livraison.status == True %}
+  {% if livraison.date == journee.date and livraison.livreur.nom == livreur.nom and livraison.status == True and livraison.recuperation == recuperations %}
+                <tr>
+                  <td style="color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
+                  <td style="color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
+                  <td style="color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
+                  <td style="color: #F1B3DA;"><strong>{{ livraison.route }}</strong></td>
+                  <td style="color: #F1B3DA;"><strong>{{livraison.retourtraiteur}}</strong></td>
+                  <td style="color: #F1B3DA;"><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+                </tr>
+            {% elif livraison.date == journee.date and livraison.livreur.nom == livreur.nom and livraison.status == True %}
             <tr>
               <td><strong>{{ livraison.heure_depart }}</strong></td>
               <td><strong>{{livraison.nom}}</strong></td>
