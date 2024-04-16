@@ -56,7 +56,7 @@ def livraison_detail(request, ip):  # notez le paramètre id supplémentaire
        
    return render(request,
           'listings/livraison_detail.html',
-          context={'livraison': livraison, 'livreur':livreur, 'recuperation': recuperation, 'form': form, 'journee':journee, 'result':result,}) # nous passons l'id au modèle
+          context={'livraison': livraison, 'livreur':livreur, 'recuperation': recuperation, 'form': form, 'journee':journee, 'result':result,'adresse': adresse}) # nous passons l'id au modèle
 
 def recuperation_detail(request, id):  # notez le paramètre id supplémentaire
    recuperations = Recuperation.objects.get(id=id)
@@ -261,4 +261,4 @@ def deleteDistance(request, pk):
         return redirect('my_distance_view')
 
     context = {'distance':distance}
-    return render(request, 'listings/deletedistance.html')
+    return render(request, 'listings/deletedistance.html', context)

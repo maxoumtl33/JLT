@@ -51,6 +51,7 @@
 <br>
 <br>
 <br>
+
 {% if livraison.recuperation == recuperation%}
 <h1 style="text-align: center; color: #F1B3DA;">RECUPERATION {{livraison.nom|upper}}</h1>
   <br>
@@ -59,26 +60,108 @@
   <br>
   {% endif %}
   
-  <ul class="list-group">
-    <li class="list-group-item active" aria-current="true">Route n°</li>
-    <li class="list-group-item"><strong>{{livraison.route}}</strong></li>
-    <li class="list-group-item active" aria-current="true">HEURE DEPART</li>
-    <li class="list-group-item"><strong>{{livraison.heure_depart}}</strong></li>
-    <li class="list-group-item active" aria-current="true">HEURE LIVRAISON (+/- 15min)</li>
-    <li class="list-group-item"><strong>{{livraison.heure_livraison}}</strong></li>
-    <li class="list-group-item active" aria-current="true">Checklist</li>
-    <li class="list-group-item"><strong>{{livraison.checklist}}</strong></li>
-    <li class="list-group-item active" aria-current="true"><p>
-      Important
-    <i class="fa-solid fa-triangle-exclamation fa-xl" style="color: #fa0000;"></i>
-  </p></li>
-    <li class="list-group-item"><strong>{{livraison.commentaire}}</strong></li>
-    <li class="list-group-item active" aria-current="true">Infos Client</li>
-    <li class="list-group-item"><strong>{{livraison.client.nom}}</strong></li>
-    <li class="list-group-item"><strong>{{livraison.client.adresse_lieux}}</strong></li>
-    <li class="list-group-item"><a href="{{livraison.client.adresse_dock}}" target="_blank">Adresse Dock</a></li>
-    <li class="list-group-item"><strong>{{livraison.client.contact}}</strong></li>
-  </ul>
+  
+  
+    <div class="card card-body">
+      <ul class="list-group">
+        <li class="list-group-item active" aria-current="true">Informations</li>
+        <li class="list-group-item"><div class="row row-cols-1 row-cols-md-2 g-4">
+          <div class="col">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><strong>Nom</strong></h5>
+                <p class="card-text">{{ livraison.nom }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><strong>Adresse</strong></h5>
+                <p class="card-text">{{ livraison.adress }}, {{livraison.zipcode}}, {{livraison.city}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><strong>Route n°</strong></h5>
+                <p class="card-text">{{ livraison.route }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><strong>Heure départ</strong></h5>
+                <p class="card-text">{{ livraison.heure_depart }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><strong>Heure de livraison</strong></h5>
+                <p class="card-text">{{ livraison.heure_livraison }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><strong>Checklist</strong></h5>
+                <p class="card-text">{{ livraison.checklist }}</p>
+              </div>
+            </div>
+          </div>
+        <div class="col">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title"><strong>Commentaires</strong></h5>
+              <p class="card-text">{{livraison.commentaire}}</p>
+            </div>
+          </div>
+        </div>
+        
+      </li>
+      </ul>
+    </div>
+  
+    <div class="card card-body">
+      <div class="card card-body">
+        <ul class="list-group">
+          <li class="list-group-item active" aria-current="true">Client</li>
+          <li class="list-group-item"><div class="row row-cols-1 row-cols-md-2 g-4">
+            <div class="col">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title"><strong>Nom</strong></h5>
+                  <p class="card-text">{{livraison.client.nom}}</p>
+                </div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title"><strong>Adresse Dock</strong></h5>
+                  <p class="card-text"><a href="{{livraison.client.adresse_dock}}" target="_blank">ici</a></p>
+                </div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title"><strong>Contact</strong></h5>
+                  <p class="card-text">{{livraison.client.contact}}</p>
+                </div>
+              </div>
+            </div>
+        </li>
+        </ul>
+      </div>
+    </div>
+    </div>
+  
   
 
   <br>
