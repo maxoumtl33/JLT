@@ -1,7 +1,7 @@
 {% extends 'listings/base.html' %}
 {% load static %}
 {% block content %}
-<nav class="nav container">
+<nav class="nav container fixed-bottom">
   <a href="#" class="nav__logo">Julien Leblanc Traiteur</a>
 
   <div class="nav__menu" id="nav-menu">
@@ -46,7 +46,8 @@
 <br>
 <br>
 <div style="text-align: center;">
-    <h2>Dashboard {{ livreur.nom }}</h2>
+    <h1>Dashboard {{ livreur.nom }}</h1>
+    <h2>{{journee}}</h2>
     <br>
     <br>
 </div>
@@ -56,24 +57,8 @@
   <div class="col">
     <div class="card">
       <div class="card-body">
-        <h5 class="card-title">Total livraisons</h5>
-        <p class="card-text">{{livraison|length}}</p>
-      </div>
-    </div>
-  </div>
-  <div class="col">
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">Total récupérations</h5>
-        <p class="card-text">{{recuperation|length}}</p>
-      </div>
-    </div>
-  </div>
-  <div class="col">
-    <div class="card">
-      <div class="card-body">
         <h5 class="card-title">Total livraisons validées</h5>
-        <p class="card-text">{{livraisonstatusok|length}}</p>
+        <p class="card-text">{{livraisonstatusok|length}} / {{livraison|length}}</p>
       </div>
     </div>
   </div>
@@ -81,30 +66,17 @@
     <div class="card">
       <div class="card-body">
         <h5 class="card-title">Total récupérations validées</h5>
-        <p class="card-text">{{recuperationok|length}}</p>
-      </div>
-    </div>
-  </div>
-  <div class="col">
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">Total livraisons en cours</h5>
-        <p class="card-text">{{livraisonstatusko|length}}</p>
-      </div>
-    </div>
-  </div>
-  <div class="col">
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">Total récupérations en cours</h5>
-        <p class="card-text">{{recuperationko|length}}</p>
+        <p class="card-text">{{recuperationok|length}} / {{recuperation|length}}</p>
       </div>
     </div>
   </div>
 </div>
+<br>
+<br>
+<br>
 
   <br>
-  <h2 style="text-align: center;" id="listlivraisons">EN COURS<i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i>
+  <h2 style="text-align: center;" id="listlivraisons">EN COURS  <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i>
 </h2>
   <br>
   
@@ -132,7 +104,11 @@
                   <td style="color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
                   <td style="color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
                   <td style="color: #F1B3DA;"><strong>{{ livraison.route }}</strong></td>
-                  <td style="color: #F1B3DA;"><strong>{{livraison.retourtraiteur}}</strong></td>
+                  {% if livraison.retourtraiteur == recuperations %}
+          <td><strong><i class="fa-solid fa-house-circle-check" style="color: #63E6BE;"></i></strong></td>
+          {%  else %}
+          <td><strong><i class="fa-solid fa-house-circle-xmark" style="color: #de391b;"></i></strong></td>
+          {% endif %}
                   <td style="color: #F1B3DA;"><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
                 </tr>
                 {% elif livraison.date == journee.date and livraison.livreur.nom == livreur.nom and livraison.status == False %}
@@ -141,7 +117,12 @@
                   <td ><strong>{{livraison.nom}}</strong></td>
                   <td ><strong>{{ livraison.heure_livraison }}</strong></td>
                   <td ><strong>{{ livraison.route }}</strong></td>
-                  <td ><strong>{{livraison.retourtraiteur}}</strong></td>
+                  {% if livraison.retourtraiteur == recuperations %}
+                  <td><strong><i class="fa-solid fa-house-circle-check" style="color: #63E6BE;"></i></strong></td>
+                  {%  else %}
+                  <td><strong><i class="fa-solid fa-house-circle-xmark" style="color: #de391b;"></i></strong></td>
+                  {% endif %}
+        
                   <td ><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
                 </tr>
                 
@@ -155,7 +136,7 @@
                 <br>
                 <br>
 
-  <h2 style="text-align: center;" id="listlivraisons">TERMINÉ <i class="fa-solid fa-circle-check" style="color: green;"></i></h2>
+  <h2 style="text-align: center;" id="listlivraisons">TERMINÉ  <i class="fa-solid fa-circle-check" style="color: green;"></i></h2>
   <br>
   <table class="table table-striped">
     <thead class="thead-dark">
@@ -178,7 +159,7 @@
                   <td style="color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
                   <td style="color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
                   <td style="color: #F1B3DA;"><strong>{{ livraison.route }}</strong></td>
-                  <td style="color: #F1B3DA;"><strong>{{livraison.retourtraiteur}}</strong></td>
+                  <td style="color: #F1B3DA;"><strong><i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong></td>
                   <td style="color: #F1B3DA;"><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
                 </tr>
             {% elif livraison.date == journee.date and livraison.livreur.nom == livreur.nom and livraison.status == True %}

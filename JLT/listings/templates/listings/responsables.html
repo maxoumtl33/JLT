@@ -44,6 +44,10 @@
   <br>
   <br>
   <br>
+  <h1 style="text-align: center;">{{journee}}</h1>
+
+<br>
+<br>
   <div class="row row-cols-1 row-cols-md-2 g-4">
     <div class="col">
       <div class="card">
@@ -65,7 +69,7 @@
       <div class="card">
         <div class="card-body">
           <h5 class="card-title">Total livraisons validées</h5>
-          <p class="card-text">{{livraisonstatusok|length}}</p>
+          <p class="card-text">{{livraisonstatusok|length}} / {{livraison|length}}</p>
         </div>
       </div>
     </div>
@@ -73,7 +77,7 @@
       <div class="card">
         <div class="card-body">
           <h5 class="card-title">Total récupérations validées</h5>
-          <p class="card-text">{{recuperationok|length}}</p>
+          <p class="card-text">{{recuperationok|length}} / {{recuperation|length}}</p>
         </div>
       </div>
     </div>
@@ -97,22 +101,23 @@
   <br>
   <br>
   <br>
-  <h1 style="text-align: center;">Liste des livraisons aujourd'hui</h1>
+  <h1 style="text-align: center;">Liste des livraisons et récupérations aujourd'hui</h1>
   <br>
 
-<h2 style="text-align: center;" id="listlivraisons">EN COURS  <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i>
-</h2>
   <br>
   
             
             <table class="table table-striped">
               <thead class="thead-dark">
                 <tr>
+                  <th scope="col" style="color: #303FBA;">Livreur</th>
                   <th scope="col" style="color: #303FBA;">Heure départ</th>
                   <th scope="col" style="color: #303FBA;">Nom du contrat</th>
                   <th scope="col" style="color: #303FBA;">Heure livraison</th>
                   <th scope="col" style="color: #303FBA;">Route</th>
-                  <th scope="col" style="color: #303FBA;">En cours</th>
+                  <th scope="col" style="color: #303FBA;">Status</th>
+                  <th scope="col" style="color: #303FBA;">Lien</th>
+
         
                 </tr>
               </thead>
@@ -123,19 +128,25 @@
           
         
                 <tr>
+                  <td style="color: #F1B3DA;"><strong>{{ livraison.livreur.nom }}</strong></td>
                   <td style="color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
                   <td style="color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
                   <td style="color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
                   <td style="color: #F1B3DA;"><strong>{{ livraison.route }}</strong></td>
-                  <td style="color: #F1B3DA;"><strong><i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
+                  <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
+                  <td ><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+
                 </tr>
                 {% elif livraison.date == journee.date and livraison.status == False %}
                 <tr>
+                  <td ><strong>{{ livraison.livreur.nom }}</strong></td>
                   <td><strong>{{ livraison.heure_depart }}</strong></td>
                   <td ><strong>{{livraison.nom}}</strong></td>
                   <td ><strong>{{ livraison.heure_livraison }}</strong></td>
                   <td ><strong>{{ livraison.route }}</strong></td>
-                  <td ><strong>{{livraison.retourtraiteur}}</strong></td>
+                  <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
+                  <td ><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+
                 </tr>
                   {% endif %}
                 {% endfor %}
@@ -144,34 +155,50 @@
           
                 <br>
                 <br>
-
-  <h2 style="text-align: center;" id="listlivraisons">TERMINÉ  <i class="fa-solid fa-circle-check" style="color: green;"></i></h2>
+                <hr>
+<br>
   <br>
   <table class="table table-striped">
     <thead class="thead-dark">
       <tr>
-        
+        <th scope="col" style="color: #303FBA;">Livreur</th>
         <th scope="col" style="color: #303FBA;">Heure départ</th>
         <th scope="col" style="color: #303FBA;">Nom du contrat</th>
         <th scope="col" style="color: #303FBA;">Heure livraison</th>
         <th scope="col" style="color: #303FBA;">Route</th>
-        <th scope="col" style="color: #303FBA;">Validé</th>
+        <th scope="col" style="color: #303FBA;">Status</th>
+        <th scope="col" style="color: #303FBA;">Lien</th>
+
 
       </tr>
     </thead>
     <tbody>
   {% for livraison in livraisons %}
-            {% if livraison.date == journee.date and livraison.status == True %}
-            <tr>
-              <td><strong>{{ livraison.heure_depart }}</strong></td>
-              <td><strong>{{livraison.nom}}</strong></td>
-              <td><strong>{{ livraison.heure_livraison }}</strong></td>
-              <td><strong>{{ livraison.route }}</strong></td>
-              <td><i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></td>
-            </tr>
-    
-                
-                {% endif %}
+  {% if livraison.date == journee.date and livraison.status == True and livraison.recuperation == recuperations %}
+          
+        
+  <tr>
+    <td style="color: #F1B3DA;"><strong>{{ livraison.livreur.nom }}</strong></td>
+    <td style="color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
+    <td style="color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
+    <td style="color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
+    <td style="color: #F1B3DA;"><strong>{{ livraison.route }}</strong></td>
+    <td><strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong></td>
+    <td ><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+
+  </tr>
+  {% elif livraison.date == journee.date and livraison.status == True %}
+  <tr>
+    <td><strong>{{ livraison.livreur.nom }}</strong></td>
+    <td><strong>{{ livraison.heure_depart }}</strong></td>
+    <td ><strong>{{livraison.nom}}</strong></td>
+    <td ><strong>{{ livraison.heure_livraison }}</strong></td>
+    <td ><strong>{{ livraison.route }}</strong></td>
+    <td><strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong></td>
+    <td ><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+
+  </tr>
+    {% endif %}
     
                 
                 {% endfor %}
@@ -207,3 +234,4 @@
 
 
     {% endblock %}
+    

@@ -69,7 +69,7 @@ class Livraison(models.Model):
     heure_livraison = models.fields.CharField(null=True, blank=True, max_length=100)
     client = models.ForeignKey(Client, null=True, blank=True, on_delete=models.SET_NULL)
     date = models.fields.DateField(null=True, blank=True,)
-    commentaire = models.fields.CharField(null=True, blank=True, max_length=100)
+    commentaire = models.fields.CharField(null=True, blank=True, max_length=500)
     details_commande = models.FileField(null=True, blank=True, upload_to='media/commandesdetail/')
     infodetail = models.fields.CharField(null=True, blank=True, max_length=100)
     livreur = models.ForeignKey(Livreur, null=True, blank=True, on_delete=models.SET_NULL)

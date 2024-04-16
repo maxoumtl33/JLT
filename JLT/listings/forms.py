@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, time
 class LivraisonForm(ModelForm):
     class Meta:
         model = Livraison
-        fields = ('status',)
+        fields = ('status','commentaire')
 
 modes = (
     ("driving", "driving"),

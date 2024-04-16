@@ -81,10 +81,11 @@ def journee_detail(request, id):  # notez le paramètre id supplémentaire
    recuperationo = "non"
    loic = "Loic"
    maxime = "Maxime"
+   rien = "."
    
    return render(request,
           'listings/journee_detail.html',
-          context={'journees': journees ,'livraisonsroute': livraisonsroute, 'livreurs':livreurs, 'recuperations' : recuperations,'retourtraiteur' : retourtraiteur,'recuperation' : recuperation,'retourtraiteurno': retourtraiteurno,'livraisons' : livraisons, 'recuperationo':recuperationo, 'loic':loic, 'maxime':maxime }) # nous passons l'id au modèle
+          context={'journees': journees ,'livraisonsroute': livraisonsroute, 'livreurs':livreurs, 'recuperations' : recuperations,'retourtraiteur' : retourtraiteur,'recuperation' : recuperation,'retourtraiteurno': retourtraiteurno,'livraisons' : livraisons, 'recuperationo':recuperationo, 'loic':loic, 'maxime':maxime, 'rien':rien }) # nous passons l'id au modèle
 
 
 def livreur_list(request):
@@ -113,8 +114,9 @@ def livreur_detail(request, pk):  # notez le paramètre id supplémentaire
     
 def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
     if request.user.is_authenticated :
-        userid = request.user.id
+        
         livreur = Livreur.objects.get(user_id= pk)
+        userid = livreur.id
         today = now().date()
         livraisons  = Livraison.objects.order_by('route').filter(date=today)
         livraisonstatusok = Livraison.objects.filter(status=True, date=today,recuperation="non", livreur = userid)
@@ -125,6 +127,7 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
         livraison = Livraison.objects.filter(recuperation="non", date=today, livreur = userid)
         journee = Journee.objects.get(id=id)
         recuperations = "oui"
+        recuperationo = "non"
         
        
         
@@ -139,6 +142,7 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
                                                                 'livraison':livraison,
                                                                 'recuperations':recuperations,
                                                                 'userid':userid,
+                                                                'recuperationo':recuperationo
                                                                 
 
                                                                 
