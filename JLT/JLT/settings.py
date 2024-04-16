@@ -137,5 +137,8 @@ LOGOUT_REDIRECT_URL = ('/home')
 MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'
 
+STATIC_ROOT = "/home/maxoufaya33/JLT/JLT/listings/static"
+
+
 
 
