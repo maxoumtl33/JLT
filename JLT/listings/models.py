@@ -83,6 +83,9 @@ class Livraison(models.Model):
     zipcode = models.fields.CharField(null=True, blank=True, max_length=100)
     city = models.fields.CharField(null=True, blank=True, max_length=100, default="Montreal")
     country = models.fields.CharField(null=True, blank=True, max_length=100, default="Canada")
+    lat = models.fields.CharField(null=True, blank=True, max_length=200)
+    lng = models.fields.CharField(null=True, blank=True, max_length=200)
+    place_id = models.fields.CharField(null=True, blank=True, max_length=200)
     
 class Distances(models.Model):
      from_location = models.ForeignKey(Livraison, related_name="from_location", on_delete=models.CASCADE)

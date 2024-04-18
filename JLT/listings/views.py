@@ -280,8 +280,20 @@ class DistanceView(View):
 class MapView(View):
     def get(self, request):
         key = settings.GOOGLE_API_KEY
-        eligable_locations = Livraison.objects.filter(place_id_isnull=False)
-        context = {'key': key
+        eligable_locations = Livraison.objects.filter(place_id__isnull=False)
+        livraisons =[]
+        for a in eligable_locations:
+            data = {
+                'lat': float(a.lat),
+                'lng': float(a.lng),
+                'place_id': a.place_id,
+                'nom': a.nom,
+            }
+
+            livraisons.append(data)
+
+        context = {'key': key,
+                   'livraisons':livraisons
 
         }
         return render(request, 'listings/map.html', context)
@@ -296,3 +308,58 @@ def deleteDistance(request, pk):
 
     context = {'distance':distance}
     return render(request, 'listings/deletedistance.html', context)
+
+class GeocodingView(View):
+    def get(self, request, pk):
+        today = datetime.now().date()
+        tomorrow = today + timedelta(1)
+        livraison = Livraison.objects.get(pk = pk)
+
+        if livraison.adress and livraison.zipcode and livraison.city != None:
+            lat = livraison1.get('lat', None)
+            lng = livraison1.get('lng', None)
+            place_id = result.get('place_id', {})
+
+        
+
+
+        elif livraison.adress and livraison.country and livraison.zipcode and livraison.city != None:
+            adress_string = str(livraison.adress)+", "+str(livraison.zipcode)+", "+str(livraison.city)+", "+str(livraison.country)
+
+            gmaps = googlemaps.Client(key= settings.GOOGLE_API_KEY)
+            result =  gmaps.geocode(adress_string)[0]
+            geometry = result.get('geometry', {})
+            livraison1 = geometry.get('location', {})
+
+            
+
+            livraison.lat = lat
+            livraison.lng = lng
+            livraison.place_id = place_id
+
+            livraison.save()
+
+
+        else:
+            result = ""
+            lat = ""
+            lng = ""
+            place_id = ""
+
+        context = {'livraison': livraison,
+                   'result': result,
+                   'geometry': geometry,
+                   'lat':lat,
+                   'lng':lng,
+                   'place_id':place_id,
+
+        }
+        return render(request, 'listings/geocoding.html', context)
+
+
+def livraisonstomorrow(request):
+    today = datetime.now().date()
+    tomorrow = today + timedelta(1)
+    livraisons = Livraison.objects.filter(date=tomorrow)
+    context = {'livraisons':livraisons}
+    return render(request, 'listings/livraisonstomorrow.html', context)

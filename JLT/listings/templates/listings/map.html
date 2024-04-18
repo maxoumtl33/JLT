@@ -41,17 +41,28 @@
   
     <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
   </nav>
-  
+
 <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
 
 <script>
     let map
     function initMap(){
+
+        var livraisons = {{livraisons|safe}};
+
         map = new google.maps.Map(document.getElementById("map"),{
         center: { lat:  -34.397, lng: 150.644 },
         zoom: 10,
     }
     );
+
+    livraisons.forEach(function(livraison){
+        var marker = new google.maps.Marker({
+            position: {lat: livraison.lat, lng: livraison.lng, },
+            map : map,
+            title: livraison.nom
+        });
+    })
 }
 
     window.initMap = initMap
