@@ -280,6 +280,8 @@ class DistanceView(View):
 class MapView(View):
     def get(self, request):
         key = settings.GOOGLE_API_KEY
+        form = DistanceForm
+        distances = Distances.objects.all()
         eligable_locations = Livraison.objects.filter(place_id__isnull=False)
         livraisons =[]
         for a in eligable_locations:
@@ -293,20 +295,69 @@ class MapView(View):
             livraisons.append(data)
 
         context = {'key': key,
-                   'livraisons':livraisons
+                   'livraisons':livraisons,
+                   'form': form,
+                   'distances':distances,
 
         }
         return render(request, 'listings/map.html', context)
-    
+
+    def post(self, request):
+        form = DistanceForm(request.POST)
+        if form.is_valid():
+            from_location = form.cleaned_data['from_location']
+            from_location_info = Livraison.objects.get(nom=from_location)
+            from_adress_string = str(from_location_info.adress)+", "+str(from_location_info.zipcode)+", "+str(from_location_info.city)+", "+str(from_location_info.country)
+
+            to_location = form.cleaned_data['to_location']
+            to_location_info = Livraison.objects.get(nom=to_location)
+            to_adress_string = str(to_location_info.adress)+", "+str(to_location_info.zipcode)+", "+str(to_location_info.city)+", "+str(to_location_info.country)
+
+            mode = form.cleaned_data['mode']
+            now = datetime.now()
+
+            gmaps = googlemaps.Client(key= settings.GOOGLE_API_KEY)
+            calculate = gmaps.distance_matrix(
+                from_adress_string,
+                to_adress_string,
+                mode = mode,
+                departure_time = now
+            )
+            print(calculate)
+
+            duration_secons = calculate['rows'][0]['elements'][0]['duration']['value']
+            duration_minutes = duration_secons/60
+
+            distance_meters = calculate['rows'][0]['elements'][0]['distance']['value']
+            distance_km = distance_meters/1000
+
+            if 'duration_in_traffic' in calculate['rows'][0]['elements'][0]:
+                duration_in_traffic_seconds = calculate['rows'][0]['elements'][0]['duration_in_traffic']['value']
+                duration_in_traffic_minutes = duration_in_traffic_seconds/60
+            else:
+                duration_in_traffic_minutes = None
+
+            obj = Distances(
+                from_location = Livraison.objects.get(nom=from_location),
+                to_location = Livraison.objects.get(nom=to_location),
+                mode = mode,
+                distance_km = distance_km,
+                distance_mins = duration_minutes,
+                distance_traffic_mins = duration_in_traffic_minutes
+            )
+
+            obj.save()
+
+        return redirect('my_map_view')
 
 
 def deleteDistance(request, pk):
     distance = Distances.objects.get(id= pk)
     if request.method == 'POST':
         distance.delete()
-        return redirect('my_distance_view')
+        return redirect('my_map_view')
 
-    context = {'distance':distance}
+    context = {'distance':distance,}
     return render(request, 'listings/deletedistance.html', context)
 
 class GeocodingView(View):
@@ -361,8 +412,12 @@ class GeocodingView(View):
 
 
 def livraisonstomorrow(request):
+    recuperation = "oui"
     today = datetime.now().date()
     tomorrow = today + timedelta(1)
     livraisons = Livraison.objects.filter(date=tomorrow)
-    context = {'livraisons':livraisons}
+    retourtraiteur = "oui"
+    context = {'livraisons':livraisons,
+               'recuperation': recuperation,
+               'retourtraiteur': retourtraiteur}
     return render(request, 'listings/livraisonstomorrow.html', context)
