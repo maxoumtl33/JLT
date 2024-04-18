@@ -316,8 +316,8 @@ class GeocodingView(View):
         livraison = Livraison.objects.get(pk = pk)
 
         if livraison.adress and livraison.zipcode and livraison.city != None:
-            lat = livraison1.get('lat', None)
-            lng = livraison1.get('lng', None)
+            lat = result.get('geometry', {}).get('location', {}).get('lat', {})
+            lng = result.get('geometry', {}).get('location', {}).get('lng', {})
             place_id = result.get('place_id', {})
 
         
