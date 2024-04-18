@@ -315,21 +315,25 @@ class GeocodingView(View):
         tomorrow = today + timedelta(1)
         livraison = Livraison.objects.get(pk = pk)
 
-        if livraison.adress and livraison.zipcode and livraison.city != None:
-            lat = result.get('geometry', {}).get('location', {}).get('lat', {})
-            lng = result.get('geometry', {}).get('location', {}).get('lng', {})
-            place_id = result.get('place_id', {})
+        if livraison.lng and livraison.lat and livraison.place_id != None:
+
+            lat = livraison.lat
+            lng = livraison.lng
+            place_id = livraison.place_id
 
         
 
 
         elif livraison.adress and livraison.country and livraison.zipcode and livraison.city != None:
+
             adress_string = str(livraison.adress)+", "+str(livraison.zipcode)+", "+str(livraison.city)+", "+str(livraison.country)
 
             gmaps = googlemaps.Client(key= settings.GOOGLE_API_KEY)
             result =  gmaps.geocode(adress_string)[0]
-            geometry = result.get('geometry', {})
-            livraison1 = geometry.get('location', {})
+
+            lat = result.get('geometry', {}).get('location', {}).get('lat', {})
+            lng = result.get('geometry', {}).get('location', {}).get('lng', {})
+            place_id = result.get('place_id', {})
 
             
 
@@ -338,17 +342,16 @@ class GeocodingView(View):
             livraison.place_id = place_id
 
             livraison.save()
-
+            return redirect('livraisonstomorrow')
 
         else:
+
             result = ""
             lat = ""
             lng = ""
             place_id = ""
 
         context = {'livraison': livraison,
-                   'result': result,
-                   'geometry': geometry,
                    'lat':lat,
                    'lng':lng,
                    'place_id':place_id,

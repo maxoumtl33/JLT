@@ -44,28 +44,46 @@
 
 <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
 
-<script>
+<script> 
     let map
+
     function initMap(){
 
-        var livraisons = {{livraisons|safe}};
+        var livraisons = {{ livraisons|safe }}
+        var firstLocation = livraisons[0]
+        var infoWindow = []
 
         map = new google.maps.Map(document.getElementById("map"),{
-        center: { lat:  -34.397, lng: 150.644 },
-        zoom: 10,
-    }
-    );
+            center: { lat: firstLocation.lat, lng: firstLocation.lng }, 
+            zoom: 10.5,
+        }
+        );
 
-    livraisons.forEach(function(livraison){
-        var marker = new google.maps.Marker({
-            position: {lat: livraison.lat, lng: livraison.lng, },
-            map : map,
-            title: livraison.nom
+        livraisons.forEach(function (livraison){
+            var marker = new google.maps.Marker({
+                position: {lat: livraison.lat, lng: livraison.lng}, 
+                map: map, 
+                title: livraison.nom
+            });
+
+            var infowindow = new google.maps.InfoWindow({
+                content: livraison.nom, 
+            });
+
+            infoWindow.push(infowindow)
+
+            marker.addListener('click', function(){
+                infoWindow.forEach(function(iw){
+                    iw.close();
+                });
+
+                infowindow.open(map, marker)
+            });
         });
-    })
-}
+    };
 
     window.initMap = initMap
+
 </script>
 <h1>Livraisons sur la carte</h1>
 <br>
