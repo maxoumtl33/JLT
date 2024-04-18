@@ -71,7 +71,7 @@ class Livraison(models.Model):
     date = models.fields.DateField(null=True, blank=True,)
     commentaire = models.fields.CharField(null=True, blank=True, max_length=500)
     details_commande = models.FileField(null=True, blank=True, upload_to='media/commandesdetail/')
-    infodetail = models.fields.CharField(null=True, blank=True, max_length=100)
+    infodetail = models.fields.CharField(null=True, blank=True, max_length=500000)
     livreur = models.ForeignKey(Livreur, null=True, blank=True, on_delete=models.SET_NULL)
     journee = models.ForeignKey(Journee, null=True, blank=True, on_delete=models.SET_NULL)
     aidelivreur = models.fields.CharField(null=True, blank=True, max_length=100)
@@ -86,6 +86,13 @@ class Livraison(models.Model):
     lat = models.fields.CharField(null=True, blank=True, max_length=200)
     lng = models.fields.CharField(null=True, blank=True, max_length=200)
     place_id = models.fields.CharField(null=True, blank=True, max_length=200)
+    convives = models.fields.CharField(null=True, blank=True, max_length=200)
+    mode_envoi = models.fields.CharField(null=True, blank=True, max_length=200)
+    num_commande = models.fields.CharField(null=True, blank=True, max_length=200)
+    nom_client = models.fields.CharField(null=True, blank=True, max_length=200)
+    contact_site = models.fields.CharField(null=True, blank=True, max_length=200)
+
+
     
 class Distances(models.Model):
      from_location = models.ForeignKey(Livraison, related_name="from_location", on_delete=models.CASCADE)

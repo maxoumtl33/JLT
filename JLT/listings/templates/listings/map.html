@@ -53,6 +53,7 @@
         var firstLocation = livraisons[0]
         var infoWindow = []
 
+
         map = new google.maps.Map(document.getElementById("map"),{
             center: { lat: firstLocation.lat, lng: firstLocation.lng }, 
             zoom: 10.5,
@@ -60,14 +61,16 @@
         );
 
         livraisons.forEach(function (livraison){
+            var markerinfos = livraison.nom + " " +livraison.heure_livraison
             var marker = new google.maps.Marker({
                 position: {lat: livraison.lat, lng: livraison.lng}, 
                 map: map, 
-                title: livraison.nom
+                title: markerinfos,
+
             });
 
             var infowindow = new google.maps.InfoWindow({
-                content: livraison.nom, 
+                content: markerinfos,
             });
 
             infoWindow.push(infowindow)

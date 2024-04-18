@@ -77,9 +77,9 @@
           <td style="color: #F1B3DA;"><strong>{{livraison.aidelivreur}}</strong></td>
           <td style="color: #F1B3DA;"><strong>{{ livraison.route }}</strong></td>
           {% if livraison.retourtraiteur == retourtraiteur %}
-          <td style="color: #F1B3DA;"><strong><i class="fa-solid fa-house-circle-check" style="color: #63E6BE;"></i></strong></td>
+          <td style="color: #F1B3DA;"><strong><i class="fa-solid fa-house-circle-check"></i></strong></td>
           {%  else %}
-          <td style="color: #F1B3DA;"><strong><i class="fa-solid fa-house-circle-xmark" style="color: #de391b;"></i></strong></td>
+          <td></td>
           {% endif %}
           <td style="color: #F1B3DA;"><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
           {% if livraison.lng == None %}
@@ -100,9 +100,9 @@
             <td><strong>{{livraison.aidelivreur}}</strong></td>
             <td><strong>{{ livraison.route }}</strong></td>
             {% if livraison.retourtraiteur == retourtraiteur %}
-          <td><strong><i class="fa-solid fa-house-circle-check" style="color: #63E6BE;"></i></strong></td>
+          <td><strong><i class="fa-solid fa-house-circle-check"></i></strong></td>
           {%  else %}
-          <td><strong><i class="fa-solid fa-house-circle-xmark" style="color: #de391b;"></i></strong></td>
+          <td></td>
           {% endif %}
             <td><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
             {% if livraison.lng == None %}

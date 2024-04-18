@@ -290,6 +290,7 @@ class MapView(View):
                 'lng': float(a.lng),
                 'place_id': a.place_id,
                 'nom': a.nom,
+                'heure_livraison': a.heure_livraison,
             }
 
             livraisons.append(data)
@@ -415,7 +416,7 @@ def livraisonstomorrow(request):
     recuperation = "oui"
     today = datetime.now().date()
     tomorrow = today + timedelta(1)
-    livraisons = Livraison.objects.filter(date=tomorrow)
+    livraisons = Livraison.objects.order_by('route').filter(date=tomorrow)
     retourtraiteur = "oui"
     context = {'livraisons':livraisons,
                'recuperation': recuperation,

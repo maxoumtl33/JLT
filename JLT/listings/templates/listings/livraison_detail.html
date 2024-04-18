@@ -77,6 +77,22 @@
           <div class="col">
             <div class="card">
               <div class="card-body">
+                <h5 class="card-title"><strong>N° de commande</strong></h5>
+                <p class="card-text">{{ livraison.num_commande}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><strong>Nombre convives</strong></h5>
+                <p class="card-text">{{ livraison.convives}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card">
+              <div class="card-body">
                 <h5 class="card-title"><strong>Adresse</strong></h5>
                 <p class="card-text">{{ livraison.adress }}, {{livraison.zipcode}}, {{livraison.city}}</p>
               </div>
@@ -103,6 +119,14 @@
               <div class="card-body">
                 <h5 class="card-title"><strong>Heure de livraison</strong></h5>
                 <p class="card-text">{{ livraison.heure_livraison }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><strong>Mode d'envoi</strong></h5>
+                <p class="card-text">{{ livraison.mode_envoi}}</p>
               </div>
             </div>
           </div>
@@ -144,7 +168,7 @@
               <div class="card">
                 <div class="card-body">
                   <h5 class="card-title"><strong>Nom</strong></h5>
-                  <p class="card-text">{{livraison.client.nom}}</p>
+                  <p class="card-text">{{livraison.nom_client}}</p>
                 </div>
               </div>
             </div>
@@ -160,7 +184,7 @@
               <div class="card">
                 <div class="card-body">
                   <h5 class="card-title"><strong>Contact</strong></h5>
-                  <p class="card-text">{{livraison.client.contact}}</p>
+                  <p class="card-text">{{livraison.contact_site}}</p>
                 </div>
               </div>
             </div>
