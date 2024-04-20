@@ -6,10 +6,9 @@ from django.conf.urls.static import static
 from listings.views import *
 urlpatterns = [
 path('admin/', admin.site.urls, name ="admin"),
-path('home/', views.home),
 path('', include('django_dyn_dt.urls')),  # <-- NEW: API routing rules
 path('livraison/<int:ip>/', views.livraison_detail, name='livraison-detail'),
-path('home/', views.home, name='home'),
+path('', views.home, name='home'),
 path('members/', include('members.urls')),
 path('members/', include('django.contrib.auth.urls')),
 path('livraisons_list/', views.livraisons_list, name = 'livraisons-list'),
