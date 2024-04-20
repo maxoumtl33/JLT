@@ -61,6 +61,12 @@ class Route(models.Model):
 
         
 class Livraison(models.Model):
+    choices = (
+         ('oui', 'oui'),
+         ('non', 'non'))
+    choicesaide = (
+         ('Osnel', 'Osnel'),
+         ('Aucun', 'Aucun'))
     nom = models.fields.CharField(max_length=100, null=True, blank=True,)
     def __str__(self):
         return f'{self.nom}'
@@ -74,10 +80,10 @@ class Livraison(models.Model):
     infodetail = models.fields.CharField(null=True, blank=True, max_length=500000)
     livreur = models.ForeignKey(Livreur, null=True, blank=True, on_delete=models.SET_NULL)
     journee = models.ForeignKey(Journee, null=True, blank=True, on_delete=models.SET_NULL)
-    aidelivreur = models.fields.CharField(null=True, blank=True, max_length=100)
-    checklist = models.fields.CharField(null=True, blank=True, max_length =3)
-    retourtraiteur = models.fields.CharField(null=True, blank=True, max_length = 3)
-    recuperation = models.fields.CharField(null=True, blank=True, max_length = 3)
+    aidelivreur = models.fields.CharField(null=True, blank=True, max_length=100, choices=choicesaide)
+    checklist = models.fields.CharField(null=True, blank=True, max_length =3, choices=choices)
+    retourtraiteur = models.fields.CharField(null=True, blank=True, max_length = 3, choices=choices)
+    recuperation = models.fields.CharField(null=True, blank=True, max_length = 3, choices=choices)
     status = models.BooleanField(default=False)
     adress = models.fields.CharField(null=True, blank=True, max_length=100)
     zipcode = models.fields.CharField(null=True, blank=True, max_length=100)

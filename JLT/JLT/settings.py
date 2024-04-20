@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+import os, inspect
+import django_dyn_dt
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,6 +46,8 @@ INSTALLED_APPS = [
     'import_export',
     'crispy_forms',
     'crispy_bootstrap4',
+    'django_dyn_dt',
+  
 ]
 
 MIDDLEWARE = [
@@ -58,10 +62,12 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'JLT.urls'
 
+TEMPLATE_DIR_DATATB = os.path.join(BASE_DIR, "django_dyn_dt/templates")
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [TEMPLATE_DIR_DATATB],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -139,6 +145,13 @@ MEDIA_URL = '/media/'
 
 STATIC_ROOT = "/home/maxoufaya33/JLT/JLT/listings/static"
 
+DYN_DB_PKG_ROOT = os.path.dirname( inspect.getfile( django_dyn_dt ) ) # <-- NEW App
 
+STATICFILES_DIRS = (
+    os.path.join(DYN_DB_PKG_ROOT, "templates/static"),
+)
 
-
+DYNAMIC_DATATB = {
+    # SLUG -> Import_PATH 
+    'livraisons'  : "listings.models.Livraison",
+}

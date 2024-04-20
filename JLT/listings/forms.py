@@ -8,10 +8,17 @@ class LivraisonForm(ModelForm):
         model = Livraison
         fields = ('status','commentaire')
 
+class LivraisonFeuilleForm(ModelForm):
+    class Meta:
+        model = Livraison
+        fields = ('heure_depart','aidelivreur', 'route', 'livreur', 'retourtraiteur', 'checklist')
+
+
+
+
 modes = (
     ("driving", "driving"),
 )
-
 class DistanceForm(ModelForm):
     today = datetime.now().date()
     tomorrow = today + timedelta(1)

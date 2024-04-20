@@ -4,7 +4,7 @@
 <nav class="nav container">
   <a href="#" class="nav__logo">Julien Leblanc Traiteur</a>
 
-  <div class="nav__menu fixed-bottom" id="nav-menu">
+  <div class="nav__menu" id="nav-menu">
       <ul class="nav__list">
           <li class="nav__item">
             <a href="{% url 'dashboard' livraison.journee.id request.user.id %}" class="nav__link" ><i class="fa-solid fa-reply"></i>
@@ -44,6 +44,12 @@
           </button> 
           </li>
           {% endif %}
+          {% if user.username == loic or user.username == maxime %}
+          <button type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#edit">
+            <i class="fa-solid fa-pen-to-square"></i>
+            <span>Editer</span>
+        </button>  
+        {% endif %}
       </ul>
   </div>
   <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
@@ -221,6 +227,23 @@
         <form action="" method=POST >
           {% csrf_token %}
           {{ form.as_p }}
+          <input type="submit" value="valider" class="btn btn-primary">
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="edit" tabindex="-1" aria-labelledby="edit1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">   
+        <h5 class="modal-title" id="edit1">{{livraison.nom}} / {{livraison.heure_livraison}}</h5> 
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form action="" method=POST >
+          {% csrf_token %}
+          {{ formbis.as_p }}
           <input type="submit" value="valider" class="btn btn-primary">
         </form>
       </div>

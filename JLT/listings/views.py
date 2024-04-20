@@ -6,8 +6,10 @@ from .models import Tacheafaire
 from .models import Journee
 from .models import Distances
 from .models import User
-
+from django.shortcuts import get_object_or_404
 from .forms import LivraisonForm
+from .forms import LivraisonFeuilleForm
+import json
 from .forms import DistanceForm
 from tablib import Dataset
 from .ressources import LivraisonResource
@@ -18,6 +20,7 @@ import googlemaps
 from django.conf import settings
 from django.views import View
 from datetime import datetime
+from django.views.decorators.http import require_POST
 
 from django.http import FileResponse, HttpResponseRedirect, HttpResponse
 
@@ -44,21 +47,7 @@ def journees_list(request):
                                                               'livreurs': livreurs,
                                                               'journees' : journees})
 
-def livraison_detail(request, ip):  # notez le paramètre id supplémentaire
-   livraison = Livraison.objects.get(id=ip)
-   adresse = Livraison.adress
-   livreur = Livreur.objects.all()
-   journee = Journee.objects.all()
-   recuperation = "oui"
-   form = LivraisonForm(request.POST or None, instance=livraison)
-   gmaps = googlemaps.Client(key = settings.GOOGLE_API_KEY)
-   result = gmaps.geocode(adresse)
-   if form.is_valid():
-       form.save()
-       
-   return render(request,
-          'listings/livraison_detail.html',
-          context={'livraison': livraison, 'livreur':livreur, 'recuperation': recuperation, 'form': form, 'journee':journee, 'result':result,'adresse': adresse}) # nous passons l'id au modèle
+
 
 def recuperation_detail(request, id):  # notez le paramètre id supplémentaire
    recuperations = Recuperation.objects.get(id=id)
@@ -281,9 +270,11 @@ class MapView(View):
     def get(self, request):
         key = settings.GOOGLE_API_KEY
         form = DistanceForm
+        today = datetime.now().date()
+        tomorrow = today + timedelta(1)
         distances = Distances.objects.all()
         matin = ['05h00', '05h15', '05h30', '05h45', '06h00', '06h15', '06h30', '06h45', '07h00', '07h15', '07h30', '07h45', '08h00','08h15', '08h30', '08h45', '09h00', '09h15', '09h30']
-        eligable_locations = Livraison.objects.filter(place_id__isnull=False, heure_livraison__in = matin)
+        eligable_locations = Livraison.objects.filter(place_id__isnull=False, heure_livraison__in = matin, date=tomorrow)
         livraisons =[]
         for a in eligable_locations:
             data = {
@@ -356,9 +347,11 @@ class MapMidiView(View):
     def get(self, request):
         key = settings.GOOGLE_API_KEY
         form = DistanceForm
+        today = datetime.now().date()
+        tomorrow = today + timedelta(1)
         distances = Distances.objects.all()
         midi = ['10h00', '10h15', '10h30', '10h45', '11h00', '11h15', '11h30', '11h45', '12h00', '12h15', '12h30', '12h45']
-        eligable_locations = Livraison.objects.filter(place_id__isnull=False, heure_livraison__in = midi)
+        eligable_locations = Livraison.objects.filter(place_id__isnull=False, heure_livraison__in = midi, date=tomorrow)
         livraisons =[]
         for a in eligable_locations:
             data = {
@@ -431,10 +424,12 @@ class MapApremView(View):
     def get(self, request):
         key = settings.GOOGLE_API_KEY
         form = DistanceForm
+        today = datetime.now().date()
+        tomorrow = today + timedelta(1)
         distances = Distances.objects.all()
         aprem = ['13h00', '13h15', '13h30', '13h45', '14h00', '14h15', '14h30', '14h45', '15h00', '15h15', '15h30', '15h45', '16h00', '16h15', '16h30', '16h45', '17h00', '17h15', '17h30', '17h45', '18h00', '18h15', '18h30', '18h45', '19h00']
 
-        eligable_locations = Livraison.objects.filter(place_id__isnull=False, heure_livraison__in = aprem)
+        eligable_locations = Livraison.objects.filter(place_id__isnull=False, heure_livraison__in = aprem, date=tomorrow )
         livraisons =[]
         for a in eligable_locations:
             data = {
@@ -564,6 +559,28 @@ class GeocodingView(View):
         }
         return render(request, 'listings/geocoding.html', context)
 
+def livraison_detail(request, ip):  # notez le paramètre id supplémentaire
+   livraison = Livraison.objects.get(id=ip)
+   adresse = Livraison.adress
+   livreur = Livreur.objects.all()
+   journee = Journee.objects.all()
+   recuperation = "oui"
+   loic = "Loic"
+   maxime = "Maxime"
+   formbis = LivraisonFeuilleForm(request.POST or None, instance=livraison)
+   if formbis.is_valid():
+       formbis.save()
+       return redirect('livraisonstomorrow')
+   
+   form = LivraisonForm(request.POST or None, instance=livraison)
+   gmaps = googlemaps.Client(key = settings.GOOGLE_API_KEY)
+   result = gmaps.geocode(adresse)
+   if form.is_valid():
+       form.save()
+       
+   return render(request,
+          'listings/livraison_detail.html',
+          context={'livraison': livraison, 'livreur':livreur, 'recuperation': recuperation, 'form': form, 'journee':journee, 'result':result,'adresse': adresse, 'formbis':formbis, 'loic': loic, 'maxime':maxime}) # nous passons l'id au modèle
 
 
 def livraisonstomorrow(request):
@@ -586,4 +603,6 @@ def livraisonstomorrow(request):
                'livraisonsmidi': livraisonsmidi,
                'livraisonsapresmidi': livraisonsapresmidi,
                }
+
+    
     return render(request, 'listings/livraisonstomorrow.html', context)
