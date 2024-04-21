@@ -567,20 +567,16 @@ def livraison_detail(request, ip):  # notez le paramètre id supplémentaire
    recuperation = "oui"
    loic = "Loic"
    maxime = "Maxime"
-   formbis = LivraisonFeuilleForm(request.POST or None, instance=livraison)
-   if formbis.is_valid():
-       formbis.save()
-       return redirect('livraisonstomorrow')
-   
    form = LivraisonForm(request.POST or None, instance=livraison)
    gmaps = googlemaps.Client(key = settings.GOOGLE_API_KEY)
    result = gmaps.geocode(adresse)
    if form.is_valid():
        form.save()
        
+       
    return render(request,
           'listings/livraison_detail.html',
-          context={'livraison': livraison, 'livreur':livreur, 'recuperation': recuperation, 'form': form, 'journee':journee, 'result':result,'adresse': adresse, 'formbis':formbis, 'loic': loic, 'maxime':maxime}) # nous passons l'id au modèle
+          context={'livraison': livraison, 'livreur':livreur, 'recuperation': recuperation, 'form': form, 'journee':journee, 'result':result,'adresse': adresse, 'loic': loic, 'maxime':maxime}) # nous passons l'id au modèle
 
 
 def livraisonstomorrow(request):
@@ -606,3 +602,55 @@ def livraisonstomorrow(request):
 
     
     return render(request, 'listings/livraisonstomorrow.html', context)
+
+def livraisonsresp(request):
+    today = datetime.now().date()
+    tomorrow = today + timedelta(1)
+    livraisonstatusok = Livraison.objects.filter(status=True, date=today,recuperation="non")
+    livraisonstatusko = Livraison.objects.filter(status=False, date=today,recuperation="non")
+    recuperation = Livraison.objects.filter(recuperation="oui", date=today)
+    recuperationok = Livraison.objects.filter(recuperation="oui", status=True, date=today)
+    recuperationko = Livraison.objects.filter(status=False,recuperation="oui", date=today)
+    recuperation = "oui"
+    livraison = Livraison.objects.all()
+    livraisons = Livraison.objects.order_by('route').filter(date=tomorrow)
+    return render(request, 'listings/livraisonsresp.html', context={'livraisons': livraisons,
+                                                              
+                                                              'recuperation' : recuperation,
+                                                              'livraisonstatusok':livraisonstatusok,
+                                                              'livraisonstatusko':livraisonstatusko,
+                                                            
+                                                              'recuperationok':recuperationok,
+                                                              'recuperationko':recuperationko,
+                                                              'recuperation' : recuperation,
+                                                              })
+
+def livraisonrespdetail(request, ip):
+    today = datetime.now().date()
+    tomorrow = today + timedelta(1)
+    livraison = Livraison.objects.get(id=ip)
+    livraisons = Livraison.objects.order_by('route').filter(date=tomorrow)
+    livraisonstatusok = Livraison.objects.filter(status=True, date=today,recuperation="non")
+    livraisonstatusko = Livraison.objects.filter(status=False, date=today,recuperation="non")
+    recuperation = Livraison.objects.filter(recuperation="oui", date=today)
+    recuperationok = Livraison.objects.filter(recuperation="oui", status=True, date=today)
+    recuperationko = Livraison.objects.filter(status=False,recuperation="oui", date=today)
+    recuperation = "oui"
+    retourtraiteur = "oui"
+    formbis = LivraisonFeuilleForm(request.POST or None, instance=livraison)
+    if formbis.is_valid():
+       formbis.save()
+       return redirect('livraisonsresp')
+    
+    return render(request, 'listings/livraisonrespdetail.html', context={'livraisons': livraisons,
+                                                              'livraison':livraison,
+                                                              'recuperation' : recuperation,
+                                                              'livraisonstatusok':livraisonstatusok,
+                                                              'livraisonstatusko':livraisonstatusko,
+                                                              'retourtraiteur':retourtraiteur,
+                                                              'recuperationok':recuperationok,
+                                                              'recuperationko':recuperationko,
+                                                              'recuperation' : recuperation,
+                                                              'tomorrow':tomorrow,
+                                                              'formbis':formbis,
+                                                              })

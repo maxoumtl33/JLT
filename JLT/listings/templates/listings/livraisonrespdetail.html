@@ -1,62 +1,33 @@
 {% extends 'listings/base.html' %}
 {%  load static%}
 {% block content %}
-<nav class="nav container fixed-bottom">
-  <a href="#" class="nav__logo">Julien Leblanc Traiteur</a>
 
-  <div class="nav__menu" id="nav-menu">
-      <ul class="nav__list">
-          <li class="nav__item">
-            <a href="{% url 'dashboard' livraison.journee.id request.user.id %}" class="nav__link" ><i class="fa-solid fa-reply"></i>
-              <span>Retour</span>
-            </a>
-          </li>
-          <li class="nav__item">
-            <a class="nav__link" href="https://view.forms.app/loicveyre/jeparsenlivraison" target="_blank"><i class="fa-solid fa-truck-fast"></i>
-              <span>Départ</span>
-            </a>
-          </li>
-          {% if livraison.recuperation == recuperation%}
-          <li class="nav__item">
-            <a href="https://oakmnxgj.forms.app/recuplivreurs" target="_blank" class="nav__link"><i class="fa-solid fa-dolly"></i>
-            <span>Récupération</span>
-            </a>
-          </li>
-          {% else %}
-          <li class="nav__item">
-            <a class="nav__link" href="https://discord.com/channels/1174091428876533800/1194755233935523952" target="_blank"><i class="fa-solid fa-camera"></i>
-            <span>Photo</span>
-            </a> 
-          </li>
-          {% endif %}
-          {% if livraison.status == False %}
-          <li class="nav__item">
-            <button type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
-              <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i>
-              <span>En cours</span>
-          </button>  
-          </li>
-          {% else %}
-          <li class="nav__item">
-            <button type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
-              <i class="fa-solid fa-circle-check" style="color: green;"></i>
-              <span>Validé</span>
-          </button> 
-          </li>
-          {% endif %}
-      </ul>
-  </div>
-  <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
-</nav>
-<br>
-<br>
-<br>
+
+  
+             
+         
 
 {% if livraison.recuperation == recuperation%}
 <h1 style="text-align: center; color: #F1B3DA;">RECUPERATION {{livraison.nom|upper}}</h1>
+<br>
+<a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
+    <i class="fa-solid fa-pen-to-square"></i><span>Editer</span>
+</a> 
+<br>
+<a  href="{% url 'acceuilresponsables' %}" class="nav__link"><i class="fa-solid fa-user-ninja"></i>
+    <span class="nav__name">Retour</span>
+  </a>
   <br>
   {% else %}
   <h1 style="text-align: center;">LIVRAISON {{livraison.nom|upper}}</h1>
+  <br>
+  <a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
+    <i class="fa-solid fa-pen-to-square"></i><span>Editer</span>
+  </a> 
+  <br>
+<a  href="{% url 'acceuilresponsables' %}" class="nav__link"><i class="fa-solid fa-user-ninja"></i>
+    <span class="nav__name">Retour</span>
+  </a>
   <br>
   {% endif %}
   
@@ -154,14 +125,6 @@
             </div>
           </div>
         </div>
-        <div class="col">
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title"><strong>Important</strong></h5>
-              <p class="card-text">{{livraison.important}}</p>
-            </div>
-          </div>
-        </div>
         
       </li>
       </ul>
@@ -221,25 +184,8 @@
         <h5 class="modal-title" id="exampleModalLabel">Récupération terminée ? check status puis valider pour confimer la récupération</h5>
 
         {% else %}
-        <h5 class="modal-title" id="exampleModalLabel">Livraison terminée ? check status puis valider pour confimer la livraiso</h5>
+        <h5 class="modal-title" id="exampleModalLabel">{{livraison.nom}} / {{livraison.heure_livraison}}</h5>
         {% endif %}        
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form action="" method=POST >
-          {% csrf_token %}
-          {{ form.as_p }}
-          <input type="submit" value="valider" class="btn btn-primary">
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="modal fade" id="edit" tabindex="-1" aria-labelledby="edit1" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">   
-        <h5 class="modal-title" id="edit1">{{livraison.nom}} / {{livraison.heure_livraison}}</h5> 
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">

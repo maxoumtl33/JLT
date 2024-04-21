@@ -41,7 +41,7 @@
 <br>
 <br>
 <div class="body">
-  <h1 style="text-align: center;">FEUILLE DE ROUTE DU LENDEMAIN</h1> <h1 style="text-align: center;"> {{journees}} </h1>
+  <h1 style="text-align: center;">LIVRAISONS DU LENDEMAIN</h1> <h1 style="text-align: center;"> {{journees}} </h1>
   <br>
   <br>
   <p style="text-align: center;">{{ livraisons|length }} livraisons demain</p>
@@ -49,7 +49,7 @@
   <br>
   <h1 style="text-align: center;">MATIN <a href="{% url 'my_map_view' %}" class="btn"><i class="fa-solid fa-map-location-dot fa-2xl" style="color: #74C0FC;"></i></a></h1>
   <br>
-  <p style="text-align: center;">{{ livraisonsmatin|length }} livraisons ce matin</p>
+  <p style="text-align: center;">{{ livraisonsmatin|length }} livraisons le matin</p>
   <br>
   <table class="table table-striped">
       <thead class="thead-dark">
@@ -86,7 +86,7 @@
           {%  else %}
           <td></td>
           {% endif %}
-          <td style="color: #F1B3DA;"><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+          <td style="color: #F1B3DA;"><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
           {% if livraison.lng == None %}
           <td><strong><a href="{% url 'geocoding' livraison.id %}" class="btn"><i class="fa-solid fa-location-dot"></i></a></strong></td>
           {% else %}
@@ -109,7 +109,7 @@
           {%  else %}
           <td></td>
           {% endif %}
-            <td><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+            <td><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
             {% if livraison.lng == None %}
           <td><strong><a href="{% url 'geocoding' livraison.id %}" class="btn"><i class="fa-solid fa-location-dot"></i></a></strong></td>
           {% else %}
@@ -130,7 +130,7 @@
   <br>
   <h1 style="text-align: center;">MIDI <a href="{% url 'my_mapmidi_view' %}" class="btn"><i class="fa-solid fa-map-location-dot fa-2xl" style="color: #74C0FC;"></i></a></h1>
   <br>
-  <p style="text-align: center;">{{ livraisonsmidi|length }} livraisons ce midi</p>
+  <p style="text-align: center;">{{ livraisonsmidi|length }} livraisons le midi</p>
   <br>
   <table class="table table-striped">
       <thead class="thead-dark">
@@ -167,7 +167,7 @@
           {%  else %}
           <td></td>
           {% endif %}
-          <td style="color: #F1B3DA;"><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+          <td style="color: #F1B3DA;"><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
           {% if livraison.lng == None %}
           <td><strong><a href="{% url 'geocoding' livraison.id %}" class="btn"><i class="fa-solid fa-location-dot"></i></a></strong></td>
           {% else %}
@@ -190,7 +190,7 @@
           {%  else %}
           <td></td>
           {% endif %}
-            <td><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+            <td><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
             {% if livraison.lng == None %}
           <td><strong><a href="{% url 'geocoding' livraison.id %}" class="btn"><i class="fa-solid fa-location-dot"></i></a></strong></td>
           {% else %}
@@ -211,7 +211,7 @@
   <br>
   <h1 style="text-align: center;">APRES MIDI <a href="{% url 'my_mapaprem_view' %}" class="btn"><i class="fa-solid fa-map-location-dot fa-2xl" style="color: #74C0FC;"></i></a></h1>
   <br>
-  <p style="text-align: center;">{{ livraisonsapresmidi|length }} livraisons cet après midi</p>
+  <p style="text-align: center;">{{ livraisonsapresmidi|length }} livraisons l'raprès midi</p>
   <br>
   <table class="table table-striped">
       <thead class="thead-dark">
@@ -247,7 +247,7 @@
         {%  else %}
         <td></td>
         {% endif %}
-        <td style="color: #F1B3DA;"><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+        <td style="color: #F1B3DA;"><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
         {% if livraison.lng == None %}
         <td><strong><a href="{% url 'geocoding' livraison.id %}" class="btn"><i class="fa-solid fa-location-dot"></i></a></strong></td>
         {% else %}
@@ -271,7 +271,7 @@
         {%  else %}
         <td></td>
         {% endif %}
-          <td><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+          <td><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
           {% if livraison.lng == None %}
         <td><strong><a href="{% url 'geocoding' livraison.id %}" class="btn"><i class="fa-solid fa-location-dot"></i></a></strong></td>
         {% else %}
