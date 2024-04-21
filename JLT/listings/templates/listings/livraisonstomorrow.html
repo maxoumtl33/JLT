@@ -154,7 +154,6 @@
           {% for livraison in livraisonsmidi %}
           {% if livraison.recuperation == recuperation %}
         <tr>
-          
           <td style="color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
           <td style="color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
           <td style="color: #F1B3DA;"><strong>{{livraison.infodetail}}</strong></td>
@@ -196,8 +195,6 @@
           {% else %}
           <td><strong><i class="fa-solid fa-location-dot" style="color: #63E6BE;"></i></strong></td>
           {% endif %}
-            
-            
         </tr>
           {% endif %}
         {% endfor %}
