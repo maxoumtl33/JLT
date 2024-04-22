@@ -4,6 +4,8 @@ from listings.models import Livraison
 from .models import Livreur
 from .models import Tacheafaire
 from .models import Journee
+from .models import Route
+
 from .models import Distances
 from .models import User
 from django.shortcuts import get_object_or_404
@@ -273,9 +275,12 @@ class MapView(View):
         today = datetime.now().date()
         tomorrow = today + timedelta(1)
         distances = Distances.objects.all()
+        routesmatin = ['1','2','3','4']
+        routes = Route.objects.filter(nom__in=routesmatin)
         matin = ['05h00', '05h15', '05h30', '05h45', '06h00', '06h15', '06h30', '06h45', '07h00', '07h15', '07h30', '07h45', '08h00','08h15', '08h30', '08h45', '09h00', '09h15', '09h30']
         eligable_locations = Livraison.objects.filter(place_id__isnull=False, heure_livraison__in = matin, date=tomorrow)
         livraisons =[]
+
         for a in eligable_locations:
             data = {
                 'lat': float(a.lat),
@@ -283,6 +288,7 @@ class MapView(View):
                 'place_id': a.place_id,
                 'nom': a.nom,
                 'heure_livraison': a.heure_livraison,
+                'adress' : a.adress,
             }
 
             livraisons.append(data)
@@ -291,6 +297,8 @@ class MapView(View):
                    'livraisons':livraisons,
                    'form': form,
                    'distances':distances,
+                   'routes':routes,
+                   'routesmatin':routesmatin,
 
         }
         return render(request, 'listings/map.html', context)
@@ -640,7 +648,7 @@ def livraisonrespdetail(request, ip):
     formbis = LivraisonFeuilleForm(request.POST or None, instance=livraison)
     if formbis.is_valid():
        formbis.save()
-       return redirect('livraisonsresp')
+       return redirect('livraisonstomorrow')
     
     return render(request, 'listings/livraisonrespdetail.html', context={'livraisons': livraisons,
                                                               'livraison':livraison,

@@ -61,7 +61,7 @@
         );
 
         livraisons.forEach(function (livraison){
-            var markerinfos = livraison.nom + " " +livraison.heure_livraison
+            var markerinfos = livraison.nom + "/" +livraison.heure_livraison
             var marker = new google.maps.Marker({
                 position: {lat: livraison.lat, lng: livraison.lng}, 
                 map: map, 
@@ -105,6 +105,35 @@
     </div>
 </div>
 <br>
+<br>
+<br>
+<h1>Creer les routes du matin</h1>
+<br>
+<div id="creation" style="display: flex;">
+    <div id="livraisons">
+{% for livraison in livraisons %}
+<div class="card" style="width: 18rem;">
+    <div class="card-body">
+      <h5 class="card-title">{{livraison.nom}}</h5>
+      <h6 class="card-subtitle mb-2 text-body-secondary">{{livraison.heure_livraison}}</h6>
+      <p class="card-text">{{livraison.infodetail}}</p>
+    </div>
+  </div>
+  <br>
+{% endfor %}
+</div>
+<div id="routes" style="display: flex;">
+    {% for route in routes %}
+    <div class="card" style="width: 18rem;">
+        <div class="card-body">
+          <h5 class="card-title">Route n°{{route.id}}</h5>
+          <h5 class="card-title">{{route.livraison}}</h5>
+
+        </div>
+      </div>
+    {% endfor %}
+</div>
+</div>
 <br>
 <br>
 <h1>Calculer les distances</h1>
