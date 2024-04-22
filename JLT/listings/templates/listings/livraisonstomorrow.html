@@ -74,19 +74,19 @@
           {% if livraison.recuperation == recuperation %}
         <tr>
           
-          <td style="color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
-          <td style="color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
-          <td style="color: #F1B3DA;"><strong>{{livraison.infodetail}}</strong></td>
-          <td style="color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
-          <td style="color: #F1B3DA;"><strong>{{livraison.livreur.nom}}</strong></td>
-          <td style="color: #F1B3DA;"><strong>{{livraison.aidelivreur}}</strong></td>
-          <td style="color: #F1B3DA;"><strong>{{ livraison.route }}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{livraison.infodetail}}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{livraison.livreur.nom}}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{livraison.aidelivreur}}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{ livraison.route }}</strong></td>
           {% if livraison.retourtraiteur == retourtraiteur %}
           <td><strong><i class="fa-solid fa-house-chimney-window fa-xl"></i></i></strong></td>
           {%  else %}
           <td></td>
           {% endif %}
-          <td style="color: #F1B3DA;"><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+          <td style="background-color: #F1B3DA;"><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
           {% if livraison.lng == None %}
           <td><strong><a href="{% url 'geocoding' livraison.id %}" class="btn"><i class="fa-solid fa-location-dot"></i></a></strong></td>
           {% else %}
@@ -154,19 +154,19 @@
           {% for livraison in livraisonsmidi %}
           {% if livraison.recuperation == recuperation %}
         <tr>
-          <td style="color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
-          <td style="color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
-          <td style="color: #F1B3DA;"><strong>{{livraison.infodetail}}</strong></td>
-          <td style="color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
-          <td style="color: #F1B3DA;"><strong>{{livraison.livreur.nom}}</strong></td>
-          <td style="color: #F1B3DA;"><strong>{{livraison.aidelivreur}}</strong></td>
-          <td style="color: #F1B3DA;"><strong>{{ livraison.route }}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{livraison.infodetail}}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{livraison.livreur.nom}}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{livraison.aidelivreur}}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{ livraison.route }}</strong></td>
           {% if livraison.retourtraiteur == retourtraiteur %}
-          <td style="color: #F1B3DA;"><strong><i class="fa-solid fa-house-chimney-window fa-xl"></i></strong></td>
+          <td style="background-color: #F1B3DA;"><strong><i class="fa-solid fa-house-chimney-window fa-xl"></i></strong></td>
           {%  else %}
           <td></td>
           {% endif %}
-          <td style="color: #F1B3DA;"><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+          <td style="background-color: #F1B3DA;"><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
           {% if livraison.lng == None %}
           <td><strong><a href="{% url 'geocoding' livraison.id %}" class="btn"><i class="fa-solid fa-location-dot"></i></a></strong></td>
           {% else %}
@@ -232,19 +232,19 @@
         {% if livraison.recuperation == recuperation %}
       <tr>
         
-        <td style="color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
-        <td style="color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
-        <td style="color: #F1B3DA;"><strong>{{livraison.infodetail}}</strong></td>
-        <td style="color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
-        <td style="color: #F1B3DA;"><strong>{{livraison.livreur.nom}}</strong></td>
-        <td style="color: #F1B3DA;"><strong>{{livraison.aidelivreur}}</strong></td>
-        <td style="color: #F1B3DA;"><strong>{{ livraison.route }}</strong></td>
+        <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
+        <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
+        <td style="background-color: #F1B3DA;"><strong>{{livraison.infodetail}}</strong></td>
+        <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
+        <td style="background-color: #F1B3DA;"><strong>{{livraison.livreur.nom}}</strong></td>
+        <td style="background-color: #F1B3DA;"><strong>{{livraison.aidelivreur}}</strong></td>
+        <td style="background-color: #F1B3DA;"><strong>{{ livraison.route }}</strong></td>
         {% if livraison.retourtraiteur == retourtraiteur %}
-        <td style="color: #F1B3DA;"><strong><i class="fa-solid fa-house-chimney-window fa-xl"></i></strong></td>
+        <td><strong><i class="fa-solid fa-house-chimney-window fa-xl"></i></strong></td>
         {%  else %}
         <td></td>
         {% endif %}
-        <td style="color: #F1B3DA;"><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+        <td><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
         {% if livraison.lng == None %}
         <td><strong><a href="{% url 'geocoding' livraison.id %}" class="btn"><i class="fa-solid fa-location-dot"></i></a></strong></td>
         {% else %}

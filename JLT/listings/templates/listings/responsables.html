@@ -116,6 +116,7 @@
                   <th scope="col" style="color: #303FBA;">Heure livraison</th>
                   <th scope="col" style="color: #303FBA;">Route</th>
                   <th scope="col" style="color: #303FBA;">Status</th>
+                  <th scope="col" style="color: #303FBA;">Commentaire</th>
                   <th scope="col" style="color: #303FBA;">Lien</th>
 
         
@@ -128,12 +129,17 @@
           
         
                 <tr>
-                  <td style="color: #F1B3DA;"><strong>{{ livraison.livreur.nom }}</strong></td>
-                  <td style="color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
-                  <td style="color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
-                  <td style="color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
-                  <td style="color: #F1B3DA;"><strong>{{ livraison.route }}</strong></td>
+                  <td style="background-color: #F1B3DA;"><strong>{{ livraison.livreur.nom }}</strong></td>
+                  <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
+                  <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
+                  <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
+                  <td style="background-color: #F1B3DA;"><strong>{{ livraison.route }}</strong></td>
                   <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
+                  {% if livraison.commentaire|length > 0  %}
+                  <td><i class="fa-solid fa-message"></i></td>
+                  {% else %}
+                  <td></td>
+                  {% endif %}
                   <td ><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
 
                 </tr>
@@ -145,6 +151,11 @@
                   <td ><strong>{{ livraison.heure_livraison }}</strong></td>
                   <td ><strong>{{ livraison.route }}</strong></td>
                   <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
+                  {% if livraison.commentaire|length > 0  %}
+                  <td><i class="fa-solid fa-message"></i></td>
+                  {% else %}
+                  <td></td>
+                  {% endif %}
                   <td ><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
 
                 </tr>
@@ -167,6 +178,8 @@
         <th scope="col" style="color: #303FBA;">Heure livraison</th>
         <th scope="col" style="color: #303FBA;">Route</th>
         <th scope="col" style="color: #303FBA;">Status</th>
+        <th scope="col" style="color: #303FBA;">Commentaire</th>
+
         <th scope="col" style="color: #303FBA;">Lien</th>
 
 
@@ -178,12 +191,17 @@
           
         
   <tr>
-    <td style="color: #F1B3DA;"><strong>{{ livraison.livreur.nom }}</strong></td>
-    <td style="color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
-    <td style="color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
-    <td style="color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
-    <td style="color: #F1B3DA;"><strong>{{ livraison.route }}</strong></td>
+    <td style="background-color: #F1B3DA;"><strong>{{ livraison.livreur.nom }}</strong></td>
+    <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
+    <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
+    <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
+    <td style="background-color: #F1B3DA;"><strong>{{ livraison.route }}</strong></td>
     <td><strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong></td>
+    {% if livraison.commentaire|length > 0  %}
+                  <td><i class="fa-solid fa-message"></i></td>
+                  {% else %}
+                  <td></td>
+                  {% endif %}
     <td ><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
 
   </tr>
@@ -195,6 +213,11 @@
     <td ><strong>{{ livraison.heure_livraison }}</strong></td>
     <td ><strong>{{ livraison.route }}</strong></td>
     <td><strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong></td>
+    {% if livraison.commentaire|length > 0  %}
+                  <td><i class="fa-solid fa-message"></i></td>
+                  {% else %}
+                  <td></td>
+                  {% endif %}
     <td ><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
 
   </tr>
