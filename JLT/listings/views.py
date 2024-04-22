@@ -662,3 +662,27 @@ def livraisonrespdetail(request, ip):
                                                               'tomorrow':tomorrow,
                                                               'formbis':formbis,
                                                               })
+
+def livraisonshier(request):
+    
+    today = datetime.now().date()
+    tomorrow = today + timedelta(1)
+    yesterday = today - timedelta(1)
+    livraisonstatusok = Livraison.objects.filter(status=True, date=yesterday,recuperation="non")
+    livraisonstatusko = Livraison.objects.filter(status=False, date=yesterday,recuperation="non")
+    recuperation = Livraison.objects.filter(recuperation="oui", date=yesterday)
+    recuperationok = Livraison.objects.filter(recuperation="oui", status=True, date=yesterday)
+    recuperationko = Livraison.objects.filter(status=False,recuperation="oui", date=yesterday)
+    recuperation = "oui"
+    livraison = Livraison.objects.all()
+    livraisons = Livraison.objects.order_by('route').filter(date=yesterday)
+    return render(request, 'listings/livraisonshier.html', context={'livraisons': livraisons,
+                                                              
+                                                              'recuperation' : recuperation,
+                                                              'livraisonstatusok':livraisonstatusok,
+                                                              'livraisonstatusko':livraisonstatusko,
+                                                            
+                                                              'recuperationok':recuperationok,
+                                                              'recuperationko':recuperationko,
+                                                              'recuperation' : recuperation,
+                                                              })

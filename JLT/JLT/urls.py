@@ -27,6 +27,7 @@ path('delete_distance/<str:pk>/', views.deleteDistance, name = 'deletedistance')
 path('livreur/<int:pk>/', views.livreur_detail, name='livreur-detail'),
 path('livraisonstomorrow/', views.livraisonstomorrow, name='livraisonstomorrow'),
 path('livraisonsresp/', views.livraisonsresp, name='livraisonsresp'),
+path('livraisonshier/', views.livraisonshier, name='livraisonshier'),
 path('geocoding/<int:pk>/', GeocodingView.as_view(), name='geocoding'),
 path('livraisonrespdetail/<int:ip>/', views.livraisonrespdetail, name='livraisonrespdetail'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
