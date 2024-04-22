@@ -29,14 +29,14 @@
             </a> 
           </li>
           {% endif %}
-          {% if livraison.status == False %}
+          {% if livraison.status == False and user.username == livraison.livreur.nom %}
           <li class="nav__item">
             <button type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
               <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i>
               <span>En cours</span>
           </button>  
           </li>
-          {% else %}
+          {% elif user.username == livraison.livreur.nom %}
           <li class="nav__item">
             <button type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
               <i class="fa-solid fa-circle-check" style="color: green;"></i>
