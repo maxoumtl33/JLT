@@ -184,7 +184,7 @@ def responsableschoixjournee(request):
 def responsables(request, id):
     today = datetime.now().date()
     tomorrow = today + timedelta(1)
-    livraisons  = Livraison.objects.order_by('route').filter(date=today)
+    livraisons  = Livraison.objects.order_by('route').filter(date=today,recuperation="non" )
     livraisonstatusok = Livraison.objects.filter(status=True, date=today,recuperation="non")
     livraisonstatusko = Livraison.objects.filter(status=False, date=today,recuperation="non")
     recuperation = Livraison.objects.filter(recuperation="oui", date=today)
