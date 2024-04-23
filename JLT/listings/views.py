@@ -119,6 +119,7 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
         journee = Journee.objects.get(id=id)
         recuperations = "oui"
         recuperationo = "non"
+        retourtraiteur = "oui"
         
        
         
@@ -133,7 +134,8 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
                                                                 'livraison':livraison,
                                                                 'recuperations':recuperations,
                                                                 'userid':userid,
-                                                                'recuperationo':recuperationo
+                                                                'recuperationo':recuperationo,
+                                                                'retourtraiteur':retourtraiteur
                                                                 
 
                                                                 
