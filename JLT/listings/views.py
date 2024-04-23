@@ -109,13 +109,13 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
         livreur = Livreur.objects.get(user_id= pk)
         userid = livreur.id
         today = now().date()
-        livraisons  = Livraison.objects.order_by('route').filter(date=today, recuperation="non")
+        livraisons  = Livraison.objects.order_by('route').filter(date=today)
         livraisonstatusok = Livraison.objects.filter(status=True, date=today,recuperation="non", livreur = userid)
         livraisonstatusko = Livraison.objects.filter(status=False, date=today,recuperation="non", livreur = userid)
         recuperation = Livraison.objects.filter(recuperation="oui", date=today, livreur = userid)
         recuperationok = Livraison.objects.filter(recuperation="oui", status=True, date=today, livreur = userid)
         recuperationko = Livraison.objects.filter(status=False,recuperation="oui", date=today, livreur = userid)
-        livraison = Livraison.objects.filter(recuperation="non", date=today, livreur = userid)
+        livraison = Livraison.objects.filter(date=today, livreur = userid)
         journee = Journee.objects.get(id=id)
         recuperations = "oui"
         recuperationo = "non"
@@ -184,7 +184,7 @@ def responsableschoixjournee(request):
 def responsables(request, id):
     today = datetime.now().date()
     tomorrow = today + timedelta(1)
-    livraisons  = Livraison.objects.order_by('route').filter(date=today,recuperation="non" )
+    livraisons  = Livraison.objects.order_by('route').filter(date=today)
     livraisonstatusok = Livraison.objects.filter(status=True, date=today,recuperation="non")
     livraisonstatusko = Livraison.objects.filter(status=False, date=today,recuperation="non")
     recuperation = Livraison.objects.filter(recuperation="oui", date=today)
