@@ -105,8 +105,8 @@
                   <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
                   <td style="background-color: #F1B3DA;"><strong>{{ livraison.route }}</strong></td>
                   {% if livraison.retourtraiteur == retourtraiteur %}
-          <td><strong><i class="fa-solid fa-house-chimney-window fa-xl"></i></strong></td>
-          {%  else %}
+                  <td><strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-xl"></i></a></strong></td>
+                  {%  else %}
           <td></td>
           {% endif %}
                   <td><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
@@ -118,7 +118,7 @@
                   <td ><strong>{{ livraison.heure_livraison }}</strong></td>
                   <td ><strong>{{ livraison.route }}</strong></td>
                   {% if livraison.retourtraiteur == retourtraiteur %}
-                  <td><strong><i class="fa-solid fa-house-chimney-window fa-xl"></i></strong></td>
+                  <td><strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-xl"></i></a></strong></td>
                   {%  else %}
                   <td></td>
                   {% endif %}
