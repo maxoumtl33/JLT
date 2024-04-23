@@ -87,6 +87,20 @@
 
     window.initMap = initMap
 
+    function allowDrop(ev) {
+        ev.preventDefault();
+        }
+
+        function drag(ev) {
+        ev.dataTransfer.setData("text", ev.target.id);
+        }
+
+        function drop(ev) {
+        ev.preventDefault();
+        var data = ev.dataTransfer.getData("text");
+        ev.target.appendChild(document.getElementById(data));
+        }
+
 </script>
 <br>
 <br>
@@ -110,9 +124,9 @@
 <h1>Creer les routes du matin</h1>
 <br>
 <div id="creation" style="display: flex;">
-    <div id="livraisons">
+    <div id="livraisons" ondrop="drop(event)" ondragover="allowDrop(event)">
 {% for livraison in livraisons %}
-<div class="card" style="width: 18rem;">
+<div class="card" style="width: 18rem;" draggable="true" ondragstart="drag(event)" id="drag">
     <div class="card-body">
       <h5 class="card-title">{{livraison.nom}}</h5>
       <h6 class="card-subtitle mb-2 text-body-secondary">{{livraison.heure_livraison}}</h6>
@@ -122,9 +136,14 @@
   <br>
 {% endfor %}
 </div>
-<div id="routes" style="display: flex;">
-    {% for route in routes %}
-    <div class="card" style="width: 18rem;">
+
+<div id="routes" style="display: flex;" >
+{% for route in routes %}
+    <div class="card" style="float: left;
+    width: 330px;
+    height: 300px;
+    margin: 10px;
+    padding: 10px;" ondrop="drop(event)" ondragover="allowDrop(event)">
         <div class="card-body">
           <h5 class="card-title">Route n°{{route.id}}</h5>
           <h5 class="card-title">{{route.livraison}}</h5>

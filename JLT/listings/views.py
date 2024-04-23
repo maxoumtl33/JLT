@@ -65,7 +65,7 @@ def journee_detail(request, id):  # notez le paramètre id supplémentaire
    livraisonsroute  = Livraison.objects.order_by('route')
    today = now().date()
    livraisons = Livraison.objects.order_by('route').filter(date=today)
-   recuperations = Livraison.objects.filter(recuperation="oui")
+   recuperations = Livraison.objects.filter(recuperation="oui",date=today)
    retourtraiteur = "oui"
    retourtraiteurno = "non"
    recuperation = "oui"
@@ -109,7 +109,7 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
         livreur = Livreur.objects.get(user_id= pk)
         userid = livreur.id
         today = now().date()
-        livraisons  = Livraison.objects.order_by('route').filter(date=today)
+        livraisons  = Livraison.objects.order_by('route').filter(date=today, recuperation="non")
         livraisonstatusok = Livraison.objects.filter(status=True, date=today,recuperation="non", livreur = userid)
         livraisonstatusko = Livraison.objects.filter(status=False, date=today,recuperation="non", livreur = userid)
         recuperation = Livraison.objects.filter(recuperation="oui", date=today, livreur = userid)
