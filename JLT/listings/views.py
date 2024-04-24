@@ -115,7 +115,7 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
         recuperation = Livraison.objects.filter(recuperation="oui", date=today, livreur = userid)
         recuperationok = Livraison.objects.filter(recuperation="oui", status=True, date=today, livreur = userid)
         recuperationko = Livraison.objects.filter(status=False,recuperation="oui", date=today, livreur = userid)
-        livraison = Livraison.objects.filter(date=today, livreur = userid)
+        livraison = Livraison.objects.filter(date=today,recuperation="non", livreur = userid)
         journee = Journee.objects.get(id=id)
         recuperations = "oui"
         recuperationo = "non"
@@ -187,8 +187,8 @@ def responsables(request, id):
     today = datetime.now().date()
     tomorrow = today + timedelta(1)
     livraisons  = Livraison.objects.order_by('route').filter(date=today)
-    livraisonstatusok = Livraison.objects.filter(status=True, date=today)
-    livraisonstatusko = Livraison.objects.filter(status=False, date=today)
+    livraisonstatusok = Livraison.objects.filter(status=True,recuperation="non", date=today)
+    livraisonstatusko = Livraison.objects.filter(status=False,recuperation="non", date=today)
     recuperation = Livraison.objects.filter(recuperation="oui", date=today)
     recuperationok = Livraison.objects.filter(recuperation="oui", status=True, date=today)
     recuperationko = Livraison.objects.filter(status=False,recuperation="oui", date=today)
