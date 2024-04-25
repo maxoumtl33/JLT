@@ -31,8 +31,8 @@
               </a>
             </li>
             <li class="nav__item">
-                <a  href="{% url 'livraisonstomorrow' %}" class="nav__link"><i class="fa-solid fa-user-ninja"></i>
-                    <span class="nav__name">Retour</span>
+              <a  href="{% url 'livraisonstoday' %}" class="nav__link"><i class="fa-solid fa-user-ninja"></i>
+                <span class="nav__name">Retour</span>
               </a>
   
             </li>
@@ -61,7 +61,7 @@
         );
 
         livraisons.forEach(function (livraison){
-            var markerinfos = livraison.nom + "/" +livraison.heure_livraison + "/" + livraison.convives + " convives"
+            var markerinfos = livraison.nom + "/" +livraison.heure_livraison
             var marker = new google.maps.Marker({
                 position: {lat: livraison.lat, lng: livraison.lng}, 
                 map: map, 
@@ -87,10 +87,24 @@
 
     window.initMap = initMap
 
+    function allowDrop(ev) {
+        ev.preventDefault();
+        }
+
+        function drag(ev) {
+        ev.dataTransfer.setData("text", ev.target.id);
+        }
+
+        function drop(ev) {
+        ev.preventDefault();
+        var data = ev.dataTransfer.getData("text");
+        ev.target.appendChild(document.getElementById(data));
+        }
+
 </script>
 <br>
 <br>
-<h1>Carte de l'après midi</h1>
+<h1>Carte du matin</h1>
 <br>
 <br>
 <br>
@@ -107,6 +121,7 @@
 <br>
 <br>
 <br>
+
 <h1>Calculer les distances</h1>
 <br>
 <br>

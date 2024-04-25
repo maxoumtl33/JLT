@@ -23,12 +23,18 @@ path('distance', DistanceView.as_view(), name = 'my_distance_view'),
 path('map', MapView.as_view(), name = 'my_map_view'),
 path('mapmidi', MapMidiView.as_view(), name = 'my_mapmidi_view'),
 path('mapaprem', MapApremView.as_view(), name = 'my_mapaprem_view'),
+path('maptoday', MapTodayView.as_view(), name = 'my_maptoday_view'),
+path('maptodaymidi', MapMidiTodayView.as_view(), name = 'my_maptodaymidi_view'),
+path('maptodayaprem', MapApremTodayView.as_view(), name = 'my_maptodayaprem_view'),
 path('delete_distance/<str:pk>/', views.deleteDistance, name = 'deletedistance'),
 path('livreur/<int:pk>/', views.livreur_detail, name='livreur-detail'),
 path('livraisonstomorrow/', views.livraisonstomorrow, name='livraisonstomorrow'),
+path('livraisonstoday/', views.livraisonstoday, name='livraisonstoday'),
 path('livraisonsresp/', views.livraisonsresp, name='livraisonsresp'),
 path('livraisonshier/', views.livraisonshier, name='livraisonshier'),
 path('geocoding/<int:pk>/', GeocodingView.as_view(), name='geocoding'),
+path('geocodingtoday/<int:pk>/', GeocodingTodayView.as_view(), name='geocodingtoday'),
+
 path('livraisonrespdetail/<int:ip>/', views.livraisonrespdetail, name='livraisonrespdetail'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

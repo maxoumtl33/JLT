@@ -50,6 +50,11 @@
       <a href="{% url 'responsables' journee.id %}" class="btn btn-primary">Stats journée en cours</a>    
     </div>
     {% endfor %}
+  <br>
+  <br>
+    <div style="text-align: center;">
+      <a href="{% url 'livraisonstoday' %}" class="btn btn-primary">Livraisons aujourd'hui</a>    
+    </div>
 <br>
 <br>
 <div style="text-align: center;">
@@ -70,6 +75,9 @@
 <div style="text-align: center;">
   <a href="{% url 'livraisonsresp' %}" class="btn btn-primary">Feuile de route demain</a>    
 </div>
+<br>
+<br>
+
 
 
 <!-- Modal -->
