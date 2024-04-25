@@ -45,38 +45,47 @@
 <br>
 <br>
 <br>
-    {% for journee in journees %}
-    <div style="text-align: center;">
-      <a href="{% url 'responsables' journee.id %}" class="btn btn-primary">Stats journée en cours</a>    
-    </div>
-    {% endfor %}
-  <br>
-  <br>
-    <div style="text-align: center;">
-      <a href="{% url 'livraisonstoday' %}" class="btn btn-primary">Livraisons aujourd'hui</a>    
-    </div>
-<br>
-<br>
-<div style="text-align: center;">
-  <a href="admin/" class="btn btn-primary" target="_blank">Menu admin</a>    
+<div id="bouttonsaccueil" style="display: flex; text-align: center;">
+<div class="dropdown">
+  <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="margin-right: 30px;margin-left: 30px;">
+            Hier
+        </button>
+  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+    <li>  <a href="{% url 'livraisonshier' %}" class="dropdown-item">Livraisons</a></li>
+  </ul>
 </div>
-<br>
-<br>
-<div style="text-align: center;">
-  <a href="{% url 'livraisonstomorrow' %}" class="btn btn-primary">Livraisons demain</a>    
+<div class="dropdown">
+  <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="margin-right: 30px;">
+            Aujourd'hui
+        </button>
+  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+    <li> {% for journee in journees %}
+        <a href="{% url 'responsables' journee.id %}" class="dropdown-item">Live</a>     
+      {% endfor %}</li>
+    <li></li>
+    <li>      <a href="{% url 'livraisonstoday' %}" class="dropdown-item">Carte</a>    
+    </li>
+  </ul>
 </div>
-<br>
-<br>
-<div style="text-align: center;">
-  <a href="{% url 'livraisonshier' %}" class="btn btn-primary">Livraisons hiers</a>    
+
+<div class="dropdown">
+  <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="margin-right: 30px;">
+            Demain
+        </button>
+  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+    <li>  <a href="{% url 'livraisonsresp' %}" class="dropdown-item">Livraisons</a>    
+    </li>
+    <li>  <a href="{% url 'livraisonstomorrow' %}" class="dropdown-item">Carte</a>    
+    </li>
+    
+  </ul>
 </div>
- <br>
- <br>
-<div style="text-align: center;">
-  <a href="{% url 'livraisonsresp' %}" class="btn btn-primary">Feuile de route demain</a>    
+<a href="admin/" class="btn btn-primary" target="_blank">Menu admin</a>    
+
 </div>
-<br>
-<br>
+
+   
+  
 
 
 

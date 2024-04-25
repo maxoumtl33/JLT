@@ -899,6 +899,7 @@ def livraisonstomorrow(request):
                'livraisonsmidi': livraisonsmidi,
                'livraisonsapresmidi': livraisonsapresmidi,
                }
+    return render(request, 'listings/livraisonstomorrow.html', context)
     
 def livraisonstoday(request):
     recuperation = "oui"
