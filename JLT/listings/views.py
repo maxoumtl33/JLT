@@ -64,7 +64,7 @@ def journee_detail(request, id):  # notez le paramètre id supplémentaire
    livreurs = Livreur.objects.all()
    livraisonsroute  = Livraison.objects.order_by('route')
    today = now().date()
-   livraisons = Livraison.objects.order_by('route').filter(date=today, recuperation="non")
+   livraisons = Livraison.objects.order_by('route').filter(date=today)
    recuperations = Livraison.objects.filter(recuperation="oui",date=today)
    retourtraiteur = "oui"
    retourtraiteurno = "non"
