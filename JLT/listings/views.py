@@ -368,6 +368,7 @@ class MapView(View):
                    'routes':routes,
                    'routesmatin':routesmatin,
                    'recuperation': recuperation,
+                   'infodetail': a.infodetail
 
         }
         return render(request, 'listings/map.html', context)
@@ -426,6 +427,7 @@ class MapMidiView(View):
         form = DistanceForm
         today = datetime.now().date()
         tomorrow = today + timedelta(1)
+        recuperation = "oui"
         distances = Distances.objects.all()
         midi = ['10h00', '10h15', '10h30', '10h45', '11h00', '11h15', '11h30', '11h45', '12h00', '12h15', '12h30', '12h45']
         eligable_locations = Livraison.objects.filter(place_id__isnull=False, heure_livraison__in = midi, date=tomorrow)
@@ -437,6 +439,8 @@ class MapMidiView(View):
                 'place_id': a.place_id,
                 'nom': a.nom,
                 'heure_livraison': a.heure_livraison,
+                'recuperation' : a.recuperation,
+                'infodetail': a.infodetail
             }
 
             livraisons.append(data)
@@ -445,6 +449,7 @@ class MapMidiView(View):
                    'livraisons':livraisons,
                    'form': form,
                    'distances':distances,
+                   'recuperation':recuperation,
 
         }
         return render(request, 'listings/mapmidi.html', context)
@@ -503,6 +508,7 @@ class MapApremView(View):
         form = DistanceForm
         today = datetime.now().date()
         tomorrow = today + timedelta(1)
+        recuperation = "oui"
         distances = Distances.objects.all()
         aprem = ['13h00', '13h15', '13h30', '13h45', '14h00', '14h15', '14h30', '14h45', '15h00', '15h15', '15h30', '15h45', '16h00', '16h15', '16h30', '16h45', '17h00', '17h15', '17h30', '17h45', '18h00', '18h15', '18h30', '18h45', '19h00']
 
@@ -517,6 +523,8 @@ class MapApremView(View):
                 'heure_livraison': a.heure_livraison,
                 'convives' : a.convives,
                 'mode_envoi' : a.mode_envoi,
+                'recuperation' : a.recuperation,
+                'infodetail': a.infodetail
             }
 
             livraisons.append(data)
@@ -525,6 +533,7 @@ class MapApremView(View):
                    'livraisons':livraisons,
                    'form': form,
                    'distances':distances,
+                   'recuperation':recuperation,
 
         }
         return render(request, 'listings/mapaprem.html', context)

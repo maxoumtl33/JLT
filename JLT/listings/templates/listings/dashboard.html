@@ -45,6 +45,10 @@
 
 <div style="text-align: center;">
     <h1>Dashboard {{ livreur.nom }}</h1>
+    <p><a href="https://www.julienleblanclivraisons.com/admin" class="btn btn-primary">changer mot de passe</a></p>
+ 
+    <hr>
+    <br>
     <h2>{{journee}}</h2>
     <br>
     <br>
@@ -453,7 +457,7 @@
 {% endif %}
 {% endif %}
 {% endfor %}
-{% for ra in route8 %}
+{% for a in route8 %}
 {% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
