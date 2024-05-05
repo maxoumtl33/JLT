@@ -41,10 +41,127 @@
   
     <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
   </nav>
+  <style>
+    /* ---- RESET/BASIC STYLING ---- */
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: sans-serif;
+
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+*::-webkit-scrollbar {
+  display: none;
+}
+
+.board {
+  width: 100%;
+  height: 100vh;
+  overflow: scroll;
+
+  background-image: url(https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80);
+  background-position: center;
+  background-size: cover;
+}
+
+/* ---- FORM ---- */
+#todo-form {
+  padding: 32px 32px 0;
+}
+
+#todo-form input {
+  padding: 12px;
+  margin-right: 12px;
+  width: 225px;
+
+  border-radius: 4px;
+  border: none;
+
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.25);
+  background: white;
+
+  font-size: 14px;
+  outline: none;
+}
+
+#todo-form button {
+  padding: 12px 32px;
+
+  border-radius: 4px;
+  border: none;
+
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.25);
+  background: #ffffff;
+  color: black;
+
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* ---- BOARD ---- */
+.lanes {
+  display: flex;
+  align-items: flex-start;
+  justify-content: start;
+  gap: 16px;
+
+  padding: 24px 32px;
+
+  overflow: scroll;
+  height: 100%;
+}
+
+.heading {
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.swim-lane {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  background: #f4f4f4;
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.25);
+
+  padding: 12px;
+  border-radius: 4px;
+  width: 225px;
+  min-height: 120px;
+
+  flex-shrink: 0;
+}
+
+.task {
+  background: white;
+  color: black;
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.15);
+
+  padding: 12px;
+  border-radius: 4px;
+
+  font-size: 16px;
+  cursor: move;
+}
+
+.is-dragging {
+  scale: 1.05;
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.25);
+  background: rgb(50, 50, 50);
+  color: white;
+}
+  </style>
 
 <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
 
 <script> 
+
+
     let map
 
     function initMap(){
@@ -87,20 +204,7 @@
 
     window.initMap = initMap
 
-    function allowDrop(ev) {
-        ev.preventDefault();
-        }
-
-        function drag(ev) {
-        ev.dataTransfer.setData("text", ev.target.id);
-        }
-
-        function drop(ev) {
-        ev.preventDefault();
-        var data = ev.dataTransfer.getData("text");
-        ev.target.appendChild(document.getElementById(data));
-        }
-
+   
 </script>
 <br>
 <br>
@@ -123,36 +227,37 @@
 <br>
 <h1>Creer les routes du matin</h1>
 <br>
-<div id="creation" style="display: flex;">
-    <div id="livraisons" ondrop="drop(event)" ondragover="allowDrop(event)">
-{% for livraison in livraisons %}
-<div class="card" style="width: 18rem;" draggable="true" ondragstart="drag(event)" id="drag">
-    <div class="card-body">
-      <h5 class="card-title">{{livraison.nom}}</h5>
-      <h6 class="card-subtitle mb-2 text-body-secondary">{{livraison.heure_livraison}}</h6>
-      <p class="card-text">{{livraison.infodetail}}</p>
+<div class="board">
+  <form id="todo-form">
+    <input type="text" placeholder="New TODO..." id="todo-input" />
+    <button type="submit">Add +</button>
+  </form>
+
+  <div class="lanes">
+    <div class="swim-lane" id="todo-lane">
+      <h3 class="heading">TODO</h3>
+
+      <p class="task" draggable="true">Get groceries</p>
+      <p class="task" draggable="true">Feed the dogs</p>
+      <p class="task" draggable="true">Mow the lawn</p>
+    </div>
+
+    <div class="swim-lane">
+      <h3 class="heading">Doing</h3>
+
+      <p class="task" draggable="true">Binge 80 hours of Game of Thrones</p>
+    </div>
+
+    <div class="swim-lane">
+      <h3 class="heading">Done</h3>
+
+      <p class="task" draggable="true">
+        Watch video of a man raising a grocery store lobster as a pet
+      </p>
     </div>
   </div>
-  <br>
-{% endfor %}
 </div>
 
-<div id="routes" style="display: flex;" >
-{% for route in routes %}
-    <div class="card" style="float: left;
-    width: 330px;
-    height: 300px;
-    margin: 10px;
-    padding: 10px;" ondrop="drop(event)" ondragover="allowDrop(event)">
-        <div class="card-body">
-          <h5 class="card-title">Route n°{{route.id}}</h5>
-          <h5 class="card-title">{{route.livraison}}</h5>
-
-        </div>
-      </div>
-    {% endfor %}
-</div>
-</div>
 <br>
 <br>
 <h1>Calculer les distances</h1>
@@ -188,22 +293,66 @@
     </tbody>
 </table>
 
-<form method="POST">
-    {% csrf_token %}
-    <div id="linkholder">
-        <div class="form1 ml-3"> {{ form.from_location|as_crispy_field }}</div>
-        <div class="form1 ml-3"> {{ form.to_location|as_crispy_field }}</div>
-        <div class="form1 ml-3"> {{ form.mode|as_crispy_field }}</div>
-        <br>
-        <button  class="btn btn-primary" type="submit">Calculer</button>
-    </div>
-</form>
-<br>
-<br>
-<b>
 
-</b>
+<br>
+<br>
+<form method="POST">
+  {% csrf_token %}
+  <div id="linkholder">
+      <div class="form1 ml-3"> {{ form.from_location|as_crispy_field }}</div>
+      <div class="form1 ml-3"> {{ form.to_location|as_crispy_field }}</div>
+      <div class="form1 ml-3"> {{ form.mode|as_crispy_field }}</div>
+      <br>
+      <button  class="btn btn-primary" type="submit">Calculer</button>
+  </div>
+</form>
 
 {% endblock %}
 
+<div id="creation" style="display: flex;">
+  <div id="livraisons" ondrop="drop(event)" ondragover="allowDrop(event)">
+{% for livraison in livraisons %}
+{% if livraison.recuperation == recuperation %}
+<div class="card" style="width: 18rem; background-color: #F1B3DA;" draggable="true" ondragstart="drag(event)" id="drag">
+<div class="card-body">
+  <h5 class="card-title">{{livraison.nom}}</h5>
+  <h6 class="card-subtitle mb-2 text-body-secondary">{{livraison.heure_livraison}}</h6>
+  <p class="card-text">{{livraison.infodetail}}</p>
+</div>
+</div>
+    {% else %}
+    <div class="card" style="width: 18rem;" draggable="true" ondragstart="drag(event)" id="drag">
+      <div class="card-body">
+        <h5 class="card-title">{{livraison.nom}}</h5>
+        <h6 class="card-subtitle mb-2 text-body-secondary">{{livraison.heure_livraison}}</h6>
+        <p class="card-text">{{livraison.infodetail}}</p>
+      </div>
+    </div>
+    {% endif %}
+<br>
+{% endfor %}
+</div>
+
+<div id="routes" style="display: flex;" >
+{% for route in routes %}
+  <div class="card" style="float: left;
+  width: 330px;
+  height: 300px;
+  margin: 10px;
+  padding: 10px;" ondrop="drop(event)" ondragover="allowDrop(event)">
+  {% if route.livraison == recuperation %}
+      <div class="card-body" >
+        <h5 class="card-title">Route n°{{route.id}}</h5>
+        <h5 class="card-title">{{route.livraison}}</h5>
+      </div>
+    {% else %}
+      <div class="card-body">
+        <h5 class="card-title">Route n°{{route.id}}</h5>
+        <h5 class="card-title">{{route.livraison}}</h5>
+      </div>
+    </div>
+    {% endif %}
+  {% endfor %}
+</div>
+</div>
                   

@@ -65,6 +65,7 @@
     <li></li>
     <li>      <a href="{% url 'livraisonstoday' %}" class="dropdown-item">Carte</a>    
     </li>
+    <li><a href="{% url 'recuptoday'%}" class="dropdown-item">Récups</a> </li>
   </ul>
 </div>
 
@@ -73,7 +74,7 @@
             Demain
         </button>
   <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-    <li>  <a href="{% url 'livraisonsresp' %}" class="dropdown-item">Livraisons</a>    
+    <li>  <a href="{% url 'livraisonsresp' %}" class="dropdown-item">Feuille de route</a>    
     </li>
     <li>  <a href="{% url 'livraisonstomorrow' %}" class="dropdown-item">Carte</a>    
     </li>
@@ -81,8 +82,22 @@
   </ul>
 </div>
 <a href="admin/" class="btn btn-primary" target="_blank">Menu admin</a>    
-
+<div style="margin-right: 30px;margin-left: 30px;">
+  <a href="https://forms.app/form/65568cf0ae67c4ca87c4b9d3/655a2833380bc0c412acea11/65a86c3bfe7e97fa6ba16518/result/responses/inbox" class="btn btn-primary" target="_blank" >Formulaire Récup Frigo</a>
 </div>
+<div style="margin-right: 30px;">
+  <a href="https://forms.app/form/65568cf0ae67c4ca87c4b9d3/655a2833380bc0c412acea11/655a28e533756106ac796923/result/responses/inbox" class="btn btn-primary" target="_blank" >Formulaire Recup livreur</a>
+</div>
+</div>
+
+<br>
+<br>
+
+<h1>Liste des livreurs</h1>
+<br>
+{% for livreur in livreurs %}
+<p>Nom : {{ livreur.nom }} / id: {{ livreur.id }}</p>
+{% endfor %}
 
    
   

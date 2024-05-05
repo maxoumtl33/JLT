@@ -41,7 +41,7 @@
 <br>
 <br>
 <div class="body">
-  <h1 style="text-align: center;">FEUILLE DE ROUTE</h1> <h1 style="text-align: center;"> {{journees}} </h1>
+  <h1 style="text-align: center;">Récuperations à faire demain</h1> <h1 style="text-align: center;"> {{journees}} </h1>
   <br>
   <br>
   <br>
@@ -50,65 +50,69 @@
       <thead class="thead-dark">
         <tr>
           
-          <th scope="col" style="color: #303FBA;">Heure départ</th>
           <th scope="col" style="color: #303FBA;">Nom du contrat</th>
-          <th scope="col" style="color: #303FBA;">Infos</th>
-          <th scope="col" style="color: #303FBA;">Heure livraison</th>
+          <th scope="col" style="color: #303FBA;">mode d'envoi</th>
           <th scope="col" style="color: #303FBA;">Livreur</th>
           <th scope="col" style="color: #303FBA;">Aide livreur</th>
           <th scope="col" style="color: #303FBA;">Route</th>
-          <th scope="col" style="color: #303FBA;">Retour traiteur</th>
           <th scope="col" style="color: #303FBA;">lien</th>
 
         </tr>
       </thead>
       <tbody>
-          {% for livraison in livraisons %}
-          {% if livraison.recuperation == recuperation %}
+          {% for livraison in recuperations %}
         <tr>
-          
-          <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
-          <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
-          <td style="background-color: #F1B3DA;"><strong>{{livraison.infodetail}}</strong></td>
-          <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
-          <td style="background-color: #F1B3DA;"><strong>{{livraison.livreur.nom}}</strong></td>
-          <td style="background-color: #F1B3DA;"><strong>{{livraison.aidelivreur}}</strong></td>
-          <td style="background-color: #F1B3DA;"><strong>{{ livraison.route }}</strong></td>
-          {% if livraison.retourtraiteur == retourtraiteur %}
-          <td><strong><i class="fa-solid fa-house-chimney-window fa-xl"></i></strong></td>
-          {%  else %}
-          <td></td>
-          {% endif %}
+          <td ><strong>{{livraison.nom}}</strong></td>
+          <td ><strong>{{livraison.mode_envoi}}</strong></td>
+          <td ><strong>{{livraison.livreur.nom}}</strong></td>
+          <td ><strong>{{livraison.aidelivreur}}</strong></td>
+          <td ><strong>{{ livraison.route }}</strong></td>
           <td><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
         </tr>
-
-          {% else %}
-          <tr>
-          
-            <td><strong>{{ livraison.heure_depart }}</strong></td>
-            <td><strong>{{livraison.nom}}</strong></td>
-            <td><strong>{{livraison.infodetail}}</strong></td>
-            <td><strong>{{ livraison.heure_livraison }}</strong></td>
-            <td><strong>{{livraison.livreur.nom}}</strong></td>
-            <td><strong>{{livraison.aidelivreur}}</strong></td>
-            <td><strong>{{ livraison.route }}</strong></td>
-            {% if livraison.retourtraiteur == retourtraiteur %}
-          <td><strong><i class="fa-solid fa-house-chimney-window fa-xl"></i></strong></td>
-          {%  else %}
-          <td></td>
-          {% endif %}
-            <td><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
-          </tr>
-          {% endif %}
         {% endfor %}
         
       </tbody>
     </table>
   </div>
+
   
   <br>
   <br>
   <br>
+
+  <h1 style="text-align: center;">Récuperations en cours (au TOTAL)</h1> <h1 style="text-align: center;"> {{journees}} </h1>
+  <br>
+  <br>
+  <br>
+  <br>
+  <table class="table table-striped">
+      <thead class="thead-dark">
+        <tr>
+          
+          <th scope="col" style="color: #303FBA;">Nom du contrat</th>
+          <th scope="col" style="color: #303FBA;">mode d'envoi</th>
+          <th scope="col" style="color: #303FBA;">Livreur</th>
+          <th scope="col" style="color: #303FBA;">Aide livreur</th>
+          <th scope="col" style="color: #303FBA;">Route</th>
+          <th scope="col" style="color: #303FBA;">lien</th>
+
+        </tr>
+      </thead>
+      <tbody>
+          {% for livraison in recupsencours %}
+        <tr>
+          <td ><strong>{{livraison.nom}}</strong></td>
+          <td ><strong>{{livraison.mode_envoi}}</strong></td>
+          <td ><strong>{{livraison.livreur.nom}}</strong></td>
+          <td ><strong>{{livraison.aidelivreur}}</strong></td>
+          <td ><strong>{{ livraison.route }}</strong></td>
+          <td><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+        </tr>
+        {% endfor %}
+        
+      </tbody>
+    </table>
+  </div>
   
       
   

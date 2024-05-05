@@ -34,6 +34,8 @@ path('livraisonsresp/', views.livraisonsresp, name='livraisonsresp'),
 path('livraisonshier/', views.livraisonshier, name='livraisonshier'),
 path('geocoding/<int:pk>/', GeocodingView.as_view(), name='geocoding'),
 path('geocodingtoday/<int:pk>/', GeocodingTodayView.as_view(), name='geocodingtoday'),
+path('recuptoday/', views.recuptoday, name='recuptoday'),
+
 
 path('livraisonrespdetail/<int:ip>/', views.livraisonrespdetail, name='livraisonrespdetail'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

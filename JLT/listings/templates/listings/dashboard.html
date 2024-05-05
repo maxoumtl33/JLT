@@ -42,9 +42,7 @@
 
   <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
 </nav>
-<br>
-<br>
-<br>
+
 <div style="text-align: center;">
     <h1>Dashboard {{ livreur.nom }}</h1>
     <h2>{{journee}}</h2>
@@ -52,187 +50,926 @@
     <br>
 </div>
 <br>
-
-<div class="row row-cols-1 row-cols-md-2 g-4">
-  <div class="col">
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">Total livraisons validées</h5>
-        <p class="card-text">{{livraisonstatusok|length}} / {{livraison|length}}</p>
-      </div>
-    </div>
-  </div>
-  <div class="col">
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">Total récupérations validées</h5>
-        <p class="card-text">{{recuperationok|length}} / {{recuperation|length}}</p>
-      </div>
-    </div>
-  </div>
-</div>
+<ul class="list-group">
+  <li class="list-group-item d-flex justify-content-between align-items-center">
+    Livraisons en cours
+    <span class="badge text-bg-warning rounded-pill">{{livraisonstatusko|length}}</span>
+  </li>
+  <li class="list-group-item d-flex justify-content-between align-items-center">
+    Livraisons validées
+    <span class="badge text-bg-success rounded-pill">{{livraisonstatusok|length}}</span>
+  </li>
+  <hr>
+  <li class="list-group-item d-flex justify-content-between align-items-center">
+    Récupérations en cours
+    <span class="badge text-bg-warning rounded-pill">{{recuperationko|length}}</span>
+  </li>
+  <li class="list-group-item d-flex justify-content-between align-items-center">
+    Récupérations validées
+    <span class="badge text-bg-success rounded-pill">{{recuperationok|length}}</span>
+  </li>
+</ul>
 <br>
 <br>
 <br>
-
-  <br>
-  <h2 style="text-align: center;" id="listlivraisons">EN COURS  <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i>
-</h2>
-  <br>
   
-            
-            <table class="table table-striped">
-              <thead class="thead-dark">
-                <tr>
-                  <th scope="col" style="color: #303FBA;">Heure départ</th>
-                  <th scope="col" style="color: #303FBA;">Nom du contrat</th>
-                  <th scope="col" style="color: #303FBA;">Heure livraison</th>
-                  <th scope="col" style="color: #303FBA;">Route</th>
-                  <th scope="col" style="color: #303FBA;">Retour traiteur</th>
-                  <th scope="col" style="color: #303FBA;">lien</th>
-        
-                </tr>
-              </thead>
-              <tbody>
-                
-                {% for livraison in livraisons %}
-                {% if livraison.date == journee.date and livraison.livreur.nom == livreur.nom and livraison.status == False and livraison.recuperation == recuperations %}
-          
-        
-                <tr>
-                  <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
-                  <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
-                  <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
-                  <td style="background-color: #F1B3DA;"><strong>{{ livraison.route }}</strong></td>
-                  {% if livraison.retourtraiteur == retourtraiteur %}
-                  <td><strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-xl"></i></a></strong></td>
-                  {%  else %}
-          <td></td>
-          {% endif %}
-                  <td><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
-                </tr>
-                {% elif livraison.date == journee.date and livraison.livreur.nom == livreur.nom and livraison.status == False %}
-                <tr>
-                  <td><strong>{{ livraison.heure_depart }}</strong></td>
-                  <td ><strong>{{livraison.nom}}</strong></td>
-                  <td ><strong>{{ livraison.heure_livraison }}</strong></td>
-                  <td ><strong>{{ livraison.route }}</strong></td>
-                  {% if livraison.retourtraiteur == retourtraiteur %}
-                  <td><strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-xl"></i></a></strong></td>
-                  {%  else %}
-                  <td></td>
-                  {% endif %}
-        
-                  <td ><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
-                </tr>
-                
-                  
-                  {% endif %}
-              
-                {% endfor %}
-              </tbody>
-            </table>
-          
-                <br>
-                <br>
 
-  <h2 style="text-align: center;" id="listlivraisons">TERMINÉ  <i class="fa-solid fa-circle-check" style="color: green;"></i></h2>
-  <br>
-  <table class="table table-striped">
-    <thead class="thead-dark">
-      <tr>
-        
-        <th scope="col" style="color: #303FBA;">Heure départ</th>
-        <th scope="col" style="color: #303FBA;">Nom du contrat</th>
-        <th scope="col" style="color: #303FBA;">Heure livraison</th>
-        <th scope="col" style="color: #303FBA;">Route</th>
-        <th scope="col" style="color: #303FBA;">Validé</th>
-        <th scope="col" style="color: #303FBA;">lien</th>
-
-      </tr>
-    </thead>
-    <tbody>
-  {% for livraison in livraisons %}
-  {% if livraison.date == journee.date and livraison.livreur.nom == livreur.nom and livraison.status == True and livraison.recuperation == recuperations %}
-                <tr>
-                  <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
-                  <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
-                  <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
-                  <td style="background-color: #F1B3DA;"><strong>{{ livraison.route }}</strong></td>
-                  <td><strong><i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong></td>
-                  <td><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
-                </tr>
-            {% elif livraison.date == journee.date and livraison.livreur.nom == livreur.nom and livraison.status == True %}
-            <tr>
-              <td><strong>{{ livraison.heure_depart }}</strong></td>
-              <td><strong>{{livraison.nom}}</strong></td>
-              <td><strong>{{ livraison.heure_livraison }}</strong></td>
-              <td><strong>{{ livraison.route }}</strong></td>
-              <td><i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></td>
-              <td><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
-            </tr>
-    
-                
-                {% endif %}
-    
-                
-                {% endfor %}
-              </tbody>
-            </table>
-<br>
-<br>
-<br>
-<br>
-<br>
-    
-
-
-
-<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="offcanvasExampleLabel">Liens Formulaires</h5>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+{% for a in route1 %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+<div class="card" style="background-color: #F1B3DA;">
+  <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+  <div class="card-body text-start">
+    {% if a.status == True %}
+    <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+    {% else %}
+    <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+    {% endif %}
+    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+    <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
-  <div class="offcanvas-body">
-    <div>
-      <p><a class="btn btn-primary" href="https://discord.com/channels/1174091428876533800/1194755233935523952" target="_blank">Photo livraison <i class="fa-brands fa-discord"></i></a></p>
-      <p><a href="https://view.forms.app/loicveyre/jeparsenlivraison" target="_blank" class="btn btn-primary">Départ <i class="fa-solid fa-truck-fast"></i></a></p>
-      <p><a href="https://view.forms.app/loicveyre/jereviensdelivraison" target="_blank" class="btn btn-primary">Retour <i class="fa-sharp fa-solid fa-truck fa-flip-horizontal"></i></a></p>
-      <p><a href="https://oakmnxgj.forms.app/recuplivreurs" target="_blank" class="btn btn-primary">Récup <i class="fa-solid fa-dolly"></i></a>
-      </p>
-      <p><a href="https://oakmnxgj.forms.app/essence" target="_blank" class="btn btn-primary">Essence <i class="fa-solid fa-gas-pump"></i></a>
-      </p>
-    </p>    
-  </div>
-  </div>
+  {% if a.retourtraiteur == retourtraiteur %}
+            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+    {% endif %}
+</a>
+<span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+  {{a.route.nom}}
+</span>
 </div>
 
+{% elif a.livreur.nom == user.username and a.date == today %}
+  <div class="card">
+    <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+    <div class="card-body text-start">
+      {% if a.status == True %}
+      <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+      {% else %}
+      <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+      {% endif %}
+      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+      <p class="card-text">Infos: {{ a.infodetail }}</p>
+    </div>
+    {% if a.retourtraiteur == retourtraiteur %}
+              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+      {% endif %}
+  </a>
+  <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+    {{a.route.nom}}
+  </span>
+  </div>
 
+{% endif %}
+{% endfor %}
+
+
+{% for a in route2 %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+<div class="card" style="background-color: #F1B3DA;">
+  <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+  <div class="card-body text-start">
+    {% if a.status == True %}
+    <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+    {% else %}
+    <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+    {% endif %}
+    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+    <p class="card-text">Infos: {{ a.infodetail }}</p>
+  </div>
+  {% if a.retourtraiteur == retourtraiteur %}
+            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+    {% endif %}
+</a>
+<span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+  {{a.route.nom}}
+</span>
+</div>
+
+{% elif a.livreur.nom == user.username and a.date == today %}
+  <div class="card">
+    <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+    <div class="card-body text-start">
+      {% if a.status == True %}
+      <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+      {% else %}
+      <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+      {% endif %}
+      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+      <p class="card-text">Infos: {{ a.infodetail }}</p>
+    </div>
+    {% if a.retourtraiteur == retourtraiteur %}
+              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+      {% endif %}
+  </a>
+  <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+    {{a.route.nom}}
+  </span>
+  </div>
+
+{% endif %}
+{% endfor %}
+{% for a in route3 %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+<div class="card" style="background-color: #F1B3DA;">
+  <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+  <div class="card-body text-start">
+    {% if a.status == True %}
+    <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+    {% else %}
+    <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+    {% endif %}
+    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+    <p class="card-text">Infos: {{ a.infodetail }}</p>
+  </div>
+  {% if a.retourtraiteur == retourtraiteur %}
+            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+    {% endif %}
+</a>
+<span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+  {{a.route.nom}}
+</span>
+</div>
+
+{% elif a.livreur.nom == user.username and a.date == today %}
+  <div class="card">
+    <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+    <div class="card-body text-start">
+      {% if a.status == True %}
+      <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+      {% else %}
+      <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+      {% endif %}
+      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+      <p class="card-text">Infos: {{ a.infodetail }}</p>
+    </div>
+    {% if a.retourtraiteur == retourtraiteur %}
+              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+      {% endif %}
+  </a>
+  <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+    {{a.route.nom}}
+  </span>
+  </div>
+
+{% endif %}
+{% endfor %}
+{% for a in route4 %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+<div class="card" style="background-color: #F1B3DA;">
+  <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+  <div class="card-body text-start">
+    {% if a.status == True %}
+    <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+    {% else %}
+    <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+    {% endif %}
+    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+    <p class="card-text">Infos: {{ a.infodetail }}</p>
+  </div>
+  {% if a.retourtraiteur == retourtraiteur %}
+            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+    {% endif %}
+</a>
+<span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+  {{a.route.nom}}
+</span>
+</div>
+
+{% elif a.livreur.nom == user.username and a.date == today %}
+  <div class="card">
+    <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+    <div class="card-body text-start">
+      {% if a.status == True %}
+      <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+      {% else %}
+      <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+      {% endif %}
+      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+      <p class="card-text">Infos: {{ a.infodetail }}</p>
+    </div>
+    {% if a.retourtraiteur == retourtraiteur %}
+              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+      {% endif %}
+  </a>
+  <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+    {{a.route.nom}}
+  </span>
+  </div>
+
+{% endif %}
+{% endfor %}
+{% for a in route5 %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+<div class="card" style="background-color: #F1B3DA;">
+  <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+  <div class="card-body text-start">
+    {% if a.status == True %}
+    <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+    {% else %}
+    <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+    {% endif %}
+    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+    <p class="card-text">Infos: {{ a.infodetail }}</p>
+  </div>
+  {% if a.retourtraiteur == retourtraiteur %}
+            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+    {% endif %}
+</a>
+<span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+  {{a.route.nom}}
+</span>
+</div>
+
+{% elif a.livreur.nom == user.username and a.date == today %}
+  <div class="card">
+    <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+    <div class="card-body text-start">
+      {% if a.status == True %}
+      <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+      {% else %}
+      <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+      {% endif %}
+      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+      <p class="card-text">Infos: {{ a.infodetail }}</p>
+    </div>
+    {% if a.retourtraiteur == retourtraiteur %}
+              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+      {% endif %}
+  </a>
+  <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+    {{a.route.nom}}
+  </span>
+  </div>
+
+{% endif %}
+{% endfor %}
+{% for a in route6 %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+<div class="card" style="background-color: #F1B3DA;">
+  <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+  <div class="card-body text-start">
+    {% if a.status == True %}
+    <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+    {% else %}
+    <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+    {% endif %}
+    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+    <p class="card-text">Infos: {{ a.infodetail }}</p>
+  </div>
+  {% if a.retourtraiteur == retourtraiteur %}
+            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+    {% endif %}
+</a>
+<span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+  {{a.route.nom}}
+</span>
+</div>
+
+{% elif a.livreur.nom == user.username and a.date == today %}
+  <div class="card">
+    <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+    <div class="card-body text-start">
+      {% if a.status == True %}
+      <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+      {% else %}
+      <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+      {% endif %}
+      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+      <p class="card-text">Infos: {{ a.infodetail }}</p>
+    </div>
+    {% if a.retourtraiteur == retourtraiteur %}
+              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+      {% endif %}
+  </a>
+  <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+    {{a.route.nom}}
+  </span>
+  </div>
+
+{% endif %}
+{% endfor %}
+{% for a in route7 %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+<div class="card" style="background-color: #F1B3DA;">
+  <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+  <div class="card-body text-start">
+    {% if a.status == True %}
+    <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+    {% else %}
+    <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+    {% endif %}
+    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+    <p class="card-text">Infos: {{ a.infodetail }}</p>
+  </div>
+  {% if a.retourtraiteur == retourtraiteur %}
+            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+    {% endif %}
+</a>
+<span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+  {{a.route.nom}}
+</span>
+</div>
+
+{% elif a.livreur.nom == user.username and a.date == today %}
+  <div class="card">
+    <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+    <div class="card-body text-start">
+      {% if a.status == True %}
+      <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+      {% else %}
+      <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+      {% endif %}
+      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+      <p class="card-text">Infos: {{ a.infodetail }}</p>
+    </div>
+    {% if a.retourtraiteur == retourtraiteur %}
+              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+      {% endif %}
+  </a>
+  <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+    {{a.route.nom}}
+  </span>
+  </div>
+
+{% endif %}
+{% endfor %}
+{% for a in route8 %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+<div class="card" style="background-color: #F1B3DA;">
+  <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+  <div class="card-body text-start">
+    {% if a.status == True %}
+    <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+    {% else %}
+    <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+    {% endif %}
+    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+    <p class="card-text">Infos: {{ a.infodetail }}</p>
+  </div>
+  {% if a.retourtraiteur == retourtraiteur %}
+            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+    {% endif %}
+</a>
+<span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+  {{a.route.nom}}
+</span>
+</div>
+
+{% elif a.livreur.nom == user.username and a.date == today %}
+  <div class="card">
+    <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+    <div class="card-body text-start">
+      {% if a.status == True %}
+      <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+      {% else %}
+      <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+      {% endif %}
+      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+      <p class="card-text">Infos: {{ a.infodetail }}</p>
+    </div>
+    {% if a.retourtraiteur == retourtraiteur %}
+              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+      {% endif %}
+  </a>
+  <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+    {{a.route.nom}}
+  </span>
+  </div>
+
+{% endif %}
+{% endfor %}
+{% for a in route9 %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+<div class="card" style="background-color: #F1B3DA;">
+  <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+  <div class="card-body text-start">
+    {% if a.status == True %}
+    <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+    {% else %}
+    <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+    {% endif %}
+    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+    <p class="card-text">Infos: {{ a.infodetail }}</p>
+  </div>
+  {% if a.retourtraiteur == retourtraiteur %}
+            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+    {% endif %}
+</a>
+<span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+  {{a.route.nom}}
+</span>
+</div>
+
+{% elif a.livreur.nom == user.username and a.date == today %}
+  <div class="card">
+    <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+    <div class="card-body text-start">
+      {% if a.status == True %}
+      <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+      {% else %}
+      <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+      {% endif %}
+      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+      <p class="card-text">Infos: {{ a.infodetail }}</p>
+    </div>
+    {% if a.retourtraiteur == retourtraiteur %}
+              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+      {% endif %}
+  </a>
+  <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+    {{a.route.nom}}
+  </span>
+  </div>
+
+{% endif %}
+{% endfor %}
+{% for a in route10 %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+<div class="card" style="background-color: #F1B3DA;">
+  <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+  <div class="card-body text-start">
+    {% if a.status == True %}
+    <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+    {% else %}
+    <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+    {% endif %}
+    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+    <p class="card-text">Infos: {{ a.infodetail }}</p>
+  </div>
+  {% if a.retourtraiteur == retourtraiteur %}
+            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+    {% endif %}
+</a>
+<span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+  {{a.route.nom}}
+</span>
+</div>
+
+{% elif a.livreur.nom == user.username and a.date == today %}
+  <div class="card">
+    <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+    <div class="card-body text-start">
+      {% if a.status == True %}
+      <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+      {% else %}
+      <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+      {% endif %}
+      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+      <p class="card-text">Infos: {{ a.infodetail }}</p>
+    </div>
+    {% if a.retourtraiteur == retourtraiteur %}
+              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+      {% endif %}
+  </a>
+  <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+    {{a.route.nom}}
+  </span>
+  </div>
+
+{% endif %}
+{% endfor %}
+{% for a in route11 %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+<div class="card" style="background-color: #F1B3DA;">
+  <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+  <div class="card-body text-start">
+    {% if a.status == True %}
+    <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+    {% else %}
+    <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+    {% endif %}
+    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+    <p class="card-text">Infos: {{ a.infodetail }}</p>
+  </div>
+  {% if a.retourtraiteur == retourtraiteur %}
+            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+    {% endif %}
+</a>
+<span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+  {{a.route.nom}}
+</span>
+</div>
+
+{% elif a.livreur.nom == user.username and a.date == today %}
+  <div class="card">
+    <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+    <div class="card-body text-start">
+      {% if a.status == True %}
+      <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+      {% else %}
+      <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+      {% endif %}
+      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+      <p class="card-text">Infos: {{ a.infodetail }}</p>
+    </div>
+    {% if a.retourtraiteur == retourtraiteur %}
+              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+      {% endif %}
+  </a>
+  <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+    {{a.route.nom}}
+  </span>
+  </div>
+
+{% endif %}
+{% endfor %}
+{% for a in route12 %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+<div class="card" style="background-color: #F1B3DA;">
+  <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+  <div class="card-body text-start">
+    {% if a.status == True %}
+    <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+    {% else %}
+    <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+    {% endif %}
+    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+    <p class="card-text">Infos: {{ a.infodetail }}</p>
+  </div>
+  {% if a.retourtraiteur == retourtraiteur %}
+            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+    {% endif %}
+</a>
+<span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+  {{a.route.nom}}
+</span>
+</div>
+
+{% elif a.livreur.nom == user.username and a.date == today %}
+  <div class="card">
+    <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+    <div class="card-body text-start">
+      {% if a.status == True %}
+      <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+      {% else %}
+      <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+      {% endif %}
+      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+      <p class="card-text">Infos: {{ a.infodetail }}</p>
+    </div>
+    {% if a.retourtraiteur == retourtraiteur %}
+              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+      {% endif %}
+  </a>
+  <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+    {{a.route.nom}}
+  </span>
+  </div>
+
+{% endif %}
+{% endfor %}
+{% for a in route13 %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+<div class="card" style="background-color: #F1B3DA;">
+  <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+  <div class="card-body text-start">
+    {% if a.status == True %}
+    <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+    {% else %}
+    <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+    {% endif %}
+    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+    <p class="card-text">Infos: {{ a.infodetail }}</p>
+  </div>
+  {% if a.retourtraiteur == retourtraiteur %}
+            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+    {% endif %}
+</a>
+<span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+  {{a.route.nom}}
+</span>
+</div>
+
+{% elif a.livreur.nom == user.username and a.date == today %}
+  <div class="card">
+    <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+    <div class="card-body text-start">
+      {% if a.status == True %}
+      <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+      {% else %}
+      <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+      {% endif %}
+      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+      <p class="card-text">Infos: {{ a.infodetail }}</p>
+    </div>
+    {% if a.retourtraiteur == retourtraiteur %}
+              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+      {% endif %}
+  </a>
+  <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+    {{a.route.nom}}
+  </span>
+  </div>
+
+{% endif %}
+{% endfor %}
+{% for a in route14 %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+<div class="card" style="background-color: #F1B3DA;">
+  <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+  <div class="card-body text-start">
+    {% if a.status == True %}
+    <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+    {% else %}
+    <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+    {% endif %}
+    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+    <p class="card-text">Infos: {{ a.infodetail }}</p>
+  </div>
+  {% if a.retourtraiteur == retourtraiteur %}
+            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+    {% endif %}
+</a>
+<span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+  {{a.route.nom}}
+</span>
+</div>
+
+{% elif a.livreur.nom == user.username and a.date == today %}
+  <div class="card">
+    <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+    <div class="card-body text-start">
+      {% if a.status == True %}
+      <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+      {% else %}
+      <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+      {% endif %}
+      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+      <p class="card-text">Infos: {{ a.infodetail }}</p>
+    </div>
+    {% if a.retourtraiteur == retourtraiteur %}
+              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+      {% endif %}
+  </a>
+  <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+    {{a.route.nom}}
+  </span>
+  </div>
+
+{% endif %}
+{% endfor %}
+{% for a in route15 %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+<div class="card" style="background-color: #F1B3DA;">
+  <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+  <div class="card-body text-start">
+    {% if a.status == True %}
+    <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+    {% else %}
+    <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+    {% endif %}
+    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+    <p class="card-text">Infos: {{ a.infodetail }}</p>
+  </div>
+  {% if a.retourtraiteur == retourtraiteur %}
+            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+    {% endif %}
+</a>
+<span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+  {{a.route.nom}}
+</span>
+</div>
+
+{% elif a.livreur.nom == user.username and a.date == today %}
+  <div class="card">
+    <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+    <div class="card-body text-start">
+      {% if a.status == True %}
+      <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+      {% else %}
+      <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+      {% endif %}
+      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+      <p class="card-text">Infos: {{ a.infodetail }}</p>
+    </div>
+    {% if a.retourtraiteur == retourtraiteur %}
+              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+      {% endif %}
+  </a>
+  <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+    {{a.route.nom}}
+  </span>
+  </div>
+
+{% endif %}
+{% endfor %}
+{% for a in route17 %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+<div class="card" style="background-color: #F1B3DA;">
+  <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+  <div class="card-body text-start">
+    {% if a.status == True %}
+    <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+    {% else %}
+    <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+    {% endif %}
+    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+    <p class="card-text">Infos: {{ a.infodetail }}</p>
+  </div>
+  {% if a.retourtraiteur == retourtraiteur %}
+            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+    {% endif %}
+</a>
+<span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+  {{a.route.nom}}
+</span>
+</div>
+
+{% elif a.livreur.nom == user.username and a.date == today %}
+  <div class="card">
+    <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+    <div class="card-body text-start">
+      {% if a.status == True %}
+      <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+      {% else %}
+      <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+      {% endif %}
+      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+      <p class="card-text">Infos: {{ a.infodetail }}</p>
+    </div>
+    {% if a.retourtraiteur == retourtraiteur %}
+              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+      {% endif %}
+  </a>
+  <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+    {{a.route.nom}}
+  </span>
+  </div>
+
+{% endif %}
+{% endfor %}
+{% for a in route18 %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+<div class="card" style="background-color: #F1B3DA;">
+  <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+  <div class="card-body text-start">
+    {% if a.status == True %}
+    <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+    {% else %}
+    <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+    {% endif %}
+    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+    <p class="card-text">Infos: {{ a.infodetail }}</p>
+  </div>
+  {% if a.retourtraiteur == retourtraiteur %}
+            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+    {% endif %}
+</a>
+<span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+  {{a.route.nom}}
+</span>
+</div>
+
+{% elif a.livreur.nom == user.username and a.date == today %}
+  <div class="card">
+    <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+    <div class="card-body text-start">
+      {% if a.status == True %}
+      <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+      {% else %}
+      <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+      {% endif %}
+      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+      <p class="card-text">Infos: {{ a.infodetail }}</p>
+    </div>
+    {% if a.retourtraiteur == retourtraiteur %}
+              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+      {% endif %}
+  </a>
+  <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+    {{a.route.nom}}
+  </span>
+  </div>
+
+{% endif %}
+{% endfor %}
+{% for a in route19 %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+<div class="card" style="background-color: #F1B3DA;">
+  <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+  <div class="card-body text-start">
+    {% if a.status == True %}
+    <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+    {% else %}
+    <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+    {% endif %}
+    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+    <p class="card-text">Infos: {{ a.infodetail }}</p>
+  </div>
+  {% if a.retourtraiteur == retourtraiteur %}
+            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+    {% endif %}
+</a>
+<span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+  {{a.route.nom}}
+</span>
+</div>
+
+{% elif a.livreur.nom == user.username and a.date == today %}
+  <div class="card">
+    <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+    <div class="card-body text-start">
+      {% if a.status == True %}
+      <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+      {% else %}
+      <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+      {% endif %}
+      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+      <p class="card-text">Infos: {{ a.infodetail }}</p>
+    </div>
+    {% if a.retourtraiteur == retourtraiteur %}
+              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+      {% endif %}
+  </a>
+  <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+    {{a.route.nom}}
+  </span>
+  </div>
+
+{% endif %}
+{% endfor %}
+{% for a in route20 %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+<div class="card" style="background-color: #F1B3DA;">
+  <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+  <div class="card-body text-start">
+    {% if a.status == True %}
+    <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+    {% else %}
+    <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+    {% endif %}
+    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+    <p class="card-text">Infos: {{ a.infodetail }}</p>
+  </div>
+  {% if a.retourtraiteur == retourtraiteur %}
+            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+    {% endif %}
+</a>
+<span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+  {{a.route.nom}}
+</span>
+</div>
+
+{% elif a.livreur.nom == user.username and a.date == today %}
+  <div class="card">
+    <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
+    <div class="card-body text-start">
+      {% if a.status == True %}
+      <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
+      {% else %}
+      <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
+      {% endif %}
+      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
+      <p class="card-text">Infos: {{ a.infodetail }}</p>
+    </div>
+    {% if a.retourtraiteur == retourtraiteur %}
+              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
+      {% endif %}
+  </a>
+  <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
+    {{a.route.nom}}
+  </span>
+  </div>
+
+{% endif %}
+{% endfor %}
+ <br>
+ <br>
 {% endblock %}
 
-<tr>
-                  
-  <td style="color: #F1B3DA;">{{ livraison.heure_depart }}</td>
-  <td style="color: #F1B3DA;">{{livraison.nom}}</td>
-  <td style="color: #F1B3DA;">{{livraison.commentaire}}</td>
-  <td style="color: #F1B3DA;">{{ livraison.heure_livraison }}</td>
-  <td style="color: #F1B3DA;">{{livraison.aidelivreur}}</td>
-  <td style="color: #F1B3DA;">{{ livraison.route }}</td>
-  <td style="color: #F1B3DA;">oui</td>
-  <td style="color: #F1B3DA;"><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
-
-</tr>
-
-
-                  <tr>
-                  
-                    <td>{{ livraison.heure_depart }}</td>
-                    <td>{{livraison.nom}}</td>
-                    <td>{{livraison.commentaire}}</td>
-                    <td>{{ livraison.heure_livraison }}</td>
-                    <td>{{livraison.aidelivreur}}</td>
-                    <td>{{ livraison.route }}</td>
-                    <td>non</td>
-                    <td><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
-                  
-                  </tr>

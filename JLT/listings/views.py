@@ -117,9 +117,52 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
         recuperationko = Livraison.objects.filter(status=False,recuperation="oui", date=today, livreur = userid)
         livraison = Livraison.objects.filter(date=today,recuperation="non", livreur = userid)
         journee = Journee.objects.get(id=id)
-        recuperations = "oui"
+        recuperation = "oui"
         recuperationo = "non"
         retourtraiteur = "oui"
+        routes1 = Route.objects.get(nom = "1")
+        route1 = routes1.livraisons.all()
+        routes2 = Route.objects.get(nom = "2")
+        route2 = routes2.livraisons.all()
+        routes3 = Route.objects.get(nom = "3")
+        route3 = routes3.livraisons.all()
+        routes4 = Route.objects.get(nom = "4")
+        route4 = routes4.livraisons.all()
+        routes5 = Route.objects.get(nom = "5")
+        route5 = routes5.livraisons.all()
+        routes6 = Route.objects.get(nom = "6")
+        route6 = routes6.livraisons.all()
+        routes7 = Route.objects.get(nom = "7")
+        route7 = routes7.livraisons.all()
+        routes8 = Route.objects.get(nom = "8")
+        route8 = routes8.livraisons.all()
+        routes9 = Route.objects.get(nom = "9")
+        route9 = routes9.livraisons.all()
+        routes10 = Route.objects.get(nom = "10")
+        route10 = routes10.livraisons.all()
+        routes11 = Route.objects.get(nom = "11")
+        route11 = routes11.livraisons.all()
+        routes12 = Route.objects.get(nom = "12")
+        route12 = routes12.livraisons.all()
+        routes13 = Route.objects.get(nom = "13")
+        route13 = routes13.livraisons.all()
+        routes14 = Route.objects.get(nom = "14")
+        route14 = routes14.livraisons.all()
+        routes15 = Route.objects.get(nom = "15")
+        route15 = routes15.livraisons.all()
+        routes16 = Route.objects.get(nom = "16")
+        route16 = routes16.livraisons.all()
+        routes17 = Route.objects.get(nom = "17")
+        route17 = routes17.livraisons.all()
+        routes18 = Route.objects.get(nom = "18")
+        route18 = routes18.livraisons.all()
+        routes19 = Route.objects.get(nom = "19")
+        route19 = routes19.livraisons.all()
+        routes20 = Route.objects.get(nom = "20")
+        route20 = routes20.livraisons.all()
+
+
+        
         
        
         
@@ -132,10 +175,31 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
                                                                 'recuperationok':recuperationok,
                                                                 'recuperationko':recuperationko,
                                                                 'livraison':livraison,
-                                                                'recuperations':recuperations,
+                                                                'recuperation':recuperation,
                                                                 'userid':userid,
                                                                 'recuperationo':recuperationo,
-                                                                'retourtraiteur':retourtraiteur
+                                                                'retourtraiteur':retourtraiteur,
+                                                                'route1':route1,
+                                                                'route2':route2,
+                                                                'route3':route3,
+                                                                'route4':route4,
+                                                                'route5':route5,
+                                                                'route6':route6,
+                                                                'route7':route7,
+                                                                'route8':route8,
+                                                                'route9':route9,
+                                                                'route10':route10,
+                                                                'route11':route11,
+                                                                'route12':route12,
+                                                                'route13':route13,
+                                                                'route14':route14,
+                                                                'route15':route15,
+                                                                'route16':route16,
+                                                                'route17':route17,
+                                                                'route18':route18,
+                                                                'route19':route19,
+                                                                'route20':route20,
+                                                                'today':today,
                                                                 
 
                                                                 
@@ -278,6 +342,7 @@ class MapView(View):
         tomorrow = today + timedelta(1)
         distances = Distances.objects.all()
         routesmatin = ['1','2','3','4']
+        recuperation = "oui"
         routes = Route.objects.filter(nom__in=routesmatin)
         matin = ['05h00', '05h15', '05h30', '05h45', '06h00', '06h15', '06h30', '06h45', '07h00', '07h15', '07h30', '07h45', '08h00','08h15', '08h30', '08h45', '09h00', '09h15', '09h30']
         eligable_locations = Livraison.objects.filter(place_id__isnull=False, heure_livraison__in = matin, date=tomorrow)
@@ -291,6 +356,7 @@ class MapView(View):
                 'nom': a.nom,
                 'heure_livraison': a.heure_livraison,
                 'adress' : a.adress,
+                'recuperation' : a.recuperation,
             }
 
             livraisons.append(data)
@@ -301,6 +367,7 @@ class MapView(View):
                    'distances':distances,
                    'routes':routes,
                    'routesmatin':routesmatin,
+                   'recuperation': recuperation,
 
         }
         return render(request, 'listings/map.html', context)
@@ -930,22 +997,36 @@ def livraisonsresp(request):
     tomorrow = today + timedelta(1)
     livraisonstatusok = Livraison.objects.filter(status=True, date=today,recuperation="non")
     livraisonstatusko = Livraison.objects.filter(status=False, date=today,recuperation="non")
-    recuperation = Livraison.objects.filter(recuperation="oui", date=today)
+    recuperations = Livraison.objects.filter(recuperation="oui", date=today)
     recuperationok = Livraison.objects.filter(recuperation="oui", status=True, date=today)
     recuperationko = Livraison.objects.filter(status=False,recuperation="oui", date=today)
     recuperation = "oui"
+    retourtraiteur = "oui"
     livraison = Livraison.objects.all()
     livraisons = Livraison.objects.order_by('route').filter(date=tomorrow)
     return render(request, 'listings/livraisonsresp.html', context={'livraisons': livraisons,
                                                               
-                                                              'recuperation' : recuperation,
+                                    
                                                               'livraisonstatusok':livraisonstatusok,
                                                               'livraisonstatusko':livraisonstatusko,
-                                                            
+                                                              'retourtraiteur':retourtraiteur,
                                                               'recuperationok':recuperationok,
                                                               'recuperationko':recuperationko,
                                                               'recuperation' : recuperation,
+                                                              'recuperations' : recuperations,
                                                               })
+
+def recuptoday(request):
+    today = datetime.now().date()
+    tomorrow = today + timedelta(1)
+    recups = ["Porcelaine", "Chaud et porcelaine", "Porcelaine et bois", "Plateau de bois"]
+    recuperations = Livraison.objects.filter(recuperation="non", date=today, mode_envoi__in = recups)
+    recupsencours = Livraison.objects.filter(recuperation="oui", status = False)
+    return render(request, 'listings/recuptoday.html', context={
+                                                              'recuperations' : recuperations,
+                                                              'recupsencours' : recupsencours,
+                                                              })
+
 
 def livraisonrespdetail(request, ip):
     today = datetime.now().date()

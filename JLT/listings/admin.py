@@ -15,7 +15,7 @@ from .models import Livraison
 #from listings.models import Route
 
 class LivraisonAdmin(ImportExportModelAdmin):
-    list_display = ('nom', 'date', 'route', 'client', 'heure_livraison')
+    list_display = ('nom', 'date', 'client', 'heure_livraison')
 
 class LivreursAdmin(ImportExportModelAdmin):
     list_display = ('nom')

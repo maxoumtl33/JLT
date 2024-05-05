@@ -29,14 +29,14 @@
             </a> 
           </li>
           {% endif %}
-          {% if livraison.status == False and user.username == livraison.livreur.nom %}
+          {% if livraison.status == False %}
           <li class="nav__item">
             <button type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
               <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i>
               <span>En cours</span>
           </button>  
           </li>
-          {% elif user.username == livraison.livreur.nom %}
+          {% else %}
           <li class="nav__item">
             <button type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
               <i class="fa-solid fa-circle-check" style="color: green;"></i>
@@ -48,10 +48,6 @@
   </div>
   <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
 </nav>
-<br>
-<br>
-<br>
-
 {% if livraison.recuperation == recuperation%}
 <h1 style="text-align: center; color: #F1B3DA;">RECUPERATION {{livraison.nom|upper}}</h1>
   <br>
@@ -77,40 +73,10 @@
           <div class="col">
             <div class="card">
               <div class="card-body">
-                <h5 class="card-title"><strong>N° de commande</strong></h5>
-                <p class="card-text">{{ livraison.num_commande}}</p>
-              </div>
-            </div>
-          </div>
-          <div class="col">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title"><strong>Nombre convives</strong></h5>
-                <p class="card-text">{{ livraison.convives}}</p>
-              </div>
-            </div>
-          </div>
-          <div class="col">
-            <div class="card">
-              <div class="card-body">
                 <h5 class="card-title"><strong>Adresse</strong></h5>
                 <p class="card-text"><a href="https://maps.google.com/?q={{ livraison.adress }}, {{livraison.zipcode}}, {{livraison.city}}" target="_blank">{{ livraison.adress }}, {{livraison.zipcode}}, {{livraison.city}}</a></p>
-              </div>
-            </div>
-          </div>
-          <div class="col">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title"><strong>Route n°</strong></h5>
-                <p class="card-text">{{ livraison.route }}</p>
-              </div>
-            </div>
-          </div>
-          <div class="col">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title"><strong>Heure départ</strong></h5>
-                <p class="card-text">{{ livraison.heure_depart }}</p>
+                <hr>
+                <p class="card-text"><a href="{{livraison.client.adresse_dock}}">Aller au Dock</a></p>
               </div>
             </div>
           </div>
@@ -125,27 +91,19 @@
           <div class="col">
             <div class="card">
               <div class="card-body">
-                <h5 class="card-title"><strong>Mode d'envoi</strong></h5>
-                <p class="card-text">{{ livraison.mode_envoi}}</p>
-              </div>
-            </div>
-          </div>
-          <div class="col">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title"><strong>Checklist</strong></h5>
-                <p class="card-text">{{ livraison.checklist }}</p>
-              </div>
-            </div>
-          </div>
-          <div class="col">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title"><strong>Infos supplemmentaires</strong></h5>
+                <h5 class="card-title" style="color: orange;"><strong>Infos supplementaires</strong></h5>
                 <p class="card-text">{{livraison.infodetail}}</p>
               </div>
             </div>
           </div>
+          <div class="col">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><strong>Commentaire du dispatch</strong></h5>
+                <p class="card-text">{{livraison.commentairedispatch}}</p>
+              </div>
+            </div>
+          </div>  
         <div class="col">
           <div class="card">
             <div class="card-body">
@@ -154,14 +112,36 @@
             </div>
           </div>
         </div>
-        <div class="col">
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title"><strong>Important</strong></h5>
-              <p class="card-text">{{livraison.important}}</p>
+          <div class="col">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><strong>N° de commande</strong></h5>
+                <p class="card-text">{{ livraison.num_commande}}</p>
+              </div>
             </div>
           </div>
-        </div>
+          <div class="col">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><strong>Nombre convives</strong></h5>
+                <p class="card-text">{{ livraison.convives}}</p>
+              </div>
+            </div>
+          </div>
+         
+          
+         
+          
+          <div class="col">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><strong>Mode d'envoi</strong></h5>
+                <p class="card-text">{{ livraison.mode_envoi}}</p>
+              </div>
+            </div>
+          </div>
+          
+        
         
       </li>
       </ul>
@@ -175,24 +155,16 @@
             <div class="col">
               <div class="card">
                 <div class="card-body">
-                  <h5 class="card-title"><strong>Nom</strong></h5>
-                  <p class="card-text">{{livraison.nom_client}}</p>
-                </div>
-              </div>
-            </div>
-            <div class="col">
-              <div class="card">
-                <div class="card-body">
-                  <h5 class="card-title"><strong>Adresse Dock</strong></h5>
-                  <p class="card-text"><a href="{{livraison.client.adresse_dock}}" target="_blank">ici</a></p>
-                </div>
-              </div>
-            </div>
-            <div class="col">
-              <div class="card">
-                <div class="card-body">
-                  <h5 class="card-title"><strong>Contact</strong></h5>
+                  <h5 class="card-title"><strong>Contact client</strong></h5>
                   <p class="card-text">{{livraison.contact_site}}</p>
+                </div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title"><strong>Commandé par</strong></h5>
+                  <p class="card-text">{{livraison.nom_client}}</p>
                 </div>
               </div>
             </div>
