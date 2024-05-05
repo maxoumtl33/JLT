@@ -88,12 +88,16 @@
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
-  {% if a.retourtraiteur == retourtraiteur %}
-            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-    {% endif %}
 </a>
+</div>
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-  {{a.route.nom}}
+  <i class="fa-solid fa-arrow-down"></i>
 </span>
 </div>
 
@@ -110,18 +114,19 @@
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
-    {% if a.retourtraiteur == retourtraiteur %}
-              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-      {% endif %}
   </a>
   <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-    {{a.route.nom}}
+    <i class="fa-solid fa-arrow-down"></i>
   </span>
   </div>
-
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 {% endif %}
 {% endfor %}
-
 
 {% for a in route2 %}
 {% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
@@ -137,12 +142,16 @@
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
-  {% if a.retourtraiteur == retourtraiteur %}
-            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-    {% endif %}
 </a>
+</div>
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-  {{a.route.nom}}
+  <i class="fa-solid fa-arrow-down"></i>
 </span>
 </div>
 
@@ -159,15 +168,17 @@
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
-    {% if a.retourtraiteur == retourtraiteur %}
-              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-      {% endif %}
   </a>
   <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-    {{a.route.nom}}
+    <i class="fa-solid fa-arrow-down"></i>
   </span>
   </div>
-
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 {% endif %}
 {% endfor %}
 {% for a in route3 %}
@@ -184,12 +195,16 @@
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
-  {% if a.retourtraiteur == retourtraiteur %}
-            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-    {% endif %}
 </a>
+</div>
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-  {{a.route.nom}}
+  <i class="fa-solid fa-arrow-down"></i>
 </span>
 </div>
 
@@ -206,15 +221,17 @@
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
-    {% if a.retourtraiteur == retourtraiteur %}
-              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-      {% endif %}
   </a>
   <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-    {{a.route.nom}}
+    <i class="fa-solid fa-arrow-down"></i>
   </span>
   </div>
-
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 {% endif %}
 {% endfor %}
 {% for a in route4 %}
@@ -231,12 +248,16 @@
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
-  {% if a.retourtraiteur == retourtraiteur %}
-            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-    {% endif %}
 </a>
+</div>
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-  {{a.route.nom}}
+  <i class="fa-solid fa-arrow-down"></i>
 </span>
 </div>
 
@@ -253,15 +274,17 @@
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
-    {% if a.retourtraiteur == retourtraiteur %}
-              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-      {% endif %}
   </a>
   <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-    {{a.route.nom}}
+    <i class="fa-solid fa-arrow-down"></i>
   </span>
   </div>
-
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 {% endif %}
 {% endfor %}
 {% for a in route5 %}
@@ -278,12 +301,16 @@
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
-  {% if a.retourtraiteur == retourtraiteur %}
-            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-    {% endif %}
 </a>
+</div>
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-  {{a.route.nom}}
+  <i class="fa-solid fa-arrow-down"></i>
 </span>
 </div>
 
@@ -300,15 +327,17 @@
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
-    {% if a.retourtraiteur == retourtraiteur %}
-              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-      {% endif %}
   </a>
   <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-    {{a.route.nom}}
+    <i class="fa-solid fa-arrow-down"></i>
   </span>
   </div>
-
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 {% endif %}
 {% endfor %}
 {% for a in route6 %}
@@ -325,12 +354,16 @@
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
-  {% if a.retourtraiteur == retourtraiteur %}
-            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-    {% endif %}
 </a>
+</div>
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-  {{a.route.nom}}
+  <i class="fa-solid fa-arrow-down"></i>
 </span>
 </div>
 
@@ -347,15 +380,17 @@
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
-    {% if a.retourtraiteur == retourtraiteur %}
-              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-      {% endif %}
   </a>
   <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-    {{a.route.nom}}
+    <i class="fa-solid fa-arrow-down"></i>
   </span>
   </div>
-
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 {% endif %}
 {% endfor %}
 {% for a in route7 %}
@@ -372,12 +407,16 @@
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
-  {% if a.retourtraiteur == retourtraiteur %}
-            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-    {% endif %}
 </a>
+</div>
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-  {{a.route.nom}}
+  <i class="fa-solid fa-arrow-down"></i>
 </span>
 </div>
 
@@ -394,18 +433,20 @@
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
-    {% if a.retourtraiteur == retourtraiteur %}
-              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-      {% endif %}
   </a>
   <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-    {{a.route.nom}}
+    <i class="fa-solid fa-arrow-down"></i>
   </span>
   </div>
-
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 {% endif %}
 {% endfor %}
-{% for a in route8 %}
+{% for ra in route8 %}
 {% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
@@ -419,12 +460,16 @@
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
-  {% if a.retourtraiteur == retourtraiteur %}
-            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-    {% endif %}
 </a>
+</div>
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-  {{a.route.nom}}
+  <i class="fa-solid fa-arrow-down"></i>
 </span>
 </div>
 
@@ -441,15 +486,17 @@
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
-    {% if a.retourtraiteur == retourtraiteur %}
-              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-      {% endif %}
   </a>
   <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-    {{a.route.nom}}
+    <i class="fa-solid fa-arrow-down"></i>
   </span>
   </div>
-
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 {% endif %}
 {% endfor %}
 {% for a in route9 %}
@@ -466,12 +513,16 @@
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
-  {% if a.retourtraiteur == retourtraiteur %}
-            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-    {% endif %}
 </a>
+</div>
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-  {{a.route.nom}}
+  <i class="fa-solid fa-arrow-down"></i>
 </span>
 </div>
 
@@ -488,15 +539,17 @@
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
-    {% if a.retourtraiteur == retourtraiteur %}
-              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-      {% endif %}
   </a>
   <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-    {{a.route.nom}}
+    <i class="fa-solid fa-arrow-down"></i>
   </span>
   </div>
-
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 {% endif %}
 {% endfor %}
 {% for a in route10 %}
@@ -513,12 +566,16 @@
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
-  {% if a.retourtraiteur == retourtraiteur %}
-            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-    {% endif %}
 </a>
+</div>
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-  {{a.route.nom}}
+  <i class="fa-solid fa-arrow-down"></i>
 </span>
 </div>
 
@@ -535,15 +592,17 @@
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
-    {% if a.retourtraiteur == retourtraiteur %}
-              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-      {% endif %}
   </a>
   <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-    {{a.route.nom}}
+    <i class="fa-solid fa-arrow-down"></i>
   </span>
   </div>
-
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 {% endif %}
 {% endfor %}
 {% for a in route11 %}
@@ -560,12 +619,16 @@
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
-  {% if a.retourtraiteur == retourtraiteur %}
-            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-    {% endif %}
 </a>
+</div>
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-  {{a.route.nom}}
+  <i class="fa-solid fa-arrow-down"></i>
 </span>
 </div>
 
@@ -582,15 +645,17 @@
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
-    {% if a.retourtraiteur == retourtraiteur %}
-              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-      {% endif %}
   </a>
   <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-    {{a.route.nom}}
+    <i class="fa-solid fa-arrow-down"></i>
   </span>
   </div>
-
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 {% endif %}
 {% endfor %}
 {% for a in route12 %}
@@ -607,12 +672,16 @@
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
-  {% if a.retourtraiteur == retourtraiteur %}
-            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-    {% endif %}
 </a>
+</div>
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-  {{a.route.nom}}
+  <i class="fa-solid fa-arrow-down"></i>
 </span>
 </div>
 
@@ -629,15 +698,17 @@
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
-    {% if a.retourtraiteur == retourtraiteur %}
-              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-      {% endif %}
   </a>
   <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-    {{a.route.nom}}
+    <i class="fa-solid fa-arrow-down"></i>
   </span>
   </div>
-
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 {% endif %}
 {% endfor %}
 {% for a in route13 %}
@@ -654,12 +725,16 @@
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
-  {% if a.retourtraiteur == retourtraiteur %}
-            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-    {% endif %}
 </a>
+</div>
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-  {{a.route.nom}}
+  <i class="fa-solid fa-arrow-down"></i>
 </span>
 </div>
 
@@ -676,15 +751,17 @@
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
-    {% if a.retourtraiteur == retourtraiteur %}
-              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-      {% endif %}
   </a>
   <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-    {{a.route.nom}}
+    <i class="fa-solid fa-arrow-down"></i>
   </span>
   </div>
-
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 {% endif %}
 {% endfor %}
 {% for a in route14 %}
@@ -701,12 +778,16 @@
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
-  {% if a.retourtraiteur == retourtraiteur %}
-            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-    {% endif %}
 </a>
+</div>
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-  {{a.route.nom}}
+  <i class="fa-solid fa-arrow-down"></i>
 </span>
 </div>
 
@@ -723,15 +804,17 @@
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
-    {% if a.retourtraiteur == retourtraiteur %}
-              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-      {% endif %}
   </a>
   <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-    {{a.route.nom}}
+    <i class="fa-solid fa-arrow-down"></i>
   </span>
   </div>
-
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 {% endif %}
 {% endfor %}
 {% for a in route15 %}
@@ -748,12 +831,16 @@
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
-  {% if a.retourtraiteur == retourtraiteur %}
-            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-    {% endif %}
 </a>
+</div>
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-  {{a.route.nom}}
+  <i class="fa-solid fa-arrow-down"></i>
 </span>
 </div>
 
@@ -770,15 +857,17 @@
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
-    {% if a.retourtraiteur == retourtraiteur %}
-              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-      {% endif %}
   </a>
   <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-    {{a.route.nom}}
+    <i class="fa-solid fa-arrow-down"></i>
   </span>
   </div>
-
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 {% endif %}
 {% endfor %}
 {% for a in route17 %}
@@ -795,12 +884,16 @@
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
-  {% if a.retourtraiteur == retourtraiteur %}
-            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-    {% endif %}
 </a>
+</div>
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-  {{a.route.nom}}
+  <i class="fa-solid fa-arrow-down"></i>
 </span>
 </div>
 
@@ -817,15 +910,17 @@
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
-    {% if a.retourtraiteur == retourtraiteur %}
-              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-      {% endif %}
   </a>
   <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-    {{a.route.nom}}
+    <i class="fa-solid fa-arrow-down"></i>
   </span>
   </div>
-
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 {% endif %}
 {% endfor %}
 {% for a in route18 %}
@@ -842,12 +937,16 @@
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
-  {% if a.retourtraiteur == retourtraiteur %}
-            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-    {% endif %}
 </a>
+</div>
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-  {{a.route.nom}}
+  <i class="fa-solid fa-arrow-down"></i>
 </span>
 </div>
 
@@ -864,15 +963,17 @@
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
-    {% if a.retourtraiteur == retourtraiteur %}
-              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-      {% endif %}
   </a>
   <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-    {{a.route.nom}}
+    <i class="fa-solid fa-arrow-down"></i>
   </span>
   </div>
-
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 {% endif %}
 {% endfor %}
 {% for a in route19 %}
@@ -889,12 +990,16 @@
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
-  {% if a.retourtraiteur == retourtraiteur %}
-            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-    {% endif %}
 </a>
+</div>
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-  {{a.route.nom}}
+  <i class="fa-solid fa-arrow-down"></i>
 </span>
 </div>
 
@@ -911,15 +1016,17 @@
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
-    {% if a.retourtraiteur == retourtraiteur %}
-              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-      {% endif %}
   </a>
   <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-    {{a.route.nom}}
+    <i class="fa-solid fa-arrow-down"></i>
   </span>
   </div>
-
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 {% endif %}
 {% endfor %}
 {% for a in route20 %}
@@ -936,12 +1043,16 @@
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
-  {% if a.retourtraiteur == retourtraiteur %}
-            <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-    {% endif %}
 </a>
+</div>
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-  {{a.route.nom}}
+  <i class="fa-solid fa-arrow-down"></i>
 </span>
 </div>
 
@@ -958,15 +1069,17 @@
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
-    {% if a.retourtraiteur == retourtraiteur %}
-              <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong></td>
-      {% endif %}
   </a>
   <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-    {{a.route.nom}}
+    <i class="fa-solid fa-arrow-down"></i>
   </span>
   </div>
-
+  {% if a.retourtraiteur == retourtraiteur %}
+  <div style="text-align: center; background-color: black;">
+  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
+  </div>
+  <br>
+{% endif %}
 {% endif %}
 {% endfor %}
  <br>
