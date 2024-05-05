@@ -66,7 +66,16 @@ class Livraison(models.Model):
          ('non', 'non'))
     choicesaide = (
          ('Osnel', 'Osnel'),
-         ('Aucun', 'Aucun'))
+         ('Jef', 'Jef'),
+         ('Loic', 'Loic'),
+         ('Maxime', 'Maxime'),
+         ('Mohammad', 'Mohammad'),
+         ('Samuel', 'Samuel'),
+         ('Anthonny', 'Anthonny'),
+         ('Bruno', 'Bruno'),
+         ('Dany', 'Dany'),
+         ('Rooseph', 'Rooseph'),
+         ('Aucun', 'Aucun'),)
     choiceheures = (
          ('.', '.'),
          ('06h00', '06h00'),
