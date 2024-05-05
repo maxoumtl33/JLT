@@ -176,7 +176,7 @@
         );
 
         livraisons.forEach(function (livraison){
-            var markerinfos = livraison.nom + "/" +livraison.heure_livraison
+            var markerinfos = livraison.nom + "/" + livraison.heure_livraison + "/" + livraison.mode_envoi + "/" + livraison.convives
             var marker = new google.maps.Marker({
                 position: {lat: livraison.lat, lng: livraison.lng}, 
                 map: map, 

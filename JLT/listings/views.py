@@ -356,7 +356,10 @@ class MapView(View):
                 'nom': a.nom,
                 'heure_livraison': a.heure_livraison,
                 'adress' : a.adress,
+                'convives': a.convives,
+                'mode_envoi': a.mode_envoi,
                 'recuperation' : a.recuperation,
+                'infodetail': a.infodetail
             }
 
             livraisons.append(data)
@@ -439,6 +442,9 @@ class MapMidiView(View):
                 'place_id': a.place_id,
                 'nom': a.nom,
                 'heure_livraison': a.heure_livraison,
+                'adress' : a.adress,
+                'convives': a.convives,
+                'mode_envoi': a.mode_envoi,
                 'recuperation' : a.recuperation,
                 'infodetail': a.infodetail
             }
@@ -521,8 +527,9 @@ class MapApremView(View):
                 'place_id': a.place_id,
                 'nom': a.nom,
                 'heure_livraison': a.heure_livraison,
-                'convives' : a.convives,
-                'mode_envoi' : a.mode_envoi,
+                'adress' : a.adress,
+                'convives': a.convives,
+                'mode_envoi': a.mode_envoi,
                 'recuperation' : a.recuperation,
                 'infodetail': a.infodetail
             }
