@@ -1,0 +1,18 @@
+<h1>{{ livraison.nom }}</h1>
+<p>{{ livraison.route }}</p>
+<p>{{ livraison.livreur }}</p>
+<p>{{ livraison.aidelivreur }}</p>
+<p>{{ livraison.commentairedispatch }}</p>
+<p>{{ livraison.infodetail }}</p>
+
+
+
+
+
+
+<button class="btn btn-primary"
+    hx-get="{% url 'livraison-edit-formtoday' livraison.id %}"
+    hx-target="#livraison-detailstoday">Edit</button>
+
+
+    

@@ -66,6 +66,7 @@
     <li>      <a href="{% url 'livraisonstoday' %}" class="dropdown-item">Carte</a>    
     </li>
     <li><a href="{% url 'recuptoday'%}" class="dropdown-item">Récups</a> </li>
+    <li><a href="{% url 'livraisonsdragtoday' %}" class="dropdown-item">Classer et modifier</a></li>
   </ul>
 </div>
 
@@ -78,6 +79,7 @@
     </li>
     <li>  <a href="{% url 'livraisonstomorrow' %}" class="dropdown-item">Carte</a>    
     </li>
+    <li><a href="{% url 'livraisonsdrag'%}" class="dropdown-item">Classer et modifier</a> </li>
     
   </ul>
 </div>
@@ -99,7 +101,6 @@
 <p>Nom : {{ livreur.nom }} / id: {{ livreur.id }}</p>
 {% endfor %}
 
-   
   
 
 

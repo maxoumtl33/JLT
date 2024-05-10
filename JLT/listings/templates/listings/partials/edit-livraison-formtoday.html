@@ -1,0 +1,14 @@
+
+<form hx-put="{% url 'livraisonsdrag-detailtoday' livraison.id %}" hx-target="#livraison-detailstoday">
+    {% csrf_token %}
+
+        {% for fields in form %}
+        {{ fields }}
+
+        {% endfor %}
+        <button type="submit" class="btn btn-outline-primary">valider</button>
+      </form>
+   
+
+    
+</form>

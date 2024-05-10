@@ -125,7 +125,7 @@
               <tbody>
                 
                 {% for livraison in livraisons %}
-                {% if livraison.date == journee.date and livraison.status == False and livraison.recuperation == recuperations %}
+                {% if livraison.date == journee.date and livraison.status == False and livraison.recuperation == True %}
           
         
                 <tr>
@@ -187,7 +187,7 @@
     </thead>
     <tbody>
   {% for livraison in livraisons %}
-  {% if livraison.date == journee.date and livraison.status == True and livraison.recuperation == recuperations %}
+  {% if livraison.date == journee.date and livraison.status == True and livraison.recuperation == True %}
           
         
   <tr>

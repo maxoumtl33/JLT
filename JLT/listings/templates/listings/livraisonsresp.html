@@ -64,7 +64,7 @@
       </thead>
       <tbody>
           {% for livraison in livraisons %}
-          {% if livraison.recuperation == recuperation %}
+          {% if livraison.recuperation == True %}
         <tr>
           
           <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>

@@ -50,3 +50,13 @@ class DistanceFormAprem(ModelForm):
         exclude = ['created_at', 'edited_at','distance_km', 'duration_mins','duration_traffic_mins']
 
 
+class LivraisonDragForm(forms.ModelForm):
+    class Meta:
+        model = Livraison
+        fields = ('heure_depart', 'nom', 'infodetail','heure_livraison',  'livreur', 'aidelivreur', 'route', 'commentairedispatch', 'recuperation', 'retourtraiteur')
+
+class LivraisonDragFormtoday(forms.ModelForm):
+    class Meta:
+        model = Livraison
+        fields = ('heure_depart', 'nom', 'infodetail',  'livreur', 'aidelivreur', 'route', 'commentairedispatch', 'recuperation', 'retourtraiteur')
+        

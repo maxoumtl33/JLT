@@ -5,12 +5,14 @@ from .models import Livreur
 from .models import Tacheafaire
 from .models import Journee
 from .models import Route
-
+from django.views.generic.list import ListView
 from .models import Distances
 from .models import User
 from django.shortcuts import get_object_or_404
 from .forms import LivraisonForm
 from .forms import LivraisonFeuilleForm
+from .forms import LivraisonDragForm
+from .forms import LivraisonDragFormtoday
 import json
 from .forms import DistanceForm
 from tablib import Dataset
@@ -19,12 +21,26 @@ from django.utils.timezone import now
 from datetime import datetime, timedelta, time
 from .models import Recuperation
 import googlemaps
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .utils import get_max_order, reorder
 from django.conf import settings
 from django.views import View
 from datetime import datetime
 from django.views.decorators.http import require_POST
+from django.http import QueryDict
+from django.shortcuts import render, get_object_or_404
 
 from django.http import FileResponse, HttpResponseRedirect, HttpResponse
+
+@csrf_exempt
+def save_positions(request):
+    if request.method == 'POST':
+        positions = json.loads(request.POST['positions'])
+        for position, livraison_id in enumerate(positions):
+            Livraison.objects.filter(id=livraison_id).update(position=position)
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False})
 
 
 def home(request):
@@ -62,10 +78,11 @@ def recuperation_detail(request, id):  # notez le paramètre id supplémentaire
 def journee_detail(request, id):  # notez le paramètre id supplémentaire
    journees = Journee.objects.get(id=id)
    livreurs = Livreur.objects.all()
-   livraisonsroute  = Livraison.objects.order_by('route')
+   livraisonsroute  = Livraison.objects.order_by('position')
    today = now().date()
-   livraisons = Livraison.objects.order_by('route').filter(date=today)
-   recuperations = Livraison.objects.filter(recuperation="oui",date=today)
+   livraisons = Livraison.objects.order_by('position').filter(date=today)
+   livraisonsok = Livraison.objects.filter(recuperation=False,date=today)
+   recuperations = Livraison.objects.filter(recuperation=True, date=today)   
    retourtraiteur = "oui"
    retourtraiteurno = "non"
    recuperation = "oui"
@@ -76,7 +93,7 @@ def journee_detail(request, id):  # notez le paramètre id supplémentaire
    
    return render(request,
           'listings/journee_detail.html',
-          context={'journees': journees ,'livraisonsroute': livraisonsroute, 'livreurs':livreurs, 'recuperations' : recuperations,'retourtraiteur' : retourtraiteur,'recuperation' : recuperation,'retourtraiteurno': retourtraiteurno,'livraisons' : livraisons, 'recuperationo':recuperationo, 'loic':loic, 'maxime':maxime, 'rien':rien, 'recuperations':recuperations }) # nous passons l'id au modèle
+          context={'journees': journees ,'livraisonsroute': livraisonsroute, 'livreurs':livreurs, 'recuperations':recuperations,'retourtraiteur' : retourtraiteur,'recuperation' : recuperation,'retourtraiteurno': retourtraiteurno,'livraisons' : livraisons, 'recuperationo':recuperationo, 'loic':loic, 'maxime':maxime, 'rien':rien, 'recuperations':recuperation, 'livraisonsok':livraisonsok, }) # nous passons l'id au modèle
 
 
 def livreur_list(request):
@@ -109,13 +126,13 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
         livreur = Livreur.objects.get(user_id= pk)
         userid = livreur.id
         today = now().date()
-        livraisons  = Livraison.objects.order_by('route').filter(date=today)
-        livraisonstatusok = Livraison.objects.filter(status=True, date=today,recuperation="non", livreur = userid)
-        livraisonstatusko = Livraison.objects.filter(status=False, date=today,recuperation="non", livreur = userid)
-        recuperation = Livraison.objects.filter(recuperation="oui", date=today, livreur = userid)
-        recuperationok = Livraison.objects.filter(recuperation="oui", status=True, date=today, livreur = userid)
-        recuperationko = Livraison.objects.filter(status=False,recuperation="oui", date=today, livreur = userid)
-        livraison = Livraison.objects.filter(date=today,recuperation="non", livreur = userid)
+        livraisons  = Livraison.objects.order_by('position').filter(date=today)
+        livraisonstatusok = Livraison.objects.filter(status=True, date=today,recuperation=False, livreur = userid)
+        livraisonstatusko = Livraison.objects.filter(status=False, date=today,recuperation=False, livreur = userid)
+        recuperation = Livraison.objects.filter(recuperation=True, date=today, livreur = userid)
+        recuperationok = Livraison.objects.filter(recuperation=True, status=True, date=today, livreur = userid)
+        recuperationko = Livraison.objects.filter(status=False,recuperation=True, date=today, livreur = userid)
+        livraison = Livraison.objects.filter(date=today,recuperation=False, livreur = userid)
         journee = Journee.objects.get(id=id)
         recuperation = "oui"
         recuperationo = "non"
@@ -250,13 +267,13 @@ def responsableschoixjournee(request):
 def responsables(request, id):
     today = datetime.now().date()
     tomorrow = today + timedelta(1)
-    livraisons  = Livraison.objects.order_by('route').filter(date=today)
-    livraisonstatusok = Livraison.objects.filter(status=True,recuperation="non", date=today)
-    livraisonstatusko = Livraison.objects.filter(status=False,recuperation="non", date=today)
-    recuperation = Livraison.objects.filter(recuperation="oui", date=today)
-    recuperationok = Livraison.objects.filter(recuperation="oui", status=True, date=today)
-    recuperationko = Livraison.objects.filter(status=False,recuperation="oui", date=today)
-    livraison = Livraison.objects.filter(recuperation="non", date=today)
+    livraisons  = Livraison.objects.order_by('position').filter(date=today)
+    livraisonstatusok = Livraison.objects.filter(status=True,recuperation=False, date=today)
+    livraisonstatusko = Livraison.objects.filter(status=False,recuperation=False, date=today)
+    recuperation = Livraison.objects.filter(recuperation=True, date=today)
+    recuperationok = Livraison.objects.filter(recuperation=True, status=True, date=today)
+    recuperationko = Livraison.objects.filter(status=False,recuperation=True, date=today)
+    livraison = Livraison.objects.filter(recuperation=False, date=today)
     livreurs = Livreur.objects.all()
     journee = Journee.objects.get(id=id)
     recuperations = "oui"
@@ -344,7 +361,7 @@ class MapView(View):
         routesmatin = ['1','2','3','4']
         recuperation = "oui"
         routes = Route.objects.filter(nom__in=routesmatin)
-        matin = ['05h00', '05h15', '05h30', '05h45', '06h00', '06h15', '06h30', '06h45', '07h00', '07h15', '07h30', '07h45', '08h00','08h15', '08h30', '08h45', '09h00', '09h15', '09h30']
+        matin = ['05h00', '05h15', '05h30', '05h45', '06h00', '06h15', '06h30', '06h45', '07h00', '07h15', '07h30', '07h45', '08h00','08h15', '08h30', '08h45', '09h00', '09h15', '09h30', '09h45']
         eligable_locations = Livraison.objects.filter(place_id__isnull=False, heure_livraison__in = matin, date=tomorrow)
         livraisons =[]
 
@@ -760,7 +777,7 @@ class MapTodayView(View):
         today = datetime.now().date()
         tomorrow = today + timedelta(1)
         distances = Distances.objects.all()
-        matin = ['05h00', '05h15', '05h30', '05h45', '06h00', '06h15', '06h30', '06h45', '07h00', '07h15', '07h30', '07h45', '08h00','08h15', '08h30', '08h45', '09h00', '09h15', '09h30']
+        matin = ['05h00', '05h15', '05h30', '05h45', '06h00', '06h15', '06h30', '06h45', '07h00', '07h15', '07h30', '07h45', '08h00','08h15', '08h30', '08h45', '09h00', '09h15', '09h30', '09h45']
 
         eligable_locations = Livraison.objects.filter(place_id__isnull=False, heure_livraison__in = matin, date=today )
         livraisons =[]
@@ -970,10 +987,10 @@ def livraisonstomorrow(request):
              '08h15', '08h30', '08h45', '09h00', '09h15', '09h30']
     midi = ['10h00', '10h15', '10h30', '10h45', '11h00', '11h15', '11h30', '11h45', '12h00', '12h15', '12h30', '12h45']
     apresmidi = ['13h00', '13h15', '13h30', '13h45', '14h00', '14h15', '14h30', '14h45', '15h00', '15h15', '15h30', '15h45', '16h00', '16h15', '16h30', '16h45', '17h00', '17h15', '17h30', '17h45', '18h00', '18h15', '18h30', '18h45', '19h00']
-    livraisons = Livraison.objects.order_by('route').filter(date=tomorrow)
-    livraisonsmatin =  Livraison.objects.order_by('route').filter(heure_livraison__in= matin,date=tomorrow)
-    livraisonsmidi =  Livraison.objects.order_by('route').filter(heure_livraison__in=midi, date=tomorrow)
-    livraisonsapresmidi =  Livraison.objects.order_by('route').filter(heure_livraison__in=apresmidi, date=tomorrow)
+    livraisons = Livraison.objects.order_by('position').filter(date=tomorrow)
+    livraisonsmatin =  Livraison.objects.order_by('position').filter(heure_livraison__in= matin,date=tomorrow)
+    livraisonsmidi =  Livraison.objects.order_by('position').filter(heure_livraison__in=midi, date=tomorrow)
+    livraisonsapresmidi =  Livraison.objects.order_by('position').filter(heure_livraison__in=apresmidi, date=tomorrow)
     retourtraiteur = "oui"
     context = {'livraisons':livraisons,
                'recuperation': recuperation,
@@ -992,10 +1009,10 @@ def livraisonstoday(request):
              '08h15', '08h30', '08h45', '09h00', '09h15', '09h30']
     midi = ['10h00', '10h15', '10h30', '10h45', '11h00', '11h15', '11h30', '11h45', '12h00', '12h15', '12h30', '12h45']
     apresmidi = ['13h00', '13h15', '13h30', '13h45', '14h00', '14h15', '14h30', '14h45', '15h00', '15h15', '15h30', '15h45', '16h00', '16h15', '16h30', '16h45', '17h00', '17h15', '17h30', '17h45', '18h00', '18h15', '18h30', '18h45', '19h00']
-    livraisons = Livraison.objects.order_by('route').filter(date=today)
-    livraisonsmatin =  Livraison.objects.order_by('route').filter(heure_livraison__in= matin,date=today)
-    livraisonsmidi =  Livraison.objects.order_by('route').filter(heure_livraison__in=midi, date=today)
-    livraisonsapresmidi =  Livraison.objects.order_by('route').filter(heure_livraison__in=apresmidi, date=today)
+    livraisons = Livraison.objects.order_by('position').filter(date=today)
+    livraisonsmatin =  Livraison.objects.order_by('position').filter(heure_livraison__in= matin,date=today)
+    livraisonsmidi =  Livraison.objects.order_by('position').filter(heure_livraison__in=midi, date=today)
+    livraisonsapresmidi =  Livraison.objects.order_by('position').filter(heure_livraison__in=apresmidi, date=today)
     retourtraiteur = "oui"
     context = {'livraisons':livraisons,
                'recuperation': recuperation,
@@ -1011,15 +1028,15 @@ def livraisonstoday(request):
 def livraisonsresp(request):
     today = datetime.now().date()
     tomorrow = today + timedelta(1)
-    livraisonstatusok = Livraison.objects.filter(status=True, date=today,recuperation="non")
-    livraisonstatusko = Livraison.objects.filter(status=False, date=today,recuperation="non")
-    recuperations = Livraison.objects.filter(recuperation="oui", date=today)
-    recuperationok = Livraison.objects.filter(recuperation="oui", status=True, date=today)
-    recuperationko = Livraison.objects.filter(status=False,recuperation="oui", date=today)
+    livraisonstatusok = Livraison.objects.filter(status=True, date=today,recuperation=False)
+    livraisonstatusko = Livraison.objects.filter(status=False, date=today,recuperation=False)
+    recuperations = Livraison.objects.filter(recuperation=True, date=today)
+    recuperationok = Livraison.objects.filter(recuperation=True, status=True, date=today)
+    recuperationko = Livraison.objects.filter(status=False,recuperation=True, date=today)
     recuperation = "oui"
     retourtraiteur = "oui"
     livraison = Livraison.objects.all()
-    livraisons = Livraison.objects.order_by('route').filter(date=tomorrow)
+    livraisons = Livraison.objects.order_by('position').filter(date=tomorrow)
     return render(request, 'listings/livraisonsresp.html', context={'livraisons': livraisons,
                                                               
                                     
@@ -1035,9 +1052,9 @@ def livraisonsresp(request):
 def recuptoday(request):
     today = datetime.now().date()
     tomorrow = today + timedelta(1)
-    recups = ["Porcelaine", "Chaud et porcelaine", "Porcelaine et bois", "Plateau de bois"]
-    recuperations = Livraison.objects.filter(recuperation="non", date=today, mode_envoi__in = recups)
-    recupsencours = Livraison.objects.filter(recuperation="oui", status = False)
+    recups = ["Porcelaine", "Chaud et porcelaine", "Porcelaine et bois", "Plateau de bois", "Froid et bois"]
+    recuperations = Livraison.objects.filter(recuperation=False, date=today, mode_envoi__in = recups)
+    recupsencours = Livraison.objects.filter(recuperation=True, status = False)
     return render(request, 'listings/recuptoday.html', context={
                                                               'recuperations' : recuperations,
                                                               'recupsencours' : recupsencours,
@@ -1048,12 +1065,12 @@ def livraisonrespdetail(request, ip):
     today = datetime.now().date()
     tomorrow = today + timedelta(1)
     livraison = Livraison.objects.get(id=ip)
-    livraisons = Livraison.objects.order_by('route').filter(date=tomorrow)
-    livraisonstatusok = Livraison.objects.filter(status=True, date=today,recuperation="non")
-    livraisonstatusko = Livraison.objects.filter(status=False, date=today,recuperation="non")
-    recuperation = Livraison.objects.filter(recuperation="oui", date=today)
-    recuperationok = Livraison.objects.filter(recuperation="oui", status=True, date=today)
-    recuperationko = Livraison.objects.filter(status=False,recuperation="oui", date=today)
+    livraisons = Livraison.objects.order_by('position').filter(date=tomorrow)
+    livraisonstatusok = Livraison.objects.filter(status=True, date=today,recuperation=False)
+    livraisonstatusko = Livraison.objects.filter(status=False, date=today,recuperation=False)
+    recuperation = Livraison.objects.filter(recuperation=True, date=today)
+    recuperationok = Livraison.objects.filter(recuperation=True, status=True, date=today)
+    recuperationko = Livraison.objects.filter(status=False,recuperation=True, date=today)
     recuperation = "oui"
     retourtraiteur = "oui"
     formbis = LivraisonFeuilleForm(request.POST or None, instance=livraison)
@@ -1079,14 +1096,14 @@ def livraisonshier(request):
     today = datetime.now().date()
     tomorrow = today + timedelta(1)
     yesterday = today - timedelta(1)
-    livraisonstatusok = Livraison.objects.filter(status=True, date=yesterday,recuperation="non")
-    livraisonstatusko = Livraison.objects.filter(status=False, date=yesterday,recuperation="non")
-    recuperation = Livraison.objects.filter(recuperation="oui", date=yesterday)
-    recuperationok = Livraison.objects.filter(recuperation="oui", status=True, date=yesterday)
-    recuperationko = Livraison.objects.filter(status=False,recuperation="oui", date=yesterday)
+    livraisonstatusok = Livraison.objects.filter(status=True, date=yesterday,recuperation=False)
+    livraisonstatusko = Livraison.objects.filter(status=False, date=yesterday,recuperation=False)
+    recuperation = Livraison.objects.filter(recuperation=True, date=yesterday)
+    recuperationok = Livraison.objects.filter(recuperation=True, status=True, date=yesterday)
+    recuperationko = Livraison.objects.filter(status=False,recuperation=True, date=yesterday)
     recuperation = "oui"
     livraison = Livraison.objects.all()
-    livraisons = Livraison.objects.order_by('route').filter(date=yesterday)
+    livraisons = Livraison.objects.order_by('position').filter(date=yesterday)
     return render(request, 'listings/livraisonshier.html', context={'livraisons': livraisons,
                                                               
                                                               'recuperation' : recuperation,
@@ -1097,3 +1114,132 @@ def livraisonshier(request):
                                                               'recuperationko':recuperationko,
                                                               'recuperation' : recuperation,
                                                               })
+
+    
+class Livraisonsdrag(ListView):
+    template_name = 'listings/livraisonsdrag.html'
+    model = Livraison
+    
+    context_object_name = 'livraisons'
+    
+
+    def get_queryset(self):
+        
+        today = datetime.now().date()
+        tomorrow = today + timedelta(1)
+        livraisons = Livraison.objects.order_by('position').filter(date=tomorrow)
+
+        return livraisons
+
+    
+
+def add_livraison(request):
+    nom = request.POST.get('filmname')
+    date = request.POST.get('date')
+    
+    # add film
+    livraison = Livraison.objects.create(nom=nom, date=date)
+    
+    today = datetime.now().date()
+    tomorrow = today + timedelta(1)
+    livraisons = Livraison.objects.filter(date=tomorrow)
+ 
+    return render(request, 'listings/partials/livraisonslist.html', {'livraisons': livraisons})
+
+def delete_livraison(request, pk):
+    # remove the film from the user's list
+
+    livraison = Livraison.objects.get(id=pk)
+
+    livraison.delete()
+
+    # return template fragment with all the user's films
+    today = datetime.now().date()
+    tomorrow = today + timedelta(1)
+    livraisons = Livraison.objects.filter(date=tomorrow)
+
+    return render(request, 'listings/partials/livraisonslist.html', {'livraisons': livraisons})
+
+def sort(request):
+    film_pks_order = request.POST.getlist('film_order')
+    films = []
+    for idx, film_pk in enumerate(film_pks_order, start=1):
+        userfilm = Livraison.objects.get(id=film_pk)
+        userfilm.order = idx
+        userfilm.save()
+        films.append(userfilm)
+
+    return render(request, '/listings/partials/livraisonslist.html', {'films': films})
+
+def livraisonsdrag_detailtoday(request, pk):
+    livraison = Livraison.objects.get(id=pk)
+    context = {'livraison': livraison}
+    if request.method == 'GET':
+        return render(request, 'listings/livraisonsdragtoday.html', context)
+    elif request.method == 'PUT':
+        data = QueryDict(request.body).dict()
+        form = LivraisonDragFormtoday(data, instance=livraison)
+        if form.is_valid():
+            form.save()
+            return render(request, 'listings/partials/livraisonslisttoday.html', context)
+
+        context['form'] = form
+        return render(request, 'listings/partials/edit-livraison-formtoday.html', context)
+
+def livraison_edit_formtoday(request, pk):
+    livraison = Livraison.objects.get(id=pk)
+    form = LivraisonDragFormtoday(instance=livraison)
+    context = {'livraison': livraison, 'form': form}
+    return render(request, 'listings/partials/edit-livraison-formtoday.html', context)
+
+
+class Livraisonsdragtoday(ListView):
+    template_name = 'listings/livraisonsdragtoday.html'
+    model = Livraison
+    
+    context_object_name = 'livraisons'
+    
+
+    def get_queryset(self):
+        
+        today = datetime.now().date()
+        tomorrow = today + timedelta(1)
+        livraisons = Livraison.objects.order_by('position').filter(date=today)
+
+        return livraisons
+
+    
+
+def add_livraisontoday(request):
+    nom = request.POST.get('filmname')
+    date = request.POST.get('date')
+    
+    # add film
+    livraison = Livraison.objects.create(nom=nom, date=date)
+    
+    today = datetime.now().date()
+    tomorrow = today + timedelta(1)
+    livraisons = Livraison.objects.filter(date=today)
+ 
+    return render(request, 'listings/partials/livraisonslisttoday.html', {'livraisons': livraisons})
+
+def livraisonsdrag_detail(request, pk):
+    livraison = Livraison.objects.get(id=pk)
+    context = {'livraison': livraison}
+    if request.method == 'GET':
+        return render(request, 'listings/livraisonsdrag.html', context)
+    elif request.method == 'PUT':
+        data = QueryDict(request.body).dict()
+        form = LivraisonDragForm(data, instance=livraison)
+        if form.is_valid():
+            form.save()
+            return render(request, 'listings/partials/livraisonslist.html', context)
+
+        context['form'] = form
+        return render(request, 'listings/partials/edit-livraison-form.html', context)
+
+def livraison_edit_form(request, pk):
+    livraison = Livraison.objects.get(id=pk)
+    form = LivraisonDragForm(instance=livraison)
+    context = {'livraison': livraison, 'form': form}
+    return render(request, 'listings/partials/edit-livraison-form.html', context)

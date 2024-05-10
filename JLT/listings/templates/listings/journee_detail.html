@@ -52,7 +52,7 @@
   <h1 style="text-align: center;">FEUILLE DE ROUTE</h1> <h1 style="text-align: center;"> {{journees}} </h1>
   <br>
   <br>
-  <p style="text-align: center;">{{ livraisons|length }} livraisons et {{ recuperations|length }} récupérations aujourd'hui</p>
+  <p style="text-align: center;">{{ livraisonsok|length }} livraisons et {{ recuperations|length }} récupérations aujourd'hui</p>
   <br>
   <table class="table table-striped">
       <thead class="thead-dark">
@@ -72,7 +72,7 @@
       </thead>
       <tbody>
           {% for livraison in livraisons %}
-          {% if livraison.recuperation == recuperation %}
+          {% if livraison.recuperation == True %}
         <tr>
           
           <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
