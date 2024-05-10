@@ -79,7 +79,7 @@
   
 
 {% for a in route1 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -134,7 +134,7 @@
 {% endfor %}
 
 {% for a in route2 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -188,7 +188,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route3 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -242,7 +242,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route4 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -296,7 +296,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route5 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -350,7 +350,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route6 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -404,7 +404,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route7 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -458,7 +458,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route8 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -512,7 +512,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route9 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -566,7 +566,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route10 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -620,7 +620,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route11 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -674,7 +674,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route12 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -728,7 +728,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route13 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -782,7 +782,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route14 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -836,7 +836,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route15 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -890,7 +890,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route16 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -945,7 +945,7 @@
 {% endfor %}
 
 {% for a in route17 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -999,7 +999,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route18 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -1053,7 +1053,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route19 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -1107,7 +1107,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route20 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == recuperation %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
