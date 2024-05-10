@@ -83,6 +83,7 @@ def journee_detail(request, id):  # notez le paramètre id supplémentaire
    livraisons = Livraison.objects.order_by('position').filter(date=today)
    livraisonsok = Livraison.objects.filter(recuperation=False,date=today)
    recuperations = Livraison.objects.filter(recuperation=True, date=today)   
+   recuperationes = Livraison.objects.filter(recuperation = True, date=today)
    retourtraiteur = "oui"
    retourtraiteurno = "non"
    recuperation = "oui"
@@ -93,7 +94,7 @@ def journee_detail(request, id):  # notez le paramètre id supplémentaire
    
    return render(request,
           'listings/journee_detail.html',
-          context={'journees': journees ,'livraisonsroute': livraisonsroute, 'livreurs':livreurs, 'recuperations':recuperations,'retourtraiteur' : retourtraiteur,'recuperation' : recuperation,'retourtraiteurno': retourtraiteurno,'livraisons' : livraisons, 'recuperationo':recuperationo, 'loic':loic, 'maxime':maxime, 'rien':rien, 'recuperations':recuperation, 'livraisonsok':livraisonsok, }) # nous passons l'id au modèle
+          context={'journees': journees ,'livraisonsroute': livraisonsroute, 'livreurs':livreurs, 'recuperations':recuperations,'retourtraiteur' : retourtraiteur,'recuperation' : recuperation,'retourtraiteurno': retourtraiteurno,'livraisons' : livraisons, 'recuperationo':recuperationo, 'loic':loic, 'maxime':maxime, 'rien':rien, 'recuperations':recuperation, 'livraisonsok':livraisonsok,'recuperationes':recuperationes }) # nous passons l'id au modèle
 
 
 def livreur_list(request):
