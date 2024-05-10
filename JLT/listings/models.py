@@ -158,6 +158,8 @@ class Livraison(models.Model):
     status = models.BooleanField(default=False)
     adress = models.fields.CharField(null=True, blank=True, max_length=700, default=" ")
     zipcode = models.fields.CharField(null=True, blank=True, max_length=100, default=" ")
+    app = models.fields.CharField(null=True, blank=True, max_length=700, default=" ")
+    ligne2 = models.fields.CharField(null=True, blank=True, max_length=700, default=" ")
     city = models.fields.CharField(null=True, blank=True, max_length=100, default="Montreal")
     country = models.fields.CharField(null=True, blank=True, max_length=100, default="Canada")
     lat = models.fields.CharField(null=True, blank=True, max_length=200, default=" ")
