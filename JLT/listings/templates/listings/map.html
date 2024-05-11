@@ -234,7 +234,7 @@
       <h3 class="heading">Livraisons et Récupérations</h3>
 
       {% for livraison in livraisons %}
-      {% if livraison.recuperation == recuperation %}
+      {% if livraison.recuperation == True %}
       <p class="task" draggable="true" style="color: #F1B3DA;">
         {{livraison.nom}} / {{livraison.heure_livraison}} / {{livraison.infodetail}}
       </p>
