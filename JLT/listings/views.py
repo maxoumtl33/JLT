@@ -376,7 +376,6 @@ class MapView(View):
                 'adress' : a.adress,
                 'convives': a.convives,
                 'mode_envoi': a.mode_envoi,
-                'recuperation' : a.recuperation,
                 'infodetail': a.infodetail
             }
 
@@ -388,7 +387,6 @@ class MapView(View):
                    'distances':distances,
                    'routes':routes,
                    'routesmatin':routesmatin,
-                   'recuperation': recuperation,
                    'infodetail': a.infodetail
 
         }
@@ -463,7 +461,6 @@ class MapMidiView(View):
                 'adress' : a.adress,
                 'convives': a.convives,
                 'mode_envoi': a.mode_envoi,
-                'recuperation' : a.recuperation,
                 'infodetail': a.infodetail
             }
 
@@ -548,7 +545,6 @@ class MapApremView(View):
                 'adress' : a.adress,
                 'convives': a.convives,
                 'mode_envoi': a.mode_envoi,
-                'recuperation' : a.recuperation,
                 'infodetail': a.infodetail
             }
 
