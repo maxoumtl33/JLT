@@ -134,56 +134,65 @@
 <div class="column" data-status="todo">
     <h2>A faire</h2>
     {% for task in todo_livraison %}
-    <div class="task" data-task-id="{{ task.id }}">{{ task.nom }} / {{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}</div>
+    <div class="task" data-task-id="{{ task.id }}">
+      <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
     {% endfor %}
 </div>
 <div class="column" data-statut="2">
     <h2>Route N°2</h2>
     {% for task in route2 %}
-    <div class="task" data-task-id="{{ task.id }}">{{ task.nom }} / {{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}</div>
+    <div class="task" data-task-id="{{ task.id }}">
+      <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
     {% endfor %}
 </div>
 <div class="column" data-statut="3">
     <h2>Route N°3</h2>
     {% for task in route3 %}
-    <div class="task" data-task-id="{{ task.id }}">{{ task.nom }} / {{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}</div>
+    <div class="task" data-task-id="{{ task.id }}">
+      <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
     {% endfor %}
 </div>
 <div class="column" data-statut="4">
   <h2>Route N°4</h2>
   {% for task in route4 %}
-  <div class="task" data-task-id="{{ task.id }}">{{ task.nom }} / {{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}</div>
-  {% endfor %}
+  <div class="task" data-task-id="{{ task.id }}">
+    <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
+{% endfor %}
 </div>
 <div class="column" data-statut="5">
   <h2>Route N°5</h2>
   {% for task in route5 %}
-  <div class="task" data-task-id="{{ task.id }}">{{ task.nom }} / {{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}</div>
-  {% endfor %}
+  <div class="task" data-task-id="{{ task.id }}">
+    <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
+{% endfor %}
 </div>
 <div class="column" data-statut="6">
   <h2>Route N°6</h2>
   {% for task in route6 %}
-  <div class="task" data-task-id="{{ task.id }}">{{ task.nom }} / {{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}</div>
-  {% endfor %}
+  <div class="task" data-task-id="{{ task.id }}">
+    <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
+{% endfor %}
 </div>
 <div class="column" data-statut="7">
   <h2>Route N°7</h2>
   {% for task in route7 %}
-  <div class="task" data-task-id="{{ task.id }}">{{ task.nom }} / {{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}</div>
-  {% endfor %}
+  <div class="task" data-task-id="{{ task.id }}">
+    <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
+{% endfor %}
 </div>
 <div class="column" data-statut="8">
   <h2>Route N°8</h2>
   {% for task in route8 %}
-  <div class="task" data-task-id="{{ task.id }}">{{ task.nom }} / {{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}</div>
-  {% endfor %}
+  <div class="task" data-task-id="{{ task.id }}">
+    <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
+{% endfor %}
 </div>
 <div class="column" data-statut="9">
   <h2>Route N°9</h2>
   {% for task in route9 %}
-  <div class="task" data-task-id="{{ task.id }}">{{ task.nom }} / {{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}</div>
-  {% endfor %}
+  <div class="task" data-task-id="{{ task.id }}">
+    <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
+{% endfor %}
 </div>
 </div>
 <br>
@@ -236,6 +245,7 @@
 <br>
 <script>
   $(document).ready(function () {
+        $('[data-toggle="popover"]').popover();
         $(".task").draggable({
             revert: 'invalid',
             helper: "clone"
