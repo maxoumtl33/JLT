@@ -560,6 +560,8 @@ class MapApremView(View):
         distances = Distances.objects.all()
         aprem = ['13h00', '13h15', '13h30', '13h45', '14h00', '14h15', '14h30', '14h45', '15h00', '15h15', '15h30', '15h45', '16h00', '16h15', '16h30', '16h45', '17h00', '17h15', '17h30', '17h45', '18h00', '18h15', '18h30', '18h45', '19h00']
         todo_livraison = Livraison.objects.filter(statut='todo', date=tomorrow, heure_livraison__in = aprem, place_id__isnull=False)
+        route6 = Livraison.objects.filter(statut='6', date=tomorrow, heure_livraison__in = aprem)
+        route7 = Livraison.objects.filter(statut='7', date=tomorrow, heure_livraison__in = aprem)
         route8 = Livraison.objects.filter(statut='8', date=tomorrow, heure_livraison__in = aprem)
         route9 = Livraison.objects.filter(statut='9', date=tomorrow, heure_livraison__in = aprem)
         route10 = Livraison.objects.filter(statut='10', date=tomorrow, heure_livraison__in = aprem)
@@ -595,6 +597,8 @@ class MapApremView(View):
                    'livraisons':livraisons,
                    'form': form,
                    'distances':distances,
+                   'route6':route6,
+                   'route7':route7,
                    'route8':route8,
                    'route9':route9,
                    'route10':route10,

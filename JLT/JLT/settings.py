@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-jms1pass6#6pcx3)6nk1idtw*upl)n!-kkq!%uodn_txemj%ln'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['www.julienleblanclivraisons.com', '127.0.0.1']
 
