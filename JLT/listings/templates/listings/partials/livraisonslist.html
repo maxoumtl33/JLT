@@ -35,7 +35,7 @@
               <td style="background-color: #F1B3DA;">{{ livraison.heure_livraison }}</td>
               <td style="background-color: #F1B3DA;">{{ livraison.livreur }}</td>
               <td style="background-color: #F1B3DA;">{{ livraison.aidelivreur }}</td>
-              <td style="background-color: #F1B3DA;">{{ livraison.route }}</td>
+              <td style="background-color: #F1B3DA;">{{ livraison.statut }}</td>
               <td><button class="btn btn-outline-primary"
                 hx-get="{% url 'livraison-edit-form' livraison.id %}"
                 hx-target="#livraison-details">modifier</button></td>
@@ -46,7 +46,7 @@
               <td>{{ livraison.heure_livraison }}</td>
               <td>{{ livraison.livreur }}</td>
               <td>{{ livraison.aidelivreur }}</td>
-              <td>{{ livraison.route }}</td>
+              <td>{{ livraison.statut }}</td>
               <td><button class="btn btn-outline-primary"
                 hx-get="{% url 'livraison-edit-form' livraison.id %}"
                 hx-target="#livraison-details">modifier</button></td>

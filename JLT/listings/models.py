@@ -25,8 +25,20 @@ class Tacheafaire(models.Model) :
         description = models.fields.CharField(max_length=100)
         livreur = models.ForeignKey(Livreur, null=True, on_delete=models.SET_NULL)
 
+class Task(models.Model):
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+    status = models.CharField(max_length=20, choices=[
+        ('todo', 'To Do'),
+        ('in_progress', 'In Progress'),
+        ('done', 'Done')
+    ])
 
 
+class Item(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    status = models.CharField(max_length=20, default='pending')
 
 class Client(models.Model):
         nom = models.fields.CharField(null=True, blank=True, max_length=100)
@@ -139,6 +151,30 @@ class Livraison(models.Model):
          
 
     )
+    statut = models.CharField(max_length=20, default='todo', choices=[
+        ('todo', 'A faire'),
+        ('1', '1'),
+        ('2', '2'),
+        ('3', '3'),
+        ('4', '4'),
+        ('5', '5'),
+        ('6', '6'),
+        ('7', '7'),
+        ('8', '8'),
+        ('9', '9'),
+        ('10', '10'),
+        ('11', '11'),
+        ('12', '12'),
+        ('13', '13'),
+        ('14', '14'),
+        ('15', '15'),
+        ('16', '16'),
+        ('17', '17'),
+        ('18', '18'),
+        ('19', '19'),
+        ('20', '20'),
+
+    ])
     nom = models.fields.CharField(max_length=100, null=True, blank=True,)
     def __str__(self):
         return f'{self.nom}'

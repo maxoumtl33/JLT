@@ -35,15 +35,92 @@
 <br>
 <br>
 <br>
-<h1 style="text-align: center;">Commence ta journée ici</h1>
 <br>
-<ul>
+{% if user.username == ventes %}
+<div style="text-align: center;">
+  <div class="body">
+    <h1 style="text-align: center;">LIVRAISONS DU JOUR</h1>
+    <br>
+    <br>
+    <p style="text-align: center;">{{ livraisonsok|length }} livraisons et {{ livraisonsrecup|length }} récupérations aujourd'hui</p>
+    <br>
+    <br>
+    <table class="table table-hover">
+        <thead class="thead-dark">
+          <tr>
+            
+            <th scope="col" style="color: #303FBA;">Heure départ</th>
+            <th scope="col" style="color: #303FBA;">Nom du contrat</th>
+            <th scope="col" style="color: #303FBA;">Infos</th>
+            <th scope="col" style="color: #303FBA;">Heure livraison</th>
+            <th scope="col" style="color: #303FBA;">Livreur</th>
+            <th scope="col" style="color: #303FBA;">Aide livreur</th>
+            <th scope="col" style="color: #303FBA;">Route</th>
+            <th scope="col" style="color: #303FBA;">Status</th>
+            <th scope="col" style="color: #303FBA;">Modifier</th>
+
+
+  
+  
+          </tr>
+        </thead>
+        <tbody>
+            {% for livraison in livraisons %}
+            {% if livraison.recuperation == True %}
+          <tr>
+            
+            <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
+            <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
+            <td style="background-color: #F1B3DA;"><strong>{{livraison.infodetail}}</strong></td>
+            <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
+            <td style="background-color: #F1B3DA;"><strong>{{livraison.livreur.nom}}</strong></td>
+            <td style="background-color: #F1B3DA;"><strong>{{livraison.aidelivreur}}</strong></td>
+            <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut }}</strong></td>
+            {% if livraison.status == True %}
+            <td><strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong></td>
+              {% else %}
+            <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
+            {% endif %}
+          
+          <td><a href="{% url 'livraisonventesdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+            </tr>
+            {% else %}
+            <tr>
+            
+              <td><strong>{{ livraison.heure_depart }}</strong></td>
+              <td><strong>{{livraison.nom}}</strong></td>
+              <td><strong>{{livraison.infodetail}}</strong></td>
+              <td><strong>{{ livraison.heure_livraison }}</strong></td>
+              <td><strong>{{livraison.livreur.nom}}</strong></td>
+              <td><strong>{{livraison.aidelivreur}}</strong></td>
+              <td><strong>{{ livraison.statut }}</strong></td>
+              {% if livraison.status == True %}
+              <td><strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong><td>
+                {% else %}
+              <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
+              {% endif %}
+                   
+         
+            
+            <td><a href="{% url 'livraisonventesdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+          </tr>
+          {% endif %}
+          {% endfor %}
+          
+        </tbody>
+      </table>
+    </div>
+</div>
+
+
+{% elif user.is_authenticated %}
     {% for journee in journees %}
     <div style="text-align: center;">
           <a href="{% url 'journee-detail' journee.id %}" class="btn btn-primary">Commencer la journée</a>
     </div>
     {% endfor %}
-</ul>
+  {% endif %}
+
 
 <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
   <div class="offcanvas-header">

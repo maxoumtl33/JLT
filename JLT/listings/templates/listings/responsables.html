@@ -133,7 +133,7 @@
                   <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
                   <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
                   <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
-                  <td style="background-color: #F1B3DA;"><strong>{{ livraison.route }}</strong></td>
+                  <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut }}</strong></td>
                   <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
                   {% if livraison.commentaire|length > 0  %}
                   <td><i class="fa-solid fa-message"></i></td>
@@ -149,7 +149,7 @@
                   <td><strong>{{ livraison.heure_depart }}</strong></td>
                   <td ><strong>{{livraison.nom}}</strong></td>
                   <td ><strong>{{ livraison.heure_livraison }}</strong></td>
-                  <td ><strong>{{ livraison.route }}</strong></td>
+                  <td ><strong>{{ livraison.statut }}</strong></td>
                   <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
                   {% if livraison.commentaire|length > 0  %}
                   <td><i class="fa-solid fa-message"></i></td>
@@ -195,7 +195,7 @@
     <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
     <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
     <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
-    <td style="background-color: #F1B3DA;"><strong>{{ livraison.route }}</strong></td>
+    <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut }}</strong></td>
     <td><strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong></td>
     {% if livraison.commentaire|length > 0  %}
                   <td><i class="fa-solid fa-message"></i></td>
@@ -211,7 +211,7 @@
     <td><strong>{{ livraison.heure_depart }}</strong></td>
     <td ><strong>{{livraison.nom}}</strong></td>
     <td ><strong>{{ livraison.heure_livraison }}</strong></td>
-    <td ><strong>{{ livraison.route }}</strong></td>
+    <td ><strong>{{ livraison.statut }}</strong></td>
     <td><strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong></td>
     {% if livraison.commentaire|length > 0  %}
                   <td><i class="fa-solid fa-message"></i></td>

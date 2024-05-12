@@ -53,7 +53,7 @@
           <th scope="col" style="color: #303FBA;">Nom du contrat</th>
           <th scope="col" style="color: #303FBA;">mode d'envoi</th>
           <th scope="col" style="color: #303FBA;">Livreur</th>
-          <th scope="col" style="color: #303FBA;">Aide livreur</th>
+          <th scope="col" style="color: #303FBA;">Status</th>
           <th scope="col" style="color: #303FBA;">Route</th>
           <th scope="col" style="color: #303FBA;">lien</th>
 
@@ -65,8 +65,12 @@
           <td ><strong>{{livraison.nom}}</strong></td>
           <td ><strong>{{livraison.mode_envoi}}</strong></td>
           <td ><strong>{{livraison.livreur.nom}}</strong></td>
-          <td ><strong>{{livraison.aidelivreur}}</strong></td>
-          <td ><strong>{{ livraison.route }}</strong></td>
+          {% if livraison.statut == True %}
+          <td><strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong></td>
+          {% else %}
+          <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
+          {% endif %}
+          <td ><strong>{{ livraison.statut }}</strong></td>
           <td><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
         </tr>
         {% endfor %}
@@ -92,7 +96,7 @@
           <th scope="col" style="color: #303FBA;">Nom du contrat</th>
           <th scope="col" style="color: #303FBA;">mode d'envoi</th>
           <th scope="col" style="color: #303FBA;">Livreur</th>
-          <th scope="col" style="color: #303FBA;">Aide livreur</th>
+          <th scope="col" style="color: #303FBA;">Status</th>
           <th scope="col" style="color: #303FBA;">Route</th>
           <th scope="col" style="color: #303FBA;">lien</th>
 
@@ -104,8 +108,14 @@
           <td ><strong>{{livraison.nom}}</strong></td>
           <td ><strong>{{livraison.mode_envoi}}</strong></td>
           <td ><strong>{{livraison.livreur.nom}}</strong></td>
-          <td ><strong>{{livraison.aidelivreur}}</strong></td>
-          <td ><strong>{{ livraison.route }}</strong></td>
+          {% if livraison.statut == True %}
+          <td><strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong></td>
+          {% else %}
+          <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
+          {% endif %}
+          <td ><strong>{{livraison.statut}}</strong></td>
+          
+
           <td><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
         </tr>
         {% endfor %}

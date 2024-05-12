@@ -8,7 +8,7 @@
           <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
           <td style="background-color: #F1B3DA;"><strong>{{livraison.livreur.nom}}</strong></td>
           <td style="background-color: #F1B3DA;"><strong>{{livraison.aidelivreur}}</strong></td>
-          <td style="background-color: #F1B3DA;"><strong>{{ livraison.route }}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut }}</strong></td>
           {% if livraison.retourtraiteur == retourtraiteur %}
           <td style="background-color: #F1B3DA;"><strong><i class="fa-solid fa-house-chimney-window fa-xl"></i></strong></td>
           {%  else %}
@@ -34,7 +34,7 @@
             <td><strong>{{ livraison.heure_livraison }}</strong></td>
             <td><strong>{{livraison.livreur.nom}}</strong></td>
             <td><strong>{{livraison.aidelivreur}}</strong></td>
-            <td><strong>{{ livraison.route }}</strong></td>
+            <td><strong>{{ livraison.statut }}</strong></td>
             {% if livraison.retourtraiteur == retourtraiteur %}
           <td><strong><i class="fa-solid fa-house-chimney-window fa-xl"></i></strong></td>
           {%  else %}

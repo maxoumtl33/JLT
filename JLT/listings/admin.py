@@ -8,6 +8,8 @@ from listings.models import Recuperation
 from listings.models import Message
 from listings.models import Route
 from listings.models import Distances
+from listings.models import Task
+
 
 from django.contrib.auth.models import User, Group
 from import_export.admin import ImportExportModelAdmin
@@ -32,6 +34,7 @@ admin.site.register(Livraison, LivraisonAdmin)
 admin.site.register(Journee)
 admin.site.register(Livreur)
 admin.site.register(Route)
+admin.site.register(Task)
 admin.site.register(Distances)
 admin.site.register(Client, ClientAdmin)
 #admin.site.register(Route)

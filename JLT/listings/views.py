@@ -13,6 +13,8 @@ from .forms import LivraisonForm
 from .forms import LivraisonFeuilleForm
 from .forms import LivraisonDragForm
 from .forms import LivraisonDragFormtoday
+from .forms import LivraisonsVentesForm
+
 import json
 from .forms import DistanceForm
 from tablib import Dataset
@@ -30,8 +32,12 @@ from datetime import datetime
 from django.views.decorators.http import require_POST
 from django.http import QueryDict
 from django.shortcuts import render, get_object_or_404
+from .models import Task
 
 from django.http import FileResponse, HttpResponseRedirect, HttpResponse
+
+
+
 
 @csrf_exempt
 def save_positions(request):
@@ -58,12 +64,20 @@ def livraisons_list(request):
                                                               'journees' : journees})
 
 def journees_list(request):
-    livraisons  = Livraison.objects.all()
+    today = now().date()
+    livraisons  = Livraison.objects.order_by('position').filter(date = today)
+    livraisonsok  = Livraison.objects.filter(date = today, recuperation=False)
+    livraisonsrecup  = Livraison.objects.filter(date = today, recuperation=True)
+
     livreurs = Livreur.objects.all()
     journees = Journee.objects.all()
+    ventes = "Ventes"
     return render(request, 'listings/journees_list.html', context={'livraisons': livraisons,
                                                               'livreurs': livreurs,
-                                                              'journees' : journees})
+                                                              'journees' : journees,
+                                                              'ventes':ventes,
+                                                              'livraisonsok':livraisonsok,
+                                                              'livraisonsrecup':livraisonsrecup,})
 
 
 
@@ -138,46 +152,26 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
         recuperation = "oui"
         recuperationo = "non"
         retourtraiteur = "oui"
-        routes1 = Route.objects.get(nom = "1")
-        route1 = routes1.livraisons.order_by('position').filter(date=today)
-        routes2 = Route.objects.get(nom = "2")
-        route2 = routes2.livraisons.order_by('position').filter(date=today)
-        routes3 = Route.objects.get(nom = "3")
-        route3 = routes3.livraisons.order_by('position').filter(date=today)
-        routes4 = Route.objects.get(nom = "4")
-        route4 = routes4.livraisons.order_by('position').filter(date=today)
-        routes5 = Route.objects.get(nom = "5")
-        route5 = routes5.livraisons.order_by('position').filter(date=today)
-        routes6 = Route.objects.get(nom = "6")
-        route6 = routes6.livraisons.order_by('position').filter(date=today)
-        routes7 = Route.objects.get(nom = "7")
-        route7 = routes7.livraisons.order_by('position').filter(date=today)
-        routes8 = Route.objects.get(nom = "8")
-        route8 = routes8.livraisons.order_by('position').filter(date=today)
-        routes9 = Route.objects.get(nom = "9")
-        route9 = routes9.livraisons.order_by('position').filter(date=today)
-        routes10 = Route.objects.get(nom = "10")
-        route10 = routes10.livraisons.order_by('position').filter(date=today)
-        routes11 = Route.objects.get(nom = "11")
-        route11 = routes11.livraisons.order_by('position').filter(date=today)
-        routes12 = Route.objects.get(nom = "12")
-        route12 = routes12.livraisons.order_by('position').filter(date=today)
-        routes13 = Route.objects.get(nom = "13")
-        route13 = routes13.livraisons.order_by('position').filter(date=today)
-        routes14 = Route.objects.get(nom = "14")
-        route14 = routes14.livraisons.order_by('position').filter(date=today)
-        routes15 = Route.objects.get(nom = "15")
-        route15 = routes15.livraisons.order_by('position').filter(date=today)
-        routes16 = Route.objects.get(nom = "16")
-        route16 = routes16.livraisons.order_by('position').filter(date=today)
-        routes17 = Route.objects.get(nom = "17")
-        route17 = routes17.livraisons.order_by('position').filter(date=today)
-        routes18 = Route.objects.get(nom = "18")
-        route18 = routes18.livraisons.order_by('position').filter(date=today)
-        routes19 = Route.objects.get(nom = "19")
-        route19 = routes19.livraisons.order_by('position').filter(date=today)
-        routes20 = Route.objects.get(nom = "20")
-        route20 = routes20.livraisons.order_by('position').filter(date=today)
+        route1 = Livraison.objects.order_by('position').filter(date=today, statut="1")
+        route2 = Livraison.objects.order_by('position').filter(date=today, statut="2")
+        route3 = Livraison.objects.order_by('position').filter(date=today, statut="3")
+        route4 = Livraison.objects.order_by('position').filter(date=today, statut="4")
+        route5 = Livraison.objects.order_by('position').filter(date=today, statut="5")
+        route6 = Livraison.objects.order_by('position').filter(date=today, statut="6")
+        route7 = Livraison.objects.order_by('position').filter(date=today, statut="7")
+        route8 = Livraison.objects.order_by('position').filter(date=today, statut="8")
+        route9 = Livraison.objects.order_by('position').filter(date=today, statut="9")
+        route10 = Livraison.objects.order_by('position').filter(date=today, statut="10")
+        route11 = Livraison.objects.order_by('position').filter(date=today, statut="11")
+        route12 = Livraison.objects.order_by('position').filter(date=today, statut="12")
+        route13 = Livraison.objects.order_by('position').filter(date=today, statut="13")
+        route14 = Livraison.objects.order_by('position').filter(date=today, statut="14")
+        route15 = Livraison.objects.order_by('position').filter(date=today, statut="15")
+        route16 = Livraison.objects.order_by('position').filter(date=today, statut="16")
+        route17 = Livraison.objects.order_by('position').filter(date=today, statut="17")
+        route18 = Livraison.objects.order_by('position').filter(date=today, statut="18")
+        route19 = Livraison.objects.order_by('position').filter(date=today, statut="19")
+        route20 = Livraison.objects.order_by('position').filter(date=today, statut="20")
 
 
         
@@ -351,6 +345,16 @@ class DistanceView(View):
 
         return redirect('my_distance_view')
        
+def update_status(request):
+    if request.method == 'POST' and request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
+        task_id = request.POST.get('livraison_id')
+        new_status = request.POST.get('new_statut')
+        task = Livraison.objects.get(id=task_id)
+        task.statut = new_status
+        task.save()
+        return JsonResponse({'message': 'Route mise à jour'})
+    else:
+        return JsonResponse({'message': 'Echec'})
 
 class MapView(View):
     def get(self, request):
@@ -358,12 +362,16 @@ class MapView(View):
         form = DistanceForm
         today = datetime.now().date()
         tomorrow = today + timedelta(1)
-        distances = Distances.objects.all()
-        routesmatin = ['1','2','3','4']
-        recuperation = "oui"
-        routes = Route.objects.filter(nom__in=routesmatin)
         matin = ['05h00', '05h15', '05h30', '05h45', '06h00', '06h15', '06h30', '06h45', '07h00', '07h15', '07h30', '07h45', '08h00','08h15', '08h30', '08h45', '09h00', '09h15', '09h30', '09h45']
-        eligable_locations = Livraison.objects.filter(place_id__isnull=False, heure_livraison__in = matin, date=tomorrow)
+        distances = Distances.objects.all()
+        todo_livraison = Livraison.objects.filter(statut='todo', date=tomorrow, heure_livraison__in = matin, place_id__isnull=False)
+        route1 = Livraison.objects.filter(statut='1', date=tomorrow, heure_livraison__in = matin)
+        route2 = Livraison.objects.filter(statut='2', date=tomorrow, heure_livraison__in = matin)
+        route3 = Livraison.objects.filter(statut='3', date=tomorrow, heure_livraison__in = matin)
+        route4 = Livraison.objects.filter(statut='4', date=tomorrow, heure_livraison__in = matin)
+        routesmatin = ['1','2','3','4']
+        routes = Route.objects.filter(nom__in=routesmatin)
+        eligable_locations = Livraison.objects.order_by('position').filter(place_id__isnull=False, heure_livraison__in = matin, date=tomorrow)
         livraisons =[]
 
         for a in eligable_locations:
@@ -376,7 +384,7 @@ class MapView(View):
                 'adress' : a.adress,
                 'convives': a.convives,
                 'mode_envoi': a.mode_envoi,
-                'infodetail': a.infodetail
+                'infodetail': a.infodetail,
             }
 
             livraisons.append(data)
@@ -387,7 +395,11 @@ class MapView(View):
                    'distances':distances,
                    'routes':routes,
                    'routesmatin':routesmatin,
-                   'infodetail': a.infodetail
+                   'route1':route1,
+                   'route2':route2,
+                   'route3':route3,
+                   'route4':route4,
+                   'todo_livraison':todo_livraison,
 
         }
         return render(request, 'listings/map.html', context)
@@ -446,9 +458,17 @@ class MapMidiView(View):
         form = DistanceForm
         today = datetime.now().date()
         tomorrow = today + timedelta(1)
-        recuperation = "oui"
         distances = Distances.objects.all()
         midi = ['10h00', '10h15', '10h30', '10h45', '11h00', '11h15', '11h30', '11h45', '12h00', '12h15', '12h30', '12h45']
+        todo_livraison = Livraison.objects.filter(statut='todo', date=tomorrow, heure_livraison__in = midi, place_id__isnull=False)
+        route2 = Livraison.objects.filter(statut='2', date=tomorrow, heure_livraison__in = midi)
+        route3 = Livraison.objects.filter(statut='3', date=tomorrow, heure_livraison__in = midi)
+        route4 = Livraison.objects.filter(statut='4', date=tomorrow, heure_livraison__in = midi)
+        route5 = Livraison.objects.filter(statut='5', date=tomorrow, heure_livraison__in = midi)
+        route6 = Livraison.objects.filter(statut='6', date=tomorrow, heure_livraison__in = midi)
+        route7 = Livraison.objects.filter(statut='7', date=tomorrow, heure_livraison__in = midi)
+        route8 = Livraison.objects.filter(statut='8', date=tomorrow, heure_livraison__in = midi)
+        route9 = Livraison.objects.filter(statut='9', date=tomorrow, heure_livraison__in = midi)
         eligable_locations = Livraison.objects.filter(place_id__isnull=False, heure_livraison__in = midi, date=tomorrow)
         livraisons =[]
         for a in eligable_locations:
@@ -470,7 +490,15 @@ class MapMidiView(View):
                    'livraisons':livraisons,
                    'form': form,
                    'distances':distances,
-                   'recuperation':recuperation,
+                   'route2':route2,
+                   'route3':route3,
+                   'route4':route4,
+                   'route5':route5,
+                   'route6':route6,
+                   'route7':route7,
+                   'route8':route8,
+                   'route9':route9,
+                   'todo_livraison':todo_livraison,
 
         }
         return render(request, 'listings/mapmidi.html', context)
@@ -529,9 +557,22 @@ class MapApremView(View):
         form = DistanceForm
         today = datetime.now().date()
         tomorrow = today + timedelta(1)
-        recuperation = "oui"
         distances = Distances.objects.all()
         aprem = ['13h00', '13h15', '13h30', '13h45', '14h00', '14h15', '14h30', '14h45', '15h00', '15h15', '15h30', '15h45', '16h00', '16h15', '16h30', '16h45', '17h00', '17h15', '17h30', '17h45', '18h00', '18h15', '18h30', '18h45', '19h00']
+        todo_livraison = Livraison.objects.filter(statut='todo', date=tomorrow, heure_livraison__in = aprem, place_id__isnull=False)
+        route8 = Livraison.objects.filter(statut='8', date=tomorrow, heure_livraison__in = aprem)
+        route9 = Livraison.objects.filter(statut='9', date=tomorrow, heure_livraison__in = aprem)
+        route10 = Livraison.objects.filter(statut='10', date=tomorrow, heure_livraison__in = aprem)
+        route11 = Livraison.objects.filter(statut='11', date=tomorrow, heure_livraison__in = aprem)
+        route12 = Livraison.objects.filter(statut='12', date=tomorrow, heure_livraison__in = aprem)
+        route13 = Livraison.objects.filter(statut='13', date=tomorrow, heure_livraison__in = aprem)
+        route14 = Livraison.objects.filter(statut='14', date=tomorrow, heure_livraison__in = aprem)
+        route15 = Livraison.objects.filter(statut='15', date=tomorrow, heure_livraison__in = aprem)
+        route16 = Livraison.objects.filter(statut='16', date=tomorrow, heure_livraison__in = aprem)
+        route17 = Livraison.objects.filter(statut='17', date=tomorrow, heure_livraison__in = aprem)
+        route18 = Livraison.objects.filter(statut='18', date=tomorrow, heure_livraison__in = aprem)
+        route19 = Livraison.objects.filter(statut='19', date=tomorrow, heure_livraison__in = aprem)
+        route20 = Livraison.objects.filter(statut='20', date=tomorrow, heure_livraison__in = aprem)
 
         eligable_locations = Livraison.objects.filter(place_id__isnull=False, heure_livraison__in = aprem, date=tomorrow )
         livraisons =[]
@@ -554,7 +595,21 @@ class MapApremView(View):
                    'livraisons':livraisons,
                    'form': form,
                    'distances':distances,
-                   'recuperation':recuperation,
+                   'route8':route8,
+                   'route9':route9,
+                   'route10':route10,
+                   'route11':route11,
+                   'route12':route12,
+                   'route13':route13,
+                   'route14':route14,
+                   'route15':route15,
+                   'route16':route16,
+                   'route17':route17,
+                   'route18':route18,
+                   'route19':route19,
+                   'route20':route20,
+                   'todo_livraison':todo_livraison,
+                   
 
         }
         return render(request, 'listings/mapaprem.html', context)
@@ -985,6 +1040,8 @@ def livraisonstomorrow(request):
     midi = ['10h00', '10h15', '10h30', '10h45', '11h00', '11h15', '11h30', '11h45', '12h00', '12h15', '12h30', '12h45']
     apresmidi = ['13h00', '13h15', '13h30', '13h45', '14h00', '14h15', '14h30', '14h45', '15h00', '15h15', '15h30', '15h45', '16h00', '16h15', '16h30', '16h45', '17h00', '17h15', '17h30', '17h45', '18h00', '18h15', '18h30', '18h45', '19h00']
     livraisons = Livraison.objects.order_by('position').filter(date=tomorrow)
+    livraisonsok = Livraison.objects.filter(date=tomorrow, recuperation=False)
+    livraisonrecup = Livraison.objects.filter(date=tomorrow, recuperation=True)
     livraisonsmatin =  Livraison.objects.order_by('position').filter(heure_livraison__in= matin,date=tomorrow)
     livraisonsmidi =  Livraison.objects.order_by('position').filter(heure_livraison__in=midi, date=tomorrow)
     livraisonsapresmidi =  Livraison.objects.order_by('position').filter(heure_livraison__in=apresmidi, date=tomorrow)
@@ -995,6 +1052,9 @@ def livraisonstomorrow(request):
                'livraisonsmatin': livraisonsmatin,
                'livraisonsmidi': livraisonsmidi,
                'livraisonsapresmidi': livraisonsapresmidi,
+               'livraisonsok':livraisonsok,
+               'livraisonrecup':livraisonrecup,
+
                }
     return render(request, 'listings/livraisonstomorrow.html', context)
     
@@ -1076,6 +1136,36 @@ def livraisonrespdetail(request, ip):
        return redirect('livraisonstomorrow')
     
     return render(request, 'listings/livraisonrespdetail.html', context={'livraisons': livraisons,
+                                                              'livraison':livraison,
+                                                              'recuperation' : recuperation,
+                                                              'livraisonstatusok':livraisonstatusok,
+                                                              'livraisonstatusko':livraisonstatusko,
+                                                              'retourtraiteur':retourtraiteur,
+                                                              'recuperationok':recuperationok,
+                                                              'recuperationko':recuperationko,
+                                                              'recuperation' : recuperation,
+                                                              'tomorrow':tomorrow,
+                                                              'formbis':formbis,
+                                                              })
+
+def livraisonsventesdetail(request, pk):
+    today = datetime.now().date()
+    tomorrow = today + timedelta(1)
+    livraison = Livraison.objects.get(id=pk)
+    livraisons = Livraison.objects.order_by('position').filter(date=tomorrow)
+    livraisonstatusok = Livraison.objects.filter(status=True, date=today,recuperation=False)
+    livraisonstatusko = Livraison.objects.filter(status=False, date=today,recuperation=False)
+    recuperation = Livraison.objects.filter(recuperation=True, date=today)
+    recuperationok = Livraison.objects.filter(recuperation=True, status=True, date=today)
+    recuperationko = Livraison.objects.filter(status=False,recuperation=True, date=today)
+    recuperation = "oui"
+    retourtraiteur = "oui"
+    formbis = LivraisonsVentesForm(request.POST or None, instance=livraison)
+    if formbis.is_valid():
+       formbis.save()
+       return redirect('journees-list')
+    
+    return render(request, 'listings/livraisonsventes.html', context={'livraisons': livraisons,
                                                               'livraison':livraison,
                                                               'recuperation' : recuperation,
                                                               'livraisonstatusok':livraisonstatusok,

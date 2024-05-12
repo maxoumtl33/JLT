@@ -97,9 +97,26 @@
 
 <h1>Liste des livreurs</h1>
 <br>
-{% for livreur in livreurs %}
-<p>Nom : {{ livreur.nom }} / id: {{ livreur.id }}</p>
-{% endfor %}
+<table class="table table-striped">
+  <thead class="thead-dark">
+    <tr>
+      
+      <th scope="col" style="color: #303FBA;">#</th>
+      <th scope="col" style="color: #303FBA;">Nom du livreur</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      {% for livreur in livreurs %}
+      <td ><strong>{{livreur.id}}</strong></td>
+      <td ><strong>{{livreur.nom}}</strong></td>
+     
+    </tr>
+    {% endfor %}
+    
+  </tbody>
+</table>
+
 
   
 
@@ -129,7 +146,6 @@
     </div>
   </div>
 </div>
-
 
 {% endblock %}
 
