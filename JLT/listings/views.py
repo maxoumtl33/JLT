@@ -696,7 +696,7 @@ class MapApremTodayView(View):
                    'distances':distances,
 
         }
-        return render(request, 'listings/mapaprem.html', context)
+        return render(request, 'listings/maptodayaprem.html', context)
 
     def post(self, request):
         form = DistanceForm(request.POST)

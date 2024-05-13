@@ -188,7 +188,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route3 %}
-{% if a.livreur.nom == user.username and a.date == today %}
+{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
