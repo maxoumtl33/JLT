@@ -64,5 +64,5 @@ class LivraisonDragFormtoday(forms.ModelForm):
 class LivraisonsVentesForm(forms.ModelForm):
     class Meta:
         model = Livraison
-        fields = ('nom_client', 'contact_site')
+        fields = ('nom_client', 'contact_site', 'app')
         

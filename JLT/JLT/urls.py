@@ -44,12 +44,6 @@ path('livraisonsdragtoday/<int:pk>/', views.livraisonsdrag_detailtoday, name='li
 path('livraisonsdragtoday/<int:pk>/edit', views.livraison_edit_formtoday, name='livraison-edit-formtoday'),
 path("livraisonsdragtoday/", views.Livraisonsdragtoday.as_view(), name='livraisonsdragtoday'),
 path('update_status/', views.update_status, name='update_status'),
-
-
-
-
-
-
 path('livraisonrespdetail/<int:ip>/', views.livraisonrespdetail, name='livraisonrespdetail'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
@@ -58,7 +52,6 @@ path('livraisonrespdetail/<int:ip>/', views.livraisonrespdetail, name='livraison
 htmx_urlpatterns = [
     path('add-livraison/', views.add_livraison, name='add-livraison'),
     path('add-livraisontoday/', views.add_livraisontoday, name='add-livraisontoday'),
-
     path('delete-livraison/<int:pk>/', views.delete_livraison, name='delete-livraison'),
     path('sort/', views.sort, name='sort'),
 ]

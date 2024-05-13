@@ -231,7 +231,6 @@
         {% for livraison in livraisonsapresmidi %}
         {% if livraison.recuperation == True %}
       <tr>
-        
         <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
         <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
         <td style="background-color: #F1B3DA;"><strong>{{livraison.infodetail}}</strong></td>
@@ -274,11 +273,8 @@
         {% else %}
         <td><strong><i class="fa-solid fa-location-dot" style="color: #63E6BE;"></i></strong></td>
         {% endif %}
-     
-          
-          
       </tr>
-        {% endif %}©
+        {% endif %}
       {% endfor %}
       </tbody>
     </table>
