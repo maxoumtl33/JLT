@@ -86,19 +86,19 @@
             {% else %}
             <tr>
             
-              <td><strong>{{ livraison.heure_depart }}</strong></td>
-              <td><strong>{{livraison.nom}}</strong></td>
-              <td><strong>{{livraison.infodetail}}</strong></td>
-              <td><strong>{{ livraison.heure_livraison }}</strong></td>
-              <td><strong>{{livraison.livreur.nom}}</strong></td>
-              <td><strong>{{livraison.aidelivreur}}</strong></td>
-              <td><strong>{{ livraison.statut }}</strong></td>
-              {% if livraison.status == True %}
-              <td><strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong><td>
-                {% else %}
-              <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
-              {% endif %}
-              <td><a href="{% url 'livraisonventesdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+            <td><strong>{{ livraison.heure_depart }}</strong></td>
+            <td><strong>{{livraison.nom}}</strong></td>
+            <td><strong>{{livraison.infodetail}}</strong></td>
+            <td><strong>{{ livraison.heure_livraison }}</strong></td>
+            <td><strong>{{livraison.livreur.nom}}</strong></td>
+            <td><strong>{{livraison.aidelivreur}}</strong></td>
+            <td><strong>{{ livraison.statut }}</strong></td>
+            {% if livraison.status == True %}
+            <td><strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong></td>
+              {% else %}
+            <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
+            {% endif %}
+          <td><a href="{% url 'livraisonventesdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
           </tr>
           {% endif %}
           {% endfor %}
