@@ -18,7 +18,7 @@
           {% else %}
 
           <li class="nav__item">
-            <a href="{% url 'login' %}" class="nav__link" style="color: green;"><i class="fa-regular fa-user"></i></i></a>
+            <a href="{% url 'login' %}" class="nav__link active-link" style="color: green;"><i class="fa-regular fa-user"></i>
                   <span class="nav__name">Login</span>
               </a>
           </li>
@@ -28,16 +28,23 @@
               <i class="fa-solid fa-link"></i><span class="nav__name">Liens</span>
             </a>
           </li>
+          {% if user.username == loic or user.username == maxime %}
           <li class="nav__item">
             <a  href="{% url 'acceuilresponsables' %}" class="nav__link"><i class="fa-solid fa-user-ninja"></i>
               <span class="nav__name">Retour</span>
             </a>
           </li>
+          {% else %}
+          <li class="nav__item">
+            <a href="javascript:history.back()" class="nav__link"><i class="fa-regular fa-paste"></i><span class="nav__name">Retour</span></a>
+          </li>
+          {% endif %}
       </ul>
   </div>
 
   <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
 </nav>
+{% if user.is_authenticated %}
 <br>
 <br>
 <div class="body">
@@ -58,7 +65,6 @@
           <th scope="col" style="color: #303FBA;">Aide livreur</th>
           <th scope="col" style="color: #303FBA;">Route</th>
           <th scope="col" style="color: #303FBA;">Retour traiteur</th>
-          <th scope="col" style="color: #303FBA;">lien</th>
 
         </tr>
       </thead>
@@ -79,7 +85,6 @@
           {%  else %}
           <td></td>
           {% endif %}
-          <td><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
         </tr>
 
           {% else %}
@@ -97,7 +102,6 @@
           {%  else %}
           <td></td>
           {% endif %}
-            <td><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
           </tr>
           {% endif %}
         {% endfor %}
@@ -105,7 +109,8 @@
       </tbody>
     </table>
   </div>
-  
+  {% endif %}
+
   <br>
   <br>
   <br>

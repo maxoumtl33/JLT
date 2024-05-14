@@ -40,8 +40,9 @@
 </nav>
 <br>
 <br>
+<h1 style="text-align: center;">Menu Responsable</h1>
 <br>
-<h1 style="text-align: center;">Bienvenue {{ user.username }} !</h1>
+<h2 style="text-align: center;">Utilisateur: {{ user.username }}</h2>
 <br>
 <br>
 <br>
@@ -90,6 +91,10 @@
 <div style="margin-right: 30px;">
   <a href="https://forms.app/form/65568cf0ae67c4ca87c4b9d3/655a2833380bc0c412acea11/655a28e533756106ac796923/result/responses/inbox" class="btn btn-primary" target="_blank" >Formulaire Recup livreur</a>
 </div>
+<div style="margin-right: 30px;">
+  <a href="{% url 'commentcamarche' %}" class="btn btn-primary" target="_blank" >Comment ça marche ?</a>
+</div>
+
 </div>
 
 <br>

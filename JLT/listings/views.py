@@ -1096,6 +1096,8 @@ def livraisonsresp(request):
     recuperationko = Livraison.objects.filter(status=False,recuperation=True, date=today)
     recuperation = "oui"
     retourtraiteur = "oui"
+    loic = "Loic"
+    maxime= "Maxime"
     livraison = Livraison.objects.all()
     livraisons = Livraison.objects.order_by('position').filter(date=tomorrow)
     return render(request, 'listings/livraisonsresp.html', context={'livraisons': livraisons,
@@ -1108,6 +1110,9 @@ def livraisonsresp(request):
                                                               'recuperationko':recuperationko,
                                                               'recuperation' : recuperation,
                                                               'recuperations' : recuperations,
+                                                              'loic':loic,
+                                                              'maxime': maxime,
+                                                            
                                                               })
 
 def recuptoday(request):
@@ -1334,3 +1339,9 @@ def livraison_edit_form(request, pk):
     form = LivraisonDragForm(instance=livraison)
     context = {'livraison': livraison, 'form': form}
     return render(request, 'listings/partials/edit-livraison-form.html', context)
+
+
+def commentcamarche(request):
+    context = {}
+    return render(request, 'listings/commentcamarche.html', context)
+

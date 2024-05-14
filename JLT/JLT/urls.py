@@ -44,6 +44,7 @@ path('livraisonsdragtoday/<int:pk>/', views.livraisonsdrag_detailtoday, name='li
 path('livraisonsdragtoday/<int:pk>/edit', views.livraison_edit_formtoday, name='livraison-edit-formtoday'),
 path("livraisonsdragtoday/", views.Livraisonsdragtoday.as_view(), name='livraisonsdragtoday'),
 path('update_status/', views.update_status, name='update_status'),
+path('commentcamarche/', views.commentcamarche, name='commentcamarche'),
 path('livraisonrespdetail/<int:ip>/', views.livraisonrespdetail, name='livraisonrespdetail'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
