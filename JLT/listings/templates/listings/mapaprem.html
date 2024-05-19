@@ -131,122 +131,34 @@
 <h1>Creer les routes de l'aprem</h1>
 <br>
 <div style="display: flex;">
-<div class="column" data-status="todo">
-    <h2>A faire</h2>
-    {% for task in todo_livraison %}
-    <div class="task" data-task-id="{{ task.id }}">
-      <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
-    {% endfor %}
-</div>
-<div class="column" data-statut="6">
-  <h2>Route N°6</h2>
-  {% for task in route6 %}
-  <div class="task" data-task-id="{{ task.id }}">
-    <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
-{% endfor %}
-</div>
+  <div class="column" data-status="todo">
+      <h2>A faire</h2>
+      {% for task in todo_livraison %}
+      <div class="task" data-task-id="{{ task.id }}">
+        <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a>
+      </div>
+      {% endfor %}
+  </div>
+  {% for a in routes %}
+  <div class="column" data-statut="{{ a.nom }}">
+      <h1>Route N°{{ a.nom }}</h1>
+      <p><a href="{% url 'routedetail' a.id %}"><i class="fa-solid fa-pen-to-square"></i></a></p>
+      <hr>
+      <p>Livreur : {{ a.livreur }}</p>
+      <p>Heure départ : {{ a.heure_depart }}</p>
+      <hr>
+      {% for task in route8 %}
+      {% if task.statut.nom == a.nom %}
+      <div class="task" data-task-id="{{ task.id }}">
+        <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a>
+      </div>
+      {% endif %}
+      {% endfor %}
+  </div>
+  {% endfor %}
 
-<div class="column" data-statut="7">
-  <h2>Route N°7</h2>
-  {% for task in route7 %}
-  <div class="task" data-task-id="{{ task.id }}">
-    <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
-{% endfor %}
-</div>
-
-<div class="column" data-statut="8">
-    <h2>Route N°8</h2>
-    {% for task in route8 %}
-    <div class="task" data-task-id="{{ task.id }}">
-      <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
-    {% endfor %}
-</div>
-<div class="column" data-statut="9">
-    <h2>Route N°9</h2>
-    {% for task in route9 %}
-    <div class="task" data-task-id="{{ task.id }}">
-      <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
-    {% endfor %}
-</div>
-<div class="column" data-statut="10">
-  <h2>Route N°10</h2>
-  {% for task in route10 %}
-  <div class="task" data-task-id="{{ task.id }}">
-    <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
-{% endfor %}
-</div>
-<div class="column" data-statut="11">
-  <h2>Route N°11</h2>
-  {% for task in route11 %}
-  <div class="task" data-task-id="{{ task.id }}">
-    <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
-{% endfor %}
-</div>
-<div class="column" data-statut="12">
-  <h2>Route N°12</h2>
-  {% for task in route12 %}
-  <div class="task" data-task-id="{{ task.id }}">
-    <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
-{% endfor %}
-</div>
-<div class="column" data-statut="13">
-  <h2>Route N°13</h2>
-  {% for task in route13 %}
-  <div class="task" data-task-id="{{ task.id }}">
-    <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
-{% endfor %}
-</div>
-<div class="column" data-statut="14">
-  <h2>Route N°14</h2>
-  {% for task in route14 %}
-  <div class="task" data-task-id="{{ task.id }}">
-    <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
-{% endfor %}
-</div>
-<div class="column" data-statut="15">
-  <h2>Route N°15</h2>
-  {% for task in route15 %}
-  <div class="task" data-task-id="{{ task.id }}">
-    <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
-{% endfor %}
-</div>
-<div class="column" data-statut="16">
-  <h2>Route N°16</h2>
-  {% for task in route16 %}
-  <div class="task" data-task-id="{{ task.id }}">
-    <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
-{% endfor %}
-</div>
-<div class="column" data-statut="17">
-  <h2>Route N°17</h2>
-  {% for task in route17 %}
-  <div class="task" data-task-id="{{ task.id }}">
-    <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
-{% endfor %}
-</div>
-<div class="column" data-statut="18">
-  <h2>Route N°18</h2>
-  {% for task in route18 %}
-  <div class="task" data-task-id="{{ task.id }}">
-    <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
-{% endfor %}
-</div>
-<div class="column" data-statut="19">
-  <h2>Route N°19</h2>
-  {% for task in route19 %}
-  <div class="task" data-task-id="{{ task.id }}">
-    <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
-{% endfor %}
-</div>
-<div class="column" data-statut="20">
-  <h2>Route N°20</h2>
-  {% for task in route20 %}
-  <div class="task" data-task-id="{{ task.id }}">
-    <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
-{% endfor %}
-</div>
-
-</div><br>
+  </div>
+<br>
 <br>
 
 <h1>Calculer les distances</h1>
@@ -312,7 +224,7 @@
                     method: 'POST',
                     data: {
                         'livraison_id': livraison_id,
-                        'new_statut': new_statut,
+                        'new_statut_id': new_statut,
                      
 
                         'csrfmiddlewaretoken': '{{ csrf_token }}'

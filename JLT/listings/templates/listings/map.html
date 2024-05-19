@@ -138,42 +138,34 @@
 <h1>Creer les routes du matin</h1>
 <br>
 <div style="display: flex;">
-<div class="column" data-status="todo">
-    <h2>A faire</h2>
-    {% for task in todo_livraison %}
-    <div class="task" data-task-id="{{ task.id }}">
-      <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
-    {% endfor %}
-</div>
-<div class="column" data-statut="1">
-    <h2>Route N°1</h2>
-    {% for task in route1 %}
-    <div class="task" data-task-id="{{ task.id }}">
-      <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
-    {% endfor %}
-</div>
-<div class="column" data-statut="2">
-    <h2>Route N°2</h2>
-    {% for task in route2 %}
-    <div class="task" data-task-id="{{ task.id }}">
-      <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
-    {% endfor %}
-</div>
-<div class="column" data-statut="3">
-  <h2>Route N°3</h2>
-  {% for task in route3 %}
-  <div class="task" data-task-id="{{ task.id }}">
-    <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
-{% endfor %}
-</div>
-<div class="column" data-statut="4">
-  <h2>Route N°4</h2>
-  {% for task in route4 %}
-  <div class="task" data-task-id="{{ task.id }}">
-    <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
-{% endfor %}
-</div>
-</div>
+  <div class="column" data-status="todo">
+      <h2>A faire</h2>
+      {% for task in todo_livraison %}
+      <div class="task" data-task-id="{{ task.id }}">
+        <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a>
+      </div>
+      {% endfor %}
+  </div>
+  {% for a in routes %}
+  <div class="column" data-statut="{{ a.nom }}">
+      <h1>Route N°{{ a.nom }}</h1>
+      <p><a href="{% url 'routedetail' a.id %}"><i class="fa-solid fa-pen-to-square"></i></a></p>
+      <hr>
+      <p>Livreur : {{ a.livreur }}</p>
+      <p>Heure départ : {{ a.heure_depart }}</p>
+      <hr>
+      {% for task in route1 %}
+      {% if task.statut.nom == a.nom %}
+      <div class="task" data-task-id="{{ task.id }}">
+        <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a>
+      </div>
+      {% endif %}
+      {% endfor %}
+  </div>
+  {% endfor %}
+
+  </div>
+
  <br>
  <br>
 <br>
@@ -226,40 +218,41 @@
 </form>
 
 <script>
+$(document).ready(function () {
 
-  $(document).ready(function () {
+$('[data-toggle="popover"]').popover();
+$(".task").draggable({
+    revert: 'invalid',
+    helper: "clone"
+});
 
-        $('[data-toggle="popover"]').popover();
-        $(".task").draggable({
-            revert: 'invalid',
-            helper: "clone"
-        });
+$(".column").droppable({
+    accept: ".task",
+    drop: function (event, ui) {
+        var livraison_id = ui.draggable.data('task-id');
+        var new_statut = $(this).data('statut');
+        $.ajax({
+            url: "{% url 'update_status' %}",
+            method: 'POST',
+            data: {
+                'livraison_id': livraison_id,
+                'new_statut_id': new_statut,
+             
 
-        $(".column").droppable({
-            accept: ".task",
-            drop: function (event, ui) {
-                var livraison_id = ui.draggable.data('task-id');
-                var new_statut = $(this).data('statut');
-                $.ajax({
-                    url: "{% url 'update_status' %}",
-                    method: 'POST',
-                    data: {
-                        'livraison_id': livraison_id,
-                        'new_statut': new_statut,
-                     
-
-                        'csrfmiddlewaretoken': '{{ csrf_token }}'
-                    },
-                    success: function (data) {
-                        location.reload(); // Refresh page after updating status
-                    }
-                });
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function (data) {
+                location.reload(); // Refresh page after updating status
             }
         });
-    });
+    }
+});
+});
 
-  $("[data-bs-toggle=popover]").popover();
+ 
 </script>
 
 {% endblock %}
 
+  
+$("[data-bs-toggle=popover]").popover();

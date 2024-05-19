@@ -74,13 +74,13 @@
           {% if livraison.recuperation == True %}
         <tr>
           
-          <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.heure_depart }}</strong></td>
           <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
           <td style="background-color: #F1B3DA;"><strong>{{livraison.infodetail}}</strong></td>
           <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
-          <td style="background-color: #F1B3DA;"><strong>{{livraison.livreur.nom}}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{livraison.statut.livreur}}</strong></td>
           <td style="background-color: #F1B3DA;"><strong>{{livraison.aidelivreur}}</strong></td>
-          <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut }}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.nom }}</strong></td>
           {% if livraison.retourtraiteur == retourtraiteur %}
           <td><strong><i class="fa-solid fa-house-chimney-window fa-xl"></i></i></strong></td>
           {%  else %}
@@ -97,13 +97,13 @@
           {% else %}
           <tr>
           
-            <td><strong>{{ livraison.heure_depart }}</strong></td>
+            <td><strong>{{ livraison.statut.heure_depart }}</strong></td>
             <td><strong>{{livraison.nom}}</strong></td>
             <td><strong>{{livraison.infodetail}}</strong></td>
             <td><strong>{{ livraison.heure_livraison }}</strong></td>
-            <td><strong>{{livraison.livreur.nom}}</strong></td>
+            <td><strong>{{livraison.statut.livreur}}</strong></td>
             <td><strong>{{livraison.aidelivreur}}</strong></td>
-            <td><strong>{{ livraison.statut }}</strong></td>
+            <td><strong>{{ livraison.statut.nom }}</strong></td>
             {% if livraison.retourtraiteur == retourtraiteur %}
           <td><strong><i class="fa-solid fa-house-chimney-window fa-xl"></i></i></strong></td>
           {%  else %}
@@ -154,13 +154,13 @@
           {% for livraison in livraisonsmidi %}
           {% if livraison.recuperation == True %}
         <tr>
-          <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.heure_depart }}</strong></td>
           <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
           <td style="background-color: #F1B3DA;"><strong>{{livraison.infodetail}}</strong></td>
           <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
-          <td style="background-color: #F1B3DA;"><strong>{{livraison.livreur.nom}}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{livraison.statut.livreur}}</strong></td>
           <td style="background-color: #F1B3DA;"><strong>{{livraison.aidelivreur}}</strong></td>
-          <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut }}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.nom }}</strong></td>
           {% if livraison.retourtraiteur == retourtraiteur %}
           <td style="background-color: #F1B3DA;"><strong><i class="fa-solid fa-house-chimney-window fa-xl"></i></strong></td>
           {%  else %}
@@ -177,13 +177,13 @@
           {% else %}
           <tr>
           
-            <td><strong>{{ livraison.heure_depart }}</strong></td>
+            <td><strong>{{ livraison.statut.heure_depart }}</strong></td>
             <td><strong>{{livraison.nom}}</strong></td>
             <td><strong>{{livraison.infodetail}}</strong></td>
             <td><strong>{{ livraison.heure_livraison }}</strong></td>
-            <td><strong>{{livraison.livreur.nom}}</strong></td>
+            <td><strong>{{livraison.statut.livreur}}</strong></td>
             <td><strong>{{livraison.aidelivreur}}</strong></td>
-            <td><strong>{{ livraison.statut }}</strong></td>
+            <td><strong>{{ livraison.statut.nom }}</strong></td>
             {% if livraison.retourtraiteur == retourtraiteur %}
           <td><strong><i class="fa-solid fa-house-chimney-window fa-xl"></i></strong></td>
           {%  else %}
@@ -231,13 +231,13 @@
         {% for livraison in livraisonsapresmidi %}
         {% if livraison.recuperation == True %}
       <tr>
-        <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
-        <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
-        <td style="background-color: #F1B3DA;"><strong>{{livraison.infodetail}}</strong></td>
-        <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
-        <td style="background-color: #F1B3DA;"><strong>{{livraison.livreur.nom}}</strong></td>
-        <td style="background-color: #F1B3DA;"><strong>{{livraison.aidelivreur}}</strong></td>
-        <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut }}</strong></td>
+        <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.heure_depart }}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{livraison.infodetail}}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{livraison.statut.livreur}}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{livraison.aidelivreur}}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.nom }}</strong></td>
         {% if livraison.retourtraiteur == retourtraiteur %}
         <td><strong><i class="fa-solid fa-house-chimney-window fa-xl"></i></strong></td>
         {%  else %}
@@ -255,13 +255,13 @@
         {% else %}
         <tr>
         
-          <td><strong>{{ livraison.heure_depart }}</strong></td>
+          <td><strong>{{ livraison.statut.heure_depart }}</strong></td>
           <td><strong>{{livraison.nom}}</strong></td>
           <td><strong>{{livraison.infodetail}}</strong></td>
           <td><strong>{{ livraison.heure_livraison }}</strong></td>
-          <td><strong>{{livraison.livreur.nom}}</strong></td>
+          <td><strong>{{livraison.statut.livreur}}</strong></td>
           <td><strong>{{livraison.aidelivreur}}</strong></td>
-          <td><strong>{{ livraison.statut }}</strong></td>
+          <td><strong>{{ livraison.statut.nom }}</strong></td>
           {% if livraison.retourtraiteur == retourtraiteur %}
         <td><strong><i class="fa-solid fa-house-chimney-window fa-xl"></i></strong></td>
         {%  else %}

@@ -129,11 +129,11 @@
           
         
                 <tr>
-                  <td style="background-color: #F1B3DA;"><strong>{{ livraison.livreur.nom }}</strong></td>
-                  <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
+                  <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.livreur }}</strong></td>
+                  <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.heure_depart }}</strong></td>
                   <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
                   <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
-                  <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut }}</strong></td>
+                  <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.nom }}</strong></td>
                   <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
                   {% if livraison.commentaire|length > 0  %}
                   <td><i class="fa-solid fa-message"></i></td>
@@ -145,11 +145,11 @@
                 </tr>
                 {% elif livraison.date == journee.date and livraison.status == False %}
                 <tr>
-                  <td ><strong>{{ livraison.livreur.nom }}</strong></td>
-                  <td><strong>{{ livraison.heure_depart }}</strong></td>
+                  <td ><strong>{{ livraison.statut.livreur }}</strong></td>
+                  <td><strong>{{ livraison.statut.heure_depart }}</strong></td>
                   <td ><strong>{{livraison.nom}}</strong></td>
                   <td ><strong>{{ livraison.heure_livraison }}</strong></td>
-                  <td ><strong>{{ livraison.statut }}</strong></td>
+                  <td ><strong>{{ livraison.statut.nom }}</strong></td>
                   <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
                   {% if livraison.commentaire|length > 0  %}
                   <td><i class="fa-solid fa-message"></i></td>
@@ -191,11 +191,11 @@
           
         
   <tr>
-    <td style="background-color: #F1B3DA;"><strong>{{ livraison.livreur.nom }}</strong></td>
-    <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
+    <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.livreur }}</strong></td>
+    <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.heure_depart }}</strong></td>
     <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
     <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
-    <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut }}</strong></td>
+    <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.nom }}</strong></td>
     <td><strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong></td>
     {% if livraison.commentaire|length > 0  %}
                   <td><i class="fa-solid fa-message"></i></td>
@@ -207,11 +207,11 @@
   </tr>
   {% elif livraison.date == journee.date and livraison.status == True %}
   <tr>
-    <td><strong>{{ livraison.livreur.nom }}</strong></td>
-    <td><strong>{{ livraison.heure_depart }}</strong></td>
+    <td><strong>{{ livraison.statut.livreur }}</strong></td>
+    <td><strong>{{ livraison.statut.heure_depart }}</strong></td>
     <td ><strong>{{livraison.nom}}</strong></td>
     <td ><strong>{{ livraison.heure_livraison }}</strong></td>
-    <td ><strong>{{ livraison.statut }}</strong></td>
+    <td ><strong>{{ livraison.statut.nom }}</strong></td>
     <td><strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong></td>
     {% if livraison.commentaire|length > 0  %}
                   <td><i class="fa-solid fa-message"></i></td>

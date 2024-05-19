@@ -80,7 +80,7 @@
   
 
 {% for a in route1 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
+{% if a.statut.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -89,7 +89,7 @@
     {% else %}
     <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
     {% endif %}
-    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
@@ -107,7 +107,7 @@
 
 </div>
 
-{% elif a.livreur.nom == user.username and a.date == today %}
+{% elif a.statut.livreur.nom == user.username and a.date == today %}
   <div class="card">
     <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
     <div class="card-body text-start">
@@ -116,7 +116,7 @@
       {% else %}
       <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
       {% endif %}
-      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
@@ -135,7 +135,7 @@
 {% endfor %}
 
 {% for a in route2 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
+{% if a.statut.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -144,7 +144,7 @@
     {% else %}
     <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
     {% endif %}
-    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
@@ -162,7 +162,7 @@
 
 </div>
 
-{% elif a.livreur.nom == user.username and a.date == today %}
+{% elif a.statut.livreur.nom == user.username and a.date == today %}
   <div class="card">
     <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
     <div class="card-body text-start">
@@ -171,7 +171,7 @@
       {% else %}
       <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
       {% endif %}
-      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
@@ -189,7 +189,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route3 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
+{% if a.statut.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -198,7 +198,7 @@
     {% else %}
     <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
     {% endif %}
-    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
@@ -216,7 +216,7 @@
 
 </div>
 
-{% elif a.livreur.nom == user.username and a.date == today  %}
+{% elif a.statut.livreur.nom == user.username and a.date == today  %}
   <div class="card">
     <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
     <div class="card-body text-start">
@@ -225,7 +225,7 @@
       {% else %}
       <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
       {% endif %}
-      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
@@ -243,7 +243,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route4 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
+{% if a.statut.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -252,7 +252,7 @@
     {% else %}
     <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
     {% endif %}
-    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
@@ -270,7 +270,7 @@
 
 </div>
 
-{% elif a.livreur.nom == user.username and a.date == today %}
+{% elif a.statut.livreur.nom == user.username and a.date == today %}
   <div class="card">
     <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
     <div class="card-body text-start">
@@ -279,7 +279,7 @@
       {% else %}
       <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
       {% endif %}
-      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
@@ -297,7 +297,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route5 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
+{% if a.statut.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -306,7 +306,7 @@
     {% else %}
     <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
     {% endif %}
-    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
@@ -324,7 +324,7 @@
 
 </div>
 
-{% elif a.livreur.nom == user.username and a.date == today %}
+{% elif a.statut.livreur.nom == user.username and a.date == today %}
   <div class="card">
     <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
     <div class="card-body text-start">
@@ -333,7 +333,7 @@
       {% else %}
       <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
       {% endif %}
-      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
@@ -351,7 +351,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route6 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
+{% if a.statut.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -360,7 +360,7 @@
     {% else %}
     <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
     {% endif %}
-    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
@@ -378,7 +378,7 @@
 
 </div>
 
-{% elif a.livreur.nom == user.username and a.date == today %}
+{% elif a.statut.livreur.nom == user.username and a.date == today %}
   <div class="card">
     <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
     <div class="card-body text-start">
@@ -387,7 +387,7 @@
       {% else %}
       <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
       {% endif %}
-      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
@@ -405,7 +405,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route7 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
+{% if a.statut.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -414,7 +414,7 @@
     {% else %}
     <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
     {% endif %}
-    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
@@ -432,7 +432,7 @@
 
 </div>
 
-{% elif a.livreur.nom == user.username and a.date == today %}
+{% elif a.statut.livreur.nom == user.username and a.date == today %}
   <div class="card">
     <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
     <div class="card-body text-start">
@@ -441,7 +441,7 @@
       {% else %}
       <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
       {% endif %}
-      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
@@ -459,7 +459,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route8 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
+{% if a.statut.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -468,7 +468,7 @@
     {% else %}
     <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
     {% endif %}
-    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
@@ -486,7 +486,7 @@
 
 </div>
 
-{% elif a.livreur.nom == user.username and a.date == today %}
+{% elif a.statut.livreur.nom == user.username and a.date == today %}
   <div class="card">
     <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
     <div class="card-body text-start">
@@ -495,7 +495,7 @@
       {% else %}
       <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
       {% endif %}
-      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
@@ -513,7 +513,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route9 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
+{% if a.statut.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -522,7 +522,7 @@
     {% else %}
     <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
     {% endif %}
-    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
@@ -540,7 +540,7 @@
 
 </div>
 
-{% elif a.livreur.nom == user.username and a.date == today %}
+{% elif a.statut.livreur.nom == user.username and a.date == today %}
   <div class="card">
     <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
     <div class="card-body text-start">
@@ -549,7 +549,7 @@
       {% else %}
       <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
       {% endif %}
-      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
@@ -567,7 +567,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route10 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
+{% if a.statut.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -576,7 +576,7 @@
     {% else %}
     <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
     {% endif %}
-    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
@@ -594,7 +594,7 @@
 
 </div>
 
-{% elif a.livreur.nom == user.username and a.date == today %}
+{% elif a.statut.livreur.nom == user.username and a.date == today %}
   <div class="card">
     <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
     <div class="card-body text-start">
@@ -603,7 +603,7 @@
       {% else %}
       <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
       {% endif %}
-      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
@@ -621,7 +621,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route11 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
+{% if a.statut.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -630,7 +630,7 @@
     {% else %}
     <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
     {% endif %}
-    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
@@ -648,7 +648,7 @@
 
 </div>
 
-{% elif a.livreur.nom == user.username and a.date == today %}
+{% elif a.statut.livreur.nom == user.username and a.date == today %}
   <div class="card">
     <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
     <div class="card-body text-start">
@@ -657,7 +657,7 @@
       {% else %}
       <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
       {% endif %}
-      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
@@ -675,7 +675,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route12 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
+{% if a.statut.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -684,7 +684,7 @@
     {% else %}
     <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
     {% endif %}
-    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
@@ -702,7 +702,7 @@
 
 </div>
 
-{% elif a.livreur.nom == user.username and a.date == today %}
+{% elif a.statut.livreur.nom == user.username and a.date == today %}
   <div class="card">
     <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
     <div class="card-body text-start">
@@ -711,7 +711,7 @@
       {% else %}
       <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
       {% endif %}
-      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
@@ -729,7 +729,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route13 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
+{% if a.statut.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -738,7 +738,7 @@
     {% else %}
     <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
     {% endif %}
-    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
@@ -756,7 +756,7 @@
 
 </div>
 
-{% elif a.livreur.nom == user.username and a.date == today %}
+{% elif a.statut.livreur.nom == user.username and a.date == today %}
   <div class="card">
     <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
     <div class="card-body text-start">
@@ -765,7 +765,7 @@
       {% else %}
       <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
       {% endif %}
-      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
@@ -783,7 +783,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route14 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
+{% if a.statut.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -792,7 +792,7 @@
     {% else %}
     <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
     {% endif %}
-    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
@@ -810,7 +810,7 @@
 
 </div>
 
-{% elif a.livreur.nom == user.username and a.date == today %}
+{% elif a.statut.livreur.nom == user.username and a.date == today %}
   <div class="card">
     <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
     <div class="card-body text-start">
@@ -819,7 +819,7 @@
       {% else %}
       <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
       {% endif %}
-      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
@@ -837,7 +837,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route15 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
+{% if a.statut.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -846,7 +846,7 @@
     {% else %}
     <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
     {% endif %}
-    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
@@ -864,7 +864,7 @@
 
 </div>
 
-{% elif a.livreur.nom == user.username and a.date == today %}
+{% elif a.statut.livreur.nom == user.username and a.date == today %}
   <div class="card">
     <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
     <div class="card-body text-start">
@@ -873,7 +873,7 @@
       {% else %}
       <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
       {% endif %}
-      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
@@ -891,7 +891,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route16 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
+{% if a.statut.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -900,7 +900,7 @@
     {% else %}
     <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
     {% endif %}
-    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
@@ -918,7 +918,7 @@
 
 </div>
 
-{% elif a.livreur.nom == user.username and a.date == today %}
+{% elif a.statut.livreur.nom == user.username and a.date == today %}
   <div class="card">
     <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
     <div class="card-body text-start">
@@ -927,7 +927,7 @@
       {% else %}
       <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
       {% endif %}
-      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
@@ -946,7 +946,7 @@
 {% endfor %}
 
 {% for a in route17 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
+{% if a.statut.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -955,7 +955,7 @@
     {% else %}
     <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
     {% endif %}
-    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
@@ -973,7 +973,7 @@
 
 </div>
 
-{% elif a.livreur.nom == user.username and a.date == today %}
+{% elif a.statut.livreur.nom == user.username and a.date == today %}
   <div class="card">
     <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
     <div class="card-body text-start">
@@ -982,7 +982,7 @@
       {% else %}
       <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
       {% endif %}
-      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
@@ -1000,7 +1000,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route18 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
+{% if a.statut.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -1009,7 +1009,7 @@
     {% else %}
     <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
     {% endif %}
-    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
@@ -1027,7 +1027,7 @@
 
 </div>
 
-{% elif a.livreur.nom == user.username and a.date == today %}
+{% elif a.statut.livreur.nom == user.username and a.date == today %}
   <div class="card">
     <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
     <div class="card-body text-start">
@@ -1036,7 +1036,7 @@
       {% else %}
       <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
       {% endif %}
-      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
@@ -1054,7 +1054,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route19 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
+{% if a.statut.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -1063,7 +1063,7 @@
     {% else %}
     <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
     {% endif %}
-    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
@@ -1081,7 +1081,7 @@
 
 </div>
 
-{% elif a.livreur.nom == user.username and a.date == today %}
+{% elif a.statut.livreur.nom == user.username and a.date == today %}
   <div class="card">
     <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
     <div class="card-body text-start">
@@ -1090,7 +1090,7 @@
       {% else %}
       <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
       {% endif %}
-      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>
@@ -1108,7 +1108,7 @@
 {% endif %}
 {% endfor %}
 {% for a in route20 %}
-{% if a.livreur.nom == user.username and a.date == today and a.recuperation == True %}
+{% if a.statut.livreur.nom == user.username and a.date == today and a.recuperation == True %}
 <div class="card" style="background-color: #F1B3DA;">
   <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
   <div class="card-body text-start">
@@ -1117,7 +1117,7 @@
     {% else %}
     <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
     {% endif %}
-    <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+    <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
     <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
     <p class="card-text">Infos: {{ a.infodetail }}</p>
   </div>
@@ -1135,7 +1135,7 @@
 
 </div>
 
-{% elif a.livreur.nom == user.username and a.date == today %}
+{% elif a.statut.livreur.nom == user.username and a.date == today %}
   <div class="card">
     <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
     <div class="card-body text-start">
@@ -1144,7 +1144,7 @@
       {% else %}
       <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
       {% endif %}
-      <p class="card-text">Heure départ: {{ a.heure_depart }}</p>
+      <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
       <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
       <p class="card-text">Infos: {{ a.infodetail }}</p>
     </div>

@@ -11,7 +11,7 @@ class LivraisonForm(ModelForm):
 class LivraisonFeuilleForm(ModelForm):
     class Meta:
         model = Livraison
-        fields = ('nom','route', 'heure_depart','aidelivreur',  'livreur', 'retourtraiteur', 'commentairedispatch', 'recuperation', 'status', 'date')
+        fields = ('nom','statut', 'heure_depart','aidelivreur',  'livreur', 'retourtraiteur', 'commentairedispatch', 'recuperation', 'status', 'date')
 
 
 
@@ -65,4 +65,9 @@ class LivraisonsVentesForm(forms.ModelForm):
     class Meta:
         model = Livraison
         fields = ('nom_client', 'contact_site', 'app')
+
+class RoutedetailForm(forms.ModelForm):
+    class Meta:
+        model = Route
+        fields = ('livreur', 'heure_depart')
         

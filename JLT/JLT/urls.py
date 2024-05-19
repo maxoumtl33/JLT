@@ -16,7 +16,6 @@ path('livraisons_list/', views.livraisons_list, name = 'livraisons-list'),
 path('journees_list/', views.journees_list, name = 'journees-list'),
 path('journee/<int:id>/', views.journee_detail, name='journee-detail'),
 path('journee/<int:id>/livreur/<int:pk>', views.dashboard, name='dashboard'),
-path('recuperation/<int:id>/', views.recuperation_detail, name='recuperation-detail'),
 path('livreur_list/', views.livreur_list, name = 'livreur-list'),
 path('responsables/journee/<int:id>/', views.responsables, name = 'responsables'),
 path('acceuilresp', views.responsableschoixjournee, name = 'acceuilresponsables'),
@@ -46,6 +45,9 @@ path("livraisonsdragtoday/", views.Livraisonsdragtoday.as_view(), name='livraiso
 path('update_status/', views.update_status, name='update_status'),
 path('commentcamarche/', views.commentcamarche, name='commentcamarche'),
 path('livraisonrespdetail/<int:ip>/', views.livraisonrespdetail, name='livraisonrespdetail'),
+path('routedetail/<int:id>/', views.routedetail, name='routedetail'),
+
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 

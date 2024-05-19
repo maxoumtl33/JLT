@@ -41,10 +41,11 @@
   
     <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
   </nav>
+  
   <style>
     .column {
         float: left;
-        width: 30%;
+        width: 60%;
         padding: 10px;
         border: 1px solid #ccc;
         margin: 10px;
@@ -131,70 +132,33 @@
 <h1>Creer les routes du midi</h1>
 <br>
 <div style="display: flex;">
-<div class="column" data-status="todo">
-    <h2>A faire</h2>
-    {% for task in todo_livraison %}
-    <div class="task" data-task-id="{{ task.id }}">
-      <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
-    {% endfor %}
-</div>
-<div class="column" data-statut="2">
-    <h2>Route N°2</h2>
-    {% for task in route2 %}
-    <div class="task" data-task-id="{{ task.id }}">
-      <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
-    {% endfor %}
-</div>
-<div class="column" data-statut="3">
-    <h2>Route N°3</h2>
-    {% for task in route3 %}
-    <div class="task" data-task-id="{{ task.id }}">
-      <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
-    {% endfor %}
-</div>
-<div class="column" data-statut="4">
-  <h2>Route N°4</h2>
-  {% for task in route4 %}
-  <div class="task" data-task-id="{{ task.id }}">
-    <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
-{% endfor %}
-</div>
-<div class="column" data-statut="5">
-  <h2>Route N°5</h2>
-  {% for task in route5 %}
-  <div class="task" data-task-id="{{ task.id }}">
-    <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
-{% endfor %}
-</div>
-<div class="column" data-statut="6">
-  <h2>Route N°6</h2>
-  {% for task in route6 %}
-  <div class="task" data-task-id="{{ task.id }}">
-    <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
-{% endfor %}
-</div>
-<div class="column" data-statut="7">
-  <h2>Route N°7</h2>
-  {% for task in route7 %}
-  <div class="task" data-task-id="{{ task.id }}">
-    <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
-{% endfor %}
-</div>
-<div class="column" data-statut="8">
-  <h2>Route N°8</h2>
-  {% for task in route8 %}
-  <div class="task" data-task-id="{{ task.id }}">
-    <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
-{% endfor %}
-</div>
-<div class="column" data-statut="9">
-  <h2>Route N°9</h2>
-  {% for task in route9 %}
-  <div class="task" data-task-id="{{ task.id }}">
-    <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a></div>
-{% endfor %}
-</div>
-</div>
+  <div class="column" data-status="todo">
+      <h2>A faire</h2>
+      {% for task in todo_livraison %}
+      <div class="task" data-task-id="{{ task.id }}">
+        <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a>
+      </div>
+      {% endfor %}
+  </div>
+  {% for a in routes %}
+  <div class="column" data-statut="{{ a.nom }}">
+      <h1>Route N°{{ a.nom }}</h1>
+      <p><a href="{% url 'routedetail' a.id %}"><i class="fa-solid fa-pen-to-square"></i></a></p>
+      <hr>
+      <p>Livreur : {{ a.livreur }}</p>
+      <p>Heure départ : {{ a.heure_depart }}</p>
+      <hr>
+      {% for task in route2 %}
+      {% if task.statut.nom == a.nom %}
+      <div class="task" data-task-id="{{ task.id }}">
+        <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a>
+      </div>
+      {% endif %}
+      {% endfor %}
+  </div>
+  {% endfor %}
+
+  </div>
 <br>
 <br>
 
@@ -261,7 +225,7 @@
                     method: 'POST',
                     data: {
                         'livraison_id': livraison_id,
-                        'new_statut': new_statut,
+                        'new_statut_id': new_statut,
                      
 
                         'csrfmiddlewaretoken': '{{ csrf_token }}'

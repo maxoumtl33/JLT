@@ -66,9 +66,73 @@ class Journee(models.Model):
 
 
 class Route(models.Model):
+
+     choiceheures = (
+         ('.', '.'),
+         ('06h00', '06h00'),
+         ('06h15', '06h15'),
+         ('06h30', '06h30'),
+         ('06h45', '06h45'),
+         ('07h00', '07h00'),
+         ('07h15', '07h15'),
+         ('07h30', '07h30'),
+         ('07h45', '07h45'),
+         ('08h00', '08h00'),
+         ('08h15', '08h15'),
+         ('08h30', '08h30'),
+         ('08h45', '08h45'),
+         ('09h00', '09h00'),
+         ('09h15', '09h15'),
+         ('09h30', '09h30'),
+         ('09h45', '09h45'),
+         ('10h00', '10h00'),
+         ('10h15', '10h15'),
+         ('10h30', '10h30'),
+         ('10h45', '10h45'),
+         ('11h00', '11h00'),
+         ('11h15', '11h15'),
+         ('11h30', '11h30'),
+         ('11h45', '11h45'),
+         ('12h00', '12h00'),
+         ('12h15', '12h15'),
+         ('12h30', '12h30'),
+         ('12h45', '12h45'),
+         ('13h00', '13h00'),
+         ('13h15', '13h15'),
+         ('13h30', '13h30'),
+         ('13h45', '13h45'),
+         ('14h00', '14h00'),
+         ('14h15', '14h15'),
+         ('14h30', '14h30'),
+         ('14h45', '14h45'),
+         ('15h00', '15h00'),
+         ('15h15', '15h15'),
+         ('15h30', '15h30'),
+         ('15h45', '15h45'),
+         ('16h00', '16h00'),
+         ('16h15', '16h15'),
+         ('16h30', '16h30'),
+         ('16h45', '16h45'),
+         ('17h00', '17h00'),
+         ('17h15', '17h15'),
+         ('17h30', '17h30'),
+         ('17h45', '17h45'),
+         ('18h00', '18h00'),
+         ('18h15', '18h15'),
+         ('18h30', '18h30'),
+         ('18h45', '18h45'),
+         ('19h00', '19h00'),
+         ('19h15', '19h15'),
+         ('19h30', '19h30'),
+         ('19h45', '19h45'),
+         ('20h00', '20h00'),
+     )
+     
      nom = models.fields.CharField(max_length=100)
-     def __str__(self):
-        return f'{self.nom}'
+     
+     livreur = models.ForeignKey(Livreur, null=True, blank=True, on_delete=models.SET_NULL)
+     heure_depart = models.fields.CharField(null=True, blank=True, max_length=100, choices= choiceheures, default=" ")
+
 
 
         
@@ -151,34 +215,10 @@ class Livraison(models.Model):
          
 
     )
-    statut = models.CharField(max_length=20, default='todo', choices=[
-        ('todo', 'A faire'),
-        ('1', '1'),
-        ('2', '2'),
-        ('3', '3'),
-        ('4', '4'),
-        ('5', '5'),
-        ('6', '6'),
-        ('7', '7'),
-        ('8', '8'),
-        ('9', '9'),
-        ('10', '10'),
-        ('11', '11'),
-        ('12', '12'),
-        ('13', '13'),
-        ('14', '14'),
-        ('15', '15'),
-        ('16', '16'),
-        ('17', '17'),
-        ('18', '18'),
-        ('19', '19'),
-        ('20', '20'),
-
-    ])
+    statut = models.ForeignKey(Route, null=True, blank=True, on_delete=models.SET_NULL, default=21)
     nom = models.fields.CharField(max_length=100, null=True, blank=True,)
     def __str__(self):
         return f'{self.nom}'
-    route = models.ForeignKey(Route, null=True, blank=True, on_delete=models.SET_NULL, related_name='livraisons')
     heure_depart = models.fields.CharField(null=True, blank=True, max_length=100, choices= choiceheures, default=" ")
     heure_livraison = models.fields.CharField(null=True, blank=True, max_length=100, default=" ")
     client = models.ForeignKey(Client, null=True, blank=True, on_delete=models.SET_NULL)
