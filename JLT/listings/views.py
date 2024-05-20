@@ -153,7 +153,6 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
         recuperation = "oui"
         recuperationo = "non"
         retourtraiteur = "oui"
-        routes = Route.objects.order_by('position').filter(date=today)
         route1 = Livraison.objects.order_by('position').filter(date=today, statut=1)
         route2 = Livraison.objects.order_by('position').filter(date=today, statut=2)
         route3 = Livraison.objects.order_by('position').filter(date=today, statut=3)
