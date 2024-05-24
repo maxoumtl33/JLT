@@ -138,18 +138,22 @@
 <h1>Creer les routes du matin</h1>
 <br>
 <div style="display: flex;">
-  <div class="column" data-status="todo">
-      <h2>A faire</h2>
+    {% for a in routes21 %}
+  <div class="column" data-statut="{{ a.nom }}">
+      <h2>{{ a.nom }}</h2>
       {% for task in todo_livraison %}
+      {% if task.statut.nom == a.nom %}
       <div class="task" data-task-id="{{ task.id }}">
         <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a>
       </div>
+      {% endif %}
       {% endfor %}
   </div>
+  {% endfor %}
   {% for a in routes %}
   <div class="column" data-statut="{{ a.nom }}">
       <h1>Route N°{{ a.nom }}</h1>
-      <p><a href="{% url 'routedetail' a.id %}"><i class="fa-solid fa-pen-to-square"></i></a></p>
+      <p><a href="{% url 'routedetail' a.id %}" target="_blank"><i class="fa-solid fa-pen-to-square"></i></a></p>
       <hr>
       <p>Livreur : {{ a.livreur }}</p>
       <p>Heure départ : {{ a.heure_depart }}</p>

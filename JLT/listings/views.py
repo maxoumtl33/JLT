@@ -81,6 +81,9 @@ def journees_list(request):
 
 def routedetail(request, id):  # notez le paramètre id supplémentaire
    route = Route.objects.get(id=id)
+   today = datetime.now().date()
+   tomorrow = today + timedelta(1)
+   livraison = Livraison.objects.filter(date = tomorrow)
    form = RoutedetailForm(request.POST or None, instance = route)
    if form.is_valid():
        form.save()
@@ -88,7 +91,7 @@ def routedetail(request, id):  # notez le paramètre id supplémentaire
    
    return render(request,
           'listings/routedetail.html',
-          context={'route': route, 'form': form}) # nous passons l'id au modèle
+          context={'route': route, 'form': form, 'livraison':livraison}) # nous passons l'id au modèle
 
 def journee_detail(request, id):  # notez le paramètre id supplémentaire
    journees = Journee.objects.get(id=id)
@@ -373,6 +376,7 @@ class MapView(View):
         route3 = Livraison.objects.filter(statut__id= 3, date=tomorrow, heure_livraison__in = matin)
         route4 = Livraison.objects.filter(statut__id= 4, date=tomorrow, heure_livraison__in = matin)
         routesmatin = ['1','2','3','4']
+        routes21 = Route.objects.filter(id=21)
         routes = Route.objects.filter(nom__in=routesmatin)
         eligable_locations = Livraison.objects.order_by('position').filter(place_id__isnull=False, heure_livraison__in = matin, date=tomorrow)
         livraisons =[]
@@ -388,6 +392,7 @@ class MapView(View):
                 'convives': a.convives,
                 'mode_envoi': a.mode_envoi,
                 'infodetail': a.infodetail,
+                
             }
 
             livraisons.append(data)
@@ -403,6 +408,7 @@ class MapView(View):
                    'route3':route3,
                    'route4':route4,
                    'todo_livraison':todo_livraison,
+                   'routes21':routes21,
 
         }
         return render(request, 'listings/map.html', context)
@@ -465,7 +471,7 @@ class MapMidiView(View):
         midi = ['10h00', '10h15', '10h30', '10h45', '11h00', '11h15', '11h30', '11h45', '12h00', '12h15', '12h30', '12h45']
         todo_livraison = Livraison.objects.filter(statut=21, date=tomorrow, heure_livraison__in = midi, place_id__isnull=False)
         routesmidi = ['2','3','4','5','6','7','8','9','10','11','12']
-
+        routes21 = Route.objects.filter(id=21)
         routes = Route.objects.filter(nom__in=routesmidi)
         route2 = Livraison.objects.filter(date=tomorrow, heure_livraison__in = midi)
         route3 = Livraison.objects.filter(statut='3', date=tomorrow, heure_livraison__in = midi)
@@ -506,6 +512,7 @@ class MapMidiView(View):
                    'route9':route9,
                    'todo_livraison':todo_livraison,
                    'routes':routes,
+                   'routes21':routes21,
 
         }
         return render(request, 'listings/mapmidi.html', context)
@@ -584,7 +591,7 @@ class MapApremView(View):
         route18 = Livraison.objects.filter(statut='18', date=tomorrow, heure_livraison__in = aprem)
         route19 = Livraison.objects.filter(statut='19', date=tomorrow, heure_livraison__in = aprem)
         route20 = Livraison.objects.filter(statut='20', date=tomorrow, heure_livraison__in = aprem)
-
+        routes21 = Route.objects.filter(id=21)
         eligable_locations = Livraison.objects.filter(place_id__isnull=False, heure_livraison__in = aprem, date=tomorrow )
         livraisons =[]
         for a in eligable_locations:
@@ -623,6 +630,7 @@ class MapApremView(View):
                    'route20':route20,
                    'routes':routes,
                    'todo_livraison':todo_livraison,
+                   'routes21': routes21,
                    
 
         }
@@ -1122,6 +1130,7 @@ def livraisonsresp(request):
                                                               'recuperations' : recuperations,
                                                               'loic':loic,
                                                               'maxime': maxime,
+                                                              'tomorrow': tomorrow,
                                                             
                                                               })
 

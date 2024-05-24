@@ -11,6 +11,15 @@
 <br>
 <p style="text-align: center;">Livreur : {{ route.livreur }}</p>
 <p style="text-align: center;">Heure départ : {{ route.heure_depart }}</p>
+<p style="text-align: center;">Livraisons route n°{{ route.nom }} :</p>
+<ul style="text-align: center;">
+{% for a in livraison %}
+{% if route.nom == a.statut.nom %}
+  <li>{{ a.nom }} / {{ a.heure_livraison }}</li>
+  {% endif %}
+  {% endfor %}
+</ul>
+
 
 <a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
     <i class="fa-solid fa-pen-to-square"></i><span>Editer</span>
