@@ -42,7 +42,29 @@
     <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
   </nav>
 
+  <style>
+    .column {
+        float: left;
+        width: 60%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        margin: 10px;
+    }
+    .task {
+        padding: 10px;
+        margin: 10px 0;
+        background-color: #f9f9f9;
+        cursor: pointer;
+    }
+  </style>
+  
 <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
 
 <script> 
     let map
@@ -121,6 +143,40 @@
 <br>
 <br>
 <br>
+<h1>Routes Apres midi</h1>
+<br>
+<div style="display: flex;">
+    {% for a in routes21 %}
+  <div class="column" data-statut="{{ a.nom }}">
+      <h2>{{ a.nom }}</h2>
+      {% for task in todo_livraison %}
+      {% if task.statut.nom == a.nom %}
+      <div class="task" data-task-id="{{ task.id }}">
+        <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a>
+      </div>
+      {% endif %}
+      {% endfor %}
+  </div>
+  {% endfor %}
+  {% for a in routes %}
+  <div class="column" data-statut="{{ a.nom }}">
+      <h1>Route N°{{ a.nom }}</h1>
+      <p><a href="{% url 'routedetail' a.id %}" target="_blank"><i class="fa-solid fa-pen-to-square"></i></a></p>
+      <hr>
+      <p>Livreur : {{ a.livreur }}</p>
+      <p>Heure départ : {{ a.heure_depart }}</p>
+      <hr>
+      {% for task in route1 %}
+      {% if task.statut.nom == a.nom %}
+      <div class="task" data-task-id="{{ task.id }}">
+        <a  data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a>
+      </div>
+      {% endif %}
+      {% endfor %}
+  </div>
+  {% endfor %}
+
+  </div>
 
 <h1>Calculer les distances</h1>
 <br>
@@ -167,10 +223,40 @@
 </form>
 <br>
 <br>
-<b>
-
-</b>
+<script>
+    $(document).ready(function () {
+          $('[data-toggle="popover"]').popover();
+          $(".task").draggable({
+              revert: 'invalid',
+              helper: "clone"
+          });
+  
+          $(".column").droppable({
+              accept: ".task",
+              drop: function (event, ui) {
+                  var livraison_id = ui.draggable.data('task-id');
+                  var new_statut = $(this).data('statut');
+                  $.ajax({
+                      url: "{% url 'update_status' %}",
+                      method: 'POST',
+                      data: {
+                          'livraison_id': livraison_id,
+                          'new_statut_id': new_statut,
+                       
+  
+                          'csrfmiddlewaretoken': '{{ csrf_token }}'
+                      },
+                      success: function (data) {
+                          location.reload(); // Refresh page after updating status
+                      }
+                  });
+              }
+          });
+      });
+  
+  </script>
 
 {% endblock %}
 
-                  
+
+  

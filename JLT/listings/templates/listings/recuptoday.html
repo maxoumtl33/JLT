@@ -56,6 +56,7 @@
           <th scope="col" style="color: #303FBA;">Route</th>
           <th scope="col" style="color: #303FBA;">Status</th>
           <th scope="col" style="color: #303FBA;">lien</th>
+          <th scope="col" style="color: #303FBA;">Creer recup</th>
 
         </tr>
       </thead>
@@ -72,6 +73,7 @@
           <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
           {% endif %}
           <td><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+          <td><a href="{% url 'duplicate-model' livraison.id %}" class="btn"><i class="fa-solid fa-clone"></i></a></td>
         </tr>
         {% endfor %}
         

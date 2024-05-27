@@ -692,7 +692,11 @@ class MapApremTodayView(View):
         tomorrow = today + timedelta(1)
         distances = Distances.objects.all()
         aprem = ['13h00', '13h15', '13h30', '13h45', '14h00', '14h15', '14h30', '14h45', '15h00', '15h15', '15h30', '15h45', '16h00', '16h15', '16h30', '16h45', '17h00', '17h15', '17h30', '17h45', '18h00', '18h15', '18h30', '18h45', '19h00']
-
+        todo_livraison = Livraison.objects.filter(date=today, heure_livraison__in = aprem, place_id__isnull=False, statut__id= 21)
+        routesaprem = ['6','7','8','9','10','11','12','13','14','15','16','17', '18','19','20']
+        routes21 = Route.objects.filter(id=21)
+        routes = Route.objects.filter(nom__in=routesaprem)
+        route1 = Livraison.objects.filter(date=today)
         eligable_locations = Livraison.objects.filter(place_id__isnull=False, heure_livraison__in = aprem, date=today )
         livraisons =[]
         for a in eligable_locations:
@@ -712,6 +716,12 @@ class MapApremTodayView(View):
                    'livraisons':livraisons,
                    'form': form,
                    'distances':distances,
+                   'todo_livraison':todo_livraison,
+                   'routes21':routes21,
+                   'routes':routes,
+                   'route1':route1,
+
+
 
         }
         return render(request, 'listings/maptodayaprem.html', context)
@@ -772,7 +782,11 @@ class MapMidiTodayView(View):
         tomorrow = today + timedelta(1)
         distances = Distances.objects.all()
         midi = ['10h00', '10h15', '10h30', '10h45', '11h00', '11h15', '11h30', '11h45', '12h00', '12h15', '12h30', '12h45']
-
+        todo_livraison = Livraison.objects.filter(date=today, heure_livraison__in = midi, place_id__isnull=False, statut__id= 21)
+        routesmidi = ['2','3','4','5','6','7','8','9','10','11','12']
+        routes21 = Route.objects.filter(id=21)
+        routes = Route.objects.filter(nom__in=routesmidi)
+        route1 = Livraison.objects.filter(date=today)
         eligable_locations = Livraison.objects.filter(place_id__isnull=False, heure_livraison__in = midi, date=today )
         livraisons =[]
         for a in eligable_locations:
@@ -792,6 +806,12 @@ class MapMidiTodayView(View):
                    'livraisons':livraisons,
                    'form': form,
                    'distances':distances,
+                   'todo_livraison':todo_livraison,
+                   'routes21':routes21,
+                   'routes':routes,
+                   'route1':route1
+
+
 
         }
         return render(request, 'listings/maptodaymidi.html', context)
@@ -852,7 +872,11 @@ class MapTodayView(View):
         tomorrow = today + timedelta(1)
         distances = Distances.objects.all()
         matin = ['05h00', '05h15', '05h30', '05h45', '06h00', '06h15', '06h30', '06h45', '07h00', '07h15', '07h30', '07h45', '08h00','08h15', '08h30', '08h45', '09h00', '09h15', '09h30', '09h45']
-
+        todo_livraison = Livraison.objects.filter(date=today, heure_livraison__in = matin, place_id__isnull=False, statut__id= 21)
+        routesmatin = ['1','2','3','4']
+        routes21 = Route.objects.filter(id=21)
+        routes = Route.objects.filter(nom__in=routesmatin)
+        route1 = Livraison.objects.filter(date=today)
         eligable_locations = Livraison.objects.filter(place_id__isnull=False, heure_livraison__in = matin, date=today )
         livraisons =[]
         for a in eligable_locations:
@@ -872,6 +896,10 @@ class MapTodayView(View):
                    'livraisons':livraisons,
                    'form': form,
                    'distances':distances,
+                   'routes21':routes21,
+                   'routes':routes,
+                   'todo_livraison':todo_livraison,
+                   'route1':route1,
 
         }
         return render(request, 'listings/maptoday.html', context)
@@ -1084,8 +1112,7 @@ def livraisonstoday(request):
     recuperation = "oui"
     today = datetime.now().date()
     tomorrow = today + timedelta(1)
-    matin = ['05h00', '05h15', '05h30', '05h45', '06h00', '06h15', '06h30', '06h45', '07h00', '07h15', '07h30', '07h45', '08h00',
-             '08h15', '08h30', '08h45', '09h00', '09h15', '09h30']
+    matin = ['05h00', '05h15', '05h30', '05h45', '06h00', '06h15', '06h30', '06h45', '07h00', '07h15', '07h30', '07h45', '08h00','08h15', '08h30', '08h45', '09h00', '09h15', '09h30','09h45']
     midi = ['10h00', '10h15', '10h30', '10h45', '11h00', '11h15', '11h30', '11h45', '12h00', '12h15', '12h30', '12h45']
     apresmidi = ['13h00', '13h15', '13h30', '13h45', '14h00', '14h15', '14h30', '14h45', '15h00', '15h15', '15h30', '15h45', '16h00', '16h15', '16h30', '16h45', '17h00', '17h15', '17h30', '17h45', '18h00', '18h15', '18h30', '18h45', '19h00']
     livraisons = Livraison.objects.order_by('position').filter(date=today)
@@ -1364,3 +1391,34 @@ def commentcamarche(request):
     context = {}
     return render(request, 'listings/commentcamarche.html', context)
 
+
+
+def duplicate_model(request, model_id):
+    original_object = Livraison.objects.get(pk=model_id)
+    today = datetime.now().date()
+    tomorrow = today + timedelta(1)
+    # Create a new object with the same attributes as the original
+    new_object = Livraison()
+    new_object.nom = original_object.nom
+    new_object.mode_envoi = original_object.mode_envoi
+    new_object.status = False
+    new_object.recuperation = True
+    new_object.client = original_object.client
+    new_object.commentaire = original_object.commentaire
+    new_object.commentairedispatch = original_object.commentairedispatch
+    new_object.adress = original_object.adress
+    new_object.zipcode = original_object.zipcode
+    new_object.app = original_object.app
+    new_object.ligne2 = original_object.ligne2
+    new_object.convives = original_object.convives
+    new_object.num_commande = original_object.num_commande
+    new_object.nom_client = original_object.nom_client
+    new_object.contact_site = original_object.contact_site
+    new_object.date = tomorrow
+
+
+    # Assign other fields as needed
+    new_object.save()
+    
+    # Redirect back to a page or render a template
+    return redirect('recuptoday')  # Redirect to a specific URL name

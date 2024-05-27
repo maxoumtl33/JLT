@@ -246,6 +246,8 @@ class Livraison(models.Model):
     num_commande = models.fields.CharField(null=True, blank=True, max_length=200, default=" ")
     nom_client = models.fields.CharField(null=True, blank=True, max_length=200, default=" ")
     contact_site = models.fields.CharField(null=True, blank=True, max_length=200, default=" ")
+    vendeur = models.fields.CharField(null=True, blank=True, max_length=200, default=" ")
+
     position = models.IntegerField(default=0)
 
     
