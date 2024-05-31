@@ -15,6 +15,7 @@ from .forms import LivraisonDragForm
 from .forms import LivraisonDragFormtoday
 from .forms import LivraisonsVentesForm, RoutedetailForm
 import json
+from .forms import PhotoUploadForm
 from .forms import DistanceForm
 from tablib import Dataset
 from .ressources import LivraisonResource
@@ -60,6 +61,8 @@ def livraisons_list(request):
     return render(request, 'listings/livraisons_list.html', context={'livraisons': livraisons,
                                                               'livreurs': livreurs,
                                                               'journees' : journees})
+
+
 
 def journees_list(request):
     today = now().date()
@@ -146,12 +149,12 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
         userid = livreur.id
         today = now().date()
         livraisons  = Livraison.objects.order_by('position').filter(date=today)
-        livraisonstatusok = Livraison.objects.filter(status=True, date=today,recuperation=False, livreur = userid)
-        livraisonstatusko = Livraison.objects.filter(status=False, date=today,recuperation=False, livreur = userid)
-        recuperation = Livraison.objects.filter(recuperation=True, date=today, livreur = userid)
-        recuperationok = Livraison.objects.filter(recuperation=True, status=True, date=today, livreur = userid)
-        recuperationko = Livraison.objects.filter(status=False,recuperation=True, date=today, livreur = userid)
-        livraison = Livraison.objects.filter(date=today,recuperation=False, livreur = userid)
+        livraisonstatusok = Livraison.objects.filter(status=True, date=today,recuperation=False, statut__livreur = userid)
+        livraisonstatusko = Livraison.objects.filter(status=False, date=today,recuperation=False, statut__livreur = userid)
+        recuperation = Livraison.objects.filter(recuperation=True, date=today, statut__livreur = userid)
+        recuperationok = Livraison.objects.filter(recuperation=True, status=True, date=today, statut__livreur = userid)
+        recuperationko = Livraison.objects.filter(status=False,recuperation=True, date=today, statut__livreur = userid)
+        livraison = Livraison.objects.filter(date=today,recuperation=False, statut__livreur = userid)
         journee = Journee.objects.get(id=id)
         recuperation = "oui"
         recuperationo = "non"
@@ -1069,17 +1072,35 @@ def livraison_detail(request, ip):  # notez le paramètre id supplémentaire
    recuperation = "oui"
    loic = "Loic"
    maxime = "Maxime"
+   
    form = LivraisonForm(request.POST or None, instance=livraison)
-   gmaps = googlemaps.Client(key = settings.GOOGLE_API_KEY)
-   result = gmaps.geocode(adresse)
    if form.is_valid():
        form.save()
-       
-       
+
+   
+   formbis = PhotoUploadForm(request.POST, request.FILES, instance=livraison)
+   if formbis.is_valid():
+      formbis.save()
+   
+
+      
+   gmaps = googlemaps.Client(key = settings.GOOGLE_API_KEY)
+   result = gmaps.geocode(adresse)
+   
    return render(request,
           'listings/livraison_detail.html',
-          context={'livraison': livraison, 'livreur':livreur, 'recuperation': recuperation, 'form': form, 'journee':journee, 'result':result,'adresse': adresse, 'loic': loic, 'maxime':maxime}) # nous passons l'id au modèle
+          context={'livraison': livraison, 'livreur':livreur, 'recuperation': recuperation, 'form': form, 'journee':journee, 'result':result,'adresse': adresse, 'loic': loic, 'maxime':maxime, 'formbis':formbis}) # nous passons l'id au modèle
 
+def update_photo(request, pk):
+    instance = Livraison.objects.get(pk=pk)
+    if request.method == 'POST':
+        form = PhotoUploadForm(request.POST, request.FILES, instance=instance)
+        if form.is_valid():
+            form.save()
+            return redirect('livraison-detail')  # Redirect to some URL after successful upload
+    else:
+        form = PhotoUploadForm(instance=instance)
+    return render(request, 'listings/update_photo.html', {'form': form})
 
 def livraisonstomorrow(request):
     recuperation = "oui"
@@ -1407,6 +1428,7 @@ def duplicate_model(request, model_id):
     new_object.commentaire = original_object.commentaire
     new_object.commentairedispatch = original_object.commentairedispatch
     new_object.adress = original_object.adress
+    new_object.infodetail = original_object.infodetail
     new_object.zipcode = original_object.zipcode
     new_object.app = original_object.app
     new_object.ligne2 = original_object.ligne2

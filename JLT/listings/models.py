@@ -148,7 +148,7 @@ class Livraison(models.Model):
          ('Mohammad', 'Mohammad'),
          ('Samuel', 'Samuel'),
          ('Anthonny', 'Anthonny'),
-         ('Bruno', 'Bruno'),
+         ('Antoine', 'Antoine'),
          ('Dany', 'Dany'),
          ('Rooseph', 'Rooseph'),
          ('Aucun', 'Aucun'),)
@@ -247,7 +247,7 @@ class Livraison(models.Model):
     nom_client = models.fields.CharField(null=True, blank=True, max_length=200, default=" ")
     contact_site = models.fields.CharField(null=True, blank=True, max_length=200, default=" ")
     vendeur = models.fields.CharField(null=True, blank=True, max_length=200, default=" ")
-
+    photo = models.ImageField(upload_to='listings/media/commandesdetail', blank=True, null=True)
     position = models.IntegerField(default=0)
 
     

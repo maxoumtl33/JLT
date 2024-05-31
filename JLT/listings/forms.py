@@ -71,3 +71,7 @@ class RoutedetailForm(forms.ModelForm):
         model = Route
         fields = ('livreur', 'heure_depart')
         
+class PhotoUploadForm(forms.ModelForm):
+    class Meta:
+        model = Livraison
+        fields = ['photo']

@@ -24,24 +24,25 @@
           </li>
           {% else %}
           <li class="nav__item">
-            <a class="nav__link" href="https://discord.com/channels/1174091428876533800/1194755233935523952" target="_blank"><i class="fa-solid fa-camera"></i>
-            <span>Photo</span>
-            </a> 
+            <a type="button" class="nav__link" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
+              <i class="fa-solid fa-camera"></i>
+              <span>Photo</span>
+            </a>
           </li>
           {% endif %}
           {% if livraison.status == False %}
           <li class="nav__item">
-            <button type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            <a type="button" class="nav__link" data-bs-toggle="offcanvas" href="#ofcanvasExample" role="button" aria-controls="offcanvasExample">
               <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i>
               <span>En cours</span>
-          </button>  
+            </a>  
           </li>
           {% else %}
           <li class="nav__item">
-            <button type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            <a type="button" class="nav__link" data-bs-toggle="offcanvas" href="#ofcanvasExample" role="button" aria-controls="offcanvasExample">
               <i class="fa-solid fa-circle-check" style="color: green;"></i>
               <span>Validé</span>
-          </button> 
+            </a> 
           </li>
           {% endif %}
       </ul>
@@ -144,13 +145,32 @@
               </div>
             </div>
           </div>
-          
+          {% if livraison.photo %}  
+          <div class="col">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><strong>Photo Livraison</strong></h5>
+                <p class="card-text"><img src="{{ livraison.photo.url }}" alt="Photo">
+                </p>
+              </div>
+            </div>
+          </div>
+          {% else %}
+          <div class="col">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><strong>Photo Livraison</strong></h5>
+                <p class="card-text">Pas de photo
+                </p>
+              </div>
+            </div>
+          </div>
+    {% endif %}
         
         
       </li>
       </ul>
     </div>
-  
     
       <div class="card card-body">
         <ul class="list-group">
@@ -189,47 +209,38 @@
 
     
 
-      <!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        {% if livraison.recuperation == recuperation %}
-        <h5 class="modal-title" id="exampleModalLabel">Récupération terminée ? check status puis valider pour confimer la récupération</h5>
-
-        {% else %}
-        <h5 class="modal-title" id="exampleModalLabel">Livraison terminée ? check status puis valider pour confimer la livraiso</h5>
-        {% endif %}        
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
+  <div class="offcanvas offcanvas-start" tabindex="-1" id="ofcanvasExample" aria-labelledby="offcanvasExampleLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="offcanvasExampleLabel">Valider livraison</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div>
         <form action="" method=POST >
           {% csrf_token %}
           {{ form.as_p }}
           <input type="submit" value="valider" class="btn btn-primary">
         </form>
-      </div>
+    </div>
     </div>
   </div>
-</div>
-<div class="modal fade" id="edit" tabindex="-1" aria-labelledby="edit1" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">   
-        <h5 class="modal-title" id="edit1">{{livraison.nom}} / {{livraison.heure_livraison}}</h5> 
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form action="" method=POST >
+  
+
+  <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="offcanvasExampleLabel">Photo</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div>
+        <form method="post" enctype="multipart/form-data">
           {% csrf_token %}
           {{ formbis.as_p }}
-          <input type="submit" value="valider" class="btn btn-primary">
-        </form>
-      </div>
+          <button type="submit">Update Photo</button>
+      </form>
+    </div>
     </div>
   </div>
-</div>
-
 
 {% endblock %}
 

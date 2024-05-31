@@ -47,6 +47,7 @@ path('commentcamarche/', views.commentcamarche, name='commentcamarche'),
 path('livraisonrespdetail/<int:ip>/', views.livraisonrespdetail, name='livraisonrespdetail'),
 path('routedetail/<int:id>/', views.routedetail, name='routedetail'),
 path('duplicate/<int:model_id>/', duplicate_model, name='duplicate-model'),
+path('update_photo/<int:pk>/', update_photo, name='update_photo'),
 
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
