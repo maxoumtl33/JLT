@@ -36,7 +36,7 @@
 <br>
 <br>
 <br>
-{% if user.username == ventes %}
+{% if user.username == ventes or user.username == cuisine %}
 <div style="text-align: center;">
   <div class="body">
     <h1 style="text-align: center;">LIVRAISONS DU JOUR</h1>
@@ -57,7 +57,9 @@
             <th scope="col" style="color: #303FBA;">Aide livreur</th>
             <th scope="col" style="color: #303FBA;">Route</th>
             <th scope="col" style="color: #303FBA;">Status</th>
+            {% if user.username == ventes %}
             <th scope="col" style="color: #303FBA;">Modifier</th>
+            {% endif %}
 
 
   
@@ -81,7 +83,9 @@
               {% else %}
             <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
             {% endif %}
+            {% if user.username == ventes %}
           <td><a href="{% url 'livraisonventesdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+          {% endif %}
             </tr>
             {% else %}
             <tr>
@@ -98,7 +102,9 @@
               {% else %}
             <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
             {% endif %}
+            {% if user.username == ventes %}
           <td><a href="{% url 'livraisonventesdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+          {% endif %}
           </tr>
           {% endif %}
           {% endfor %}

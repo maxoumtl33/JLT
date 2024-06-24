@@ -74,6 +74,7 @@
   </ul>
 </div>
 
+
 <div class="dropdown">
   <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="margin-right: 30px;">
             Demain
@@ -85,6 +86,25 @@
     </li>
     <li><a href="{% url 'livraisonsdrag'%}" class="dropdown-item">Classer et modifier</a> </li>
     
+  </ul>
+</div>
+<div class="dropdown">
+  <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="margin-right: 30px;">
+            Dimanche
+        </button>
+  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+    <li>      <a href="{% url 'livraisonstoday' %}" class="dropdown-item">Carte</a>    
+    </li>
+    <li><a href="{% url 'livraisonsdragtoday' %}" class="dropdown-item">Classer et modifier</a></li>
+  </ul>
+</div>
+<div class="dropdown">
+  <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="margin-right: 30px;">
+            Lundi
+        </button>
+  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+    <li>      <a href="{% url 'livraisonstoday' %}" class="dropdown-item">Carte</a></li>
+    <li><a href="{% url 'livraisonsdragtoday' %}" class="dropdown-item">Classer et modifier</a></li>
   </ul>
 </div>
 <div class="dropdown">

@@ -35,14 +35,14 @@
             <a type="button" class="nav__link" data-bs-toggle="offcanvas" href="#ofcanvasExample" role="button" aria-controls="offcanvasExample">
               <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i>
               <span>En cours</span>
-            </a>  
+            </a>
           </li>
           {% else %}
           <li class="nav__item">
             <a type="button" class="nav__link" data-bs-toggle="offcanvas" href="#ofcanvasExample" role="button" aria-controls="offcanvasExample">
               <i class="fa-solid fa-circle-check" style="color: green;"></i>
               <span>Validé</span>
-            </a> 
+            </a>
           </li>
           {% endif %}
       </ul>
@@ -56,9 +56,9 @@
   <h1 style="text-align: center;">LIVRAISON {{livraison.nom|upper}}</h1>
   <br>
   {% endif %}
-  
-  
-  
+
+
+
     <div class="card card-body">
       <ul class="list-group">
         <li class="list-group-item active" aria-current="true">Informations Livraison</li>
@@ -104,7 +104,7 @@
                 <p class="card-text">{{livraison.commentairedispatch}}</p>
               </div>
             </div>
-          </div>  
+          </div>
         <div class="col">
           <div class="card">
             <div class="card-body">
@@ -145,7 +145,7 @@
               </div>
             </div>
           </div>
-          {% if livraison.photo %}  
+          {% if livraison.photo %}
           <div class="col">
             <div class="card">
               <div class="card-body">
@@ -166,12 +166,12 @@
             </div>
           </div>
     {% endif %}
-        
-        
+
+
       </li>
       </ul>
     </div>
-    
+
       <div class="card card-body">
         <ul class="list-group">
           <li class="list-group-item active" aria-current="true">Informations Client sur place</li>
@@ -192,22 +192,22 @@
                 </div>
               </div>
             </div>
-            
+
         </li>
         </ul>
       </div>
     </div>
-    
-  
-  
+
+
+
 
   <br>
   <br>
   <br>
 
-  
 
-    
+
+
 
   <div class="offcanvas offcanvas-start" tabindex="-1" id="ofcanvasExample" aria-labelledby="offcanvasExampleLabel">
     <div class="offcanvas-header">
@@ -224,7 +224,7 @@
     </div>
     </div>
   </div>
-  
+
 
   <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
     <div class="offcanvas-header">
@@ -236,7 +236,7 @@
         <form method="post" enctype="multipart/form-data">
           {% csrf_token %}
           {{ formbis.as_p }}
-          <button type="submit">Update Photo</button>
+          <input type="submit" value="valider" class="btn btn-primary">
       </form>
     </div>
     </div>

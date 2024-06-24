@@ -73,12 +73,14 @@ def journees_list(request):
     livreurs = Livreur.objects.all()
     journees = Journee.objects.all()
     ventes = "Ventes"
+    cuisine = "Cuisine"
     return render(request, 'listings/journees_list.html', context={'livraisons': livraisons,
                                                               'livreurs': livreurs,
                                                               'journees' : journees,
                                                               'ventes':ventes,
                                                               'livraisonsok':livraisonsok,
-                                                              'livraisonsrecup':livraisonsrecup,})
+                                                              'livraisonsrecup':livraisonsrecup,
+                                                              'cuisine':cuisine,})
 
 
 
@@ -1437,6 +1439,9 @@ def duplicate_model(request, model_id):
     new_object.nom_client = original_object.nom_client
     new_object.contact_site = original_object.contact_site
     new_object.date = tomorrow
+    new_object.photo = original_object.photo
+
+
 
 
     # Assign other fields as needed

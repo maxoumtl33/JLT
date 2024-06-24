@@ -96,6 +96,27 @@
               </div>
             </div>
           </div>
+          {% if livraison.photo %}  
+          <div class="col">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><strong>Photo Livraison</strong></h5>
+                <p class="card-text"><img src="{{ livraison.photo.url }}" alt="Photo">
+                </p>
+              </div>
+            </div>
+          </div>
+          {% else %}
+          <div class="col">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><strong>Photo Livraison</strong></h5>
+                <p class="card-text">Pas de photo
+                </p>
+              </div>
+            </div>
+          </div>
+    {% endif %}
           
         
         

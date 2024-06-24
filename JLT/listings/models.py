@@ -247,10 +247,14 @@ class Livraison(models.Model):
     nom_client = models.fields.CharField(null=True, blank=True, max_length=200, default=" ")
     contact_site = models.fields.CharField(null=True, blank=True, max_length=200, default=" ")
     vendeur = models.fields.CharField(null=True, blank=True, max_length=200, default=" ")
-    photo = models.ImageField(upload_to='listings/media/commandesdetail', blank=True, null=True)
     position = models.IntegerField(default=0)
-
+    photo = models.ImageField(upload_to='listings/media/commandesdetail', blank=True, null=True)
     
+class ProductPhoto(models.Model):
+    product = models.ForeignKey(Livraison, related_name='photos', on_delete=models.CASCADE)
+    photo = models.ImageField(upload_to='listings/media/commandesdetail/')
+
+
 class Distances(models.Model):
      from_location = models.ForeignKey(Livraison, related_name="from_location", on_delete=models.CASCADE)
      to_location = models.ForeignKey(Livraison, related_name="to", on_delete=models.CASCADE)
