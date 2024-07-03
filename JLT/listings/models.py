@@ -8,10 +8,14 @@ from django.contrib.auth.models import User
 
 
 
-#class Route(models.Model):
-        #nom = models.fields.CharField(max_length=100)
-        #def __str__(self):
-            #return f'{self.nom}'
+class ItemInv(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    quantity = models.IntegerField(default=0)
+    photo = models.ImageField(upload_to='listings/media/commandesdetail', blank=True, null=True)
+
+    def __str__(self):
+        return self.name
 
 
 class Livreur(models.Model):

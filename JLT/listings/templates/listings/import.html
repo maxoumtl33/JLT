@@ -1,0 +1,16 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<h1>Import Items from Excel</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="myfile">
+        <button type="submit">Importer</button>
+    </form>
+    {% for message in messages %}
+        <div>{{ message }}</div>
+    {% endfor %}
+
+{% endblock %}

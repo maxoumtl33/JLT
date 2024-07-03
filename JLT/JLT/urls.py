@@ -48,6 +48,8 @@ path('livraisonrespdetail/<int:ip>/', views.livraisonrespdetail, name='livraison
 path('routedetail/<int:id>/', views.routedetail, name='routedetail'),
 path('duplicate/<int:model_id>/', duplicate_model, name='duplicate-model'),
 path('update_photo/<int:pk>/', update_photo, name='update_photo'),
+path('inventaire', inventory_list, name='inventaire'),
+path('import/', views.import_items, name='import_items'),
 
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

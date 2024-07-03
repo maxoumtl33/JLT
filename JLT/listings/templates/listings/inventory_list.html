@@ -1,0 +1,18 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<h1>Inventory List</h1>
+<ul>
+    {% for item in items %}
+        <li>{{ item.name }} - Quantité: {{ item.quantity }}</li>
+        {% if item.photo %}
+        <li><img src="{{ item.photo.url }}" alt="Photo"></li>
+        {% else %}
+        <li>pas de photo</li>
+        {% endif %}
+    {% endfor %}
+</ul>
+
+{% endblock %}

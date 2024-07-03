@@ -32,11 +32,60 @@ from django.views.decorators.http import require_POST
 from django.http import QueryDict
 from django.shortcuts import render, get_object_or_404
 from .models import Task
+from .models import ItemInv
+from django.shortcuts import render
+from django.contrib import messages
+from .models import Item
+from openpyxl import load_workbook
+from tempfile import NamedTemporaryFile
+from urllib.request import urlopen
+from django.core.files import File
 
 from django.http import FileResponse, HttpResponseRedirect, HttpResponse
 
+def import_items(request):
+    if request.method == 'POST' and request.FILES['myfile']:
+        myfile = request.FILES['myfile']
+        temp_file = NamedTemporaryFile(delete=True, suffix='.xlsx')
+        
+        # Write the uploaded file to a temporary file
+        for chunk in myfile.chunks():
+            temp_file.write(chunk)
+        temp_file.flush()
+        
+        # Load the Excel workbook
+        wb = load_workbook(temp_file.name)
+        ws = wb.active
+
+        # Process each row in the Excel sheet
+        for row in ws.iter_rows(min_row=2, values_only=True):
+            name = row[0]
+            description = row[1]
+            quantity = row[2]
+            photo_url = row[3]  # Assuming the photo URL is in the fourth column
+
+            item = ItemInv(name=name, description=description, quantity=quantity)
+
+            # Download the photo and save it as ImageField
+            if photo_url:
+                img_temp = NamedTemporaryFile(delete=True)
+                img_temp.write(urlopen(photo_url).read())
+                img_temp.flush()
+                item.photo.save(f'{name}.jpg', File(img_temp))
+
+            item.save()
+
+        messages.success(request, 'Les données ont été importées avec succès.')
+        temp_file.close()
+    else:
+        messages.error(request, 'Veuillez fournir un fichier.')
+
+    return render(request, 'listings/import.html')
 
 
+def inventory_list(request):
+    items = ItemInv.objects.all()
+    return render(request, 'listings/inventory_list.html', {'items': items})
 
 @csrf_exempt
 def save_positions(request):
