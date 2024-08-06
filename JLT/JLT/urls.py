@@ -48,9 +48,16 @@ path('livraisonrespdetail/<int:ip>/', views.livraisonrespdetail, name='livraison
 path('routedetail/<int:id>/', views.routedetail, name='routedetail'),
 path('duplicate/<int:model_id>/', duplicate_model, name='duplicate-model'),
 path('update_photo/<int:pk>/', update_photo, name='update_photo'),
-path('inventaire', inventory_list, name='inventaire'),
+path('inventory/', views.inventory, name='inventory'),
 path('import/', views.import_items, name='import_items'),
-
+path('creerchecklist/', views.creerchecklist, name='creerchecklist'),
+path('checklist/<int:checklist_id>/add/', views.add_to_checklist, name='add_to_checklist'),
+path('checklist/<int:checklist_id>/', views.checklist_detail, name='checklist-detail'),
+path('iteminv/<int:item_id>/', views.product_detail, name='product_detail'),
+path('subtract/<int:checklist_id>/', views.subtract_to_checklist, name='subtract_checklist'),
+path('voirchecklist/', views.voir_checklist, name='voir_checklist'),
+path('checklistvoir/<int:checklist_id>/', views.checklistvoir_detail, name='checklistvoir-detail'),
+ path('checklist-item/<int:pk>/delete-ajax/', ChecklistItemDeleteAjaxView.as_view(), name='checklist-item-delete-ajax'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
@@ -61,6 +68,7 @@ htmx_urlpatterns = [
     path('add-livraisontoday/', views.add_livraisontoday, name='add-livraisontoday'),
     path('delete-livraison/<int:pk>/', views.delete_livraison, name='delete-livraison'),
     path('sort/', views.sort, name='sort'),
+    path('edit/<int:pk>/', views.edit_item, name='edit_item'),
 ]
 
 urlpatterns += htmx_urlpatterns

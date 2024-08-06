@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'crispy_bootstrap4',
     'django_dyn_dt',
     'django_htmx',
+    'bootstrap_datepicker_plus',
   
 ]
 

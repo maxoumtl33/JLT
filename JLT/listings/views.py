@@ -7,7 +7,7 @@ from .models import Journee
 from .models import Route
 from django.views.generic.list import ListView
 from .models import Distances
-from .models import User
+from .models import Checklist
 from django.shortcuts import get_object_or_404
 from .forms import LivraisonForm
 from .forms import LivraisonFeuilleForm
@@ -31,7 +31,7 @@ from datetime import datetime
 from django.views.decorators.http import require_POST
 from django.http import QueryDict
 from django.shortcuts import render, get_object_or_404
-from .models import Task
+from .models import Inventory
 from .models import ItemInv
 from django.shortcuts import render
 from django.contrib import messages
@@ -40,8 +40,305 @@ from openpyxl import load_workbook
 from tempfile import NamedTemporaryFile
 from urllib.request import urlopen
 from django.core.files import File
-
+from .forms import ItemInvForm
+from .forms import SearchFormInv
+from .forms import ProductForm
+from .models import Product, Checklist, ChecklistItem
+from .forms import ChecklistItemForm
+from .forms import ChecklistForm
 from django.http import FileResponse, HttpResponseRedirect, HttpResponse
+from .utils import add_quantity_to_checklist, remove_quantity_from_checklist
+from .forms import DateFilterForm
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.views.generic.edit import UpdateView
+from django.http import HttpResponseForbidden
+from django.urls import reverse_lazy
+from django.views.generic.edit import DeleteView
+
+class ChecklistItemDeleteAjaxView(View):
+    def post(self, request, *args, **kwargs):
+        item_id = self.kwargs.get('pk')
+        try:
+            item = ChecklistItem.objects.get(pk=item_id)
+            product = item.product
+            quantity = item.quantity
+            item.delete()
+            # Adjust the product quantity
+            if product:
+                product.adjust_quantity(quantity)
+            response_data = {'status': 'success', 'message': 'Objet bien supprimé :)'}
+        except ChecklistItem.DoesNotExist:
+            response_data = {'status': 'error', 'message': 'Checklist item not found.'}
+        
+        return JsonResponse(response_data)
+        
+
+def voir_checklist(request):
+
+    checklists = Checklist.objects.all().order_by('-added_on')
+    encours = "en_cours"
+    valide = "valide"
+    refuse = "refuse"
+
+    if request.method == 'GET' and 'date' in request.GET:
+       form = DateFilterForm(request.GET)
+       if form.is_valid():
+            date = form.cleaned_data['date']
+            checklists = checklists.filter(date=date)
+    else:
+        form = DateFilterForm()
+
+    paginator = Paginator(checklists, 10)  # Show 10 events per page
+
+    page = request.GET.get('page')
+    try:
+        checklists = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        checklists = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g., 9999), deliver last page of results.
+        checklists = paginator.page(paginator.num_pages)
+
+    context = {
+    
+        'checklists': checklists,
+        'form': form,
+        'encours': encours,
+        'valide': valide,
+        'refuse': refuse,
+    }
+    return render(request, 'listings/voir-checklist.html', context)
+
+def checklistvoir_detail(request, checklist_id):
+    checklist = get_object_or_404(Checklist, pk=checklist_id)
+    checklist_item = ChecklistItem.objects.filter(checklist=checklist)
+    products = Product.objects.all()
+    encours = "en_cours"
+    valide = "valide"
+    refuse = "refuse"
+
+    
+
+    if request.method == 'POST':
+        item_id = request.POST.get('item_id')
+        status = request.POST.get('status')
+        
+        # Validate item_id and status
+        if not item_id or not status:
+            return HttpResponseForbidden("Invalid item ID or status.")
+        
+        checklist_item = get_object_or_404(ChecklistItem, id=item_id, checklist=checklist)
+        checklist_item.status = status
+        checklist_item.save()
+        
+        # Redirect to the same page or another page
+        return redirect('checklistvoir-detail', checklist_id=checklist_id)
+    
+    # Prepare checklist items to be displayed with their statuses
+    items = ChecklistItem.objects.filter(checklist=checklist)
+
+
+
+    context = {
+       'checklist': checklist,
+       'checklist_item': checklist_item,
+       'products': products,
+       'items': items,
+       'encours':encours,
+       'valide':valide,
+       'refuse':refuse,
+
+    }
+    return render(request, 'listings/checklistevoir_detail.html', context)
+
+def product_detail(request, item_id):
+    item = get_object_or_404(ItemInv, pk=item_id)
+
+    context = {
+        'item': item,
+    }
+    return render(request, 'listings/product_detail.html', context)
+
+def inventory(request):
+    products = Product.objects.all()
+    context = {
+        'products': products,
+    }
+    return render(request, 'listings/inventory.html', context)
+
+def add_to_checklist(request, checklist_id):
+    checklist = get_object_or_404(Checklist, pk=checklist_id)
+
+    if request.method == 'POST':
+        product_id = request.POST.get('product_id')
+        quantity_to_modify = int(request.POST.get('quantity', 0))
+        action = request.POST.get('action')  # 'add' or 'subtract' action
+
+        product = get_object_or_404(Product, pk=product_id)
+
+        if action == 'add' and quantity_to_modify > 0:
+            # Add quantity to ChecklistItem and subtract from inventory
+            checklist_item, created = ChecklistItem.objects.get_or_create(checklist=checklist, product=product)
+            checklist_item.quantity += quantity_to_modify
+            checklist_item.save()
+
+            product.quantity -= quantity_to_modify
+            product.save()
+
+        elif action == 'subtract' and quantity_to_modify > 0:
+            # Subtract quantity from ChecklistItem and add back to inventory
+            try:
+                checklist_item = ChecklistItem.objects.get(checklist=checklist, product=product)
+                if checklist_item.quantity >= quantity_to_modify:
+                    checklist_item.quantity -= quantity_to_modify
+                    checklist_item.save()
+
+                    product.quantity += quantity_to_modify
+                    product.save()
+                else:
+                    # Handle insufficient quantity in checklist item
+                    pass
+            except ChecklistItem.DoesNotExist:
+                # Handle case where ChecklistItem does not exist
+                pass
+
+
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+def subtract_to_checklist(request, checklist_id):
+    
+    checklist_item = get_object_or_404(Checklist, pk=checklist_id)
+    item = checklist_item.item
+    quantity_to_subtract = checklist_item.quantity_checked
+
+    # Ensure there are enough items in inventory to subtract
+    if item.quantity >= quantity_to_subtract:
+        # Update item quantity in inventory
+        item.quantity -= quantity_to_subtract
+        item.save()
+
+        # Delete checklist item after subtracting
+        checklist_item.delete()
+
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+def checklist_detail(request, checklist_id):
+    checklist = get_object_or_404(Checklist, pk=checklist_id)
+    checklist_items = ChecklistItem.objects.filter(checklist=checklist)
+    products = Product.objects.all()
+    query = request.GET.get('query')
+    equipementdebase = "ÉQUIPEMENT DE BASE"
+    jetable = "JETABLE"
+    accessoirededecor = "ACCESSOIRES DE DÉCOR"
+    equipementdebar = "ÉQUIPEMENT DE BAR"
+    equipementpourservicecafe = "ÉQUIPEMENT POUR SERVICE CAFÉ"
+    itemsdivers = "ITEMS DIVERS"
+    tableetlinge = "TABLE ET LINGE DE TABLE"
+    verrerie = "VERRERIE"
+    porcelaine = "PORCELAINE ET COUTELLERIE"
+    montage = "ÉQUIPEMENT POUR MONTAGE CANAPÉS"
+    cuisson = "ÉQUIPEMENT DE CUISSON"
+    service = "USTENSILES DE SERVICE"
+    encours = "en_cours"
+    valide = "valide"
+    refuse = "refuse"
+
+
+
+
+
+    if query:
+        products = products.filter(name__icontains=query)
+
+    formbis = ChecklistForm(request.POST or None, instance=checklist)
+    if formbis.is_valid():
+       formbis.save()
+       return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+    context = {
+        'encours':encours,
+        'valide': valide,
+        'refuse': refuse,
+        'checklist': checklist,
+        'checklist_items': checklist_items,
+        'products': products,
+        'form': SearchFormInv(),
+        'query': query,
+        'formbis': formbis,
+        'equipementdebase':equipementdebase,
+        'jetable':jetable,
+        'accessoirededecor':accessoirededecor,
+        'equipementdebar':equipementdebar,
+        'equipementpourservicecafe':equipementpourservicecafe,
+        'itemsdivers':itemsdivers,
+        'tableetlinge':tableetlinge,
+        'verrerie':verrerie,
+        'porcelaine':porcelaine,
+        'montage':montage,
+        'cuisson':cuisson,
+        'service':service,
+
+    }
+    return render(request, 'listings/checklist_detail.html', context)
+
+def creerchecklist(request):
+    checklists = Checklist.objects.all().order_by('date')
+    encours = "en_cours"
+    valide = "valide"
+    refuse = "refuse"
+
+
+    if request.method == 'GET' and 'date' in request.GET:
+        form = DateFilterForm(request.GET)
+        if form.is_valid():
+            date = form.cleaned_data['date']
+            checklists = checklists.filter(date=date)
+    else:
+        form = DateFilterForm()
+
+    if request.method == 'POST':
+        form2 = ChecklistForm(request.POST)
+        if form2.is_valid():
+            form2.save()
+        return redirect('creerchecklist')
+    
+    paginator = Paginator(checklists, 10)  # Show 10 events per page
+
+    page = request.GET.get('page')
+    try:
+        checklists = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        checklists = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g., 9999), deliver last page of results.
+        checklists = paginator.page(paginator.num_pages)
+    
+    
+    context = {
+       'checklists': checklists,
+       'form': form,
+       'form2': ChecklistForm(),
+       'encours': encours,
+       'valide': valide,
+       'refuse': refuse,
+       
+    }
+    return render(request, 'listings/checklistcreate.html', context)
+
+def edit_item(request, pk):
+    item = get_object_or_404(ItemInv, pk=pk)
+    if request.method == 'POST':
+        form = ItemInvForm(request.POST, instance=item)
+        if form.is_valid():
+            form.save()
+            return redirect('inventaire')
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Form is not valid.'}, status=400)
+    else:
+        form = ItemInvForm(instance=item)
+    return render(request, 'listings/edit_item.html', {'form': form, 'item':item})
 
 def import_items(request):
     if request.method == 'POST' and request.FILES['myfile']:
@@ -85,7 +382,17 @@ def import_items(request):
 
 def inventory_list(request):
     items = ItemInv.objects.all()
-    return render(request, 'listings/inventory_list.html', {'items': items})
+    query = request.GET.get('query')
+    
+    if query:
+        items = items.filter(name__icontains=query)
+
+    context = {
+        'items': items,
+        'query': query,
+        'form': SearchFormInv()
+    }
+    return render(request, 'listings/inventory_list.html', context)
 
 @csrf_exempt
 def save_positions(request):
@@ -166,7 +473,7 @@ def journee_detail(request, id):  # notez le paramètre id supplémentaire
    
    return render(request,
           'listings/journee_detail.html',
-          context={'journees': journees ,'livraisonsroute': livraisonsroute, 'livreurs':livreurs, 'recuperations':recuperations,'retourtraiteur' : retourtraiteur,'recuperation' : recuperation,'retourtraiteurno': retourtraiteurno,'livraisons' : livraisons, 'recuperationo':recuperationo, 'loic':loic, 'maxime':maxime, 'rien':rien, 'recuperations':recuperation, 'livraisonsok':livraisonsok,'recuperationes':recuperationes }) # nous passons l'id au modèle
+          context={'journees': journees ,'livraisonsroute': livraisonsroute, 'livreurs':livreurs, 'recuperations':recuperations,'retourtraiteur' : retourtraiteur,'recuperation' : recuperation,'retourtraiteurno': retourtraiteurno,'livraisons' : livraisons, 'recuperationo':recuperationo, 'loic':loic, 'maxime':maxime, 'rien':rien, 'recuperations':recuperation, 'livraisonsok':livraisonsok,'recuperationes':recuperationes, 'today':today, }) # nous passons l'id au modèle
 
 
 def livreur_list(request):

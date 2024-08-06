@@ -3,16 +3,24 @@
 
 {% block content %}
 
-<h1>Inventory List</h1>
-<ul>
-    {% for item in items %}
-        <li>{{ item.name }} - Quantité: {{ item.quantity }}</li>
-        {% if item.photo %}
-        <li><img src="{{ item.photo.url }}" alt="Photo"></li>
-        {% else %}
-        <li>pas de photo</li>
-        {% endif %}
-    {% endfor %}
-</ul>
+<h1>Liste inventaire Checklist</h1>
+<br>
+<h2>Recherche inventaire</h2>
+    <form method="GET">
+        {{ form }}
+        <button type="submit">Rechercher</button>
+    </form>
+    <hr>
+    {% if query %}
+        <h2>Recherche pour  "{{ query }}"</h2>
+    {% endif %}
+    <ul>
+        {% for item in items %}
+            <li>{{ item.name }} - Quantité: {{ item.quantity }}</li>
+            <li><a href="{% url 'edit_item' item.id %}"  aria-current="page">changer quantité</a></li>
+        {% empty %}
+            <li>No items found.</li>
+        {% endfor %}
+    </ul>
 
 {% endblock %}

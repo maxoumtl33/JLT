@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 
 
@@ -11,8 +13,9 @@ from django.contrib.auth.models import User
 class ItemInv(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
-    quantity = models.IntegerField(default=0)
     photo = models.ImageField(upload_to='listings/media/commandesdetail', blank=True, null=True)
+    quantity = models.IntegerField(default=0)
+
 
     def __str__(self):
         return self.name
@@ -253,6 +256,110 @@ class Livraison(models.Model):
     vendeur = models.fields.CharField(null=True, blank=True, max_length=200, default=" ")
     position = models.IntegerField(default=0)
     photo = models.ImageField(upload_to='listings/media/commandesdetail', blank=True, null=True)
+
+
+class Product(models.Model):
+    choices = (
+         ('ÉQUIPEMENT DE BASE', 'ÉQUIPEMENT DE BASE'),
+         ('JETABLE', 'JETABLE'),
+         ('ACCESSOIRES DE DÉCOR', 'ACCESSOIRES DE DÉCOR'),
+         ('ÉQUIPEMENT DE BAR', 'ÉQUIPEMENT DE BAR'),
+         ('ÉQUIPEMENT POUR SERVICE CAFÉ','ÉQUIPEMENT POUR SERVICE CAFÉ'),
+         ('TABLE ET LINGE DE TABLE','TABLE ET LINGE DE TABLE'),
+         ('VERRERIE','VERRERIE'),
+         ('PORCELAINE ET COUTELLERIE','PORCELAINE ET COUTELLERIE'),
+         ('ÉQUIPEMENT POUR MONTAGE CANAPÉS','ÉQUIPEMENT POUR MONTAGE CANAPÉS'),
+         ('ÉQUIPEMENT DE CUISSON','ÉQUIPEMENT DE CUISSON'),
+         ('USTENSILES DE SERVICE','USTENSILES DE SERVICE'),
+         ('ITEMS DIVERS','ITEMS DIVERS'))
+    
+    
+    name = models.CharField(max_length=100)
+    quantity = models.IntegerField(default=0)
+    category = models.CharField(max_length=100, choices= choices)
+
+    def adjust_quantity(self, amount):
+        """Adjust the product quantity."""
+        self.quantity += amount
+        self.save()
+    
+
+    def __str__(self):
+        return self.name
+
+class Checklist(models.Model):
+
+    STATUS_CHOICES = [
+        ('en_cours', 'En cours'),
+        ('valide', 'Validé'),
+        ('refuse', 'Refusé'),
+    ]
+
+
+    name = models.CharField(max_length=100)
+    products = models.ManyToManyField(Product, through='ChecklistItem')
+    livraison = models.ForeignKey(Livraison, null=True, on_delete=models.SET_NULL, blank=True)
+    date = models.fields.DateField(null=True, blank=True)
+    lieu = models.CharField(max_length=10000, blank=True)
+    num_contrat = models.fields.CharField(null=True, blank=True, max_length=200, default=" ")
+    conseillere = models.CharField(max_length=100, blank=True)
+    nb_convive = models.fields.CharField(null=True, blank=True, max_length=200, default=" ")
+    heure_livraison = models.fields.CharField(null=True, blank=True, max_length=100, default=" ")
+    md = models.fields.CharField(null=True, blank=True, max_length=100, default=" ")
+    added_on = models.DateTimeField(default=timezone.now)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='en_cours')
+    
+
+    def update_status(self):
+        # Check if all items are 'valide'
+        if self.checklistitem_set.filter(status='valide').count() == self.checklistitem_set.count():
+            self.status = 'valide'
+        elif self.checklistitem_set.filter(status='refuse').exists():
+            self.status = 'refuse'
+        else:
+            self.status = 'en_cours'
+        
+        self.save()
+
+    def __str__(self):
+        return self.name
+    
+
+class ChecklistItem(models.Model):
+
+    STATUS_CHOICES = [
+        ('en_cours', 'En cours'),
+        ('valide', 'Validé'),
+        ('refuse', 'Refusé'),
+    ]
+
+    checklist = models.ForeignKey(Checklist, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
+    quantity = models.IntegerField(default=0, null=True)
+    is_completed = models.BooleanField(default=False)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='en_cours')
+
+    class Meta:
+        unique_together = ('checklist', 'product', 'status')  # Assure qu'un produit ne peut avoir qu'un seul statut dans une checklist
+
+    
+    def clean(self):
+        super().clean()
+        if ChecklistItem.objects.filter(checklist=self.checklist, product=self.product).exclude(id=self.id).exists():
+            raise ValidationError('This product already has a status in the same checklist.')
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # Update checklist status whenever this item is saved
+        self.checklist.update_status()
+   
+class Inventory(models.Model):
+    item = models.ForeignKey(ItemInv, on_delete=models.CASCADE)
+    quantity = models.IntegerField(blank=True, null=True, default=0)
+    # other fields as needed
+
+    def __str__(self):
+        return f"{self.item.name} - Quantity: {self.quantity}"
     
 class ProductPhoto(models.Model):
     product = models.ForeignKey(Livraison, related_name='photos', on_delete=models.CASCADE)

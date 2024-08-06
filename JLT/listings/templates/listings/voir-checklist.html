@@ -1,0 +1,93 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% block content %}
+
+
+
+<div class="container mt-5">
+    <h2>Liste des Checklists</h2>
+    <br>
+    <!-- Date Filter Form -->
+    <form method="get">
+        {{ form.date }}
+        <button type="submit" class="btn btn-primary">Filtrer</button>
+        <a href="{% url 'voir_checklist' %}" class="btn btn-primary">Voir toute la liste</a>
+    </form>
+    <br>
+    <hr>
+    
+    <!-- Display Events -->
+    
+    <div class="row">
+        {% for checklist in checklists %}
+        {% if checklist.status == encours %}
+            <div class="col-md-4 mb-4">
+                <a href="{% url 'checklistvoir-detail' checklist.id %}">
+                <div class="card border-warning mb-3">
+                    <div class="card-body text-warning">
+                        <h5 class="card-title">{{ checklist.name }}</h5>
+                        <p class="card-text">Date événement: {{ checklist.date|date:'d-m-Y' }}</p>
+                        <p class="card-text">Heure livraison: {{ checklist.heure_livraison }}</p>
+                        <p class="card-text">Ajouté le: {{ checklist.added_on|date:'d-m-Y' }}</p>
+                        <p class="card-text">Ajouté par: {{ checklist.conseillere }}</p>
+                    </div>
+                </div>
+            </a>
+            </div>
+        {% elif checklist.status == refuse %}
+        <div class="col-md-4 mb-4">
+            <a href="{% url 'checklistvoir-detail' checklist.id %}">
+            <div class="card border-danger mb-3">
+                <div class="card-body text-danger">
+                    <h5 class="card-title">{{ checklist.name }}</h5>
+                    <p class="card-text">Date événement: {{ checklist.date|date:'d-m-Y' }}</p>
+                    <p class="card-text">Heure livraison: {{ checklist.heure_livraison }}</p>
+                    <p class="card-text">Ajouté le: {{ checklist.added_on|date:'d-m-Y' }}</p>
+                    <p class="card-text">Ajouté par: {{ checklist.conseillere }}</p>
+                </div>
+            </div>
+        </a>
+        </div>
+        {% elif checklist.status == valide %}
+        <div class="col-md-4 mb-4">
+            <a href="{% url 'checklistvoir-detail' checklist.id %}">
+            <div class="card border-success mb-3">
+                <div class="card-body text-success">
+                    <h5 class="card-title">{{ checklist.name }}</h5>
+                    <p class="card-text">Date événement: {{ checklist.date|date:'d-m-Y' }}</p>
+                    <p class="card-text">Heure livraison: {{ checklist.heure_livraison }}</p>
+                    <p class="card-text">Ajouté le: {{ checklist.added_on|date:'d-m-Y' }}</p>
+                    <p class="card-text">Ajouté par: {{ checklist.conseillere }}</p>
+                </div>
+            </div>
+        </a>
+        </div>
+        {% endif %}
+        {% empty %}
+            <div class="col">
+                <p>Pas de Checklist à ce jour</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="container mt-5">
+<nav aria-label="Page navigation" style="align-items: center;">
+    <ul class="pagination">
+        {% if checklists.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page=1">1ère page</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ checklists.previous_page_number }}">Précédent</a></li>
+        {% endif %}
+        <li class="page-item active"><a class="page-link" href="?page={{ checklists.number }}">{{ checklists.number }}</a></li>
+        {% if checklists.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ checklists.next_page_number }}">Suivant</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ checklists.paginator.num_pages }}">Dernière page</a></li>
+        {% endif %}
+    </ul>
+</nav>
+</div>
+  
+
+    
+
+{% endblock %}

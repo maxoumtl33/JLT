@@ -17,16 +17,18 @@
           </li>
           {% else %}
           <li class="nav__item">
-            <a href="{% url 'login' %}" class="nav__link" style="color: green;"><i class="fa-regular fa-user"></i></i>
+            <a href="{% url 'login' %}" class="nav__link" style="color: green;"><i class="fa-regular fa-user"></i>
                   <span class="nav__name">Login</span>
               </a>
           </li>
           {% endif %}
+          {% if user.username == ventes %}
           <li class="nav__item">
-            <a type="button" class="nav__link" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
-              <i class="fa-solid fa-link"></i><span class="nav__name">Liens</span>
-            </a>
+            <a href="{% url 'creerchecklist' %}" class="nav__link"><i class="fa-solid fa-clipboard-list"></i>
+              <span class="nav__name">Checklist</span>
+          </a>
           </li>
+          {% endif %}
       </ul>
   </div>
 

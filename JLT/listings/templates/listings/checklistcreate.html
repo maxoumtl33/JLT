@@ -1,0 +1,144 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% block content %}
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
+<nav class="nav container">
+    <a href="#" class="nav__logo">Julien Leblanc Traiteur</a>
+  
+    <div class="nav__menu" id="nav-menu">
+        <ul class="nav__list">
+          {% if user.is_authenticated %}
+            <li class="nav__item">
+              <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="nav__link active-link" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i></i>
+            </form>
+                    <span class="nav__name">Logout</span>
+          </button>
+            </li>
+            {% else %}
+            <li class="nav__item">
+              <a href="{% url 'login' %}" class="nav__link" style="color: green;"><i class="fa-regular fa-user"></i>
+                    <span class="nav__name">Login</span>
+                </a>
+            </li>
+            {% endif %}
+            <li class="nav__item">
+              <a href="{% url 'journees-list' %}" class="nav__link"><i class="fa-solid fa-truck"></i>
+                <span class="nav__name">Retour livraisons</span>
+            </a>
+            </li>
+        </ul>
+    </div>
+  
+    <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
+  </nav>
+<hr>
+<h1 style="text-align: center;">Création Checklist</h1>
+<hr>
+<div class="container mt-5">
+<h2>Créer ta Checklist (remplir le formulaire ci-dessous)</h2>
+<br>
+<div class="col-md-4 mb-4">
+<form method="post">
+    {% csrf_token %}
+    {{ form2.as_p }}
+    <button type="submit" class="btn btn-outline-primary">Créer Checklist</button>
+</form>
+</div>
+</div>
+<hr>
+<div class="container mt-5">
+    <h2>Liste des Checklists</h2>
+    <br>
+    <!-- Date Filter Form -->
+    <form method="get">
+        {{ form.date }}
+        <button type="submit" class="btn btn-primary">Filtrer</button>
+        <a href="{% url 'creerchecklist' %}" class="btn btn-primary">Voir toute la liste</a>
+    </form>
+    <br>
+    <hr>
+    
+    <!-- Display Events -->
+    <div class="row">
+        {% for checklist in checklists %}
+        {% if checklist.status == encours %}
+            <div class="col-md-4 mb-4">
+                <a href="{% url 'checklist-detail' checklist.id %}">
+                <div class="card border-warning mb-3">
+                    <div class="card-body text-warning">
+                        <h5 class="card-title">{{ checklist.name }}</h5>
+                        <p class="card-text">Date événement: {{ checklist.date|date:'d-m-Y' }}</p>
+                        <p class="card-text">Heure livraison: {{ checklist.heure_livraison }}</p>
+                        <p class="card-text">Ajouté le: {{ checklist.added_on|date:'d-m-Y' }}</p>
+                        <p class="card-text">Ajouté par: {{ checklist.conseillere }}</p>
+                    </div>
+                </div>
+            </a>
+            </div>
+        {% elif checklist.status == refuse %}
+        <div class="col-md-4 mb-4">
+            <a href="{% url 'checklist-detail' checklist.id %}">
+            <div class="card border-danger mb-3">
+                <div class="card-body text-danger">
+                    <h5 class="card-title">{{ checklist.name }}</h5>
+                    <p class="card-text">Date événement: {{ checklist.date|date:'d-m-Y' }}</p>
+                    <p class="card-text">Heure livraison: {{ checklist.heure_livraison }}</p>
+                    <p class="card-text">Ajouté le: {{ checklist.added_on|date:'d-m-Y' }}</p>
+                    <p class="card-text">Ajouté par: {{ checklist.conseillere }}</p>
+                </div>
+            </div>
+        </a>
+        </div>
+        {% elif checklist.status == valide %}
+        <div class="col-md-4 mb-4">
+            <a href="{% url 'checklist-detail' checklist.id %}">
+            <div class="card border-success mb-3">
+                <div class="card-body text-success">
+                    <h5 class="card-title">{{ checklist.name }}</h5>
+                    <p class="card-text">Date événement: {{ checklist.date|date:'d-m-Y' }}</p>
+                    <p class="card-text">Heure livraison: {{ checklist.heure_livraison }}</p>
+                    <p class="card-text">Ajouté le: {{ checklist.added_on|date:'d-m-Y' }}</p>
+                    <p class="card-text">Ajouté par: {{ checklist.conseillere }}</p>
+                </div>
+            </div>
+        </a>
+        </div>
+        {% endif %}
+        {% empty %}
+            <div class="col">
+                <p>Pas de Checklist à ce jour</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="container mt-5">
+<nav aria-label="Page navigation" style="align-items: center;">
+    <ul class="pagination">
+        {% if checklists.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page=1">1ère page</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ checklists.previous_page_number }}">Précédent</a></li>
+        {% endif %}
+        <li class="page-item active"><a class="page-link" href="?page={{ checklists.number }}">{{ checklists.number }}</a></li>
+        {% if checklists.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ checklists.next_page_number }}">Suivant</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ checklists.paginator.num_pages }}">Dernière page</a></li>
+        {% endif %}
+    </ul>
+</nav>
+</div>
+
+<!-- Add jQuery (required for Bootstrap Datepicker) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Add Bootstrap JS (CDN) -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<!-- Add Bootstrap Datepicker JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<!-- Initialize Bootstrap Datepicker -->
+
+{% endblock %}
+

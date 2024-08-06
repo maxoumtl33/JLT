@@ -1,0 +1,98 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% block content %}
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+
+<div class="container mt-5">
+    <hr>
+<h1>Checklist {{ checklist.name }}</h1> <a  href="{% url 'voir_checklist' %}" class="nav__link"><i class="fa-solid fa-clipboard-list"></i><span>Retour</span></a>
+<hr>
+<br>
+<p><strong>Date événement:</strong> {{ checklist.date|date:"d/m/Y" }}</p>
+<p><strong>Lieu événement:</strong> {{ checklist.lieu }}</p>
+<p><strong>Nombre convives:</strong> {{ checklist.nb_convive }}</p>
+<p><strong>Heure de livraison:</strong> {{ checklist.heure_livraison }}</p>
+<p><strong>Numéro de contrat:</strong> {{ checklist.num_contrat }}</p>
+<p><strong>Conseiller(e):</strong> {{ checklist.conseillere }}</p>
+<p><strong>Nom du MD:</strong> {{ checklist.md }}</p>
+<hr>
+
+<br>
+<hr>
+<h1>Contenu de la checklist</h1>
+<hr>
+<br>
+
+<h3>Produits dans la checklist</h3>
+<table class="table table-hover">
+    <thead>
+      <tr>
+        <th scope="col">Produit</th>
+        <th scope="col">Quantité</th>
+        <th scope="col">Statut</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for checklist_product in checklist_item %}
+      {% if checklist_product.status == encours %}
+        <tr>
+          <td style="color: orange;">{{ checklist_product.product.name }}</td>
+          <td style="color: orange;">{{ checklist_product.quantity }}</td>
+          <td ><form method="post" action="{% url 'checklistvoir-detail' checklist.id %}">
+            {% csrf_token %}
+              <div>
+                <select name="status" id="status_{{ checklist_product.id }}">
+                  <option value="en_cours" {% if checklist_product.status == 'en_cours' %}selected{% endif %}>En cours</option>
+                  <option value="valide" {% if checklist_product.status == 'valide' %}selected{% endif %}>Validé</option>
+                  <option value="refuse" {% if checklist_product.status == 'refuse' %}selected{% endif %}>Refusé</option>
+                </select>
+                <input type="hidden" name="item_id" value="{{ checklist_product.id }}">
+                <button type="submit" class="btn btn-outline-primary">Mettre à jour</button>
+              </div>
+          </form></td>
+        </tr>
+        {% elif checklist_product.status == valide %}
+        <tr>
+            <td style="color: green;">{{ checklist_product.product.name }}</td>
+            <td style="color: green;">{{ checklist_product.quantity }}</td>
+            <td ><form method="post" action="{% url 'checklistvoir-detail' checklist.id %}">
+              {% csrf_token %}
+                <div>
+                  <select name="status" id="status_{{ checklist_product.id }}">
+                    <option value="en_cours" {% if checklist_product.status == 'en_cours' %}selected{% endif %}>En cours</option>
+                    <option value="valide" {% if checklist_product.status == 'valide' %}selected{% endif %}>Validé</option>
+                    <option value="refuse" {% if checklist_product.status == 'refuse' %}selected{% endif %}>Refusé</option>
+                  </select>
+                  <input type="hidden" name="item_id" value="{{ checklist_product.id }}">
+                  <button type="submit" class="btn btn-outline-primary">Mettre à jour</button>
+                </div>
+            </form></td>
+          </tr>
+          {% elif checklist_product.status == refuse %}
+          <tr>
+            <td style="color: red;">{{ checklist_product.product.name }}</td>
+            <td style="color: red;">{{ checklist_product.quantity }}</td>
+            <td ><form method="post" action="{% url 'checklistvoir-detail' checklist.id %}">
+              {% csrf_token %}
+                <div>
+                  <select name="status" id="status_{{ checklist_product.id }}">
+                    <option value="en_cours" {% if checklist_product.status == 'en_cours' %}selected{% endif %}>En cours</option>
+                    <option value="valide" {% if checklist_product.status == 'valide' %}selected{% endif %}>Validé</option>
+                    <option value="refuse" {% if checklist_product.status == 'refuse' %}selected{% endif %}>Refusé</option>
+                  </select>
+                  <input type="hidden" name="item_id" value="{{ checklist_product.id }}">
+                  <button type="submit" class="btn btn-outline-primary">Mettre à jour</button>
+                </div>
+            </form></td>
+          </tr>
+        {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+
+
+</div>
+
+{% endblock %}

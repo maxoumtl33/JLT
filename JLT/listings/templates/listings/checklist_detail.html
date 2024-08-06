@@ -1,0 +1,744 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% block content %}
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+<style>
+    .collapse-inline {
+        display: inline-block;
+        width: auto;
+        margin-left: 10px;
+    }
+</style>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function(){
+        $('.delete-btn').on('click', function(event){
+            event.preventDefault();
+            const button = $(this);
+            const url = button.data('url');
+            
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        button.closest('li').remove();  // Remove the item from the DOM
+                        alert(response.message);
+                    } else {
+                        alert(response.message);
+                    }
+                }
+            });
+        });
+    });
+</script>
+
+<nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+    <div class="container">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav" style="display: ;">
+            <ul class="navbar-nav ms-auto" >
+                <li class="nav-item">
+                    <a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                        <i class="fa-solid fa-basket-shopping"></i><span>Mon panier</span></a>
+                </li>
+                <li class="nav-item">
+                    <a  type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModals" style="margin-left: 20px;"><i class="fa-solid fa-pen-to-square"></i><span>Modifier</span></a>
+                </li>
+                <li class="nav-item">
+                    <a  href="{% url 'creerchecklist' %}" class="nav__link" style="margin-left: 20px;"><i class="fa-solid fa-clipboard-list"></i><span>Retour</span></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+<div class="container mt-5">
+    <hr>
+<h1>Checklist {{ checklist.name }}</h1>
+<br>
+<p><strong>Date événement:</strong> {{ checklist.date|date:"d/m/Y" }}</p>
+<p><strong>Lieu événement:</strong> {{ checklist.lieu }}</p>
+<p><strong>Nombre convives:</strong> {{ checklist.nb_convive }}</p>
+<p><strong>Heure de livraison:</strong> {{ checklist.heure_livraison }}</p>
+<p><strong>Numéro de contrat:</strong> {{ checklist.num_contrat }}</p>
+<p><strong>Conseiller(e):</strong> {{ checklist.conseillere }}</p>
+<p><strong>Nom du MD:</strong> {{ checklist.md }}</p>
+<hr>
+
+<h2>Liste des objets disponibles par catégories</h2>
+<hr>
+<div class="container mt-5">
+    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#inline">
+        ÉQUIPEMENT DE BASE
+    </button>
+    <div id="inline" class="collapse collapse-inline">
+        <div class="card card-body">
+            <ul>
+                {% for product in products %}
+                {% if product.category == equipementdebase %}
+                <li>
+                    <div class="card" style="width: 18rem; margin-bottom: 10px;">
+                        <div class="card-body">
+                            
+                          <h5 class="card-title">{{ product.name }}</h5>
+                          {% if product.quantity <= 0 %}
+                          <h6 class="card-subtitle mb-2" style="color: red;">Quantité disponible: {{ product.quantity }}</h6>
+                          {% else %}
+                          <h6 class="card-subtitle mb-2" style="color: green;">Quantité disponible: {{ product.quantity }}</h6>
+                          {% endif %}
+                          <p class="card-text">
+                            <form action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="{{ product.id }}">
+                            <input type="hidden" name="product_name" value="{{ product.name }}">
+                            <div class="form-group">
+                                <label for="quantity">Quantité à ajouter ou enlever:</label>
+                                <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="action">Ajouter ou Enlever:</label>
+                                <select class="form-control" id="action" name="action">
+                                    <option value="add">Ajouter</option>
+                                    <option value="subtract">Enlever</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-outline-success">valider</button>
+                        </form></p>
+                        </div>
+                      </div>
+                </li>
+                {% endif %}
+                {% endfor %}
+                
+            </ul>
+        </div>
+    </div>
+</div>
+    <div class="container mt-5">
+
+    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#inline1">
+        JETABLE
+    </button>
+    <div id="inline1" class="collapse collapse-inline">
+        <div class="card card-body">
+            <ul>
+                {% for product in products %}
+                {% if product.category == jetable %}
+                <li>
+                    <div class="card" style="width: 18rem; margin-bottom: 10px;">
+                        <div class="card-body">
+                            
+                          <h5 class="card-title">{{ product.name }}</h5>
+                          {% if product.quantity <= 0 %}
+                          <h6 class="card-subtitle mb-2" style="color: red;">Quantité disponible: {{ product.quantity }}</h6>
+                          {% else %}
+                          <h6 class="card-subtitle mb-2" style="color: green;">Quantité disponible: {{ product.quantity }}</h6>
+                          {% endif %}
+                          <p class="card-text"><form action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="{{ product.id }}">
+                            <input type="hidden" name="product_name" value="{{ product.name }}">
+                            <div class="form-group">
+                                <label for="quantity">Quantité à ajouter ou enlever:</label>
+                                <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="action">Ajouter ou Enlever:</label>
+                                <select class="form-control" id="action" name="action">
+                                    <option value="add">Ajouter</option>
+                                    <option value="subtract">Enlever</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-outline-success">valider</button>
+                        </form></p>
+                        </div>
+                      </div>
+                </li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="container mt-5">
+    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#inline2">
+        ACCESSOIRES DE DÉCOR
+    </button>
+    <div id="inline2" class="collapse collapse-inline">
+        <div class="card card-body">
+            <ul>
+                {% for product in products %}
+                {% if product.category == accessoirededecor %}
+                <li>
+                    <div class="card" style="width: 18rem; margin-bottom: 10px;">
+                        <div class="card-body">
+                            
+                          <h5 class="card-title">{{ product.name }}</h5>
+                          {% if product.quantity <= 0 %}
+                          <h6 class="card-subtitle mb-2" style="color: red;">Quantité disponible: {{ product.quantity }}</h6>
+                          {% else %}
+                          <h6 class="card-subtitle mb-2" style="color: green;">Quantité disponible: {{ product.quantity }}</h6>
+                          {% endif %}
+                          <p class="card-text"><form action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="{{ product.id }}">
+                            <input type="hidden" name="product_name" value="{{ product.name }}">
+                            <div class="form-group">
+                                <label for="quantity">Quantité à ajouter ou enlever:</label>
+                                <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="action">Ajouter ou Enlever:</label>
+                                <select class="form-control" id="action" name="action">
+                                    <option value="add">Ajouter</option>
+                                    <option value="subtract">Enlever</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-outline-success">valider</button>
+                        </form></p>
+                        </div>
+                      </div>
+                </li>
+                {% endif %}
+                {% endfor %}
+                
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="container mt-5">
+<button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#inline3">
+    ÉQUIPEMENT DE BAR
+</button>
+<div id="inline3" class="collapse collapse-inline">
+    <div class="card card-body">
+        <ul>
+            {% for product in products %}
+            {% if product.category == equipementdebar %}
+            <li>
+                <div class="card" style="width: 18rem; margin-bottom: 10px;">
+                    <div class="card-body">
+                        
+                      <h5 class="card-title">{{ product.name }}</h5>
+                      {% if product.quantity <= 0 %}
+                      <h6 class="card-subtitle mb-2" style="color: red;">Quantité disponible: {{ product.quantity }}</h6>
+                      {% else %}
+                      <h6 class="card-subtitle mb-2" style="color: green;">Quantité disponible: {{ product.quantity }}</h6>
+                      {% endif %}
+                      <p class="card-text"><form action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="product_id" value="{{ product.id }}">
+                        <input type="hidden" name="product_name" value="{{ product.name }}">
+                        <div class="form-group">
+                            <label for="quantity">Quantité à ajouter ou enlever:</label>
+                            <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="action">Ajouter ou Enlever:</label>
+                            <select class="form-control" id="action" name="action">
+                                <option value="add">Ajouter</option>
+                                <option value="subtract">Enlever</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-outline-success">valider</button>
+                    </form></p>
+                    </div>
+                  </div>
+            </li>
+            {% endif %}
+            {% endfor %}
+            
+        </ul>
+    </div>
+</div>
+</div>
+<div class="container mt-5">
+
+    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#inline4">
+        ÉQUIPEMENT POUR SERVICE CAFÉ
+    </button>
+    <div id="inline4" class="collapse collapse-inline">
+        <div class="card card-body">
+            <ul>
+                {% for product in products %}
+                {% if product.category == equipementpourservicecafe %}
+                <li>
+                    <div class="card" style="width: 18rem; margin-bottom: 10px;">
+                        <div class="card-body">
+                            
+                          <h5 class="card-title">{{ product.name }}</h5>
+                          {% if product.quantity <= 0 %}
+                          <h6 class="card-subtitle mb-2" style="color: red;">Quantité disponible: {{ product.quantity }}</h6>
+                          {% else %}
+                          <h6 class="card-subtitle mb-2" style="color: green;">Quantité disponible: {{ product.quantity }}</h6>
+                          {% endif %}
+                          <p class="card-text"><form action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="{{ product.id }}">
+                            <input type="hidden" name="product_name" value="{{ product.name }}">
+                            <div class="form-group">
+                                <label for="quantity">Quantité à ajouter ou enlever:</label>
+                                <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="action">Ajouter ou Enlever:</label>
+                                <select class="form-control" id="action" name="action">
+                                    <option value="add">Ajouter</option>
+                                    <option value="subtract">Enlever</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-outline-success">valider</button>
+                        </form></p>
+                        </div>
+                      </div>
+                </li>
+                {% endif %}
+                {% endfor %}
+                
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="container mt-5">
+    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#inline6">
+        ITEMS DIVERS
+    </button>
+    <div id="inline6" class="collapse collapse-inline">
+        <div class="card card-body">
+            <ul>
+                {% for product in products %}
+                {% if product.category == itemsdivers %}
+                <li>
+                    <div class="card" style="width: 18rem; margin-bottom: 10px;">
+                        <div class="card-body">
+                            
+                          <h5 class="card-title">{{ product.name }}</h5>
+                          {% if product.quantity <= 0 %}
+                          <h6 class="card-subtitle mb-2" style="color: red;">Quantité disponible: {{ product.quantity }}</h6>
+                          {% else %}
+                          <h6 class="card-subtitle mb-2" style="color: green;">Quantité disponible: {{ product.quantity }}</h6>
+                          {% endif %}
+                          <p class="card-text"><form action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="{{ product.id }}">
+                            <input type="hidden" name="product_name" value="{{ product.name }}">
+                            <div class="form-group">
+                                <label for="quantity">Quantité à ajouter ou enlever:</label>
+                                <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="action">Ajouter ou Enlever:</label>
+                                <select class="form-control" id="action" name="action">
+                                    <option value="add">Ajouter</option>
+                                    <option value="subtract">Enlever</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-outline-success">valider</button>
+                        </form></p>
+                        </div>
+                      </div>
+                </li>
+                {% endif %}
+                {% endfor %}
+                
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="container mt-5">
+
+    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#inline7">
+        TABLE ET LINGE DE TABLE
+    </button>
+    <div id="inline7" class="collapse collapse-inline">
+        <div class="card card-body">
+            <ul>
+                {% for product in products %}
+                {% if product.category == tableetlinge %}
+                <li>
+                    <div class="card" style="width: 18rem; margin-bottom: 10px;">
+                        <div class="card-body">
+                            
+                          <h5 class="card-title">{{ product.name }}</h5>
+                          {% if product.quantity <= 0 %}
+                          <h6 class="card-subtitle mb-2" style="color: red;">Quantité disponible: {{ product.quantity }}</h6>
+                          {% else %}
+                          <h6 class="card-subtitle mb-2" style="color: green;">Quantité disponible: {{ product.quantity }}</h6>
+                          {% endif %}
+                          <p class="card-text"><form action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="{{ product.id }}">
+                            <input type="hidden" name="product_name" value="{{ product.name }}">
+                            <div class="form-group">
+                                <label for="quantity">Quantité à ajouter ou enlever:</label>
+                                <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="action">Ajouter ou Enlever:</label>
+                                <select class="form-control" id="action" name="action">
+                                    <option value="add">Ajouter</option>
+                                    <option value="subtract">Enlever</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-outline-success">valider</button>
+                        </form></p>
+                        </div>
+                      </div>
+                </li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="container mt-5">
+
+    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#inline8">
+        VERRERIE
+    </button>
+    <div id="inline8" class="collapse collapse-inline">
+        <div class="card card-body">
+            <ul>
+                {% for product in products %}
+                {% if product.category == verrerie %}
+                <li>
+                    <div class="card" style="width: 18rem; margin-bottom: 10px;">
+                        <div class="card-body">
+                            
+                          <h5 class="card-title">{{ product.name }}</h5>
+                          {% if product.quantity <= 0 %}
+                          <h6 class="card-subtitle mb-2" style="color: red;">Quantité disponible: {{ product.quantity }}</h6>
+                          {% else %}
+                          <h6 class="card-subtitle mb-2" style="color: green;">Quantité disponible: {{ product.quantity }}</h6>
+                          {% endif %}
+                          <p class="card-text"><form action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="{{ product.id }}">
+                            <input type="hidden" name="product_name" value="{{ product.name }}">
+                            <div class="form-group">
+                                <label for="quantity">Quantité à ajouter ou enlever:</label>
+                                <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="action">Ajouter ou Enlever:</label>
+                                <select class="form-control" id="action" name="action">
+                                    <option value="add">Ajouter</option>
+                                    <option value="subtract">Enlever</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-outline-success">valider</button>
+                        </form></p>
+                        </div>
+                      </div>
+                </li>
+                {% endif %}
+                {% endfor %}
+                
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="container mt-5">
+
+    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#inline9">
+        PORCELAINE ET COUTELLERIE
+    </button>
+    <div id="inline9" class="collapse collapse-inline">
+        <div class="card card-body">
+            <ul>
+                {% for product in products %}
+                {% if product.category == porcelaine %}
+                <li>
+                    <div class="card" style="width: 18rem; margin-bottom: 10px;">
+                        <div class="card-body">
+                            
+                          <h5 class="card-title">{{ product.name }}</h5>
+                          {% if product.quantity <= 0 %}
+                          <h6 class="card-subtitle mb-2" style="color: red;">Quantité disponible: {{ product.quantity }}</h6>
+                          {% else %}
+                          <h6 class="card-subtitle mb-2" style="color: green;">Quantité disponible: {{ product.quantity }}</h6>
+                          {% endif %}
+                          <p class="card-text"><form action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="{{ product.id }}">
+                            <input type="hidden" name="product_name" value="{{ product.name }}">
+                            <div class="form-group">
+                                <label for="quantity">Quantité à ajouter ou enlever:</label>
+                                <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="action">Ajouter ou Enlever:</label>
+                                <select class="form-control" id="action" name="action">
+                                    <option value="add">Ajouter</option>
+                                    <option value="subtract">Enlever</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-outline-success">valider</button>
+                        </form></p>
+                        </div>
+                      </div>
+                </li>
+                {% endif %}
+                {% endfor %}
+                
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="container mt-5">
+
+    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#inline10">
+        ÉQUIPEMENT POUR MONTAGE CANAPÉS
+    </button>
+    <div id="inline10" class="collapse collapse-inline">
+        <div class="card card-body">
+            <ul>
+                {% for product in products %}
+                {% if product.category == montage %}
+                <li>
+                    <div class="card" style="width: 18rem; margin-bottom: 10px;">
+                        <div class="card-body">
+                            
+                          <h5 class="card-title">{{ product.name }}</h5>
+                          {% if product.quantity <= 0 %}
+                          <h6 class="card-subtitle mb-2" style="color: red;">Quantité disponible: {{ product.quantity }}</h6>
+                          {% else %}
+                          <h6 class="card-subtitle mb-2" style="color: green;">Quantité disponible: {{ product.quantity }}</h6>
+                          {% endif %}
+                          <p class="card-text"><form action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="{{ product.id }}">
+                            <input type="hidden" name="product_name" value="{{ product.name }}">
+                            <div class="form-group">
+                                <label for="quantity">Quantité à ajouter ou enlever:</label>
+                                <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="action">Ajouter ou Enlever:</label>
+                                <select class="form-control" id="action" name="action">
+                                    <option value="add">Ajouter</option>
+                                    <option value="subtract">Enlever</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-outline-success">valider</button>
+                        </form></p>
+                        </div>
+                      </div>
+                </li>
+                {% endif %}
+                {% endfor %}
+                
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="container mt-5">
+
+    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#inline11">
+        ÉQUIPEMENT DE CUISSON
+    </button>
+    <div id="inline11" class="collapse collapse-inline">
+        <div class="card card-body">
+            <ul>
+                {% for product in products %}
+                {% if product.category == cuisson %}
+                <li>
+                    <div class="card" style="width: 18rem; margin-bottom: 10px;">
+                        <div class="card-body">
+                            
+                          <h5 class="card-title">{{ product.name }}</h5>
+                          {% if product.quantity <= 0 %}
+                          <h6 class="card-subtitle mb-2" style="color: red;">Quantité disponible: {{ product.quantity }}</h6>
+                          {% else %}
+                          <h6 class="card-subtitle mb-2" style="color: green;">Quantité disponible: {{ product.quantity }}</h6>
+                          {% endif %}
+                          <p class="card-text"><form action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="{{ product.id }}">
+                            <input type="hidden" name="product_name" value="{{ product.name }}">
+                            <div class="form-group">
+                                <label for="quantity">Quantité à ajouter ou enlever:</label>
+                                <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="action">Ajouter ou Enlever:</label>
+                                <select class="form-control" id="action" name="action">
+                                    <option value="add">Ajouter</option>
+                                    <option value="subtract">Enlever</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-outline-success">valider</button>
+                        </form></p>
+                        </div>
+                      </div>
+                </li>
+                {% endif %}
+                {% endfor %}
+                
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="container mt-5">
+    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#inline12" style="margin-bottom: 20px;">
+        USTENSILES DE SERVICE
+    </button>
+    <div id="inline12" class="collapse collapse-inline">
+        <div class="card card-body">
+            <ul>
+                {% for product in products %}
+                {% if product.category == service %}
+                <li>
+                    <div class="card" style="width: 18rem; margin-bottom: 10px;">
+                        <div class="card-body">
+                            
+                          <h5 class="card-title">{{ product.name }}</h5>
+                          {% if product.quantity <= 0 %}
+                          <h6 class="card-subtitle mb-2" style="color: red;">Quantité disponible: {{ product.quantity }}</h6>
+                          {% else %}
+                          <h6 class="card-subtitle mb-2" style="color: green;">Quantité disponible: {{ product.quantity }}</h6>
+                          {% endif %}
+                          <p class="card-text"><form action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="{{ product.id }}">
+                            <input type="hidden" name="product_name" value="{{ product.name }}">
+                            <div class="form-group">
+                                <label for="quantity">Quantité à ajouter ou enlever:</label>
+                                <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="action">Ajouter ou Enlever:</label>
+                                <select class="form-control" id="action" name="action">
+                                    <option value="add">Ajouter</option>
+                                    <option value="subtract">Enlever</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-outline-success">valider</button>
+                        </form></p>
+                        </div>
+                      </div>
+                </li>
+                {% endif %}
+                {% endfor %}
+                
+            </ul>
+        </div>
+    </div>
+    </div>
+</div>
+
+
+  
+  <!-- Modal -->
+  <div class="modal fade modal-xlg" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Objets dans la checklist</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <ul>
+                {% for item in checklist_items %}
+                {% if item.status == encours %}
+                <li style="color: orange;">
+                    {{ item.product.name }} - Quantité: {{ item.quantity }} - Statut: {{ item.status }}
+                    <a href="#" class="delete-btn" data-url="{% url 'checklist-item-delete-ajax' item.pk %}"><i class="fa-solid fa-trash" style="color: #74C0FC;"></i></a>
+                </li>
+                {% elif item.status == valide %}
+                <li style="color: green;">
+                    {{ item.product.name }} - Quantité: {{ item.quantity }} - Statut: {{ item.status }}
+                    <a href="#" class="delete-btn" data-url="{% url 'checklist-item-delete-ajax' item.pk %}"><i class="fa-solid fa-trash" style="color: #74C0FC;"></i></a>
+                </li>
+                {% elif item.status == refuse %}
+                <li style="color: red;">
+                    {{ item.product.name }} - Quantité: {{ item.quantity }} - Statut: {{ item.status }}
+                    <a href="#" class="delete-btn" data-url="{% url 'checklist-item-delete-ajax' item.pk %}"><i class="fa-solid fa-trash" style="color: #74C0FC;"></i></a>
+                </li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade modal-xlg" id="exampleModals" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Modifier Checklist</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form action="" method=POST >
+                {% csrf_token %}
+                {{ formbis.as_p }}
+                <input type="submit" value="valider" class="btn btn-primary">
+              </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    
+
+{% endblock %}
+
+<ul>
+    {% for product in products %}
+    <li>
+        {% if product.quantity <= 0 %}
+        {{ product.name }} <p style="color: red;">Quantité: {{ product.quantity }}</p>
+        {% else %}
+        <p>{{ product.name }} <p style="color: green;"> Quantité: {{ product.quantity }}</p>
+        {% endif %}
+        <form action="{% url 'add_to_checklist' checklist.id %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="product_id" value="{{ product.id }}">
+            <input type="hidden" name="product_name" value="{{ product.name }}">
+            <div class="form-group">
+                <label for="quantity">Quantité à ajouter ou enlever:</label>
+                <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
+            </div>
+            <div class="form-group">
+                <label for="action">Ajouter ou Enlever:</label>
+                <select class="form-control" id="action" name="action">
+                    <option value="add">Ajouter</option>
+                    <option value="subtract">Enlever</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">valider</button>
+        </form>
+        
+    </li>
+    {% endfor %}
+</ul>
+
+<h2>Recherche Objet</h2>
+    <form method="GET">
+        {{ form }}
+        <button type="submit">Rechercher</button>
+    </form>
+    <hr>
+
+    {% if query %}
+    <h2>Recherche pour  "{{ query }}"</h2>
+    <a href="{% url 'checklist-detail' checklist.id %}" class="btn text-end">Retour à la liste</a>
+    {% endif %}
