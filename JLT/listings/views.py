@@ -492,7 +492,7 @@ def journees_list(request):
     livraisons  = Livraison.objects.order_by('position').filter(date = today)
     livraisonsok  = Livraison.objects.filter(date = today, recuperation=False)
     livraisonsrecup  = Livraison.objects.filter(date = today, recuperation=True)
-    journees = Journee.objects.all().order_by('-date')
+    journees = Journee.objects.all().order_by('date')
 
 
     if request.method == 'GET' and 'date' in request.GET:
