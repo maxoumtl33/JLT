@@ -503,7 +503,7 @@ def journees_list(request):
     else:
         form = DateFilterForm()
 
-    paginator = Paginator(journees, 10)  # Show 10 events per page
+    paginator = Paginator(journees, 7)  # Show 10 events per page
 
     page = request.GET.get('page')
     try:
