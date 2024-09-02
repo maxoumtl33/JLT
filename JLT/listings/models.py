@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+from datetime import datetime
+from datetime import date
 
 
 
@@ -134,11 +136,10 @@ class Route(models.Model):
          ('19h45', '19h45'),
          ('20h00', '20h00'),
      )
-     
      nom = models.fields.CharField(max_length=100)
-     
      livreur = models.ForeignKey(Livreur, null=True, blank=True, on_delete=models.SET_NULL)
      heure_depart = models.fields.CharField(null=True, blank=True, max_length=100, choices= choiceheures, default=" ")
+     date = models.DateField(default=date.today)
 
 
 
@@ -155,7 +156,7 @@ class Livraison(models.Model):
          ('Mohammad', 'Mohammad'),
          ('Samuel', 'Samuel'),
          ('Anthonny', 'Anthonny'),
-         ('Antoine', 'Antoine'),
+         ('Mohamed', 'Mohamed'),
          ('Dany', 'Dany'),
          ('Rooseph', 'Rooseph'),
          ('Aucun', 'Aucun'),)

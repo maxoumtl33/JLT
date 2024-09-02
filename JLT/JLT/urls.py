@@ -5,6 +5,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from listings.views import save_positions
 from listings.views import *
+from django.urls import path, include
 urlpatterns = [
 path('admin/', admin.site.urls, name ="admin"),
 path('livraison/<int:ip>/', views.livraison_detail, name='livraison-detail'),
@@ -57,7 +58,11 @@ path('iteminv/<int:item_id>/', views.product_detail, name='product_detail'),
 path('subtract/<int:checklist_id>/', views.subtract_to_checklist, name='subtract_checklist'),
 path('voirchecklist/', views.voir_checklist, name='voir_checklist'),
 path('checklistvoir/<int:checklist_id>/', views.checklistvoir_detail, name='checklistvoir-detail'),
- path('checklist-item/<int:pk>/delete-ajax/', ChecklistItemDeleteAjaxView.as_view(), name='checklist-item-delete-ajax'),
+path('checklist-item/<int:pk>/delete-ajax/', ChecklistItemDeleteAjaxView.as_view(), name='checklist-item-delete-ajax'),
+path('update_livraison/', views.update_livraison, name='update_livraison'),
+path('create_routes/', create_routes, name='create_routes'),
+path('responsablelist/', responsable_list, name='responsablelist'),
+
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

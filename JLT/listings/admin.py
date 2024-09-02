@@ -38,14 +38,20 @@ class ProductAdmin(ImportExportModelAdmin):
 class InventoryAdmin(ImportExportModelAdmin):
     list_display = ('id', 'item', 'quantity')
 
+class JourneeAdmin(ImportExportModelAdmin):
+    list_display = ('id', 'nom', 'date')
+
+class RouteAdmin(ImportExportModelAdmin):
+    list_display = ('id', 'nom', 'date')
+
 class ClientAdmin(ImportExportModelAdmin):
     list_display = ('nom', 'adresse_lieux', 'adresse_dock', 'contact')
 
 admin.site.unregister(Group)
 admin.site.register(Livraison, LivraisonAdmin)
-admin.site.register(Journee)
+admin.site.register(Journee, JourneeAdmin)
 admin.site.register(Livreur)
-admin.site.register(Route)
+admin.site.register(Route, RouteAdmin)
 admin.site.register(Task)
 admin.site.register(ChecklistItem)
 admin.site.register(Distances)

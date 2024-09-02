@@ -139,7 +139,7 @@
 <br>
 <div style="display: flex;">
     {% for a in routes21 %}
-  <div class="column" data-statut="{{ a.nom }}">
+  <div class="column" data-statut="{{ a.id }}">
       <h2>{{ a.nom }}</h2>
       {% for task in todo_livraison %}
       {% if task.statut.nom == a.nom %}
@@ -151,7 +151,7 @@
   </div>
   {% endfor %}
   {% for a in routes %}
-  <div class="column" data-statut="{{ a.nom }}">
+  <div class="column" data-statut="{{ a.id }}">
       <h1>Route N°{{ a.nom }}</h1>
       <p><a href="{% url 'routedetail' a.id %}" target="_blank"><i class="fa-solid fa-pen-to-square"></i></a></p>
       <hr>

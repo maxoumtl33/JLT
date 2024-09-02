@@ -165,51 +165,7 @@
 <br>
 <br>
 
-<h1>Calculer les distances</h1>
-<br>
-<br>
-<table id="ourtable3" class="table table-striped">
-    <thead class="thead-dark">
-        <tr>
-            <th>De</th>
-            <th>Vers</th>
-            <th>Mode</th>
-            <th>Distance km</th>
-            <th>Durée min moyenne</th>
-            <th>Durée mins traffic actuel</th>
-            <th>Supprimer</th>
-        </tr>
-    </thead>
 
-    <tbody>
-        {% for distance in distances %}
-        <tr>
-            <td>{{ distance.from_location }}</td>
-            <td>{{ distance.to_location }}</td>
-            <td>{{ distance.mode }}</td>
-            <td>{{ distance.distance_km }}</td>
-            <td>{{ distance.distance_mins }}</td>
-            <td>{{ distance.distance_traffic_mins }}</td>
-            <td><a href="{% url 'deletedistance' distance.id %}">supprimer</a></td>
-
-        </tr>
-       
-        {% endfor %}
-    </tbody>
-</table>
-
-<form method="POST">
-    {% csrf_token %}
-    <div id="linkholder">
-        <div class="form1 ml-3"> {{ form.from_location|as_crispy_field }}</div>
-        <div class="form1 ml-3"> {{ form.to_location|as_crispy_field }}</div>
-        <div class="form1 ml-3"> {{ form.mode|as_crispy_field }}</div>
-        <br>
-        <button  class="btn btn-primary" type="submit">Calculer</button>
-    </div>
-</form>
-<br>
-<br>
 <script>
   $(document).ready(function () {
         $('[data-toggle="popover"]').popover();

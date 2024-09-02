@@ -60,10 +60,10 @@
             Aujourd'hui
         </button>
   <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-    <li> {% for journee in journees %}
-        <a href="{% url 'responsables' journee.id %}" class="dropdown-item">Live</a>     
-      {% endfor %}</li>
-    <li></li>
+    <li> 
+        <a href="{% url 'responsablelist'%}" class="dropdown-item">Live</a>     
+
+    </li>
     <li>      <a href="{% url 'livraisonstoday' %}" class="dropdown-item">Carte</a>    
     </li>
     <li><a href="{% url 'recuptoday'%}" class="dropdown-item">Récups</a> </li>
@@ -73,8 +73,6 @@
 
   </ul>
 </div>
-
-
 <div class="dropdown">
   <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="margin-right: 30px;">
             Demain
@@ -108,35 +106,18 @@
   </ul>
 </div>
 <div class="dropdown">
-  <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="margin-right: 30px;">
-            Camions Traceur
-        </button>
-  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-    <li>  <a href="https://v2.finder-portal.com/stand-alone-page/viewmode_1339062_09cbb0aa94881ee66dc264e7677ec10ef0ab8079" class="dropdown-item" target="_blank">Econoline</a>    
-    </li>
-    <li>  <a href="" class="dropdown-item">Promaster Gris</a>    
-    </li>
-    <li><a href="" target="_blank" class="dropdown-item">Promaster Noir</a> </li>
-    <li><a href="" target="_blank" class="dropdown-item">Transit Noir</a> </li>
-    <li><a href="" target="_blank" class="dropdown-item">Transit Blanc</a> </li>
-    <li><a href="" target="_blank" class="dropdown-item">Caravane Chef</a> </li>
-    <li><a href="" target="_blank" class="dropdown-item">King Kong</a> </li>
-
-
-    
-  </ul>
-</div>
-<a href="admin/" class="btn btn-primary" target="_blank">Menu admin</a>    
-<div style="margin-right: 30px;margin-left: 30px;">
-  <a href="https://forms.app/form/65568cf0ae67c4ca87c4b9d3/655a2833380bc0c412acea11/65a86c3bfe7e97fa6ba16518/result/responses/inbox" class="btn btn-primary" target="_blank" >Formulaire Récup Frigo</a>
-</div>
-<div style="margin-right: 30px;">
-  <a href="https://forms.app/form/65568cf0ae67c4ca87c4b9d3/655a2833380bc0c412acea11/655a28e533756106ac796923/result/responses/inbox" class="btn btn-primary" target="_blank" >Formulaire Recup livreur</a>
-</div>
-<div style="margin-right: 30px;">
-  <a href="{% url 'commentcamarche' %}" class="btn btn-primary" target="_blank" >Comment ça marche ?</a>
+    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="margin-right: 30px;">
+              Checklist
+          </button>
+    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+      <li>      <a href="{% url 'voir_checklist' %}" class="dropdown-item">Checklist Lucas</a>    
+      </li>
+      <li><a href="{% url 'creerchecklist' %}" class="dropdown-item">Checklist Ventes</a></li>
+    </ul>
 </div>
 
+<a href="admin/" class="btn btn-primary" target="_blank" style="margin-right: 30px;">Menu admin</a>    
+<a href="{% url 'commentcamarche' %}" class="btn btn-primary" target="_blank" >Comment ça marche ?</a>
 </div>
 
 <br>
@@ -201,3 +182,27 @@
   <input type="file" name="livraisons_file">
   <button type="submit" class="btn btn-primary mb-2">Importer</button>
 </form>
+
+<div class="dropdown">
+  <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="margin-right: 30px;">
+            Camions Traceur
+        </button>
+  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+    <li>  <a href="https://v2.finder-portal.com/stand-alone-page/viewmode_1339062_09cbb0aa94881ee66dc264e7677ec10ef0ab8079" class="dropdown-item" target="_blank">Econoline</a>    
+    </li>
+    <li>  <a href="" class="dropdown-item">Promaster Gris</a>    
+    </li>
+    <li><a href="" target="_blank" class="dropdown-item">Promaster Noir</a> </li>
+    <li><a href="" target="_blank" class="dropdown-item">Transit Noir</a> </li>
+    <li><a href="" target="_blank" class="dropdown-item">Transit Blanc</a> </li>
+    <li><a href="" target="_blank" class="dropdown-item">Caravane Chef</a> </li>
+    <li><a href="" target="_blank" class="dropdown-item">King Kong</a> </li>
+  </ul>
+</div>
+
+<div style="margin-right: 30px;margin-left: 30px;">
+  <a href="https://forms.app/form/65568cf0ae67c4ca87c4b9d3/655a2833380bc0c412acea11/65a86c3bfe7e97fa6ba16518/result/responses/inbox" class="btn btn-primary" target="_blank" >Formulaire Récup Frigo</a>
+</div>
+<div style="margin-right: 30px;">
+  <a href="https://forms.app/form/65568cf0ae67c4ca87c4b9d3/655a2833380bc0c412acea11/655a28e533756106ac796923/result/responses/inbox" class="btn btn-primary" target="_blank" >Formulaire Recup livreur</a>
+</div>

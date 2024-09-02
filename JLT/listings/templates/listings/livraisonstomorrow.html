@@ -40,8 +40,33 @@
 </nav>
 <br>
 <br>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function () {
+    $('#create-routes-btn').click(function () {
+        $.ajax({
+            url: "{% url 'create_routes' %}",
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            success: function (data) {
+                if (data.success) {
+                    alert('20 routes created successfully!');
+                } else {
+                    alert('Failed to create routes: ' + data.error);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Error creating routes:', error);
+            }
+        });
+    });
+});
+</script>
 <div class="body">
   <h1 style="text-align: center;">LIVRAISONS DU LENDEMAIN</h1> <h1 style="text-align: center;"> {{journees}} </h1>
+  <button id="create-routes-btn">Create 20 Routes for Tomorrow</button>
   <br>
   <br>
   <p style="text-align: center;">{{ livraisonsok|length }} livraisons demain</p>

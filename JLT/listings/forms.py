@@ -31,10 +31,6 @@ modes = (
     ("driving", "driving"),
 )
 
-class ChecklistItemForm(forms.ModelForm):
-    class Meta:
-        model = Checklist
-        fields = []
 
 class DistanceForm(ModelForm):
     today = datetime.now().date()
@@ -123,3 +119,13 @@ class SearchFormChecklist(forms.Form):
 
 class DateFilterForm(forms.Form):
     date = forms.CharField(label='', widget=forms.DateInput(attrs={'type': 'date'}))
+
+class RouteForm(forms.ModelForm):
+    class Meta:
+        model = Route
+        fields = ['nom','date', 'livreur', 'heure_depart']
+        widgets = {
+            'heure_depart': forms.Select(choices=Route.choiceheures),
+            'livreur': forms.Select(),  # Optional: customize widget if needed
+            'date': forms.DateInput(attrs={'type': 'date'}),
+        }
