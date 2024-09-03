@@ -920,7 +920,7 @@ class MapApremView(View):
         distances = Distances.objects.all()
         aprem = ['13h00', '13h15', '13h30', '13h45', '14h00', '14h15', '14h30', '14h45', '15h00', '15h15', '15h30', '15h45', '16h00', '16h15', '16h30', '16h45', '17h00', '17h15', '17h30', '17h45', '18h00', '18h15', '18h30', '18h45', '19h00']
         todo_livraison = Livraison.objects.filter(statut=21, date=tomorrow, heure_livraison__in = aprem, place_id__isnull=False)
-        routesaprem = ['6','7','8','9','10','11','12','13','14','15','16','17', '18','19','1']
+        routesaprem = ['6','7','8','9','10','11','12','13','14','15','16','17', '18','19','20']
         routes = Route.objects.filter(date=tomorrow, nom__in=routesaprem)
         route6 = Livraison.objects.filter(statut='1', date=tomorrow, heure_livraison__in = aprem)
         route7 = Livraison.objects.filter(statut='7', date=tomorrow, heure_livraison__in = aprem)
@@ -1134,57 +1134,7 @@ class MapMidiView(View):
 
         return redirect('my_mapmidi_view')
     
-    def get(self, request):
-        form = RouteForm
-        key = settings.GOOGLE_API_KEY
-        today = datetime.now().date()
-        tomorrow = today + timedelta(1)
-        distances = Distances.objects.all()
-        aprem = ['13h00', '13h15', '13h30', '13h45', '14h00', '14h15', '14h30', '14h45', '15h00', '15h15', '15h30', '15h45', '16h00', '16h15', '16h30', '16h45', '17h00', '17h15', '17h30', '17h45', '18h00', '18h15', '18h30', '18h45', '19h00']
-        todo_livraison = Livraison.objects.filter(statut=21, date=tomorrow, heure_livraison__in = aprem, place_id__isnull=False)
-        routes = Route.objects.exclude(id=21)
-        routes21 = Route.objects.filter(id=21)
-        eligable_locations = Livraison.objects.filter(place_id__isnull=False, heure_livraison__in = aprem, date=tomorrow )
-        livraisons =[]
-        for a in eligable_locations:
-            data = {
-                'lat': float(a.lat),
-                'lng': float(a.lng),
-                'place_id': a.place_id,
-                'nom': a.nom,
-                'heure_livraison': a.heure_livraison,
-                'adress' : a.adress,
-                'convives': a.convives,
-                'mode_envoi': a.mode_envoi,
-                'infodetail': a.infodetail
-            }
-
-            livraisons.append(data)
-
-        
-
-        context = {'key': key,
-                   'livraisons':livraisons,
-                   'distances':distances,
-                   'form':form,
-                   'routes':routes,
-                   'todo_livraison':todo_livraison,
-                   'routes21': routes21,
-                   'tomorrow':tomorrow,
-                   
-
-        }
-        return render(request, 'listings/mapaprem.html', context)
     
-    def post(self, request):
-
-        if request.method == 'POST':
-           form = RouteForm(request.POST)
-           if form.is_valid():
-              form.save()
-              return redirect('my_mapaprem_view')  # Redirect to a route list or another appropriate view
-        else:
-            form = RouteForm()
 
 class MapApremTodayView(View):
     def get(self, request):
@@ -1525,7 +1475,7 @@ def livraisonstomorrow(request):
     today = datetime.now().date()
     tomorrow = today + timedelta(1)
     matin = ['05h00', '05h15', '05h30', '05h45', '06h00', '06h15', '06h30', '06h45', '07h00', '07h15', '07h30', '07h45', '08h00',
-             '08h15', '08h30', '08h45', '09h00', '09h15', '09h30']
+             '08h15', '08h30', '08h45', '09h00', '09h15', '09h30', '09h45']
     midi = ['10h00', '10h15', '10h30', '10h45', '11h00', '11h15', '11h30', '11h45', '12h00', '12h15', '12h30', '12h45']
     apresmidi = ['13h00', '13h15', '13h30', '13h45', '14h00', '14h15', '14h30', '14h45', '15h00', '15h15', '15h30', '15h45', '16h00', '16h15', '16h30', '16h45', '17h00', '17h15', '17h30', '17h45', '18h00', '18h15', '18h30', '18h45', '19h00']
     livraisons = Livraison.objects.order_by('position').filter(date=tomorrow)
