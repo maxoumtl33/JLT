@@ -225,8 +225,6 @@ class Livraison(models.Model):
     )
     statut = models.ForeignKey(Route, null=True, blank=True, on_delete=models.SET_NULL, default=21)
     nom = models.fields.CharField(max_length=100, null=True, blank=True,)
-    def __str__(self):
-        return f'{self.nom}'
     heure_depart = models.fields.CharField(null=True, blank=True, max_length=100, choices= choiceheures, default=" ")
     heure_livraison = models.fields.CharField(null=True, blank=True, max_length=100, default=" ")
     client = models.ForeignKey(Client, null=True, blank=True, on_delete=models.SET_NULL)
@@ -257,7 +255,8 @@ class Livraison(models.Model):
     vendeur = models.fields.CharField(null=True, blank=True, max_length=200, default=" ")
     position = models.IntegerField(default=0)
     photo = models.ImageField(upload_to='listings/media/commandesdetail', blank=True, null=True)
-
+    def __str__(self):
+        return f'{self.nom}'
 
 class Product(models.Model):
     choices = (

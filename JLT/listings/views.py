@@ -486,7 +486,30 @@ def responsable_list(request):
                                                               'form':form})
 
 
+def journeedetailvente(request, id):
+    today = now().date()
+    livraisons  = Livraison.objects.order_by('position').filter(date = today)
+    livraisonsok  = Livraison.objects.filter(date = today, recuperation=False)
+    livraisonsrecup  = Livraison.objects.filter(date = today, recuperation=True)
+    journees = Journee.objects.all().order_by('date')
+    journee = Journee.objects.get(id=id)
 
+
+   
+
+    livreurs = Livreur.objects.all()
+
+    ventes = "Ventes"
+    cuisine = "Cuisine"
+    return render(request, 'listings/journeedetailvente.html', context={'livraisons': livraisons,
+                                                              'livreurs': livreurs,
+                                                              'journees' : journees,
+                                                              'ventes':ventes,
+                                                              'today':today,
+                                                              'livraisonsok':livraisonsok,
+                                                              'livraisonsrecup':livraisonsrecup,
+                                                              'cuisine':cuisine,
+                                                              'journee':journee,})
 def journees_list(request):
     today = now().date()
     livraisons  = Livraison.objects.order_by('position').filter(date = today)
@@ -1813,6 +1836,7 @@ def duplicate_model(request, model_id):
     original_object = Livraison.objects.get(pk=model_id)
     today = datetime.now().date()
     tomorrow = today + timedelta(1)
+    
     # Create a new object with the same attributes as the original
     new_object = Livraison()
     new_object.nom = original_object.nom
@@ -1833,10 +1857,9 @@ def duplicate_model(request, model_id):
     new_object.contact_site = original_object.contact_site
     new_object.date = tomorrow
     new_object.photo = original_object.photo
-
-
-
-
+    new_object.statut = original_object.statut
+    new_object.journee = original_object.journee
+    
     # Assign other fields as needed
     new_object.save()
     

@@ -1,7 +1,7 @@
 {% extends 'listings/base.html' %}
 {% load static %}
 {% block content %}
-{% if user.username == ventes or user.username == cuisine %}
+{% if user.username == cuisine %}
 <div style="text-align: center;">
   <div class="body">
     <h1 style="text-align: center;">LIVRAISONS DU JOUR</h1>
@@ -80,7 +80,7 @@
 </div>
 
 
-{% elif user.is_authenticated %}
+{% elif user.is_authenticated and user.username != ventes %}
 <div class="container mt-5">
   <h1>Liste des Journées</h1>
   <br>
@@ -141,8 +141,67 @@
   </div>
     
   {% endif %}
+  {% if user.username == ventes %}
+  <div class="container mt-5">
+    <h1>Liste des Journées</h1>
+    <br>
+    <!-- Date Filter Form -->
+    <form method="get">
+        {{ form.date }}
+        <button type="submit" class="btn btn-primary">Filtrer</button>
+        <a href="{% url 'journees-list' %}" class="btn btn-primary">Voir toute la liste</a>
+    </form>
+    <br>
+    <hr>
+    
+    <!-- Display Events -->
+    <div class="row">
+        {% for journee in journees %}
+        {% if journee.date == today %}
+            <div class="col-md-2 mb-2">
+                <a href="{% url 'journeedetailvente' journee.id %}">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title" style="color: green;">{{ journee.nom }}</h5>
+                    </div>
+                </div>
+            </a>
+            </div>
+            {% else %}
+            <div class="col-md-2 mb-2">
+              <a href="{% url 'journeedetailvente' journee.id %}">
+              <div class="card">
+                  <div class="card-body">
+                      <h5 style="color: gray;">{{ journee.nom }}</h5>
+                  </div>
+              </div>
+          </a>
+          </div>
+            {% endif %}
+        {% empty %}
+            <div class="col">
+                <p>Pas de Journées</p>
+            </div>
+        {% endfor %}
+    </div>
+  </div>
+  <div class="container mt-5">
+    <nav aria-label="Page navigation" style="align-items: center;">
+        <ul class="pagination">
+            {% if journees.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page=1">1ère page</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ journees.previous_page_number }}">Précédent</a></li>
+            {% endif %}
+            <li class="page-item active"><a class="page-link" href="?page={{ journees.number }}">{{ journees.number }}</a></li>
+            {% if journees.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ journees.next_page_number }}">Suivant</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ journees.paginator.num_pages }}">Dernière page</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    </div>
 
-
+  {% endif %}
 
 <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
   <div class="offcanvas-header">
