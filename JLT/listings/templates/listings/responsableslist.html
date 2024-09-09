@@ -1,125 +1,132 @@
 {% extends 'listings/base.html' %}
 {% load static %}
 {% block content %}
-<nav class="nav container">
-  <a href="#" class="nav__logo">Julien Leblanc Traiteur</a>
 
-  <div class="nav__menu" id="nav-menu">
-      <ul class="nav__list">
-        {% if user.is_authenticated %}
-          <li class="nav__item">
-            <form action="{% url 'logout' %}" method="post">
-              {% csrf_token %}
-              <button type="submit" class="nav__link active-link" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i></i>
-          </form>
-                  <span class="nav__name">Logout</span>
-        </button>
-          </li>
-          {% else %}
-          <li class="nav__item">
-            <a href="{% url 'login' %}" class="nav__link" style="color: green;"><i class="fa-regular fa-user"></i>
-                  <span class="nav__name">Login</span>
-              </a>
-          </li>
-          {% endif %}
-          {% if user.username == ventes %}
-          <li class="nav__item">
-            <a href="{% url 'creerchecklist' %}" class="nav__link"><i class="fa-solid fa-clipboard-list"></i>
-              <span class="nav__name">Checklist</span>
-          </a>
-          </li>
-          {% endif %}
-      </ul>
-  </div>
+<style>
+  .card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
 
-  <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
-</nav>
-<br>
-<br>
+.card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
 
+.card-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.text-success {
+  color: #28a745 !important;
+}
+
+.text-secondary {
+  color: #6c757d !important;
+}
+
+    /* Footer Navigation Bar (Fixed to bottom) */
+    .bottom-navbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #333;
+            padding: 10px 0;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .bottom-navbar ul {
+            list-style: none;
+            display: flex;
+            justify-content: space-around;
+            margin: 0;
+            padding: 0;
+        }
+
+        .bottom-navbar ul li {
+            flex: 1;
+            text-align: center;
+        }
+
+        .bottom-navbar ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            display: block;
+            padding: 5px;
+            transition: color 0.3s ease;
+        }
+
+        .bottom-navbar ul li a:hover {
+            text-decoration: underline;
+            color: #127BFF;
+        }
+</style>
 
 {% if user.is_authenticated %}
 <div class="container mt-5">
-  <h2>Liste des Journées</h2>
+    <h1 class="text-center mb-4">Liste des Journées</h1>
   <br>
-  <!-- Date Filter Form -->
-  <form method="get">
-      {{ form.date }}
-      <button type="submit" class="btn btn-primary">Filtrer</button>
-      <a href="{% url 'journees-list' %}" class="btn btn-primary">Voir toute la liste</a>
-  </form>
   <br>
-  <hr>
-  
-  <!-- Display Events -->
-  <div class="row">
+    <!-- Date Filter Form -->
+    <form method="get" class="d-flex justify-content-center mb-4">
+      <div class="form-group me-2">
+        {{ form.date }}  <!-- The class is added directly in the form field -->
+      </div>
+      <button type="submit" class="btn btn-primary me-2">Filtrer</button>
+      <a href="{% url 'journees-list' %}" class="btn btn-secondary">Voir toute la liste</a>
+    </form>
+  <br>
+    <!-- Display Events -->
+    <div class="row">
       {% for journee in journees %}
-      {% if journee.date == today %}
-          <div class="col-md-2 mb-2">
-              <a href="{% url 'responsables' journee.id %}">
-              <div class="card mb-3">
-                  <div class="card-body">
-                      <h5 class="card-title" style="color: green;">{{ journee.nom }}</h5>
-                  </div>
+        <div class="col-md-4 col-lg-3 mb-4">
+          <a href="{% url 'responsables' journee.id %}" class="text-decoration-none">
+            <div class="card shadow-sm h-100 {% if journee.date == today %}border-success{% else %}border-light{% endif %}">
+              <div class="card-body">
+                <h5 class="card-title text-center {% if journee.date == today %}text-success{% else %}text-secondary{% endif %}">
+                  {{ journee.nom }}
+                </h5>
               </div>
-          </a>
-          </div>
-          {% else %}
-          <div class="col-md-2 mb-2">
-            <a href="{% url 'responsables' journee.id %}">
-            <div class="card">
-                <div class="card-body">
-                    <h5 style="color: gray;">{{ journee.nom }}</h5>
-                </div>
             </div>
-        </a>
+          </a>
         </div>
-          {% endif %}
       {% empty %}
-          <div class="col">
-              <p>Pas de Journées</p>
-          </div>
+        <div class="col">
+          <p class="text-center">Aucune journée disponible</p>
+        </div>
       {% endfor %}
-  </div>
-</div>
-<div class="container mt-5">
-  <nav aria-label="Page navigation" style="align-items: center;">
-      <ul class="pagination">
+    </div>
+  <br>
+  <br>
+    <!-- Pagination -->
+    <div class="d-flex justify-content-center mt-4">
+      <nav aria-label="Page navigation">
+        <ul class="pagination">
           {% if journees.has_previous %}
-              <li class="page-item"><a class="page-link" href="?page=1">1ère page</a></li>
-              <li class="page-item"><a class="page-link" href="?page={{ journees.previous_page_number }}">Précédent</a></li>
+            <li class="page-item"><a class="page-link" href="?page=1">1ère page</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ journees.previous_page_number }}">Précédent</a></li>
           {% endif %}
           <li class="page-item active"><a class="page-link" href="?page={{ journees.number }}">{{ journees.number }}</a></li>
           {% if journees.has_next %}
-              <li class="page-item"><a class="page-link" href="?page={{ journees.next_page_number }}">Suivant</a></li>
-              <li class="page-item"><a class="page-link" href="?page={{ journees.paginator.num_pages }}">Dernière page</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ journees.next_page_number }}">Suivant</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ journees.paginator.num_pages }}">Dernière page</a></li>
           {% endif %}
-      </ul>
-  </nav>
+        </ul>
+      </nav>
+    </div>
   </div>
     
   {% endif %}
 
-
-
-<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="offcanvasExampleLabel">Liens Formulaires</h5>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-  </div>
-  <div class="offcanvas-body">
-    <div>
-      <p><a class="btn btn-primary" href="https://discord.com/channels/1174091428876533800/1194755233935523952" target="_blank">Photo livraison <i class="fa-brands fa-discord"></i></a></p>
-      <p><a href="https://view.forms.app/loicveyre/jeparsenlivraison" target="_blank" class="btn btn-primary">Départ <i class="fa-solid fa-truck-fast"></i></a></p>
-      <p><a href="https://view.forms.app/loicveyre/jereviensdelivraison" target="_blank" class="btn btn-primary">Retour <i class="fa-sharp fa-solid fa-truck fa-flip-horizontal"></i></a></p>
-      <p><a href="https://oakmnxgj.forms.app/recuplivreurs" target="_blank" class="btn btn-primary">Récup <i class="fa-solid fa-dolly"></i></a>
-      </p>
-      <p><a href="https://oakmnxgj.forms.app/essence" target="_blank" class="btn btn-primary">Essence <i class="fa-solid fa-gas-pump"></i></a>
-      </p>
-    </p>    
-  </div>
-  </div>
-</div>
-
+<!-- Footer Navbar -->
+<nav class="bottom-navbar">
+    <ul>
+        <li><a href="{% url 'acceuilresponsables'%}" class="nav__link" ><i class="fa-solid fa-user-ninja"></i>
+          <span class="nav__name">Menu Admin</span>
+      </a></li>  
+</nav>
 
 {% endblock %}

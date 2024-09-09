@@ -1,144 +1,389 @@
 {% extends 'listings/base.html' %}
 {% load static %}
 {% block content %}
-<nav class="nav container">
-  <a href="#" class="nav__logo">Julien Leblanc Traiteur</a>
+<style>
+ * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-  <div class="nav__menu" id="nav-menu">
-      <ul class="nav__list">
-        {% if user.is_authenticated %}
-          <li class="nav__item">
-            <form action="{% url 'logout' %}" method="post">
-              {% csrf_token %}
-              <button type="submit" class="nav__link active-link" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i>
-          </form>
-                  <span class="nav__name">Logout</span>
-        </button>
-          </li>
-          {% else %}
+body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background-color: #f9f9f9;
+}
 
-          <li class="nav__item">
-            <a href="{% url 'login' %}" class="nav__link" style="color: green;"><i class="fa-regular fa-user"></i></i></a>
-                  <span class="nav__name">Login</span>
-              </a>
-          </li>
-          {% endif %}
-          <li class="nav__item">
-            <a type="button" class="nav__link" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
-              <i class="fa-solid fa-link"></i><span class="nav__name">Liens</span>
-            </a>
-          </li>
+.card-title {
+    font-size: 1.5rem;
+    color: #333;
+}
 
-          <li class="nav__item">
-            <a href="{% url 'dashboard' journees.id request.user.id %}" class="nav__link" ><i class="fa-regular fa-id-badge"></i>
-                  <span class="nav__name">Dashboard</span>
-              </a>
-          </li>
-          {% if user.username == loic or user.username == maxime %}
-          <li class="nav__item">
-            <a href="{% url 'acceuilresponsables'%}" class="nav__link" ><i class="fa-solid fa-user-ninja"></i>
-                  <span class="nav__name">Acceuil</span>
-              </a>
-          </li>
-          {% endif %}
-      </ul>
-  </div>
+.stats-row {
+    display: flex;
+    justify-content: space-between;
+}
 
-  <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
-</nav>
-<br>
-<br>
-<div class="body">
-  <h1 style="text-align: center;">FEUILLE DE ROUTE</h1> <h1 style="text-align: center;"> {{journees}} </h1>
-  <br>
-  <br>
-  <p style="text-align: center;">{{ livraisonsok|length }} livraisons et {{ recuperationes|length }} récupérations aujourd'hui</p>
-  <br>
-  <table class="table table-striped">
-      <thead class="thead-dark">
-        <tr>
-          
-          <th scope="col" style="color: #303FBA;">Heure départ</th>
-          <th scope="col" style="color: #303FBA;">Nom du contrat</th>
-          <th scope="col" style="color: #303FBA;">Infos</th>
-          <th scope="col" style="color: #303FBA;">Heure livraison</th>
-          <th scope="col" style="color: #303FBA;">Livreur</th>
-          <th scope="col" style="color: #303FBA;">Aide livreur</th>
-          <th scope="col" style="color: #303FBA;">Route</th>
-          <th scope="col" style="color: #303FBA;">Retour traiteur</th>
-          <th scope="col" style="color: #303FBA;">lien</th>
+.stat-item h2 {
+    font-size: 3rem;
+    margin: 0;
+}
 
-        </tr>
-      </thead>
-      <tbody>
-          {% for livraison in livraisons %}
-          {% if livraison.recuperation == True and livraison.date == journees.date %}
-        <tr>
-          
-          <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.heure_depart }}</strong></td>
-          <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
-          <td style="background-color: #F1B3DA;"><strong>{{livraison.infodetail}}</strong></td>
-          <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
-          <td style="background-color: #F1B3DA;"><strong>{{livraison.statut.livreur.nom}}</strong></td>
-          <td style="background-color: #F1B3DA;"><strong>{{livraison.aidelivreur}}</strong></td>
-          <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.nom }}</strong></td>
-          {% if livraison.retourtraiteur == retourtraiteur %}
-          <td><strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-xl"></i></a></strong></td>
-          {%  else %}
-          <td></td>
-          {% endif %}
-          <td><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
-        </tr>
+.stat-item p {
+    font-size: 1rem;
+    color: #777;
+}
 
-          {% elif livraison.date == journees.date %}
-          <tr>
-          
-            <td><strong>{{ livraison.statut.heure_depart }}</strong></td>
-            <td><strong>{{livraison.nom}}</strong></td>
-            <td style="color: orange;"><strong>{{ livraison.infodetail }}</strong></td>
-            <td><strong>{{ livraison.heure_livraison }}</strong></td>
-            <td><strong>{{livraison.statut.livreur.nom}}</strong></td>
-            <td><strong>{{livraison.aidelivreur}}</strong></td>
-            <td><strong>{{ livraison.statut.nom }}</strong></td>
-            {% if livraison.retourtraiteur == retourtraiteur %}
-            <td><strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i class="fa-solid fa-house-chimney-window fa-xl"></i></a></strong></td>
-            {%  else %}
-          <td></td>
-          {% endif %}
-            <td><a href="{% url 'livraison-detail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
-          </tr>
-          {% endif %}
-        {% endfor %}
-        
-      </tbody>
-    </table>
-  </div>
-  
-  <br>
-  <br>
-  <br>
-  
+.text-primary {
+    color: #4a90e2 !important;
+}
+
+.text-success {
+    color: #F1B3DA !important;
+}
+
+.card {
+    border-radius: 15px;
+    background-color: #f9f9f9;
+    padding: 20px;
+}
+
+.card-body {
+    padding: 30px;
+}
+
+.card-text {
+    margin-top: 20px;
+}
+
+
+/* Heading */
+h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Table for desktop view */
+.delivery-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.delivery-table th, .delivery-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.delivery-table th {
+    background-color: #127BFF;
+    color: white;
+}
+
+/* Responsive card view for mobile */
+.delivery-cards {
+    display: none; /* Hidden on desktop */
+}
+
+.delivery-card {
+    background-color: white;
+    margin: 10px 0;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+.delivery-card:hover {
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.delivery-card h3 {
+    color: #127BFF;
+    margin-bottom: 10px;
+}
+
+.delivery-card p {
+    margin-bottom: 8px;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+body {
+    flex: 1;
+}
+
+.container {
+    flex-grow: 1; /* Ensures that content stretches to take up space before the footer */
+}
+
+.bottom-navbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #333;
+    padding: 10px 0;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000; /* Ensures it's above other content */
+}
+
+.bottom-navbar ul {
+    list-style: none;
+    display: flex;
+    justify-content: space-around;
+    margin: 0;
+    padding: 0;
+}
+
+.bottom-navbar ul li {
+    flex: 1;
+    text-align: center;
+}
+
+.bottom-navbar ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.bottom-navbar ul li a:hover {
+    text-decoration: underline;
+}
+
+/* Media query for responsive behavior */
+@media (max-width: 768px) {
+    .navbar ul {
+        flex-direction: column;
+    }
+
+    .navbar ul li {
+        margin: 10px 0;
+    }
+}
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .header-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+
+    .stats-section {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .map-section {
+        padding: 10px;
+    }
+
+    .order {
+        font-size: 14px;
+    }
+    .dashboard-header {
+    text-align: center;
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 20px;
+}
+
+
+}
+
+</style>
+</head>
+<body>
+
+  <nav class="bottom-navbar">
+    <ul>
+        <li><a  href="{% url 'journees-list'%}" class="nav__link"><i class="fa-solid fa-calendar-days"></i>
+          <span class="nav__name">Journées</span>
+        </a></li>
+        <li><a  href="{% url 'dashboard' journees.id request.user.id %}" class="nav__link"><i class="fa-regular fa-id-badge"></i>
+          <span class="nav__name">Dashboard</span>
+        </a></li>
       
-  
-  <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
-    <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="offcanvasExampleLabel">Liens Formulaires</h5>
-      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body">
-      <div>
-        <p><a class="btn btn-primary" href="https://discord.com/channels/1174091428876533800/1194755233935523952" target="_blank">Photo livraison <i class="fa-brands fa-discord"></i></a></p>
-        <p><a href="https://view.forms.app/loicveyre/jeparsenlivraison" target="_blank" class="btn btn-primary">Départ <i class="fa-solid fa-truck-fast"></i></a></p>
-        <p><a href="https://view.forms.app/loicveyre/jereviensdelivraison" target="_blank" class="btn btn-primary">Retour <i class="fa-sharp fa-solid fa-truck fa-flip-horizontal"></i></a></p>
-        <p><a href="https://oakmnxgj.forms.app/recuplivreurs" target="_blank" class="btn btn-primary">Récup <i class="fa-solid fa-dolly"></i></a>
-        </p>
-        <p><a href="https://oakmnxgj.forms.app/essence" target="_blank" class="btn btn-primary">Essence <i class="fa-solid fa-gas-pump"></i></a>
-        </p>
-      </p>    
-    </div>
+        <li><a type="button" class="nav__link" >
+          <i class="fa-regular fa-circle-question"></i><span class="nav__name">FAQ</span>
+        </a></li>
+        {% if user.username == loic or user.username == maxime %}
+        <li><a href="{% url 'acceuilresponsables'%}" class="nav__link" ><i class="fa-solid fa-user-ninja"></i>
+          <span class="nav__name">Admin</span>
+      </a></li>  
+      {% endif %} 
+      </ul>
+</nav>
+<header>
+  <div class="header-container">
+    <div class="header-content">
+      <h1 class="header-title">Feuille de route</h1>
+        <h1 class="header-title">{{ journees }}</h1>
+      </div>
     </div>
   </div>
+</header>
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow-sm border-0">
+        <div class="card-body text-center">
+          <h5 class="card-title" style="font-weight: bold;">Statistiques du jour</h5>
+          <hr>
+          <div class="stats-row d-flex justify-content-around align-items-center">
+            <!-- Livraisons Stat -->
+            <div class="stat-item">
+              <h2 class="text-primary">{{ livraisonsok|length }}</h2>
+              <p>Livraisons</p>
+            </div>
+            <!-- Récupérations Stat -->
+            <div class="stat-item">
+              <h2 class="text-success">{{ recuperationes|length }}</h2>
+              <p>Récupérations</p>
+            </div>
+          </div>
+          <hr>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+ 
+  
+        
+
+
+<table class="delivery-table">
+  <thead>
+      <tr>
+          <th>Heure Départ</th>
+          <th>Nom Client</th>
+          <th>Informations</th>
+          <th>Heure livraison</th>
+          <th>Livreur</th>
+          <th>Détails</th>
+      </tr>
+  </thead>
+  
+  
+  <tbody id="delivery-data">
+    
+  </tbody>
+
+  <div id="delivery-cards" class="delivery-cards">
+    <!-- Cards will be added here dynamically -->
+</div>
+
+</table>
+</div>
+<br>
+<br>
+<br>
+<br>
+
+
+
+
+<script>
+  // Parse JSON data into JavaScript object
+  const livraisons = JSON.parse('{{ livraisonss|escapejs }}');
+  console.log("Delivery locations data:", livraisons);
+
+  function renderDeliveries() {
+      const tableBody = document.getElementById('delivery-data');
+      const deliveryCards = document.getElementById('delivery-cards');
+
+      // Clear previous data
+      tableBody.innerHTML = '';
+      deliveryCards.innerHTML = '';
+
+      // Check if the deliveries array is not empty
+      if (!livraisons || livraisons.length === 0) {
+          console.error("No deliveries data found.");
+          return;
+      }
+
+      livraisons.forEach(livraison => {
+          console.log("Processing delivery:", livraison);
+
+          const { nom, infodetail, heure_livraison, heure_depart, livreur, id, recuperation, date } = livraison;
+          const today = new Date().toISOString().slice(0, 10);  // Get current date in 'YYYY-MM-DD' format
+
+          // Check if essential properties exist
+          if (!nom || !infodetail || !heure_livraison) {
+              console.error("Missing essential delivery properties:", livraison);
+              return;
+          }
+
+          // Condition: Only show rows where recuperation is true and the date matches today
+          if (recuperation === true) {
+    const baseUrl = "{% url 'livraison-detail' 0 %}".replace('0', id);
+
+    // Create a new table row with background color
+    const row = document.createElement('tr');
+    row.innerHTML = `
+        <td style="background-color: #F1B3DA;">${heure_depart || 'N/A'}</td>
+        <td style="background-color: #F1B3DA;">${nom || 'N/A'}</td>
+        <td style="background-color: #F1B3DA;">${infodetail || 'N/A'}</td>
+        <td style="background-color: #F1B3DA;">${heure_livraison || 'N/A'}</td>
+        <td style="background-color: #F1B3DA;">${livreur || 'N/A'}</td>
+        <td><a href="${baseUrl}" class="view-details">Voir</a></td>
+    `;
+    tableBody.appendChild(row);
+} else if (recuperation === false) {
+    const baseUrl = "{% url 'livraison-detail' 0 %}".replace('0', id);
+
+    // Create a new table row without background color
+    const row = document.createElement('tr');
+    row.innerHTML = `
+        <td>${heure_depart || 'N/A'}</td>
+        <td>${nom || 'N/A'}</td>
+        <td>${infodetail || 'N/A'}</td>
+        <td>${heure_livraison || 'N/A'}</td>
+        <td>${livreur || 'N/A'}</td>
+        <td><a href="${baseUrl}" class="view-details">Voir</a></td>
+    `;
+    tableBody.appendChild(row);
+}
+
+
+          // Render the delivery card
+          const card = document.createElement('div');
+          card.className = 'delivery-card';
+          card.innerHTML = `
+              <h3>${nom || "N/A"}</h3>
+              <p><strong>Heure Départ:</strong> ${heure_depart || "."}</p>
+              <p><strong>Détails:</strong> ${infodetail || "."}</p>
+              <p><strong>Heure Livraison:</strong> ${heure_livraison || "."}</p>
+              <p><strong>Livreur:</strong> ${livreur || "."}</p>
+          `;
+          deliveryCards.appendChild(card);
+      });
+  }
+
+  // Call the function on page load
+  window.onload = renderDeliveries;
+</script>
+
+
+
   
 
+</body>
 
 {% endblock %}
+

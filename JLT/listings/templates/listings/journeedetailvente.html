@@ -40,7 +40,7 @@
       <h1 style="text-align: center;">LIVRAISONS DU JOUR</h1>
       <br>
       <br>
-      <p style="text-align: center;">{{ livraisonsok|length }} livraisons et {{ livraisonsrecup|length }} récupérations aujourd'hui</p>
+      <p style="text-align: center;">{{ livraisonsok|length }} livraisons et {{ recuperationes|length }} récupérations aujourd'hui</p>
       <br>
       <br>
       <table class="table table-hover">
@@ -55,9 +55,9 @@
               <th scope="col" style="color: #303FBA;">Aide livreur</th>
               <th scope="col" style="color: #303FBA;">Route</th>
               <th scope="col" style="color: #303FBA;">Status</th>
-              {% if user.username == ventes %}
+              
               <th scope="col" style="color: #303FBA;">Modifier</th>
-              {% endif %}
+             
   
   
     
@@ -66,7 +66,7 @@
           </thead>
           <tbody>
               {% for livraison in livraisons %}
-              {% if livraison.recuperation == True %}
+              {% if livraison.recuperation == True and livraison.date == journees.date %}
             <tr>
               
               <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.heure_depart }}</strong></td>
@@ -81,13 +81,12 @@
                 {% else %}
               <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
               {% endif %}
-              {% if user.username == ventes %}
-            <td><a href="{% url 'livraisonventesdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
-            {% endif %}
-              </tr>
-              {% else %}
-              <tr>
               
+            <td><a href="{% url 'livraisonventesdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+            
+              </tr>
+              {% elif livraison.date == journees.date %}
+              <tr>
               <td><strong>{{ livraison.statut.heure_depart }}</strong></td>
               <td><strong>{{livraison.nom}}</strong></td>
               <td><strong>{{livraison.infodetail}}</strong></td>
@@ -100,9 +99,9 @@
                 {% else %}
               <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
               {% endif %}
-              {% if user.username == ventes %}
+              
             <td><a href="{% url 'livraisonventesdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
-            {% endif %}
+            
             </tr>
             {% endif %}
             {% endfor %}

@@ -3,82 +3,54 @@
 
 {% block content %}
 
-            
-         
-<nav class="nav container">
-  <a href="#" class="nav__logo">Julien Leblanc Traiteur</a>
+<style>
+    .content-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 80vh;
+        flex-direction: column;
+        text-align: center;
+    }
+    h1 {
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+        color: #333;
+    }
+    .btn-primary, .btn-secondary {
+        padding: 12px 24px;
+        font-size: 1.2rem;
+        border-radius: 8px;
+    }
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: white;
+    }
+    .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #0056b3;
+    }
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        color: white;
+        margin-top: 20px;
+    }
+    .btn-secondary:hover {
+        background-color: #5a6268;
+        border-color: #545b62;
+    }
+</style>
 
-  <div class="nav__menu" id="nav-menu">
-      <ul class="nav__list">
-        {% if user.is_authenticated %}
-          <li class="nav__item">
-            <form action="{% url 'logout' %}" method="post">
-              {% csrf_token %}
-              <button type="submit" class="nav__link active-link" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i></i>
-          </form>
-                  <span class="nav__name">Logout</span>
-        </button>
-          </li>
-          {% else %}
-          <li class="nav__item">
-            <a href="{% url 'login' %}" class="nav__link" style="color: green;"><i class="fa-regular fa-user"></i></i>
-                  <span class="nav__name">Login</span>
-              </a>
-          </li>
-          {% endif %}
-          <li class="nav__item">
-            <a type="button" class="nav__link" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
-              <i class="fa-solid fa-link"></i><span class="nav__name">Liens</span>
-            </a>
-          </li>
-      </ul>
-  </div>
-
-  <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
-</nav>
-
- 
-
-<div style="text-align: center;">
-
-<br>
-
-<p>{% if user.is_authenticated %}
-  <h1 id="dejaco">Tu es déjà connecté</h1>
-  <br>
-  <br>
-  <p><a class="btn btn-primary" href="{% url 'journees-list'  %}"  aria-current="page">Voir les journées</a></p>
-{% else %}
-<h1>Connecte toi pour continuer</h1>
-<br>
-<br>
-<br>
-
-{% endif %}
-<br>
-
-
-
-
-</div>
-
-<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="offcanvasExampleLabel">Liens Formulaires</h5>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-  </div>
-  <div class="offcanvas-body">
-    <div>
-      <p><a class="btn btn-primary" href="https://discord.com/channels/1174091428876533800/1194755233935523952" target="_blank">Photo livraison <i class="fa-brands fa-discord"></i></a></p>
-      <p><a href="https://view.forms.app/loicveyre/jeparsenlivraison" target="_blank" class="btn btn-primary">Départ <i class="fa-solid fa-truck-fast"></i></a></p>
-      <p><a href="https://view.forms.app/loicveyre/jereviensdelivraison" target="_blank" class="btn btn-primary">Retour <i class="fa-sharp fa-solid fa-truck fa-flip-horizontal"></i></a></p>
-      <p><a href="https://oakmnxgj.forms.app/recuplivreurs" target="_blank" class="btn btn-primary">Récup <i class="fa-solid fa-dolly"></i></a>
-      </p>
-      <p><a href="https://oakmnxgj.forms.app/essence" target="_blank" class="btn btn-primary">Essence <i class="fa-solid fa-gas-pump"></i></a>
-      </p>
-    </p>    
-  </div>
-  </div>
+<div class="content-container">
+    {% if user.is_authenticated %}
+        <h1 id="dejaco">Tu es déjà connecté</h1>
+        <a class="btn btn-primary" href="{% url 'journees-list'  %}" aria-current="page">Voir les journées</a>
+    {% else %}
+        <h1>Connecte-toi pour continuer</h1>
+        <a class="btn btn-primary" href="{% url 'login' %}">Se connecter</a>
+    {% endif %}
 </div>
 
 {% endblock %}

@@ -1,43 +1,47 @@
 {% extends 'listings/base.html' %}
 {%  load static %}
 {% block content %}
-<nav class="nav container">
-    <a href="#" class="nav__logo">Julien Leblanc Traiteur</a>
-  
-    <div class="nav__menu" id="nav-menu">
-        <ul class="nav__list">
-          {% if user.is_authenticated %}
-            <li class="nav__item">
-              <form action="{% url 'logout' %}" method="post">
-                {% csrf_token %}
-                <button type="submit" class="nav__link active-link" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i>
-            </form>
-                    <span class="nav__name">Logout</span>
-          </button>
-            </li>
-            {% else %}
-  
-            <li class="nav__item">
-              <a href="{% url 'login' %}" class="nav__link" style="color: green;"><i class="fa-regular fa-user"></i></i></a>
-                    <span class="nav__name">Login</span>
-                </a>
-            </li>
-            {% endif %}
-            <li class="nav__item">
-              <a type="button" class="nav__link" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
-                <i class="fa-solid fa-link"></i><span class="nav__name">Liens</span>
-              </a>
-            </li>
-            <li class="nav__item">
-              <a  href="{% url 'acceuilresponsables' %}" class="nav__link"><i class="fa-solid fa-user-ninja"></i>
-                <span class="nav__name">Retour</span>
-              </a>
-            </li>
-        </ul>
-    </div>
-  
-    <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
-  </nav>
+<style>
+  .bottom-navbar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #333;
+        padding: 10px 0;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+    }
+    .bottom-navbar ul {
+        list-style: none;
+        display: flex;
+        justify-content: space-around;
+        margin: 0;
+        padding: 0;
+    }
+    .bottom-navbar ul li {
+        flex: 1;
+        text-align: center;
+    }
+    .bottom-navbar ul li a {
+        color: white;
+        text-decoration: none;
+        font-size: 16px;
+        display: block;
+        padding: 5px;
+        transition: color 0.3s ease;
+    }
+    .bottom-navbar ul li a:hover {
+        text-decoration: underline;
+        color: #127BFF;
+    }
+</style>
+<nav class="bottom-navbar">
+  <ul>
+      <li><a href="{% url 'acceuilresponsables'%}" class="nav__link"><i class="fa-solid fa-user-ninja"></i><span class="nav__name">Menu Admin</span></a></li>
+      
+  </ul>
+</nav>
 
 <br>
 <br>

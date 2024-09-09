@@ -4,100 +4,322 @@
 {% load static %}
 
 {% block content %}
-<nav class="nav container">
-    <a href="#" class="nav__logo">Julien Leblanc Traiteur</a>
-  
-    <div class="nav__menu" id="nav-menu">
-        <ul class="nav__list">
-          {% if user.is_authenticated %}
-            <li class="nav__item">
-              <form action="{% url 'logout' %}" method="post">
-                {% csrf_token %}
-                <button type="submit" class="nav__link active-link" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i></i>
-            </form>
-                    <span class="nav__name">Logout</span>
-          </button>
-            </li>
-            {% else %}
-            <li class="nav__item">
-              <a href="{% url 'login' %}" class="nav__link" style="color: green;"><i class="fa-regular fa-user"></i></i>
-                    <span class="nav__name">Login</span>
-                </a>
-            </li>
-            {% endif %}
-            <li class="nav__item">
-              <a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                <i class="fa-solid fa-link"></i><span class="nav__name">Liens</span>
-              </a>
-            </li>
-            <li class="nav__item">
-              <a  href="{% url 'acceuilresponsables' %}" class="nav__link"><i class="fa-solid fa-user-ninja"></i>
-                <span class="nav__name">Retour</span>
-              </a>
-  
-            </li>
-        </ul>
-    </div>
-  
-    <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
-  </nav>
-  <br>
-  <br>
-  <br>
-  <h1 style="text-align: center;">{{journee}}</h1>
+<style>
+  /* General Reset */
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
 
-<br>
-<br>
-  <div class="row row-cols-1 row-cols-md-2 g-4">
-    <div class="col">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Total livraisons</h5>
-          <p class="card-text">{{livraison|length}}</p>
-        </div>
+body {
+font-family: Arial, sans-serif;
+background-color: #f4f4f4;
+color: #333;
+}
+
+/* styles.css */
+
+header {
+background: #127BFF; /* A cool blue background color */
+color: #fff;
+padding: 20px 0;
+}
+
+.header-container {
+max-width: 1200px;
+margin: 0 auto;
+padding: 0 20px;
+}
+
+.header-content {
+display: flex;
+justify-content: space-between;
+align-items: center;
+flex-wrap: wrap;
+}
+
+.header-title {
+font-size: 2em;
+margin: 0;
+font-family: 'Roboto', sans-serif;
+}
+
+.header-subtitle {
+font-size: 1.5em;
+margin: 0;
+font-family: 'Roboto', sans-serif;
+}
+
+.logout-form {
+margin: 0;
+}
+
+.logout-button {
+background: #e94e77; /* A contrasting pink color */
+border: none;
+padding: 10px 20px;
+color: #fff;
+font-size: 1em;
+font-family: 'Roboto', sans-serif;
+border-radius: 5px;
+cursor: pointer;
+display: flex;
+align-items: center;
+transition: background 0.3s ease;
+}
+
+.logout-button:hover {
+background: #d43f65; /* Darker pink on hover */
+}
+
+.logout-button i {
+margin-right: 8px; /* Space between icon and text */
+}
+
+
+
+/* Navigation Bar */
+.navbar {
+background-color: #333;
+padding: 10px 0;
+}
+
+.navbar ul {
+list-style: none;
+display: flex;
+justify-content: center;
+}
+
+.navbar ul li {
+margin: 0 15px;
+}
+
+.navbar ul li a {
+color: white;
+text-decoration: none;
+}
+
+.navbar ul li a:hover {
+text-decoration: underline;
+}
+
+/* Stats Section */
+.stats-section {
+display: flex;
+justify-content: space-around;
+background-color: white;
+padding: 20px;
+margin: 20px 0;
+box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.stat-box {
+text-align: center;
+padding: 10px;
+}
+
+.stat-box h3 {
+color: #007BFF;
+}
+
+.stat-box p {
+font-size: 24px;
+font-weight: bold;
+}
+
+/* Map Section */
+.map-section {
+padding: 20px;
+background-color: white;
+box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#map {
+height: 400px;
+width: 100%;
+border-radius: 5px;
+}
+
+/* Order List Section */
+.order-card {
+background-color: #ffffff;
+border-radius: 8px;
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+margin: 15px;
+padding: 20px;
+text-align: center;
+transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.order-card:hover {
+transform: translateY(-5px);
+box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.order-title {
+color: #e5aacf;
+font-size: 1.2em;
+margin: 0;
+}
+
+.order-detail {
+color: #333;
+font-size: 1em;
+margin: 5px 0;
+}
+
+.order-info {
+color: #ffa500;
+font-size: 1em;
+margin: 10px 0;
+}
+
+.order-status {
+margin: 15px 0;
+}
+
+.status-icon {
+font-size: 1.5em;
+}
+
+.success {
+color: #28a745;
+}
+
+.pending {
+color: #ffc107;
+}
+
+.order-footer {
+margin-top: 20px;
+}
+
+.map-link {
+display: inline-block;
+background-color: #333;
+color: #fff;
+padding: 10px 20px;
+border-radius: 5px;
+text-decoration: none;
+font-size: 1em;
+transition: background-color 0.3s ease;
+}
+
+.map-link:hover {
+background-color: #555;
+}
+
+.map-link i {
+margin-right: 8px;
+}
+
+/* Footer Navigation Bar (Fixed to bottom) */
+.bottom-navbar {
+position: fixed;
+bottom: 0;
+left: 0;
+width: 100%;
+background-color: #333;
+padding: 10px 0;
+box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+z-index: 1000; /* Ensures it's above other content */
+}
+
+.bottom-navbar ul {
+list-style: none;
+display: flex;
+justify-content: space-around;
+margin: 0;
+padding: 0;
+}
+
+.bottom-navbar ul li {
+flex: 1;
+text-align: center;
+}
+
+.bottom-navbar ul li a {
+color: white;
+text-decoration: none;
+font-size: 16px;
+}
+
+.bottom-navbar ul li a:hover {
+text-decoration: underline;
+}
+
+/* Responsive Design */
+
+@media (max-width: 768px) {
+
+
+.header-title {
+    font-size: 1.5em;
+}
+
+.header-subtitle {
+    font-size: 1.2em;
+}
+
+.header-content {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.logout-button {
+    margin-top: 10px;
+}
+.navbar ul {
+    flex-direction: column;
+}
+
+.navbar ul li {
+    margin: 10px 0;
+}
+
+.stats-section {
+    flex-direction: column;
+    align-items: center;
+}
+
+.map-section {
+    padding: 10px;
+}
+
+.order {
+    font-size: 14px;
+}
+}
+</style>
+<header>
+  <div class="header-container">
+      <div class="header-content">
+          <h2 class="header-subtitle">{{ journee }}</h2>
       </div>
-    </div>
-    <div class="col">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Total récupérations</h5>
-          <p class="card-text">{{recuperation|length}}</p>
-        </div>
-      </div>
-    </div>
-    <div class="col">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Total livraisons validées</h5>
-          <p class="card-text">{{livraisonstatusok|length}} / {{livraison|length}}</p>
-        </div>
-      </div>
-    </div>
-    <div class="col">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Total récupérations validées</h5>
-          <p class="card-text">{{recuperationok|length}} / {{recuperation|length}}</p>
-        </div>
-      </div>
-    </div>
-    <div class="col">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Total livraisons en cours</h5>
-          <p class="card-text">{{livraisonstatusko|length}}</p>
-        </div>
-      </div>
-    </div>
-    <div class="col">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Total récupérations en cours</h5>
-          <p class="card-text">{{recuperationko|length}}</p>
-        </div>
-      </div>
-    </div>
   </div>
+</header>
+<br>
+<br>
+<section class="stats-section">
+  <div class="stat-box">
+      <h3>Livraisons en cours</h3>
+      <p id="totalDeliveries">{{livraisonstatusko|length}}</p>
+  </div>
+  <div class="stat-box">
+    <h3>Livraisons validées</h3>
+    <p id="completedDeliveries">{{livraisonstatusok|length}} / {{livraison|length}}</p>
+</div>
+  <div class="stat-box">
+    <h3 style="color: #E5AACF;">Récupérations en cours</h3>
+    <p id="totalRecups">{{recuperationko|length}}</p>
+</div>
+  <div class="stat-box">
+      <h3 style="color: #E5AACF;">Récupérations validées</h3>
+      <p id="completedRecups">{{recuperationok|length}} / {{recuperation|length}}</p>
+  </div>
+</section>
+ 
   <br>
   <br>
   <br>
@@ -235,24 +457,16 @@
 
 
 
-<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="offcanvasExampleLabel">Liens Formulaires</h5>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-  </div>
-  <div class="offcanvas-body">
-    <div>
-      <p><a class="btn btn-primary" href="https://discord.com/channels/1174091428876533800/1194755233935523952" target="_blank">Photo livraison <i class="fa-brands fa-discord"></i></a></p>
-      <p><a href="https://view.forms.app/loicveyre/jeparsenlivraison" target="_blank" class="btn btn-primary">Départ <i class="fa-solid fa-truck-fast"></i></a></p>
-      <p><a href="https://view.forms.app/loicveyre/jereviensdelivraison" target="_blank" class="btn btn-primary">Retour <i class="fa-sharp fa-solid fa-truck fa-flip-horizontal"></i></a></p>
-      <p><a href="https://oakmnxgj.forms.app/recuplivreurs" target="_blank" class="btn btn-primary">Récup <i class="fa-solid fa-dolly"></i></a>
-      </p>
-      <p><a href="https://oakmnxgj.forms.app/essence" target="_blank" class="btn btn-primary">Essence <i class="fa-solid fa-gas-pump"></i></a>
-      </p>
-    </p>    
-  </div>
-  </div>
-</div>
+
+<nav class="bottom-navbar">
+  <ul>
+      <li><a href="{% url 'acceuilresponsables'%}" class="nav__link" ><i class="fa-solid fa-user-ninja"></i>
+        <span class="nav__name">Menu Admin</span>
+    </a></li>  
+    <li><a  href="{% url 'responsablelist'%}" class="nav__link"><i class="fa-solid fa-calendar-days"></i>
+      <span class="nav__name">Journées</span>
+    </a></li>
+</nav>
 
 
     {% endblock %}

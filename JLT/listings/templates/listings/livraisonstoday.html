@@ -1,42 +1,11 @@
 {% extends 'listings/base.html' %}
 {% load static %}
 {% block content %}
-<nav class="nav container">
-  <a href="#" class="nav__logo">Julien Leblanc Traiteur</a>
-
-  <div class="nav__menu" id="nav-menu">
-      <ul class="nav__list">
-        {% if user.is_authenticated %}
-          <li class="nav__item">
-            <form action="{% url 'logout' %}" method="post">
-              {% csrf_token %}
-              <button type="submit" class="nav__link active-link" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i>
-          </form>
-                  <span class="nav__name">Logout</span>
-        </button>
-          </li>
-          {% else %}
-
-          <li class="nav__item">
-            <a href="{% url 'login' %}" class="nav__link" style="color: green;"><i class="fa-regular fa-user"></i></i></a>
-                  <span class="nav__name">Login</span>
-              </a>
-          </li>
-          {% endif %}
-          <li class="nav__item">
-            <a type="button" class="nav__link" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
-              <i class="fa-solid fa-link"></i><span class="nav__name">Liens</span>
-            </a>
-          </li>
-          <li class="nav__item">
-            <a  href="{% url 'acceuilresponsables' %}" class="nav__link"><i class="fa-solid fa-user-ninja"></i>
-              <span class="nav__name">Retour</span>
-            </a>
-          </li>
-      </ul>
-  </div>
-
-  <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
+<nav class="bottom-navbar">
+  <ul>
+      <li><a href="{% url 'acceuilresponsables'%}" class="nav__link"><i class="fa-solid fa-user-ninja"></i><span class="nav__name">Menu Admin</span></a></li>
+      
+  </ul>
 </nav>
 <br>
 <br>

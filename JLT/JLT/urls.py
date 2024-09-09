@@ -28,6 +28,9 @@ path('mapaprem', MapApremView.as_view(), name = 'my_mapaprem_view'),
 path('maptoday', MapTodayView.as_view(), name = 'my_maptoday_view'),
 path('maptodaymidi', MapMidiTodayView.as_view(), name = 'my_maptodaymidi_view'),
 path('maptodayaprem', MapApremTodayView.as_view(), name = 'my_maptodayaprem_view'),
+path('mapdim', MapDimView.as_view(), name = 'my_mapdim_view'),
+path('mapdimmidi', MapMidiDimView.as_view(), name = 'my_mapdimmidi_view'),
+path('mapdimyaprem', MapApremDimView.as_view(), name = 'my_mapdimaprem_view'),
 path('delete_distance/<str:pk>/', views.deleteDistance, name = 'deletedistance'),
 path('livreur/<int:pk>/', views.livreur_detail, name='livreur-detail'),
 path('livraisonstomorrow/', views.livraisonstomorrow, name='livraisonstomorrow'),
@@ -62,7 +65,10 @@ path('checklistvoir/<int:checklist_id>/', views.checklistvoir_detail, name='chec
 path('checklist-item/<int:pk>/delete-ajax/', ChecklistItemDeleteAjaxView.as_view(), name='checklist-item-delete-ajax'),
 path('update_livraison/', views.update_livraison, name='update_livraison'),
 path('create_routes/', create_routes, name='create_routes'),
+path('create_routesnext/', create_routesn, name='create_routesn'),
+path('create_routesnextnext/', create_routesnn, name='create_routesnn'),
 path('responsablelist/', responsable_list, name='responsablelist'),
+path('geocode_all_livraisons/', views.geocode_all_livraisons, name='geocode_all_livraisons'),
 
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

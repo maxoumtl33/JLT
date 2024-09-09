@@ -1,153 +1,175 @@
 {% extends 'listings/base.html' %}
 {% load static %}
 {% block content %}
-<nav class="nav container">
-  <a href="#" class="nav__logo">Julien Leblanc Traiteur</a>
+<style>
+  /* General Styles */
+  body {
+    background-color: #f8f9fa;
+    font-family: Arial, sans-serif;
+  }
+  
+  .container {
+    margin: 20px auto;
+    max-width: 1200px;
+  }
 
-  <div class="nav__menu" id="nav-menu">
-      <ul class="nav__list">
-        {% if user.is_authenticated %}
-          <li class="nav__item">
-            <form action="{% url 'logout' %}" method="post">
-              {% csrf_token %}
-              <button type="submit" class="nav__link active-link" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i>
-          </form>
-                  <span class="nav__name">Logout</span>
-        </button>
-          </li>
-          {% else %}
+  h1 {
+    color: #1176F5;
+    margin-bottom: 20px;
+    font-size: 2.5rem;
+  }
+  
+  .table thead th {
+    background-color: #1176F5;
+    color: white;
+    font-weight: bold;
+  }
+  
+  .table tbody tr:nth-child(even) {
+    background-color: #e9ecef;
+  }
+  
+  .table tbody tr:nth-child(odd) {
+    background-color: #ffffff;
+  }
+  
+  .table tbody td {
+    vertical-align: middle;
+  }
+  
+  .btn-custom {
+    background-color: #1176F5;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 12px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+  }
+  
+  .btn-custom:hover {
+    background-color: #1176F5;
+  }
+  
+  /* Footer Navigation Bar */
+  .bottom-navbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #333;
+    padding: 10px 0;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+  }
 
-          <li class="nav__item">
-            <a href="{% url 'login' %}" class="nav__link" style="color: green;"><i class="fa-regular fa-user"></i></i></a>
-                  <span class="nav__name">Login</span>
-              </a>
-          </li>
-          {% endif %}
-          <li class="nav__item">
-            <a type="button" class="nav__link" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
-              <i class="fa-solid fa-link"></i><span class="nav__name">Liens</span>
-            </a>
-          </li>
-          <li class="nav__item">
-            <a  href="{% url 'acceuilresponsables' %}" class="nav__link"><i class="fa-solid fa-user-ninja"></i>
-              <span class="nav__name">Retour</span>
-            </a>
-          </li>
-      </ul>
+  .bottom-navbar ul {
+    list-style: none;
+    display: flex;
+    justify-content: space-around;
+    margin: 0;
+    padding: 0;
+  }
+
+  .bottom-navbar ul li {
+    flex: 1;
+    text-align: center;
+  }
+
+  .bottom-navbar ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    display: block;
+    padding: 10px;
+    transition: color 0.3s ease;
+  }
+
+  .bottom-navbar ul li a:hover {
+    text-decoration: underline;
+    color: #127BFF;
+  }
+</style>
+
+<div class="container">
+  <!-- Tomorrow's Recoveries -->
+  <div class="mb-5">
+    <h1 class="text-center">Récupérations à faire demain</h1>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th scope="col">Nom du contrat</th>
+          <th scope="col">Mode d'envoi</th>
+          <th scope="col">Livreur</th>
+          <th scope="col">Route</th>
+          <th scope="col">Status</th>
+          <th scope="col">Lien</th>
+          <th scope="col">Créer Recup</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for livraison in recuperations %}
+          <tr>
+            <td>{{ livraison.nom }}</td>
+            <td>{{ livraison.mode_envoi }}</td>
+            <td>{{ livraison.statut.livreur }}</td>
+            <td>{{ livraison.statut.nom }}</td>
+            <td>
+              {% if livraison.statut %}
+                Validée <i class="fa-solid fa-circle-check" style="color: green;"></i>
+              {% else %}
+                En cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i>
+              {% endif %}
+            </td>
+            <td><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn btn-custom"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+            <td><a href="{% url 'duplicate-model' livraison.id %}" class="btn btn-custom"><i class="fa-solid fa-clone"></i></a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 
-  <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
+  <!-- Ongoing Recoveries -->
+  <div>
+    <h1 class="text-center">Récupérations en cours (au TOTAL)</h1>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th scope="col">Nom du contrat</th>
+          <th scope="col">Mode d'envoi</th>
+          <th scope="col">Livreur</th>
+          <th scope="col">Status</th>
+          <th scope="col">Route</th>
+          <th scope="col">Lien</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for livraison in recupsencours %}
+          <tr>
+            <td>{{ livraison.nom }}</td>
+            <td>{{ livraison.mode_envoi }}</td>
+            <td>{{ livraison.statut.livreur }}</td>
+            <td>
+              {% if livraison.statut %}
+                Validée <i class="fa-solid fa-circle-check" style="color: green;"></i>
+              {% else %}
+                En cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i>
+              {% endif %}
+            </td>
+            <td>{{ livraison.statut.nom }}</td>
+            <td><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn btn-custom"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Footer Navbar -->
+<nav class="bottom-navbar">
+  <ul>
+    <li><a href="{% url 'acceuilresponsables' %}" class="nav__link"><i class="fa-solid fa-user-ninja"></i><span class="nav__name">Menu Admin</span></a></li>
+  </ul>
 </nav>
-<br>
-<br>
-<div class="body">
-  <h1 style="text-align: center;">Récuperations à faire demain</h1> <h1 style="text-align: center;"> {{journees}} </h1>
-  <br>
-  <br>
-  <br>
-  <br>
-  <table class="table table-striped">
-      <thead class="thead-dark">
-        <tr>
-          
-          <th scope="col" style="color: #303FBA;">Nom du contrat</th>
-          <th scope="col" style="color: #303FBA;">mode d'envoi</th>
-          <th scope="col" style="color: #303FBA;">Livreur</th>
-          <th scope="col" style="color: #303FBA;">Route</th>
-          <th scope="col" style="color: #303FBA;">Status</th>
-          <th scope="col" style="color: #303FBA;">lien</th>
-          <th scope="col" style="color: #303FBA;">Creer recup</th>
-
-        </tr>
-      </thead>
-      <tbody>
-          {% for livraison in recuperations %}
-        <tr>
-          <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
-          <td style="background-color: #F1B3DA;"><strong>{{livraison.mode_envoi}}</strong></td>
-          <td style="background-color: #F1B3DA;"><strong>{{livraison.statut.livreur}}</strong></td>
-          <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.nom }}</strong></td>
-          {% if livraison.statut == True %}
-          <td><strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong></td>
-          {% else %}
-          <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
-          {% endif %}
-          <td><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
-          <td><a href="{% url 'duplicate-model' livraison.id %}" class="btn"><i class="fa-solid fa-clone"></i></a></td>
-        </tr>
-        {% endfor %}
-        
-      </tbody>
-    </table>
-  </div>
-
-  
-  <br>
-  <br>
-  <br>
-
-  <h1 style="text-align: center;">Récuperations en cours (au TOTAL)</h1> <h1 style="text-align: center;"> {{journees}} </h1>
-  <br>
-  <br>
-  <br>
-  <br>
-  <table class="table table-striped">
-      <thead class="thead-dark">
-        <tr>
-          
-          <th scope="col" style="color: #303FBA;">Nom du contrat</th>
-          <th scope="col" style="color: #303FBA;">mode d'envoi</th>
-          <th scope="col" style="color: #303FBA;">Livreur</th>
-          <th scope="col" style="color: #303FBA;">Status</th>
-          <th scope="col" style="color: #303FBA;">Route</th>
-          <th scope="col" style="color: #303FBA;">lien</th>
-
-        </tr>
-      </thead>
-      <tbody>
-          {% for livraison in recupsencours %}
-        <tr>
-          <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
-          <td style="background-color: #F1B3DA;"><strong>{{livraison.mode_envoi}}</strong></td>
-          <td style="background-color: #F1B3DA;"><strong>{{livraison.statut.livreur}}</strong></td>
-          <td style="background-color: #F1B3DA;"><strong>{{livraison.statut.nom}}</strong></td>
-
-          {% if livraison.statut == True %}
-          <td><strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong></td>
-          {% else %}
-          <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
-          {% endif %}
-          
-
-          <td><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
-        </tr>
-        {% endfor %}
-        
-      </tbody>
-    </table>
-  </div>
-  
-      
-  
-  <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
-    <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="offcanvasExampleLabel">Liens Formulaires</h5>
-      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body">
-      <div>
-        <p><a class="btn btn-primary" href="https://discord.com/channels/1174091428876533800/1194755233935523952" target="_blank">Photo livraison <i class="fa-brands fa-discord"></i></a></p>
-        <p><a href="https://view.forms.app/loicveyre/jeparsenlivraison" target="_blank" class="btn btn-primary">Départ <i class="fa-solid fa-truck-fast"></i></a></p>
-        <p><a href="https://view.forms.app/loicveyre/jereviensdelivraison" target="_blank" class="btn btn-primary">Retour <i class="fa-sharp fa-solid fa-truck fa-flip-horizontal"></i></a></p>
-        <p><a href="https://oakmnxgj.forms.app/recuplivreurs" target="_blank" class="btn btn-primary">Récup <i class="fa-solid fa-dolly"></i></a>
-        </p>
-        <p><a href="https://oakmnxgj.forms.app/essence" target="_blank" class="btn btn-primary">Essence <i class="fa-solid fa-gas-pump"></i></a>
-        </p>
-      </p>    
-    </div>
-    </div>
-  </div>
-  
-
 
 {% endblock %}

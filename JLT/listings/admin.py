@@ -24,7 +24,7 @@ class ChecklistItemAdmin(admin.ModelAdmin):
     search_fields = ['product__name', 'checklist__name']
 
 class LivraisonAdmin(ImportExportModelAdmin):
-    list_display = ('nom', 'date', 'client', 'heure_livraison')
+    list_display = ('id', 'nom', 'date', 'client', 'heure_livraison')
 
 class LivreursAdmin(ImportExportModelAdmin):
     list_display = ('nom')

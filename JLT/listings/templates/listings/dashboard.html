@@ -1,159 +1,435 @@
 {% extends 'listings/base.html' %}
 {% load static %}
 {% block content %}
-<nav class="nav container fixed-bottom">
-  <a href="#" class="nav__logo">Julien Leblanc Traiteur</a>
 
-  <div class="nav__menu" id="nav-menu">
-      <ul class="nav__list">
-        {% if user.is_authenticated %}
-          <li class="nav__item">
-            <form action="{% url 'logout' %}" method="post">
-              {% csrf_token %}
-              <button type="submit" class="nav__link active-link" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i>
-          </form>
-                  <span class="nav__name">Logout</span>
-        </button>
-          </li>
-          {% else %}
+<style>
+    /* General Reset */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-          <li class="nav__item">
-            <a href="{% url 'login' %}" class="nav__link" style="color: green;"><i class="fa-regular fa-user"></i></i></a>
-                  <span class="nav__name">Login</span>
-              </a>
-          </li>
-          {% endif %}
-          <li class="nav__item">
-            <a type="button" class="nav__link" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
-              <i class="fa-solid fa-link"></i><span class="nav__name">Liens</span>
-            </a>
-          </li>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        color: #333;
+    }
 
-          <li class="nav__item">
-            <a  href="{% url 'journee-detail' journee.id %}" class="nav__link"><i class="fa-regular fa-paste"></i>
-              <span class="nav__name">Feuille de route</span>
-            </a>
+    /* Header Styles */
+    header {
+        background: #127BFF;
+        color: #fff;
+        padding: 20px 0;
+    }
 
-          </li>
+    .header-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
 
-          
-      </ul>
-  </div>
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+    }
 
-  <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
-</nav>
-<div style="text-align: center;">
-    <h1>Dashboard {{ livreur.nom }}</h1>
-    <br>
-    <p><a href="https://www.julienleblanclivraisons.com/admin/password_change/" class="btn btn-primary">changer mot de passe</a></p>
-    <p><a href="https://www.julienleblanclivraisons.com/livraisonsresp/" class="btn btn-primary">Feuille de route lendemain</a></p>
- 
-    <hr>
-    <br>
-    <h2>{{journee}}</h2>
-    <br>
-    <br>
-</div>
-<br>
-<ul class="list-group">
-  <li class="list-group-item d-flex justify-content-between align-items-center">
-    Livraisons en cours
-    <span class="badge text-bg-warning rounded-pill">{{livraisonstatusko|length}}</span>
-  </li>
-  <li class="list-group-item d-flex justify-content-between align-items-center">
-    Livraisons validées
-    <span class="badge text-bg-success rounded-pill">{{livraisonstatusok|length}}</span>
-  </li>
-  <hr>
-  <li class="list-group-item d-flex justify-content-between align-items-center">
-    Récupérations en cours
-    <span class="badge text-bg-warning rounded-pill">{{recuperationko|length}}</span>
-  </li>
-  <li class="list-group-item d-flex justify-content-between align-items-center">
-    Récupérations validées
-    <span class="badge text-bg-success rounded-pill">{{recuperationok|length}}</span>
-  </li>
-</ul>
-<br>
-<br>
-<br>
-  
+    .header-title {
+        font-size: 2em;
+        margin: 0;
+        font-family: 'Roboto', sans-serif;
+    }
 
-{% for a in routes %}
-{% if a.statut.livreur.nom == user.username and a.date == today and a.recuperation == True %}
-<div class="card" style="background-color: #F1B3DA;">
-  <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
-  <div class="card-body text-start">
-    {% if a.status == True %}
-    <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
-    {% else %}
-    <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
-    {% endif %}
-    <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
-    <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
-    <p class="card-text">Infos: {{ a.infodetail }}</p>
-  </div>
-</a>
-<span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-  <i class="fa-solid fa-arrow-down"></i>
-</span>
-</div>
-  {% if a.retourtraiteur == retourtraiteur %}
-  <div style="text-align: center; background-color: black;">
-  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
-  </div>
-  <br>
-{% endif %}
+    .header-subtitle {
+        font-size: 1.5em;
+        margin: 0;
+        font-family: 'Roboto', sans-serif;
+    }
 
-</div>
+    .logout-form {
+        margin: 0;
+    }
 
-{% elif a.statut.livreur.nom == user.username and a.date == today %}
-  <div class="card">
-    <a href="{% url 'livraison-detail' a.id %}" class="btn text-end">
-    <div class="card-body text-start">
-      {% if a.status == True %}
-      <h5 class="card-title"><span class="badge text-bg-success rounded-pill">{{ a.nom }}</span></h5>
-      {% else %}
-      <h5 class="card-title"><span class="badge text-bg-warning rounded-pill">{{ a.nom }}</span></h5>
-      {% endif %}
-      <p class="card-text">Heure départ: {{ a.statut.heure_depart }}</p>
-      <p class="card-text">Heure livraison: {{ a.heure_livraison }}</p>
-      <p class="card-text">Infos: {{ a.infodetail }}</p>
+    .logout-button {
+        background: #e94e77;
+        border: none;
+        padding: 10px 20px;
+        color: #fff;
+        font-size: 1em;
+        font-family: 'Roboto', sans-serif;
+        border-radius: 5px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        transition: background 0.3s ease;
+    }
+
+    .logout-button:hover {
+        background: #d43f65;
+    }
+
+    .logout-button i {
+        margin-right: 8px;
+    }
+
+    /* Navigation Bar Styles */
+    .bottom-navbar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #333;
+        padding: 10px 0;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+    }
+    .bottom-navbar ul {
+        list-style: none;
+        display: flex;
+        justify-content: space-around;
+        margin: 0;
+        padding: 0;
+    }
+    .bottom-navbar ul li {
+        flex: 1;
+        text-align: center;
+    }
+    .bottom-navbar ul li a {
+        color: white;
+        text-decoration: none;
+        font-size: 16px;
+        display: block;
+        padding: 5px;
+        transition: color 0.3s ease;
+    }
+    .bottom-navbar ul li a:hover {
+        text-decoration: underline;
+        color: #127BFF;
+    }
+
+    /* Stats Section Styles */
+    .stats-section {
+        display: flex;
+        justify-content: space-around;
+        background-color: white;
+        padding: 20px;
+        margin: 20px 0;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-box {
+        text-align: center;
+        padding: 10px;
+    }
+
+    .stat-box h3 {
+        color: #007BFF;
+    }
+
+    .stat-box p {
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    /* Map Section Styles */
+    .map-section {
+        padding: 20px;
+        background-color: white;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    #map {
+        height: 400px;
+        width: 100%;
+        border-radius: 5px;
+    }
+
+    /* Delivery Card Styles */
+    .delivery-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .delivery-card {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .delivery-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .delivery-title {
+        font-size: 1.5em;
+        margin-bottom: 10px;
+    }
+
+    .delivery-info {
+        margin-bottom: 15px;
+    }
+
+    .delivery-info p {
+        margin: 5px 0;
+    }
+
+    .delivery-status {
+        font-size: 1.2em;
+        margin: 10px 0;
+    }
+
+    .delivery-status .status-icon {
+        font-size: 1.5em;
+    }
+
+    .success {
+        color: #28a745;
+    }
+
+    .pending {
+        color: #ffc107;
+    }
+
+    /* Footer Link Styles */
+    .delivery-footer {
+        margin-top: 10px;
+        text-align: center;
+    }
+
+    .map-link {
+        display: inline-block;
+        background-color: #333;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-decoration: none;
+        transition: background-color 0.3s ease;
+    }
+
+    .map-link:hover {
+        background-color: #555;
+    }
+
+    .map-link i {
+        margin-right: 8px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .header-title {
+            font-size: 1.5em;
+        }
+
+        .header-subtitle {
+            font-size: 1.2em;
+        }
+
+        .header-content {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .logout-button {
+            margin-top: 10px;
+        }
+
+        .bottom-navbar ul {
+            flex-direction: column;
+        }
+
+        .bottom-navbar ul li {
+            margin: 10px 0;
+        }
+
+        .stats-section {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .map-section {
+            padding: 10px;
+        }
+    }
+</style>
+
+<header>
+    <div class="header-container">
+        <div class="header-content">
+            <h1 class="header-title">Dashboard {{ livreur.nom }}</h1>
+            <h2 class="header-subtitle">{{ journee }}</h2>
+            {% if user.is_authenticated %}
+            <form action="{% url 'logout' %}" method="post" class="logout-form">
+                {% csrf_token %}
+                <button type="submit" class="logout-button">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    Déconnexion
+                </button>
+            </form>
+            {% endif %}
+        </div>
     </div>
-  </a>
-  <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
-    <i class="fa-solid fa-arrow-down"></i>
-  </span>
-  </div>
-  {% if a.retourtraiteur == retourtraiteur %}
-  <div style="text-align: center; background-color: black;">
-  <strong><a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z/data=!3m1!4b1!4m6!3m5!1s0x4cc91a6b49675e23:0xc3833e27a346b078!8m2!3d45.4946342!4d-73.583082!16s%2Fg%2F1tfk417b?entry=ttu" class="btn" target="_blank"><i style="color: beige;"class="fa-solid fa-house-chimney-window fa-2xl"></i></a></strong>
-  </div>
-  <br>
-{% endif %}
-{% endif %}
-{% endfor %}
+</header>
 
+<nav class="bottom-navbar">
+    <ul>
+        <li><a href="{% url 'journee-detail' journee.id %}" class="nav__link"><i class="fa-regular fa-paste"></i> Feuille de route</a></li>
+        <li><a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#offcanvasExample">
+            <i class="fa-solid fa-link"></i> Liens
+          </a>
+          </li>
+        <li><a class="nav__link"><i class="fa-regular fa-circle-question"></i> FAQ</a></li>
+    </ul>
+</nav>
 
- <br>
- <br>
- <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="offcanvasExampleLabel">Liens Formulaires</h5>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-  </div>
-  <div class="offcanvas-body">
-    <div>
-      <p><a class="btn btn-primary" href="https://discord.com/channels/1174091428876533800/1194755233935523952" target="_blank">Photo livraison <i class="fa-brands fa-discord"></i></a></p>
-      <p><a href="https://view.forms.app/loicveyre/jeparsenlivraison" target="_blank" class="btn btn-primary">Départ <i class="fa-solid fa-truck-fast"></i></a></p>
-      <p><a href="https://view.forms.app/loicveyre/jereviensdelivraison" target="_blank" class="btn btn-primary">Retour <i class="fa-sharp fa-solid fa-truck fa-flip-horizontal"></i></a></p>
-      <p><a href="https://oakmnxgj.forms.app/recuplivreurs" target="_blank" class="btn btn-primary">Récup <i class="fa-solid fa-dolly"></i></a>
-      </p>
-      <p><a href="https://oakmnxgj.forms.app/essence" target="_blank" class="btn btn-primary">Essence <i class="fa-solid fa-gas-pump"></i></a>
-      </p>
-    </p>    
-  </div>
-  </div>
+<!-- Stats Section -->
+<section class="stats-section">
+    <div class="stat-box">
+        <h3>Livraisons en cours</h3>
+        <p id="totalDeliveries">{{ livraisonstatusko|length }}</p>
+    </div>
+    <div class="stat-box">
+        <h3>Livraisons validées</h3>
+        <p id="completedDeliveries">{{ livraisonstatusok|length }}</p>
+    </div>
+    <div class="stat-box">
+        <h3 style="color: #E5AACF;">Récupérations en cours</h3>
+        <p id="totalRecups">{{ recuperationko|length }}</p>
+    </div>
+    <div class="stat-box">
+        <h3 style="color: #E5AACF;">Récupérations validées</h3>
+        <p id="completedRecups">{{ recuperationok|length }}</p>
+    </div>
+</section>
+
+<!-- Map Section -->
+<section class="map-section">
+    <h2>Carte</h2>
+    <div id="map"></div>
+</section>
+
+<div class="delivery-container">
+    <!-- Loop through the user's deliveries -->
+    {% for delivery in routes %}
+    {% if delivery.statut.livreur.nom == user.username %}
+    <a href="{% url 'livraison-detail' delivery.id %}" style="text-decoration: none;">
+        <div class="delivery-card" style="border-left: 5px solid; color: {{ delivery.recuperation|yesno:'#E5AACF,#127BFF' }};">
+            <div>
+                <h3 class="delivery-title">{{ delivery.recuperation|yesno:"RECUPERATION,LIVRAISON" }} {{ delivery.nom }}</h3>
+                <div class="delivery-info">
+                    <p><strong>Départ:</strong> {{ delivery.statut.heure_depart }}</p>
+                    <p><strong>Heure Livraison:</strong> {{ delivery.heure_livraison }}</p>
+                    {% if delivery.infodetail %}
+                    <p><strong>Infos:</strong> {{ delivery.infodetail }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="delivery-status">
+                {% if delivery.status %}
+                <i class="fa-solid fa-circle-check status-icon success"></i> Validée
+                {% else %}
+                <i class="fa-solid fa-spinner fa-spin status-icon pending"></i> En attente
+                {% endif %}
+            </div>
+
+            {% if delivery.retourtraiteur == True %}
+            <div class="delivery-footer">
+                <a href="https://www.google.com/maps/place/Julien-Leblanc+traiteur/@45.4946379,-73.5856569,17z" class="map-link" target="_blank">
+                    <i class="fa-solid fa-house-chimney"></i> Retour Traiteur
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </a>
+    {% endif %}
+    {% endfor %}
 </div>
-{% endblock %}
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
 
+<br>
+
+<!-- Modal -->
+<div class="modal fade" id="offcanvasExample" tabindex="-1" aria-labelledby="offcanvasExampleLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="offcanvasExampleLabel">Liens</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Content for the modal goes here -->
+          <ul>
+            <li><a href="https://example.com" target="_blank">Example Link 1</a></li>
+            <li><a href="https://example.com" target="_blank">Example Link 2</a></li>
+            <!-- Add more links as needed -->
+          </ul>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+<!-- JavaScript -->
+<!-- Bootstrap Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    function initMap() {
+    const montreal = { lat: 45.50884, lng: -73.58781 };
+    const mapOptions = {
+        zoom: 12,
+        center: montreal,
+    };
+    const map = new google.maps.Map(document.getElementById('map'), mapOptions);
+
+    const livraisons = {{ livraisonss|safe }};
+    livraisons.forEach(livraison => {
+        const marker = new google.maps.Marker({
+            position: { lat: livraison.latitude, lng: livraison.longitude },
+            map: map,
+            title: `Client ${livraison.nom}`,
+        });
+
+        const infoWindow = new google.maps.InfoWindow({
+            content: `
+                <div>
+                    <h3>${livraison.nom}</h3>
+                    <p><strong>Heure livraison:</strong> ${livraison.heure_livraison}</p>
+                    
+                </div>
+            `,
+        });
+
+        marker.addListener('click', () => {
+            infoWindow.open(map, marker);
+        });
+    });
+}
+
+</script>
+
+<!-- Load Google Maps API -->
+<script src="https://maps.googleapis.com/maps/api/js?key={{ key }}&callback=initMap" async defer></script>
+
+{% endblock %}
