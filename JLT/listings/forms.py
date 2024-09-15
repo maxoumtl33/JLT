@@ -4,7 +4,12 @@ from .models import *
 from datetime import datetime, timedelta, time
 from .models import ItemInv
 from .models import Checklist
+from .models import Phototaches
 from bootstrap_datepicker_plus.widgets import DateTimePickerInput
+from django.forms import inlineformset_factory
+from .models import Livraison, Photo
+
+
 
 
 class ChecklistItemForm(forms.ModelForm):
@@ -84,11 +89,20 @@ class RoutedetailForm(forms.ModelForm):
         model = Route
         fields = ('livreur', 'heure_depart')
         
-class PhotoUploadForm(forms.ModelForm):
+class PhotoForm(forms.ModelForm):
     class Meta:
-        model = Livraison
-        fields = ['photo']
+        model = Photo
+        fields = ['image', 'caption']
 
+class PhotoTachesForm(forms.ModelForm):
+    class Meta:
+        model = Phototaches
+        fields = ['image', 'caption']
+
+class TaskUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Tacheafaire
+        fields = ('status','commentaire')
 
 class ItemInvForm(forms.ModelForm):
     class Meta:
@@ -129,3 +143,20 @@ class RouteForm(forms.ModelForm):
             'livreur': forms.Select(),  # Optional: customize widget if needed
             'date': forms.DateInput(attrs={'type': 'date'}),
         }
+
+# Create a formset for the Photo model linked to the Livraison
+PhotoFormSet = inlineformset_factory(
+    Livraison,  # The parent model
+    Photo,      # The model the formset is for
+    form=PhotoForm,  # Use the PhotoForm we defined above
+    extra=7,  # Number of additional blank photo forms to display
+    
+)
+
+PhotoTachesFormSet = inlineformset_factory(
+    Tacheafaire,  # The parent model
+    Phototaches,      # The model the formset is for
+    form=PhotoTachesForm,  # Use the PhotoForm we defined above
+    extra=3,  # Number of additional blank photo forms to display
+    
+)

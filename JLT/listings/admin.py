@@ -9,6 +9,9 @@ from listings.models import ChecklistItem
 from listings.models import Route
 from listings.models import Distances
 from listings.models import Task
+from listings.models import Tacheafaire
+
+from listings.models import Photo, Phototaches
 from listings.models import Checklist, Product
 
 
@@ -55,7 +58,10 @@ admin.site.register(Route, RouteAdmin)
 admin.site.register(Task)
 admin.site.register(ChecklistItem)
 admin.site.register(Distances)
+admin.site.register(Photo)
+admin.site.register(Tacheafaire)
 admin.site.register(Checklist)
+admin.site.register(Phototaches)
 admin.site.register(Product,ProductAdmin)
 admin.site.register(Inventory, InventoryAdmin)
 admin.site.register(Client, ClientAdmin)

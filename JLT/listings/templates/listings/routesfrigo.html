@@ -2,213 +2,13 @@
 {% load static %}
 {% block content %}
 
-
 <style>
-    * {
-       margin: 0;
-       padding: 0;
-       box-sizing: border-box;
-   }
-   
-   body {
-       font-family: Arial, sans-serif;
-       padding: 20px;
-       background-color: #f9f9f9;
-   }
-   
-   header {
-        background: #127BFF;
-        color: #fff;
-        padding: 20px 0;
-    }
-
-    .header-container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 20px;
-    }
-
-    .header-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-    }
-
-    .header-title {
-        font-size: 2em;
-        margin: 0;
-        font-family: 'Roboto', sans-serif;
-    }
-
-    .header-subtitle {
-        font-size: 1.5em;
-        margin: 0;
-        font-family: 'Roboto', sans-serif;
-    }
-
-    .logout-form {
-        margin: 0;
-    }
-
-    .logout-button {
-        background: #e94e77;
-        border: none;
-        padding: 10px 20px;
-        color: #fff;
-        font-size: 1em;
-        font-family: 'Roboto', sans-serif;
-        border-radius: 5px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        transition: background 0.3s ease;
-    }
-
-    .logout-button:hover {
-        background: #d43f65;
-    }
-
-    .logout-button i {
-        margin-right: 8px;
-    }
-
-    /* Navigation Bar Styles */
-    html, body {
-       height: 100%;
-       margin: 0;
-       padding: 0;
-       display: flex;
-       flex-direction: column;
-   }
-   
-   body {
-       flex: 1;
-   }
-   /* Heading */
-   h1 {
-       text-align: center;
-       color: #333;
-       margin-bottom: 20px;
-   }
-   
-    /* Stats Section Styles */
-    .stats-section {
-        display: flex;
-        justify-content: space-around;
-        background-color: white;
-        padding: 20px;
-        margin: 20px 0;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .stat-box {
-        text-align: center;
+    /* Mobile-friendly styles */
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f9f9f9;
+        color: #333;
         padding: 10px;
-    }
-
-    .stat-box h3 {
-        color: #007BFF;
-    }
-
-    .stat-box p {
-        font-size: 24px;
-        font-weight: bold;
-    }
-
-    /* Map Section Styles */
-    .map-section {
-        padding: 20px;
-        background-color: white;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-
-    #map {
-        height: 400px;
-        width: 100%;
-        border-radius: 5px;
-    }
-
-    /* Delivery Card Styles */
-    .delivery-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 20px;
-        padding: 20px;
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-
-    .delivery-card {
-        background-color: white;
-        border-radius: 10px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        padding: 20px;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-    }
-
-    .delivery-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-    }
-
-    .delivery-title {
-        font-size: 1.5em;
-        margin-bottom: 10px;
-    }
-
-    .delivery-info {
-        margin-bottom: 15px;
-    }
-
-    .delivery-info p {
-        margin: 5px 0;
-    }
-
-    .delivery-status {
-        font-size: 1.2em;
-        margin: 10px 0;
-    }
-
-    .delivery-status .status-icon {
-        font-size: 1.5em;
-    }
-
-    .success {
-        color: #28a745;
-    }
-
-    .pending {
-        color: #ffc107;
-    }
-
-    
-
-    /* Footer Link Styles */
-    .delivery-footer {
-        margin-top: 10px;
-        text-align: center;
-    }
-
-    .map-link {
-        display: inline-block;
-        background-color: #333;
-        color: white;
-        padding: 10px 20px;
-        border-radius: 5px;
-        text-decoration: none;
-        transition: background-color 0.3s ease;
-    }
-
-    .map-link:hover {
-        background-color: #555;
-    }
-
-    .map-link i {
-        margin-right: 8px;
     }
 
     .route-container {
@@ -252,189 +52,92 @@
         font-size: 16px;
         margin: 0;
     }
-   
-   .bottom-navbar {
-       position: fixed;
-       bottom: 0;
-       left: 0;
-       width: 100%;
-       background-color: #333;
-       padding: 10px 0;
-       box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
-       z-index: 1000; /* Ensures it's above other content */
-   }
-   
-   .bottom-navbar ul {
-       list-style: none;
-       display: flex;
-       justify-content: space-around;
-       margin: 0;
-       padding: 0;
-   }
-   
-   .bottom-navbar ul li {
-       flex: 1;
-       text-align: center;
-   }
-   
-   .bottom-navbar ul li a {
-       color: white;
-       text-decoration: none;
-       font-size: 16px;
-   }
-   
-   .bottom-navbar ul li a:hover {
-       text-decoration: underline;
-   }
-   
-   /* Media query for responsive behavior */
-   @media (max-width: 768px) {
-       .navbar ul {
-           flex-direction: column;
-       }
-   
-       .navbar ul li {
-           margin: 10px 0;
-       }
-   }
-   #lii {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px;
-            background-color: #f9f9f9;
-            margin: 5px 0;
-            border-radius: 4px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+
+    .bottom-navbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #333;
+    padding: 10px 0;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+  }
+
+  .bottom-navbar ul {
+    list-style: none;
+    display: flex;
+    justify-content: space-around;
+    margin: 0;
+    padding: 0;
+  }
+
+  .bottom-navbar ul li {
+    flex: 1;
+    text-align: center;
+  }
+
+  .bottom-navbar ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    display: block;
+    padding: 10px;
+    transition: color 0.3s ease;
+  }
+
+  .bottom-navbar ul li a:hover {
+    text-decoration: underline;
+    color: #127BFF;
+  }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .route-container {
+            padding: 10px;
         }
-        .task-name {
-            font-weight: bold;
+
+        .route-header {
+            font-size: 16px;
         }
-        .task-status {
-            color: #555;
+
+        .delivery-item h4 {
+            font-size: 14px;
         }
-        i {
-            margin-left: 10px;
-        }
-   
-   /* Responsive Design */
-   @media (max-width: 768px) {
-       .header-container {
-           flex-direction: column;
-           text-align: center;
-       }
-   
-   
-       .stats-section {
-           flex-direction: column;
-           align-items: center;
-       }
-   
-       .map-section {
-           padding: 10px;
-       }
-   
-       .order {
-           font-size: 14px;
-       }
-       .dashboard-header {
-       text-align: center;
-       padding: 20px;
-       background-color: #f5f5f5;
-       border-radius: 10px;
-       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-       margin: 20px;
-   }
-   
-   
-   }
-   
-   </style>
+    }
+</style>
 
-<header>
-    <div class="header-container">
-        <div class="header-content">
-            <h1 class="header-title">Dashboard {{ livreur.nom }}</h1>
-            <h2 class="header-subtitle">{{ journee }}</h2>
-            {% if user.is_authenticated %}
-            <form action="{% url 'logout' %}" method="post" class="logout-form">
-                {% csrf_token %}
-                <button type="submit" class="logout-button">
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                    Déconnexion
-                </button>
-            </form>
-            {% endif %}
-        </div>
-    </div>
-</header>
+{% for journe in journee %}
+<h2>{{ journe.nom }}</h2>
+{% endfor %}
 
-<nav class="bottom-navbar">
-    <ul>
-        <li><a href="{% url 'journee-detail' journee.id %}" class="nav__link"><i class="fa-regular fa-paste"></i><span class="nav__name">Feuille de route</span> </a></li>
-        <li><a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#offcanvasExample">
-            <i class="fa-solid fa-link"></i> <span class="nav__name">Liens</span>
-          </a>
-          </li>
-        <li><a href="{% url 'faq' %}" class="nav__link"><i class="fa-regular fa-circle-question"></i><span class="nav__name">FAQ</span></a></li>
-    </ul>
-</nav>
 
-<!-- Stats Section -->
-<section class="stats-section">
-    <div class="stat-box">
-        <h3>Livraisons en cours</h3>
-        <p id="totalDeliveries">{{ livraisonstatusko|length }}</p>
-    </div>
-    <div class="stat-box">
-        <h3>Livraisons validées</h3>
-        <p id="completedDeliveries">{{ livraisonstatusok|length }}</p>
-    </div>
-    <div class="stat-box">
-        <h3 style="color: #E5AACF;">Récupérations en cours</h3>
-        <p id="totalRecups">{{ recuperationko|length }}</p>
-    </div>
-    <div class="stat-box">
-        <h3 style="color: #E5AACF;">Récupérations validées</h3>
-        <p id="completedRecups">{{ recuperationok|length }}</p>
-    </div>
-    <div class="stat-box">
-        <h3 style="color: black;">Tâches en cours</h3>
-        <p id="completedRecups">{{ tacheko|length }}</p>
-    </div>
-    <div class="stat-box">
-        <h3 style="color: black;">Tâches validées</h3>
-        <p id="completedRecups">{{ tacheok|length }}</p>
-    </div>
-</section>
-
-<!-- Map Section -->
-<section class="map-section">
-    <h2>Carte</h2>
-    <div id="map"></div>
-</section>
-<br>
-
-<h1>Mes routes</h1>
 
 <div class="routes">
-    {% for route in routes_with_livraisons %}
+    {% for route in routes %}
     <div class="route-container">
         <div class="route-header" onclick="toggleDeliveries(this)">
-            Départ {{ route.heure_depart }} / Route N°{{ route.nom }}
+            Départ {{ route.heure_depart }} {{ route.livreur.nom }}
             <i class="fa-solid fa-chevron-down"></i>
         </div>
 
         <div class="delivery-list">
             {% if route.livraisons.all %}
             {% for livraison in route.livraisons.all %}
-            
+            {% if livraison.recuperation == False %}
             <a href="{% url 'livraison-detail' livraison.id %}" style="text-decoration: none;">
-            <div class="delivery-item" style="border-left: 5px solid; color: {{ livraison.recuperation|yesno:'#E5AACF,#127BFF' }};">
-                <h4>{{ livraison.recuperation|yesno:"RECUPERATION,LIVRAISON" }} {{ livraison.nom }}</h4>
+            <div class="delivery-item">
+                <h4>{{ livraison.nom }}</h4>
                 <p><strong>Heure Livraison:</strong> {{ livraison.heure_livraison }}</p>
                 
-                {% if '1 café thermos' in livraison.infodetail|lower %}
+                {% if 'cambro' in livraison.infodetail|lower %}
+                <i class="fa-solid fa-box-archive fa-2xl" style="color: #a24716;"></i>                
+
+                {% endif %}
+                    {% if 'glace' in livraison.infodetail|lower %}
+                    <i class="fa-regular fa-snowflake fa-2xl" style="color: #74C0FC;"></i>
+                    {% endif %}
+                    {% if '1 café thermos' in livraison.infodetail|lower %}
                 <i class="fa-solid fa-mug-hot fa-2xl" style="color: #533018;"></i>
             {% elif '2 café thermos' in livraison.infodetail|lower %}
                 <i class="fa-solid fa-mug-hot fa-2xl" style="color: #533018;"></i>
@@ -667,30 +370,15 @@
     <i class="fa-solid fa-mug-hot fa-2xl" style="color: #74C0FC;"></i>
     <i class="fa-solid fa-mug-hot fa-2xl" style="color: #74C0FC;"></i>
 {% endif %}
-{% if 'cambro' in livraison.infodetail|lower %}
-<i class="fa-solid fa-box-archive fa-2xl" style="color: #a24716;"></i>                
-
-{% endif %}
-    {% if 'part chaud' in livraison.nom|lower or 'part chaud' in livraison.infodetail|lower %}
-    <i class="fa-solid fa-fire-flame-curved fa-2xl" style="color: #f4a15d;"></i>
-    {% endif %}
-    {% if 'checklist' in livraison.infodetail|lower or 'checklist' in livraison.nom|lower %}
-    <i class="fa-solid fa-cart-flatbed fa-2xl"></i>
-    {% endif %}
-    <br>
-    <br>
-    <div class="delivery-status">
-        {% if livraison.status %}
-        <i class="fa-solid fa-circle-check status-icon success"></i> Validée
-        {% else %}
-        <i class="fa-solid fa-spinner fa-spin status-icon pending"></i> En attente
-        {% endif %}
-    </div>
-                    
+                    {% if 'part chaud' in livraison.nom|lower or 'part chaud' in livraison.infodetail|lower %}
+                    <i class="fa-solid fa-fire-flame-curved fa-2xl" style="color: #f4a15d;"></i>
+                    {% endif %}
+                    {% if 'checklist' in livraison.infodetail|lower or 'checklist' in livraison.nom|lower %}
+                    <i class="fa-solid fa-cart-flatbed fa-2xl"></i>>
+                    {% endif %}
             </div>
-        </a>
-            
-            
+            </a>
+            {% endif %}
         {% endfor %}
 {% else %}
     <p>No deliveries found for this route.</p>
@@ -700,73 +388,20 @@
     </div>
     {% endfor %}
 </div>
-
 <br>
 <br>
-<h1>Mes Tâches du Jour</h1>
+<br>
+<nav class="bottom-navbar">
     <ul>
-        {% for task in taches %}
-        {% if task.date == today %}
-        <a  href="{% url 'taskdetail' task.id %}" class="nav__link">
-        <li>
-            <span class="task-name">{{ task.nom }}</span>
-            {% if task.status %}
-            <i class="fa-solid fa-square-check fa-2xl" style="color: #63E6BE;"></i>
-            {% else %}
-            <i class="fa-solid fa-spinner fa-spin fa-2xl" style="color: #FFD43B;"></i>
-            {% endif %}
-        </li>
-        </a>
-        {% endif %}
-        {% endfor %}
-    </ul>
-<br>
-<br>
-<br>
-<br>
-<!-- Modal -->
+        <li><a  href="{% url 'journees-list'%}" class="nav__link"><i class="fa-solid fa-calendar-days"></i>
+            <span class="nav__name">Journées</span>
+          </a></li>
+      </ul>
+  </nav>
 
- 
-
-  
-<!-- JavaScript -->
-<!-- Bootstrap Bundle with Popper -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+<!-- JavaScript to handle delivery list toggle -->
 <script>
-    function initMap() {
-    const montreal = { lat: 45.50884, lng: -73.58781 };
-    const mapOptions = {
-        zoom: 12,
-        center: montreal,
-    };
-    const map = new google.maps.Map(document.getElementById('map'), mapOptions);
-
-    const livraisons = {{ livraisonss|safe }};
-    livraisons.forEach(livraison => {
-        const marker = new google.maps.Marker({
-            position: { lat: livraison.latitude, lng: livraison.longitude },
-            map: map,
-            title: `Client ${livraison.nom}`,
-        });
-
-        const infoWindow = new google.maps.InfoWindow({
-            content: `
-                <div>
-                    <h3>${livraison.nom}</h3>
-                    <p><strong>Heure livraison:</strong> ${livraison.heure_livraison}</p>
-                    
-                </div>
-            `,
-        });
-
-        marker.addListener('click', () => {
-            infoWindow.open(map, marker);
-        });
-    });
-}
-
-function toggleDeliveries(element) {
+    function toggleDeliveries(element) {
         const deliveryList = element.nextElementSibling;
         const icon = element.querySelector('i');
 
@@ -778,10 +413,7 @@ function toggleDeliveries(element) {
             icon.classList.add('collapsed');
         }
     }
-
 </script>
 
-<!-- Load Google Maps API -->
-<script src="https://maps.googleapis.com/maps/api/js?key={{ key }}&callback=initMap" async defer></script>
-
 {% endblock %}
+

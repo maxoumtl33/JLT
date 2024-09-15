@@ -1,0 +1,10 @@
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ formbis.management_form }}
+      {% for form in formbis %}
+          <div>
+              {{ form.as_p }}
+          </div>
+      {% endfor %}
+    <button type="submit" class="btn btn-primary">Deposer les photos</button>
+</form>

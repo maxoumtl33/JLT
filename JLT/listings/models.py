@@ -33,6 +33,13 @@ class Tacheafaire(models.Model) :
         nom = models.fields.CharField(max_length=100)
         description = models.fields.CharField(max_length=100)
         livreur = models.ForeignKey(Livreur, null=True, on_delete=models.SET_NULL)
+        status = models.BooleanField(default=False)
+        photo = models.ImageField(upload_to='listings/media/commandesdetail', blank=True, null=True)
+        date = models.fields.DateField(null=True, blank=True)
+        commentaire = models.fields.CharField(null=True, blank=True, max_length=500)
+
+
+
 
 class Task(models.Model):
     title = models.CharField(max_length=100)
@@ -71,7 +78,6 @@ class Journee(models.Model):
      def __str__(self):
         return f'{self.nom}'
      date = models.DateField()
-    
 
 
 class Route(models.Model):
@@ -223,17 +229,17 @@ class Livraison(models.Model):
          
 
     )
-    statut = models.ForeignKey(Route, null=True, blank=True, on_delete=models.SET_NULL, default=21)
+    statut = models.ForeignKey(Route, null=True, blank=True,related_name='livraisons', on_delete=models.SET_NULL, default=21)
     nom = models.fields.CharField(max_length=100, null=True, blank=True,)
     heure_depart = models.fields.CharField(null=True, blank=True, max_length=100, choices= choiceheures, default=" ")
-    heure_livraison = models.fields.CharField(null=True, blank=True, max_length=100, default=" ")
+    heure_livraison = models.fields.CharField(null=True, blank=True, max_length=100, default=".")
     client = models.ForeignKey(Client, null=True, blank=True, on_delete=models.SET_NULL)
     date = models.fields.DateField(null=True, blank=True)
     commentaire = models.fields.CharField(null=True, blank=True, max_length=500)
     commentairedispatch = models.fields.CharField(null=True, blank=True, max_length=500000, default=" ")
     infodetail = models.fields.CharField(null=True, blank=True, max_length=500000, default=".")
     livreur = models.ForeignKey(Livreur, null=True, blank=True, on_delete=models.SET_NULL)
-    journee = models.ForeignKey(Journee, null=True, blank=True, on_delete=models.SET_NULL, default= 2)
+    journee = models.ForeignKey(Journee, null=True, blank=True, on_delete=models.SET_NULL)
     aidelivreur = models.fields.CharField(null=True, blank=True, max_length=100, choices=choicesaide, default=" ")
     retourtraiteur = models.fields.CharField(null=True, blank=True, max_length = 3, choices=choices, default="non")
     recuperation = models.BooleanField(default=False)
@@ -257,6 +263,25 @@ class Livraison(models.Model):
     photo = models.ImageField(upload_to='listings/media/commandesdetail', blank=True, null=True)
     def __str__(self):
         return f'{self.nom}'
+    
+
+class Photo(models.Model):
+    livraison = models.ForeignKey('Livraison', on_delete=models.CASCADE, related_name='livraison_photos')
+    image = models.ImageField(upload_to='listings/media/commandesdetail')
+    caption = models.CharField(max_length=200, null=True, blank=True)
+
+    def __str__(self):
+        return f'Photo for {self.livraison.nom} - {self.caption or "No Caption"}'
+    
+class Phototaches(models.Model):
+    tache = models.ForeignKey('Tacheafaire', on_delete=models.CASCADE, related_name='tache_photos')
+    image = models.ImageField(upload_to='listings/media/commandesdetail')
+    caption = models.CharField(max_length=200, null=True, blank=True)
+
+    def __str__(self):
+        return f'Photo for {self.tache.nom} - {self.caption or "No Caption"}'
+
+
 
 class Product(models.Model):
     choices = (
@@ -362,8 +387,12 @@ class Inventory(models.Model):
         return f"{self.item.name} - Quantity: {self.quantity}"
     
 class ProductPhoto(models.Model):
-    product = models.ForeignKey(Livraison, related_name='photos', on_delete=models.CASCADE)
-    photo = models.ImageField(upload_to='listings/media/commandesdetail/')
+    product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='product_photos')
+    image = models.ImageField(upload_to='listings/media/products')
+    caption = models.CharField(max_length=200, null=True, blank=True)
+
+    def __str__(self):
+        return f'Photo for {self.product.name} - {self.caption or "No Caption"}'
 
 
 class Distances(models.Model):

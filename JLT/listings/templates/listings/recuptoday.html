@@ -80,15 +80,11 @@
     color: white;
     text-decoration: none;
     font-size: 16px;
-    display: block;
-    padding: 10px;
-    transition: color 0.3s ease;
-  }
+}
 
-  .bottom-navbar ul li a:hover {
+.bottom-navbar ul li a:hover {
     text-decoration: underline;
-    color: #127BFF;
-  }
+}
 </style>
 
 <div class="container">
@@ -101,26 +97,16 @@
           <th scope="col">Nom du contrat</th>
           <th scope="col">Mode d'envoi</th>
           <th scope="col">Livreur</th>
-          <th scope="col">Route</th>
-          <th scope="col">Status</th>
           <th scope="col">Lien</th>
           <th scope="col">Créer Recup</th>
         </tr>
       </thead>
       <tbody>
         {% for livraison in recuperations %}
-          <tr>
+          <tr style="color: #F1B3DA;">
             <td>{{ livraison.nom }}</td>
             <td>{{ livraison.mode_envoi }}</td>
             <td>{{ livraison.statut.livreur }}</td>
-            <td>{{ livraison.statut.nom }}</td>
-            <td>
-              {% if livraison.statut %}
-                Validée <i class="fa-solid fa-circle-check" style="color: green;"></i>
-              {% else %}
-                En cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i>
-              {% endif %}
-            </td>
             <td><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn btn-custom"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
             <td><a href="{% url 'duplicate-model' livraison.id %}" class="btn btn-custom"><i class="fa-solid fa-clone"></i></a></td>
           </tr>
@@ -138,25 +124,15 @@
           <th scope="col">Nom du contrat</th>
           <th scope="col">Mode d'envoi</th>
           <th scope="col">Livreur</th>
-          <th scope="col">Status</th>
-          <th scope="col">Route</th>
           <th scope="col">Lien</th>
         </tr>
       </thead>
       <tbody>
         {% for livraison in recupsencours %}
-          <tr>
+          <tr style="color: #F1B3DA;">
             <td>{{ livraison.nom }}</td>
             <td>{{ livraison.mode_envoi }}</td>
             <td>{{ livraison.statut.livreur }}</td>
-            <td>
-              {% if livraison.statut %}
-                Validée <i class="fa-solid fa-circle-check" style="color: green;"></i>
-              {% else %}
-                En cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i>
-              {% endif %}
-            </td>
-            <td>{{ livraison.statut.nom }}</td>
             <td><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn btn-custom"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
           </tr>
         {% endfor %}
@@ -164,6 +140,10 @@
     </table>
   </div>
 </div>
+<br>
+<br>
+<br>
+<br>
 
 <!-- Footer Navbar -->
 <nav class="bottom-navbar">

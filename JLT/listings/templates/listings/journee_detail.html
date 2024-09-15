@@ -216,7 +216,7 @@ body {
           <span class="nav__name">Dashboard</span>
         </a></li>
       
-        <li><a type="button" class="nav__link" >
+        <li><a href="{% url 'faq' %}" class="nav__link" target="_blank">
           <i class="fa-regular fa-circle-question"></i><span class="nav__name">FAQ</span>
         </a></li>
         {% if user.username == loic or user.username == maxime %}

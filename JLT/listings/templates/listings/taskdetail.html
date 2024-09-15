@@ -1,0 +1,145 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    /* Footer Navigation Bar (Fixed to bottom) */
+    .bottom-navbar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #333;
+        padding: 10px 0;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1000; /* Ensures it's above other content */
+    }
+
+    .bottom-navbar ul {
+        list-style: none;
+        display: flex;
+        justify-content: space-around;
+        margin: 0;
+        padding: 0;
+    }
+
+    .bottom-navbar ul li {
+        flex: 1;
+        text-align: center;
+    }
+
+    .bottom-navbar ul li a {
+        color: white;
+        text-decoration: none;
+        font-size: 16px;
+    }
+
+    .bottom-navbar ul li a:hover {
+        text-decoration: underline;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .navbar ul {
+            flex-direction: column;
+        }
+
+        .navbar ul li {
+            margin: 10px 0;
+        }
+    }
+</style>
+
+<!-- Bottom Navigation Bar -->
+<nav class="bottom-navbar">
+    <ul>
+        <li><a  href="{% url 'journees-list'%}" class="nav__link"><i class="fa-solid fa-calendar-days"></i>
+            Journées</span>
+          </a></li>
+        <li>
+            <a type="button" class="nav__link" data-bs-toggle="offcanvas" href="#offcanvasExample1" role="button" aria-controls="offcanvasExample1">
+                <i class="fa-solid fa-camera"></i>
+                <span>Photo</span>
+            </a>
+        </li>
+
+        {% if task.status == False %}
+        <li>
+            <a type="button" class="nav__link" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
+                <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i>
+                <span>En cours</span>
+            </a>
+        </li>
+        {% elif task.status == True %}
+        <li>
+            <a type="button" class="nav__link" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
+                <i class="fa-solid fa-circle-check" style="color: green;"></i>
+                <span>Validé</span>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+
+<!-- Task Details Section -->
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>{{ task.nom }}</h1>
+            <p>{{ task.description }}</p>
+
+            <!-- Task Photos Section -->
+            <h2>Mes Photos</h2>
+            <div class="row">
+                {% for photo in task.tache_photos.all %}
+                <div class="col-md-4 col-sm-6 col-12 mb-3">
+                    <img src="{{ photo.image.url }}" alt="{{ photo.caption }}" class="img-fluid rounded shadow-sm">
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Extra space to accommodate bottom navbar -->
+<div style="margin-bottom: 80px;"></div>
+
+<!-- Offcanvas for Validation Form -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasExampleLabel">Valider Livraison</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit" value="Valider" class="btn btn-primary w-100">
+        </form>
+    </div>
+</div>
+
+<!-- Offcanvas for Photo Upload Form -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample1" aria-labelledby="offcanvasExample1Label">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasExample1Label">Télécharger Photo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ formbis.management_form }}
+            <div class="row">
+                {% for form in formbis %}
+                <div class="col-md-12 mb-2">
+                    {{ form.as_p }}
+                </div>
+                {% endfor %}
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Déposer les photos</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

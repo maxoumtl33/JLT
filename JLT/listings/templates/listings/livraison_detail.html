@@ -307,25 +307,18 @@
           </div>
 
           <!-- Photo Livraison -->
-          {% if livraison.photo %}
+   
           <div class="col-md-6">
             <div class="card border-0">
               <div class="card-body">
                 <h5 class="card-title">Photo Livraison</h5>
-                <img src="{{ livraison.photo.url }}" alt="Photo" class="img-fluid rounded">
+                {% for photo in livraison.livraison_photos.all %}
+                <img src="{{ photo.image.url }}" alt="{{ photo.caption }}" class="img-fluid rounded mb-2">
+                {% endfor %}
               </div>
             </div>
           </div>
-          {% else %}
-          <div class="col-md-6">
-            <div class="card border-0">
-              <div class="card-body">
-                <h5 class="card-title">Photo Livraison</h5>
-                <p>Pas de photo disponible</p>
-              </div>
-            </div>
-          </div>
-          {% endif %}
+          
         </div>
       </li>
     </ul>
@@ -387,9 +380,15 @@
   <div class="offcanvas-body">
     <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
-      {{ formbis.as_p }}
-      <input type="submit" value="Valider" class="btn btn-primary">
-    </form>
+      {{ formbis.management_form }}
+        {% for form in formbis %}
+            <div>
+                {{ form.as_p }}
+            </div>
+        {% endfor %}
+      <button type="submit" class="btn btn-primary">Deposer les photos</button>
+  </form>
+  
   </div>
 </div>
 
