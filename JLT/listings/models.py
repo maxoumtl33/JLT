@@ -29,6 +29,59 @@ class Livreur(models.Model):
             return f'{self.nom}'
         user = models.OneToOneField(User, null=True, on_delete=models.CASCADE)
 
+class Recupfrigo(models.Model):
+        livraison = models.ForeignKey('Livraison', on_delete=models.CASCADE, related_name='livraison_recupfrigo')
+        def __str__(self):
+            return f'Recupfrigo for {self.livraison}'
+        date = models.DateField()
+
+
+
+class RecupfrigoItem(models.Model):
+    recupfrigo = models.ForeignKey(Recupfrigo, on_delete=models.CASCADE, related_name='itemsfrigo')
+    item_name = models.CharField(max_length=200, choices=[
+        ('plateaux', 'plateaux'),
+        ('bols', 'bols'),
+        ('pinces', 'pinces'),
+        ('ramequins', 'ramequins'),
+        ('verres', 'verres'),
+        ('paniers', 'paniers'),
+        ('thermos', 'thermos'),
+        ('cambro', 'cambro'),
+        ('tempkeep', 'tempkeep'),
+    ])
+    quantity = models.PositiveIntegerField(default=1)
+
+
+    def __str__(self):
+        return f'{self.item_name} - {self.quantity}'
+        
+class Recuplivreur(models.Model):
+        livraison = models.ForeignKey('Livraison', on_delete=models.CASCADE, related_name='livraison_recuplivreur')
+        def __str__(self):
+            return f'Recupfrigo for {self.livraison}'
+        date = models.DateField()
+
+        
+class RecuplivreurItem(models.Model):
+    recupfrigo = models.ForeignKey(Recupfrigo, on_delete=models.CASCADE, related_name='itemslivreur')
+    item_name = models.CharField(max_length=200, choices=[
+        ('plateaux', 'plateaux'),
+        ('bols', 'bols'),
+        ('pinces', 'pinces'),
+        ('ramequins', 'ramequins'),
+        ('verres', 'verres'),
+        ('paniers', 'paniers'),
+        ('thermos', 'thermos'),
+        ('cambro', 'cambro'),
+        ('tempkeep', 'tempkeep'),
+    ])
+    quantity = models.PositiveIntegerField(default=1)
+
+    def __str__(self):
+        return f'{self.item_name} - {self.quantity}'
+        
+
 class Tacheafaire(models.Model) :
         nom = models.fields.CharField(max_length=100)
         description = models.fields.CharField(max_length=100)

@@ -6,10 +6,10 @@ from .models import Tacheafaire
 from .models import Journee
 from .models import Photo
 from .models import Phototaches
-from .models import Route
+from .models import Route, Recupfrigo
 from django.views.generic.list import ListView
 from .models import Distances
-from .models import Checklist
+from .models import Checklist, Recuplivreur
 from django.shortcuts import get_object_or_404
 from .forms import LivraisonForm,PhotoTachesForm,PhotoTachesFormSet
 from .forms import LivraisonFeuilleForm
@@ -650,7 +650,47 @@ def journees_list(request):
                                                               'jef':jef,
                                                               'loic':loic})
 
+def recuplivreur_detail(request, recuplivreur_id):
+    recuplivreur = Recuplivreur.objects.get(id=recuplivreur_id)
+    items = recuplivreur.items.all()  # Get all items for this Recupfrigo
+    return render(request, 'listings/recupfrigo_detail.html', {'recuplivreur': recuplivreur, 'items': items})
 
+def recupfrigo_detail(request, recupfrigo_id):
+    recupfrigo = Recupfrigo.objects.get(id=recupfrigo_id)
+    items = recupfrigo.items.all()  # Get all items for this Recupfrigo
+    return render(request, 'listings/recupfrigo_detail.html', {'recupfrigo': recupfrigo, 'items': items})
+
+def recupslist(request):
+    if request.user.is_authenticated:
+        journees = Journee.objects.all().order_by('-date')
+        recuplivreur = Recuplivreur.objects.all()
+        recupfrigo = Recupfrigo.objects.all()
+        
+        # Initialize the form first
+        form = DateFilterForm(request.GET or None)
+        
+        # Process the form if it's a GET request and has a 'date' field
+        if request.method == 'GET' and 'date' in request.GET:
+            if form.is_valid():
+                date = form.cleaned_data['date']
+                journees = journees.filter(date=date)
+
+        paginator = Paginator(journees, 7)  # Show 7 items per page
+        page = request.GET.get('page')
+        
+        try:
+            journees = paginator.page(page)
+        except PageNotAnInteger:
+            journees = paginator.page(1)  # Deliver first page if page is not an integer
+        except EmptyPage:
+            journees = paginator.page(paginator.num_pages)  # Deliver last page if out of range
+
+        return render(request, 'listings/recups-list.html', context={
+            'journees': journees,
+            'form': form,
+        })
+    else:
+        return redirect('home')
 
 def routedetail(request, id):  # notez le paramètre id supplémentaire
    
@@ -1869,9 +1909,9 @@ def livraison_detail(request, ip):  # notez le paramètre id supplémentaire
         form = LivraisonForm(request.POST or None, instance=livraison)
         formbis = PhotoFormSet(request.POST, request.FILES or None, instance=livraison)
         
-        if form.is_valid() and formbis.is_valid():
+        if form.is_valid():
             livraison = form.save()  # Save the Livraison instance
-
+        if formbis.is_valid():
             # Save the associated photos
             photos = formbis.save(commit=False)
             for photo in photos:

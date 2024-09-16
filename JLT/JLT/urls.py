@@ -57,6 +57,8 @@ path('taskdetail/<int:id>/', views.taskdetail, name='taskdetail'),
 path('duplicate/<int:model_id>/', duplicate_model, name='duplicate-model'),
 path('update_photo/<int:pk>/', update_photo, name='update_photo'),
 path('inventory/', views.inventory, name='inventory'),
+path('recupslist/', views.recupslist, name='recupslist'),
+
 path('import/', views.import_items, name='import_items'),
 path('creerchecklist/', views.creerchecklist, name='creerchecklist'),
 path('checklist/<int:checklist_id>/add/', views.add_to_checklist, name='add_to_checklist'),
