@@ -16,6 +16,7 @@ from .forms import LivraisonFeuilleForm
 from .forms import LivraisonDragForm
 from .forms import LivraisonDragFormtoday, TaskUpdateForm
 from .forms import LivraisonsVentesForm, RoutedetailForm
+from django.urls import reverse
 import json
 from .forms import DistanceForm
 from tablib import Dataset
@@ -32,7 +33,7 @@ from datetime import datetime
 from django.views.decorators.http import require_POST
 from django.http import QueryDict
 from django.shortcuts import render, get_object_or_404
-from .models import Inventory
+from .models import *
 from .models import ItemInv
 from django.shortcuts import render
 from django.contrib import messages
@@ -46,6 +47,7 @@ from .forms import SearchFormInv
 from .models import Product, Checklist, ChecklistItem
 from .forms import PhotoForm, PhotoFormSet
 from .forms import RouteForm
+from .forms import *
 from .forms import ChecklistForm
 from django.http import FileResponse, HttpResponseRedirect, HttpResponse
 from .utils import add_quantity_to_checklist, remove_quantity_from_checklist
@@ -574,6 +576,156 @@ def responsable_list(request):
                                                               'cuisine':cuisine,
                                                               'form':form})
 
+# View to handle Recupfrigo and its items
+def create_recupfrigo(request):
+    # Define the acceptable values for mode_envoi
+    valid_modes_envoi = [
+        "Porcelaine",
+        "Chaud et porcelaine",
+        "Porcelaine et bois",
+        "Plateau de bois",
+        "Froid et bois",
+        "Chaud et jetable"
+    ]
+
+    # Get today's date
+    today = date.today()
+
+    # Filter livraisons by date and mode_envoi
+    livraisons = Livraison.objects.filter(
+        date_livraison=today,
+        mode_envoi__in=valid_modes_envoi
+    )
+    print(livraisons)
+
+    if request.method == 'POST':
+        recupfrigo_form = RecupfrigoForm(request.POST)
+        formset = RecupfrigoItemFormset(request.POST)
+
+        if recupfrigo_form.is_valid() and formset.is_valid():
+            # Save the recupfrigo
+            recupfrigo = recupfrigo_form.save(commit=False)
+            recupfrigo.save()
+
+            # Save the formset
+            items = formset.save(commit=False)
+            for item in items:
+                item.recupfrigo = recupfrigo  # Set the Recupfrigo for each item
+                item.save()
+
+            return redirect(reverse('create_recupfrigo'))
+
+    else:
+        recupfrigo_form = RecupfrigoForm()
+        formset = RecupfrigoItemFormset()
+
+    return render(request, 'listings/create_recupfrigo.html', {
+        'recupfrigo_form': recupfrigo_form,
+        'formset': formset,
+        'livraisons': livraisons
+    })
+# View to handle Recuplivreur and its items
+def create_recuplivreur(request, livraison_id):
+    # Fetch the Livraison instance
+    livraison = get_object_or_404(Livraison, id=livraison_id)
+    
+    if request.method == 'POST':
+        recuplivreur_form = RecuplivreurForm(request.POST)
+        formset = RecuplivreurItemFormset(request.POST)
+
+        if recuplivreur_form.is_valid() and formset.is_valid():
+            # Save the recuplivreur
+            recuplivreur = recuplivreur_form.save(commit=False)
+            recuplivreur.livraison = livraison  # Set the Livraison instance
+            recuplivreur.date = livraison.date_livraison  # Set the date
+            recuplivreur.save()
+
+            # Save the formset
+            items = formset.save(commit=False)
+            for item in items:
+                item.recuplivreur = recuplivreur  # Set the RecupLivreur for each item
+                item.save()
+
+            # Redirect to the detail page or another appropriate view
+            return redirect(reverse('create_recuplivreur', args=[livraison_id]))
+
+    else:
+        recuplivreur_form = RecuplivreurForm()
+        formset = RecuplivreurItemFormset()
+
+    return render(request, 'listings/create_recuplivreur.html', {
+        'recuplivreur_form': recuplivreur_form,
+        'formset': formset,
+        'livraison': livraison
+    })
+
+def journeerecupdetail(request, id):
+    journee = Journee.objects.get(id=id)
+    recupfrigo = Recupfrigo.objects.filter(date=journee.date)
+    recuplivreur = Recuplivreur.objects.filter(date=journee.date)
+
+    # Build a comparison dictionary by item name
+    comparison_data = []
+    frigo_dict = {}
+    livreur_dict = {}
+
+    # Group RecupFrigo items by name
+    for frigo in recupfrigo:
+        for item in frigo.items_frigo.all():
+            if item.item_name not in frigo_dict:
+                frigo_dict[item.item_name] = []
+            frigo_dict[item.item_name].append({
+                'livraison_nom': frigo.livraison.nom,
+                'frigo_quantity': item.quantity,
+            })
+
+    # Group RecupLivreur items by name
+    for livreur in recuplivreur:
+        for item in livreur.items_livreur.all():
+            if item.item_name not in livreur_dict:
+                livreur_dict[item.item_name] = []
+            livreur_dict[item.item_name].append({
+                'livraison_nom': livreur.livraison.nom,
+                'livreur_quantity': item.quantity,
+            })
+
+    # Build a comparison list
+    all_items = set(list(frigo_dict.keys()) + list(livreur_dict.keys()))
+    for item_name in all_items:
+        livraisons = []
+        frigo_data = frigo_dict.get(item_name, [])
+        livreur_data = livreur_dict.get(item_name, [])
+
+        # Combine livraisons by name for comparison
+        livraison_names = set([data['livraison_nom'] for data in frigo_data] + [data['livraison_nom'] for data in livreur_data])
+        for livraison_name in livraison_names:
+            frigo_quantity = next((data['frigo_quantity'] for data in frigo_data if data['livraison_nom'] == livraison_name), 0)
+            livreur_quantity = next((data['livreur_quantity'] for data in livreur_data if data['livraison_nom'] == livraison_name), 0)
+            difference = livreur_quantity - frigo_quantity
+
+            livraisons.append({
+                'nom': livraison_name,
+                'frigo_quantity': frigo_quantity,
+                'livreur_quantity': livreur_quantity,
+                'difference': difference
+            })
+
+        comparison_data.append({
+            'item_name': item_name,
+            'frigo_quantity': sum([data['frigo_quantity'] for data in frigo_data]),
+            'livreur_quantity': sum([data['livreur_quantity'] for data in livreur_data]),
+            'quantity_difference': sum([data['difference'] for data in livraisons]),
+            'livraisons': livraisons,  # Include livraisons for dropdown
+            'mismatch': any(data['difference'] != 0 for data in livraisons)
+        })
+
+    context = {
+        'journee': journee,
+        'comparison_data': comparison_data,
+    }
+
+    return render(request, 'listings/journeerecupdetail.html', context)
+
 
 def journeedetailvente(request, id):
    journees = Journee.objects.get(id=id)
@@ -650,21 +802,34 @@ def journees_list(request):
                                                               'jef':jef,
                                                               'loic':loic})
 
-def recuplivreur_detail(request, recuplivreur_id):
-    recuplivreur = Recuplivreur.objects.get(id=recuplivreur_id)
-    items = recuplivreur.items.all()  # Get all items for this Recupfrigo
-    return render(request, 'listings/recupfrigo_detail.html', {'recuplivreur': recuplivreur, 'items': items})
+# RecupFrigo detail view
+def recupfrigo_detail(request, id):
+    recupfrigo = Recupfrigo.objects.get(id=id)
+    items = recupfrigo.itemsfrigo.all()
+    
+    return render(request, 'listings/recupfrigo_detail.html', {
+        'recupfrigo': recupfrigo,
+        'items': items,
+    })
 
-def recupfrigo_detail(request, recupfrigo_id):
-    recupfrigo = Recupfrigo.objects.get(id=recupfrigo_id)
-    items = recupfrigo.items.all()  # Get all items for this Recupfrigo
-    return render(request, 'listings/recupfrigo_detail.html', {'recupfrigo': recupfrigo, 'items': items})
+
+# Recuplivreur detail view
+def recuplivreur_detail(request, id):
+    recuplivreur = Recuplivreur.objects.get(id=id)
+    items = recuplivreur.items.all()
+    
+    return render(request, 'listings/recuplivreur_detail.html', {
+        'recuplivreur': recuplivreur,
+        'items': items,
+    })
+
+
 
 def recupslist(request):
     if request.user.is_authenticated:
+        today = now().date()
         journees = Journee.objects.all().order_by('-date')
-        recuplivreur = Recuplivreur.objects.all()
-        recupfrigo = Recupfrigo.objects.all()
+        
         
         # Initialize the form first
         form = DateFilterForm(request.GET or None)
@@ -688,6 +853,7 @@ def recupslist(request):
         return render(request, 'listings/recups-list.html', context={
             'journees': journees,
             'form': form,
+            'today':today,
         })
     else:
         return redirect('home')
@@ -2328,16 +2494,24 @@ def duplicate_model(request, model_id):
     new_object.nom_client = original_object.nom_client
     new_object.contact_site = original_object.contact_site
     new_object.date = tomorrow
-    new_object.photo = original_object.photo
-    new_object.statut = Route.objects.get(id = 21)
+    new_object.date_livraison = original_object.date_livraison
+    new_object.statut = Route.objects.get(id=21)
     new_journee = Journee.objects.get(id=original_object.journee.id + 1)
     new_object.journee = new_journee
     new_object.lat = original_object.lat
     new_object.lng = original_object.lng
     new_object.place_id = original_object.place_id
 
-    # Assign other fields as needed
+    # Save the new Livraison object
     new_object.save()
+
+    # Duplicate related Photo objects
+    for photo_instance in original_object.livraison_photos.all():
+        new_photo = Photo()
+        new_photo.livraison = new_object  # Associate the new photo with the new Livraison
+        new_photo.image = photo_instance.image  # Copy the image
+        new_photo.caption = photo_instance.caption  # Copy the caption if available
+        new_photo.save()
 
     # Redirect back to a page or render a template
     return redirect('recuptoday')  # Redirect to a specific URL name

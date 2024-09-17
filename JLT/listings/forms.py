@@ -149,7 +149,7 @@ PhotoFormSet = inlineformset_factory(
     Livraison,  # The parent model
     Photo,      # The model the formset is for
     form=PhotoForm,  # Use the PhotoForm we defined above
-    extra=7,  # Number of additional blank photo forms to display
+    extra=3,  # Number of additional blank photo forms to display
     
 )
 
@@ -157,6 +157,82 @@ PhotoTachesFormSet = inlineformset_factory(
     Tacheafaire,  # The parent model
     Phototaches,      # The model the formset is for
     form=PhotoTachesForm,  # Use the PhotoForm we defined above
-    extra=3,  # Number of additional blank photo forms to display
+    extra=7,  # Number of additional blank photo forms to display
     
+)
+
+# Form for Recupfrigo
+class RecupfrigoForm(forms.ModelForm):
+    livraison = forms.ModelChoiceField(queryset=Livraison.objects.none(), empty_label="Sélectionnez une Livraison")
+
+    class Meta:
+        model = Recupfrigo
+        fields = ['livraison', 'date']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)  # Call the parent constructor first
+
+        # Get today's date
+        today = date.today()
+
+        # Set up the valid modes_envoi
+        valid_modes_envoi = [
+            "Porcelaine",
+            "Chaud et porcelaine",
+            "Porcelaine et bois",
+            "Plateau de bois",
+            "Froid et bois",
+            "Chaud et jetable",
+        ]
+
+        # Get the Livraison IDs that are already associated with a Recupfrigo
+        used_livraison_ids = Recupfrigo.objects.values_list('livraison_id', flat=True)
+
+        # Filter Livraison queryset based on today's date, mode_envoi, and exclude used Livraisons
+        self.fields['livraison'].queryset = Livraison.objects.filter(
+            date_livraison=today,
+            mode_envoi__in=valid_modes_envoi,
+            recuperation = False,
+        ).exclude(id__in=used_livraison_ids)
+
+# Form for RecupfrigoItem
+class RecupfrigoItemForm(forms.ModelForm):
+    class Meta:
+        model = RecupfrigoItem
+        fields = ['item_name', 'quantity']
+
+# Formset for RecupfrigoItem
+RecupfrigoItemFormset = inlineformset_factory(
+    Recupfrigo,
+    RecupfrigoItem,
+    form=RecupfrigoItemForm,
+    extra=9,  # Number of empty forms displayed initially
+
+)
+# Form for Recuplivreur
+class RecuplivreurForm(forms.ModelForm):
+    class Meta:
+        model = Recuplivreur
+        fields = ['date']
+        widgets = {
+                'date': forms.DateInput(attrs={'type': 'date'}),
+            }
+
+# Form for RecuplivreurItem
+class RecuplivreurItemForm(forms.ModelForm):
+    class Meta:
+        model = RecuplivreurItem
+        fields = ['item_name', 'quantity']
+
+# Formset for RecuplivreurItem
+# Formset for RecupfrigoItem
+RecuplivreurItemFormset = inlineformset_factory(
+    Recuplivreur,
+    RecuplivreurItem,
+    form=RecuplivreurItemForm,
+    extra=9,  # Number of empty forms displayed initially
+
 )

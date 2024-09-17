@@ -147,7 +147,7 @@
     </li>
     {% if livraison.recuperation == True%}
       <li>
-        <a href="https://oakmnxgj.forms.app/recuplivreurs" target="_blank" class="nav__link"><i class="fa-solid fa-dolly"></i>
+        <a href="{% url 'create_recuplivreur' livraison.id %}" target="_blank" class="nav__link"><i class="fa-solid fa-dolly"></i>
           <span>Récupération</span>
           </a>
       </li>

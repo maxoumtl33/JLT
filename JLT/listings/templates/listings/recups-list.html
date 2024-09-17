@@ -76,7 +76,7 @@
   <div class="row">
     {% for journee in journees %}
       <div class="col-md-4 col-lg-3 mb-4">
-        <a href="{% url 'journee-detail' journee.id %}" class="text-decoration-none">
+        <a href="{% url 'journeerecupdetail' journee.id %}" class="text-decoration-none">
           <div class="card shadow-sm h-100 {% if journee.date == today %}border-success{% else %}border-light{% endif %}">
             <div class="card-body">
               <h5 class="card-title text-center {% if journee.date == today %}text-success{% else %}text-secondary{% endif %}">

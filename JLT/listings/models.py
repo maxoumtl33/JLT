@@ -29,57 +29,7 @@ class Livreur(models.Model):
             return f'{self.nom}'
         user = models.OneToOneField(User, null=True, on_delete=models.CASCADE)
 
-class Recupfrigo(models.Model):
-        livraison = models.ForeignKey('Livraison', on_delete=models.CASCADE, related_name='livraison_recupfrigo')
-        def __str__(self):
-            return f'Recupfrigo for {self.livraison}'
-        date = models.DateField()
 
-
-
-class RecupfrigoItem(models.Model):
-    recupfrigo = models.ForeignKey(Recupfrigo, on_delete=models.CASCADE, related_name='itemsfrigo')
-    item_name = models.CharField(max_length=200, choices=[
-        ('plateaux', 'plateaux'),
-        ('bols', 'bols'),
-        ('pinces', 'pinces'),
-        ('ramequins', 'ramequins'),
-        ('verres', 'verres'),
-        ('paniers', 'paniers'),
-        ('thermos', 'thermos'),
-        ('cambro', 'cambro'),
-        ('tempkeep', 'tempkeep'),
-    ])
-    quantity = models.PositiveIntegerField(default=1)
-
-
-    def __str__(self):
-        return f'{self.item_name} - {self.quantity}'
-        
-class Recuplivreur(models.Model):
-        livraison = models.ForeignKey('Livraison', on_delete=models.CASCADE, related_name='livraison_recuplivreur')
-        def __str__(self):
-            return f'Recupfrigo for {self.livraison}'
-        date = models.DateField()
-
-        
-class RecuplivreurItem(models.Model):
-    recupfrigo = models.ForeignKey(Recupfrigo, on_delete=models.CASCADE, related_name='itemslivreur')
-    item_name = models.CharField(max_length=200, choices=[
-        ('plateaux', 'plateaux'),
-        ('bols', 'bols'),
-        ('pinces', 'pinces'),
-        ('ramequins', 'ramequins'),
-        ('verres', 'verres'),
-        ('paniers', 'paniers'),
-        ('thermos', 'thermos'),
-        ('cambro', 'cambro'),
-        ('tempkeep', 'tempkeep'),
-    ])
-    quantity = models.PositiveIntegerField(default=1)
-
-    def __str__(self):
-        return f'{self.item_name} - {self.quantity}'
         
 
 class Tacheafaire(models.Model) :
@@ -288,6 +238,7 @@ class Livraison(models.Model):
     heure_livraison = models.fields.CharField(null=True, blank=True, max_length=100, default=".")
     client = models.ForeignKey(Client, null=True, blank=True, on_delete=models.SET_NULL)
     date = models.fields.DateField(null=True, blank=True)
+    date_livraison = models.fields.DateField(null=True, blank=True)
     commentaire = models.fields.CharField(null=True, blank=True, max_length=500)
     commentairedispatch = models.fields.CharField(null=True, blank=True, max_length=500000, default=" ")
     infodetail = models.fields.CharField(null=True, blank=True, max_length=500000, default=".")
@@ -483,7 +434,62 @@ class Recuperation(models.Model):
 
 
 
-    
+class Recupfrigo(models.Model):
+    livraison = models.ForeignKey(Livraison, on_delete=models.CASCADE, related_name='livraison_recupfrigo', default=None)
+    def __str__(self):
+        return f'Recupfrigo for {self.livraison}'
+    date = models.DateField()
+
+
+
+class RecupfrigoItem(models.Model):
+    recupfrigo = models.ForeignKey(Recupfrigo, on_delete=models.CASCADE, related_name='items_frigo', default=None)
+    item_name = models.CharField(max_length=200, choices=[
+        ('plateaux', 'plateaux'),
+        ('bols', 'bols'),
+        ('pinces', 'pinces'),
+        ('ramequins', 'ramequins'),
+        ('verres', 'verres'),
+        ('paniers', 'paniers'),
+        ('thermos', 'thermos'),
+        ('cambro', 'cambro'),
+        ('tempkeep', 'tempkeep'),
+    ])
+    quantity = models.PositiveIntegerField(default=1)
+
+
+    def __str__(self):
+        return f'{self.item_name} - {self.quantity}'
+        
+class Recuplivreur(models.Model):
+        livraison = models.ForeignKey(Livraison, on_delete=models.CASCADE, related_name='livraison_recuplivreur', default=None)
+        def __str__(self):
+            return f'Recuplivreur for {self.livraison}'
+        date = models.DateField()
+
+        
+class RecuplivreurItem(models.Model):
+    recuplivreur = models.ForeignKey(Recuplivreur, on_delete=models.CASCADE, related_name='items_livreur', null=True)
+    item_name = models.CharField(max_length=200, choices=[
+        ('plateaux', 'plateaux'),
+        ('bols', 'bols'),
+        ('porcelaine', 'porcelaine'),
+        ('ramequins', 'ramequins'),
+        ('verres', 'verres'),
+        ('insertion', 'insertion'),
+        ('plateau de bois', 'plateau de bois'),
+        ('paniers', 'paniers'),
+        ('thermos', 'thermos'),
+        ('cambro', 'cambro'),
+        ('tempkeep', 'tempkeep'),
+        ('pinces', 'pinces'),
+        
+    ])
+    quantity = models.PositiveIntegerField(default=1)
+
+    def __str__(self):
+        return f'{self.item_name} - {self.quantity}'
+
 
 
 

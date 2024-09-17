@@ -58,7 +58,9 @@ path('duplicate/<int:model_id>/', duplicate_model, name='duplicate-model'),
 path('update_photo/<int:pk>/', update_photo, name='update_photo'),
 path('inventory/', views.inventory, name='inventory'),
 path('recupslist/', views.recupslist, name='recupslist'),
-
+path('journeerecupdetail/<int:id>/', views.journeerecupdetail, name='journeerecupdetail'),
+path('recupfrigo/<int:id>/', views.recupfrigo_detail, name='recupfrigo_detail'),
+path('recuplivreur/<int:id>/', views.recuplivreur_detail, name='recuplivreur_detail'),
 path('import/', views.import_items, name='import_items'),
 path('creerchecklist/', views.creerchecklist, name='creerchecklist'),
 path('checklist/<int:checklist_id>/add/', views.add_to_checklist, name='add_to_checklist'),
@@ -76,7 +78,9 @@ path('responsablelist/', responsable_list, name='responsablelist'),
 path('geocode_all_livraisons/', views.geocode_all_livraisons, name='geocode_all_livraisons'),
 path('faq/', faq, name='faq'),
 path('routesfrigo/', routesfrigo, name='routesfrigo'),
- path('update-task/<int:pk>/', views.update_task, name='update_task'),
+path('update-task/<int:pk>/', views.update_task, name='update_task'),
+path('create-recupfrigo/', create_recupfrigo, name='create_recupfrigo'),
+path('create-recuplivreur/<int:livraison_id>/', create_recuplivreur, name='create_recuplivreur'),
 
 
 

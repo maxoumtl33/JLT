@@ -8,7 +8,7 @@ from listings.models import ItemInv
 from listings.models import ChecklistItem
 from listings.models import Route
 from listings.models import Distances
-from listings.models import Task
+from listings.models import *
 from listings.models import Tacheafaire
 
 from listings.models import Photo, Phototaches
@@ -59,6 +59,10 @@ admin.site.register(Task)
 admin.site.register(ChecklistItem)
 admin.site.register(Distances)
 admin.site.register(Photo)
+admin.site.register(RecupfrigoItem)
+admin.site.register(RecuplivreurItem)
+admin.site.register(Recupfrigo)
+admin.site.register(Recuplivreur)
 admin.site.register(Tacheafaire)
 admin.site.register(Checklist)
 admin.site.register(Phototaches)

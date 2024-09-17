@@ -89,12 +89,29 @@ WSGI_APPLICATION = 'JLT.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+
+
+import os
+
+if os.getenv('DJANGO_PRODUCTION', None):  # When on PythonAnywhere or production
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',  # Or your production DB engine
+            'NAME': 'maxoufaya33$default',
+            'USER': 'maxoufaya33',
+            'PASSWORD': 'F#2bc55c',
+            'HOST': 'maxoufaya33.mysql.pythonanywhere-services.com',
+            'PORT': '3306',  # Or your custom port
+        }
     }
-}
+else:  # For local development
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
+
 
 
 # Password validation
