@@ -31,6 +31,10 @@
                                 <th>Quantité Frigo</th>
                                 <th>Quantité Livreur</th>
                                 <th>Différence</th>
+                                <th>Frigo Rempli Par</th>
+                                <th>Frigo Date de Remplissage</th>
+                                <th>Livraison Rempli Par</th>
+                                <th>Livraison Date de Remplissage</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -40,6 +44,10 @@
                                 <td>{{ livraison.frigo_quantity }}</td>
                                 <td>{{ livraison.livreur_quantity }}</td>
                                 <td>{{ livraison.difference }}</td>
+                                <td>{{ livraison.frigo_filled_by.username }}</td>
+                                <td>{{ livraison.frigo_filled_at }}</td>
+                                <td>{{ livraison.livreur_filled_by.username }}</td>
+                                <td>{{ livraison.livreur_filled_at }}</td>                           
                             </tr>
                             {% endfor %}
                         </tbody>

@@ -634,19 +634,25 @@ def create_recuplivreur(request, livraison_id):
         formset = RecuplivreurItemFormset(request.POST)
 
         if recuplivreur_form.is_valid() and formset.is_valid():
-            # Save the recuplivreur
+            # Create the recuplivreur object but don't save to DB yet
             recuplivreur = recuplivreur_form.save(commit=False)
-            recuplivreur.livraison = livraison  # Set the Livraison instance
-            recuplivreur.date = livraison.date_livraison  # Set the date
+
+            # Ensure that livraison and date are set properly
+            recuplivreur.livraison = livraison
+            recuplivreur.date = livraison.date_livraison - timedelta(days=1) # Set the date from livraison
+            recuplivreur.filled_by = request.user  # Track the user
+            recuplivreur.filled_at = timezone.now()  # Track the timestamp
+            
+            # Now save the recuplivreur object to the database
             recuplivreur.save()
 
-            # Save the formset
+            # Save the formset with recuplivreur linked
             items = formset.save(commit=False)
             for item in items:
-                item.recuplivreur = recuplivreur  # Set the RecupLivreur for each item
+                item.recuplivreur = recuplivreur  # Set the recuplivreur for each item
                 item.save()
-
-            # Redirect to the detail page or another appropriate view
+            
+            # Redirect after successful save
             return redirect(reverse('create_recuplivreur', args=[livraison_id]))
 
     else:
@@ -659,8 +665,9 @@ def create_recuplivreur(request, livraison_id):
         'livraison': livraison
     })
 
+
 def journeerecupdetail(request, id):
-    journee = Journee.objects.get(id=id)
+    journee = get_object_or_404(Journee, id=id)
     recupfrigo = Recupfrigo.objects.filter(date=journee.date)
     recuplivreur = Recuplivreur.objects.filter(date=journee.date)
 
@@ -677,6 +684,8 @@ def journeerecupdetail(request, id):
             frigo_dict[item.item_name].append({
                 'livraison_nom': frigo.livraison.nom,
                 'frigo_quantity': item.quantity,
+                'frigo_filled_by': frigo.filled_by,   # User who filled the form
+                'frigo_filled_at': frigo.filled_at    # Timestamp when form was filled
             })
 
     # Group RecupLivreur items by name
@@ -687,6 +696,9 @@ def journeerecupdetail(request, id):
             livreur_dict[item.item_name].append({
                 'livraison_nom': livreur.livraison.nom,
                 'livreur_quantity': item.quantity,
+                'livreur_filled_by': livreur.filled_by,   # User who filled the form
+                'livreur_filled_at': livreur.filled_at,    # Timestamp when form was filled
+                'livreur_nom': livreur.filled_by.username  # Access the username
             })
 
     # Build a comparison list
@@ -703,11 +715,23 @@ def journeerecupdetail(request, id):
             livreur_quantity = next((data['livreur_quantity'] for data in livreur_data if data['livraison_nom'] == livraison_name), 0)
             difference = livreur_quantity - frigo_quantity
 
+            # Get user and timestamp info for each livraison
+            frigo_filled_by = next((data['frigo_filled_by'] for data in frigo_data if data['livraison_nom'] == livraison_name), None)
+            livreur_filled_by = next((data['livreur_filled_by'] for data in livreur_data if data['livraison_nom'] == livraison_name), None)
+            frigo_filled_at = next((data['frigo_filled_at'] for data in frigo_data if data['livraison_nom'] == livraison_name), None)
+            livreur_filled_at = next((data['livreur_filled_at'] for data in livreur_data if data['livraison_nom'] == livraison_name), None)
+            livreur_nom = next((data['livreur_nom'] for data in livreur_data if data['livraison_nom'] == livraison_name), None)
+
             livraisons.append({
                 'nom': livraison_name,
                 'frigo_quantity': frigo_quantity,
                 'livreur_quantity': livreur_quantity,
-                'difference': difference
+                'difference': difference,
+                'frigo_filled_by': frigo_filled_by.username if frigo_filled_by else 'N/A',
+                'livreur_filled_by': livreur_filled_by.username if livreur_filled_by else 'N/A',
+                'frigo_filled_at': frigo_filled_at,
+                'livreur_filled_at': livreur_filled_at,
+                'livreur_nom': livreur_nom,
             })
 
         comparison_data.append({
@@ -725,6 +749,7 @@ def journeerecupdetail(request, id):
     }
 
     return render(request, 'listings/journeerecupdetail.html', context)
+
 
 
 def journeedetailvente(request, id):

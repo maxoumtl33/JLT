@@ -30,7 +30,7 @@ class Livreur(models.Model):
         user = models.OneToOneField(User, null=True, on_delete=models.CASCADE)
 
 
-        
+
 
 class Tacheafaire(models.Model) :
         nom = models.fields.CharField(max_length=100)
@@ -73,7 +73,7 @@ class Message(models.Model):
             return f'{self.nom}'
      description = models.fields.CharField(max_length=100)
      livreur = models.ForeignKey(Livreur, null=True, on_delete=models.SET_NULL)
-     
+
 
 
 class Journee(models.Model):
@@ -152,7 +152,7 @@ class Route(models.Model):
 
 
 
-        
+
 class Livraison(models.Model):
     choices = (
          ('oui', 'oui'),
@@ -228,8 +228,8 @@ class Livraison(models.Model):
          ('19h30', '19h30'),
          ('19h45', '19h45'),
          ('20h00', '20h00'),
-        
-         
+
+
 
     )
     statut = models.ForeignKey(Route, null=True, blank=True,related_name='livraisons', on_delete=models.SET_NULL, default=21)
@@ -267,7 +267,7 @@ class Livraison(models.Model):
     photo = models.ImageField(upload_to='listings/media/commandesdetail', blank=True, null=True)
     def __str__(self):
         return f'{self.nom}'
-    
+
 
 class Photo(models.Model):
     livraison = models.ForeignKey('Livraison', on_delete=models.CASCADE, related_name='livraison_photos')
@@ -276,7 +276,7 @@ class Photo(models.Model):
 
     def __str__(self):
         return f'Photo for {self.livraison.nom} - {self.caption or "No Caption"}'
-    
+
 class Phototaches(models.Model):
     tache = models.ForeignKey('Tacheafaire', on_delete=models.CASCADE, related_name='tache_photos')
     image = models.ImageField(upload_to='listings/media/commandesdetail')
@@ -301,8 +301,8 @@ class Product(models.Model):
          ('ÉQUIPEMENT DE CUISSON','ÉQUIPEMENT DE CUISSON'),
          ('USTENSILES DE SERVICE','USTENSILES DE SERVICE'),
          ('ITEMS DIVERS','ITEMS DIVERS'))
-    
-    
+
+
     name = models.CharField(max_length=100)
     quantity = models.IntegerField(default=0)
     category = models.CharField(max_length=100, choices= choices)
@@ -311,7 +311,7 @@ class Product(models.Model):
         """Adjust the product quantity."""
         self.quantity += amount
         self.save()
-    
+
 
     def __str__(self):
         return self.name
@@ -337,7 +337,7 @@ class Checklist(models.Model):
     md = models.fields.CharField(null=True, blank=True, max_length=100, default=" ")
     added_on = models.DateTimeField(default=timezone.now)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='en_cours')
-    
+
 
     def update_status(self):
         # Check if all items are 'valide'
@@ -347,12 +347,12 @@ class Checklist(models.Model):
             self.status = 'refuse'
         else:
             self.status = 'en_cours'
-        
+
         self.save()
 
     def __str__(self):
         return self.name
-    
+
 
 class ChecklistItem(models.Model):
 
@@ -371,7 +371,7 @@ class ChecklistItem(models.Model):
     class Meta:
         unique_together = ('checklist', 'product', 'status')  # Assure qu'un produit ne peut avoir qu'un seul statut dans une checklist
 
-    
+
     def clean(self):
         super().clean()
         if ChecklistItem.objects.filter(checklist=self.checklist, product=self.product).exclude(id=self.id).exists():
@@ -381,7 +381,7 @@ class ChecklistItem(models.Model):
         super().save(*args, **kwargs)
         # Update checklist status whenever this item is saved
         self.checklist.update_status()
-   
+
 class Inventory(models.Model):
     item = models.ForeignKey(ItemInv, on_delete=models.CASCADE)
     quantity = models.IntegerField(blank=True, null=True, default=0)
@@ -389,7 +389,7 @@ class Inventory(models.Model):
 
     def __str__(self):
         return f"{self.item.name} - Quantity: {self.quantity}"
-    
+
 class ProductPhoto(models.Model):
     product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='product_photos')
     image = models.ImageField(upload_to='listings/media/products')
@@ -438,7 +438,9 @@ class Recupfrigo(models.Model):
     livraison = models.ForeignKey(Livraison, on_delete=models.CASCADE, related_name='livraison_recupfrigo', default=None)
     def __str__(self):
         return f'Recupfrigo for {self.livraison}'
-    date = models.DateField()
+    date = models.DateField(null=True)
+    filled_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    filled_at = models.DateTimeField(default=timezone.now)
 
 
 
@@ -460,14 +462,16 @@ class RecupfrigoItem(models.Model):
 
     def __str__(self):
         return f'{self.item_name} - {self.quantity}'
-        
+
 class Recuplivreur(models.Model):
         livraison = models.ForeignKey(Livraison, on_delete=models.CASCADE, related_name='livraison_recuplivreur', default=None)
         def __str__(self):
             return f'Recuplivreur for {self.livraison}'
-        date = models.DateField()
+        date = models.DateField(null=True)
+        filled_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+        filled_at = models.DateTimeField(default=timezone.now)
 
-        
+
 class RecuplivreurItem(models.Model):
     recuplivreur = models.ForeignKey(Recuplivreur, on_delete=models.CASCADE, related_name='items_livreur', null=True)
     item_name = models.CharField(max_length=200, choices=[
@@ -475,15 +479,15 @@ class RecuplivreurItem(models.Model):
         ('bols', 'bols'),
         ('porcelaine', 'porcelaine'),
         ('ramequins', 'ramequins'),
-        ('verres', 'verres'),
         ('insertion', 'insertion'),
         ('plateau de bois', 'plateau de bois'),
         ('paniers', 'paniers'),
+        ('verres', 'verres'),
         ('thermos', 'thermos'),
         ('cambro', 'cambro'),
         ('tempkeep', 'tempkeep'),
         ('pinces', 'pinces'),
-        
+
     ])
     quantity = models.PositiveIntegerField(default=1)
 
@@ -494,6 +498,6 @@ class RecuplivreurItem(models.Model):
 
 
 
-    
 
-        
+
+
