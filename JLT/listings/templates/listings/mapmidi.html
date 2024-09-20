@@ -164,6 +164,10 @@
         <h2>{{ a.nom }}</h2>
         {% for task in todo_livraison %}
         {% if task.statut.nom == a.nom and task.recuperation == True %}
+        <div class="task" data-task-id="{{ task.id }}" style="color: pink;">
+            <a data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a>
+        </div>
+        {% else %}
         <div class="task" data-task-id="{{ task.id }}">
             <a data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a>
         </div>

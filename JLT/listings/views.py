@@ -1630,29 +1630,34 @@ class MapMidiView(View):
 
         return redirect('my_mapmidi_view')
 
-
-
 class MapApremTodayView(View):
     def get(self, request):
         key = settings.GOOGLE_API_KEY
         form = DistanceForm
         today = datetime.now().date()
-        aftertomorrow = today + timedelta(2)
+        tomorrow = today + timedelta(2)
         distances = Distances.objects.all()
         aprem = ['13h00', '13h15', '13h30', '13h45', '14h00', '14h15', '14h30', '14h45', '15h00', '15h15', '15h30', '15h45', '16h00', '16h15', '16h30', '16h45', '17h00', '17h15', '17h30', '17h45', '18h00', '18h15', '18h30', '18h45', '19h00', 'recup']
-        todo_livraison = Livraison.objects.filter(date=aftertomorrow, heure_livraison__in = aprem, place_id__isnull=False, statut__id= 21)
+        todo_livraison = Livraison.objects.filter(statut=21, date=tomorrow, heure_livraison__in = aprem, place_id__isnull=False)
         routesaprem = ['6','7','8','9','10','11','12','13','14','15','16','17', '18','19','20']
+        routes = Route.objects.filter(date=tomorrow, nom__in=routesaprem)
+        route1 = Livraison.objects.filter(date=tomorrow, heure_livraison__in = aprem)
+        route7 = Livraison.objects.filter(statut='7', date=tomorrow, heure_livraison__in = aprem)
+        route8 = Livraison.objects.filter(date=tomorrow, heure_livraison__in = aprem)
+        route9 = Livraison.objects.filter(statut='9', date=tomorrow, heure_livraison__in = aprem)
+        route10 = Livraison.objects.filter(statut='27', date=tomorrow, heure_livraison__in = aprem)
+        route11 = Livraison.objects.filter(statut='11', date=tomorrow, heure_livraison__in = aprem)
+        route12 = Livraison.objects.filter(statut='12', date=tomorrow, heure_livraison__in = aprem)
+        route13 = Livraison.objects.filter(statut='13', date=tomorrow, heure_livraison__in = aprem)
+        route14 = Livraison.objects.filter(statut='14', date=tomorrow, heure_livraison__in = aprem)
+        route15 = Livraison.objects.filter(statut='15', date=tomorrow, heure_livraison__in = aprem)
+        route16 = Livraison.objects.filter(statut='16', date=tomorrow, heure_livraison__in = aprem)
+        route17 = Livraison.objects.filter(statut='17', date=tomorrow, heure_livraison__in = aprem)
+        route18 = Livraison.objects.filter(statut='18', date=tomorrow, heure_livraison__in = aprem)
+        route19 = Livraison.objects.filter(statut='19', date=tomorrow, heure_livraison__in = aprem)
+        route20 = Livraison.objects.filter(statut='20', date=tomorrow, heure_livraison__in = aprem)
         routes21 = Route.objects.filter(id=21)
-        routes = Route.objects.filter(nom__in=routesaprem, date=aftertomorrow)
-        route1 = Livraison.objects.filter(date=aftertomorrow)
-        if request.method == 'POST':
-            form2 = RouteForm(request.POST)
-        if form2.is_valid():
-            form2.save()
-            return redirect('route_list')  # Redirect to a route list or another appropriate view
-        else:
-            form2 = RouteForm()
-        eligable_locations = Livraison.objects.filter(place_id__isnull=False, heure_livraison__in = aprem, date=aftertomorrow )
+        eligable_locations = Livraison.objects.filter(place_id__isnull=False, heure_livraison__in = aprem, date=tomorrow )
         livraisons =[]
         for a in eligable_locations:
             data = {
@@ -1661,8 +1666,10 @@ class MapApremTodayView(View):
                 'place_id': a.place_id,
                 'nom': a.nom,
                 'heure_livraison': a.heure_livraison,
-                'convives' : a.convives,
-                'mode_envoi' : a.mode_envoi,
+                'adress' : a.adress,
+                'convives': a.convives,
+                'mode_envoi': a.mode_envoi,
+                'infodetail': a.infodetail
             }
 
             livraisons.append(data)
@@ -1671,15 +1678,75 @@ class MapApremTodayView(View):
                    'livraisons':livraisons,
                    'form': form,
                    'distances':distances,
-                   'todo_livraison':todo_livraison,
-                   'routes21':routes21,
-                   'routes':routes,
                    'route1':route1,
-
+                   'route8':route8,
+                   'route9':route9,
+                   'route10':route10,
+                   'route11':route11,
+                   'route12':route12,
+                   'route13':route13,
+                   'route14':route14,
+                   'route15':route15,
+                   'route16':route16,
+                   'route17':route17,
+                   'route18':route18,
+                   'route19':route19,
+                   'route20':route20,
+                   'routes':routes,
+                   'todo_livraison':todo_livraison,
+                   'routes21': routes21,
 
 
         }
         return render(request, 'listings/maptodayaprem.html', context)
+
+    def post(self, request):
+        form = DistanceForm(request.POST)
+        if form.is_valid():
+            from_location = form.cleaned_data['from_location']
+            from_location_info = Livraison.objects.get(nom=from_location)
+            from_adress_string = str(from_location_info.adress)+", "+str(from_location_info.zipcode)+", "+str(from_location_info.city)+", "+str(from_location_info.country)
+
+            to_location = form.cleaned_data['to_location']
+            to_location_info = Livraison.objects.get(nom=to_location)
+            to_adress_string = str(to_location_info.adress)+", "+str(to_location_info.zipcode)+", "+str(to_location_info.city)+", "+str(to_location_info.country)
+
+            mode = form.cleaned_data['mode']
+            now = datetime.now()
+
+            gmaps = googlemaps.Client(key= settings.GOOGLE_API_KEY)
+            calculate = gmaps.distance_matrix(
+                from_adress_string,
+                to_adress_string,
+                mode = mode,
+                departure_time = now
+            )
+            print(calculate)
+
+            duration_secons = calculate['rows'][0]['elements'][0]['duration']['value']
+            duration_minutes = duration_secons/60
+
+            distance_meters = calculate['rows'][0]['elements'][0]['distance']['value']
+            distance_km = distance_meters/1000
+
+            if 'duration_in_traffic' in calculate['rows'][0]['elements'][0]:
+                duration_in_traffic_seconds = calculate['rows'][0]['elements'][0]['duration_in_traffic']['value']
+                duration_in_traffic_minutes = duration_in_traffic_seconds/60
+            else:
+                duration_in_traffic_minutes = None
+
+            obj = Distances(
+                from_location = Livraison.objects.get(nom=from_location),
+                to_location = Livraison.objects.get(nom=to_location),
+                mode = mode,
+                distance_km = distance_km,
+                distance_mins = duration_minutes,
+                distance_traffic_mins = duration_in_traffic_minutes
+            )
+
+            obj.save()
+
+        return redirect('my_maptodayaprem_view')
 class MapMidiTodayView(View):
     def get(self, request):
         key = settings.GOOGLE_API_KEY
@@ -1690,18 +1757,9 @@ class MapMidiTodayView(View):
         midi = ['10h00', '10h15', '10h30', '10h45', '11h00', '11h15', '11h30', '11h45', '12h00', '12h15', '12h30', '12h45', 'recup']
         todo_livraison = Livraison.objects.filter(date=aftertomorrow, heure_livraison__in = midi, place_id__isnull=False, statut__id= 21)
         routesmidi = ['2','3','4','5','6','7','8','9','10','11','12']
-
         routes21 = Route.objects.filter(id=21)
         routes = Route.objects.filter(nom__in=routesmidi, date=aftertomorrow)
         route1 = Livraison.objects.filter(date=aftertomorrow)
-        if request.method == 'POST':
-            form2 = RouteForm(request.POST)
-        if form2.is_valid():
-            form2.save()
-            return redirect('route_list')  # Redirect to a route list or another appropriate view
-        else:
-            form2 = RouteForm()
-
         eligable_locations = Livraison.objects.filter(place_id__isnull=False, heure_livraison__in = midi, date=aftertomorrow )
         livraisons =[]
         for a in eligable_locations:
@@ -1713,7 +1771,6 @@ class MapMidiTodayView(View):
                 'heure_livraison': a.heure_livraison,
                 'convives' : a.convives,
                 'mode_envoi' : a.mode_envoi,
-                'form2':form2,
             }
 
             livraisons.append(data)
@@ -1722,15 +1779,62 @@ class MapMidiTodayView(View):
                    'livraisons':livraisons,
                    'form': form,
                    'distances':distances,
-                   'todo_livraison':todo_livraison,
                    'routes21':routes21,
                    'routes':routes,
-                   'route1':route1
-
-
+                   'todo_livraison':todo_livraison,
+                   'route1':route1,
 
         }
         return render(request, 'listings/maptodaymidi.html', context)
+
+    def post(self, request):
+        form = DistanceForm(request.POST)
+        if form.is_valid():
+            from_location = form.cleaned_data['from_location']
+            from_location_info = Livraison.objects.get(nom=from_location)
+            from_adress_string = str(from_location_info.adress)+", "+str(from_location_info.zipcode)+", "+str(from_location_info.city)+", "+str(from_location_info.country)
+
+            to_location = form.cleaned_data['to_location']
+            to_location_info = Livraison.objects.get(nom=to_location)
+            to_adress_string = str(to_location_info.adress)+", "+str(to_location_info.zipcode)+", "+str(to_location_info.city)+", "+str(to_location_info.country)
+
+            mode = form.cleaned_data['mode']
+            now = datetime.now()
+
+            gmaps = googlemaps.Client(key= settings.GOOGLE_API_KEY)
+            calculate = gmaps.distance_matrix(
+                from_adress_string,
+                to_adress_string,
+                mode = mode,
+                departure_time = now
+            )
+            print(calculate)
+
+            duration_secons = calculate['rows'][0]['elements'][0]['duration']['value']
+            duration_minutes = duration_secons/60
+
+            distance_meters = calculate['rows'][0]['elements'][0]['distance']['value']
+            distance_km = distance_meters/1000
+
+            if 'duration_in_traffic' in calculate['rows'][0]['elements'][0]:
+                duration_in_traffic_seconds = calculate['rows'][0]['elements'][0]['duration_in_traffic']['value']
+                duration_in_traffic_minutes = duration_in_traffic_seconds/60
+            else:
+                duration_in_traffic_minutes = None
+
+            obj = Distances(
+                from_location = Livraison.objects.get(nom=from_location),
+                to_location = Livraison.objects.get(nom=to_location),
+                mode = mode,
+                distance_km = distance_km,
+                distance_mins = duration_minutes,
+                distance_traffic_mins = duration_in_traffic_minutes
+            )
+
+            obj.save()
+
+        
+        return render(request, 'listings/maptodaymidi.html')  
 class MapTodayView(View):
     def get(self, request):
         key = settings.GOOGLE_API_KEY
@@ -1825,22 +1929,29 @@ class MapApremDimView(View):
         key = settings.GOOGLE_API_KEY
         form = DistanceForm
         today = datetime.now().date()
-        aftertomorrow = today + timedelta(3)
+        tomorrow = today + timedelta(3)
         distances = Distances.objects.all()
         aprem = ['13h00', '13h15', '13h30', '13h45', '14h00', '14h15', '14h30', '14h45', '15h00', '15h15', '15h30', '15h45', '16h00', '16h15', '16h30', '16h45', '17h00', '17h15', '17h30', '17h45', '18h00', '18h15', '18h30', '18h45', '19h00', 'recup']
-        todo_livraison = Livraison.objects.filter(date=aftertomorrow, heure_livraison__in = aprem, place_id__isnull=False, statut__id= 21)
+        todo_livraison = Livraison.objects.filter(statut=21, date=tomorrow, heure_livraison__in = aprem, place_id__isnull=False)
         routesaprem = ['6','7','8','9','10','11','12','13','14','15','16','17', '18','19','20']
+        routes = Route.objects.filter(date=tomorrow, nom__in=routesaprem)
+        route1 = Livraison.objects.filter(date=tomorrow, heure_livraison__in = aprem)
+        route7 = Livraison.objects.filter(statut='7', date=tomorrow, heure_livraison__in = aprem)
+        route8 = Livraison.objects.filter(date=tomorrow, heure_livraison__in = aprem)
+        route9 = Livraison.objects.filter(statut='9', date=tomorrow, heure_livraison__in = aprem)
+        route10 = Livraison.objects.filter(statut='27', date=tomorrow, heure_livraison__in = aprem)
+        route11 = Livraison.objects.filter(statut='11', date=tomorrow, heure_livraison__in = aprem)
+        route12 = Livraison.objects.filter(statut='12', date=tomorrow, heure_livraison__in = aprem)
+        route13 = Livraison.objects.filter(statut='13', date=tomorrow, heure_livraison__in = aprem)
+        route14 = Livraison.objects.filter(statut='14', date=tomorrow, heure_livraison__in = aprem)
+        route15 = Livraison.objects.filter(statut='15', date=tomorrow, heure_livraison__in = aprem)
+        route16 = Livraison.objects.filter(statut='16', date=tomorrow, heure_livraison__in = aprem)
+        route17 = Livraison.objects.filter(statut='17', date=tomorrow, heure_livraison__in = aprem)
+        route18 = Livraison.objects.filter(statut='18', date=tomorrow, heure_livraison__in = aprem)
+        route19 = Livraison.objects.filter(statut='19', date=tomorrow, heure_livraison__in = aprem)
+        route20 = Livraison.objects.filter(statut='20', date=tomorrow, heure_livraison__in = aprem)
         routes21 = Route.objects.filter(id=21)
-        routes = Route.objects.filter(nom__in=routesaprem, date=aftertomorrow)
-        route1 = Livraison.objects.filter(date=aftertomorrow)
-        if request.method == 'POST':
-            form2 = RouteForm(request.POST)
-        if form2.is_valid():
-            form2.save()
-            return redirect('route_list')  # Redirect to a route list or another appropriate view
-        else:
-            form2 = RouteForm()
-        eligable_locations = Livraison.objects.filter(place_id__isnull=False, heure_livraison__in = aprem, date=aftertomorrow )
+        eligable_locations = Livraison.objects.filter(place_id__isnull=False, heure_livraison__in = aprem, date=tomorrow )
         livraisons =[]
         for a in eligable_locations:
             data = {
@@ -1849,8 +1960,10 @@ class MapApremDimView(View):
                 'place_id': a.place_id,
                 'nom': a.nom,
                 'heure_livraison': a.heure_livraison,
-                'convives' : a.convives,
-                'mode_envoi' : a.mode_envoi,
+                'adress' : a.adress,
+                'convives': a.convives,
+                'mode_envoi': a.mode_envoi,
+                'infodetail': a.infodetail
             }
 
             livraisons.append(data)
@@ -1859,37 +1972,88 @@ class MapApremDimView(View):
                    'livraisons':livraisons,
                    'form': form,
                    'distances':distances,
-                   'todo_livraison':todo_livraison,
-                   'routes21':routes21,
-                   'routes':routes,
                    'route1':route1,
-
+                   'route8':route8,
+                   'route9':route9,
+                   'route10':route10,
+                   'route11':route11,
+                   'route12':route12,
+                   'route13':route13,
+                   'route14':route14,
+                   'route15':route15,
+                   'route16':route16,
+                   'route17':route17,
+                   'route18':route18,
+                   'route19':route19,
+                   'route20':route20,
+                   'routes':routes,
+                   'todo_livraison':todo_livraison,
+                   'routes21': routes21,
 
 
         }
         return render(request, 'listings/mapdimaprem.html', context)
+
+    def post(self, request):
+        form = DistanceForm(request.POST)
+        if form.is_valid():
+            from_location = form.cleaned_data['from_location']
+            from_location_info = Livraison.objects.get(nom=from_location)
+            from_adress_string = str(from_location_info.adress)+", "+str(from_location_info.zipcode)+", "+str(from_location_info.city)+", "+str(from_location_info.country)
+
+            to_location = form.cleaned_data['to_location']
+            to_location_info = Livraison.objects.get(nom=to_location)
+            to_adress_string = str(to_location_info.adress)+", "+str(to_location_info.zipcode)+", "+str(to_location_info.city)+", "+str(to_location_info.country)
+
+            mode = form.cleaned_data['mode']
+            now = datetime.now()
+
+            gmaps = googlemaps.Client(key= settings.GOOGLE_API_KEY)
+            calculate = gmaps.distance_matrix(
+                from_adress_string,
+                to_adress_string,
+                mode = mode,
+                departure_time = now
+            )
+            print(calculate)
+
+            duration_secons = calculate['rows'][0]['elements'][0]['duration']['value']
+            duration_minutes = duration_secons/60
+
+            distance_meters = calculate['rows'][0]['elements'][0]['distance']['value']
+            distance_km = distance_meters/1000
+
+            if 'duration_in_traffic' in calculate['rows'][0]['elements'][0]:
+                duration_in_traffic_seconds = calculate['rows'][0]['elements'][0]['duration_in_traffic']['value']
+                duration_in_traffic_minutes = duration_in_traffic_seconds/60
+            else:
+                duration_in_traffic_minutes = None
+
+            obj = Distances(
+                from_location = Livraison.objects.get(nom=from_location),
+                to_location = Livraison.objects.get(nom=to_location),
+                mode = mode,
+                distance_km = distance_km,
+                distance_mins = duration_minutes,
+                distance_traffic_mins = duration_in_traffic_minutes
+            )
+
+            obj.save()
+    
+            return render(request, 'listings/mapdimaprem.html')
 class MapMidiDimView(View):
     def get(self, request):
         key = settings.GOOGLE_API_KEY
         form = DistanceForm
         today = datetime.now().date()
-        aftertomorrow = today + timedelta(3)
+        aftertomorrow = today + timedelta(2)
         distances = Distances.objects.all()
         midi = ['10h00', '10h15', '10h30', '10h45', '11h00', '11h15', '11h30', '11h45', '12h00', '12h15', '12h30', '12h45', 'recup']
         todo_livraison = Livraison.objects.filter(date=aftertomorrow, heure_livraison__in = midi, place_id__isnull=False, statut__id= 21)
         routesmidi = ['2','3','4','5','6','7','8','9','10','11','12']
-
         routes21 = Route.objects.filter(id=21)
         routes = Route.objects.filter(nom__in=routesmidi, date=aftertomorrow)
         route1 = Livraison.objects.filter(date=aftertomorrow)
-        if request.method == 'POST':
-            form2 = RouteForm(request.POST)
-        if form2.is_valid():
-            form2.save()
-            return redirect('route_list')  # Redirect to a route list or another appropriate view
-        else:
-            form2 = RouteForm()
-
         eligable_locations = Livraison.objects.filter(place_id__isnull=False, heure_livraison__in = midi, date=aftertomorrow )
         livraisons =[]
         for a in eligable_locations:
@@ -1901,7 +2065,6 @@ class MapMidiDimView(View):
                 'heure_livraison': a.heure_livraison,
                 'convives' : a.convives,
                 'mode_envoi' : a.mode_envoi,
-                'form2':form2,
             }
 
             livraisons.append(data)
@@ -1910,15 +2073,63 @@ class MapMidiDimView(View):
                    'livraisons':livraisons,
                    'form': form,
                    'distances':distances,
-                   'todo_livraison':todo_livraison,
                    'routes21':routes21,
                    'routes':routes,
-                   'route1':route1
-
-
+                   'todo_livraison':todo_livraison,
+                   'route1':route1,
 
         }
         return render(request, 'listings/mapdimmidi.html', context)
+
+    def post(self, request):
+        form = DistanceForm(request.POST)
+        if form.is_valid():
+            from_location = form.cleaned_data['from_location']
+            from_location_info = Livraison.objects.get(nom=from_location)
+            from_adress_string = str(from_location_info.adress)+", "+str(from_location_info.zipcode)+", "+str(from_location_info.city)+", "+str(from_location_info.country)
+
+            to_location = form.cleaned_data['to_location']
+            to_location_info = Livraison.objects.get(nom=to_location)
+            to_adress_string = str(to_location_info.adress)+", "+str(to_location_info.zipcode)+", "+str(to_location_info.city)+", "+str(to_location_info.country)
+
+            mode = form.cleaned_data['mode']
+            now = datetime.now()
+
+            gmaps = googlemaps.Client(key= settings.GOOGLE_API_KEY)
+            calculate = gmaps.distance_matrix(
+                from_adress_string,
+                to_adress_string,
+                mode = mode,
+                departure_time = now
+            )
+            print(calculate)
+
+            duration_secons = calculate['rows'][0]['elements'][0]['duration']['value']
+            duration_minutes = duration_secons/60
+
+            distance_meters = calculate['rows'][0]['elements'][0]['distance']['value']
+            distance_km = distance_meters/1000
+
+            if 'duration_in_traffic' in calculate['rows'][0]['elements'][0]:
+                duration_in_traffic_seconds = calculate['rows'][0]['elements'][0]['duration_in_traffic']['value']
+                duration_in_traffic_minutes = duration_in_traffic_seconds/60
+            else:
+                duration_in_traffic_minutes = None
+
+            obj = Distances(
+                from_location = Livraison.objects.get(nom=from_location),
+                to_location = Livraison.objects.get(nom=to_location),
+                mode = mode,
+                distance_km = distance_km,
+                distance_mins = duration_minutes,
+                distance_traffic_mins = duration_in_traffic_minutes
+            )
+
+            obj.save()
+
+
+        
+        return render(request, 'listings/mapdimmidi.html')
 class MapDimView(View):
     def get(self, request):
         key = settings.GOOGLE_API_KEY
@@ -1957,7 +2168,7 @@ class MapDimView(View):
                    'route1':route1,
 
         }
-        return render(request, 'listings/maptoday.html', context)
+        return render(request, 'listings/mapdim.html', context)
 
     def post(self, request):
         form = DistanceForm(request.POST)
