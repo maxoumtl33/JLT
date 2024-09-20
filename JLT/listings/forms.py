@@ -199,10 +199,14 @@ class RecupfrigoForm(forms.ModelForm):
         ).exclude(id__in=used_livraison_ids)
 
 # Form for RecupfrigoItem
+# forms.py
 class RecupfrigoItemForm(forms.ModelForm):
     class Meta:
         model = RecupfrigoItem
         fields = ['item_name', 'quantity']
+        
+
+       
 
 # Formset for RecupfrigoItem
 RecupfrigoItemFormset = inlineformset_factory(

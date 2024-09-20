@@ -2,84 +2,151 @@
 {%  load static %}
 {% block content %}
 <style>
+  /* Bottom Navbar Styling */
   .bottom-navbar {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        background-color: #333;
-        padding: 10px 0;
-        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
-        z-index: 1000;
-    }
-    .bottom-navbar ul {
-        list-style: none;
-        display: flex;
-        justify-content: space-around;
-        margin: 0;
-        padding: 0;
-    }
-    .bottom-navbar ul li {
-        flex: 1;
-        text-align: center;
-    }
-    .bottom-navbar ul li a {
-        color: white;
-        text-decoration: none;
-        font-size: 16px;
-        display: block;
-        padding: 5px;
-        transition: color 0.3s ease;
-    }
-    .bottom-navbar ul li a:hover {
-        text-decoration: underline;
-        color: #127BFF;
-    }
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: #333;
+      padding: 10px 0;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+  }
+  .bottom-navbar ul {
+      list-style: none;
+      display: flex;
+      justify-content: space-around;
+      margin: 0;
+      padding: 0;
+  }
+  .bottom-navbar ul li {
+      flex: 1;
+      text-align: center;
+  }
+  .bottom-navbar ul li a {
+      color: white;
+      text-decoration: none;
+      font-size: 18px;
+      display: block;
+      padding: 5px;
+      transition: color 0.3s ease;
+  }
+  .bottom-navbar ul li a:hover {
+      text-decoration: underline;
+      color: #127BFF;
+  }
+
+  /* Input and Button Styles */
+  .form-control-sm {
+      border-radius: 5px;
+      padding: 10px;
+      width: 200px;
+      margin-right: 10px;
+  }
+  .btn-success {
+      background-color: #28a745;
+      border: none;
+      padding: 10px 15px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+  }
+  .btn-success:hover {
+      background-color: #218838;
+  }
+
+  /* Loading Spinner */
+  .htmx-indicator {
+      display: none;
+  }
+  [hx-request][hx-trigger]:not([hx-trigger='revealed']) .htmx-indicator {
+      display: inline-block;
+  }
+
+  /* General Layout */
+  .container {
+      max-width: 80%;
+  }
+  .lead {
+      font-size: 1.5rem;
+  }
+  .align-center {
+      text-align: center;
+  }
+
+  /* For Mobile Responsiveness */
+  @media (max-width: 768px) {
+      .container {
+          max-width: 95%;
+      }
+      .btn-success {
+          width: 100%;
+      }
+      .form-control-sm {
+          width: 100%;
+          margin-bottom: 10px;
+      }
+  }
 </style>
+
+<!-- Bottom Navigation -->
 <nav class="bottom-navbar">
   <ul>
-      <li><a href="{% url 'acceuilresponsables'%}" class="nav__link"><i class="fa-solid fa-user-ninja"></i><span class="nav__name">Menu Admin</span></a></li>
-      
+      <li><a href="{% url 'acceuilresponsables' %}" class="nav__link">
+          <i class="fa-solid fa-user-ninja"></i><span class="nav__name">Menu Admin</span></a></li>
   </ul>
 </nav>
 
-<br>
-<br>
-<br>
-<div class="align-center col-10 offset-1">
+<!-- Form Section -->
+<div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center">
         <p class="lead ml-0">Ajouter une livraison</p>
-        <form class="d-flex align-items-center">
+        <form class="d-flex align-items-center" hx-post="{% url 'add-livraison' %}" hx-target="#livraison-list" hx-swap="beforeend">
             {% csrf_token %}
-            <input type="text" name="filmname" class="form-control-sm mr-2" placeholder="AJouter une livraison" />
-            <input type="text" name="date" class="form-control-sm mr-2" placeholder="AJouter une date" />
-            <button type="submit" class="btn btn-success btn-sm" hx-post="{% url 'add-livraison' %}" hx-target='#livraison-list'>AJouter</button>
+            <input type="text" name="filmname" class="form-control-sm mr-2" placeholder="Ajouter une livraison" required />
+            <input type="text" name="date" class="form-control-sm mr-2" placeholder="Ajouter une date (YYYY-MM-DD)" required />
+            <button type="submit" class="btn btn-success btn-sm">
+                <span class="htmx-indicator">
+                    <i class="fa fa-spinner fa-spin"></i>
+                </span>
+                Ajouter
+            </button>
         </form>
     </div>
     <hr/>
-    
+
+    <!-- Livraison List -->
     <div id="livraison-list">
-      {% include 'listings/partials/livraisonslist.html' %}
-  </div>
-    <br>
-    <br>
-    <br>
-    <br>
+        {% include 'listings/partials/livraisonslist.html' %}
+    </div>
+
+    <!-- Spacing for Bottom Navigation -->
+    <div style="margin-bottom: 60px;"></div>
 </div>
+
+<!-- Htmx Configuration for CSRF and AJAX enhancements -->
 <script>
+  // Automatically add CSRF token to htmx requests
   document.body.addEventListener('htmx:configRequest', (event) => {
       event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
-  })
+  });
 
-  htmx.onLoad(function(content) {
-      var sortables = content.querySelectorAll(".sortable");
-      for (var i = 0; i < sortables.length; i++) {
-          var sortable = sortables[i];
-          new Sortable(sortable, {
-              animation: 150,
-              ghostClass: 'blue-background-class'
-          });
-      }
-  })
+  // Handle form validation errors
+  htmx.on('htmx:responseError', function(event) {
+      alert('Failed to add livraison. Please check your input and try again.');
+  });
+
+  // Show loading spinner when an htmx request is triggered
+  htmx.on('htmx:beforeRequest', function() {
+      var spinner = document.querySelector('.htmx-indicator');
+      spinner.style.display = 'inline-block';
+  });
+
+  // Hide loading spinner when htmx request is complete
+  htmx.on('htmx:afterRequest', function() {
+      var spinner = document.querySelector('.htmx-indicator');
+      spinner.style.display = 'none';
+  });
 </script>
 {% endblock content %}

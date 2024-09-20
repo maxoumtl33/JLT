@@ -101,6 +101,9 @@
         <button id="create-routes-tomorrow-btn" class="btn btn-custom"><i class="fas fa-route"></i> Creer routes pour le lendemain</button>
         <button id="create-routes-day-after-tomorrow-btn" class="btn btn-custom"><i class="fas fa-route"></i>Creer routes pour dimanche</button>
         <button id="create-routes-day-after-day-after-tomorrow-btn" class="btn btn-custom"><i class="fas fa-route"></i>Creer routes pour lundi</button>
+        <form method="get" action="{% url 'geocode_all_livraisons' %}">
+          <button type="submit" class="btn btn-primary">Geocode All Livraisons</button>
+      </form>
     </div>
 
    
@@ -128,6 +131,7 @@
                         <th>Route</th>
                         <th>lien</th>
                         <th>Geocode</th>
+
                     </tr>
                 </thead>
                 <tbody>
@@ -144,8 +148,6 @@
                             <td>
                                 {% if livraison.lng %}
                                     <strong><i class="fa-solid fa-location-dot" style="color: #63E6BE;"></i></strong>
-                                {% else %}
-                                    <strong><a href="{% url 'geocoding' livraison.id %}" class="btn btn-custom"><i class="fa-solid fa-location-dot"></i></a></strong>
                                 {% endif %}
                             </td>
                         </tr>
@@ -174,6 +176,7 @@
                         <th>Route</th>
                         <th>lien</th>
                         <th>Geocode</th>
+
                     </tr>
                 </thead>
                 <tbody>
@@ -190,8 +193,6 @@
                             <td>
                                 {% if livraison.lng %}
                                     <strong><i class="fa-solid fa-location-dot" style="color: #63E6BE;"></i></strong>
-                                {% else %}
-                                    <strong><a href="{% url 'geocoding' livraison.id %}" class="btn btn-custom"><i class="fa-solid fa-location-dot"></i></a></strong>
                                 {% endif %}
                             </td>
                         </tr>
@@ -219,6 +220,7 @@
                       <th>Route</th>
                       <th>lien</th>
                       <th>Geocode</th>
+
                   </tr>
               </thead>
               <tbody>
@@ -235,8 +237,6 @@
                           <td>
                               {% if livraison.lng %}
                                   <strong><i class="fa-solid fa-location-dot" style="color: #63E6BE;"></i></strong>
-                              {% else %}
-                                  <strong><a href="{% url 'geocoding' livraison.id %}" class="btn btn-custom"><i class="fa-solid fa-location-dot"></i></a></strong>
                               {% endif %}
                           </td>
                       </tr>
@@ -268,6 +268,7 @@
                         <th>Route</th>
                         <th>lien</th>
                         <th>Geocode</th>
+
                     </tr>
                 </thead>
                 <tbody>
@@ -284,8 +285,6 @@
                             <td>
                                 {% if livraison.lng %}
                                     <strong><i class="fa-solid fa-location-dot" style="color: #63E6BE;"></i></strong>
-                                {% else %}
-                                    <strong><a href="{% url 'geocoding' livraison.id %}" class="btn btn-custom"><i class="fa-solid fa-location-dot"></i></a></strong>
                                 {% endif %}
                             </td>
                         </tr>
@@ -314,6 +313,7 @@
                         <th>Route</th>
                         <th>lien</th>
                         <th>Geocode</th>
+
                     </tr>
                 </thead>
                 <tbody>
@@ -330,8 +330,6 @@
                             <td>
                                 {% if livraison.lng %}
                                     <strong><i class="fa-solid fa-location-dot" style="color: #63E6BE;"></i></strong>
-                                {% else %}
-                                    <strong><a href="{% url 'geocoding' livraison.id %}" class="btn btn-custom"><i class="fa-solid fa-location-dot"></i></a></strong>
                                 {% endif %}
                             </td>
                         </tr>
@@ -359,6 +357,7 @@
                       <th>Route</th>
                       <th>lien</th>
                       <th>Geocode</th>
+
                   </tr>
               </thead>
               <tbody>
@@ -376,8 +375,6 @@
                           <td>
                               {% if livraison.lng %}
                                   <strong><i class="fa-solid fa-location-dot" style="color: #63E6BE;"></i></strong>
-                              {% else %}
-                                  <strong><a href="{% url 'geocoding' livraison.id %}" class="btn btn-custom"><i class="fa-solid fa-location-dot"></i></a></strong>
                               {% endif %}
                           </td>
                       </tr>
@@ -409,6 +406,7 @@
                       <th>Route</th>
                       <th>lien</th>
                       <th>Geocode</th>
+
                   </tr>
               </thead>
               <tbody>
@@ -425,8 +423,6 @@
                           <td>
                               {% if livraison.lng %}
                                   <strong><i class="fa-solid fa-location-dot" style="color: #63E6BE;"></i></strong>
-                              {% else %}
-                                  <strong><a href="{% url 'geocoding' livraison.id %}" class="btn btn-custom"><i class="fa-solid fa-location-dot"></i></a></strong>
                               {% endif %}
                           </td>
                       </tr>
@@ -455,6 +451,7 @@
                       <th>Route</th>
                       <th>lien</th>
                       <th>Geocode</th>
+
                   </tr>
               </thead>
               <tbody>
@@ -471,8 +468,6 @@
                           <td>
                               {% if livraison.lng %}
                                   <strong><i class="fa-solid fa-location-dot" style="color: #63E6BE;"></i></strong>
-                              {% else %}
-                                  <strong><a href="{% url 'geocoding' livraison.id %}" class="btn btn-custom"><i class="fa-solid fa-location-dot"></i></a></strong>
                               {% endif %}
                           </td>
                       </tr>
@@ -516,8 +511,6 @@
                         <td>
                             {% if livraison.lng %}
                                 <strong><i class="fa-solid fa-location-dot" style="color: #63E6BE;"></i></strong>
-                            {% else %}
-                                <strong><a href="{% url 'geocoding' livraison.id %}" class="btn btn-custom"><i class="fa-solid fa-location-dot"></i></a></strong>
                             {% endif %}
                         </td>
                     </tr>

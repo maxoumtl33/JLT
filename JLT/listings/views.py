@@ -61,7 +61,35 @@ from django.utils import timezone
 import random
 
 def geocode_all_livraisons(request):
-        return JsonResponse({'success': False, 'error': 'Invalid request method'})
+    if request.method == 'GET':  # Ensure the method is GET
+        livraisons = Livraison.objects.filter(lat__isnull=True, lng__isnull=True, place_id__isnull=True)
+
+        if livraisons.exists():
+            gmaps = googlemaps.Client(key=settings.GOOGLE_API_KEY)
+
+            for livraison in livraisons:
+                if livraison.adress and livraison.country and livraison.zipcode and livraison.city:
+                    adress_string = f"{livraison.adress}, {livraison.zipcode}, {livraison.city}, {livraison.country}"
+
+                    result = gmaps.geocode(adress_string)
+                    if result:
+                        lat = result[0].get('geometry', {}).get('location', {}).get('lat', None)
+                        lng = result[0].get('geometry', {}).get('location', {}).get('lng', None)
+                        place_id = result[0].get('place_id', None)
+
+                        # Update the livraison instance
+                        livraison.lat = lat
+                        livraison.lng = lng
+                        livraison.place_id = place_id
+                        livraison.save()
+
+            return JsonResponse({'success': True, 'message': 'Geocoding completed'})
+        else:
+            return JsonResponse({'success': False, 'message': 'No livraisons need geocoding'})
+    
+    # If the request method is not GET
+    return JsonResponse({'success': False, 'error': 'Invalid request method. Use GET.'})
+
 TASK_NAMES = ['Nettoyer machines à café', 'Nettoyer intérieur des camions et checker essence', 'Faire boites de thé + café', 'Nettoyer dock de livraison']
 def create_random_task(request):
     # Ensure you have a Livreur to choose from
@@ -1285,7 +1313,7 @@ class MapView(View):
         form = DistanceForm
         today = datetime.now().date()
         tomorrow = today + timedelta(1)
-        matin = ['05h00', '05h15', '05h30', '05h45', '06h00', '06h15', '06h30', '06h45', '07h00', '07h15', '07h30', '07h45', '08h00','08h15', '08h30', '08h45', '09h00', '09h15', '09h30', '09h45']
+        matin = ['05h00', '05h15', '05h30', '05h45', '06h00', '06h15', '06h30', '06h45', '07h00', '07h15', '07h30', '07h45', '08h00','08h15', '08h30', '08h45', '09h00', '09h15', '09h30', '09h45', 'recup']
         distances = Distances.objects.all()
         todo_livraison = Livraison.objects.filter(date=tomorrow, heure_livraison__in = matin, place_id__isnull=False, statut__id= 21)
         route1 = Livraison.objects.filter(date=tomorrow, heure_livraison__in = matin)
@@ -1385,7 +1413,7 @@ class MapApremView(View):
         today = datetime.now().date()
         tomorrow = today + timedelta(1)
         distances = Distances.objects.all()
-        aprem = ['13h00', '13h15', '13h30', '13h45', '14h00', '14h15', '14h30', '14h45', '15h00', '15h15', '15h30', '15h45', '16h00', '16h15', '16h30', '16h45', '17h00', '17h15', '17h30', '17h45', '18h00', '18h15', '18h30', '18h45', '19h00']
+        aprem = ['13h00', '13h15', '13h30', '13h45', '14h00', '14h15', '14h30', '14h45', '15h00', '15h15', '15h30', '15h45', '16h00', '16h15', '16h30', '16h45', '17h00', '17h15', '17h30', '17h45', '18h00', '18h15', '18h30', '18h45', '19h00', 'recup']
         todo_livraison = Livraison.objects.filter(statut=21, date=tomorrow, heure_livraison__in = aprem, place_id__isnull=False)
         routesaprem = ['6','7','8','9','10','11','12','13','14','15','16','17', '18','19','20']
         routes = Route.objects.filter(date=tomorrow, nom__in=routesaprem)
@@ -1502,7 +1530,7 @@ class MapMidiView(View):
         today = datetime.now().date()
         tomorrow = today + timedelta(1)
         distances = Distances.objects.all()
-        midi = ['10h00', '10h15', '10h30', '10h45', '11h00', '11h15', '11h30', '11h45', '12h00', '12h15', '12h30', '12h45']
+        midi = ['10h00', '10h15', '10h30', '10h45', '11h00', '11h15', '11h30', '11h45', '12h00', '12h15', '12h30', '12h45', 'recup']
         todo_livraison = Livraison.objects.filter(statut=21, date=tomorrow, heure_livraison__in = midi, place_id__isnull=False)
         routesmidi = ['2','3','4','5','6','7','8','9','10','11','12']
         routes21 = Route.objects.filter(id=21)
@@ -1611,7 +1639,7 @@ class MapApremTodayView(View):
         today = datetime.now().date()
         aftertomorrow = today + timedelta(2)
         distances = Distances.objects.all()
-        aprem = ['13h00', '13h15', '13h30', '13h45', '14h00', '14h15', '14h30', '14h45', '15h00', '15h15', '15h30', '15h45', '16h00', '16h15', '16h30', '16h45', '17h00', '17h15', '17h30', '17h45', '18h00', '18h15', '18h30', '18h45', '19h00']
+        aprem = ['13h00', '13h15', '13h30', '13h45', '14h00', '14h15', '14h30', '14h45', '15h00', '15h15', '15h30', '15h45', '16h00', '16h15', '16h30', '16h45', '17h00', '17h15', '17h30', '17h45', '18h00', '18h15', '18h30', '18h45', '19h00', 'recup']
         todo_livraison = Livraison.objects.filter(date=aftertomorrow, heure_livraison__in = aprem, place_id__isnull=False, statut__id= 21)
         routesaprem = ['6','7','8','9','10','11','12','13','14','15','16','17', '18','19','20']
         routes21 = Route.objects.filter(id=21)
@@ -1659,7 +1687,7 @@ class MapMidiTodayView(View):
         today = datetime.now().date()
         aftertomorrow = today + timedelta(2)
         distances = Distances.objects.all()
-        midi = ['10h00', '10h15', '10h30', '10h45', '11h00', '11h15', '11h30', '11h45', '12h00', '12h15', '12h30', '12h45']
+        midi = ['10h00', '10h15', '10h30', '10h45', '11h00', '11h15', '11h30', '11h45', '12h00', '12h15', '12h30', '12h45', 'recup']
         todo_livraison = Livraison.objects.filter(date=aftertomorrow, heure_livraison__in = midi, place_id__isnull=False, statut__id= 21)
         routesmidi = ['2','3','4','5','6','7','8','9','10','11','12']
 
@@ -1710,7 +1738,7 @@ class MapTodayView(View):
         today = datetime.now().date()
         aftertomorrow = today + timedelta(2)
         distances = Distances.objects.all()
-        matin = ['05h00', '05h15', '05h30', '05h45', '06h00', '06h15', '06h30', '06h45', '07h00', '07h15', '07h30', '07h45', '08h00','08h15', '08h30', '08h45', '09h00', '09h15', '09h30', '09h45']
+        matin = ['05h00', '05h15', '05h30', '05h45', '06h00', '06h15', '06h30', '06h45', '07h00', '07h15', '07h30', '07h45', '08h00','08h15', '08h30', '08h45', '09h00', '09h15', '09h30', '09h45', 'recup']
         todo_livraison = Livraison.objects.filter(date=aftertomorrow, heure_livraison__in = matin, place_id__isnull=False, statut__id= 21)
         routesmatin = ['1','2','3','4']
         routes21 = Route.objects.filter(id=21)
@@ -1799,7 +1827,7 @@ class MapApremDimView(View):
         today = datetime.now().date()
         aftertomorrow = today + timedelta(3)
         distances = Distances.objects.all()
-        aprem = ['13h00', '13h15', '13h30', '13h45', '14h00', '14h15', '14h30', '14h45', '15h00', '15h15', '15h30', '15h45', '16h00', '16h15', '16h30', '16h45', '17h00', '17h15', '17h30', '17h45', '18h00', '18h15', '18h30', '18h45', '19h00']
+        aprem = ['13h00', '13h15', '13h30', '13h45', '14h00', '14h15', '14h30', '14h45', '15h00', '15h15', '15h30', '15h45', '16h00', '16h15', '16h30', '16h45', '17h00', '17h15', '17h30', '17h45', '18h00', '18h15', '18h30', '18h45', '19h00', 'recup']
         todo_livraison = Livraison.objects.filter(date=aftertomorrow, heure_livraison__in = aprem, place_id__isnull=False, statut__id= 21)
         routesaprem = ['6','7','8','9','10','11','12','13','14','15','16','17', '18','19','20']
         routes21 = Route.objects.filter(id=21)
@@ -1847,7 +1875,7 @@ class MapMidiDimView(View):
         today = datetime.now().date()
         aftertomorrow = today + timedelta(3)
         distances = Distances.objects.all()
-        midi = ['10h00', '10h15', '10h30', '10h45', '11h00', '11h15', '11h30', '11h45', '12h00', '12h15', '12h30', '12h45']
+        midi = ['10h00', '10h15', '10h30', '10h45', '11h00', '11h15', '11h30', '11h45', '12h00', '12h15', '12h30', '12h45', 'recup']
         todo_livraison = Livraison.objects.filter(date=aftertomorrow, heure_livraison__in = midi, place_id__isnull=False, statut__id= 21)
         routesmidi = ['2','3','4','5','6','7','8','9','10','11','12']
 
@@ -1898,7 +1926,7 @@ class MapDimView(View):
         today = datetime.now().date()
         aftertomorrow = today + timedelta(3)
         distances = Distances.objects.all()
-        matin = ['05h00', '05h15', '05h30', '05h45', '06h00', '06h15', '06h30', '06h45', '07h00', '07h15', '07h30', '07h45', '08h00','08h15', '08h30', '08h45', '09h00', '09h15', '09h30', '09h45']
+        matin = ['05h00', '05h15', '05h30', '05h45', '06h00', '06h15', '06h30', '06h45', '07h00', '07h15', '07h30', '07h45', '08h00','08h15', '08h30', '08h45', '09h00', '09h15', '09h30', '09h45', 'recup']
         todo_livraison = Livraison.objects.filter(date=aftertomorrow, heure_livraison__in = matin, place_id__isnull=False, statut__id= 21)
         routesmatin = ['1','2','3','4']
         routes21 = Route.objects.filter(id=21)
@@ -1987,55 +2015,35 @@ def deleteDistance(request, pk):
     context = {'distance':distance,}
     return render(request, 'listings/deletedistance.html', context)
 
-class GeocodingView(View):
-    def get(self, request, pk):
-        today = datetime.now().date()
-        tomorrow = today + timedelta(1)
-        livraison = Livraison.objects.get(pk = pk)
+class GeocodeAllLivraisonsView(View):
+    def get(self, request):
+        # Get all livraisons that need geocoding (filter for those without lat/lng or place_id)
+        livraisons = Livraison.objects.filter(lat__isnull=True, lng__isnull=True, place_id__isnull=True)
 
-        if livraison.lng and livraison.lat and livraison.place_id != None:
+        gmaps = googlemaps.Client(key=settings.GOOGLE_API_KEY)
 
-            lat = livraison.lat
-            lng = livraison.lng
-            place_id = livraison.place_id
+        for livraison in livraisons:
+            if livraison.adress and livraison.country and livraison.zipcode and livraison.city:
+                # Construct the address string
+                adress_string = f"{livraison.adress}, {livraison.zipcode}, {livraison.city}, {livraison.country}"
 
+                # Geocode the address
+                result = gmaps.geocode(adress_string)
 
+                if result:
+                    # Extract the lat, lng, and place_id
+                    lat = result[0].get('geometry', {}).get('location', {}).get('lat', {})
+                    lng = result[0].get('geometry', {}).get('location', {}).get('lng', {})
+                    place_id = result[0].get('place_id', {})
 
+                    # Update the Livraison instance
+                    livraison.lat = lat
+                    livraison.lng = lng
+                    livraison.place_id = place_id
+                    livraison.save()
 
-        elif livraison.adress and livraison.country and livraison.zipcode and livraison.city != None:
-
-            adress_string = str(livraison.adress)+", "+str(livraison.zipcode)+", "+str(livraison.city)+", "+str(livraison.country)
-
-            gmaps = googlemaps.Client(key= settings.GOOGLE_API_KEY)
-            result =  gmaps.geocode(adress_string)[0]
-
-            lat = result.get('geometry', {}).get('location', {}).get('lat', {})
-            lng = result.get('geometry', {}).get('location', {}).get('lng', {})
-            place_id = result.get('place_id', {})
-
-
-
-            livraison.lat = lat
-            livraison.lng = lng
-            livraison.place_id = place_id
-
-            livraison.save()
-            return redirect('livraisonstomorrow')
-
-        else:
-
-            result = ""
-            lat = ""
-            lng = ""
-            place_id = ""
-
-        context = {'livraison': livraison,
-                   'lat':lat,
-                   'lng':lng,
-                   'place_id':place_id,
-
-        }
-        return render(request, 'listings/geocoding.html', context)
+        # Redirect to the livraisonstomorrow page
+        return redirect('livraisonstomorrow')
 
 class GeocodingTodayView(View):
     def get(self, request, pk):
@@ -2147,9 +2155,9 @@ def livraisonstomorrow(request):
     aftertomorrow = today + timedelta(2)
     afteraftertomorrow = today + timedelta(3)
     matin = ['05h00', '05h15', '05h30', '05h45', '06h00', '06h15', '06h30', '06h45', '07h00', '07h15', '07h30', '07h45', '08h00',
-             '08h15', '08h30', '08h45', '09h00', '09h15', '09h30', '09h45']
-    midi = ['10h00', '10h15', '10h30', '10h45', '11h00', '11h15', '11h30', '11h45', '12h00', '12h15', '12h30', '12h45']
-    apresmidi = ['13h00', '13h15', '13h30', '13h45', '14h00', '14h15', '14h30', '14h45', '15h00', '15h15', '15h30', '15h45', '16h00', '16h15', '16h30', '16h45', '17h00', '17h15', '17h30', '17h45', '18h00', '18h15', '18h30', '18h45', '19h00']
+             '08h15', '08h30', '08h45', '09h00', '09h15', '09h30', '09h45', 'recup']
+    midi = ['10h00', '10h15', '10h30', '10h45', '11h00', '11h15', '11h30', '11h45', '12h00', '12h15', '12h30', '12h45', 'recup']
+    apresmidi = ['13h00', '13h15', '13h30', '13h45', '14h00', '14h15', '14h30', '14h45', '15h00', '15h15', '15h30', '15h45', '16h00', '16h15', '16h30', '16h45', '17h00', '17h15', '17h30', '17h45', '18h00', '18h15', '18h30', '18h45', '19h00', 'recup']
     livraisons = Livraison.objects.order_by('position')
     livraisonsok = Livraison.objects.filter(date=tomorrow, recuperation=False)
     livraisonrecup = Livraison.objects.filter(date=tomorrow, recuperation=True)
@@ -2519,6 +2527,7 @@ def duplicate_model(request, model_id):
     new_object.nom_client = original_object.nom_client
     new_object.contact_site = original_object.contact_site
     new_object.date = tomorrow
+    new_object.heure_livraison = new_object.heure_livraison = "recup"
     new_object.date_livraison = original_object.date_livraison
     new_object.statut = Route.objects.get(id=21)
     new_journee = Journee.objects.get(id=original_object.journee.id + 1)
