@@ -64,9 +64,13 @@ import requests
 def delivery_map(request):
     today = now().date()
     deliveries = Livraison.objects.filter(date=today)
+
+    # Convert the deliveries queryset to a JSON-compatible format
+    deliveries_data = list(deliveries.values('nom', 'lat', 'lng', 'heure_livraison'))
+
     key = settings.GOOGLE_API_KEY
     return render(request, 'listings/delivery_map.html', {
-        'deliveries': deliveries,
+        'deliveries': deliveries_data,
         'key': key,
     })
 
