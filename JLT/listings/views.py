@@ -59,6 +59,16 @@ from django.urls import reverse_lazy
 from django.views.generic.edit import DeleteView
 from django.utils import timezone
 import random
+import requests
+
+def delivery_map(request):
+    today = now().date()
+    deliveries = Livraison.objects.filter(date=today)
+    key = settings.GOOGLE_API_KEY
+    return render(request, 'listings/delivery_map.html', {
+        'deliveries': deliveries,
+        'key': key,
+    })
 
 def geocode_all_livraisons(request):
     if request.method == 'GET':  # Ensure the method is GET
@@ -90,29 +100,51 @@ def geocode_all_livraisons(request):
     # If the request method is not GET
     return JsonResponse({'success': False, 'error': 'Invalid request method. Use GET.'})
 
-TASK_NAMES = ['Nettoyer machines à café', 'Nettoyer intérieur des camions et checker essence', 'Faire boites de thé + café', 'Nettoyer dock de livraison']
+TASK_NAMES = ['Nettoyer machines à café', 'Nettoyer intérieur des camions et checker essence', 
+              'Faire boites de thé + café', 'Nettoyer dock de livraison']
+
+import random
+
+TASK_NAMES = ['Nettoyer machines à café', 'Nettoyer intérieur des camions', 
+              'Faire boites de thé + café', 'Nettoyer dock de livraison', 'Mettre essence camions']
+
 def create_random_task(request):
-    # Ensure you have a Livreur to choose from
-    livreur_list = Livreur.objects.all()
-    
-    if not livreur_list:
-        return redirect('acceuilresponsables')  # Redirect if no livreurs are available
+    # List of names to choose from
+    livreur_names = ["Mohamed", "Samuel", "Alex", "Jef", "Zayd"]
 
-    # Select a random livreur and task name
-    random_livreur = random.choice(livreur_list)
-    random_nom = random.choice(TASK_NAMES)
+    # Check if the number of livreurs is less than the number of tasks
+    if len(livreur_names) < len(TASK_NAMES):
+        return redirect('acceuilresponsables')  # Handle error: more tasks than livreurs
 
-    # Set the date to tomorrow
+    # Fetch Livreur instances corresponding to names
+    livreurs = []
+    for name in livreur_names:
+        try:
+            livreur = Livreur.objects.get(nom=name)
+            livreurs.append(livreur)
+        except Livreur.DoesNotExist:
+            return redirect('acceuilresponsables')  # Handle case where a Livreur is missing
+
+    # Set the date for tomorrow
     tomorrow = timezone.now().date() + timezone.timedelta(days=1)
 
-    # Create and save the new Tacheafaire instance
-    Tacheafaire.objects.create(
-        livreur=random_livreur,
-        nom=random_nom,
-        date=tomorrow
-    )
+    # Shuffle the task names to ensure randomness
+    random.shuffle(TASK_NAMES)
+
+    # Assign a random task to each livreur
+    for i, livreur in enumerate(livreurs):
+        if i < len(TASK_NAMES):
+            random_task = TASK_NAMES[i]
+            # Create the task
+            Tacheafaire.objects.create(
+                livreur=livreur,  # Livreur instance
+                nom=random_task,
+                date=tomorrow
+            )
 
     return redirect('acceuilresponsables')
+
+
 @csrf_exempt
 @require_POST
 def create_routes(request):
@@ -2584,16 +2616,23 @@ class Livraisonsdrag(ListView):
 
 
 def add_livraison(request):
+    # Extract data from POST request
     nom = request.POST.get('filmname')
     date = request.POST.get('date')
 
-    # add film
-    livraison = Livraison.objects.create(nom=nom, date=date)
+    # Validate date format (optional)
+    try:
+        date_obj = datetime.strptime(date, '%Y-%m-%d').date()
+    except ValueError:
+        return JsonResponse({'error': 'Invalid date format. Use YYYY-MM-DD.'}, status=400)
 
-    today = datetime.now().date()
-    tomorrow = today + timedelta(1)
-    livraisons = Livraison.objects.filter(date=tomorrow)
+    # Create and save the Livraison instance
+    livraison = Livraison.objects.create(nom=nom, date=date_obj)
 
+    # Fetch updated list of livraisons (you can filter this as needed)
+    livraisons = Livraison.objects.all()
+
+    # Render the updated livraison list (partial template)
     return render(request, 'listings/partials/livraisonslist.html', {'livraisons': livraisons})
 
 def delete_livraison(request, pk):
@@ -2710,7 +2749,6 @@ def routesfrigo(request):
         'journee':journee,
     }
     return render(request, 'listings/routesfrigo.html', context)
-
 
 
 def duplicate_model(request, model_id):

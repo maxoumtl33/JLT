@@ -80,6 +80,7 @@ path('routesfrigo/', routesfrigo, name='routesfrigo'),
 path('update-task/<int:pk>/', views.update_task, name='update_task'),
 path('create-recupfrigo/', create_recupfrigo, name='create_recupfrigo'),
 path('create-recuplivreur/<int:livraison_id>/', create_recuplivreur, name='create_recuplivreur'),
+path('deliverymap/', delivery_map, name='delivery_map'),
 
 
 

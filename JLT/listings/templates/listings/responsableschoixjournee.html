@@ -223,10 +223,11 @@
             <div class="dropdown">
                 <button>Taches</button>
                 <div class="dropdown-content">
-                    <form action="{% url 'create_random_task' %}" method="post">
+                    <form id="task-form" action="{% url 'create_random_task' %}" method="post">
                         {% csrf_token %}
-                        <button type="submit">Creer une tache</button>
+                        <a href="#" onclick="document.getElementById('task-form').submit();" style="text-decoration: none; color: inherit;">Creer les taches</a>
                     </form>
+                    
                     <a href="{% url 'tacheslist' %}">Taches</a>
                 </div>
             </div>

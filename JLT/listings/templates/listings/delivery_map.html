@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Deliveries Map</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ key }}&callback=initMap"></script>
+</head>
+<body>
+    <h3>Delivery Locations</h3>
+    <div id="map" style="height: 400px; width: 100%;"></div>
+    <iframe src="https://v2.finder-portal.com/tabs/map" style="width: 100%; height: 500px;"></iframe>
+
+    <script>
+        let map;
+
+        function initMap() {
+            const livraisons = {{ deliveries|safe }};
+            if (livraisons.length === 0) {
+                console.error("No deliveries found.");
+                return;
+            }
+
+            const firstLocation = livraisons[0];
+            const infoWindows = [];
+
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: { lat: firstLocation.lat, lng: firstLocation.lng },
+                zoom: 10.5,
+            });
+
+            livraisons.forEach(livraison => {
+                const markerInfo = `${livraison.nom} / ${livraison.heure_livraison} / ${livraison.mode_envoi} / ${livraison.convives}`;
+                const marker = new google.maps.Marker({
+                    position: { lat: livraison.lat, lng: livraison.lng },
+                    map: map,
+                    title: markerInfo,
+                });
+
+                const infowindow = new google.maps.InfoWindow({
+                    content: markerInfo,
+                });
+
+                infoWindows.push(infowindow);
+
+                marker.addListener('click', () => {
+                    infoWindows.forEach(iw => iw.close());
+                    infowindow.open(map, marker);
+                });
+            });
+        }
+
+        window.initMap = initMap;  // Ensure initMap is globally accessible
+    </script>
+</body>
+</html>
