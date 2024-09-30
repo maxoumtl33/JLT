@@ -63,7 +63,7 @@ import requests
 
 def delivery_map(request):
     today = now().date()
-    deliveries = Livraison.objects.filter(date=today).exclude(lat__isnull=True, lng__isnull=True)
+    deliveries = Livraison.objects.filter(date=today, recuperation = False).exclude(lat__isnull=True, lng__isnull=True)
 
     # Serialize the deliveries data into JSON-friendly format
     deliveries_data = [
