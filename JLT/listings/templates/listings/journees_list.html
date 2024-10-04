@@ -1,5 +1,6 @@
 {% extends 'listings/base.html' %}
 {% load static %}
+{% load widget_tweaks %}
 {% block content %}
 <style>
   .card {
@@ -200,66 +201,121 @@
     
   {% endif %}
   {% if user.username == ventes %}
-  <div class="container mt-5">
-    <h1>Liste des Journées</h1>
-    <br>
+  
+
+<style>
+    /* Styling for the page */
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+
+    h1 {
+        color: #009879;
+    }
+
+    .form-control {
+        width: 250px;
+        display: inline-block;
+        margin-right: 10px;
+        padding: 10px;
+    }
+
+    .btn {
+        padding: 10px 15px;
+        border-radius: 5px;
+    }
+
+    .card {
+        transition: 0.3s;
+        cursor: pointer;
+    }
+
+    .card:hover {
+        transform: scale(1.05);
+    }
+
+    .page-link {
+  color: #009879; /* Change text color */
+}
+
+.page-link:hover {
+  background-color: rgba(0, 152, 123, 0.2); /* Lighten the background on hover */
+  color: #00795e; /* Darker text color on hover */
+}
+
+.page-link.active {
+  background-color: #009879; /* Active page color */
+  color: white; /* Active text color */
+}
+</style>
+
+<div class="container mt-5">
+    <h1 class="text-center">Liste des Journées</h1>
+
     <!-- Date Filter Form -->
-    <form method="get">
-        {{ form.date }}
-        <button type="submit" class="btn btn-primary">Filtrer</button>
-        <a href="{% url 'journees-list' %}" class="btn btn-primary">Voir toute la liste</a>
+    <form method="get" class="d-flex justify-content-center mb-4">
+        {{ form.date|add_class:"form-control" }} <!-- Use the add_class filter -->
+        <button type="submit" class="btn btn-success mx-2">Filtrer</button>
+        <a href="{% url 'journees-list' %}" class="btn btn-secondary">Voir toute la liste</a>
     </form>
-    <br>
-    <hr>
     
     <!-- Display Events -->
-    <div class="row">
+    <div class="row text-center">
         {% for journee in journees %}
-        {% if journee.date == today %}
-            <div class="col-md-2 mb-2">
-                <a href="{% url 'journeedetailvente' journee.id %}">
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title" style="color: green;">{{ journee.nom }}</h5>
-                    </div>
-                </div>
-            </a>
+        <div class="col-md-2 mb-4">
+    <a href="{% url 'journeedetailvente' journee.id %}" class="text-decoration-none">
+        <div class="card h-100 shadow-sm {% if journee.date == today %}border-success{% else %}border-muted{% endif %}">
+            <div class="card-body">
+                <h5 class="card-title" style="color: {% if journee.date == today %}green{% else %}gray{% endif %};">
+                    {{ journee.nom }}
+                </h5>
             </div>
-            {% else %}
-            <div class="col-md-2 mb-2">
-              <a href="{% url 'journeedetailvente' journee.id %}">
-              <div class="card">
-                  <div class="card-body">
-                      <h5 style="color: gray;">{{ journee.nom }}</h5>
-                  </div>
-              </div>
-          </a>
-          </div>
-            {% endif %}
+        </div>
+    </a>
+</div>
+
         {% empty %}
-            <div class="col">
-                <p>Pas de Journées</p>
-            </div>
+        <div class="col">
+            <p class="text-muted">Pas de Journées</p>
+        </div>
         {% endfor %}
     </div>
-  </div>
-  <div class="container mt-5">
-    <nav aria-label="Page navigation" style="align-items: center;">
-        <ul class="pagination">
-            {% if journees.has_previous %}
-                <li class="page-item"><a class="page-link" href="?page=1">1ère page</a></li>
-                <li class="page-item"><a class="page-link" href="?page={{ journees.previous_page_number }}">Précédent</a></li>
-            {% endif %}
-            <li class="page-item active"><a class="page-link" href="?page={{ journees.number }}">{{ journees.number }}</a></li>
-            {% if journees.has_next %}
-                <li class="page-item"><a class="page-link" href="?page={{ journees.next_page_number }}">Suivant</a></li>
-                <li class="page-item"><a class="page-link" href="?page={{ journees.paginator.num_pages }}">Dernière page</a></li>
-            {% endif %}
-        </ul>
-    </nav>
-    </div>
 
-  {% endif %}
+    <!-- Pagination Controls -->
+    <div class="d-flex justify-content-center mt-4">
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                {% if journees.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1">1ère page</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ journees.previous_page_number }}">Précédent</a>
+                </li>
+                {% endif %}
+                
+                <li class="page-item active">
+                    <a class="page-link" href="?page={{ journees.number }}">{{ journees.number }}</a>
+                </li>
+                
+                {% if journees.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ journees.next_page_number }}">Suivant</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ journees.paginator.num_pages }}">Dernière page</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+
+{% endif %}
+
   <br>
   <br>
   <br>

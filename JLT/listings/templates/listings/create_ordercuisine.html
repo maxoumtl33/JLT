@@ -1,0 +1,166 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    /* General styling */
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        color: #333;
+    }
+
+    h2 {
+        color: #009879;
+    }
+
+    /* Search form styling */
+    .search-form {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+
+    .search-form input[type="text"] {
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        flex: 1;
+        margin-right: 10px;
+    }
+
+    .search-btn {
+        padding: 10px 15px;
+        background-color: #009879;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .view-all {
+        display: inline-block;
+        margin-bottom: 20px;
+        text-decoration: none;
+        color: #009879;
+    }
+
+    /* Order form styling */
+    .order-form {
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .items-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .item {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 15px;
+        text-align: center;
+        flex: 1 1 200px; /* Responsive flex item */
+        background-color: #fff;
+        transition: box-shadow 0.3s;
+    }
+
+    .item:hover {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .item-image {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 5px;
+        display: block;
+        margin: 0 auto; /* Center the image */
+    }
+
+    .quantity-controls {
+        margin-top: 10px;
+    }
+
+    .quantity-input {
+        width: 60px;
+        padding: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    /* Submit button styling */
+    .submit-section {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background-color: #009879;
+    }
+
+    .btn:hover {
+        opacity: 0.8;
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+        .items-list {
+            flex-direction: column; /* Stack items vertically */
+        }
+    }
+</style>
+
+<h2>Créer une commande</h2>
+
+<!-- Search bar -->
+<form method="GET" action="{% url 'create_order_cuisine' %}" class="search-form">
+    <input type="text" name="q" placeholder="Rechercher items ..." value="{{ request.GET.q }}">
+    <button type="submit" class="btn search-btn">Rechercher</button>
+</form>
+
+<a href="{% url 'create_order_cuisine' %}" class="view-all">Voir toute la liste</a>
+
+<form method="POST" id="order-form" class="order-form">
+    {% csrf_token %}
+    <div class="items-list">
+        {% for item in items %}
+            <div class="item">
+                {% if item.image %}  <!-- Check if the item has an image -->
+                    <img src="{{ item.image.url }}" alt="{{ item.name }}" class="item-image">
+                {% else %}
+                    <p>Pas de photo</p>  <!-- Optional: Display a message if there's no image -->
+                {% endif %}
+                <h4 class="item-name">{{ item.name }}</h4>
+
+                <div class="quantity-controls">
+                    <label for="quantity-{{ item.id }}">Quantité:</label>
+                    <input type="number" id="quantity-{{ item.id }}" name="quantity-{{ item.id }}" value="0" min="0" class="quantity-input">
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Submit button for the form -->
+    <div class="submit-section">
+        <button type="submit" class="btn btn-primary">Faire la commande</button>
+    </div>
+</form>
+
+ 
+
+{% endblock %}

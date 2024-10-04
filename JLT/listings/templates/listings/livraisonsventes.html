@@ -1,185 +1,235 @@
 {% extends 'listings/base.html' %}
-{%  load static%}
+{% load static %}
 {% block content %}
 
-{% if livraison.recuperation == recuperation%}
-<h1 style="text-align: center; color: #F1B3DA;">RECUPERATION {{livraison.nom|upper}}</h1>
-  <br>
-  {% else %}
-  <h1 style="text-align: center;">LIVRAISON {{livraison.nom|upper}}</h1>
-  <br>
-  {% endif %}
-  <a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
+<style>
+  /* General Styling */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Updated font for a modern look */
+    background-color: #f4f4f4; /* Light background for contrast */
+    color: #333;
+}
+
+
+
+.image-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px; /* Space between images */
+}
+
+.image-container {
+    flex: 1 1 45%; /* Allow images to take up to 45% width with flexibility */
+    max-width: 200px; /* Set a max width for each image */
+}
+
+.custom-image {
+    width: 100%; /* Full width of the container */
+    height: auto; /* Maintain aspect ratio */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+}
+
+
+
+/* Card and Modal Styling */
+.card {
+    border: none; /* No border for cards */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+    transition: transform 0.2s ease; /* Transition for hover effect */
+}
+
+
+
+.modal-content {
+    padding: 20px; /* Padding for modal content */
+    border-radius: 8px; /* Rounded corners */
+}
+
+.modal-header {
+    border-bottom: 1px solid #e3e3e3; /* Bottom border for header */
+}
+
+/* Button Styling */
+.btn-outline-primary {
+    color: #009879; /* Outline button color */
+    border-color: #009879; /* Outline border color */
+}
+
+.btn-outline-primary:hover {
+    background-color: #009879; /* Background color on hover */
+    color: white; /* Text color on hover */
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+    .card {
+        margin-bottom: 20px; /* Margin below cards for small screens */
+    }
+
+    h1 {
+        font-size: 2rem; /* Responsive heading size */
+    }
+
+    .card-title {
+        font-size: 1.2rem; /* Responsive title size */
+    }
+}
+
+</style>
+
+<!-- Main Heading -->
+{% if livraison.recuperation == True %}
+<h1 style="text-align: center; color: #F1B3DA;">RECUPERATION {{ livraison.nom|upper }}</h1>
+{% else %}
+<h1 style="text-align: center;color: #009879;">LIVRAISON {{ livraison.nom|upper }}</h1>
+{% endif %}
+<br>
+
+<a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
     <i class="fa-solid fa-pen-to-square"></i><span>Editer</span></a>
-    <br>
-  
-  
-    <div class="card card-body">
-      <ul class="list-group">
-        <li class="list-group-item active" aria-current="true">Informations Livraison</li>
-        <li class="list-group-item"><div class="row row-cols-1 row-cols-md-2 g-4">
-          <div class="col">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title"><strong>Nom</strong></h5>
-                <p class="card-text">{{ livraison.nom }}</p>
-              </div>
-            </div>
-          </div>
-          <div class="col">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title"><strong>Adresse</strong></h5>
-                <p class="card-text"><a href="https://maps.google.com/?q={{ livraison.adress }}, {{livraison.zipcode}}, {{livraison.city}}" target="_blank">{{ livraison.adress }}, {{livraison.zipcode}}, {{livraison.city}},{{livraison.app}}, {{livraison.ligne2}} </a></p>
-                <hr>
-                <p class="card-text"><a href="{{livraison.client.adresse_dock}}">Aller au Dock</a></p>
-              </div>
-            </div>
-          </div>
-          <div class="col">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title"><strong>Heure de livraison</strong></h5>
-                <p class="card-text">{{ livraison.heure_livraison }}</p>
-              </div>
-            </div>
-          </div>
-          <div class="col">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title" style="color: orange;"><strong>Infos supplementaires</strong></h5>
-                <p class="card-text">{{livraison.infodetail}}</p>
-              </div>
-            </div>
-          </div>
-          <div class="col">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title"><strong>Commentaire du dispatch</strong></h5>
-                <p class="card-text">{{livraison.commentairedispatch}}</p>
-              </div>
-            </div>
-          </div>  
-        <div class="col">
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title"><strong>Commentaire du livreur</strong></h5>
-              <p class="card-text">{{livraison.commentaire}}</p>
-            </div>
-          </div>
-        </div>
-          <div class="col">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title"><strong>N° de commande</strong></h5>
-                <p class="card-text">{{ livraison.num_commande}}</p>
-              </div>
-            </div>
-          </div>
-          <div class="col">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title"><strong>Nombre convives</strong></h5>
-                <p class="card-text">{{ livraison.convives}}</p>
-              </div>
-            </div>
-          </div>
-         
-          
-         
-          
-          <div class="col">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title"><strong>Mode d'envoi</strong></h5>
-                <p class="card-text">{{ livraison.mode_envoi}}</p>
-              </div>
-            </div>
-          </div>
-          {% if livraison.photo %}  
-          <div class="col">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title"><strong>Photo Livraison</strong></h5>
-                <p class="card-text"><img src="{{ livraison.photo.url }}" alt="Photo">
-                </p>
-              </div>
-            </div>
-          </div>
-          {% else %}
-          <div class="col">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title"><strong>Photo Livraison</strong></h5>
-                <p class="card-text">Pas de photo
-                </p>
-              </div>
-            </div>
-          </div>
-    {% endif %}
-          
-        
-        
-      </li>
-      </ul>
-    </div>
-  
-    
-      <div class="card card-body">
-        <ul class="list-group">
-          <li class="list-group-item active" aria-current="true">Informations Client sur place</li>
-          <li class="list-group-item"><div class="row row-cols-1 row-cols-md-2 g-4">
-            <div class="col">
-              <div class="card">
-                <div class="card-body">
-                  <h5 class="card-title"><strong>Contact client</strong></h5>
-                  <p class="card-text">{{livraison.contact_site}}</p>
+<br>
+
+<!-- Informations Livraison Card -->
+<div class="card card-body mb-4">
+    <ul class="list-group">
+        <li class="list-group-item" style="background-color: #009879; color: white;" aria-current="true">
+            <h2>Informations Livraison</h2>
+        </li>
+        <li class="list-group-item">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <h5 class="card-title"><strong>Nom</strong></h5>
+                    <p class="card-text">{{ livraison.nom }}</p>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="card-title"><strong>Adresse</strong></h5>
+                    <p class="card-text">
+                        <a href="https://maps.google.com/?q={{ livraison.adress }}, {{ livraison.zipcode }}, {{ livraison.city }}" target="_blank">{{ livraison.adress }}, {{ livraison.zipcode }}, {{ livraison.city }}</a>
+                    </p>
+                    <p class="card-text"><a href="{{ livraison.client.adresse_dock }}">Aller au Dock</a></p>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="card-title"><strong>Heure de livraison</strong></h5>
+                    <p class="card-text">{{ livraison.heure_livraison }}</p>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="card-title" ><strong>Infos supplementaires</strong></h5>
+                    <p class="card-text">{{ livraison.infodetail }}</p>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="card-title"><strong>Commentaire du dispatch</strong></h5>
+                    <p class="card-text">{{ livraison.commentairedispatch }}</p>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="card-title"><strong>Commentaire du livreur</strong></h5>
+                    <p class="card-text">{{ livraison.commentaire }}</p>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="card-title"><strong>N° de commande</strong></h5>
+                    <p class="card-text">{{ livraison.num_commande }}</p>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="card-title"><strong>Nombre convives</strong></h5>
+                    <p class="card-text">{{ livraison.convives }}</p>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="card-title"><strong>Mode d'envoi</strong></h5>
+                    <p class="card-text">{{ livraison.mode_envoi }}</p>
+                </div>
+                <div class="col-md-6">
+                  <h5 class="card-title"><strong>Photo Livraison</strong></h5>
+                  <div class="image-gallery">
+                      {% for photo in livraison.livraison_photos.all %}
+                          <div class="image-container">
+                              <a href="#" data-bs-toggle="modal" data-bs-target="#photoModal" data-image="{{ photo.image.url }}" data-caption="{{ photo.caption }}">
+                                  <img src="{{ photo.image.url }}" alt="{{ photo.caption }}" class="img-fluid rounded mb-3 custom-image">
+                              </a>
+                          </div>
+                      {% endfor %}
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="col">
-              <div class="card">
-                <div class="card-body">
-                  <h5 class="card-title"><strong>Commandé par</strong></h5>
-                  <p class="card-text">{{livraison.nom_client}}</p>
-                </div>
+              
+              <!-- Modal -->
+              <div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
+                  <div class="modal-dialog modal-lg">
+                      <div class="modal-content">
+                          <div class="modal-header">
+                              <h5 class="modal-title" id="photoModalLabel">Photo</h5>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                              <img id="modalImage" src="" alt="Large Photo" class="img-fluid">
+                              <p id="modalCaption" class="mt-2"></p>
+                          </div>
+                      </div>
+                  </div>
               </div>
+              
             </div>
         </li>
-        </ul>
-      </div>
-    </div>
-    
-  
-  
+    </ul>
+</div>
 
-  <br>
-  <br>
-  <br>
+<!-- Informations Client sur place Card -->
+<div class="card card-body mb-4">
+    <ul class="list-group">
+        <li class="list-group-item" style="background-color: #009879; color: white;" aria-current="true">
+            <h2>Informations Client sur place</h2>
+        </li>
+        <li class="list-group-item">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <h5 class="card-title"><strong>Contact client</strong></h5>
+                    <p class="card-text">{{ livraison.contact_site }}</p>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="card-title"><strong>Commandé par</strong></h5>
+                    <p class="card-text">{{ livraison.nom_client }}</p>
+                </div>
+            </div>
+        </li>
+    </ul>
+</div>
 
-  
-
-    
-
-      <!-- Modal -->
-      <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
+<!-- Modal for Editing Information -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel">{{livraison.nom}} / {{livraison.heure_livraison}}</h5>      
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title" id="exampleModalLabel">{{ livraison.nom }} / {{ livraison.heure_livraison }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-              <form action="" method=POST >
-                {% csrf_token %}
-                {{ formbis.as_p }}
-                <input type="submit" value="valider" class="btn btn-primary">
-              </form>
+                <form action="" method="POST">
+                    {% csrf_token %}
+                    {{ formbis.as_p }}
+                    <input type="submit" value="valider" class="btn btn-success">
+                </form>
             </div>
-          </div>
         </div>
-      </div>
-      
+    </div>
+</div>
 
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const photoLinks = document.querySelectorAll('.image-container a');
+    const modalImage = document.getElementById('modalImage');
+    const modalCaption = document.getElementById('modalCaption');
+
+    photoLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const imageSrc = this.getAttribute('data-image');
+            const imageCaption = this.getAttribute('data-caption');
+            modalImage.src = imageSrc;
+            modalCaption.innerText = imageCaption;
+        });
+    });
+});
+
+</script>
 {% endblock %}
-

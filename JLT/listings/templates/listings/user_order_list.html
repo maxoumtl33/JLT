@@ -1,0 +1,163 @@
+{% extends 'listings/base.html' %}
+{% block content %}
+
+<style>
+    /* General table styling */
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 18px;
+    text-align: left;
+}
+
+.styled-table th, .styled-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #dddddd;
+}
+
+.styled-table tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+.styled-table tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.styled-table tr:last-of-type {
+    border-bottom: 2px solid #009879;
+}
+
+/* Buttons styling */
+.update-btn, .delete-btn {
+    background-color: #009879;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.update-btn:hover, .delete-btn:hover {
+    background-color: #007b63;
+}
+
+/* Mobile responsiveness */
+.table-responsive {
+    overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+    .styled-table, .styled-table thead, .styled-table tbody, .styled-table th, .styled-table td, .styled-table tr {
+        display: block;
+    }
+
+    .styled-table th {
+        background-color: #f3f3f3;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .styled-table td {
+        text-align: center;
+        padding: 10px;
+    }
+
+    .styled-table tr {
+        margin-bottom: 15px;
+        border-bottom: 1px solid #dddddd;
+    }
+
+    .styled-table th {
+        display: none;
+    }
+
+    .styled-table td {
+        display: block;
+        text-align: right;
+        position: relative;
+    }
+
+    .styled-table td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0;
+        width: 50%;
+        padding-left: 10px;
+        font-weight: bold;
+        text-align: left;
+    }
+
+    .quantity-input {
+        width: 60px;
+    }
+}
+
+/* Styling for "Cannot delete" */
+.no-delete {
+    color: red;
+    font-weight: bold;
+}
+
+</style>
+
+<h2>Mes commandes</h2>
+
+<div class="table-responsive">
+    <table class="styled-table">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Quantité commandée</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.item.name }}</td>
+                <td>
+                    {% if not order.is_done and not order.is_delivered %}
+                    <!-- Allow updating only if not done and not delivered -->
+                    <form method="POST" action="{% url 'update_order_cuisine' order.id %}">
+                        {% csrf_token %}
+                        <input type="number" name="ordered_quantity" value="{{ order.ordered_quantity }}" min="1">
+                        <button type="submit">Editer</button>
+                    </form>
+                {% else %}
+                    {{ order.ordered_quantity }} <!-- Display static quantity if update is disabled -->
+                {% endif %}
+                </td>
+                <td>
+                    {% if not order.is_done and not order.is_delivered %}
+                        <a href="{% url 'delete_order_cuisine' order.id %}" class="delete-btn">Supprimer</a>
+                    {% else %}
+                        <span class="no-delete">Commande déjà passée</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+     <!-- Pagination Controls -->
+<div class="pagination">
+    <span class="step-links">
+        {% if orders.has_previous %}
+            <a href="?page=1{% if search_date %}&search_date={{ search_date }}{% endif %}">&laquo; première page</a>
+            <a href="?page={{ orders.previous_page_number }}{% if search_date %}&search_date={{ search_date }}{% endif %}">précédent</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ orders.number }} sur {{ orders.paginator.num_pages }}.
+        </span>
+
+        {% if orders.has_next %}
+            <a href="?page={{ orders.next_page_number }}{% if search_date %}&search_date={{ search_date }}{% endif %}">suivant</a>
+            <a href="?page={{ orders.paginator.num_pages }}{% if search_date %}&search_date={{ search_date }}{% endif %}">dernière page &raquo;</a>
+        {% endif %}
+    </span>
+</div>
+</div>
+
+{% endblock %}

@@ -18,6 +18,7 @@ from .forms import LivraisonDragFormtoday, TaskUpdateForm
 from .forms import LivraisonsVentesForm, RoutedetailForm
 from django.urls import reverse
 import json
+from .scrape_gps_data import get_gps_data
 from .forms import DistanceForm
 from tablib import Dataset
 from .ressources import LivraisonResource
@@ -60,25 +61,128 @@ from django.views.generic.edit import DeleteView
 from django.utils import timezone
 import random
 import requests
+from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+
+@login_required
+def create_ordercuisine(request):
+    query = request.GET.get('q')  # Get the search query from the request
+    if query:
+        # Filter items by name or category name (ForeignKey lookup)
+        items = ItemCuisine.objects.filter(
+            Q(name__icontains=query) | Q(category__name__icontains=query)
+        )
+    else:
+        items = ItemCuisine.objects.all()  # Get all items if no search query
+
+    if request.method == 'POST':
+        for item in items:
+            # Get the quantity from the form for each item
+            ordered_quantity = request.POST.get(f'quantity-{item.id}')
+            if ordered_quantity and int(ordered_quantity) > 0:
+                # Create or update the order
+                order, created = OrderCuisine.objects.get_or_create(
+                    user=request.user, 
+                    item=item,
+                    defaults={'ordered_quantity': ordered_quantity}
+                )
+                if not created:
+                    order.ordered_quantity += int(ordered_quantity)
+                    order.save()
+
+        return redirect('order_list_cuisine')
+
+    return render(request, 'listings/create_ordercuisine.html', {'items': items})
+
+@login_required
+def user_order_list(request):
+    orders = OrderCuisine.objects.filter(user=request.user)
+    # Paginate the orders list
+    paginator = Paginator(orders, 15)  # Show 15 orders per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'listings/user_order_list.html', {'orders': page_obj})
+
+@login_required
+def update_order_cuisine(request, order_id):
+    order = get_object_or_404(OrderCuisine, id=order_id, user=request.user)
+
+    if request.method == 'POST':
+        ordered_quantity = request.POST.get('ordered_quantity')
+        if ordered_quantity:
+            order.ordered_quantity = int(ordered_quantity)
+            order.save()
+        return redirect('user_order_list')
+
+@login_required
+def delete_order_cuisine(request, order_id):
+    order = get_object_or_404(OrderCuisine, id=order_id, user=request.user)
+
+    # Prevent deletion if order is marked as done or delivered
+    if order.is_done or order.is_delivered:
+        # Optionally, you can add a message here to notify the user
+        return redirect('user_order_list')
+
+    order.delete()
+    return redirect('user_order_list')
+
+@login_required
+def order_listcuisine(request):
+    search_date = request.GET.get('search_date', None)
+    
+    if search_date:
+        # Convert string to date
+        search_date = datetime.strptime(search_date, '%Y-%m-%d').date()
+        orders = OrderCuisine.objects.filter(user=request.user, date=search_date)
+    else:
+        orders = OrderCuisine.objects.filter(user=request.user)
+
+    # Paginate the orders list
+    paginator = Paginator(orders, 15)  # Show 15 orders per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'listings/order_listcuisine.html', {
+        'orders': page_obj,
+        'search_date': search_date
+    })
+
+def mark_order_donecuisine(request, order_id):
+    order = OrderCuisine.objects.get(id=order_id)
+    order.is_done = True
+    order.save()
+    return redirect('order_list_cuisine')
+
+def mark_order_deliveredcuisine(request, order_id):
+    order = OrderCuisine.objects.get(id=order_id)
+    order.is_delivered = True
+    order.save()
+    return redirect('order_list_cuisine')
 
 def delivery_map(request):
     today = now().date()
-    deliveries = Livraison.objects.filter(date=today, recuperation = False).exclude(lat__isnull=True, lng__isnull=True)
 
-    # Serialize the deliveries data into JSON-friendly format
+    # Fetch your deliveries for the day
+    deliveries = Livraison.objects.filter(date=today, recuperation = False)
+
+    # Fetch GPS data from FINDER portal using Selenium
+    gps_data = get_gps_data()
+
+    # Serialize deliveries
     deliveries_data = [
-        {
-            'nom': d.nom,
-            'latitude': float(d.lat),
-            'longitude': float(d.lng),
-            'heure_livraison': d.heure_livraison
-        }
-        for d in deliveries if d.lat and d.lng
+        {'nom': d.nom, 'latitude': d.lat, 'longitude': d.lng, 'heure_livraison': d.heure_livraison}
+        for d in deliveries
     ]
+
+    # Combine both datasets
+    all_data = {
+        'deliveries': deliveries_data,
+        'gps_data': gps_data,
+    }
 
     key = settings.GOOGLE_API_KEY
     return render(request, 'listings/delivery_map.html', {
-        'deliveries': deliveries_data,
+        'all_data': json.dumps(all_data),
         'key': key,
     })
 

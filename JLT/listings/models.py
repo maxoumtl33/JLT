@@ -497,7 +497,33 @@ class RecuplivreurItem(models.Model):
 
 
 
+class CategoryCuisine(models.Model):
+    name = models.CharField(max_length=100)
 
+    def __str__(self):
+        return self.name
+
+class ItemCuisine(models.Model):
+    name = models.CharField(max_length=200)
+    category = models.ForeignKey(CategoryCuisine, on_delete=models.CASCADE)
+    quantity = models.IntegerField()
+    photo = models.ImageField(upload_to='listings/media/commandesdetail', blank=True, null=True)
+
+
+    def __str__(self):
+        return f'{self.name}'
+
+class OrderCuisine(models.Model):
+    item = models.ForeignKey(ItemCuisine, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
+    ordered_quantity = models.IntegerField()
+    is_done = models.BooleanField(default=False)
+    is_delivered = models.BooleanField(default=False)
+    date_added = models.DateField(default=timezone.now)
+
+
+    def __str__(self):
+       return f"{self.item.name} ordered by {self.user.username}"
 
 
 

@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django_dyn_dt',
     'django_htmx',
     'bootstrap_datepicker_plus',
+    'widget_tweaks',
   
 ]
 

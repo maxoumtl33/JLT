@@ -36,6 +36,35 @@ modes = (
     ("driving", "driving"),
 )
 
+class OrderCuisineForm(forms.ModelForm):
+    item = forms.ModelChoiceField(
+        queryset=ItemCuisine.objects.all(), 
+        required=False,
+        label='Select Existing Item'
+    )
+    new_item_name = forms.CharField(
+        max_length=200, 
+        required=False, 
+        label='Or Create a New Item'
+    )
+    quantity = forms.IntegerField(min_value=1)
+
+    class Meta:
+        model = OrderCuisine
+        fields = ['item', 'new_item_name', 'quantity']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        item = cleaned_data.get("item")
+        new_item_name = cleaned_data.get("new_item_name")
+
+        if not item and not new_item_name:
+            raise forms.ValidationError('You must either select an existing item or enter a new item name.')
+        return cleaned_data
+
+    def __init__(self, *args, **kwargs):
+        super(OrderCuisineForm, self).__init__(*args, **kwargs)
+        self.fields['item'].queryset = ItemCuisine.objects.all()
 
 class DistanceForm(ModelForm):
     today = datetime.now().date()

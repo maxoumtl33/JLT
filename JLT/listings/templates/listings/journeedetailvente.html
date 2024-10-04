@@ -1,142 +1,240 @@
 {% extends 'listings/base.html' %}
 {% load static %}
 {% block content %}
+<style>
+  /* General Styling */
+body {
+    font-family: Arial, sans-serif;
+    color: #333;
+}
+
+h1 {
+    color: #009879;
+}
+
+/* Table Styling */
+table.table {
+    width: 100%;
+    margin: 0 auto;
+    border-collapse: collapse;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+table thead {
+    background-color: #303FBA;
+    color: white;
+}
+
+table th, table td {
+    padding: 15px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+table th {
+    font-weight: bold;
+}
+
+table tbody tr:hover {
+    background-color: #f9f9f9;
+    cursor: pointer;
+}
+
+/* Button Styling */
+.btn {
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 5px;
+    background-color: #009879;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #007a63;
+}
+
+/* General Styles for Navigation */
+nav.nav {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    background-color: #fff;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+/* Logo */
+.nav__img {
+    width: 120px; /* Adjust the size to your preference */
+    height: auto; /* Maintain aspect ratio */
+    border-radius: 5px; /* Optional: rounded corners */
+    margin-right: 20px; /* Space between image and logo */
+}
+
+/* Logo Text */
+.nav__logo {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #009879;
+    margin-left: 20px;
+}
+
+/* Navigation Menu */
+.nav__menu {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-grow: 1; /* Allow menu to take available space */
+}
+
+.nav__list {
+    list-style: none;
+    display: flex;
+    gap: 20px; /* Spacing between nav items */
+}
+
+.nav__item {
+    display: flex;
+    align-items: center;
+}
+
+.nav__link {
+    text-decoration: none;
+    font-size: 1rem;
+    color: #333;
+    transition: color 0.3s ease;
+}
+
+.nav__link:hover {
+    color: #009879;
+}
+
+/* Adjustments for Mobile Responsiveness */
+@media screen and (max-width: 768px) {
+    .nav__menu {
+        flex-direction: column;
+        gap: 10px; /* Spacing between items in mobile view */
+    }
+
+    .nav__img {
+        width: 80px; /* Smaller size on mobile */
+        margin-bottom: 10px; /* Space below the image */
+    }
+}
+
+/* Offcanvas Styling */
+.offcanvas-body p a {
+    width: 100%;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+/* Responsive Design for Tables */
+@media screen and (max-width: 1200px) {
+    table th, table td {
+        font-size: 0.9rem; /* Smaller font size for smaller screens */
+    }
+}
+
+</style>
+
+<!-- Navigation -->
 <nav class="nav container">
+  <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg' %}" alt="Julien Leblanc" class="nav__img">
   <a href="#" class="nav__logo">Julien Leblanc Traiteur</a>
 
   <div class="nav__menu" id="nav-menu">
-      <ul class="nav__list">
-        {% if user.is_authenticated %}
-          <li class="nav__item">
-            <form action="{% url 'logout' %}" method="post">
-              {% csrf_token %}
-              <button type="submit" class="nav__link active-link" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i>
+    <ul class="nav__list">
+      {% if user.is_authenticated %}
+        <li class="nav__item">
+          <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="nav__link" style="color: red;">
+              <i class="fa-solid fa-arrow-right-from-bracket"></i> Déconnexion
+            </button>
           </form>
-                  <span class="nav__name">Logout</span>
-        </button>
-          </li>
-          {% else %}
-
-          <li class="nav__item">
-            <a href="{% url 'login' %}" class="nav__link" style="color: green;"><i class="fa-regular fa-user"></i>
-                  <span class="nav__name">Login</span>
-              </a>
-          </li>
-          {% endif %}
-          <li class="nav__item">
-            <a href="{% url 'journees-list' %}" class="nav__link"><i class="fa-solid fa-calendar-days"></i>
-                <span class="nav__name">Retour</span></a>
-          </li>
-      </ul>
+        </li>
+      {% else %}
+        <li class="nav__item">
+          <a href="{% url 'login' %}" class="nav__link" style="color: green;">
+            <i class="fa-regular fa-user"></i> Connexion
+          </a>
+        </li>
+      {% endif %}
+      <li class="nav__item">
+        <a href="{% url 'journees-list' %}" class="nav__link">
+          <i class="fa-solid fa-calendar-days"></i> Retour
+        </a>
+      </li>
+    </ul>
   </div>
-
-  <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
 </nav>
-<br>
-<br>
 
-  <div style="text-align: center;">
-    <div class="body">
-      <h1 style="text-align: center;">LIVRAISONS DU JOUR</h1>
-      <br>
-      <br>
-      <p style="text-align: center;">{{ livraisonsok|length }} livraisons et {{ recuperationes|length }} récupérations aujourd'hui</p>
-      <br>
-      <br>
-      <table class="table table-hover">
-          <thead class="thead-dark">
-            <tr>
-              
-              <th scope="col" style="color: #303FBA;">Heure départ</th>
-              <th scope="col" style="color: #303FBA;">Nom du contrat</th>
-              <th scope="col" style="color: #303FBA;">Infos</th>
-              <th scope="col" style="color: #303FBA;">Heure livraison</th>
-              <th scope="col" style="color: #303FBA;">Livreur</th>
-              <th scope="col" style="color: #303FBA;">Aide livreur</th>
-              <th scope="col" style="color: #303FBA;">Route</th>
-              <th scope="col" style="color: #303FBA;">Status</th>
-              
-              <th scope="col" style="color: #303FBA;">Modifier</th>
-             
-  
-  
-    
-    
-            </tr>
-          </thead>
-          <tbody>
-              {% for livraison in livraisons %}
-              {% if livraison.recuperation == True and livraison.date == journees.date %}
-            <tr>
-              
-              <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.heure_depart }}</strong></td>
-              <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
-              <td style="background-color: #F1B3DA;"><strong>{{livraison.infodetail}}</strong></td>
-              <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
-              <td style="background-color: #F1B3DA;"><strong>{{livraison.statut.livreur}}</strong></td>
-              <td style="background-color: #F1B3DA;"><strong>{{livraison.aidelivreur}}</strong></td>
-              <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.nom }}</strong></td>
-              {% if livraison.status == True %}
-              <td><strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong></td>
-                {% else %}
-              <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
-              {% endif %}
-              
-            <td><a href="{% url 'livraisonventesdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
-            
-              </tr>
-              {% elif livraison.date == journees.date %}
-              <tr>
-              <td><strong>{{ livraison.statut.heure_depart }}</strong></td>
-              <td><strong>{{livraison.nom}}</strong></td>
-              <td><strong>{{livraison.infodetail}}</strong></td>
-              <td><strong>{{ livraison.heure_livraison }}</strong></td>
-              <td><strong>{{livraison.statut.livreur}}</strong></td>
-              <td><strong>{{livraison.aidelivreur}}</strong></td>
-              <td><strong>{{ livraison.statut.nom }}</strong></td>
-              {% if livraison.status == True %}
-              <td><strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong></td>
-                {% else %}
-              <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
-              {% endif %}
-              
-            <td><a href="{% url 'livraisonventesdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
-            
-            </tr>
+
+
+<!-- Main Content -->
+<div class="container mt-5">
+  <h1 class="text-center">LIVRAISONS DU JOUR</h1>
+  <p class="text-center">{{ livraisonsok|length }} livraisons et {{ recuperationes|length }} récupérations aujourd'hui</p>
+
+  <!-- Table -->
+  <table class="table table-hover">
+    <thead class="thead-dark">
+      <tr>
+        <th>Heure départ</th>
+        <th>Nom du contrat</th>
+        <th>Infos</th>
+        <th>Heure livraison</th>
+        <th>Livreur</th>
+        <th>Status</th>
+        <th>Modifier</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for livraison in livraisons %}
+        {% if livraison.recuperation == True and livraison.date == journees.date %}
+        <tr style="background-color: #F1B3DA;">
+          <td><strong>{{ livraison.statut.heure_depart }}</strong></td>
+          <td><strong>{{ livraison.nom }}</strong></td>
+          <td><strong>{{ livraison.infodetail }}</strong></td>
+          <td><strong>{{ livraison.heure_livraison }}</strong></td>
+          <td><strong>{{ livraison.statut.livreur }}</strong></td>
+          <td>
+            {% if livraison.status == True %}
+              <strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong>
+            {% else %}
+              <strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong>
             {% endif %}
-            {% endfor %}
-            
-          </tbody>
-        </table>
-      </div>
-  </div>
- 
-  
-  <br>
-  <br>
-  <br>
-  
-      
-  
-  <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
-    <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="offcanvasExampleLabel">Liens Formulaires</h5>
-      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body">
-      <div>
-        <p><a class="btn btn-primary" href="https://discord.com/channels/1174091428876533800/1194755233935523952" target="_blank">Photo livraison <i class="fa-brands fa-discord"></i></a></p>
-        <p><a href="https://view.forms.app/loicveyre/jeparsenlivraison" target="_blank" class="btn btn-primary">Départ <i class="fa-solid fa-truck-fast"></i></a></p>
-        <p><a href="https://view.forms.app/loicveyre/jereviensdelivraison" target="_blank" class="btn btn-primary">Retour <i class="fa-sharp fa-solid fa-truck fa-flip-horizontal"></i></a></p>
-        <p><a href="https://oakmnxgj.forms.app/recuplivreurs" target="_blank" class="btn btn-primary">Récup <i class="fa-solid fa-dolly"></i></a>
-        </p>
-        <p><a href="https://oakmnxgj.forms.app/essence" target="_blank" class="btn btn-primary">Essence <i class="fa-solid fa-gas-pump"></i></a>
-        </p>
-      </p>    
-    </div>
-    </div>
-  </div>
-  
+          </td>
+          <td><a href="{% url 'livraisonventesdetail' livraison.id %}" class="btn"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+        </tr>
+        {% elif livraison.date == journees.date %}
+        <tr>
+          <td><strong>{{ livraison.statut.heure_depart }}</strong></td>
+          <td><strong>{{ livraison.nom }}</strong></td>
+          <td><strong>{{ livraison.infodetail }}</strong></td>
+          <td><strong>{{ livraison.heure_livraison }}</strong></td>
+          <td><strong>{{ livraison.statut.livreur }}</strong></td>
+          <td>
+            {% if livraison.status == True %}
+              <strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong>
+            {% else %}
+              <strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong>
+            {% endif %}
+          </td>
+          <td><a href="{% url 'livraisonventesdetail' livraison.id %}" class="btn"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+        </tr>
+        {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 
 
 {% endblock %}
