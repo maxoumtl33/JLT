@@ -23,11 +23,36 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>    <script type="text/javascript" src="{% static '/listings/js/script.js' %}"></script>
 <script src="{% static '/listings/htmx.min.js' %}" defer></script>
 <script src="https://unpkg.com/htmx.org/dist/htmx.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging.js"></script>
+
 
 </head>
 <body>
 
+    <script>
+        const messaging = firebase.messaging();
+
+// Request permission to send notifications
+Notification.requestPermission().then((permission) => {
+    if (permission === 'granted') {
+        console.log('Notification permission granted.');
+        // Get the token for the device
+        messaging.getToken({ vapidKey: 'YOUR_PUBLIC_VAPID_KEY' }).then((token) => {
+            console.log('FCM Token:', token);
+            // You can send this token to your server to store it
+        }).catch((err) => { 
+            console.log('Unable to get token: ', err);
+        });
+    } else {
+        console.log('Unable to get permission to notify.');
+    }
+});
+
+    </script>
     {% block content %}
+
+
     {% endblock %}
 
     

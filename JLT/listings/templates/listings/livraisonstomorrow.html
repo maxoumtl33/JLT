@@ -12,6 +12,7 @@
     <title>Livraisons</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         .container {
             margin-top: 20px;
@@ -101,8 +102,8 @@
         <button id="create-routes-tomorrow-btn" class="btn btn-custom"><i class="fas fa-route"></i> Creer routes pour le lendemain</button>
         <button id="create-routes-day-after-tomorrow-btn" class="btn btn-custom"><i class="fas fa-route"></i>Creer routes pour dimanche</button>
         <button id="create-routes-day-after-day-after-tomorrow-btn" class="btn btn-custom"><i class="fas fa-route"></i>Creer routes pour lundi</button>
-        <form method="get" action="{% url 'geocode_all_livraisons' %}">
-          <button type="submit" class="btn btn-primary">Geocode</button>
+        <form id="geocode-form" method="get" action="{% url 'geocode_all_livraisons' %}">
+          <button type="button" class="btn btn-primary" onclick="triggerGeocode()">Geocode</button>
       </form>
     </div>
 
@@ -546,7 +547,7 @@ $(document).ready(function () {
             data: JSON.stringify({ day: 'tomorrow' }),
             success: function (data) {
                 if (data.success) {
-                    alert('20 routes for tomorrow created successfully!');
+                    alert('✅ Les routes ont bien été créées ');
                 } else {
                     alert('Failed to create routes: ' + data.error);
                 }
@@ -568,7 +569,7 @@ $(document).ready(function () {
             data: JSON.stringify({ day: 'day_after_tomorrow' }),
             success: function (data) {
                 if (data.success) {
-                    alert('20 routes for the day after tomorrow created successfully!');
+                    alert('✅ Les routes ont bien été créées ');
                 } else {
                     alert('Failed to create routes: ' + data.error);
                 }
@@ -590,7 +591,7 @@ $(document).ready(function () {
             data: JSON.stringify({ day: 'day_after_day_after_tomorrow' }),
             success: function (data) {
                 if (data.success) {
-                    alert('20 routes for the day after the day after tomorrow created successfully!');
+                    alert('✅ Les routes ont bien été créées ');
                 } else {
                     alert('Failed to create routes: ' + data.error);
                 }
@@ -610,7 +611,7 @@ $(document).ready(function () {
             },
             success: function (data) {
                 if (data.success) {
-                    alert('All livraisons have been geocoded successfully!');
+                    alert('Géocode réussit');
                 } else {
                     alert('Failed to geocode livraisons: ' + data.error);
                 }
@@ -621,6 +622,46 @@ $(document).ready(function () {
         });
     });
 });
+
+
+function triggerGeocode() {
+        const form = document.getElementById('geocode-form');
+        const url = form.action;
+
+        // Use fetch to send a GET request to the geocoding URL
+        fetch(url, {
+            method: 'GET',
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Show success or error popup depending on the response
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    text: 'Géocode réussit',
+                    confirmButtonColor: '#009879',
+                    confirmButtonText: 'OK'
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message || data.error,
+                    confirmButtonColor: '#009879',
+                    confirmButtonText: 'OK'
+                });
+            }
+        })
+        .catch(error => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Déjà géocodé ou aucune livraisons à géocoder',
+                confirmButtonColor: '#009879',
+                confirmButtonText: 'OK'
+            });
+        });
+    }
 </script>
 
 </body>

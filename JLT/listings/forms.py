@@ -30,7 +30,7 @@ class LivraisonForm(ModelForm):
 class LivraisonFeuilleForm(ModelForm):
     class Meta:
         model = Livraison
-        fields = ('nom','statut', 'heure_depart','aidelivreur',  'livreur', 'retourtraiteur', 'commentairedispatch', 'recuperation', 'status', 'date')
+        fields = ('nom','statut', 'heure_depart','aidelivreur',  'livreur', 'retourtraiteur', 'commentairedispatch', 'recuperation', 'status', 'date', 'journee')
 
 modes = (
     ("driving", "driving"),

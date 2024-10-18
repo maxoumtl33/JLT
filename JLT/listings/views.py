@@ -64,6 +64,7 @@ import requests
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 
+
 @login_required
 def create_ordercuisine(request):
     query = request.GET.get('q')  # Get the search query from the request
@@ -187,37 +188,40 @@ def delivery_map(request):
     })
 
 def geocode_all_livraisons(request):
-    if request.method == 'GET':  # Ensure the method is GET
+    if request.method == 'GET':  # Ensure the request method is GET
         livraisons = Livraison.objects.filter(lat__isnull=True, lng__isnull=True, place_id__isnull=True)
 
         if livraisons.exists():
-            gmaps = googlemaps.Client(key=settings.GOOGLE_API_KEY)
+            try:
+                # Initialize the Google Maps Client with the API Key
+                gmaps = googlemaps.Client(key=settings.GOOGLE_API_KEY)
 
-            for livraison in livraisons:
-                if livraison.adress and livraison.country and livraison.zipcode and livraison.city:
-                    adress_string = f"{livraison.adress}, {livraison.zipcode}, {livraison.city}, {livraison.country}"
+                for livraison in livraisons:
+                    if livraison.adress and livraison.country and livraison.zipcode and livraison.city:
+                        # Create the address string for geocoding
+                        adress_string = f"{livraison.adress}, {livraison.zipcode}, {livraison.city}, {livraison.country}"
 
-                    result = gmaps.geocode(adress_string)
-                    if result:
-                        lat = result[0].get('geometry', {}).get('location', {}).get('lat', None)
-                        lng = result[0].get('geometry', {}).get('location', {}).get('lng', None)
-                        place_id = result[0].get('place_id', None)
+                        # Perform geocoding request to Google Maps
+                        result = gmaps.geocode(adress_string)
+                        if result:
+                            lat = result[0].get('geometry', {}).get('location', {}).get('lat', None)
+                            lng = result[0].get('geometry', {}).get('location', {}).get('lng', None)
+                            place_id = result[0].get('place_id', None)
 
-                        # Update the livraison instance
-                        livraison.lat = lat
-                        livraison.lng = lng
-                        livraison.place_id = place_id
-                        livraison.save()
+                            # Update the livraison instance
+                            livraison.lat = lat
+                            livraison.lng = lng
+                            livraison.place_id = place_id
+                            livraison.save()
 
-            return JsonResponse({'success': True, 'message': 'Geocoding completed'})
+                return JsonResponse({'success': True, 'message': 'Géocode reussit'})
+            except Exception as e:
+                return JsonResponse({'success': False, 'error': str(e)})
         else:
-            return JsonResponse({'success': False, 'message': 'No livraisons need geocoding'})
+            return JsonResponse({'success': False, 'message': 'Aucune livraison à géocoder'})
     
     # If the request method is not GET
     return JsonResponse({'success': False, 'error': 'Invalid request method. Use GET.'})
-
-TASK_NAMES = ['Nettoyer machines à café', 'Nettoyer intérieur des camions et checker essence', 
-              'Faire boites de thé + café', 'Nettoyer dock de livraison']
 
 import random
 
@@ -448,38 +452,42 @@ def add_to_checklist(request, checklist_id):
     if request.method == 'POST':
         product_id = request.POST.get('product_id')
         quantity_to_modify = int(request.POST.get('quantity', 0))
-        action = request.POST.get('action')  # 'add' or 'subtract' action
+        action = request.POST.get('action')  # Should be 'add' or 'subtract'
 
         product = get_object_or_404(Product, pk=product_id)
 
-        if action == 'add' and quantity_to_modify > 0:
-            # Add quantity to ChecklistItem and subtract from inventory
-            checklist_item, created = ChecklistItem.objects.get_or_create(checklist=checklist, product=product)
-            checklist_item.quantity += quantity_to_modify
-            checklist_item.save()
+        if action == 'add':
+            if quantity_to_modify > 0:
+                # Create or update the checklist item
+                checklist_item, created = ChecklistItem.objects.get_or_create(checklist=checklist, product=product)
+                checklist_item.quantity += quantity_to_modify
+                checklist_item.save()
 
-            product.quantity -= quantity_to_modify
-            product.save()
+                # Deduct from inventory
+                product.quantity -= quantity_to_modify  # Allow going negative
+                product.save()
 
-        elif action == 'subtract' and quantity_to_modify > 0:
-            # Subtract quantity from ChecklistItem and add back to inventory
-            try:
-                checklist_item = ChecklistItem.objects.get(checklist=checklist, product=product)
-                if checklist_item.quantity >= quantity_to_modify:
-                    checklist_item.quantity -= quantity_to_modify
-                    checklist_item.save()
+        elif action == 'subtract':
+            if quantity_to_modify > 0:
+                try:
+                    checklist_item = ChecklistItem.objects.get(checklist=checklist, product=product)
+                    if checklist_item.quantity >= quantity_to_modify:
+                        checklist_item.quantity -= quantity_to_modify
+                        checklist_item.save()
 
-                    product.quantity += quantity_to_modify
-                    product.save()
-                else:
-                    # Handle insufficient quantity in checklist item
-                    pass
-            except ChecklistItem.DoesNotExist:
-                # Handle case where ChecklistItem does not exist
-                pass
-
+                        # Add back to the product inventory
+                        product.quantity += quantity_to_modify
+                        product.save()
+                    else:
+                        # Handle insufficient quantity in checklist item
+                        return HttpResponse("Not enough items in checklist to subtract.", status=400)
+                except ChecklistItem.DoesNotExist:
+                    # Handle case where ChecklistItem does not exist
+                    return HttpResponse("Item not found in checklist.", status=404)
 
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+
 
 def subtract_to_checklist(request, checklist_id):
 

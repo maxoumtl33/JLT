@@ -31,28 +31,124 @@
         });
     });
 
-    document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.addAction, .subtractAction').forEach(button => {
-        button.addEventListener('click', function() {
-            // Get the form ID from the data attribute
-            const formId = this.getAttribute('data-form-id');
-            const form = document.getElementById(`checklistForm-${formId}`);
-            const actionInput = document.getElementById(`action-${formId}`);
-            
-            // Set the action based on which button was clicked
-            if (this.classList.contains('addAction')) {
-                actionInput.value = 'add'; // Set action to 'add'
-            } else if (this.classList.contains('subtractAction')) {
-                actionInput.value = 'subtract'; // Set action to 'subtract'
-            }
-            
-            // Submit the form
-            form.submit();
-        });
+    $(document).ready(function () {
+    // For incrementing quantity
+    $('.addAction').click(function () {
+        var productId = $(this).data('product-id'); // Get the product ID
+        var quantityInput = $('#quantity-' + productId); // Target the input field using the product ID
+        var currentQuantity = parseInt(quantityInput.val());
+        quantityInput.val(currentQuantity + 1);
+    });
+
+    // For decrementing quantity
+    $('.subtractAction').click(function () {
+        var productId = $(this).data('product-id'); // Get the product ID
+        var quantityInput = $('#quantity-' + productId); // Target the input field using the product ID
+        var currentQuantity = parseInt(quantityInput.val());
+        if (currentQuantity > 1) {
+            quantityInput.val(currentQuantity - 1);
+        }
+    });
+
+    // Ensure the quantity is correct on form submit
+    $('form').on('submit', function() {
+        var quantityInput = $(this).find('.quantity'); // Find the quantity input in this form
+        var quantity = parseInt(quantityInput.val());
+        if (isNaN(quantity) || quantity <= 0) {
+            alert('Please enter a valid quantity.'); // Optional: alert if quantity is invalid
+            return false; // Prevent form submission
+        }
     });
 });
 
+
+
+
+
 </script>
+
+<style>
+    .product-item {
+        display: flex;
+        align-items: center;
+        margin-right: 15px; /* Space between each product item */
+    }
+    .btn-danger, .btn-success {
+        font-size: 16px;
+        padding: 5px 8px; /* Adjust button size for a more compact look */
+        margin: 0 2px;
+        cursor: pointer;
+    }
+    .quantity {
+        width: 50px; /* Reduced width for the quantity input */
+        height: 34px;
+        text-align: center;
+    }
+    .modal-body {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px; /* Space between rows if the content wraps */
+    }
+    .product-name {
+        font-weight: bold;
+        margin-right: 10px; /* Space between product name and buttons */
+    }
+
+    /* Styling for the plus and minus buttons */
+    .custom-btn-plus, .custom-btn-minus {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border: none;
+        border-radius: 50%; /* Make the button round */
+        font-size: 18px;
+        font-weight: bold;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease; /* Smooth transition */
+    }
+
+    .custom-btn-minus {
+        background-color: #ff4d4d; /* Red color for minus button */
+    }
+
+    .custom-btn-plus {
+        background-color: #63E6BE; /* Green color for plus button */
+    }
+
+    .custom-btn-minus:hover {
+        background-color: #ff1a1a; /* Darker shade on hover */
+        box-shadow: 0 0 10px rgba(255, 0, 0, 0.5); /* Shadow effect */
+    }
+
+    .custom-btn-plus:hover {
+        background-color: #46c498; /* Darker shade on hover */
+        box-shadow: 0 0 10px rgba(0, 255, 0, 0.5); /* Shadow effect */
+    }
+
+    .custom-btn-minus:active, .custom-btn-plus:active {
+        transform: scale(0.9); /* Slightly reduce size when clicked */
+    }
+
+    /* Submit button styling */
+    .custom-submit-btn {
+        background-color: #007bff; /* Bootstrap primary color */
+        color: white;
+        padding: 6px 12px; /* Padding for the submit button */
+        margin-left: 10px; /* Space between the input and submit button */
+        border: none;
+        border-radius: 4px; /* Rounded corners */
+        cursor: pointer;
+        transition: background-color 0.3s; /* Smooth transition */
+    }
+
+    .custom-submit-btn:hover {
+        background-color: #0056b3; /* Darker shade on hover */
+    }
+</style>
+
 
 
 <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
@@ -60,7 +156,7 @@
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarNav" style="display: ;">
+        <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto" >
                 <li class="nav-item">
                     <a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
@@ -638,71 +734,61 @@
 
   <div class="modal fade modal-xlg" id="exampleModal3" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Ajouter les produits </h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-            
-                {% for product in products %}
-                        {% if product.category == equipementdebase %}
-                            {% if product.quantity <= 0 %}
-                            <div>
-                                <h6>{{ product.name }} <strong style="color: red;">({{ product.quantity }})</strong>
-                                    
-                                    <form id="checklistForm-{{ checklist.id }}" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Ajouter les produits</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row gy-3">
+                        {% for product in products %}
+                            {% if product.category == equipementdebase %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">{{ product.name }} 
+                                            {% if product.quantity <= 0 %}
+                                                <strong style="color: red;">({{ product.quantity }})</strong>
+                                            {% else %}
+                                                <strong style="color: green;">({{ product.quantity }})</strong>
+                                            {% endif %}
+                                        </h6>
+                                    </div>
+                                    <form id="checklistForm-{{ product.id }}" action="{% url 'add_to_checklist' checklist.id %}" method="post" class="d-flex align-items-center product-form justify-content-end">
                                         {% csrf_token %}
                                         <input type="hidden" name="product_id" value="{{ product.id }}">
                                         <input type="hidden" name="product_name" value="{{ product.name }}">
-                                        
-                                        <div class="form-group">
+
+                                        <div class="form-group d-flex align-items-center me-2">
                                             <div class="input-group">
-                                                <button type="button" class="btn btn-danger subtractAction" data-form-id="{{ checklist.id }}">
+                                                <button type="button" class="btn custom-btn-minus subtractAction" data-product-id="{{ product.id }}" title="Réduire la quantité">
                                                     <i class="fa-solid fa-minus"></i>
                                                 </button>
-                                                <input type="number" class="form-control quantity" id="quantity-{{ checklist.id }}" name="quantity" min="1" value="1" required>
-                                                <button type="button" class="btn btn-success addAction" data-form-id="{{ checklist.id }}">
+                                                <input type="number" class="form-control quantity text-center mx-1" id="quantity-{{ product.id }}" name="quantity" min="1" value="1" required style="width: 60px;">
+                                                <button type="button" class="btn custom-btn-plus addAction" data-product-id="{{ product.id }}" title="Augmenter la quantité">
                                                     <i class="fa-solid fa-plus"></i>
                                                 </button>
                                             </div>
-                                            <input type="hidden" id="action-{{ checklist.id }}" name="action" value="add"> <!-- Default to "add" -->
                                         </div>
+                                        <button type="submit" name="action" value="add" class="btn custom-submit-btn d-flex align-items-center">
+                                            <i class="fa-solid fa-cart-plus me-2"></i> Ajouter
+                                        </button> <!-- Submit button -->
                                     </form>
-                                </h6>
-                            </div>
-                               
-                            {% else %}
-                          
-                            <form id="checklistForm-{{ checklist.id }}" action="{% url 'add_to_checklist' checklist.id %}" method="post">
-                                {% csrf_token %}
-                                <input type="hidden" name="product_id" value="{{ product.id }}">
-                                <input type="hidden" name="product_name" value="{{ product.name }}">
-                                
-                                <div class="form-group">
-                                    <div class="input-group">
-                                        <button type="button" class="btn btn-danger subtractAction" data-form-id="{{ checklist.id }}">
-                                            <i class="fa-solid fa-minus"></i>
-                                        </button>
-                                        <input type="number" class="form-control quantity" id="quantity-{{ checklist.id }}" name="quantity" min="1" value="1" required>
-                                        <button type="button" class="btn btn-success addAction" data-form-id="{{ checklist.id }}">
-                                            <i class="fa-solid fa-plus"></i>
-                                        </button>
-                                    </div>
-                                    <input type="hidden" id="action-{{ checklist.id }}" name="action" value="add"> <!-- Default to "add" -->
                                 </div>
-                            </form>
-                           
-                                {% endif %}
-                        {% endif %}
+                            {% endif %}
                         {% endfor %}
-            
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-        </div>
-      </div>
     </div>
+</div>
+
+
+
   </div>
 
     

@@ -28,6 +28,8 @@ class Livreur(models.Model):
         def __str__(self):
             return f'{self.nom}'
         user = models.OneToOneField(User, null=True, on_delete=models.CASCADE)
+        latitude = models.FloatField()
+        longitude = models.FloatField()
 
 
 
