@@ -18,7 +18,6 @@ from .forms import LivraisonDragFormtoday, TaskUpdateForm
 from .forms import LivraisonsVentesForm, RoutedetailForm
 from django.urls import reverse
 import json
-from .scrape_gps_data import get_gps_data
 from .forms import DistanceForm
 from tablib import Dataset
 from .ressources import LivraisonResource
@@ -160,32 +159,6 @@ def mark_order_deliveredcuisine(request, order_id):
     order.save()
     return redirect('order_list_cuisine')
 
-def delivery_map(request):
-    today = now().date()
-
-    # Fetch your deliveries for the day
-    deliveries = Livraison.objects.filter(date=today, recuperation = False)
-
-    # Fetch GPS data from FINDER portal using Selenium
-    gps_data = get_gps_data()
-
-    # Serialize deliveries
-    deliveries_data = [
-        {'nom': d.nom, 'latitude': d.lat, 'longitude': d.lng, 'heure_livraison': d.heure_livraison}
-        for d in deliveries
-    ]
-
-    # Combine both datasets
-    all_data = {
-        'deliveries': deliveries_data,
-        'gps_data': gps_data,
-    }
-
-    key = settings.GOOGLE_API_KEY
-    return render(request, 'listings/delivery_map.html', {
-        'all_data': json.dumps(all_data),
-        'key': key,
-    })
 
 def geocode_all_livraisons(request):
     if request.method == 'GET':  # Ensure the request method is GET
