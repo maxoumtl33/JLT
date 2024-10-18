@@ -2121,7 +2121,7 @@ class MapApremDimView(View):
 
 
         }
-        return render(request, 'listings/mapdimaprem.html', context)
+        return render(request, 'listings/mapapremdim.html', context)
 
     def post(self, request):
         form = DistanceForm(request.POST)
@@ -2208,7 +2208,7 @@ class MapMidiDimView(View):
                    'route1':route1,
 
         }
-        return render(request, 'listings/mapdimmidi.html', context)
+        return render(request, 'listings/mapmididim.html', context)
 
     def post(self, request):
         form = DistanceForm(request.POST)
