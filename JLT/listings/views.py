@@ -2175,7 +2175,7 @@ class MapMidiDimView(View):
         key = settings.GOOGLE_API_KEY
         form = DistanceForm
         today = datetime.now().date()
-        aftertomorrow = today + timedelta(2)
+        aftertomorrow = today + timedelta(3)
         distances = Distances.objects.all()
         midi = ['10h00', '10h15', '10h30', '10h45', '11h00', '11h15', '11h30', '11h45', '12h00', '12h15', '12h30', '12h45', 'recup']
         todo_livraison = Livraison.objects.filter(date=aftertomorrow, heure_livraison__in = midi, place_id__isnull=False, statut__id= 21)
