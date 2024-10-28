@@ -5,22 +5,22 @@
       <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 
       <br><br><br>
-      <table class="table table-hover">
+      <table class="table table-hover" id="sortable-table">
         <thead>
           <tr>
             <th scope="col" style="color: #303FBA;">Heure départ</th>
-              <th scope="col" style="color: #303FBA;">Nom Livraison</th>
-              <th scope="col" style="color: #303FBA;">Infos</th>
-              <th scope="col" style="color: #303FBA;">Heure livraison</th>
-              <th scope="col" style="color: #303FBA;">Livreur</th>
-              <th scope="col" style="color: #303FBA;">Aidelivreur</th>
-              <th scope="col" style="color: #303FBA;">Route</th>
-              <th scope="col" style="color: #303FBA;">Edit</th>
+            <th scope="col" style="color: #303FBA;">Nom Livraison</th>
+            <th scope="col" style="color: #303FBA;">Infos</th>
+            <th scope="col" style="color: #303FBA;">Heure livraison</th>
+            <th scope="col" style="color: #303FBA;">Livreur</th>
+            <th scope="col" style="color: #303FBA;">Aidelivreur</th>
+            <th scope="col" style="color: #303FBA;">Route</th>
+            <th scope="col" style="color: #303FBA;">Edit</th>
           </tr>
         </thead>
         <tbody>
           {% for livraison in livraisonstoday %}
-          <tr id="livraison-{{ livraison.id }}">
+          <tr id="livraison-{{ livraison.id }}" data-id="{{ livraison.id }}">
             <td>{{ livraison.statut.heure_depart }}</td>
             <td>{{ livraison.nom }}</td>
             <td>{{ livraison.infodetail }}</td>
@@ -39,13 +39,6 @@
                 data-bs-target="#editModal">
                 Modifier
               </button>
-
-            </td>
-          </tr>
-          <!-- This is where the edit form will be inserted dynamically -->
-          <tr id="edit-form-{{ livraison.id }}" style="display:none;">
-            <td colspan="8">
-              <!-- The edit form will be dynamically injected here -->
             </td>
           </tr>
           {% endfor %}
@@ -72,43 +65,38 @@
   </div>
 </div>
 
-
 <script>
   $(document).ready(function () {
-    // Make the table rows sortable using jQuery UI
-    $('table tbody').sortable({
-        placeholder: "sortable-placeholder",
-        update: function (event, ui) {
-            savePositions();
-        }
-    });
+      // Make the table rows sortable using jQuery UI
+      $('#sortable-table tbody').sortable({
+          placeholder: "sortable-placeholder",
+          update: function (event, ui) {
+              savePositions();
+          }
+      });
 
-    function savePositions() {
-        const positions = [];
-        $('table tbody tr').each(function () {
-            positions.push($(this).attr('data-id'));
-        });
+      function savePositions() {
+          const positions = [];
+          $('#sortable-table tbody tr').each(function () {
+              positions.push($(this).attr('data-id'));
+          });
 
-        $.ajax({
-            url: "{% url 'save_position' %}",
-            type: "POST",
-            data: {
-                'csrfmiddlewaretoken': '{{ csrf_token }}',
-                'positions': JSON.stringify(positions)
-            },
-            success: function (data) {
-                console.log('Positions saved successfully');
-            },
-            error: function (xhr, textStatus, errorThrown) {
-                console.error('Error saving positions');
-            }
-        });
-    }
-});
-
-
-
-
+          $.ajax({
+              url: "{% url 'save_position' %}",
+              type: "POST",
+              data: {
+                  'csrfmiddlewaretoken': '{{ csrf_token }}',
+                  'positions': JSON.stringify(positions)
+              },
+              success: function (data) {
+                  console.log('Positions saved successfully');
+              },
+              error: function (xhr, textStatus, errorThrown) {
+                  console.error('Error saving positions');
+              }
+          });
+      }
+  });
 </script>
 
 <style>

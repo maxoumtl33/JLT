@@ -2474,57 +2474,65 @@ class GeocodingTodayView(View):
 
 from difflib import get_close_matches
 
-def livraison_detail(request, ip):  # notez le paramètre id supplémentaire
-   livraison = Livraison.objects.get(id=ip)
-   adresse = Livraison.adress
-   livreur = Livreur.objects.all()
-   journee = Journee.objects.all()
-   recuperation = "oui"
-   loic = "Loic"
-   maxime = "Maxime"
-   all_docks = LoadingDock.objects.all()
-   dock_photos = None
+def livraison_detail(request, ip):
+    livraison = get_object_or_404(Livraison, id=ip)
+    adresse = livraison.adress
+    livreur = Livreur.objects.all()
+    journee = Journee.objects.all()
+    recuperation = "oui"
+    loic = "Loic"
+    maxime = "Maxime"
+    all_docks = LoadingDock.objects.all()
+    dock_photos = None
+    matching_dock = None  # Initialize matching_dock as None to avoid unassigned variable
 
     # Extract all loading dock addresses
-   dock_addresses = [dock.address for dock in all_docks]
+    dock_addresses = [dock.address for dock in all_docks]
     
-    # Find the closest matching address (using get_close_matches)
-   closest_matches = get_close_matches(livraison.adress, dock_addresses, n=1, cutoff=0.6)  # Adjust cutoff for flexibility
+    # Find the closest matching address
+    closest_matches = get_close_matches(livraison.adress, dock_addresses, n=1, cutoff=0.6)
 
-   if closest_matches:
+    if closest_matches:
         # Get the LoadingDock instance for the closest match
-        matching_dock = all_docks.filter(address=closest_matches[0]).first()
+        matching_dock = LoadingDock.objects.filter(address=closest_matches[0]).first()
         dock_photos = matching_dock.photo if matching_dock else None
 
-   if request.method == 'POST':
-        form = LivraisonForm(request.POST or None, instance=livraison)
-        formbis = PhotoFormSet(request.POST, request.FILES or None, instance=livraison)
+    if request.method == 'POST':
+        form = LivraisonForm(request.POST, instance=livraison)
+        formbis = PhotoFormSet(request.POST, request.FILES, instance=livraison)
         
         if form.is_valid():
-            livraison = form.save()  # Save the Livraison instance
+            livraison = form.save()
         if formbis.is_valid():
-            # Save the associated photos
             photos = formbis.save(commit=False)
             for photo in photos:
-                photo.livraison = livraison  # Set the related Livraison for each photo
+                photo.livraison = livraison
                 photo.save()
 
-            return redirect(request.META.get('HTTP_REFERER', 'redirect_if_referer_not_found'))  # Redirect to a page showing deliveries (adjust this)
+            return redirect(request.META.get('HTTP_REFERER', 'redirect_if_referer_not_found'))
 
-   else:
-        form = LivraisonForm()
-        formbis = PhotoFormSet()
+    else:
+        form = LivraisonForm(instance=livraison)
+        formbis = PhotoFormSet(instance=livraison)
 
+    # Use Google Maps API to geocode address
+    gmaps = googlemaps.Client(key=settings.GOOGLE_API_KEY)
+    result = gmaps.geocode(adresse)
 
-
-
-   gmaps = googlemaps.Client(key = settings.GOOGLE_API_KEY)
-   result = gmaps.geocode(adresse)
-
-   return render(request,
-          'listings/livraison_detail.html',
-          context={'livraison': livraison, 'livreur':livreur, 'recuperation': recuperation, 'form': form, 'journee':journee, 'result':result,'adresse': adresse, 'loic': loic, 'maxime':maxime, 'formbis':formbis, 'dock_photos': dock_photos,
-        'matching_dock': matching_dock,}) # nous passons l'id au modèle
+    return render(request, 'listings/livraison_detail.html', {
+        'livraison': livraison,
+        'livreur': livreur,
+        'recuperation': recuperation,
+        'form': form,
+        'journee': journee,
+        'result': result,
+        'adresse': adresse,
+        'loic': loic,
+        'maxime': maxime,
+        'formbis': formbis,
+        'dock_photos': dock_photos,
+        'matching_dock': matching_dock,
+    })
 
 def update_photo(request, pk):
     livraison = Livraison.objects.get(pk=pk)

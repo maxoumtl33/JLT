@@ -143,39 +143,6 @@
 <!-- Spacing for Bottom Navigation -->
 <div class="spacer"></div>
 
-<!-- Htmx Configuration for CSRF and AJAX enhancements -->
-<script>
-  // Automatically add CSRF token to htmx requests
-  document.body.addEventListener('htmx:configRequest', (event) => {
-      event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
-  });
 
-  // Handle form validation errors
-  htmx.on('htmx:responseError', function(event) {
-      alert('Failed to add livraison. Please check your input and try again.');
-  });
-
-  // Show loading spinner when an htmx request is triggered
-  htmx.on('htmx:beforeRequest', function() {
-      var spinner = document.querySelector('.htmx-indicator');
-      spinner.style.display = 'inline-block';
-  });
-
-  // Hide loading spinner when htmx request is complete
-  htmx.on('htmx:afterRequest', function() {
-      var spinner = document.querySelector('.htmx-indicator');
-      spinner.style.display = 'none';
-  });
-
-  // Auto scroll to the form and display when editing
-  document.addEventListener("htmx:afterSwap", function(evt) {
-    if (evt.detail.target.id.startsWith("edit-form-")) {
-      document.getElementById(evt.detail.target.id).style.display = 'table-row';
-      document.getElementById(evt.detail.target.id).scrollIntoView({ behavior: 'smooth' });
-    }
-  });
-
-  htmx.logAll();
-</script>
 
 {% endblock content %}
