@@ -1,0 +1,123 @@
+<div class="d-flex justify-content-between">
+
+    <section class="col-12">
+    
+    
+        <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+       <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
+        <br>
+        <br>
+        <br>
+        <table class="table table-hover"  id="sortable">
+          <thead>
+            <tr>
+              <th scope="col" style="color: #303FBA;">Heure départ</th>
+              <th scope="col" style="color: #303FBA;">Nom Livraison</th>
+              <th scope="col" style="color: #303FBA;">Infos</th>
+              <th scope="col" style="color: #303FBA;">Heure livraison</th>
+              <th scope="col" style="color: #303FBA;">Livreur</th>
+              <th scope="col" style="color: #303FBA;">Aidelivreur</th>
+              <th scope="col" style="color: #303FBA;">Route</th>
+              <th scope="col" style="color: #303FBA;">Edit</th>
+            </tr>
+          </thead>
+          <div id="livraison-list">
+          <tbody>
+            {% for livraison in livraisonsdim %}
+            <div id="livraison-detailstoday">
+            <tr data-id="{{ livraison.id }}">
+              {% if livraison.recuperation == True %}
+              <td style="background-color: #F1B3DA;">{{ livraison.statut.heure_depart }}</td>
+              <td style="background-color: #F1B3DA;">{{ livraison.nom }}</td>
+              <td style="background-color: #F1B3DA;">{{ livraison.infodetail }}</td>
+              <td style="background-color: #F1B3DA;">{{ livraison.heure_livraison }}</td>
+              <td style="background-color: #F1B3DA;">{{ livraison.statut.livreur }}</td>
+              <td style="background-color: #F1B3DA;">{{ livraison.aidelivreur }}</td>
+              <td style="background-color: #F1B3DA;">{{ livraison.statut.nom }}</td>
+              <td><button class="btn btn-outline-primary"
+                hx-get="{% url 'livraison-edit-form' livraison.id %}"
+                hx-target="#livraison-details">modifier</button></td>
+                {% else %}
+              <td>{{ livraison.statut.heure_depart }}</td>
+              <td>{{ livraison.nom }}</td>
+              <td>{{ livraison.infodetail }}</td>
+              <td>{{ livraison.heure_livraison }}</td>
+              <td>{{ livraison.statut.livreur }}</td>
+              <td>{{ livraison.aidelivreur }}</td>
+              <td>{{ livraison.statut.nom }}</td>
+              <td>
+                <button 
+                class="btn btn-outline-primary" 
+                hx-get="{% url 'livraison-edit-form' livraison.id %}" 
+                hx-target="#modal-body-content" 
+                hx-trigger="click" 
+                hx-swap="innerHTML"
+                data-bs-toggle="modal" 
+                data-bs-target="#editModal">
+                Modifier
+              </button>
+              
+              </td>
+                {% endif %}
+            </tr>
+            </div>
+            {% endfor %}
+          </tbody>
+          </div>
+        </table>
+    </section>
+
+   
+      
+
+    
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="editModalLabel">Editer Livraison</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modal-body-content">
+              <!-- Form content will be loaded here dynamically -->
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <script>
+      $(document).ready(function(){
+          $('#sortable tbody').sortable({
+              update: function(event, ui){
+                  savePositions();
+              }
+          });
+          
+          function savePositions(){
+              var positions = [];
+              $('#sortable tbody tr').each(function(){
+                  positions.push($(this).attr('data-id'));
+              });
+              $.ajax({
+                  url: "{% url 'save_position' %}",
+                  type: "POST",
+                  data: {
+                      'csrfmiddlewaretoken': '{{ csrf_token }}',
+                      'positions': JSON.stringify(positions)
+                  },
+                  success: function(data){
+                      console.log('Positions saved successfully');
+                  },
+                  error: function(xhr, textStatus, errorThrown){
+                      console.log('Error saving positions');
+                  }
+              });
+          }
+      });
+  </script>
+

@@ -1,0 +1,6 @@
+<form method="post" hx-post="{% url 'livraison-edit-form' livraison.id %}"
+      hx-target="#livraison-{{ livraison.id }}" hx-swap="outerHTML">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">Valider</button>
+</form>

@@ -368,6 +368,33 @@
         </div>
     </div>
 </header>
+<br>
+<h3>Planning de Travail</h3>
+<br>
+{% if shifts %}
+    <div class="shift-section">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Heure de Début</th>
+                    <th>Heure de Fin (estimé)</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for shift in shifts %}
+                    <tr>
+                        <td>{{ shift.start_time }}</td>
+                        <td>{{ shift.end_time }}</td>
+                        <td>{{ shift.notes }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <p>Aucun planning disponible pour aujourd'hui.</p>
+{% endif %}
 
 <nav class="bottom-navbar">
     <ul>
@@ -739,6 +766,7 @@
                 <!-- Modal content here, such as links or other information -->
                 <ul>
                     <li><a href="https://oakmnxgj.forms.app/essence">Essence</a></li>
+                    <li><a href="{% url 'create_loading_dock' %}" target="_blank">Ajouter un dock</a></li>
                 </ul>
             </div>
             <div class="modal-footer">

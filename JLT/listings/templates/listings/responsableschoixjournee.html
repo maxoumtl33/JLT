@@ -133,30 +133,30 @@
 
         /* Footer Navigation Bar (Fixed to bottom) */
         .bottom-navbar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background-color: #333;
-            padding: 10px 0;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-        }
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #333;
+    padding: 10px 0;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+  }
 
-        .bottom-navbar ul {
-            list-style: none;
-            display: flex;
-            justify-content: space-around;
-            margin: 0;
-            padding: 0;
-        }
+  .bottom-navbar ul {
+    list-style: none;
+    display: flex;
+    justify-content: space-around;
+    margin: 0;
+    padding: 0;
+  }
 
-        .bottom-navbar ul li {
-            flex: 1;
-            text-align: center;
-        }
+  .bottom-navbar ul li {
+    flex: 1;
+    text-align: center;
+  }
 
-        .bottom-navbar ul li a {
+  .bottom-navbar ul li a {
     color: white;
     text-decoration: none;
     font-size: 16px;
@@ -204,10 +204,12 @@
 
             <!-- Dropdown Menu for Dispatch Routes -->
             <div class="dropdown">
-                <button>Dispatch routes</button>
+                <button>Dispatch et Planning</button>
                 <div class="dropdown-content">
                     <a href="{% url 'livraisonstomorrow' %}">Carte</a>
                     <a href="{% url 'livraisonsdrag'%}">Classer et modifier</a>
+                    <a href="{% url 'create-shift'%}">Créer planning</a>
+                    <a href="{% url 'view_shifts_by_date'%}">Voir plannings</a>
                 </div>
             </div>
 
@@ -261,9 +263,10 @@
     <!-- Footer Navbar -->
     <nav class="bottom-navbar">
         <ul>
-            <li><a href="{% url 'journees-list' %}"><i class="fa-solid fa-calendar-days"></i> Journées</a></li>
+            <li><a href="{% url 'journees-list' %}" class="nav__link"><i class="fa-solid fa-calendar-days"></i><span class="nav__name">Journées</span></a></li>
         </ul>
     </nav>
+
 </body>
 </html>
 

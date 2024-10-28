@@ -1168,6 +1168,17 @@ def taskdetail(request, id):
 
     return render(request, 'listings/taskdetail.html', {'task': task, 'form': form, 'formbis': formbis, 'photoss':photoss,})
 
+def view_shifts_by_date(request):
+    # Get date from the request or use today’s date as default
+    selected_date = request.GET.get('date', now().date())
+    
+    # Fetch all shifts for that date
+    shifts = Shift.objects.filter(date=selected_date).select_related('livreur')
+
+    return render(request, 'listings/view_shifts_by_date.html', {
+        'shifts': shifts,
+        'selected_date': selected_date
+    })
 
 def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
     if request.user.is_authenticated :
@@ -1178,7 +1189,7 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
         today = now().date()
         livraisonss  = Livraison.objects.filter( statut__livreur = userid, date = journee.date)
         livraisons  = Livraison.objects.order_by('position').filter( statut__livreur = userid, date = journee.date)
-
+        shifts = Shift.objects.filter(livreur=livreur, date=journee.date)
         livraisonstatusok = Livraison.objects.filter(status=True, recuperation=False, statut__livreur = userid, date = journee.date)
         livraisonstatusko = Livraison.objects.filter(status=False, recuperation=False, statut__livreur = userid, date = journee.date)
         recuperation = Livraison.objects.filter(recuperation=True,  statut__livreur = userid, date = journee.date)
@@ -1242,6 +1253,7 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
                                                                 'taches':taches,
                                                                 'tacheok':tacheok,
                                                                 'tacheko':tacheko,
+                                                                'shifts':shifts, 
 
                                                                 })
     else:
@@ -1275,8 +1287,33 @@ def update_photo_task(request, pk):
 
     return render(request, 'listings/update_photo_task.html', {'form': form, 'task': task})
 
+# Admin view for creating shifts
+def create_shift(request):
+    liste_livreur = Livreur.objects.filter(nom__in=['Maxime', 'Alex', 'Mohammad', 'Osnel', 'Samuel', 'Jef', 'Rooseph', 'Zayd'])
 
+    if request.method == 'POST':
+        for livreur in liste_livreur:
+            # Check if the driver is marked as 'repos'
+            is_repos = f"repos_{livreur.id}" in request.POST
+            
+            # Only create a shift if the driver is not on repos
+            if not is_repos:
+                shift_date = request.POST.get(f"shift_date_{livreur.id}")
+                shift_start = request.POST.get(f"shift_start_{livreur.id}")
+                shift_end = request.POST.get(f"shift_end_{livreur.id}")
 
+                # Parse dates and times and create the shift
+                Shift.objects.create(
+                    livreur=livreur,
+                    date=shift_date,
+                    start_time=shift_start,
+                    end_time=shift_end,
+                )
+
+        # After saving, you could redirect or render a success message
+        return redirect('acceuilresponsables')  # Update to your target URL or response
+
+    return render(request, 'listings/create_shift.html', {'liste_livreur': liste_livreur})
 def responsableschoixjournee(request):
 
     if request.method == 'POST':
@@ -2435,6 +2472,8 @@ class GeocodingTodayView(View):
         }
         return render(request, 'listings/geocodingtoday.html', context)
 
+from difflib import get_close_matches
+
 def livraison_detail(request, ip):  # notez le paramètre id supplémentaire
    livraison = Livraison.objects.get(id=ip)
    adresse = Livraison.adress
@@ -2443,6 +2482,19 @@ def livraison_detail(request, ip):  # notez le paramètre id supplémentaire
    recuperation = "oui"
    loic = "Loic"
    maxime = "Maxime"
+   all_docks = LoadingDock.objects.all()
+   dock_photos = None
+
+    # Extract all loading dock addresses
+   dock_addresses = [dock.address for dock in all_docks]
+    
+    # Find the closest matching address (using get_close_matches)
+   closest_matches = get_close_matches(livraison.adress, dock_addresses, n=1, cutoff=0.6)  # Adjust cutoff for flexibility
+
+   if closest_matches:
+        # Get the LoadingDock instance for the closest match
+        matching_dock = all_docks.filter(address=closest_matches[0]).first()
+        dock_photos = matching_dock.photo if matching_dock else None
 
    if request.method == 'POST':
         form = LivraisonForm(request.POST or None, instance=livraison)
@@ -2471,7 +2523,8 @@ def livraison_detail(request, ip):  # notez le paramètre id supplémentaire
 
    return render(request,
           'listings/livraison_detail.html',
-          context={'livraison': livraison, 'livreur':livreur, 'recuperation': recuperation, 'form': form, 'journee':journee, 'result':result,'adresse': adresse, 'loic': loic, 'maxime':maxime, 'formbis':formbis}) # nous passons l'id au modèle
+          context={'livraison': livraison, 'livreur':livreur, 'recuperation': recuperation, 'form': form, 'journee':journee, 'result':result,'adresse': adresse, 'loic': loic, 'maxime':maxime, 'formbis':formbis, 'dock_photos': dock_photos,
+        'matching_dock': matching_dock,}) # nous passons l'id au modèle
 
 def update_photo(request, pk):
     livraison = Livraison.objects.get(pk=pk)
@@ -2487,6 +2540,17 @@ def update_photo(request, pk):
         form = PhotoForm()
 
     return render(request, 'listings/update_photo.html', {'form': form, 'livraison': livraison})
+
+def create_loading_dock(request):
+    if request.method == 'POST':
+        form = LoadingDockForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('create_loading_dock')  # Redirect to a page after saving, adjust as necessary
+    else:
+        form = LoadingDockForm()
+
+    return render(request, 'listings/create_loading_dock.html', {'form': form})
 
 def livraisonstomorrow(request):
     recuperation = "oui"
@@ -2590,13 +2654,23 @@ def livraisonsresp(request):
 def recuptoday(request):
     today = datetime.now().date()
     tomorrow = today + timedelta(1)
-    recups = ["Porcelaine", "Chaud et porcelaine", "Porcelaine et bois", "Plateau de bois", "Froid et bois", "Chaud et jetable"]
-    recuperations = Livraison.objects.filter(recuperation=False, date=today, mode_envoi__in = recups)
-    recupsencours = Livraison.objects.filter(recuperation=True, status = False)
+    recups = ["Porcelaine", "Chaud et porcelaine", "Porcelaine et bois", "Plateau de bois", "Froid et bois", "Chaud et jetable", "Froid et porcelaine"]
+
+    # Querysets
+    recuperations = Livraison.objects.filter(recuperation=False, date=today, mode_envoi__in=recups)
+    recupsencours = Livraison.objects.filter(recuperation=True, status=False)
+    recuperationstot_list = Livraison.objects.filter(recuperation=False, mode_envoi__in=recups)
+
+    # Pagination
+    paginator = Paginator(recuperationstot_list, 10)  # Show 10 items per page
+    page_number = request.GET.get('page')
+    recuperationstot = paginator.get_page(page_number)
+
     return render(request, 'listings/recuptoday.html', context={
-                                                              'recuperations' : recuperations,
-                                                              'recupsencours' : recupsencours,
-                                                              })
+        'recuperations': recuperations,
+        'recupsencours': recupsencours,
+        'recuperationstot': recuperationstot,
+    })
 
 def faq(request):
     today = datetime.now().date()
@@ -2694,43 +2768,40 @@ def livraisonshier(request):
 class Livraisonsdrag(ListView):
     template_name = 'listings/livraisonsdrag.html'
     model = Livraison
-
     context_object_name = 'livraisons'
 
-
     def get_queryset(self):
-
+        # Default queryset for the view
         today = datetime.now().date()
         tomorrow = today + timedelta(1)
-
-
+        
+        # Query for tomorrow's deliveries (default queryset)
         livraisons = Livraison.objects.order_by('position').filter(date=tomorrow)
-
-
-
+        
         return livraisons
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Get current date and the next few days
+        today = datetime.now().date()
+        tomorrow = today + timedelta(1)
+        tomorrow1 = today + timedelta(2)
+        tomorrow2 = today + timedelta(3)
+
+        # Add queries for each day
+        livraisonstoday = Livraison.objects.order_by('position').filter(date=today)
+        livraisonsdim = Livraison.objects.order_by('position').filter(date=tomorrow1)
+        livraisonslundi = Livraison.objects.order_by('position').filter(date=tomorrow2)
+
+        # Add these to the context so that the template can access them
+        context['livraisonstoday'] = livraisonstoday
+        context['livraisonsdim'] = livraisonsdim
+        context['livraisonslundi'] = livraisonslundi
+
+        return context
 
 
-def add_livraison(request):
-    # Extract data from POST request
-    nom = request.POST.get('filmname')
-    date = request.POST.get('date')
-
-    # Validate date format (optional)
-    try:
-        date_obj = datetime.strptime(date, '%Y-%m-%d').date()
-    except ValueError:
-        return JsonResponse({'error': 'Invalid date format. Use YYYY-MM-DD.'}, status=400)
-
-    # Create and save the Livraison instance
-    livraison = Livraison.objects.create(nom=nom, date=date_obj)
-
-    # Fetch updated list of livraisons (you can filter this as needed)
-    livraisons = Livraison.objects.all()
-
-    # Render the updated livraison list (partial template)
-    return render(request, 'listings/partials/livraisonslist.html', {'livraisons': livraisons})
 
 def delete_livraison(request, pk):
     # remove the film from the user's list
@@ -2824,11 +2895,18 @@ def livraisonsdrag_detail(request, pk):
         context['form'] = form
         return render(request, 'listings/partials/edit-livraison-form.html', context)
 
-def livraison_edit_form(request, pk):
-    livraison = Livraison.objects.get(id=pk)
+def livraison_edit_form(request, livraison_id):
+    livraison = get_object_or_404(Livraison, id=livraison_id)
     form = LivraisonDragForm(instance=livraison)
-    context = {'livraison': livraison, 'form': form}
-    return render(request, 'listings/partials/edit-livraison-form.html', context)
+    
+    if request.method == 'POST':
+        form = LivraisonDragForm(request.POST, instance=livraison)
+        if form.is_valid():
+            form.save()
+            return render(request, 'listings/partials/livraison_row.html', {'livraison': livraison})
+
+    # Render the partial template with the form
+    return render(request, 'listings/partials/livraison_edit_form.html', {'form': form, 'livraison': livraison})
 
 
 def commentcamarche(request):

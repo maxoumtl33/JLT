@@ -100,12 +100,17 @@ class DistanceFormAprem(ModelForm):
 class LivraisonDragForm(forms.ModelForm):
     class Meta:
         model = Livraison
-        fields = ('heure_depart', 'nom', 'infodetail','heure_livraison',  'livreur', 'aidelivreur', 'statut', 'commentairedispatch', 'recuperation', 'retourtraiteur')
+        fields = ('infodetail','heure_livraison', 'commentairedispatch', 'recuperation')
 
 class LivraisonDragFormtoday(forms.ModelForm):
     class Meta:
         model = Livraison
         fields = ('heure_depart', 'nom', 'infodetail',  'livreur', 'aidelivreur', 'statut', 'commentairedispatch', 'recuperation', 'retourtraiteur')
+
+class ShiftForm(forms.ModelForm):
+    class Meta:
+        model = Shift
+        fields = ['livreur', 'date', 'start_time', 'end_time', 'notes']
 
 
 class LivraisonsVentesForm(forms.ModelForm):
@@ -117,6 +122,16 @@ class RoutedetailForm(forms.ModelForm):
     class Meta:
         model = Route
         fields = ('livreur', 'heure_depart')
+
+class LoadingDockForm(forms.ModelForm):
+    class Meta:
+        model = LoadingDock
+        fields = ['address', 'photo', 'description']
+        widgets = {
+            'address': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Adresse du Dock'}),
+            'photo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Description du Dock', 'rows': 4}),
+        }
         
 class PhotoForm(forms.ModelForm):
     class Meta:

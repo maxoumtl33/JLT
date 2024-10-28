@@ -76,6 +76,10 @@ class Message(models.Model):
      description = models.fields.CharField(max_length=100)
      livreur = models.ForeignKey(Livreur, null=True, on_delete=models.SET_NULL)
 
+class LoadingDock(models.Model):
+    address = models.CharField(max_length=255)
+    photo = models.ImageField(upload_to='listings/media/commandesdetail', blank=True, null=True)
+    description = models.TextField(blank=True)
 
 
 class Journee(models.Model):
@@ -152,7 +156,16 @@ class Route(models.Model):
      heure_depart = models.fields.CharField(null=True, blank=True, max_length=100, choices= choiceheures, default=" ")
      date = models.DateField(default=date.today)
 
+class Shift(models.Model):
+    livreur = models.ForeignKey(Livreur, on_delete=models.CASCADE)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    notes = models.TextField(blank=True, null=True)
+    date = models.DateField(default=date.today)
 
+
+    def __str__(self):
+        return f"{self.livreur.nom} Shift from {self.start_time} to {self.end_time}"
 
 
 class Livraison(models.Model):

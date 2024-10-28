@@ -1,0 +1,151 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% block content %}
+<body>
+    <style>
+
+        /* Enhanced Bottom Navbar Styling */
+  .bottom-navbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #333;
+    padding: 10px 0;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+  }
+
+  .bottom-navbar ul {
+    list-style: none;
+    display: flex;
+    justify-content: space-around;
+    margin: 0;
+    padding: 0;
+  }
+
+  .bottom-navbar ul li {
+    flex: 1;
+    text-align: center;
+  }
+
+  .bottom-navbar ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.bottom-navbar ul li a:hover {
+    text-decoration: underline;
+}
+        .container {
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+h2 {
+    text-align: center;
+    color: #1176F5;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+th {
+    background-color: #f8f9fa;
+    color: #555;
+}
+
+tr:nth-child(even) {
+    background-color: #f1f5f9;
+}
+
+input[type="date"],
+button {
+    padding: 8px;
+    font-size: 16px;
+    margin-right: 10px;
+}
+
+button {
+    background-color: #1176F5;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #0d63cc;
+}
+
+    </style>
+    <div class="container">
+        <h2>Planning des livreurs par Date</h2>
+        <br>
+        <form method="get" action="{% url 'view_shifts_by_date' %}">
+            <label for="date">Selectionner la  date:</label>
+            <input type="date" name="date" id="date" value="{{ selected_date }}">
+            <button type="submit">Filter</button>
+        </form>
+
+        <hr>
+
+        {% if shifts %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Livreur</th>
+                        <th>Date</th>
+                        <th>Heure de début</th>
+                        <th>Heure de fin (estimé)</th>
+                        <th>Note</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for shift in shifts %}
+                        <tr>
+                            <td>{{ shift.livreur.nom }}</td>
+                            <td>{{ shift.date }}</td>
+                            <td>{{ shift.start_time }}</td>
+                            <td>{{ shift.end_time }}</td>
+                            <td>{{ shift.note }}</td>
+                            <td>
+                                {% if shift.repos %}
+                                    Repos
+                                {% else %}
+                                    Travail
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Pas de planning pour cette date</p>
+        {% endif %}
+    </div>
+
+    <nav class="bottom-navbar">
+        <ul>
+          <li><a href="{% url 'acceuilresponsables' %}" class="nav__link"><i class="fa-solid fa-user-ninja"></i><span class="nav__name">Menu Admin</span></a></li>
+        </ul>
+      </nav>
+</body>
+</html>
+
+{% endblock %}

@@ -1,0 +1,197 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% block content %}
+<style>
+
+    /* Enhanced Bottom Navbar Styling */
+  .bottom-navbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #333;
+    padding: 10px 0;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+  }
+
+  .bottom-navbar ul {
+    list-style: none;
+    display: flex;
+    justify-content: space-around;
+    margin: 0;
+    padding: 0;
+  }
+
+  .bottom-navbar ul li {
+    flex: 1;
+    text-align: center;
+  }
+
+  .bottom-navbar ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.bottom-navbar ul li a:hover {
+    text-decoration: underline;
+}
+    /* General Styles */
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f9fa;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #fff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+    }
+
+    h3 {
+        color: #1176F5;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    /* Driver Shift Card */
+    .livreur-shift {
+        background-color: #f1f5f9;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        transition: box-shadow 0.3s ease;
+    }
+
+    .livreur-shift:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .livreur-shift h4 {
+        color: #333;
+        font-size: 1.25rem;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+
+    /* Input and Label Styling */
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    label {
+        font-weight: bold;
+        color: #555;
+    }
+
+    input[type="date"],
+    input[type="time"] {
+        width: 100%;
+        padding: 8px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        transition: border-color 0.3s;
+    }
+
+    input[type="date"]:focus,
+    input[type="time"]:focus {
+        border-color: #1176F5;
+    }
+
+    /* Checkbox Styling */
+    .form-check-input {
+        margin-right: 10px;
+        transform: scale(1.2);
+    }
+
+    .form-check-label {
+        font-weight: 500;
+        color: #1176F5;
+    }
+
+    /* Submit Button */
+    .btn-primary {
+        width: 100%;
+        padding: 12px;
+        background-color: #1176F5;
+        border: none;
+        color: #fff;
+        font-size: 18px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: #0d63cc;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .container {
+            padding: 10px;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+        }
+
+        .livreur-shift h4 {
+            font-size: 1rem;
+        }
+    }
+</style>
+
+<div class="container">
+    <form method="post">
+        {% csrf_token %}
+        <h3>Créer un planning pour les livreurs</h3>
+
+        {% for livreur in liste_livreur %}
+            <div class="livreur-shift">
+                <h4>{{ livreur.nom }}</h4>
+                
+                <div class="form-group">
+                    <label for="shift_date_{{ livreur.id }}">Date de Shift</label>
+                    <input type="date" name="shift_date_{{ livreur.id }}" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="shift_start_{{ livreur.id }}">Heure de Début</label>
+                    <input type="time" name="shift_start_{{ livreur.id }}" class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label for="shift_end_{{ livreur.id }}">Heure de Fin</label>
+                    <input type="time" name="shift_end_{{ livreur.id }}" class="form-control">
+                </div>
+
+                <div class="form-check">
+                    <input type="checkbox" name="repos_{{ livreur.id }}" class="form-check-input" id="repos_{{ livreur.id }}">
+                    <label class="form-check-label" for="repos_{{ livreur.id }}">En Repos</label>
+                </div>
+                <br>
+                <div class="form-group">
+                    <label for="note_{{ livreur.id }}">Note</label>
+                    <textarea name="note_{{ livreur.id }}" rows="3" class="form-control" placeholder="Ajouter une note..."></textarea>
+                </div>
+
+            </div>
+        {% endfor %}
+
+        <button type="submit" class="btn btn-primary">Créer Planning</button>
+    </form>
+
+    <nav class="bottom-navbar">
+        <ul>
+          <li><a href="{% url 'acceuilresponsables' %}" class="nav__link"><i class="fa-solid fa-user-ninja"></i><span class="nav__name">Menu Admin</span></a></li>
+        </ul>
+      </nav>
+</div>
+
+{% endblock %}

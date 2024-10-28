@@ -1,0 +1,18 @@
+<tr id="livraison-{{ livraison.id }}">
+    <td>{{ livraison.statut.heure_depart }}</td>
+    <td>{{ livraison.nom }}</td>
+    <td>{{ livraison.infodetail }}</td>
+    <td>{{ livraison.heure_livraison }}</td>
+    <td>{{ livraison.statut.livreur }}</td>
+    <td>{{ livraison.aidelivreur }}</td>
+    <td>{{ livraison.statut.nom }}</td>
+    <td>
+      <button class="btn btn-outline-primary"
+        hx-get="{% url 'livraison-edit-form' livraison.id %}"
+        hx-target="#edit-form-{{ livraison.id }}"
+        hx-swap="beforebegin">
+        Modifier
+      </button>
+    </td>
+  </tr>
+  

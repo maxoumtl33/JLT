@@ -115,6 +115,53 @@
     </table>
   </div>
 
+  <!-- Tomorrow's Recoveries -->
+  <div class="mb-5">
+    <h1 class="text-center">Récupérations</h1>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th scope="col">Nom du contrat</th>
+          <th scope="col">Mode d'envoi</th>
+          <th scope="col">Livreur</th>
+          <th scope="col">Date</th>
+          <th scope="col">Lien</th>
+          <th scope="col">Créer Recup</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for livraison in recuperationstot %}
+          <tr style="color: #F1B3DA;">
+            <td>{{ livraison.nom }}</td>
+            <td>{{ livraison.mode_envoi }}</td>
+            <td>{{ livraison.statut.livreur }}</td>
+            <td>{{ livraison.date_livraison }}</td>
+            <td><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn btn-custom"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+            <td><a href="{% url 'duplicate-model' livraison.id %}" class="btn btn-custom"><i class="fa-solid fa-clone"></i></a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="pagination justify-content-center">
+      <nav aria-label="Page navigation">
+        <ul class="pagination">
+          {% if recuperationstot.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page=1">Première</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ recuperationstot.previous_page_number }}">Précédent</a></li>
+          {% endif %}
+  
+          <li class="page-item disabled"><span class="page-link">Page {{ recuperationstot.number }} sur {{ recuperationstot.paginator.num_pages }}</span></li>
+  
+          {% if recuperationstot.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ recuperationstot.next_page_number }}">Suivant</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ recuperationstot.paginator.num_pages }}">Dernière</a></li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+
   <!-- Ongoing Recoveries -->
   <div>
     <h1 class="text-center">Récupérations en cours (au TOTAL)</h1>

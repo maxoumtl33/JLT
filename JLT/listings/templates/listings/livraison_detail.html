@@ -215,12 +215,33 @@
                 </p>
                 <hr>
                 <p class="card-text">
-                  <a href="{{ livraison.client.adresse_dock }}">Aller au Dock</a>
-                </p>
+                  <a href="#" data-bs-toggle="modal" data-bs-target="#dockModal">Aller au Dock</a>
+              </p>
               </div>
             </div>
           </div>
-
+          <div class="modal fade" id="dockModal" tabindex="-1" aria-labelledby="dockModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="dockModalLabel">Adresse du Dock</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      {% if matching_dock %}
+                    <p><strong>Adresse :</strong> {{ matching_dock.address }}</p>
+                    <p>{{ matching_dock.description }}</p>
+                    <img src="{{ matching_dock.photo.url }}" alt="Loading Dock" style="width:100%; height:auto;">
+                {% else %}
+                    <p>Pas de dock trouvé pour cette adresse</p>
+                {% endif %}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
           <!-- Heure de Livraison -->
           <div class="col-md-6">
             <div class="card border-0">
