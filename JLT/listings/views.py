@@ -2482,20 +2482,23 @@ def livraison_detail(request, ip):
     recuperation = "oui"
     loic = "Loic"
     maxime = "Maxime"
-    all_docks = LoadingDock.objects.all()
+    # If already having place_id, try matching it.
+    matching_dock = None
     dock_photos = None
-    matching_dock = None  # Initialize matching_dock as None to avoid unassigned variable
 
-    # Extract all loading dock addresses
-    dock_addresses = [dock.address for dock in all_docks]
-    
-    # Find the closest matching address
-    closest_matches = get_close_matches(livraison.adress, dock_addresses, n=1, cutoff=0.6)
-
-    if closest_matches:
-        # Get the LoadingDock instance for the closest match
-        matching_dock = LoadingDock.objects.filter(address=closest_matches[0]).first()
+    if livraison.place_id:
+        matching_dock = LoadingDock.objects.filter(place_id=livraison.place_id).first()
         dock_photos = matching_dock.photo if matching_dock else None
+
+    # Google Maps geocode to fetch place_id and coordinate information
+    gmaps = googlemaps.Client(key=settings.GOOGLE_API_KEY)
+    result = gmaps.geocode(adresse)
+
+    if result:
+        place_id = result[0].get('place_id')
+        if place_id:
+            livraison.place_id = place_id
+            livraison.save()
 
     if request.method == 'POST':
         form = LivraisonForm(request.POST, instance=livraison)
@@ -2518,6 +2521,7 @@ def livraison_detail(request, ip):
     # Use Google Maps API to geocode address
     gmaps = googlemaps.Client(key=settings.GOOGLE_API_KEY)
     result = gmaps.geocode(adresse)
+    
 
     return render(request, 'listings/livraison_detail.html', {
         'livraison': livraison,

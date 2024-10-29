@@ -80,6 +80,7 @@ class LoadingDock(models.Model):
     address = models.CharField(max_length=255)
     photo = models.ImageField(upload_to='listings/media/commandesdetail', blank=True, null=True)
     description = models.TextField(blank=True)
+    place_id = models.CharField(max_length=200, null=True, blank=True)
 
 
 class Journee(models.Model):
