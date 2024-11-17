@@ -716,22 +716,28 @@ def generate_qr_code(request, product_id):
     return response
 
 
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from .models import Product
+
 def update_product_quantity(request, product_id):
+    # Fetch the product object
     product = Product.objects.get(id=product_id)
     
     if request.method == 'POST':
-        # Check if 'quantity' is provided in the POST data
+        # Get the new quantity from the POST data
         new_quantity = request.POST.get('quantity')
         
-        # Ensure quantity is a valid number
-        if new_quantity is not None and new_quantity.isdigit():
-            product.quantity = int(new_quantity)  # Convert the quantity to an integer
-            product.save()
-            return redirect('voir_checklist')  # Redirect to product detail page
+        # Ensure the quantity is a valid positive integer
+        if new_quantity and new_quantity.isdigit() and int(new_quantity) >= 0:
+            product.quantity = int(new_quantity)  # Update the product quantity
+            product.save()  # Save the changes to the database
+            return redirect('product_list')  # Redirect to product list or details page
         else:
-            # Handle invalid input
-            return render(request, 'listings/update_quantity.html', {'product': product, 'error': 'Invalid quantity entered.'})
+            # Handle invalid quantity input
+            return render(request, 'listings/update_quantity.html', {'product': product, 'error': 'Veuillez entrer une quantité valide.'})
     
+    # GET request, display the form
     return render(request, 'listings/update_quantity.html', {'product': product})
 
 def tacheslist(request):
