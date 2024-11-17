@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from datetime import datetime
 from datetime import date
+from datetime import timedelta
 
 
 
@@ -30,6 +31,7 @@ class Livreur(models.Model):
         user = models.OneToOneField(User, null=True, on_delete=models.CASCADE)
         latitude = models.FloatField()
         longitude = models.FloatField()
+        phone = models.fields.CharField(max_length=100)
 
 
 
@@ -80,6 +82,7 @@ class LoadingDock(models.Model):
     address = models.CharField(max_length=255)
     photo = models.ImageField(upload_to='listings/media/commandesdetail', blank=True, null=True)
     description = models.TextField(blank=True)
+    link = models.URLField(max_length=5000, blank=True, null=True)
     place_id = models.CharField(max_length=200, null=True, blank=True)
 
 
@@ -159,8 +162,8 @@ class Route(models.Model):
 
 class Shift(models.Model):
     livreur = models.ForeignKey(Livreur, on_delete=models.CASCADE)
-    start_time = models.TimeField()
-    end_time = models.TimeField()
+    start_time = models.TimeField(blank=True, null=True)
+    end_time = models.TimeField(blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
     date = models.DateField(default=date.today)
 
@@ -316,6 +319,7 @@ class Product(models.Model):
          ('ÉQUIPEMENT POUR MONTAGE CANAPÉS','ÉQUIPEMENT POUR MONTAGE CANAPÉS'),
          ('ÉQUIPEMENT DE CUISSON','ÉQUIPEMENT DE CUISSON'),
          ('USTENSILES DE SERVICE','USTENSILES DE SERVICE'),
+         ('BREUVAGE','BREUVAGE'),
          ('ITEMS DIVERS','ITEMS DIVERS'))
 
 
@@ -332,14 +336,20 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
-class Checklist(models.Model):
+class Md(models.Model):
+    name = models.CharField(max_length=100)
+    user = models.OneToOneField(User, null=True, on_delete=models.CASCADE)
+    phone = models.CharField(max_length=100, null=True)
 
+    def __str__(self):
+        return self.name
+
+class Checklist(models.Model):
     STATUS_CHOICES = [
         ('en_cours', 'En cours'),
         ('valide', 'Validé'),
         ('refuse', 'Refusé'),
     ]
-
 
     name = models.CharField(max_length=100)
     products = models.ManyToManyField(Product, through='ChecklistItem')
@@ -350,10 +360,13 @@ class Checklist(models.Model):
     conseillere = models.CharField(max_length=100, blank=True)
     nb_convive = models.fields.CharField(null=True, blank=True, max_length=200, default=" ")
     heure_livraison = models.fields.CharField(null=True, blank=True, max_length=100, default=" ")
-    md = models.fields.CharField(null=True, blank=True, max_length=100, default=" ")
+    md = models.ForeignKey(Md, null=True, on_delete=models.SET_NULL, blank=True)
     added_on = models.DateTimeField(default=timezone.now)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='en_cours')
-
+    rapportmd = models.TextField(blank=True, null=True)
+    rapportrecup = models.TextField(blank=True, null=True)
+    commentairevente = models.TextField(blank=True, null=True)
+    
 
     def update_status(self):
         # Check if all items are 'valide'
@@ -368,10 +381,43 @@ class Checklist(models.Model):
 
     def __str__(self):
         return self.name
+    
+    
+    
 
+class ChecklistMDPhoto(models.Model):
+    checklist = models.ForeignKey(Checklist, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='listings/media/commandesdetail')
+
+class ChecklistRecupPhoto(models.Model):
+    checklist = models.ForeignKey(Checklist, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='listings/media/commandesdetail')
+
+class ChecklistDocument(models.Model):
+    checklist = models.ForeignKey(Checklist, on_delete=models.CASCADE)
+    document = models.FileField(upload_to='listings/media/commandesdetail')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Document for {self.checklist.name}"
+    
+    def save(self, *args, **kwargs):
+        # Set uploaded_at to 5 hours earlier only if it's being created (not updated)
+        if not self.pk:  # This checks if it's a new instance
+            self.uploaded_at = timezone.now() - timedelta(hours=5)
+        super().save(*args, **kwargs)
+    
+
+
+
+from django.core.exceptions import ValidationError
+from django.db import models
+
+from django.core.exceptions import ValidationError
+from django.db import models, transaction
+from django.utils import timezone
 
 class ChecklistItem(models.Model):
-
     STATUS_CHOICES = [
         ('en_cours', 'En cours'),
         ('valide', 'Validé'),
@@ -383,20 +429,91 @@ class ChecklistItem(models.Model):
     quantity = models.IntegerField(default=0, null=True)
     is_completed = models.BooleanField(default=False)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='en_cours')
+    consumed_quantity = models.PositiveIntegerField(default=0)  # Amount that has been consumed
+    unconsumed_quantity = models.PositiveIntegerField(default=0)  # Amount that remains unconsumed
+
 
     class Meta:
-        unique_together = ('checklist', 'product', 'status')  # Assure qu'un produit ne peut avoir qu'un seul statut dans une checklist
-
+        unique_together = ('checklist', 'product', 'status')
 
     def clean(self):
         super().clean()
         if ChecklistItem.objects.filter(checklist=self.checklist, product=self.product).exclude(id=self.id).exists():
-            raise ValidationError('This product already has a status in the same checklist.')
+            raise ValidationError('This product already has a status in this checklist.')
 
     def save(self, *args, **kwargs):
+        if self.pk is None:
+            quantity_difference = self.quantity
+            previous_quantity = 0
+        else:
+            original = ChecklistItem.objects.get(pk=self.pk)
+            quantity_difference = self.quantity - original.quantity
+            previous_quantity = original.quantity
+            if quantity_difference != 0:
+                QuantityChangeLog.objects.create(
+                    checklist_item=self,
+                    previous_quantity=previous_quantity,
+                    new_quantity=self.quantity,
+                    quantity_change=quantity_difference,
+                    changed_by=self._changed_by  # This should be set in the view
+                )
+
+                # Set status to 'en_cours' if quantity changes
+                self.status = 'en_cours'
+
         super().save(*args, **kwargs)
-        # Update checklist status whenever this item is saved
-        self.checklist.update_status()
+
+        if self.product:
+            self.product.adjust_quantity(-quantity_difference)
+
+    def delete(self, *args, **kwargs):
+        if self.product:
+            self.product.adjust_quantity(self.quantity)
+        super().delete(*args, **kwargs)
+
+class QuantityChangeLog(models.Model):
+    checklist_item = models.ForeignKey(ChecklistItem, on_delete=models.CASCADE)
+    previous_quantity = models.IntegerField()
+    new_quantity = models.IntegerField()
+    quantity_change = models.IntegerField()  # The difference between previous and new quantity
+    changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Change log for {self.checklist_item.product.name} - {self.timestamp}"
+
+
+class ChecklistItemChangeLog(models.Model):
+    ACTION_CHOICES = [
+        ('added', 'Added'),
+        ('modified', 'Modified'),
+        ('deleted', 'Deleted'),
+    ]
+    
+    checklist_item = models.ForeignKey(ChecklistItem, on_delete=models.CASCADE)
+    action = models.CharField(max_length=10, choices=ACTION_CHOICES)
+    changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    previous_quantity = models.IntegerField(null=True, blank=True)
+    previous_status = models.CharField(max_length=20, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.action} - {self.checklist_item.product.name} on {self.timestamp}"
+
+class ChecklistChangeLog(models.Model):
+    ACTION_CHOICES = [
+        ('added', 'Added'),
+        ('modified', 'Modified'),
+        ('deleted', 'Deleted'),
+    ]
+    
+    checklist = models.ForeignKey(Checklist, on_delete=models.CASCADE)
+    action = models.CharField(max_length=10, choices=ACTION_CHOICES)
+    changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.action} - Checklist ID {self.checklist.id} on {self.timestamp}"
 
 class Inventory(models.Model):
     item = models.ForeignKey(ItemInv, on_delete=models.CASCADE)
@@ -540,8 +657,3 @@ class OrderCuisine(models.Model):
 
     def __str__(self):
        return f"{self.item.name} ordered by {self.user.username}"
-
-
-
-
-

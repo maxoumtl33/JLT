@@ -1,0 +1,26 @@
+{% load custom_filters %}
+
+<!-- templates/listings/product_item.html -->
+<div class="col-12 d-flex align-items-center justify-content-between product-item">
+    <div class="product-info d-flex align-items-center">
+        <h6 class="product-name mb-0 me-3">{{ product.name }} 
+            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">({{ product.quantity }})</strong>
+        </h6>
+    </div>
+    <form id="checklistForm-{{ product.id }}" action="{% url 'add_to_checklist' checklist.id %}" method="post" class="d-flex align-items-center product-form justify-content-end">
+        {% csrf_token %}
+        <input type="hidden" name="product_id" value="{{ product.id }}">
+        <input type="hidden" name="product_name" value="{{ product.name }}">
+        <input type="hidden" name="status" id="status-{{ product.id }}" value="">
+        <input type="hidden" id="initial-quantity-{{ product.id }}" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}">
+        <div class="form-group d-flex align-items-center me-2">
+            <label for="quantity-{{ product.id }}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
+            <input type="number" class="form-control quantity text-center" 
+                   id="quantity-{{ product.id }}" name="quantity" min="0" 
+                   value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required style="width: 80px;">
+        </div>
+        <button type="button" onclick="submitChecklistForm({{ product.id }})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
+            <i class="fa-solid fa-cart-plus me-2"></i> Valider
+        </button>
+    </form>
+</div>

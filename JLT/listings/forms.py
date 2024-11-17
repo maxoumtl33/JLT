@@ -8,8 +8,18 @@ from .models import Phototaches
 from bootstrap_datepicker_plus.widgets import DateTimePickerInput
 from django.forms import inlineformset_factory
 from .models import Livraison, Photo
+from django.forms import modelformset_factory
 
+class ChecklistDocumentForm(forms.ModelForm):
+    class Meta:
+        model = ChecklistDocument
+        fields = ['document']
 
+ChecklistDocumentFormSet = modelformset_factory(
+    ChecklistDocument,
+    form=ChecklistDocumentForm,
+    extra=8  # Number of empty file upload fields displayed initially
+)
 
 
 class ChecklistItemForm(forms.ModelForm):
@@ -110,7 +120,7 @@ class LivraisonDragFormtoday(forms.ModelForm):
 class ShiftForm(forms.ModelForm):
     class Meta:
         model = Shift
-        fields = ['livreur', 'date', 'start_time', 'end_time', 'notes']
+        fields = ['livreur', 'date', 'start_time', 'notes']
 
 
 class LivraisonsVentesForm(forms.ModelForm):
@@ -165,7 +175,7 @@ class ChecklistForm(forms.ModelForm):
    nb_convive = forms.CharField(label='Nombre de convives', max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
    heure_livraison = forms.CharField(label='Heure de livraison', max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
    conseillere = forms.CharField(label='Nom du/de la conseiller(e)', max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
-   md = forms.CharField(label='Nom du MD', max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
+   
 
 
 class SearchFormInv(forms.Form):
@@ -174,6 +184,8 @@ class SearchFormInv(forms.Form):
 class SearchFormChecklist(forms.Form):
     query = forms.CharField(label='Checklist à chercher', max_length=100)
 
+class QuantityUpdateForm(forms.Form):
+    quantity = forms.IntegerField(min_value=0, label='Quantity')
 
 class DateFilterForm(forms.Form):
     date = forms.CharField(label='', widget=forms.DateInput(attrs={'type': 'date'}))
@@ -284,3 +296,49 @@ RecuplivreurItemFormset = inlineformset_factory(
     extra=9,  # Number of empty forms displayed initially
 
 )
+
+class ChecklistItemQForm(forms.ModelForm):
+    class Meta:
+        model = ChecklistItem
+        fields = ['quantity']  # Only include the quantity field
+
+    def __init__(self, *args, **kwargs):
+        checklist = kwargs.get('checklist')
+        product = kwargs.get('product')
+        super().__init__(*args, **kwargs)
+
+        # Store checklist and product for later use
+        self.checklist = checklist
+        self.product = product
+
+    def save(self, *args, **kwargs):
+        # Ensure that the checklist and product are set before saving
+        self.instance.checklist = self.checklist
+        self.instance.product = self.product  # Associate the product with this checklist item
+        return super().save(*args, **kwargs)
+
+
+
+class ChecklistMDPhotoForm(forms.ModelForm):
+    class Meta:
+        model = ChecklistMDPhoto
+        fields = ['image']
+
+ChecklistMDPhotoFormSet = modelformset_factory(ChecklistMDPhoto, form=ChecklistMDPhotoForm, extra=5)
+
+class ChecklistRecupPhotoForm(forms.ModelForm):
+    class Meta:
+        model = ChecklistRecupPhoto
+        fields = ['image']
+
+ChecklistRecupPhotoFormSet = modelformset_factory(ChecklistRecupPhoto, form=ChecklistRecupPhotoForm, extra=5)
+
+class RapportForm(forms.ModelForm):
+    class Meta:
+        model = Checklist
+        fields = ['rapportmd']
+
+class RapportRecupForm(forms.ModelForm):
+    class Meta:
+        model = Checklist
+        fields = ['rapportrecup']

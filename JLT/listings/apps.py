@@ -1,6 +1,7 @@
 from django.apps import AppConfig
 
-
-class ListingsConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
+class YourAppConfig(AppConfig):
     name = 'listings'
+
+    def ready(self):
+        import listings.signals  # Replace with your actual app name

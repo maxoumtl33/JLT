@@ -1,0 +1,36 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container py-5">
+        <!-- Heading -->
+        <h3 class="mb-4 text-center">Mise à jour de la quantité pour <strong>{{ product.name }}</strong></h3>
+
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-6">
+                <!-- Form -->
+                <form method="POST" action="{% url 'product_quantity_update' product.id %}" class="card p-4 shadow-sm">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="quantity" class="form-label">Quantité:</label>
+                        <input type="number" name="quantity" id="id_quantity" class="form-control" value="{{ product.quantity }}" required min="0" style="font-size: 1.1rem;">
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">Valider</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Optional: Auto-submit when quantity is updated -->
+    <script>
+        // Listen for input changes on the quantity field and auto-submit the form for instant updates
+        document.getElementById('id_quantity').addEventListener('input', function() {
+            this.form.submit();
+        });
+    </script>
+
+{% endblock %}

@@ -1,73 +1,129 @@
 {% extends 'listings/base.html' %}
 {% load static %}
+{% load custom_filters %}
 {% block content %}
 
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-
-
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    $(document).ready(function(){
-        $('.delete-btn').on('click', function(event){
-            event.preventDefault();
-            const button = $(this);
-            const url = button.data('url');
-            
-            $.ajax({
-                url: url,
-                type: 'POST',
-                data: {
-                    'csrfmiddlewaretoken': '{{ csrf_token }}'
-                },
-                success: function(response) {
-                    if (response.status === 'success') {
-                        button.closest('li').remove();  // Remove the item from the DOM
-                        alert(response.message);
-                    } else {
-                        alert(response.message);
-                    }
-                }
-            });
-        });
-    });
-
-    $(document).ready(function () {
-    // For incrementing quantity
-    $('.addAction').click(function () {
-        var productId = $(this).data('product-id'); // Get the product ID
-        var quantityInput = $('#quantity-' + productId); // Target the input field using the product ID
-        var currentQuantity = parseInt(quantityInput.val());
-        quantityInput.val(currentQuantity + 1);
-    });
-
-    // For decrementing quantity
-    $('.subtractAction').click(function () {
-        var productId = $(this).data('product-id'); // Get the product ID
-        var quantityInput = $('#quantity-' + productId); // Target the input field using the product ID
-        var currentQuantity = parseInt(quantityInput.val());
-        if (currentQuantity > 1) {
-            quantityInput.val(currentQuantity - 1);
-        }
-    });
-
-    // Ensure the quantity is correct on form submit
-    $('form').on('submit', function() {
-        var quantityInput = $(this).find('.quantity'); // Find the quantity input in this form
-        var quantity = parseInt(quantityInput.val());
-        if (isNaN(quantity) || quantity <= 0) {
-            alert('Please enter a valid quantity.'); // Optional: alert if quantity is invalid
-            return false; // Prevent form submission
-        }
-    });
-});
 
 
-
-
-
-</script>
 
 <style>
+
+    /* Styling for the document link */
+    .document-link {
+        text-decoration: none;
+        color: #007bff;
+        font-weight: 500;
+    }
+
+    /* Hover effect for links */
+    .document-link:hover {
+        color: #0056b3;
+        text-decoration: underline;
+    }
+
+   
+
+    /* Modal header and close button styling */
+    .modal-header {
+        padding: 15px;
+        position: relative;
+        background-color: #007bff;
+    }
+    .modal-header h5 {
+        font-size: 1.25rem;
+        font-weight: bold;
+    }
+    .btn-close-white {
+        filter: invert(1);
+    }
+
+    /* No documents message styling */
+    .no-documents-message {
+        font-size: 1rem;
+        color: #6c757d;
+        padding: 15px 0;
+    }
+
+.toggle-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        margin-bottom: 10px;
+        font-weight: 600;
+        color: #0056b3;
+        border: 1px solid #0056b3;
+        border-radius: 5px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.2s;
+    }
+    .toggle-btn:hover {
+        background-color: #0056b3;
+        color: white;
+    }
+
+    .rapport-section {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        margin-top: 15px;
+        transition: max-height 0.3s ease, opacity 0.3s ease;
+        overflow: hidden;
+    }
+    .rapport-section.hidden {
+        max-height: 0;
+        opacity: 0;
+        padding: 0 15px;
+    }
+
+    .photo-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+        margin-top: 10px;
+    }
+    .photo-item img {
+        width: 100%;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s;
+    }
+    .photo-item img:hover {
+        transform: scale(1.05);
+    }
+    /* Basic Layout Styling */
+.photo-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+/* Individual Photo Item */
+.photo-item {
+    position: relative;
+    cursor: pointer;
+}
+
+.checklist-photo {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.checklist-photo:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+
+
+
     .product-item {
         display: flex;
         align-items: center;
@@ -84,11 +140,7 @@
         height: 34px;
         text-align: center;
     }
-    .modal-body {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px; /* Space between rows if the content wraps */
-    }
+   
     .product-name {
         font-weight: bold;
         margin-right: 10px; /* Space between product name and buttons */
@@ -147,6 +199,134 @@
     .custom-submit-btn:hover {
         background-color: #0056b3; /* Darker shade on hover */
     }
+
+    .category-card {
+        width: 150px;
+        height: 150px;
+        background-color: #f8f9fa;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, background-color 0.3s ease;
+        font-size: 1em;
+        color: #343a40;
+        cursor: pointer;
+    }
+    .category-card:hover {
+        transform: translateY(-5px);
+        background-color: #e9ecef;
+    }
+    .category-card i {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+        color: #007bff;
+    }
+    .category-card span {
+        font-weight: bold;
+    }
+    .info-card {
+        flex: 1;
+        min-width: 250px;
+        background-color: white;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        font-size: 1em;
+        color: #333;
+    }
+    .info-card p {
+        margin: 0 0 10px;
+    }
+    .info-card p strong {
+        font-weight: 600;
+        color: #0056b3;
+    }
+    .icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    margin-right: 8px;
+    color: #007bff; /* Color similar to Font Awesome */
+}
+
+.icon-label {
+    font-size: 1rem;
+    color: #4a4a4a;
+    font-weight: 500;
+}
+
+/* Modal Background */
+#photoModal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        overflow: auto;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Modal Content Wrapper */
+    .modal-content-wrapper {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    /* Image Styling */
+    #modalImg {
+        max-width: 90%;
+        max-height: 80vh;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Close Button */
+    .close {
+        position: absolute;
+        top: 20px;
+        right: 40px;
+        color: #ffffff;
+        font-size: 40px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    /* Download Button */
+    .download-btn {
+        margin-top: 15px;
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        font-size: 18px;
+        text-decoration: none;
+        border-radius: 5px;
+        display: inline-flex;
+        align-items: center;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+        transition: background-color 0.3s;
+    }
+
+    .download-btn:hover {
+        background-color: #0056b3;
+    }
+
+    /* Icon in Download Button */
+    .download-btn i {
+        margin-right: 5px;
+    }
 </style>
 
 
@@ -159,8 +339,12 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto" >
                 <li class="nav-item">
+                    <a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModalDoc" style="margin-right: 20px;">
+                        <i class="fa-solid fa-file"></i><span>Documents</span></a>
+                </li>
+                <li class="nav-item">
                     <a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                        <i class="fa-solid fa-basket-shopping"></i><span>Mon panier</span></a>
+                        <i class="fa-solid fa-basket-shopping"></i><span>Mes produits</span></a>
                 </li>
                 <li class="nav-item">
                     <a  type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModals" style="margin-left: 20px;"><i class="fa-solid fa-pen-to-square"></i><span>Modifier</span></a>
@@ -176,502 +360,232 @@
 
 <div class="container mt-5">
     <hr>
-<h1>Checklist {{ checklist.name }}</h1>
-<br>
-<div style="display: flex;">
-<div style="margin-right: 30px;">
-<p><strong>Date événement:</strong> {{ checklist.date|date:"d/m/Y" }}</p>
-<p><strong>Lieu événement:</strong> {{ checklist.lieu }}</p>
-<p><strong>Nombre convives:</strong> {{ checklist.nb_convive }}</p>
-</div>
-<div style="margin-right: 30px;">
-<p><strong>Heure de livraison:</strong> {{ checklist.heure_livraison }}</p>
-<p><strong>Numéro de contrat:</strong> {{ checklist.num_contrat }}</p>
-</div>
-<div>
-<p><strong>Conseiller(e):</strong> {{ checklist.conseillere }}</p>
-<p><strong>Nom du MD:</strong> {{ checklist.md }}</p>
-</div>
-</div>
-
-<hr>
-
-<h2>Liste des objets disponibles par catégories</h2>
-<hr>
-<br>
-
-<div style="display: flex; justify-content: space-evenly; flex-wrap: wrap;">
-    <a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal3">
-        <span>ÉQUIPEMENT DE BASE</span></a>
-
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="font-size: 2em; color: #0056b3; font-weight: 600;">Checklist: {{ checklist.name }}</h1>
+    </div>
     
+    <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 20px; padding: 20px; background-color: #f8f9fa; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
+    
+        <div class="info-card">
+            <p><strong><i class="bi bi-calendar-event"></i> Date événement:</strong> {{ checklist.date|date:"d/m/Y" }}</p>
+            <p><strong><i class="bi bi-geo-alt"></i> Lieu événement:</strong> {{ checklist.lieu }}</p>
+            <p><strong><i class="bi bi-people"></i> Nombre convives:</strong> {{ checklist.nb_convive }}</p>
+        </div>
+    
+        <div class="info-card">
+            <p><strong><i class="bi bi-clock"></i> Heure de livraison:</strong> {{ checklist.heure_livraison }}</p>
+            <p><strong><i class="bi bi-file-earmark-text"></i> Numéro de contrat:</strong> {{ checklist.num_contrat }}</p>
+        </div>
+    
+        <div class="info-card">
+            <p><strong><i class="bi bi-person-circle"></i> Conseiller(e):</strong> {{ checklist.conseillere }}</p>
+            <p><strong><i class="bi bi-person-badge"></i> Nom du MD:</strong> {{ checklist.md }}</p>
+        </div>
+    
+    </div>
+    
+    <div style="text-align: center; margin-top: 20px; display: flex;">
+        <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#documentsModal" style="display: flex; margin-right: 20px; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);">
+            <i class="bi bi-folder"></i> Voir les documents
+        </button>
+        <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModalbreuvage" style="display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);">
+            <i class="fa-solid fa-champagne-glasses"></i>Ajouter breuvages
+        </button>
+    </div>
    
-    <div class="dropdown">
-        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="margin-bottom: 20px;">
-            JETABLE
-        </button>
-        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-            {% for product in products %}
-            {% if product.category == jetable %}
-            <li>
-                <div class="card" style="width: 18rem; margin-bottom: 10px;">
-                    <div class="card-body">
-                        
-                      <h5 class="card-title">{{ product.name }}</h5>
-                      {% if product.quantity <= 0 %}
-                      <h6 class="card-subtitle mb-2" style="color: red;">Quantité disponible: {{ product.quantity }}</h6>
-                      {% else %}
-                      <h6 class="card-subtitle mb-2" style="color: green;">Quantité disponible: {{ product.quantity }}</h6>
-                      {% endif %}
-                      <p class="card-text"><form action="{% url 'add_to_checklist' checklist.id %}" method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="product_id" value="{{ product.id }}">
-                        <input type="hidden" name="product_name" value="{{ product.name }}">
-                        <div class="form-group">
-                            <label for="quantity">Quantité à ajouter ou enlever:</label>
-                            <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="action">Ajouter ou Enlever:</label>
-                            <select class="form-control" id="action" name="action">
-                                <option value="add">Ajouter</option>
-                                <option value="subtract">Enlever</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-outline-success">valider</button>
-                    </form></p>
-                    </div>
-                  </div>
-            </li>
-            {% endif %}
+    
+    <hr>
+    
+
+<h2 style="text-align: center; font-size: 1.8em; margin-bottom: 20px;">Liste des produits disponibles par catégories</h2>
+<hr>
+
+<div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; padding: 20px;">
+    <!-- Example Card Layout -->
+    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModal3">
+        <i class="fas fa-toolbox"></i>
+        <span>ÉQUIPEMENT DE BASE</span>
+    </div>
+    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModaljetable">
+        <i class="fas fa-box-open"></i>
+        <span>JETABLE</span>
+    </div>
+    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalaccessoirededecor">
+        <i class="fas fa-couch"></i>
+        <span>ACCESSOIRES DE DÉCOR</span>
+    </div>
+    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalequipementdebar">
+        <i class="fas fa-wine-glass"></i>
+        <span>ÉQUIPEMENT DE BAR</span>
+    </div>
+    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalequipementpourservicecafe">
+        <i class="fas fa-coffee"></i>
+        <span>ÉQUIPEMENT POUR SERVICE A CAFÉ</span>
+    </div>
+    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModaltableetlinge">
+        <div class="icon-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 -960 960 960" width="52px" fill="currentColor" stroke="#e8eaed" stroke-width="5">
+                <path d="M173-600h614l-34-120H208l-35 120Zm307-60Zm192 140H289l-11 80h404l-10-80ZM160-160l49-360h-89q-20 0-31.5-16T82-571l57-200q4-13 14-21t24-8h606q14 0 24 8t14 21l57 200q5 19-6.5 35T840-520h-88l48 360h-80l-27-200H267l-27 200h-80Z"/>
+            </svg>
+        </div>
+        <span class="icon-label">TABLE ET LINGE DE TABLE</span>
+    </div>
+    
+    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalverrerie">
+        <i class="fas fa-glass-martini-alt"></i>
+        <span>VERRERIE</span>
+    </div>
+    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalporcelaine">
+        <i class="fas fa-utensils"></i>
+        <span>PORCELAINE ET COUTELLERIE</span>
+    </div>
+    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalmontage">
+        <i class="fas fa-concierge-bell"></i>
+        <span>ÉQUIPEMENT POUR MONTAGE CANAPÉS</span>
+    </div>
+    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalcuisson">
+        <i class="fas fa-fire"></i>
+        <span>ÉQUIPEMENT DE CUISSON</span>
+    </div>
+    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalservice">
+        <i class="fas fa-spoon"></i>
+        <span>USTENSILES DE SERVICE</span>
+    </div>
+    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalitemsdivers">
+        <i class="fas fa-puzzle-piece"></i>
+        <span>ITEMS DIVERS</span>
+    </div>
+</div>
+
+<hr>
+<h2>Rapports</h2>
+<hr>
+
+<!-- Display RapportMD and RapportRecup Buttons -->
+<button type="button" onclick="toggleSection('rapportmd-section')" class="toggle-btn">
+    <i class="bi bi-file-earmark-text"></i> Voir rapport événement
+</button>
+<button type="button" onclick="toggleSection('rapportbreuvage-section')" class="toggle-btn">
+    <i class="fa-solid fa-champagne-glasses"></i> Voir rapport breuvage
+</button>
+<button type="button" onclick="toggleSection('rapportrecup-section')" class="toggle-btn">
+    <i class="bi bi-file-earmark-text"></i> Voir rapport récupération
+</button>
+
+
+<!-- RapportMD Section -->
+<div id="rapportmd-section" class="rapport-section hidden">
+    <h3>Rapport événement</h3>
+    <p>{{ checklist.rapportmd }}</p>
+</div>
+
+<!-- RapportBreuvage Section -->
+<div id="rapportbreuvage-section" class="rapport-section hidden">
+    <h3>Rapport Breuvage</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Produit</th>
+                <th scope="col">Total</th>
+                <th scope="col">Restant</th>
+                <th scope="col">Consommé</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for breuvage in breuvages %}
+                <tr>
+                    <td>{{ breuvage.product.name }}</td>
+                    <td>{{ breuvage.quantity }}</td>
+                    <td>{{ breuvage.consumed_quantity }}</td>
+                    <td>{{ breuvage.quantity|subtract:breuvage.consumed_quantity }}</td>
+                </tr>
             {% endfor %}
-    </div>
-
-    <div class="dropdown">
-        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="margin-bottom: 20px;">
-            ACCESSOIRES DE DÉCOR
-        </button>
-        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                {% for product in products %}
-                {% if product.category == accessoirededecor %}
-                <li>
-                    <div class="card" style="width: 18rem; margin-bottom: 10px;">
-                        <div class="card-body">
-                            
-                          <h5 class="card-title">{{ product.name }}</h5>
-                          {% if product.quantity <= 0 %}
-                          <h6 class="card-subtitle mb-2" style="color: red;">Quantité disponible: {{ product.quantity }}</h6>
-                          {% else %}
-                          <h6 class="card-subtitle mb-2" style="color: green;">Quantité disponible: {{ product.quantity }}</h6>
-                          {% endif %}
-                          <p class="card-text"><form action="{% url 'add_to_checklist' checklist.id %}" method="post">
-                            {% csrf_token %}
-                            <input type="hidden" name="product_id" value="{{ product.id }}">
-                            <input type="hidden" name="product_name" value="{{ product.name }}">
-                            <div class="form-group">
-                                <label for="quantity">Quantité à ajouter ou enlever:</label>
-                                <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="action">Ajouter ou Enlever:</label>
-                                <select class="form-control" id="action" name="action">
-                                    <option value="add">Ajouter</option>
-                                    <option value="subtract">Enlever</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-outline-success">valider</button>
-                        </form></p>
-                        </div>
-                      </div>
-                </li>
-                {% endif %}
-                {% endfor %}
-                
-            </ul>
-    </div>
-    <div class="dropdown">
-        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="margin-bottom: 20px;">
-            ÉQUIPEMENT DE BAR
-        </button>
-        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-            {% for product in products %}
-            {% if product.category == equipementdebar %}
-            <li>
-                <div class="card" style="width: 18rem; margin-bottom: 10px;">
-                    <div class="card-body">
-                        
-                      <h5 class="card-title">{{ product.name }}</h5>
-                      {% if product.quantity <= 0 %}
-                      <h6 class="card-subtitle mb-2" style="color: red;">Quantité disponible: {{ product.quantity }}</h6>
-                      {% else %}
-                      <h6 class="card-subtitle mb-2" style="color: green;">Quantité disponible: {{ product.quantity }}</h6>
-                      {% endif %}
-                      <p class="card-text"><form action="{% url 'add_to_checklist' checklist.id %}" method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="product_id" value="{{ product.id }}">
-                        <input type="hidden" name="product_name" value="{{ product.name }}">
-                        <div class="form-group">
-                            <label for="quantity">Quantité à ajouter ou enlever:</label>
-                            <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="action">Ajouter ou Enlever:</label>
-                            <select class="form-control" id="action" name="action">
-                                <option value="add">Ajouter</option>
-                                <option value="subtract">Enlever</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-outline-success">valider</button>
-                    </form></p>
-                    </div>
-                  </div>
-            </li>
-            {% endif %}
-            {% endfor %}
-    </div>
-
-    <div class="dropdown">
-    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="margin-bottom: 20px;">
-        ÉQUIPEMENT POUR SERVICE CAFÉ
-    </button>
-    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                {% for product in products %}
-                {% if product.category == equipementpourservicecafe %}
-                <li>
-                    <div class="card" style="width: 18rem; margin-bottom: 10px;">
-                        <div class="card-body">
-                            
-                          <h5 class="card-title">{{ product.name }}</h5>
-                          {% if product.quantity <= 0 %}
-                          <h6 class="card-subtitle mb-2" style="color: red;">Quantité disponible: {{ product.quantity }}</h6>
-                          {% else %}
-                          <h6 class="card-subtitle mb-2" style="color: green;">Quantité disponible: {{ product.quantity }}</h6>
-                          {% endif %}
-                          <p class="card-text"><form action="{% url 'add_to_checklist' checklist.id %}" method="post">
-                            {% csrf_token %}
-                            <input type="hidden" name="product_id" value="{{ product.id }}">
-                            <input type="hidden" name="product_name" value="{{ product.name }}">
-                            <div class="form-group">
-                                <label for="quantity">Quantité à ajouter ou enlever:</label>
-                                <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="action">Ajouter ou Enlever:</label>
-                                <select class="form-control" id="action" name="action">
-                                    <option value="add">Ajouter</option>
-                                    <option value="subtract">Enlever</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-outline-success">valider</button>
-                        </form></p>
-                        </div>
-                      </div>
-                </li>
-                {% endif %}
-                {% endfor %}
-                
-            </ul>
-    </div>
-    <div class="dropdown">
-    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="margin-bottom: 20px;">
-        ITEMS DIVERS
-    </button>
-    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                {% for product in products %}
-                {% if product.category == itemsdivers %}
-                <li>
-                    <div class="card" style="width: 18rem; margin-bottom: 10px;">
-                        <div class="card-body">
-                            
-                          <h5 class="card-title">{{ product.name }}</h5>
-                          {% if product.quantity <= 0 %}
-                          <h6 class="card-subtitle mb-2" style="color: red;">Quantité disponible: {{ product.quantity }}</h6>
-                          {% else %}
-                          <h6 class="card-subtitle mb-2" style="color: green;">Quantité disponible: {{ product.quantity }}</h6>
-                          {% endif %}
-                          <p class="card-text"><form action="{% url 'add_to_checklist' checklist.id %}" method="post">
-                            {% csrf_token %}
-                            <input type="hidden" name="product_id" value="{{ product.id }}">
-                            <input type="hidden" name="product_name" value="{{ product.name }}">
-                            <div class="form-group">
-                                <label for="quantity">Quantité à ajouter ou enlever:</label>
-                                <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="action">Ajouter ou Enlever:</label>
-                                <select class="form-control" id="action" name="action">
-                                    <option value="add">Ajouter</option>
-                                    <option value="subtract">Enlever</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-outline-success">valider</button>
-                        </form></p>
-                        </div>
-                      </div>
-                </li>
-                {% endif %}
-                {% endfor %}
-                
-            </ul>
-    </div>
-
-    <div class="dropdown">
-    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="margin-bottom: 20px;">
-        TABLE ET LINGE DE TABLE
-    </button>
-    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                {% for product in products %}
-                {% if product.category == tableetlinge %}
-                <li>
-                    <div class="card" style="width: 18rem; margin-bottom: 10px;">
-                        <div class="card-body">
-                            
-                          <h5 class="card-title">{{ product.name }}</h5>
-                          {% if product.quantity <= 0 %}
-                          <h6 class="card-subtitle mb-2" style="color: red;">Quantité disponible: {{ product.quantity }}</h6>
-                          {% else %}
-                          <h6 class="card-subtitle mb-2" style="color: green;">Quantité disponible: {{ product.quantity }}</h6>
-                          {% endif %}
-                          <p class="card-text"><form action="{% url 'add_to_checklist' checklist.id %}" method="post">
-                            {% csrf_token %}
-                            <input type="hidden" name="product_id" value="{{ product.id }}">
-                            <input type="hidden" name="product_name" value="{{ product.name }}">
-                            <div class="form-group">
-                                <label for="quantity">Quantité à ajouter ou enlever:</label>
-                                <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="action">Ajouter ou Enlever:</label>
-                                <select class="form-control" id="action" name="action">
-                                    <option value="add">Ajouter</option>
-                                    <option value="subtract">Enlever</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-outline-success">valider</button>
-                        </form></p>
-                        </div>
-                      </div>
-                </li>
-                {% endif %}
-                {% endfor %}
-            </ul>
-    </div>
-    <div class="dropdown">
-    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="margin-bottom: 20px;">
-        VERRERIE
-    </button>
-    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                {% for product in products %}
-                {% if product.category == verrerie %}
-                <li>
-                    <div class="card" style="width: 18rem; margin-bottom: 10px;">
-                        <div class="card-body">
-                            
-                          <h5 class="card-title">{{ product.name }}</h5>
-                          {% if product.quantity <= 0 %}
-                          <h6 class="card-subtitle mb-2" style="color: red;">Quantité disponible: {{ product.quantity }}</h6>
-                          {% else %}
-                          <h6 class="card-subtitle mb-2" style="color: green;">Quantité disponible: {{ product.quantity }}</h6>
-                          {% endif %}
-                          <p class="card-text"><form action="{% url 'add_to_checklist' checklist.id %}" method="post">
-                            {% csrf_token %}
-                            <input type="hidden" name="product_id" value="{{ product.id }}">
-                            <input type="hidden" name="product_name" value="{{ product.name }}">
-                            <div class="form-group">
-                                <label for="quantity">Quantité à ajouter ou enlever:</label>
-                                <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="action">Ajouter ou Enlever:</label>
-                                <select class="form-control" id="action" name="action">
-                                    <option value="add">Ajouter</option>
-                                    <option value="subtract">Enlever</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-outline-success">valider</button>
-                        </form></p>
-                        </div>
-                      </div>
-                </li>
-                {% endif %}
-                {% endfor %}
-                
-            </ul>
-    </div>
-
-    <div class="dropdown">
-    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="margin-bottom: 20px;">
-        PORCELAINE ET COUTELLERIE
-    </button>
-    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                {% for product in products %}
-                {% if product.category == porcelaine %}
-                <li>
-                    <div class="card" style="width: 18rem; margin-bottom: 10px;">
-                        <div class="card-body">
-                            
-                          <h5 class="card-title">{{ product.name }}</h5>
-                          {% if product.quantity <= 0 %}
-                          <h6 class="card-subtitle mb-2" style="color: red;">Quantité disponible: {{ product.quantity }}</h6>
-                          {% else %}
-                          <h6 class="card-subtitle mb-2" style="color: green;">Quantité disponible: {{ product.quantity }}</h6>
-                          {% endif %}
-                          <p class="card-text"><form action="{% url 'add_to_checklist' checklist.id %}" method="post">
-                            {% csrf_token %}
-                            <input type="hidden" name="product_id" value="{{ product.id }}">
-                            <input type="hidden" name="product_name" value="{{ product.name }}">
-                            <div class="form-group">
-                                <label for="quantity">Quantité à ajouter ou enlever:</label>
-                                <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="action">Ajouter ou Enlever:</label>
-                                <select class="form-control" id="action" name="action">
-                                    <option value="add">Ajouter</option>
-                                    <option value="subtract">Enlever</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-outline-success">valider</button>
-                        </form></p>
-                        </div>
-                      </div>
-                </li>
-                {% endif %}
-                {% endfor %}
-                
-            </ul>
-    </div>
-    <div class="dropdown">
-    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="margin-bottom: 20px;">
-        ÉQUIPEMENT POUR MONTAGE CANAPÉS
-    </button>
-    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                {% for product in products %}
-                {% if product.category == montage %}
-                <li>
-                    <div class="card" style="width: 18rem; margin-bottom: 10px;">
-                        <div class="card-body">
-                            
-                          <h5 class="card-title">{{ product.name }}</h5>
-                          {% if product.quantity <= 0 %}
-                          <h6 class="card-subtitle mb-2" style="color: red;">Quantité disponible: {{ product.quantity }}</h6>
-                          {% else %}
-                          <h6 class="card-subtitle mb-2" style="color: green;">Quantité disponible: {{ product.quantity }}</h6>
-                          {% endif %}
-                          <p class="card-text"><form action="{% url 'add_to_checklist' checklist.id %}" method="post">
-                            {% csrf_token %}
-                            <input type="hidden" name="product_id" value="{{ product.id }}">
-                            <input type="hidden" name="product_name" value="{{ product.name }}">
-                            <div class="form-group">
-                                <label for="quantity">Quantité à ajouter ou enlever:</label>
-                                <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="action">Ajouter ou Enlever:</label>
-                                <select class="form-control" id="action" name="action">
-                                    <option value="add">Ajouter</option>
-                                    <option value="subtract">Enlever</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-outline-success">valider</button>
-                        </form></p>
-                        </div>
-                      </div>
-                </li>
-                {% endif %}
-                {% endfor %}
-                
-            </ul>
-    </div>
-
-    <div class="dropdown">
-    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="margin-bottom: 20px;">
-        ÉQUIPEMENT DE CUISSON
-    </button>
-    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                {% for product in products %}
-                {% if product.category == cuisson %}
-                <li>
-                    <div class="card" style="width: 18rem; margin-bottom: 10px;">
-                        <div class="card-body">
-                            
-                          <h5 class="card-title">{{ product.name }}</h5>
-                          {% if product.quantity <= 0 %}
-                          <h6 class="card-subtitle mb-2" style="color: red;">Quantité disponible: {{ product.quantity }}</h6>
-                          {% else %}
-                          <h6 class="card-subtitle mb-2" style="color: green;">Quantité disponible: {{ product.quantity }}</h6>
-                          {% endif %}
-                          <p class="card-text"><form action="{% url 'add_to_checklist' checklist.id %}" method="post">
-                            {% csrf_token %}
-                            <input type="hidden" name="product_id" value="{{ product.id }}">
-                            <input type="hidden" name="product_name" value="{{ product.name }}">
-                            <div class="form-group">
-                                <label for="quantity">Quantité à ajouter ou enlever:</label>
-                                <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="action">Ajouter ou Enlever:</label>
-                                <select class="form-control" id="action" name="action">
-                                    <option value="add">Ajouter</option>
-                                    <option value="subtract">Enlever</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-outline-success">valider</button>
-                        </form></p>
-                        </div>
-                      </div>
-                </li>
-                {% endif %}
-                {% endfor %}
-                
-            </ul>
-    </div>
-    <div class="dropdown">
-    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="margin-bottom: 20px;">
-        USTENSILES DE SERVICE
-    </button>
-    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                {% for product in products %}
-                {% if product.category == service %}
-                <li>
-                    <div class="card" style="width: 18rem; margin-bottom: 10px;">
-                        <div class="card-body">
-                            
-                          <h5 class="card-title">{{ product.name }}</h5>
-                          {% if product.quantity <= 0 %}
-                          <h6 class="card-subtitle mb-2" style="color: red;">Quantité disponible: {{ product.quantity }}</h6>
-                          {% else %}
-                          <h6 class="card-subtitle mb-2" style="color: green;">Quantité disponible: {{ product.quantity }}</h6>
-                          {% endif %}
-                          <p class="card-text"><form action="{% url 'add_to_checklist' checklist.id %}" method="post">
-                            {% csrf_token %}
-                            <input type="hidden" name="product_id" value="{{ product.id }}">
-                            <input type="hidden" name="product_name" value="{{ product.name }}">
-                            <div class="form-group">
-                                <label for="quantity">Quantité à ajouter ou enlever:</label>
-                                <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="action">Ajouter ou Enlever:</label>
-                                <select class="form-control" id="action" name="action">
-                                    <option value="add">Ajouter</option>
-                                    <option value="subtract">Enlever</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-outline-success">valider</button>
-                        </form></p>
-                        </div>
-                      </div>
-                </li>
-                {% endif %}
-                {% endfor %}
-                
-            </ul>
-    </div>
-
+        </tbody>
+    </table>
 </div>
 
 
+
+<!-- RapportRecup Section -->
+<div id="rapportrecup-section" class="rapport-section hidden">
+    <h3>Rapport Récupération</h3>
+    <p>{{ checklist.rapportrecup }}</p>
+</div>
+
+<hr>
+<h2>Photos</h2>
+<hr>
+
+<!-- Display Photo Buttons -->
+<button type="button" onclick="toggleSection('photo-gallery-evenement')" class="toggle-btn">
+    <i class="bi bi-image"></i> Voir photos événement
+</button>
+<button type="button" onclick="toggleSection('photo-gallery-recup')" class="toggle-btn">
+    <i class="bi bi-image"></i> Voir photos récupération
+</button>
+
+<!-- ChecklistMDPhoto Section -->
+<div id="photo-gallery-evenement" class="rapport-section hidden">
+    <h3>Photos événement</h3>
+    <div class="photo-gallery">
+        {% for photo in md_photos %}
+            <div class="photo-item">
+                <img src="{{ photo.image.url }}" alt="MD Photo" class="checklist-photo" onclick="openModal('{{ photo.image.url }}')" />
+            </div>
+        {% empty %}
+            <p>Pas de photos.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- ChecklistRecupPhoto Section -->
+<div id="photo-gallery-recup" class="rapport-section hidden">
+    <h3>Photos récupération</h3>
+    <div class="photo-gallery">
+        {% for photo in recup_photos %}
+            <div class="photo-item">
+                <img src="{{ photo.image.url }}" alt="Recup Photo" class="checklist-photo" onclick="openModal('{{ photo.image.url }}')" />
+            </div>
+        {% empty %}
+            <p>Pas de photos.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Modal Structure -->
+<div id="photoModal" class="modal" onclick="closeModal()">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <div class="modal-content-wrapper">
+        <img class="modal-content" id="modalImg">
+        <a id="downloadBtn" class="download-btn" href="#" download>
+            <i class="fa fa-download"></i> Télécharger
+        </a>
+    </div>
+</div>
+
+
+<div class="modal fade" id="documentsModal" tabindex="-1" aria-labelledby="documentsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title mx-auto" id="documentsModalLabel">Documents</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group">
+                    {% for document in checklist_documents %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <a href="{{ document.document.url }}" target="_blank">Voir document</a>
+                            <span class="text-muted">{{ document.uploaded_at|date:"d M Y, H:i" }}</span>
+                        </li>
+                    {% empty %}
+                        <p class="no-photos-message">Pas de documents pour cette checklist.</p>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
 
   
   <!-- Modal -->
@@ -679,7 +593,7 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Objets dans la checklist</h5>
+          <h5 class="modal-title" id="exampleModalLabel">Produits dans la checklist</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
@@ -711,74 +625,47 @@
     </div>
   </div>
 
-  <div class="modal fade modal-xlg" id="exampleModals" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Modifier Checklist</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-            <form action="" method=POST >
-                {% csrf_token %}
-                {{ formbis.as_p }}
-                <input type="submit" value="valider" class="btn btn-primary">
-              </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal fade modal-xlg" id="exampleModal3" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <!-- Modal for modifying checklist -->
+<div class="modal fade modal-xlg" id="exampleModals" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Ajouter les produits</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Modifier Checklist</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="container-fluid">
-                    <div class="row gy-3">
-                        {% for product in products %}
-                            {% if product.category == equipementdebase %}
-                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
-                                    <div class="product-info d-flex align-items-center">
-                                        <h6 class="product-name mb-0 me-3">{{ product.name }} 
-                                            {% if product.quantity <= 0 %}
-                                                <strong style="color: red;">({{ product.quantity }})</strong>
-                                            {% else %}
-                                                <strong style="color: green;">({{ product.quantity }})</strong>
-                                            {% endif %}
-                                        </h6>
-                                    </div>
-                                    <form id="checklistForm-{{ product.id }}" action="{% url 'add_to_checklist' checklist.id %}" method="post" class="d-flex align-items-center product-form justify-content-end">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="product_id" value="{{ product.id }}">
-                                        <input type="hidden" name="product_name" value="{{ product.name }}">
+                <form action="" method="POST">
+                    {% csrf_token %}
+                    {{ formbis.as_p }}
+                    <input type="submit" value="Valider" class="btn btn-primary" name="submit_checklist">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-                                        <div class="form-group d-flex align-items-center me-2">
-                                            <div class="input-group">
-                                                <button type="button" class="btn custom-btn-minus subtractAction" data-product-id="{{ product.id }}" title="Réduire la quantité">
-                                                    <i class="fa-solid fa-minus"></i>
-                                                </button>
-                                                <input type="number" class="form-control quantity text-center mx-1" id="quantity-{{ product.id }}" name="quantity" min="1" value="1" required style="width: 60px;">
-                                                <button type="button" class="btn custom-btn-plus addAction" data-product-id="{{ product.id }}" title="Augmenter la quantité">
-                                                    <i class="fa-solid fa-plus"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <button type="submit" name="action" value="add" class="btn custom-submit-btn d-flex align-items-center">
-                                            <i class="fa-solid fa-cart-plus me-2"></i> Ajouter
-                                        </button> <!-- Submit button -->
-                                    </form>
-                                </div>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                </div>
+<!-- Modal for document upload -->
+<div class="modal fade modal-xlg" id="exampleModalDoc" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Télécharger documents</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ document_formset.management_form }}
+                    
+                    {% for form in document_formset %}
+                        {{ form.as_p }}
+                    {% endfor %}
+                
+                    <button type="submit" name="submit_documents" class="btn btn-primary">Ajouter Document</button>
+                </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
@@ -789,9 +676,1015 @@
 
 
 
+
+
+
+<div class="modal fade modal-xlg" id="exampleModal3" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <!-- Search Bar -->
+                    <div class="input-group mb-3">
+                        <input type="text" id="productSearch" class="form-control" placeholder="Rechercher un produit par nom">
+                        
+                    </div>
+
+                    <div class="row gy-3" id="productList">
+                        {% for product in products %}
+                        {% if product.category == equipementdebase %}
+                            {% include 'listings/product_item.html' with product=product %}
+                        {% endif %}    
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade modal-xlg" id="exampleModaljetable" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <!-- Search Bar -->
+                    <div class="input-group mb-3">
+                        <input type="text" id="productSearch1" class="form-control" placeholder="Rechercher un produit par nom">
+                        
+                    </div>
+
+                    <div class="row gy-3" id="productList1">
+                        {% for product in products %}
+                        {% if product.category == jetable %}
+                            {% include 'listings/product_item.html' with product=product %}
+                        {% endif %}    
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade modal-xlg" id="exampleModalaccessoirededecor" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <!-- Search Bar -->
+                    <div class="input-group mb-3">
+                        <input type="text" id="productSearch2" class="form-control" placeholder="Rechercher un produit par nom">
+                        
+                    </div>
+
+                    <div class="row gy-3" id="productList2">
+                        {% for product in products %}
+                        {% if product.category == accessoirededecor %}
+                            {% include 'listings/product_item.html' with product=product %}
+                        {% endif %}    
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade modal-xlg" id="exampleModalequipementdebar" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <!-- Search Bar -->
+                    <div class="input-group mb-3">
+                        <input type="text" id="productSearch3" class="form-control" placeholder="Rechercher un produit par nom">
+                        
+                    </div>
+
+                    <div class="row gy-3" id="productList3">
+                        {% for product in products %}
+                        {% if product.category == equipementdebar %}
+                            {% include 'listings/product_item.html' with product=product %}
+                        {% endif %}    
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade modal-xlg" id="exampleModalequipementpourservicecafe" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <!-- Search Bar -->
+                    <div class="input-group mb-3">
+                        <input type="text" id="productSearch4" class="form-control" placeholder="Rechercher un produit par nom">
+                        
+                    </div>
+
+                    <div class="row gy-3" id="productList4">
+                        {% for product in products %}
+                        {% if product.category == equipementpourservicecafe %}
+                            {% include 'listings/product_item.html' with product=product %}
+                        {% endif %}    
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade modal-xlg" id="exampleModalitemsdivers" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <!-- Search Bar -->
+                    <div class="input-group mb-3">
+                        <input type="text" id="productSearch5" class="form-control" placeholder="Rechercher un produit par nom">
+                        
+                    </div>
+
+                    <div class="row gy-3" id="productList5">
+                        {% for product in products %}
+                        {% if product.category == itemsdivers %}
+                            {% include 'listings/product_item.html' with product=product %}
+                        {% endif %}    
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade modal-xlg" id="exampleModaltableetlinge" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <!-- Search Bar -->
+                    <div class="input-group mb-3">
+                        <input type="text" id="productSearch6" class="form-control" placeholder="Rechercher un produit par nom">
+                        
+                    </div>
+
+                    <div class="row gy-3" id="productList6">
+                        {% for product in products %}
+                        {% if product.category == tableetlinge %}
+                            {% include 'listings/product_item.html' with product=product %}
+                        {% endif %}    
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade modal-xlg" id="exampleModalverrerie" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <!-- Search Bar -->
+                    <div class="input-group mb-3">
+                        <input type="text" id="productSearch7" class="form-control" placeholder="Rechercher un produit par nom">
+                        
+                    </div>
+
+                    <div class="row gy-3" id="productList7">
+                        {% for product in products %}
+                        {% if product.category == verrerie %}
+                            {% include 'listings/product_item.html' with product=product %}
+                        {% endif %}    
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade modal-xlg" id="exampleModalporcelaine" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <!-- Search Bar -->
+                    <div class="input-group mb-3">
+                        <input type="text" id="productSearch8" class="form-control" placeholder="Rechercher un produit par nom">
+                        
+                    </div>
+
+                    <div class="row gy-3" id="productList8">
+                        {% for product in products %}
+                        {% if product.category == porcelaine %}
+                            {% include 'listings/product_item.html' with product=product %}
+                        {% endif %}    
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade modal-xlg" id="exampleModalmontage" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <!-- Search Bar -->
+                    <div class="input-group mb-3">
+                        <input type="text" id="productSearch9" class="form-control" placeholder="Rechercher un produit par nom">
+                        
+                    </div>
+
+                    <div class="row gy-3" id="productList9">
+                        {% for product in products %}
+                        {% if product.category == montage %}
+                            {% include 'listings/product_item.html' with product=product %}
+                        {% endif %}    
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade modal-xlg" id="exampleModalcuisson" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <!-- Search Bar -->
+                    <div class="input-group mb-3">
+                        <input type="text" id="productSearch10" class="form-control" placeholder="Rechercher un produit par nom">
+                        
+                    </div>
+
+                    <div class="row gy-3" id="productList10">
+                        {% for product in products %}
+                        {% if product.category == cuisson %}
+                            {% include 'listings/product_item.html' with product=product %}
+                        {% endif %}    
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade modal-xlg" id="exampleModalservice" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <!-- Search Bar -->
+                    <div class="input-group mb-3">
+                        <input type="text" id="productSearch11" class="form-control" placeholder="Rechercher un produit par nom">
+                        
+                    </div>
+
+                    <div class="row gy-3" id="productList11">
+                        {% for product in products %}
+                        {% if product.category == service %}
+                            {% include 'listings/product_item.html' with product=product %}
+                        {% endif %}    
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade modal-xlg" id="exampleModalbreuvage" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <!-- Search Bar -->
+                    <div class="input-group mb-3">
+                        <input type="text" id="productSearch12" class="form-control" placeholder="Rechercher un produit par nom">
+                        
+                    </div>
+
+                    <div class="row gy-3" id="productList12">
+                        {% for product in products %}
+                        {% if product.category == breuvage %}
+                            {% include 'listings/product_item.html' with product=product %}
+                        {% endif %}    
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
   </div>
 
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+<script>
+
+document.getElementById('productSearch').addEventListener('input', function() {
+    const query = this.value;
+    fetch(`{% url 'search_productsbase' checklist.id %}?query=${query}`)
+        .then(response => response.json())
+        .then(data => {
+            const productList = document.getElementById('productList');
+            productList.innerHTML = '';
+            data.products.forEach(product => {
+                const productHTML = `
+                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                        <div class="product-info d-flex align-items-center">
+                            <h6 class="product-name mb-0 me-3">${product.name} 
+                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                            </h6>
+                        </div>
+                        <form id="checklistForm-${product.id}" action="{% url 'add_to_checklist' checklist.id %}" method="post" class="d-flex align-items-center product-form justify-content-end">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="${product.id}">
+                            <input type="hidden" name="product_name" value="${product.name}">
+                            <input type="hidden" name="status" id="status-${product.id}" value="">
+                            <input type="hidden" id="initial-quantity-${product.id}" value="${product.checklist_quantity || 0}">
+
+                            <div class="form-group d-flex align-items-center me-2">
+                                <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
+                                <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
+                            </div>
+                            <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
+                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                            </button>
+                        </form>
+                    </div>
+                `;
+                productList.insertAdjacentHTML('beforeend', productHTML);
+            });
+        });
+});
+
+document.getElementById('productSearch1').addEventListener('input', function() {
+    const query = this.value;
+    fetch(`{% url 'search_productsjetable' checklist.id %}?query=${query}`)
+        .then(response => response.json())
+        .then(data => {
+            const productList = document.getElementById('productList1');
+            productList.innerHTML = '';
+            data.products.forEach(product => {
+                const productHTML = `
+                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                        <div class="product-info d-flex align-items-center">
+                            <h6 class="product-name mb-0 me-3">${product.name} 
+                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                            </h6>
+                        </div>
+                        <form id="checklistForm-${product.id}" action="{% url 'add_to_checklist' checklist.id %}" method="post" class="d-flex align-items-center product-form justify-content-end">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="${product.id}">
+                            <input type="hidden" name="product_name" value="${product.name}">
+                            <input type="hidden" name="status" id="status-${product.id}" value="">
+                            <input type="hidden" id="initial-quantity-${product.id}" value="${product.checklist_quantity || 0}">
+
+                            <div class="form-group d-flex align-items-center me-2">
+                                <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
+                                <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
+                            </div>
+                            <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
+                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                            </button>
+                        </form>
+                    </div>
+                `;
+                productList.insertAdjacentHTML('beforeend', productHTML);
+            });
+        });
+});
+
+document.getElementById('productSearch2').addEventListener('input', function() {
+    const query = this.value;
+    fetch(`{% url 'search_productsdecor' checklist.id %}?query=${query}`)
+        .then(response => response.json())
+        .then(data => {
+            const productList = document.getElementById('productList2');
+            productList.innerHTML = '';
+            data.products.forEach(product => {
+                const productHTML = `
+                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                        <div class="product-info d-flex align-items-center">
+                            <h6 class="product-name mb-0 me-3">${product.name} 
+                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                            </h6>
+                        </div>
+                        <form id="checklistForm-${product.id}" action="{% url 'add_to_checklist' checklist.id %}" method="post" class="d-flex align-items-center product-form justify-content-end">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="${product.id}">
+                            <input type="hidden" name="product_name" value="${product.name}">
+                            <input type="hidden" name="status" id="status-${product.id}" value="">
+                            <input type="hidden" id="initial-quantity-${product.id}" value="${product.checklist_quantity || 0}">
+
+                            <div class="form-group d-flex align-items-center me-2">
+                                <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
+                                <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
+                            </div>
+                            <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
+                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                            </button>
+                        </form>
+                    </div>
+                `;
+                productList.insertAdjacentHTML('beforeend', productHTML);
+            });
+        });
+});
+
+document.getElementById('productSearch3').addEventListener('input', function() {
+    const query = this.value;
+    fetch(`{% url 'search_productsbar' checklist.id %}?query=${query}`)
+        .then(response => response.json())
+        .then(data => {
+            const productList = document.getElementById('productList3');
+            productList.innerHTML = '';
+            data.products.forEach(product => {
+                const productHTML = `
+                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                        <div class="product-info d-flex align-items-center">
+                            <h6 class="product-name mb-0 me-3">${product.name} 
+                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                            </h6>
+                        </div>
+                        <form id="checklistForm-${product.id}" action="{% url 'add_to_checklist' checklist.id %}" method="post" class="d-flex align-items-center product-form justify-content-end">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="${product.id}">
+                            <input type="hidden" name="product_name" value="${product.name}">
+                            <input type="hidden" name="status" id="status-${product.id}" value="">
+                            <input type="hidden" id="initial-quantity-${product.id}" value="${product.checklist_quantity || 0}">
+
+                            <div class="form-group d-flex align-items-center me-2">
+                                <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
+                                <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
+                            </div>
+                            <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
+                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                            </button>
+                        </form>
+                    </div>
+                `;
+                productList.insertAdjacentHTML('beforeend', productHTML);
+            });
+        });
+});
+
+document.getElementById('productSearch4').addEventListener('input', function() {
+    const query = this.value;
+    fetch(`{% url 'search_productscafe' checklist.id %}?query=${query}`)
+        .then(response => response.json())
+        .then(data => {
+            const productList = document.getElementById('productList4');
+            productList.innerHTML = '';
+            data.products.forEach(product => {
+                const productHTML = `
+                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                        <div class="product-info d-flex align-items-center">
+                            <h6 class="product-name mb-0 me-3">${product.name} 
+                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                            </h6>
+                        </div>
+                        <form id="checklistForm-${product.id}" action="{% url 'add_to_checklist' checklist.id %}" method="post" class="d-flex align-items-center product-form justify-content-end">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="${product.id}">
+                            <input type="hidden" name="product_name" value="${product.name}">
+                            <input type="hidden" name="status" id="status-${product.id}" value="">
+                            <input type="hidden" id="initial-quantity-${product.id}" value="${product.checklist_quantity || 0}">
+
+                            <div class="form-group d-flex align-items-center me-2">
+                                <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
+                                <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
+                            </div>
+                            <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
+                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                            </button>
+                        </form>
+                    </div>
+                `;
+                productList.insertAdjacentHTML('beforeend', productHTML);
+            });
+        });
+});
+
+document.getElementById('productSearch6').addEventListener('input', function() {
+    const query = this.value;
+    fetch(`{% url 'search_productstable' checklist.id %}?query=${query}`)
+        .then(response => response.json())
+        .then(data => {
+            const productList = document.getElementById('productList6');
+            productList.innerHTML = '';
+            data.products.forEach(product => {
+                const productHTML = `
+                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                        <div class="product-info d-flex align-items-center">
+                            <h6 class="product-name mb-0 me-3">${product.name} 
+                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                            </h6>
+                        </div>
+                        <form id="checklistForm-${product.id}" action="{% url 'add_to_checklist' checklist.id %}" method="post" class="d-flex align-items-center product-form justify-content-end">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="${product.id}">
+                            <input type="hidden" name="product_name" value="${product.name}">
+                            <input type="hidden" name="status" id="status-${product.id}" value="">
+                            <input type="hidden" id="initial-quantity-${product.id}" value="${product.checklist_quantity || 0}">
+
+                            <div class="form-group d-flex align-items-center me-2">
+                                <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
+                                <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
+                            </div>
+                            <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
+                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                            </button>
+                        </form>
+                    </div>
+                `;
+                productList.insertAdjacentHTML('beforeend', productHTML);
+            });
+        });
+});
+
+document.getElementById('productSearch7').addEventListener('input', function() {
+    const query = this.value;
+    fetch(`{% url 'search_productsverre' checklist.id %}?query=${query}`)
+        .then(response => response.json())
+        .then(data => {
+            const productList = document.getElementById('productList7');
+            productList.innerHTML = '';
+            data.products.forEach(product => {
+                const productHTML = `
+                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                        <div class="product-info d-flex align-items-center">
+                            <h6 class="product-name mb-0 me-3">${product.name} 
+                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                            </h6>
+                        </div>
+                        <form id="checklistForm-${product.id}" action="{% url 'add_to_checklist' checklist.id %}" method="post" class="d-flex align-items-center product-form justify-content-end">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="${product.id}">
+                            <input type="hidden" name="product_name" value="${product.name}">
+                            <input type="hidden" name="status" id="status-${product.id}" value="">
+                            <input type="hidden" id="initial-quantity-${product.id}" value="${product.checklist_quantity || 0}">
+
+                            <div class="form-group d-flex align-items-center me-2">
+                                <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
+                                <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
+                            </div>
+                            <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
+                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                            </button>
+                        </form>
+                    </div>
+                `;
+                productList.insertAdjacentHTML('beforeend', productHTML);
+            });
+        });
+});
+
+document.getElementById('productSearch8').addEventListener('input', function() {
+    const query = this.value;
+    fetch(`{% url 'search_productsporcelaine' checklist.id %}?query=${query}`)
+        .then(response => response.json())
+        .then(data => {
+            const productList = document.getElementById('productList8');
+            productList.innerHTML = '';
+            data.products.forEach(product => {
+                const productHTML = `
+                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                        <div class="product-info d-flex align-items-center">
+                            <h6 class="product-name mb-0 me-3">${product.name} 
+                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                            </h6>
+                        </div>
+                        <form id="checklistForm-${product.id}" action="{% url 'add_to_checklist' checklist.id %}" method="post" class="d-flex align-items-center product-form justify-content-end">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="${product.id}">
+                            <input type="hidden" name="product_name" value="${product.name}">
+                            <input type="hidden" name="status" id="status-${product.id}" value="">
+                            <input type="hidden" id="initial-quantity-${product.id}" value="${product.checklist_quantity || 0}">
+
+                            <div class="form-group d-flex align-items-center me-2">
+                                <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
+                                <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
+                            </div>
+                            <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
+                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                            </button>
+                        </form>
+                    </div>
+                `;
+                productList.insertAdjacentHTML('beforeend', productHTML);
+            });
+        });
+});
+
+document.getElementById('productSearch9').addEventListener('input', function() {
+    const query = this.value;
+    fetch(`{% url 'search_productscanape' checklist.id %}?query=${query}`)
+        .then(response => response.json())
+        .then(data => {
+            const productList = document.getElementById('productList9');
+            productList.innerHTML = '';
+            data.products.forEach(product => {
+                const productHTML = `
+                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                        <div class="product-info d-flex align-items-center">
+                            <h6 class="product-name mb-0 me-3">${product.name} 
+                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                            </h6>
+                        </div>
+                        <form id="checklistForm-${product.id}" action="{% url 'add_to_checklist' checklist.id %}" method="post" class="d-flex align-items-center product-form justify-content-end">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="${product.id}">
+                            <input type="hidden" name="product_name" value="${product.name}">
+                            <input type="hidden" name="status" id="status-${product.id}" value="">
+                            <input type="hidden" id="initial-quantity-${product.id}" value="${product.checklist_quantity || 0}">
+
+                            <div class="form-group d-flex align-items-center me-2">
+                                <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
+                                <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
+                            </div>
+                            <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
+                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                            </button>
+                        </form>
+                    </div>
+                `;
+                productList.insertAdjacentHTML('beforeend', productHTML);
+            });
+        });
+});
+
+document.getElementById('productSearch10').addEventListener('input', function() {
+    const query = this.value;
+    fetch(`{% url 'search_productscuisson' checklist.id %}?query=${query}`)
+        .then(response => response.json())
+        .then(data => {
+            const productList = document.getElementById('productList10');
+            productList.innerHTML = '';
+            data.products.forEach(product => {
+                const productHTML = `
+                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                        <div class="product-info d-flex align-items-center">
+                            <h6 class="product-name mb-0 me-3">${product.name} 
+                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                            </h6>
+                        </div>
+                        <form id="checklistForm-${product.id}" action="{% url 'add_to_checklist' checklist.id %}" method="post" class="d-flex align-items-center product-form justify-content-end">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="${product.id}">
+                            <input type="hidden" name="product_name" value="${product.name}">
+                            <input type="hidden" name="status" id="status-${product.id}" value="">
+                            <input type="hidden" id="initial-quantity-${product.id}" value="${product.checklist_quantity || 0}">
+
+                            <div class="form-group d-flex align-items-center me-2">
+                                <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
+                                <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
+                            </div>
+                            <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
+                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                            </button>
+                        </form>
+                    </div>
+                `;
+                productList.insertAdjacentHTML('beforeend', productHTML);
+            });
+        });
+});
+
+document.getElementById('productSearch11').addEventListener('input', function() {
+    const query = this.value;
+    fetch(`{% url 'search_productsservice' checklist.id %}?query=${query}`)
+        .then(response => response.json())
+        .then(data => {
+            const productList = document.getElementById('productList11');
+            productList.innerHTML = '';
+            data.products.forEach(product => {
+                const productHTML = `
+                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                        <div class="product-info d-flex align-items-center">
+                            <h6 class="product-name mb-0 me-3">${product.name} 
+                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                            </h6>
+                        </div>
+                        <form id="checklistForm-${product.id}" action="{% url 'add_to_checklist' checklist.id %}" method="post" class="d-flex align-items-center product-form justify-content-end">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="${product.id}">
+                            <input type="hidden" name="product_name" value="${product.name}">
+                            <input type="hidden" name="status" id="status-${product.id}" value="">
+                            <input type="hidden" id="initial-quantity-${product.id}" value="${product.checklist_quantity || 0}">
+
+                            <div class="form-group d-flex align-items-center me-2">
+                                <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
+                                <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
+                            </div>
+                            <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
+                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                            </button>
+                        </form>
+                    </div>
+                `;
+                productList.insertAdjacentHTML('beforeend', productHTML);
+            });
+        });
+});
+
+document.getElementById('productSearch5').addEventListener('input', function() {
+    const query = this.value;
+    fetch(`{% url 'search_productsdivers' checklist.id %}?query=${query}`)
+        .then(response => response.json())
+        .then(data => {
+            const productList = document.getElementById('productList5');
+            productList.innerHTML = '';
+            data.products.forEach(product => {
+                const productHTML = `
+                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                        <div class="product-info d-flex align-items-center">
+                            <h6 class="product-name mb-0 me-3">${product.name} 
+                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                            </h6>
+                        </div>
+                        <form id="checklistForm-${product.id}" action="{% url 'add_to_checklist' checklist.id %}" method="post" class="d-flex align-items-center product-form justify-content-end">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="${product.id}">
+                            <input type="hidden" name="product_name" value="${product.name}">
+                            <input type="hidden" name="status" id="status-${product.id}" value="">
+                            <input type="hidden" id="initial-quantity-${product.id}" value="${product.checklist_quantity || 0}">
+
+                            <div class="form-group d-flex align-items-center me-2">
+                                <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
+                                <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
+                            </div>
+                            <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
+                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                            </button>
+                        </form>
+                    </div>
+                `;
+                productList.insertAdjacentHTML('beforeend', productHTML);
+            });
+        });
+});
+
+document.getElementById('productSearch12').addEventListener('input', function() {
+    const query = this.value;
+    fetch(`{% url 'search_productsbreuvage' checklist.id %}?query=${query}`)
+        .then(response => response.json())
+        .then(data => {
+            const productList = document.getElementById('productList12');
+            productList.innerHTML = '';
+            data.products.forEach(product => {
+                const productHTML = `
+                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                        <div class="product-info d-flex align-items-center">
+                            <h6 class="product-name mb-0 me-3">${product.name} 
+                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                            </h6>
+                        </div>
+                        <form id="checklistForm-${product.id}" action="{% url 'add_to_checklist' checklist.id %}" method="post" class="d-flex align-items-center product-form justify-content-end">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="${product.id}">
+                            <input type="hidden" name="product_name" value="${product.name}">
+                            <input type="hidden" name="status" id="status-${product.id}" value="">
+                            <input type="hidden" id="initial-quantity-${product.id}" value="${product.checklist_quantity || 0}">
+
+                            <div class="form-group d-flex align-items-center me-2">
+                                <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
+                                <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
+                            </div>
+                            <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
+                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                            </button>
+                        </form>
+                    </div>
+                `;
+                productList.insertAdjacentHTML('beforeend', productHTML);
+            });
+        });
+});
+
+
+    $(document).ready(function() {
+    // Delete button functionality
+    $('.delete-btn').on('click', function(event) {
+        event.preventDefault();
+        const button = $(this);
+        const url = button.data('url');
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'  // Ensure CSRF token is set correctly
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    button.closest('li').remove();  // Remove the item from the DOM
+                    alert(response.message);
+                    location.reload();
+                } else {
+                    alert(response.message);
+                }
+            },
+            error: function() {
+                alert("Erreur, veuillez reessayer.");
+            }
+        });
+    });
+
+    // Quantity adjustment functionality
+    document.querySelectorAll(".addAction").forEach(button => {
+        button.addEventListener("click", function() {
+            const productId = button.getAttribute("data-product-id");
+            const quantityInput = document.getElementById(`quantity-${productId}`);
+            const currentValue = parseInt(quantityInput.value);
+            
+            // Update quantity
+            quantityInput.value = currentValue + 1;
+        });
+    });
+
+    document.querySelectorAll(".subtractAction").forEach(button => {
+        button.addEventListener("click", function() {
+            const productId = button.getAttribute("data-product-id");
+            const quantityInput = document.getElementById(`quantity-${productId}`);
+            const currentValue = parseInt(quantityInput.value);
+
+            // Ensure quantity does not go below 1
+            if (currentValue > 1) {
+                quantityInput.value = currentValue - 1;
+            }
+        });
+    });
+
+    // Separate validation for each form on submit
+    $('form.product-form').each(function() {
+        $(this).on('submit', function(event) {
+            var quantityInput = $(this).find('.quantity'); // Find the quantity input in this form
+            var quantity = parseInt(quantityInput.val());
+            if (isNaN(quantity) || quantity <= 0) {
+                event.preventDefault(); // Prevent form submission
+                alert('Rentrer une quantité valide.'); // Alert if quantity is invalid
+            }
+        });
+    });
+});
+
+// Handle quantity change and set status to 'en_cours'
+document.addEventListener("DOMContentLoaded", function () {
+    const quantityFields = document.querySelectorAll('input[name="quantity"]');
     
+    quantityFields.forEach(function(field) {
+        field.addEventListener("change", function() {
+            const productId = this.id.split('-')[1];
+            const statusField = document.getElementById("status-" + productId);
+            
+            // Set status to 'en_cours' on quantity change
+            if (statusField) {
+                statusField.value = "en_cours";
+            }
+        });
+    });
+});
+
+// Submit Checklist Form Function
+function submitChecklistForm(productId) {
+    const form = document.getElementById(`checklistForm-${productId}`);
+    const url = form.action;
+
+    fetch(url, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': getCSRFToken()  // Ensure CSRF token is included
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();  // Or update the quantity display dynamically
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+// Retrieve CSRF token function
+function getCSRFToken() {
+    return document.querySelector("[name=csrfmiddlewaretoken]").value;
+}
+
+// Toggle Section Visibility
+function toggleSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    section.classList.toggle("hidden");
+}
+
+// Modal Functions
+function openModal(imageUrl) {
+    const modal = document.getElementById("photoModal");
+    const modalImg = document.getElementById("modalImg");
+    const downloadBtn = document.getElementById("downloadBtn");
+
+    // Set image URL for display and download
+    modalImg.src = imageUrl;
+    downloadBtn.href = imageUrl;
+
+    modal.style.display = "flex";  // Show modal with flex centering
+}
+
+function closeModal() {
+    document.getElementById("photoModal").style.display = "none";
+}
+
+function calculateDifference(productId) {
+    const initialQuantity = parseInt(document.getElementById(`initial-quantity-${productId}`).value);
+    const currentQuantity = parseInt(document.getElementById(`quantity-${productId}`).value);
+
+    const difference = currentQuantity - initialQuantity;
+
+    // Display the difference
+    const differenceElement = document.getElementById(`quantity-difference-${productId}`);
+    if (difference !== 0) {
+        differenceElement.innerHTML = `Différence: ${difference > 0 ? '+' : ''}${difference}`;
+        differenceElement.style.color = difference > 0 ? 'green' : 'red';
+    } else {
+        differenceElement.innerHTML = '';
+    }
+}
+
+setTimeout(function(){
+       window.location.reload(1);
+    }, 300000); // 300000 milliseconds = 5 minutes
+
+</script>
 
 {% endblock %}
 

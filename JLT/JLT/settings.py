@@ -31,6 +31,8 @@ ALLOWED_HOSTS = ['www.julienleblanclivraisons.com', '127.0.0.1']
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
+MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
+
 
 # Application definition
 
@@ -50,6 +52,7 @@ INSTALLED_APPS = [
     'django_htmx',
     'bootstrap_datepicker_plus',
     'widget_tweaks',
+   
   
 ]
 
@@ -62,6 +65,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django_htmx.middleware.HtmxMiddleware',
+
+    
 ]
 
 ROOT_URLCONF = 'JLT.urls'
@@ -124,7 +129,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 GOOGLE_API_KEY = 'AIzaSyC2GqoZLMIMuAihXl8271sJN3kJ_57smdM'
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'fr-fr'
 
 TIME_ZONE = 'UTC'
 

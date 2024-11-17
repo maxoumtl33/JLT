@@ -7,6 +7,65 @@
     padding: 0;
     box-sizing: border-box;
 }
+.shift-section {
+        background-color: #fff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+        display: none; /* Initially hidden */
+    }
+
+    .shift-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .shift-table th, .shift-table td {
+        padding: 12px 20px;
+        text-align: center;
+        border: 1px solid #ddd;
+    }
+
+    .shift-table th {
+        background-color: #1176F5;
+        color: white;
+        font-size: 16px;
+    }
+
+    .shift-table td {
+        font-size: 14px;
+        color: #555;
+    }
+
+    .shift-table tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    .shift-table tr:hover {
+        background-color: #e1e1e1;
+    }
+
+    /* Toggle Button Styling */
+    .toggle-btn {
+        background-color: #1176F5;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+    }
+
+    .toggle-btn:hover {
+        background-color: #0d63cc;
+    }
+
+    .toggle-btn:focus {
+        outline: none;
+    }
 
 body {
     font-family: Arial, sans-serif;
@@ -262,6 +321,41 @@ body {
 </div>
 
 
+
+    <!-- Toggle Button -->
+    <button class="toggle-btn" id="toggle-btn">Afficher le Planning</button>
+    <br>
+
+    {% if shifts %}
+        <div class="shift-section" id="shift-section">
+            <table class="shift-table">
+                <thead>
+                    <tr>
+                        <th>Livreur</th>
+                        <th>Heure de Début</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for shift in shifts %}
+                        <tr>
+                            <td>{{ shift.livreur.nom }}</td>
+                            <td>{{ shift.start_time }}</td>
+                            <td>
+                                {% if shift.notes == "Repos" %}
+                                    <span style="color: #f44336; font-weight: bold;">Repos</span>
+                                {% else %}
+                                    {{ shift.notes }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p>Aucun planning disponible pour aujourd'hui.</p>
+    {% endif %}
  
   
         
@@ -299,6 +393,20 @@ body {
 
 
 <script>
+    // Toggle the visibility of the shift section when the button is clicked
+    document.getElementById('toggle-btn').addEventListener('click', function() {
+        var shiftSection = document.getElementById('shift-section');
+        var button = document.getElementById('toggle-btn');
+        
+        // Toggle the display of the shift section
+        if (shiftSection.style.display === 'none' || shiftSection.style.display === '') {
+            shiftSection.style.display = 'block';
+            button.textContent = 'Cacher le Planning';  // Change button text
+        } else {
+            shiftSection.style.display = 'none';
+            button.textContent = 'Afficher le Planning';  // Change button text back
+        }
+    });
   // Parse JSON data into JavaScript object
   const livraisons = JSON.parse('{{ livraisonss|escapejs }}');
   console.log("Delivery locations data:", livraisons);

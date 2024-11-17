@@ -62,7 +62,8 @@ import random
 import requests
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-
+from django.db import transaction
+from django.contrib import messages
 
 @login_required
 def create_ordercuisine(request):
@@ -91,6 +92,8 @@ def create_ordercuisine(request):
                     order.save()
 
         return redirect('order_list_cuisine')
+    if not request.user.is_superuser:
+        return redirect('unauthorized')
 
     return render(request, 'listings/create_ordercuisine.html', {'items': items})
 
@@ -101,6 +104,8 @@ def user_order_list(request):
     paginator = Paginator(orders, 15)  # Show 15 orders per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+    if not request.user.is_superuser:
+        return redirect('unauthorized')
     return render(request, 'listings/user_order_list.html', {'orders': page_obj})
 
 @login_required
@@ -112,6 +117,8 @@ def update_order_cuisine(request, order_id):
         if ordered_quantity:
             order.ordered_quantity = int(ordered_quantity)
             order.save()
+    if not request.user.is_superuser:
+        return redirect('unauthorized')
         return redirect('user_order_list')
 
 @login_required
@@ -124,6 +131,8 @@ def delete_order_cuisine(request, order_id):
         return redirect('user_order_list')
 
     order.delete()
+    if not request.user.is_superuser:
+        return redirect('unauthorized')
     return redirect('user_order_list')
 
 @login_required
@@ -141,6 +150,8 @@ def order_listcuisine(request):
     paginator = Paginator(orders, 15)  # Show 15 orders per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+    if not request.user.is_superuser:
+        return redirect('unauthorized')
 
     return render(request, 'listings/order_listcuisine.html', {
         'orders': page_obj,
@@ -151,12 +162,16 @@ def mark_order_donecuisine(request, order_id):
     order = OrderCuisine.objects.get(id=order_id)
     order.is_done = True
     order.save()
+    if not request.user.is_superuser:
+        return redirect('unauthorized')
     return redirect('order_list_cuisine')
 
 def mark_order_deliveredcuisine(request, order_id):
     order = OrderCuisine.objects.get(id=order_id)
     order.is_delivered = True
     order.save()
+    if not request.user.is_superuser:
+        return redirect('unauthorized')
     return redirect('order_list_cuisine')
 
 
@@ -234,7 +249,8 @@ def create_random_task(request):
                 nom=random_task,
                 date=tomorrow
             )
-
+    if not request.user.is_superuser:
+        return redirect('unauthorized')
     return redirect('acceuilresponsables')
 
 
@@ -312,26 +328,24 @@ class ChecklistItemDeleteAjaxView(View):
         item_id = self.kwargs.get('pk')
         try:
             item = ChecklistItem.objects.get(pk=item_id)
-            product = item.product
-            quantity = item.quantity
             item.delete()
-            # Adjust the product quantity
-            if product:
-                product.adjust_quantity(quantity)
             response_data = {'status': 'success', 'message': 'Objet bien supprimé :)'}
         except ChecklistItem.DoesNotExist:
-            response_data = {'status': 'error', 'message': 'Checklist item not found.'}
-
+            response_data = {'status': 'error', 'message': 'Objet non trouvé'}
         return JsonResponse(response_data)
-
-
+    
 def voir_checklist(request):
 
     checklists = Checklist.objects.all().order_by('-added_on')
     encours = "en_cours"
     valide = "valide"
     refuse = "refuse"
-
+    message = request.session.pop('checklist_created_message', None)
+    if message:
+        messages.success(request, message)
+    
+    change_logs = ChecklistItemChangeLog.objects.all().order_by('-timestamp')
+    change_logs_checklist = ChecklistChangeLog.objects.all().order_by('-timestamp')
     if request.method == 'GET' and 'date' in request.GET:
        form = DateFilterForm(request.GET)
        if form.is_valid():
@@ -356,15 +370,22 @@ def voir_checklist(request):
 
         'checklists': checklists,
         'form': form,
+        'message': message,
         'encours': encours,
         'valide': valide,
         'refuse': refuse,
+        'change_logs': change_logs,
+        'change_logs_checklist': change_logs_checklist,
     }
     return render(request, 'listings/voir-checklist.html', context)
 
 def checklistvoir_detail(request, checklist_id):
     checklist = get_object_or_404(Checklist, pk=checklist_id)
     checklist_item = ChecklistItem.objects.filter(checklist=checklist)
+    quantity_change_logs = QuantityChangeLog.objects.filter(
+        checklist_item__checklist_id=checklist_id
+    ).order_by('-timestamp')
+    change_logs = ChecklistItemChangeLog.objects.filter(checklist_item__checklist=checklist).order_by('-timestamp')
     products = Product.objects.all()
     encours = "en_cours"
     valide = "valide"
@@ -400,6 +421,8 @@ def checklistvoir_detail(request, checklist_id):
        'encours':encours,
        'valide':valide,
        'refuse':refuse,
+       'quantity_change_logs': quantity_change_logs,
+       'change_logs': change_logs,
 
     }
     return render(request, 'listings/checklistevoir_detail.html', context)
@@ -419,48 +442,6 @@ def inventory(request):
     }
     return render(request, 'listings/inventory.html', context)
 
-def add_to_checklist(request, checklist_id):
-    checklist = get_object_or_404(Checklist, pk=checklist_id)
-
-    if request.method == 'POST':
-        product_id = request.POST.get('product_id')
-        quantity_to_modify = int(request.POST.get('quantity', 0))
-        action = request.POST.get('action')  # Should be 'add' or 'subtract'
-
-        product = get_object_or_404(Product, pk=product_id)
-
-        if action == 'add':
-            if quantity_to_modify > 0:
-                # Create or update the checklist item
-                checklist_item, created = ChecklistItem.objects.get_or_create(checklist=checklist, product=product)
-                checklist_item.quantity += quantity_to_modify
-                checklist_item.save()
-
-                # Deduct from inventory
-                product.quantity -= quantity_to_modify  # Allow going negative
-                product.save()
-
-        elif action == 'subtract':
-            if quantity_to_modify > 0:
-                try:
-                    checklist_item = ChecklistItem.objects.get(checklist=checklist, product=product)
-                    if checklist_item.quantity >= quantity_to_modify:
-                        checklist_item.quantity -= quantity_to_modify
-                        checklist_item.save()
-
-                        # Add back to the product inventory
-                        product.quantity += quantity_to_modify
-                        product.save()
-                    else:
-                        # Handle insufficient quantity in checklist item
-                        return HttpResponse("Not enough items in checklist to subtract.", status=400)
-                except ChecklistItem.DoesNotExist:
-                    # Handle case where ChecklistItem does not exist
-                    return HttpResponse("Item not found in checklist.", status=404)
-
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-
-
 
 def subtract_to_checklist(request, checklist_id):
 
@@ -479,11 +460,51 @@ def subtract_to_checklist(request, checklist_id):
 
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
+import logging
+from django.http import JsonResponse
+
+logger = logging.getLogger(__name__)
+
+def add_to_checklist(request, checklist_id):
+    if request.method == 'POST':
+        checklist = get_object_or_404(Checklist, pk=checklist_id)
+        product_id = request.POST.get('product_id')
+        quantity = int(request.POST.get('quantity', 0))
+        product = get_object_or_404(Product, pk=product_id)
+
+        
+
+        checklist_item, created = ChecklistItem.objects.get_or_create(
+            checklist=checklist, 
+            product=product,
+            defaults={'quantity': quantity}
+        )
+
+        if not created:
+            checklist_item._changed_by = request.user
+            checklist_item.quantity = quantity
+            checklist_item.save()
+
+        return JsonResponse({'success': True, 'message': 'Objet ajouté avec succès'})
+
+    return redirect(request.META.get('HTTP_REFERER', '/'))
+
+
 def checklist_detail(request, checklist_id):
     checklist = get_object_or_404(Checklist, pk=checklist_id)
     checklist_items = ChecklistItem.objects.filter(checklist=checklist)
+    breuvages = ChecklistItem.objects.filter(checklist=checklist, product__category = "BREUVAGE")
+    checklist_documents = ChecklistDocument.objects.filter(checklist=checklist)
+    recup_photos = ChecklistRecupPhoto.objects.filter(checklist=checklist)
+    md_photos = ChecklistMDPhoto.objects.filter(checklist=checklist)
     products = Product.objects.all()
     query = request.GET.get('query')
+    checklist_item_quantities = {
+        item.product_id: item.quantity for item in checklist_items
+    }
+    
+
+    # Define categories
     equipementdebase = "ÉQUIPEMENT DE BASE"
     jetable = "JETABLE"
     accessoirededecor = "ACCESSOIRES DE DÉCOR"
@@ -496,45 +517,64 @@ def checklist_detail(request, checklist_id):
     montage = "ÉQUIPEMENT POUR MONTAGE CANAPÉS"
     cuisson = "ÉQUIPEMENT DE CUISSON"
     service = "USTENSILES DE SERVICE"
+    breuvage = "BREUVAGE"
     encours = "en_cours"
     valide = "valide"
     refuse = "refuse"
 
+    # Document formset for uploading multiple documents
+    document_formset = ChecklistDocumentFormSet(
+        request.POST or None,
+        request.FILES or None,
+        queryset=ChecklistDocument.objects.filter(checklist=checklist),
+        prefix='documents'
+    )
 
+    # Checklist form instance
+    formbis = ChecklistForm(request.POST or None, instance=checklist, prefix='checklist_form')
 
+    if 'documents-TOTAL_FORMS' in request.POST and document_formset.is_valid():
+        documents = document_formset.save(commit=False)
+        for document in documents:
+            document.checklist = checklist
+            document.save()
+        return HttpResponseRedirect(reverse('checklist-detail', args=[checklist_id]))
 
+    elif 'checklist_form-name' in request.POST and formbis.is_valid():
+        formbis.save()
+        return HttpResponseRedirect(reverse('checklist-detail', args=[checklist_id]))
 
+    # Filter products based on the search query
     if query:
         products = products.filter(name__icontains=query)
 
-    formbis = ChecklistForm(request.POST or None, instance=checklist)
-    if formbis.is_valid():
-       formbis.save()
-       return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-
     context = {
         'encours':encours,
+        'breuvages': breuvages,
         'valide': valide,
         'refuse': refuse,
         'checklist': checklist,
         'checklist_items': checklist_items,
         'products': products,
-        'form': SearchFormInv(),
-        'query': query,
+        'equipementdebase': equipementdebase,
+        'jetable': jetable,
+        'accessoirededecor': accessoirededecor,
+        'equipementdebar': equipementdebar,
+        'equipementpourservicecafe': equipementpourservicecafe,
+        'itemsdivers': itemsdivers,
+        'tableetlinge': tableetlinge,
+        'verrerie': verrerie,
+        'breuvage': breuvage,
+        'porcelaine': porcelaine,
+        'montage': montage,
+        'cuisson': cuisson,
+        'service': service,
         'formbis': formbis,
-        'equipementdebase':equipementdebase,
-        'jetable':jetable,
-        'accessoirededecor':accessoirededecor,
-        'equipementdebar':equipementdebar,
-        'equipementpourservicecafe':equipementpourservicecafe,
-        'itemsdivers':itemsdivers,
-        'tableetlinge':tableetlinge,
-        'verrerie':verrerie,
-        'porcelaine':porcelaine,
-        'montage':montage,
-        'cuisson':cuisson,
-        'service':service,
-
+        'document_formset': document_formset,
+        'checklist_documents': checklist_documents,
+        'recup_photos': recup_photos,
+        'md_photos': md_photos,
+        'checklist_item_quantities': checklist_item_quantities,
     }
     return render(request, 'listings/checklist_detail.html', context)
 
@@ -557,7 +597,12 @@ def creerchecklist(request):
         form2 = ChecklistForm(request.POST)
         if form2.is_valid():
             form2.save()
-        return redirect('creerchecklist')
+            messages.success(request, 'Nouvelle Checklist')
+            return redirect('creerchecklist')  # Replace with the name of the view you want to redirect to
+    
+    
+    else:
+        form = ChecklistForm()
 
     paginator = Paginator(checklists, 10)  # Show 10 events per page
 
@@ -636,6 +681,57 @@ def import_items(request):
     return render(request, 'listings/import.html')
 
 
+import qrcode
+from io import BytesIO
+from django.http import HttpResponse
+from django.shortcuts import render
+from django.urls import reverse
+
+def generate_qr_code(request, product_id):
+    # Get product details (example)
+    product = Product.objects.get(id=product_id)
+    quantity = product.quantity  # You can include any relevant information for the QR code
+    
+    # URL that will be encoded in the QR code
+    product_url = reverse('product_quantity_update', args=[product_id])
+    
+    # Create the QR code
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(product_url)
+    qr.make(fit=True)
+    
+    # Create an image of the QR code
+    img = qr.make_image(fill='black', back_color='white')
+    
+    # Create an HTTP response with the image
+    response = HttpResponse(content_type="image/png")
+    img.save(response, "PNG")
+    return response
+
+
+def update_product_quantity(request, product_id):
+    product = Product.objects.get(id=product_id)
+    
+    if request.method == 'POST':
+        # Check if 'quantity' is provided in the POST data
+        new_quantity = request.POST.get('quantity')
+        
+        # Ensure quantity is a valid number
+        if new_quantity is not None and new_quantity.isdigit():
+            product.quantity = int(new_quantity)  # Convert the quantity to an integer
+            product.save()
+            return redirect('voir_checklist')  # Redirect to product detail page
+        else:
+            # Handle invalid input
+            return render(request, 'listings/update_quantity.html', {'product': product, 'error': 'Invalid quantity entered.'})
+    
+    return render(request, 'listings/update_quantity.html', {'product': product})
+
 def tacheslist(request):
 
     today = now().date()
@@ -652,6 +748,8 @@ def tacheslist(request):
         'tachesko':tachesko,
         'taches':taches,
                 }
+    if not request.user.is_superuser:
+        return redirect('unauthorized')
     return render(request, 'listings/tacheslist.html', context)
 def inventory_list(request):
     items = ItemInv.objects.all()
@@ -676,6 +774,298 @@ def save_positions(request):
         return JsonResponse({'success': True})
     return JsonResponse({'success': False})
 
+from django.http import JsonResponse
+from .models import Product
+
+
+def search_productsbase(request, checklist_id):
+    query = request.GET.get('query', '')
+    checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
+    products = Product.objects.filter(name__icontains=query, category = "ÉQUIPEMENT DE BASE") if query else Product.objects.filter( category = "ÉQUIPEMENT DE BASE")
+    
+    product_data = []
+    for product in products:
+        # Get the quantity for each product from the checklist
+        checklist_item = checklist_items.filter(product=product).first()
+        quantity = checklist_item.quantity if checklist_item else 0
+        
+        product_data.append({
+            'id': product.id,
+            'name': product.name,
+            'quantity': product.quantity,
+            'checklist_quantity': quantity,  # Add this to send the checklist quantity
+        })
+    
+    return JsonResponse({'products': product_data})
+
+def search_productsjetable(request, checklist_id):
+    query = request.GET.get('query', '')
+    checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
+    products = Product.objects.filter(name__icontains=query, category = "JETABLE") if query else Product.objects.filter( category = "JETABLE")
+    
+    product_data = []
+    for product in products:
+        # Get the quantity for each product from the checklist
+        checklist_item = checklist_items.filter(product=product).first()
+        quantity = checklist_item.quantity if checklist_item else 0
+        
+        product_data.append({
+            'id': product.id,
+            'name': product.name,
+            'quantity': product.quantity,
+            'checklist_quantity': quantity,  # Add this to send the checklist quantity
+        })
+    return JsonResponse({'products': product_data})
+
+def search_productsdecor(request, checklist_id):
+    query = request.GET.get('query', '')
+    checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
+    products = Product.objects.filter(name__icontains=query, category = "ACCESSOIRES DE DÉCOR") if query else Product.objects.filter( category = "ACCESSOIRES DE DÉCOR")
+    
+    product_data = []
+    for product in products:
+        # Get the quantity for each product from the checklist
+        checklist_item = checklist_items.filter(product=product).first()
+        quantity = checklist_item.quantity if checklist_item else 0
+        
+        product_data.append({
+            'id': product.id,
+            'name': product.name,
+            'quantity': product.quantity,
+            'checklist_quantity': quantity,  # Add this to send the checklist quantity
+        })
+    
+    return JsonResponse({'products': product_data})
+
+def search_productsbar(request, checklist_id):
+    query = request.GET.get('query', '')
+    checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
+    products = Product.objects.filter(name__icontains=query, category = "ÉQUIPEMENT DE BAR") if query else Product.objects.filter( category = "ÉQUIPEMENT DE BAR")
+    
+    product_data = []
+    for product in products:
+        # Get the quantity for each product from the checklist
+        checklist_item = checklist_items.filter(product=product).first()
+        quantity = checklist_item.quantity if checklist_item else 0
+        
+        product_data.append({
+            'id': product.id,
+            'name': product.name,
+            'quantity': product.quantity,
+            'checklist_quantity': quantity,  # Add this to send the checklist quantity
+        })
+    
+    return JsonResponse({'products': product_data})
+
+def search_productscafe(request, checklist_id):
+    query = request.GET.get('query', '')
+    checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
+    products = Product.objects.filter(name__icontains=query, category = "ÉQUIPEMENT POUR SERVICE CAFÉ") if query else Product.objects.filter( category = "ÉQUIPEMENT POUR SERVICE CAFÉ")
+    
+    product_data = []
+    for product in products:
+        # Get the quantity for each product from the checklist
+        checklist_item = checklist_items.filter(product=product).first()
+        quantity = checklist_item.quantity if checklist_item else 0
+        
+        product_data.append({
+            'id': product.id,
+            'name': product.name,
+            'quantity': product.quantity,
+            'checklist_quantity': quantity,  # Add this to send the checklist quantity
+        })
+    
+    return JsonResponse({'products': product_data})
+
+def get_breuvages_products(request, checklist_id):
+    breuvages_items = ChecklistItem.objects.filter(checklist_id=checklist_id, product__category="BREUVAGE")
+    
+    product_data = [
+        {
+            'id': item.product.id,
+            'name': item.product.name,
+            'total_quantity': item.total_quantity,
+            'consumed_quantity': item.consumed_quantity,
+            'unconsumed_quantity': item.unconsumed_quantity
+        }
+        for item in breuvages_items
+    ]
+    
+    return JsonResponse({'products': product_data})
+
+def search_productstable(request, checklist_id):
+    query = request.GET.get('query', '')
+    checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
+    products = Product.objects.filter(name__icontains=query, category = "TABLE ET LINGE DE TABLE") if query else Product.objects.filter( category = "TABLE ET LINGE DE TABLE")
+    
+    product_data = []
+    for product in products:
+        # Get the quantity for each product from the checklist
+        checklist_item = checklist_items.filter(product=product).first()
+        quantity = checklist_item.quantity if checklist_item else 0
+        
+        product_data.append({
+            'id': product.id,
+            'name': product.name,
+            'quantity': product.quantity,
+            'checklist_quantity': quantity,  # Add this to send the checklist quantity
+        })
+    
+    return JsonResponse({'products': product_data})
+
+def search_productsverre(request, checklist_id):
+    query = request.GET.get('query', '')
+    checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
+    products = Product.objects.filter(name__icontains=query, category = "VERRERIE") if query else Product.objects.filter( category = "VERRERIE")
+    
+    product_data = []
+    for product in products:
+        # Get the quantity for each product from the checklist
+        checklist_item = checklist_items.filter(product=product).first()
+        quantity = checklist_item.quantity if checklist_item else 0
+        
+        product_data.append({
+            'id': product.id,
+            'name': product.name,
+            'quantity': product.quantity,
+            'checklist_quantity': quantity,  # Add this to send the checklist quantity
+        })
+    
+    return JsonResponse({'products': product_data})
+
+def search_productsporcelaine(request, checklist_id):
+    query = request.GET.get('query', '')
+    checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
+    products = Product.objects.filter(name__icontains=query, category = "PORCELAINE ET COUTELLERIE") if query else Product.objects.filter( category = "PORCELAINE ET COUTELLERIE")
+    
+    product_data = []
+    for product in products:
+        # Get the quantity for each product from the checklist
+        checklist_item = checklist_items.filter(product=product).first()
+        quantity = checklist_item.quantity if checklist_item else 0
+        
+        product_data.append({
+            'id': product.id,
+            'name': product.name,
+            'quantity': product.quantity,
+            'checklist_quantity': quantity,  # Add this to send the checklist quantity
+        })
+    
+    return JsonResponse({'products': product_data})
+
+def search_productscanape(request, checklist_id):
+    query = request.GET.get('query', '')
+    checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
+    products = Product.objects.filter(name__icontains=query, category = "ÉQUIPEMENT POUR MONTAGE CANAPÉS") if query else Product.objects.filter( category = "ÉQUIPEMENT POUR MONTAGE CANAPÉS")
+    
+    product_data = []
+    for product in products:
+        # Get the quantity for each product from the checklist
+        checklist_item = checklist_items.filter(product=product).first()
+        quantity = checklist_item.quantity if checklist_item else 0
+        
+        product_data.append({
+            'id': product.id,
+            'name': product.name,
+            'quantity': product.quantity,
+            'checklist_quantity': quantity,  # Add this to send the checklist quantity
+        })
+    
+    return JsonResponse({'products': product_data})
+
+def search_productscuisson(request, checklist_id):
+    query = request.GET.get('query', '')
+    checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
+    products = Product.objects.filter(name__icontains=query, category = "ÉQUIPEMENT DE CUISSON") if query else Product.objects.filter( category = "ÉQUIPEMENT DE CUISSON")
+    
+    product_data = []
+    for product in products:
+        # Get the quantity for each product from the checklist
+        checklist_item = checklist_items.filter(product=product).first()
+        quantity = checklist_item.quantity if checklist_item else 0
+        
+        product_data.append({
+            'id': product.id,
+            'name': product.name,
+            'quantity': product.quantity,
+            'checklist_quantity': quantity,  # Add this to send the checklist quantity
+        })
+    
+    return JsonResponse({'products': product_data})
+def search_productsservice(request, checklist_id):
+    query = request.GET.get('query', '')
+    checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
+    products = Product.objects.filter(name__icontains=query, category = "USTENSILES DE SERVICE") if query else Product.objects.filter( category = "USTENSILES DE SERVICE")
+    
+    product_data = []
+    for product in products:
+        # Get the quantity for each product from the checklist
+        checklist_item = checklist_items.filter(product=product).first()
+        quantity = checklist_item.quantity if checklist_item else 0
+        
+        product_data.append({
+            'id': product.id,
+            'name': product.name,
+            'quantity': product.quantity,
+            'checklist_quantity': quantity,  # Add this to send the checklist quantity
+        })
+    
+    return JsonResponse({'products': product_data})
+def search_productsdivers(request, checklist_id):
+    query = request.GET.get('query', '')
+    checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
+    products = Product.objects.filter(name__icontains=query, category = "ITEMS DIVERS") if query else Product.objects.filter( category = "ITEMS DIVERS")
+    
+    product_data = []
+    for product in products:
+        # Get the quantity for each product from the checklist
+        checklist_item = checklist_items.filter(product=product).first()
+        quantity = checklist_item.quantity if checklist_item else 0
+        
+        product_data.append({
+            'id': product.id,
+            'name': product.name,
+            'quantity': product.quantity,
+            'checklist_quantity': quantity,  # Add this to send the checklist quantity
+        })
+    
+    return JsonResponse({'products': product_data})
+def search_productsbreuvage(request, checklist_id):
+    query = request.GET.get('query', '')
+    checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
+    products = Product.objects.filter(name__icontains=query, category = "BREUVAGE") if query else Product.objects.filter( category = "BREUVAGE")
+    
+    product_data = []
+    for product in products:
+        # Get the quantity for each product from the checklist
+        checklist_item = checklist_items.filter(product=product).first()
+        quantity = checklist_item.quantity if checklist_item else 0
+        
+        product_data.append({
+            'id': product.id,
+            'name': product.name,
+            'quantity': product.quantity,
+            'checklist_quantity': quantity,  # Add this to send the checklist quantity
+        })
+    
+    return JsonResponse({'products': product_data})
+
+def save_breuvages_report(request, checklist_id):
+    if request.method == "POST":
+        for item_id, consumed in request.POST.items():
+            if item_id.startswith("consumed_"):
+                item_id = int(item_id.split("_")[1])
+                checklist_item = ChecklistItem.objects.get(id=item_id)
+                
+                consumed_quantity = int(consumed)
+                unconsumed_quantity = int(request.POST.get(f'unconsumed_{item_id}', 0))
+                
+                checklist_item.consumed_quantity = consumed_quantity
+                checklist_item.unconsumed_quantity = unconsumed_quantity
+                checklist_item.save()
+        
+        return JsonResponse({"success": True})
+    return JsonResponse({"success": False})
 
 def home(request):
     livraisons  = Livraison.objects.all()
@@ -723,6 +1113,8 @@ def responsable_list(request):
 
     ventes = "Ventes"
     cuisine = "Cuisine"
+    if not request.user.is_superuser:
+        return redirect('unauthorized')
     return render(request, 'listings/responsableslist.html', context={'livraisons': livraisons,
                                                               'livreurs': livreurs,
                                                               'journees' : journees,
@@ -945,6 +1337,8 @@ def journees_list(request):
     max = "Maxime"
     loic = "Loic"
     jef = "Jef"
+    md = "md"
+    
 
 
     if request.method == 'GET' and 'date' in request.GET:
@@ -968,7 +1362,7 @@ def journees_list(request):
         journees = paginator.page(paginator.num_pages)
 
     livreurs = Livreur.objects.all()
-
+    
     ventes = "Ventes"
     cuisine = "Cuisine"
     return render(request, 'listings/journees_list.html', context={'livraisons': livraisons,
@@ -981,7 +1375,10 @@ def journees_list(request):
                                                               'cuisine':cuisine,
                                                               'form':form,
                                                               'max':max,
+                                                              'is_md': request.user.groups.filter(name='md').exists(),
+                                                              'is_livreur': request.user.groups.filter(name='livreurs').exists(),
                                                               'jef':jef,
+                                                              'md':md,
                                                               'loic':loic})
 
 # RecupFrigo detail view
@@ -1058,6 +1455,7 @@ def routedetail(request, id):  # notez le paramètre id supplémentaire
 def journee_detail(request, id):  # notez le paramètre id supplémentaire
     journees = Journee.objects.get(id=id)
     livreurs = Livreur.objects.all()
+    shifts = Shift.objects.filter(date=journees.date)
     livraisonsroute = Livraison.objects.order_by('position')
     today = now().date()
 
@@ -1110,6 +1508,7 @@ def journee_detail(request, id):  # notez le paramètre id supplémentaire
                       'livraisonsok': livraisonsok,
                       'recuperationes': recuperationes,
                       'today': today,
+                      'shifts': shifts,
                   })  # nous passons l'id au modèle
 
 
@@ -1174,6 +1573,8 @@ def view_shifts_by_date(request):
     
     # Fetch all shifts for that date
     shifts = Shift.objects.filter(date=selected_date).select_related('livreur')
+    if not request.user.is_superuser:
+        return redirect('unauthorized')
 
     return render(request, 'listings/view_shifts_by_date.html', {
         'shifts': shifts,
@@ -1189,7 +1590,6 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
         today = now().date()
         livraisonss  = Livraison.objects.filter( statut__livreur = userid, date = journee.date)
         livraisons  = Livraison.objects.order_by('position').filter( statut__livreur = userid, date = journee.date)
-        shifts = Shift.objects.filter(livreur=livreur, date=journee.date)
         livraisonstatusok = Livraison.objects.filter(status=True, recuperation=False, statut__livreur = userid, date = journee.date)
         livraisonstatusko = Livraison.objects.filter(status=False, recuperation=False, statut__livreur = userid, date = journee.date)
         recuperation = Livraison.objects.filter(recuperation=True,  statut__livreur = userid, date = journee.date)
@@ -1253,7 +1653,7 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
                                                                 'taches':taches,
                                                                 'tacheok':tacheok,
                                                                 'tacheko':tacheko,
-                                                                'shifts':shifts, 
+                                                                
 
                                                                 })
     else:
@@ -1288,32 +1688,59 @@ def update_photo_task(request, pk):
     return render(request, 'listings/update_photo_task.html', {'form': form, 'task': task})
 
 # Admin view for creating shifts
+
+
 def create_shift(request):
-    liste_livreur = Livreur.objects.filter(nom__in=['Maxime', 'Alex', 'Mohammad', 'Osnel', 'Samuel', 'Jef', 'Rooseph', 'Zayd'])
+    # Get the list of livreur for which shifts will be created
+    liste_livreur = Livreur.objects.filter(nom__in=['Maxime', 'Alex', 'Mohammad', 'Osnel', 'Samuel', 'Jef', 'Zayd'])
 
     if request.method == 'POST':
         for livreur in liste_livreur:
             # Check if the driver is marked as 'repos'
             is_repos = f"repos_{livreur.id}" in request.POST
-            
-            # Only create a shift if the driver is not on repos
-            if not is_repos:
-                shift_date = request.POST.get(f"shift_date_{livreur.id}")
-                shift_start = request.POST.get(f"shift_start_{livreur.id}")
-                shift_end = request.POST.get(f"shift_end_{livreur.id}")
 
-                # Parse dates and times and create the shift
+            # Get shift data from POST request
+            shift_date = request.POST.get(f"shift_date_{livreur.id}")
+            shift_start = request.POST.get(f"shift_start_{livreur.id}")
+           
+            # Check that shift date is provided (start time can be empty)
+            if not shift_date:
+                return render(request, 'listings/create_shift.html', {'error': 'La date est requise.'})
+
+            # Validate start time if it's provided (optional field)
+            if shift_start:
+                try:
+                    datetime.strptime(shift_start, '%H:%M')
+                except ValueError:
+                    return render(request, 'listings/create_shift.html', {'error': 'Le format de l\'heure de début est invalide. Veuillez entrer l\'heure au format HH:MM.'})
+
+            
+
+            # Create shift if not in repos
+            if is_repos:
                 Shift.objects.create(
                     livreur=livreur,
                     date=shift_date,
-                    start_time=shift_start,
-                    end_time=shift_end,
+                    start_time=None,  # No start time for repos
+                    notes="Repos"
+                )
+            else:
+                # If repos is not checked, create a shift with start and end time if provided
+                Shift.objects.create(
+                    livreur=livreur,
+                    date=shift_date,
+                    start_time=shift_start or None,  # Set start time to None if it's empty
+                    notes=""
                 )
 
-        # After saving, you could redirect or render a success message
-        return redirect('acceuilresponsables')  # Update to your target URL or response
+        # Redirect after creating shifts
+        return redirect('acceuilresponsables')
 
+    # Handle GET request to render the page with livreur list
+    if not request.user.is_superuser:
+        return redirect('unauthorized')
     return render(request, 'listings/create_shift.html', {'liste_livreur': liste_livreur})
+
 def responsableschoixjournee(request):
 
     if request.method == 'POST':
@@ -1346,9 +1773,12 @@ def responsableschoixjournee(request):
     livraisons  = Livraison.objects.all()
     livreurs = Livreur.objects.all()
     journees = Journee.objects.all()
+    if not request.user.is_superuser:
+        return redirect('unauthorized')
     return render(request, 'listings/responsableschoixjournee.html', context={'livraisons': livraisons,
                                                               'livreurs': livreurs,
-                                                              'journees' : journees})
+                                                              'journees' : journees,
+                                                              })
 
 def responsables(request, id):
     today = datetime.now().date()
@@ -1364,6 +1794,8 @@ def responsables(request, id):
     livreurs = Livreur.objects.all()
 
     recuperations = "oui"
+    if not request.user.is_superuser:
+        return redirect('unauthorized')
     return render(request, 'listings/responsables.html', context={'livraisons': livraisons,
                                                               'livreurs': livreurs,
                                                               'journee' : journee,
@@ -1376,7 +1808,13 @@ def responsables(request, id):
                                                               'recuperation' : recuperation,
                                                               })
 
+def unauthorized_view(request):
+    return render(request, 'listings/pasauthorise.html', status=403)
 
+def product_list(request):
+    products = Product.objects.all()
+    
+    return render(request, 'listings/product_list.html', {'products': products})
 
 class DistanceView(View):
 
@@ -2608,6 +3046,8 @@ def livraisonstomorrow(request):
 
 
                }
+    if not request.user.is_superuser:
+        return redirect('unauthorized')
     return render(request, 'listings/livraisonstomorrow.html', context)
 
 def livraisonstoday(request):
@@ -2630,6 +3070,8 @@ def livraisonstoday(request):
                'livraisonsapresmidi': livraisonsapresmidi,
                }
 
+    if not request.user.is_superuser:
+        return redirect('unauthorized')
 
     return render(request, 'listings/livraisonstoday.html', context)
 
@@ -2647,6 +3089,8 @@ def livraisonsresp(request):
     maxime= "Maxime"
     livraison = Livraison.objects.all()
     livraisons = Livraison.objects.order_by('position').filter(date=tomorrow)
+    if not request.user.is_superuser:
+        return redirect('unauthorized')
     return render(request, 'listings/livraisonsresp.html', context={'livraisons': livraisons,
 
 
@@ -2677,7 +3121,8 @@ def recuptoday(request):
     paginator = Paginator(recuperationstot_list, 10)  # Show 10 items per page
     page_number = request.GET.get('page')
     recuperationstot = paginator.get_page(page_number)
-
+    if not request.user.is_superuser:
+        return redirect('unauthorized')
     return render(request, 'listings/recuptoday.html', context={
         'recuperations': recuperations,
         'recupsencours': recupsencours,
@@ -2708,7 +3153,8 @@ def livraisonrespdetail(request, ip):
     if formbis.is_valid():
        formbis.save()
        return redirect('livraisonstomorrow')
-
+    if not request.user.is_superuser:
+        return redirect('unauthorized')
     return render(request, 'listings/livraisonrespdetail.html', context={'livraisons': livraisons,
                                                               'livraison':livraison,
                                                               'recuperation' : recuperation,
@@ -2840,6 +3286,146 @@ def sort(request):
 
     return render(request, '/listings/partials/livraisonslist.html', {'films': films})
 
+
+from django.shortcuts import render, get_object_or_404
+from .models import Md, Checklist
+from .forms import DateFilterForm
+from django.core.paginator import Paginator
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def md_dashboard(request):
+    # Get the Md instance related to the logged-in user
+    md_instance = get_object_or_404(Md, user=request.user)  # This fetches the Md object for the logged-in user
+    
+    # Get related checklists for the Md instance
+    checklists = Checklist.objects.filter(md=md_instance)
+    
+    # Handle date filtering if applicable
+    if request.method == 'GET' and 'date' in request.GET:
+        form = DateFilterForm(request.GET)
+        if form.is_valid():
+            date = form.cleaned_data['date']
+            checklists = checklists.filter(date=date)
+    else:
+        form = DateFilterForm()
+
+    # Paginate the checklists
+    paginator = Paginator(checklists, 10)  # Show 10 checklists per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Prepare context data to pass to the template
+    context = {
+        'md_instance': md_instance,
+        'checklists': checklists,
+        'form': form,
+        'page_obj': page_obj,
+    }
+
+    return render(request, 'listings/md_dashboard.html', context)
+
+from django.shortcuts import get_object_or_404, redirect, render
+from .models import Checklist, ChecklistMDPhoto, ChecklistRecupPhoto
+from .forms import ChecklistMDPhotoFormSet, ChecklistRecupPhotoFormSet, RapportForm, RapportRecupForm
+
+
+def ChecklistmdDetailView(request, pk):
+    checklist = get_object_or_404(Checklist, pk=pk)
+    md_photos = ChecklistMDPhoto.objects.filter(checklist=checklist)
+    recup_photos = ChecklistRecupPhoto.objects.filter(checklist=checklist)
+    checklist_items = ChecklistItem.objects.filter(checklist=checklist)
+    checklist_documents = ChecklistDocument.objects.filter(checklist=checklist)
+    # Initialize the formsets and forms with unique prefixes
+    formset = ChecklistMDPhotoFormSet(request.POST or None, request.FILES or None, prefix='formset', queryset=ChecklistMDPhoto.objects.filter(checklist=checklist))
+    formset1 = ChecklistRecupPhotoFormSet(request.POST or None, request.FILES or None, prefix='formset1', queryset=ChecklistRecupPhoto.objects.filter(checklist=checklist))
+    form = RapportForm(request.POST or None, prefix='form', instance=checklist)
+    form1 = RapportRecupForm(request.POST or None, prefix='form1', instance=checklist)
+    checklist_itemsbreuvage = ChecklistItem.objects.filter(checklist_id=checklist, product__category="BREUVAGE")
+    
+    for item in checklist_itemsbreuvage:
+        item.remaining_quantity = item.quantity - (item.consumed_quantity or 0)
+
+    if request.method == 'POST':
+    # Check which form or formset was submitted and process only that one
+        if 'formset-TOTAL_FORMS' in request.POST and formset.is_valid():
+            for form in formset:
+                if form.cleaned_data:  # Ensure there's data to save
+                    checklist_photo = form.save(commit=False)
+                    checklist_photo.checklist = checklist  # Associate with the checklist
+                    checklist_photo.save()
+            return redirect('checklistmd_detail', pk=checklist.pk)
+
+        elif 'formset1-TOTAL_FORMS' in request.POST and formset1.is_valid():
+            for form in formset1:
+                if form.cleaned_data:  # Ensure there's data to save
+                    recup_photo = form.save(commit=False)
+                    recup_photo.checklist = checklist  # Associate with the checklist
+                    recup_photo.save()
+            return redirect('checklistmd_detail', pk=checklist.pk)
+
+        elif 'form-rapportmd' in request.POST and form.is_valid():
+            form.save()
+            return redirect('checklistmd_detail', pk=checklist.pk)
+
+        elif 'form1-rapportrecup' in request.POST and form1.is_valid():
+            form1.save()
+        return redirect('checklistmd_detail', pk=checklist.pk)
+
+
+    context = {
+        'checklist': checklist,
+        'livraison': checklist.livraison,
+        'formset': formset,
+        'formset1': formset1,
+        'form': form,
+        'checklist_itemsbreuvage': checklist_itemsbreuvage,
+        'form1': form1,
+        'checklist_items' : checklist_items,
+        'md_photos' : md_photos,
+        'recup_photos' : recup_photos,
+        'checklist_documents' : checklist_documents,
+    }
+    return render(request, 'listings/checklistmd_detail.html', context)
+
+
+
+from django.shortcuts import redirect
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import Group
+
+def custom_login(request):
+    print("Custom login view triggered!")  # Check if the view is being called
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            print(f"Logged in user: {user.username}")  # Confirm user is logged in
+
+            # Debugging: print the user's groups
+            print("User groups:", [group.name for group in user.groups.all()])
+
+            # Check if user belongs to 'md' group
+            if user.groups.filter(name='md').exists():
+                print("User belongs to 'md' group, redirecting to faq...")
+                return redirect('faq')
+            else:
+                print("User does not belong to 'md' group, redirecting elsewhere...")
+                return redirect('journees-list')
+        else:
+            return render(request, 'registration/login.html', {'error': 'Invalid credentials'})
+
+    return render(request, 'listings/login.html')
+
+
+
+
+
+
 def livraisonsdrag_detailtoday(request, pk):
     livraison = Livraison.objects.get(id=pk)
     context = {'livraison': livraison}
@@ -2852,13 +3438,18 @@ def livraisonsdrag_detailtoday(request, pk):
             form.save()
             return render(request, 'listings/partials/livraisonslisttoday.html', context)
 
-        context['form'] = form
-        return render(request, 'listings/partials/edit-livraison-formtoday.html', context)
+    context['form'] = form
+    if not request.user.is_superuser:
+        return redirect('unauthorized')
+    
+    return render(request, 'listings/partials/edit-livraison-formtoday.html', context)
 
 def livraison_edit_formtoday(request, pk):
     livraison = Livraison.objects.get(id=pk)
     form = LivraisonDragFormtoday(instance=livraison)
     context = {'livraison': livraison, 'form': form}
+    if not request.user.is_superuser:
+        return redirect('unauthorized')
     return render(request, 'listings/partials/edit-livraison-formtoday.html', context)
 
 
@@ -2874,7 +3465,7 @@ class Livraisonsdragtoday(ListView):
         today = datetime.now().date()
         tomorrow = today + timedelta(1)
         livraisons = Livraison.objects.order_by('position').filter(date=tomorrow)
-
+        
         return livraisons
 
 
@@ -2904,8 +3495,10 @@ def livraisonsdrag_detail(request, pk):
             form.save()
             return render(request, 'listings/partials/livraisonslist.html', context)
 
-        context['form'] = form
-        return render(request, 'listings/partials/edit-livraison-form.html', context)
+    context['form'] = form
+    if not request.user.is_superuser:
+        return redirect('unauthorized')
+    return render(request, 'listings/partials/edit-livraison-form.html', context)
 
 def livraison_edit_form(request, livraison_id):
     livraison = get_object_or_404(Livraison, id=livraison_id)
@@ -2918,11 +3511,15 @@ def livraison_edit_form(request, livraison_id):
             return render(request, 'listings/partials/livraison_row.html', {'livraison': livraison})
 
     # Render the partial template with the form
+    if not request.user.is_superuser:
+        return redirect('unauthorized')
     return render(request, 'listings/partials/livraison_edit_form.html', {'form': form, 'livraison': livraison})
 
 
 def commentcamarche(request):
     context = {}
+    if not request.user.is_superuser:
+        return redirect('unauthorized')
     return render(request, 'listings/commentcamarche.html', context)
 
 def routesfrigo(request):

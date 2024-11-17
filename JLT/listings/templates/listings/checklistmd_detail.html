@@ -1,0 +1,386 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% block content %}
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<style>
+    .photo-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 10px;
+        margin: 20px 0;
+    }
+    
+    .photo-gallery img {
+        width: 100%;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+        cursor: pointer;
+    }
+
+    .photo-gallery img:hover {
+        transform: scale(1.05);
+    }
+
+    .no-photos-message {
+        font-size: 1em;
+        color: #888;
+        text-align: center;
+        margin: 20px 0;
+    }
+
+    .btn-outline-primary {
+        color: #007bff;
+        border-color: #007bff;
+        transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .btn-outline-primary:hover {
+        color: #fff;
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+    
+    .collapsible {
+        cursor: pointer;
+    }
+
+</style>
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="text-center mb-4">Contrat - {{ checklist.name }}</h1>
+
+            <!-- Collapsible Checklist Information Section -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white collapsible" onclick="toggleSection('checklist-info')">
+                    <h5 class="mb-0">Informations de la Checklist <i class="bi bi-chevron-down float-end"></i></h5>
+                </div>
+                <div id="checklist-info" class="card-body">
+                    <p><strong>Date:</strong> {{ checklist.date|date:"d F Y" }}</p>
+                    <p><strong>Heure de livraison:</strong> {{ checklist.livraison.heure_livraison }}</p>
+                    <p><strong>Adresse:</strong> 
+                        <a href="https://maps.google.com/?q={{ checklist.livraison.adress }}" target="_blank" class="text-decoration-none">
+                            {{ checklist.livraison.adress }}
+                        </a>
+                    </p>
+                    <p><strong>Numéro de contrat:</strong> {{ checklist.livraison.num_commande }}</p>
+                    <p><strong>Conseillère:</strong> {{ checklist.livraison.vendeur }}</p>
+                    <p><strong>Nombre de convives:</strong> {{ checklist.livraison.convives }}</p>
+                    <p><strong>MD:</strong> {{ checklist.md }}</p>
+                    <p><strong>Livreur:</strong> {{ checklist.livraison.statut.livreur.nom }} / <a href="tel:{{ checklist.livraison.statut.livreur.phone }}">{{ checklist.livraison.statut.livreur.phone }}</a></p>
+                    
+                    <!-- Button to Show Checklist Items -->
+                    <button class="btn btn-primary mt-3" onclick="toggleChecklistItems()">Voir le contenu de la checklist</button>
+                    <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#documentsModal"> Voir les documents
+                    </button>
+                    <div id="checklist-items" style="display: none; margin-top: 20px;">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Produits</th>
+                                    <th>Quantité</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in checklist_items %}
+                                    <tr>
+                                        <td>{{ item.product.name }}</td>
+                                        <td>{{ item.quantity }}</td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="3">Pas de produits de cette checklist.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex flex-wrap gap-3 mt-4 justify-content-center">
+                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#formsetModal">
+                    <i class="bi bi-camera"></i> Ajouter photos rapport
+                </button>
+                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#formset1Modal">
+                    <i class="bi bi-camera"></i> Ajouter photos récupération
+                </button>
+                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#rapportmdModal">
+                    <i class="bi bi-pencil-square"></i> Ecrire rapport événement
+                </button>
+                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#rapportrecupModal">
+                    <i class="bi bi-pencil-square"></i> Ecrire rapport récupération
+                </button>
+                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#breuvagesModal">
+                    <i class="bi bi-folder"></i> Rapport breuvages
+                </button>
+                
+            </div>
+
+            <!-- Modal for Documents-->
+            <div class="modal fade" id="documentsModal" tabindex="-1" aria-labelledby="documentsModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title mx-auto" id="documentsModalLabel">Documents</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <ul class="list-group">
+                                {% for document in checklist_documents %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <a href="{{ document.document.url }}" target="_blank">Voir document</a>
+                                        <span class="text-muted">{{ document.uploaded_at|date:"d M Y, H:i" }}</span>
+                                    </li>
+                                {% empty %}
+                                    <p class="no-photos-message">Pas de documents pour cette checklist.</p>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="breuvagesModal" tabindex="-1" aria-labelledby="breuvagesModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title mx-auto" id="breuvagesModalLabel">Rapport des Breuvages Consommés</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="breuvagesReportForm">
+                                {% csrf_token %}
+                                <ul class="list-group">
+                                    {% for item in checklist_items %}
+                                        {% if item.product.category == "BREUVAGE" %}
+                                            <li class="list-group-item">
+                                                <div class="d-flex flex-column">
+                                                    <span class="mb-2">{{ item.product.name }} - Total: {{ item.quantity }}</span>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text">Restant</span>
+                                                        <input type="number" class="form-control" name="consumed_{{ item.id }}" 
+                                                               placeholder="Quantité consommée" min="0" max="{{ item.quantity }}"
+                                                               value="{{ item.consumed_quantity|default:0 }}">
+                                                        
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                </ul>
+                                <div class="text-center mt-3">
+                                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            
+            
+
+        
+            
+
+            
+
+            <!-- Modal for Rapport MD -->
+            <div class="modal fade" id="rapportmdModal" tabindex="-1" aria-labelledby="rapportmdModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title mx-auto" id="rapportmdModalLabel">RAPPORT ÉVÉNEMENT</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="post"> {% csrf_token %}
+                                
+                                {{ form.rapportmd }}
+                                <input type="hidden" name="rapportmd" value="true"> 
+                                <button type="submit" class="btn btn-primary mt-3 w-100">Enregistrer</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal for Rapport Recup -->
+            <div class="modal fade" id="rapportrecupModal" tabindex="-1" aria-labelledby="rapportrecupModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title mx-auto" id="rapportrecupModalLabel">RAPPORT RÉCUPÉRATION</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="post"> {% csrf_token %}
+                                
+                                {{ form1.rapportrecup }}
+                                <input type="hidden" name="rapportrecup" value="true"> 
+                                <button type="submit" class="btn btn-primary mt-3 w-100">Enregistrer</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal for Formset (Photos rapport) -->
+            <div class="modal fade" id="formsetModal" tabindex="-1" aria-labelledby="formsetModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title mx-auto" id="formsetModalLabel">Photos Rapport</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="post" enctype="multipart/form-data">{% csrf_token %}
+                                {{ formset.as_p }}
+                                <input type="hidden" name="formset" value="true"> 
+                                <button type="submit" class="btn btn-primary mt-3 w-100">Enregistrer</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal for Formset1 (Photos récupération) -->
+            <div class="modal fade" id="formset1Modal" tabindex="-1" aria-labelledby="formset1ModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title mx-auto" id="formset1ModalLabel">Photos Récupération</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="post" enctype="multipart/form-data">{% csrf_token %}
+                                {{ formset1.as_p }}
+                                <input type="hidden" name="formset1" value="true"> 
+                                <button type="submit" class="btn btn-primary mt-3 w-100">Enregistrer</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+ 
+
+            <!-- Photos and Actions Section with Tabs -->
+            <ul class="nav nav-tabs mt-4">
+                <li class="nav-item">
+                    <a class="nav-link active" id="rapport-tab" data-bs-toggle="tab" href="#photos-rapport">Photos Rapport</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="recup-tab" data-bs-toggle="tab" href="#photos-recuperation">Photos Récupération</a>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <!-- Photos Rapport -->
+                <div id="photos-rapport" class="tab-pane fade show active photo-gallery mt-3">
+                    {% for photo in md_photos %}
+                        <div class="photo">
+                            <img src="{{ photo.image.url }}" alt="MD Photo" data-bs-toggle="modal" data-bs-target="#imageModal" onclick="openModal('{{ photo.image.url }}')">
+                        </div>
+                    {% empty %}
+                        <p class="no-photos-message">Pas de photos.</p>
+                    {% endfor %}
+                </div>
+
+                <!-- Photos Récupération -->
+                <div id="photos-recuperation" class="tab-pane fade photo-gallery mt-3">
+                    {% for photo in recup_photos %}
+                        <div class="photo">
+                            <img src="{{ photo.image.url }}" alt="Recup Photo" data-bs-toggle="modal" data-bs-target="#imageModal" onclick="openModal('{{ photo.image.url }}')">
+                        </div>
+                    {% empty %}
+                        <p class="no-photos-message">Pas de photos.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Toast Notification -->
+            <div id="toast" class="toast position-fixed bottom-0 end-0 p-3" style="display:none; background-color: #28a745; color: white;">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        Action réussie!
+                    </div>
+                    <button type="button" class="btn-close btn-close-white ms-auto me-2" onclick="hideToast()"></button>
+                </div>
+            </div>
+
+            <!-- Image Modal -->
+            <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-body text-center">
+                            <img id="modalImage" src="" class="img-fluid rounded">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+document.getElementById("breuvagesReportForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+    const formData = new FormData(this);
+
+    fetch("{% url 'save_breuvages_report' checklist.id %}", {
+        method: "POST",
+        body: formData,
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("Rapport enregistré avec succès !");
+            location.reload();  // Reload to reflect changes
+        } else {
+            alert("Erreur lors de l'enregistrement du rapport.");
+        }
+    })
+    .catch(error => console.error("Error:", error));
+});
+
+    function toggleSection(id) {
+        const section = document.getElementById(id);
+        section.style.display = section.style.display === "none" ? "block" : "none";
+    }
+
+    function toggleChecklistItems() {
+        const itemsDiv = document.getElementById("checklist-items");
+        itemsDiv.style.display = itemsDiv.style.display === "none" ? "block" : "none";
+    }
+
+    function openModal(imgSrc) {
+        document.getElementById("modalImage").src = imgSrc;
+    }
+
+    function showToast() {
+        const toast = document.getElementById("toast");
+        toast.style.display = "block";
+        setTimeout(() => toast.style.display = "none", 3000);
+    }
+
+    function hideToast() {
+        document.getElementById("toast").style.display = "none";
+    }
+</script>
+
+{% endblock %}

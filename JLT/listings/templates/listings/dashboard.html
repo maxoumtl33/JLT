@@ -369,32 +369,7 @@
     </div>
 </header>
 <br>
-<h3>Planning de Travail</h3>
-<br>
-{% if shifts %}
-    <div class="shift-section">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Heure de Début</th>
-                    <th>Heure de Fin (estimé)</th>
-                    <th>Notes</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for shift in shifts %}
-                    <tr>
-                        <td>{{ shift.start_time }}</td>
-                        <td>{{ shift.end_time }}</td>
-                        <td>{{ shift.notes }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-{% else %}
-    <p>Aucun planning disponible pour aujourd'hui.</p>
-{% endif %}
+
 
 <nav class="bottom-navbar">
     <ul>
@@ -755,7 +730,9 @@
 <br>
 <br>
 <br>
-<br><div class="modal fade" id="offcanvasExample" tabindex="-1" aria-labelledby="offcanvasExampleLabel" aria-hidden="true">
+<br>
+<!-- Modal -->
+<div class="modal fade" id="offcanvasExample" tabindex="-1" aria-labelledby="offcanvasExampleLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -774,7 +751,7 @@
             </div>
         </div>
     </div>
-</div><!-- Modal -->
+</div>
 
  
 

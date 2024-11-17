@@ -1,0 +1,40 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container py-5">
+        <h3 class="mb-4 text-center">Liste des Produits</h3>
+
+        <!-- Search Bar (Optional) -->
+        <div class="mb-4">
+            <form method="GET" action="{% url 'product_list' %}">
+                <div class="input-group">
+                    <input type="text" class="form-control" name="query" placeholder="Rechercher un produit" value="{{ request.GET.query }}">
+                    <button class="btn btn-outline-primary" type="submit">Rechercher</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="row">
+            {% for product in products %}
+                <div class="col-12 col-md-4 mb-4">
+                    <div class="card shadow-sm">
+                        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ product.name }}</h5>
+                            <p class="card-text">{{ product.description|truncatewords:20 }}</p>
+                            <p><strong>Quantité:</strong> {{ product.quantity }}</p>
+                            <a href="{% url 'product_quantity_update' product.id %}" class="btn btn-primary">Mettre à jour</a>
+                            <!-- QR Code Generation Button -->
+                            <a href="{% url 'product_qr_code' product.id %}" class="btn btn-outline-success btn-sm mt-2" target="_blank">
+                                <i class="fas fa-qrcode"></i> Générer QR Code
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="text-center text-muted">Aucun produit trouvé.</p>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
