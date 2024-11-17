@@ -681,19 +681,21 @@ def import_items(request):
     return render(request, 'listings/import.html')
 
 
-import qrcode
-from io import BytesIO
 from django.http import HttpResponse
-from django.shortcuts import render
 from django.urls import reverse
+import qrcode
+from django.conf import settings
 
 def generate_qr_code(request, product_id):
-    # Get product details (example)
+    # Get product details
     product = Product.objects.get(id=product_id)
     quantity = product.quantity  # You can include any relevant information for the QR code
     
     # URL that will be encoded in the QR code
     product_url = reverse('product_quantity_update', args=[product_id])
+    
+    # Generate the full URL including the domain
+    full_url = request.build_absolute_uri(product_url)
     
     # Create the QR code
     qr = qrcode.QRCode(
@@ -702,7 +704,7 @@ def generate_qr_code(request, product_id):
         box_size=10,
         border=4,
     )
-    qr.add_data(product_url)
+    qr.add_data(full_url)  # Use the full URL with domain
     qr.make(fit=True)
     
     # Create an image of the QR code
@@ -1453,7 +1455,7 @@ def routedetail(request, id):  # notez le paramètre id supplémentaire
           context={'route': route, 'form': form, 'livraison':livraison}) # nous passons l'id au modèle
 
 def journee_detail(request, id):  # notez le paramètre id supplémentaire
-    journees = Journee.objects.get(id=id)
+    journees = get_object_or_404(Journee, id=id)
     livreurs = Livreur.objects.all()
     shifts = Shift.objects.filter(date=journees.date)
     livraisonsroute = Livraison.objects.order_by('position')
