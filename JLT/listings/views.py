@@ -717,28 +717,66 @@ def generate_qr_code(request, product_id):
 
 
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from .models import Product
+from .models import Product, QuantityChangeLog
+from django.contrib.auth.models import User
 
 def update_product_quantity(request, product_id):
-    # Fetch the product object
     product = Product.objects.get(id=product_id)
     
     if request.method == 'POST':
-        # Get the new quantity from the POST data
-        new_quantity = request.POST.get('quantity')
+        increment = request.POST.get('quantity')
         
-        # Ensure the quantity is a valid positive integer
-        if new_quantity and new_quantity.isdigit() and int(new_quantity) >= 0:
-            product.quantity = int(new_quantity)  # Update the product quantity
-            product.save()  # Save the changes to the database
-            return redirect('product_list')  # Redirect to product list or details page
+        # Ensure increment is a valid number
+        if increment and increment.isdigit():
+            # Get the previous quantity
+            previous_quantity = product.quantity
+            
+            # Add the increment to the current quantity
+            product.quantity += int(increment)
+            product.save()  # Save the updated product
+            
+            # Log the change
+            QuantityProductChangeLog.objects.create(
+                product=product,
+                previous_quantity=previous_quantity,
+                new_quantity=product.quantity,
+                user=request.user,  # The user who made the change
+            )
+            
+            return redirect('product_list')  # Redirect to the product list or another page
+            
         else:
-            # Handle invalid quantity input
+            # Handle invalid input (non-numeric or empty value)
             return render(request, 'listings/update_quantity.html', {'product': product, 'error': 'Veuillez entrer une quantité valide.'})
     
-    # GET request, display the form
     return render(request, 'listings/update_quantity.html', {'product': product})
+
+from django.shortcuts import render
+from .models import QuantityChangeLog
+
+from datetime import timedelta
+
+def view_quantity_change_logs(request, product_id):
+    product = Product.objects.get(id=product_id)
+    logs = QuantityProductChangeLog.objects.filter(product=product).order_by('-timestamp')
+
+    # Calculate the difference for each log entry and adjust timestamp
+    for log in logs:
+        log.difference = log.new_quantity - log.previous_quantity
+        log.adjusted_timestamp = log.timestamp - timedelta(hours=5)  # Subtract 5 hours
+
+    context = {
+        'product': product,
+        'logs': logs,
+    }
+    
+    return render(request, 'listings/view_logs.html', context)
+
+
+
+
+
+
 
 def tacheslist(request):
 
@@ -1819,10 +1857,38 @@ def responsables(request, id):
 def unauthorized_view(request):
     return render(request, 'listings/pasauthorise.html', status=403)
 
+
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 def product_list(request):
-    products = Product.objects.all()
+    query = request.GET.get('query', '')  # Get the search query (if any)
     
-    return render(request, 'listings/product_list.html', {'products': products})
+    # Retrieve all products
+    products = Product.objects.all()
+
+    # Apply filter if there is a query
+    if query:
+        products = products.filter(name__icontains=query)  # Filter by name containing query
+
+    # Paginate the products (10 products per page)
+    paginator = Paginator(products, 10)
+    page_number = request.GET.get('page')
+
+    try:
+        # Try to get the page object for the requested page number
+        page_obj = paginator.get_page(page_number)
+    except PageNotAnInteger:
+        # If the page number is not an integer, display the first page
+        page_obj = paginator.get_page(1)
+    except EmptyPage:
+        # If the page number is out of range (too large), display the last page
+        page_obj = paginator.get_page(paginator.num_pages)
+
+    # Return the context to the template
+    return render(request, 'listings/product_list.html', {'page_obj': page_obj, 'query': query})
+
+
+
 
 class DistanceView(View):
 

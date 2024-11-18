@@ -382,7 +382,18 @@ class Checklist(models.Model):
     def __str__(self):
         return self.name
     
-    
+
+
+class QuantityProductChangeLog(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    previous_quantity = models.IntegerField()
+    new_quantity = models.IntegerField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Change for {self.product.name} by {self.user.username} on {self.timestamp}"
+
     
 
 class ChecklistMDPhoto(models.Model):

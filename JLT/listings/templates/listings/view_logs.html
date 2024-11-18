@@ -1,0 +1,47 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container py-5">
+    <h3 class="mb-4">Historique des changements de quantité pour {{ product.name }}</h3>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Utilisateur</th>
+                <th>Quantité avant</th>
+                <th>Quantité après</th>
+                <th>Différence</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td>{{ log.user.username }}</td>
+                <td>{{ log.previous_quantity }}</td>
+                <td>{{ log.new_quantity }}</td>
+
+                <!-- Display the difference with conditional formatting -->
+                <td>
+                    {% if log.difference > 0 %}
+                        <span style="color: green;">+{{ log.difference }}</span>
+                    {% elif log.difference < 0 %}
+                        <span style="color: red;">{{ log.difference }}</span>
+                    {% else %}
+                        <span>0</span>
+                    {% endif %}
+                </td>
+
+                <td>{{ log.adjusted_timestamp }}</td>
+
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Back Button -->
+    <a href="{% url 'product_list' %}" class="btn btn-secondary mt-4">Retour à la liste des produits</a>
+</div>
+
+{% endblock %}

@@ -2,32 +2,53 @@
 {% load static %}
 
 {% block content %}
-    <div class="container py-5">
-        <!-- Heading -->
-        <h3 class="mb-4 text-center">Mise à jour de la quantité pour <strong>{{ product.name }}</strong></h3>
+<div class="container py-5">
+    <!-- Heading -->
+    <h3 class="mb-4 text-center">Mise à jour de la quantité pour <strong>{{ product.name }}</strong></h3>
 
-        <div class="row justify-content-center">
-            <div class="col-12 col-md-6">
-                <!-- Form -->
-                <form method="POST" action="{% url 'product_quantity_update' product.id %}" class="card p-4 shadow-sm">
-                    {% csrf_token %}
-                    
-                    <!-- Quantity Field -->
-                    <div class="mb-3">
-                        <label for="quantity" class="form-label">Quantité:</label>
-                        <input type="number" name="quantity" id="id_quantity" class="form-control" value="{{ product.quantity }}" required min="0" style="font-size: 1.1rem;">
-                    </div>
-                    
-                    <!-- Error Message -->
-                    {% if error %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                    {% endif %}
-                    
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary btn-lg">Valider</button>
-                    </div>
-                </form>
-            </div>
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-6">
+            <!-- Form -->
+            <form method="POST" action="{% url 'product_quantity_update' product.id %}" class="card p-4 shadow-sm">
+                {% csrf_token %}
+                
+                <!-- Current Quantity (readonly) -->
+                <div class="mb-3">
+                    <label for="current_quantity" class="form-label">Quantité actuelle:</label>
+                    <input type="text" id="current_quantity" class="form-control" value="{{ product.quantity }}" readonly>
+                </div>
+
+                <!-- Quantity Input Field (increment to be added) -->
+                <div class="mb-3">
+                    <label for="quantity" class="form-label">Quantité à ajouter:</label>
+                    <input type="number" name="quantity" id="id_quantity" class="form-control" value="0" required min="0" style="font-size: 1.1rem;">
+                </div>
+                
+                <!-- Display error message if there is an invalid quantity -->
+                {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+                
+                <!-- Submit Button -->
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg">Valider</button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
+
+    <script>
+        // JavaScript to dynamically calculate the difference
+        const currentQuantity = {{ product.quantity }};
+        const quantityInput = document.getElementById('id_quantity');
+        const quantityDifferenceInput = document.getElementById('quantity_difference');
+
+        // Update the quantity difference as user types in the quantity
+        quantityInput.addEventListener('input', function() {
+            const enteredQuantity = quantityInput.value;
+            const difference = enteredQuantity - currentQuantity;
+            quantityDifferenceInput.value = difference;
+        });
+    </script>
 {% endblock %}
