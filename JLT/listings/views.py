@@ -391,41 +391,46 @@ def checklistvoir_detail(request, checklist_id):
     valide = "valide"
     refuse = "refuse"
 
-
-
+    # Process the checklist note form if submitted
     if request.method == 'POST':
+        # Check if the form is for updating the note
+        if 'note' in request.POST:
+            note = request.POST.get('note')
+            if note is not None:
+                checklist.notechecklist = note  # Save the note to the model
+                checklist.save()
+            return redirect('checklistvoir-detail', checklist_id=checklist_id)  # Redirect back to the same page
+
+        # Process the checklist item status change form
         item_id = request.POST.get('item_id')
         status = request.POST.get('status')
 
-        # Validate item_id and status
-        if not item_id or not status:
-            return HttpResponseForbidden("Invalid item ID or status.")
+        if item_id and status:
+            checklist_item = get_object_or_404(ChecklistItem, id=item_id, checklist=checklist)
+            checklist_item.status = status
+            checklist_item.save()
 
-        checklist_item = get_object_or_404(ChecklistItem, id=item_id, checklist=checklist)
-        checklist_item.status = status
-        checklist_item.save()
+            # Update checklist status based on items' statuses
+            checklist.update_status()
 
-        # Redirect to the same page or another page
-        return redirect('checklistvoir-detail', checklist_id=checklist_id)
+            return redirect('checklistvoir-detail', checklist_id=checklist_id)
 
     # Prepare checklist items to be displayed with their statuses
     items = ChecklistItem.objects.filter(checklist=checklist)
 
-
-
     context = {
-       'checklist': checklist,
-       'checklist_item': checklist_item,
-       'products': products,
-       'items': items,
-       'encours':encours,
-       'valide':valide,
-       'refuse':refuse,
-       'quantity_change_logs': quantity_change_logs,
-       'change_logs': change_logs,
-
+        'checklist': checklist,
+        'checklist_item': checklist_item,
+        'products': products,
+        'items': items,
+        'encours': encours,
+        'valide': valide,
+        'refuse': refuse,
+        'quantity_change_logs': quantity_change_logs,
+        'change_logs': change_logs,
     }
     return render(request, 'listings/checklistevoir_detail.html', context)
+
 
 def product_detail(request, item_id):
     item = get_object_or_404(ItemInv, pk=item_id)

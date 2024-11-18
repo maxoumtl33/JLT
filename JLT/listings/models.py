@@ -366,6 +366,7 @@ class Checklist(models.Model):
     rapportmd = models.TextField(blank=True, null=True)
     rapportrecup = models.TextField(blank=True, null=True)
     commentairevente = models.TextField(blank=True, null=True)
+    notechecklist = models.TextField(blank=True, null=True)
     
 
     def update_status(self):

@@ -82,60 +82,68 @@
         <p><strong>Nom du MD :</strong> {{ checklist.md }}</p>
     </div>
 
+     <!-- Form for adding a note to the checklist -->
+     <h3 class="mt-4">Ajouter une note</h3>
+     <form method="POST" action="{% url 'checklistvoir-detail' checklist.id %}">
+         {% csrf_token %}
+         <div class="form-group">
+             <textarea name="note" class="form-control" rows="4" placeholder="Ajoutez une note sur cette checklist">{{ checklist.notechecklist }}</textarea>
+         </div>
+         <button type="submit" class="btn btn-primary">Ajouter la note</button>
+     </form>
+
     <hr>
-    <h3 class="mb-4">Produits dans la checklist</h3>
-
-<div class="table-responsive">
-    <table class="table table-hover">
-        <thead class="thead-dark">
-            <tr>
-                <th scope="col">Produit</th>
-                <th scope="col">Quantité</th>
-                <th scope="col">Statut</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for checklist_product in checklist_item %}
+    <h3 class="mt-4">Produits dans la checklist</h3>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="thead-dark">
                 <tr>
-                    <td class="align-middle" style="background-color: {% if checklist_product.status == 'en_cours' %}#ff9800{% elif checklist_product.status == 'valide' %}#4caf50{% elif checklist_product.status == 'refuse' %}#f44336{% endif %};">
-                        {{ checklist_product.product.name }}
-                    </td>
-                    <td class="align-middle" style="background-color: {% if checklist_product.status == 'en_cours' %}#ff9800{% elif checklist_product.status == 'valide' %}#4caf50{% elif checklist_product.status == 'refuse' %}#f44336{% endif %};">
-                        {{ checklist_product.quantity }}
-                    </td>
-                    <td class="align-middle status-cell">
-                        <form method="post" action="{% url 'checklistvoir-detail' checklist.id %}">
-                            {% csrf_token %}
-                            <input type="hidden" name="item_id" value="{{ checklist_product.id }}">
-                            
-                            <!-- Hidden input to store the selected status -->
-                            <input type="hidden" name="status" id="status_{{ checklist_product.id }}" value="">
-
-                            <!-- "Validé" Button with a check icon -->
-                            <button type="button" class="btn btn-outline-success btn-sm rounded-circle" 
-                            onclick="submitStatusForm('{{ checklist_product.id }}', 'valide')" 
-                            title="Validé">
-                            <i class="fa-solid fa-check"></i>
-                            </button>
-
-                            <!-- "Refusé" Button with an X icon -->
-                            <button type="button" class="btn btn-outline-danger btn-sm rounded-circle" 
-                            onclick="submitStatusForm('{{ checklist_product.id }}', 'refuse')" 
-                            title="Refusé">
-                            <i class="fa-solid fa-times"></i>
-                            </button>
-
-                        </form>
-                    </td>
+                    <th scope="col">Produit</th>
+                    <th scope="col">Quantité</th>
+                    <th scope="col">Statut</th>
                 </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="3" class="text-center text-muted">Pas de produits dans cette checklist.</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+            </thead>
+            <tbody>
+                {% for checklist_product in checklist_item %}
+                    <tr>
+                        <td class="align-middle" style="background-color: {% if checklist_product.status == 'en_cours' %}#ff9800{% elif checklist_product.status == 'valide' %}#4caf50{% elif checklist_product.status == 'refuse' %}#f44336{% endif %};">
+                            {{ checklist_product.product.name }}
+                        </td>
+                        <td class="align-middle" style="background-color: {% if checklist_product.status == 'en_cours' %}#ff9800{% elif checklist_product.status == 'valide' %}#4caf50{% elif checklist_product.status == 'refuse' %}#f44336{% endif %};">
+                            {{ checklist_product.quantity }}
+                        </td>
+                        <td class="align-middle status-cell">
+                            <form method="post" action="{% url 'checklistvoir-detail' checklist.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="item_id" value="{{ checklist_product.id }}">
+                                
+                                <!-- Hidden input to store the selected status -->
+                                <input type="hidden" name="status" id="status_{{ checklist_product.id }}" value="">
+
+                                <!-- "Validé" Button with a check icon -->
+                                <button type="button" class="btn btn-outline-success btn-sm rounded-circle" 
+                                onclick="submitStatusForm('{{ checklist_product.id }}', 'valide')" 
+                                title="Validé">
+                                <i class="fa-solid fa-check"></i>
+                                </button>
+
+                                <!-- "Refusé" Button with an X icon -->
+                                <button type="button" class="btn btn-outline-danger btn-sm rounded-circle" 
+                                onclick="submitStatusForm('{{ checklist_product.id }}', 'refuse')" 
+                                title="Refusé">
+                                <i class="fa-solid fa-times"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center text-muted">Pas de produits dans cette checklist.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
     <h3 class="mt-4">Changement de quantité</h3>
     <br>
@@ -171,12 +179,13 @@
 <script>
 
 function submitStatusForm(itemId, statusValue) {
-        // Set the hidden status input value
-        document.getElementById('status_' + itemId).value = statusValue;
+    // Set the hidden status input value
+    document.getElementById('status_' + itemId).value = statusValue;
 
-        // Submit the form
-        document.getElementById('status_' + itemId).closest('form').submit();
-    }
+    // Submit the form
+    document.getElementById('status_' + itemId).closest('form').submit();
+}
+
 
 </script>
 {% endblock %}

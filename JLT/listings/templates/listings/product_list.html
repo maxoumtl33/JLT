@@ -4,16 +4,22 @@
 {% block content %}
     <div class="container py-5">
         <h3 class="mb-4 text-center">Liste des Produits</h3>
-        <!-- Search Bar -->
-<form method="GET" action="{% url 'product_list' %}">
-    <div class="input-group">
-        <input type="text" class="form-control" name="query" placeholder="Rechercher un produit" value="{{ request.GET.query }}">
-        <button class="btn btn-outline-primary" type="submit">Rechercher</button>
-        <a href="{% url 'product_list' %}" class="btn btn-secondary">Voir toute la liste</a>
-    </div>
-</form>
 
-<br>
+        <!-- Button to Go to Checklist Page -->
+        <div class="d-flex justify-content-end mb-4">
+            <a href="{% url 'voir_checklist' %}" class="btn btn-primary">Voir Checklists</a>
+        </div>
+
+        <!-- Search Bar -->
+        <form method="GET" action="{% url 'product_list' %}">
+            <div class="input-group">
+                <input type="text" class="form-control" name="query" placeholder="Rechercher un produit" value="{{ request.GET.query }}">
+                <button class="btn btn-outline-primary" type="submit">Rechercher</button>
+                <a href="{% url 'product_list' %}" class="btn btn-secondary">Voir toute la liste</a>
+            </div>
+        </form>
+
+        <br>
         <div class="row">
             {% for product in page_obj %}
             <div class="col-12 col-md-4 mb-4">
@@ -36,14 +42,5 @@
             <p class="text-center text-muted">Aucun produit trouvé.</p>
             {% endfor %}
         </div>
-        
-        
-        
-        
-        
-        
-        
-        
-        </div>
-        
+    </div>
 {% endblock %}
