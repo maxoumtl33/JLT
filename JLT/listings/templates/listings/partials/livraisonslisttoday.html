@@ -1,3 +1,9 @@
+<style>
+    .highlight-row {
+    background-color: #F1B3DA;
+}
+</style>
+
 <div class="d-flex justify-content-between">
   <section class="col-12">
       <!-- Ensure jQuery and jQuery UI are included in the right order -->
@@ -20,14 +26,19 @@
         </thead>
         <tbody>
           {% for livraison in livraisonstoday %}
-          <tr id="livraison-{{ livraison.id }}" data-id="{{ livraison.id }}">
-            <td>{{ livraison.statut.heure_depart }}</td>
-            <td>{{ livraison.nom }}</td>
-            <td>{{ livraison.infodetail }}</td>
-            <td>{{ livraison.heure_livraison }}</td>
-            <td>{{ livraison.statut.livreur }}</td>
-            <td>{{ livraison.aidelivreur }}</td>
-            <td>{{ livraison.statut.nom }}</td>
+          {% if livraison.recuperation == True %}
+  
+          <tr id="livraison-{{ livraison.id }}" 
+    data-id="{{ livraison.id }}" 
+    >
+            <td style="background-color: pink !important;" >{{ livraison.statut.heure_depart }}</td>
+            <td style="background-color: pink !important;">{{ livraison.nom }}</td>
+            <td style="background-color: pink !important;">{{ livraison.infodetail }}</td>
+            <td style="background-color: pink !important;">{{ livraison.heure_livraison }}</td>
+            <td style="background-color: pink !important;">{{ livraison.statut.livreur }}</td>
+            <td style="background-color: pink !important;">{{ livraison.aidelivreur }}</td>
+            <td style="background-color: pink !important;">{{ livraison.statut.nom }}</td>
+            
             <td>
               <button 
                 class="btn btn-outline-primary" 
@@ -41,6 +52,32 @@
               </button>
             </td>
           </tr>
+          {% else %}
+          <tr id="livraison-{{ livraison.id }}" 
+    data-id="{{ livraison.id }}" 
+    >
+            <td>{{ livraison.statut.heure_depart }}</td>
+            <td>{{ livraison.nom }}</td>
+            <td>{{ livraison.infodetail }}</td>
+            <td>{{ livraison.heure_livraison }}</td>
+            <td>{{ livraison.statut.livreur }}</td>
+            <td>{{ livraison.aidelivreur }}</td>
+            <td>{{ livraison.statut.nom }}</td>
+            
+            <td>
+              <button 
+                class="btn btn-outline-primary" 
+                hx-get="{% url 'livraison-edit-form' livraison.id %}" 
+                hx-target="#modal-body-content" 
+                hx-trigger="click" 
+                hx-swap="innerHTML"
+                data-bs-toggle="modal" 
+                data-bs-target="#editModal">
+                Modifier
+              </button>
+            </td>
+          </tr>
+          {% endif %}
           {% endfor %}
         </tbody>
       </table>

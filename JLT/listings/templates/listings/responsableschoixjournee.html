@@ -264,7 +264,17 @@
     <!-- Footer Navbar -->
     <nav class="bottom-navbar">
         <ul>
-            <li><a href="{% url 'journees-list' %}" class="nav__link"><i class="fa-solid fa-calendar-days"></i><span class="nav__name">Journées</span></a></li>
+            <li><a href="{% url 'journees-list' %}" class="nav__link"><i class="fa-solid fa-calendar-days"></i><span class="nav__name">Journées</span></a>
+            </li>
+            <li>
+                <form action="{% url 'logout' %}" method="post" class="logout-form">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-button" style="color: red;">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                        Déconnexion
+                    </button>
+                </form>
+            </li>
         </ul>
     </nav>
 

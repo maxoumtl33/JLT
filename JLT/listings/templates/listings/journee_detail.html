@@ -370,6 +370,8 @@ body {
           <th>Heure livraison</th>
           <th>Livreur</th>
           <th>Détails</th>
+          <th>Status</th>
+
       </tr>
   </thead>
   
@@ -425,62 +427,57 @@ body {
           return;
       }
 
-      livraisons.forEach(livraison => {
-          console.log("Processing delivery:", livraison);
+livraisons.forEach(livraison => {
+    console.log("Processing delivery:", livraison);
 
-          const { nom, infodetail, heure_livraison, heure_depart, livreur, id, recuperation, date } = livraison;
-          const today = new Date().toISOString().slice(0, 10);  // Get current date in 'YYYY-MM-DD' format
+    const { nom, infodetail, heure_livraison, heure_depart, livreur, id, recuperation, date, status } = livraison;
 
-          // Check if essential properties exist
-          if (!nom || !infodetail || !heure_livraison) {
-              console.error("Missing essential delivery properties:", livraison);
-              return;
-          }
+    // Check if essential properties exist
+    if (!nom || !infodetail || !heure_livraison) {
+        console.error("Missing essential delivery properties:", livraison);
+        return;
+    }
 
-          // Condition: Only show rows where recuperation is true and the date matches today
-          if (recuperation === true) {
-    const baseUrl = "{% url 'livraison-detail' 0 %}".replace('0', id);
+    // Determine the status icon based on the value of 'status'
+    const statusIcon = status ? 
+        '<i class="fa-regular fa-circle-check" style="color: #63E6BE;"></i>' : 
+        '<i class="fa-solid fa-spinner fa-spin" style="color: #ff9214;"></i>';
 
-    // Create a new table row with background color
-    const row = document.createElement('tr');
-    row.innerHTML = `
-        <td style="background-color: #F1B3DA;">${heure_depart || 'N/A'}</td>
-        <td style="background-color: #F1B3DA;">${nom || 'N/A'}</td>
-        <td style="background-color: #F1B3DA;">${infodetail || 'N/A'}</td>
-        <td style="background-color: #F1B3DA;">${heure_livraison || 'N/A'}</td>
-        <td style="background-color: #F1B3DA;">${livreur || 'N/A'}</td>
-        <td><a href="${baseUrl}" class="view-details">Voir</a></td>
-    `;
-    tableBody.appendChild(row);
-} else if (recuperation === false) {
-    const baseUrl = "{% url 'livraison-detail' 0 %}".replace('0', id);
+    if (recuperation === true) {
+        const baseUrl = "{% url 'livraison-detail' 0 %}".replace('0', id);
 
-    // Create a new table row without background color
-    const row = document.createElement('tr');
-    row.innerHTML = `
-        <td>${heure_depart || 'N/A'}</td>
-        <td>${nom || 'N/A'}</td>
-        <td>${infodetail || 'N/A'}</td>
-        <td>${heure_livraison || 'N/A'}</td>
-        <td>${livreur || 'N/A'}</td>
-        <td><a href="${baseUrl}" class="view-details">Voir</a></td>
-    `;
-    tableBody.appendChild(row);
-}
+        // Create a new table row with background color
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td style="background-color: #F1B3DA;">${heure_depart || 'N/A'}</td>
+            <td style="background-color: #F1B3DA;">${nom || 'N/A'}</td>
+            <td style="background-color: #F1B3DA;">${infodetail || 'N/A'}</td>
+            <td style="background-color: #F1B3DA;">${heure_livraison || 'N/A'}</td>
+            <td style="background-color: #F1B3DA;">${livreur || 'N/A'}</td>
+            <td><a href="${baseUrl}" class="view-details">Voir</a></td>
+            <td>${statusIcon}</td>
+        `;
+        tableBody.appendChild(row);
+    } else if (recuperation === false) {
+        const baseUrl = "{% url 'livraison-detail' 0 %}".replace('0', id);
+
+        // Create a new table row without background color
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${heure_depart || 'N/A'}</td>
+            <td>${nom || 'N/A'}</td>
+            <td>${infodetail || 'N/A'}</td>
+            <td>${heure_livraison || 'N/A'}</td>
+            <td>${livreur || 'N/A'}</td>
+            <td><a href="${baseUrl}" class="view-details">Voir</a></td>
+            <td>${statusIcon}</td>
+        `;
+        tableBody.appendChild(row);
+    }
+});
 
 
-          // Render the delivery card
-          const card = document.createElement('div');
-          card.className = 'delivery-card';
-          card.innerHTML = `
-              <h3>${nom || "N/A"}</h3>
-              <p><strong>Heure Départ:</strong> ${heure_depart || "."}</p>
-              <p><strong>Détails:</strong> ${infodetail || "."}</p>
-              <p><strong>Heure Livraison:</strong> ${heure_livraison || "."}</p>
-              <p><strong>Livreur:</strong> ${livreur || "."}</p>
-          `;
-          deliveryCards.appendChild(card);
-      });
+
   }
 
   // Call the function on page load

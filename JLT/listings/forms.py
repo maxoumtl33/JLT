@@ -110,7 +110,7 @@ class DistanceFormAprem(ModelForm):
 class LivraisonDragForm(forms.ModelForm):
     class Meta:
         model = Livraison
-        fields = ('infodetail','heure_livraison', 'commentairedispatch', 'recuperation')
+        fields = ('infodetail','heure_livraison','statut', 'commentairedispatch', 'recuperation')
 
 class LivraisonDragFormtoday(forms.ModelForm):
     class Meta:
@@ -164,18 +164,17 @@ class ItemInvForm(forms.ModelForm):
         fields = ['name']
 
 class ChecklistForm(forms.ModelForm):
-   class Meta:
+    class Meta:
         model = Checklist
         fields = ['name', 'date', 'lieu', 'num_contrat', 'nb_convive', 'heure_livraison', 'conseillere', 'md']
 
-   name = forms.CharField(label='Nom du contrat', max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
-   date = forms.CharField(label='', widget=forms.DateInput(attrs={'type': 'date'}))
-   lieu = forms.CharField(label='Adresse événement', max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
-   num_contrat = forms.CharField(label='Numéro de contrat', max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
-   nb_convive = forms.CharField(label='Nombre de convives', max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
-   heure_livraison = forms.CharField(label='Heure de livraison', max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
-   conseillere = forms.CharField(label='Nom du/de la conseiller(e)', max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
-   
+    name = forms.CharField(label='Nom du contrat', max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    date = forms.DateField(label='', widget=forms.DateInput(attrs={'type': 'date'}))
+    lieu = forms.CharField(label='Adresse événement', max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    num_contrat = forms.CharField(label='Numéro de contrat', max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    nb_convive = forms.IntegerField(label='Nombre de convives', widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    heure_livraison = forms.TimeField(label='Heure de livraison', widget=forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}))
+    conseillere = forms.ModelChoiceField(queryset=Conseiller.objects.all(), widget=forms.HiddenInput())   
 
 
 class SearchFormInv(forms.Form):
@@ -317,6 +316,14 @@ class ChecklistItemQForm(forms.ModelForm):
         self.instance.product = self.product  # Associate the product with this checklist item
         return super().save(*args, **kwargs)
 
+
+class CommentaireForm(forms.ModelForm):
+    class Meta:
+        model = Checklist
+        fields = ['commentairevente']
+        widgets = {
+            'commentairevente': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Écrire un commentaire...'}),
+        }
 
 
 class ChecklistMDPhotoForm(forms.ModelForm):

@@ -159,6 +159,8 @@ class Route(models.Model):
      livreur = models.ForeignKey(Livreur, null=True, blank=True, on_delete=models.SET_NULL)
      heure_depart = models.fields.CharField(null=True, blank=True, max_length=100, choices= choiceheures, default=" ")
      date = models.DateField(default=date.today)
+     def __str__(self):
+        return f'{self.nom}'
 
 class Shift(models.Model):
     livreur = models.ForeignKey(Livreur, on_delete=models.CASCADE)
@@ -343,6 +345,20 @@ class Md(models.Model):
 
     def __str__(self):
         return self.name
+    
+class Conseiller(models.Model):
+    name = models.CharField(max_length=100)
+    user = models.OneToOneField(User, null=True, on_delete=models.CASCADE)
+    phone = models.CharField(max_length=100, null=True)
+
+    def __str__(self):
+        return self.name
+
+from datetime import timedelta
+from django.utils.timezone import now
+
+def four_hours_ago():
+    return now() - timedelta(hours=5)
 
 class Checklist(models.Model):
     STATUS_CHOICES = [
@@ -357,17 +373,17 @@ class Checklist(models.Model):
     date = models.fields.DateField(null=True, blank=True)
     lieu = models.CharField(max_length=10000, blank=True)
     num_contrat = models.fields.CharField(null=True, blank=True, max_length=200, default=" ")
-    conseillere = models.CharField(max_length=100, blank=True)
     nb_convive = models.fields.CharField(null=True, blank=True, max_length=200, default=" ")
     heure_livraison = models.fields.CharField(null=True, blank=True, max_length=100, default=" ")
     md = models.ForeignKey(Md, null=True, on_delete=models.SET_NULL, blank=True)
-    added_on = models.DateTimeField(default=timezone.now)
+    added_on = models.DateTimeField(default=four_hours_ago)    
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='en_cours')
     rapportmd = models.TextField(blank=True, null=True)
     rapportrecup = models.TextField(blank=True, null=True)
     commentairevente = models.TextField(blank=True, null=True)
     notechecklist = models.TextField(blank=True, null=True)
-    
+    conseillere = models.ForeignKey(Conseiller, on_delete=models.CASCADE, related_name='checklists', null=True, blank=True)
+    is_active = models.BooleanField(default=True)  # New field
 
     def update_status(self):
         # Check if all items are 'valide'
@@ -421,7 +437,6 @@ class ChecklistDocument(models.Model):
     
 
 
-
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -443,6 +458,7 @@ class ChecklistItem(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='en_cours')
     consumed_quantity = models.PositiveIntegerField(default=0)  # Amount that has been consumed
     unconsumed_quantity = models.PositiveIntegerField(default=0)  # Amount that remains unconsumed
+    commentaire = models.CharField(max_length=100, null=True)
 
 
     class Meta:

@@ -23,3 +23,8 @@ def subtract(value, arg):
         return value - arg
     except (TypeError, ValueError):
         return value
+    
+
+@register.simple_tag
+def year_range(start_year, end_year):
+    return range(start_year, end_year + 1)

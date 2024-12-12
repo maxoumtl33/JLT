@@ -1,0 +1,218 @@
+{% extends 'listings/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+    <div class="container">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a href="{% url 'journees-list' %}" class="nav__link" style="margin-left: 20px;">
+                        <i class="fa-solid fa-truck me-2"></i>Livraisons
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'creerchecklist' %}" class="nav__link" style="margin-left: 20px; margin-right: 20px;">
+                        <i class="fa-solid fa-cart-flatbed"></i>
+                        <span>Liste Checklist</span>
+                    </a>
+                </li>
+                <li>
+                    <button type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#createChecklistModal" style="margin-right: 20px;">
+                        <i class="fa-solid fa-square-plus"></i><span>Créer Checklist</span>
+                    </button>
+                </li>
+                <li class="nav__item">
+                    <form action="{% url 'logout' %}" method="post">
+                      {% csrf_token %}
+                      <button type="submit" class="nav__link" style="color: red;">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Déconnexion
+                      </button>
+                    </form>
+                  </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid py-4">
+    <!-- Dashboard Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="text-primary">Dashboard {{ user.username}}</h1>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Checklists Totales</h5>
+                    <p class="card-text display-4 text-primary">{{ checklists|length }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Actives</h5>
+                    <p class="card-text display-4 text-success">{{ active_checklists|length }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Inactives</h5>
+                    <p class="card-text display-4 text-danger">{{ inactive_checklists|length }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Create Checklist -->
+    <div class="modal fade" id="createChecklistModal" tabindex="-1" aria-labelledby="createChecklistModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="createChecklistModalLabel">
+                        <i class="bi bi-card-checklist me-2"></i> Créer une Nouvelle Checklist
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" action="{% url 'conseiller_dashboard' %}">
+                        {% csrf_token %}
+                        {{ checklist_form|crispy }}
+                        <input type="hidden" name="create_checklist" value="1">
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg mt-3">Créer Checklist</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="mb-4">
+        <input type="text" id="searchInput" class="form-control" placeholder="Rechercher une checklist..." onkeyup="filterChecklists()">
+    </div>
+
+    <!-- Checklists Table -->
+    <div class="table-responsive shadow-sm">
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-primary">
+                <tr class="text-center">
+                    <th>Nom</th>
+                    <th>Date</th>
+                    <th>Ajouté le</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                    <th>Détail</th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+                {% for checklist in checklists %}
+                <tr class="text-center">
+                    <td>{{ checklist.name }}</td>
+                    <td>{{ checklist.date|date:"d/m/Y" }}</td>
+                    <td>{{ checklist.added_on }}</td>
+                    <td>
+                        {% if checklist.status == valide %}
+                            <span class="badge bg-success">Validée</span>
+                        {% elif checklist.status == refuse %}
+                            <span class="badge bg-danger">Refusée</span>
+                        {% elif checklist.status == encours %}
+                            <span class="badge bg-warning">En cours</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form method="post" action="{% url 'conseiller_dashboard' %}" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="checklist_id" value="{{ checklist.id }}">
+                            <input type="hidden" name="toggle_checklist" value="1">
+                            {% if checklist.is_active %}
+                                <button type="submit" class="btn btn-warning btn-sm">
+                                    <i class="bi bi-x-circle me-1"></i>Désactiver
+                                </button>
+                            {% else %}
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    <i class="bi bi-check-circle me-1"></i>Activer
+                                </button>
+                            {% endif %}
+                        </form>
+                        
+                    </td>
+                    <td><a href="{% url 'checklist-detail' checklist.id %}" class="btn btn-primary">
+                        <i class="bi bi-eye me-1"></i>Voir
+                    </a></td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted">Aucune checklist trouvée.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <!-- Pagination Controls -->
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page=1" aria-label="Première">
+                <span aria-hidden="true">&laquo;&laquo;</span>
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Précédent">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+        <li class="page-item active" aria-current="page">
+            <span class="page-link">{{ num }}</span>
+        </li>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+        <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+        {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Suivant">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Dernière">
+                <span aria-hidden="true">&raquo;&raquo;</span>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+    </div>
+</div>
+
+<script>
+    function filterChecklists() {
+    const input = document.getElementById('searchInput').value.toLowerCase();
+    const rows = document.querySelectorAll('table tbody tr');
+    rows.forEach(row => {
+        const name = row.querySelector('td:first-child').textContent.toLowerCase();
+        row.style.display = name.includes(input) ? '' : 'none';
+    });
+}
+
+
+
+</script>
+{% endblock %}

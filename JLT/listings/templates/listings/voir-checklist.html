@@ -1,115 +1,374 @@
 {% extends 'listings/base.html' %}
 {% load static %}
+{% load custom_filters %}
 {% block content %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.css" rel="stylesheet">
+<!-- Custom CSS -->
+<style>
+    /* General styling */
+    body {
+        background-color: #f0f2f5;
+    }
 
-
-
-<div class="container mt-5">
-    <h2>Liste des Checklists</h2>
-    <br>
-
-    <hr>
-    <a href="{% url 'product_list' %}" class="btn btn-primary">Voir liste des produits</a>
-    <hr>
-
-    <br>
-    <!-- Date Filter Form -->
-    <form method="get">
-        {{ form.date }}
-        <button type="submit" class="btn btn-primary">Filtrer</button>
-        <a href="{% url 'voir_checklist' %}" class="btn btn-primary">Voir toute la liste</a>
-    </form>
-    <br>
-    <hr>
+    h1, h2 {
+        color: #343a40;
+    }
     
-    <!-- Display Events -->
-    
-    <div class="row">
-        {% for checklist in checklists %}
-        {% if checklist.status == encours %}
-            <div class="col-md-4 mb-4">
-                <a href="{% url 'checklistvoir-detail' checklist.id %}">
-                <div class="card border-warning mb-3">
-                    <div class="card-body text-warning">
-                        <h5 class="card-title">{{ checklist.name }}</h5>
-                        <p class="card-text">Date événement: {{ checklist.date|date:'d-m-Y' }}</p>
-                        <p class="card-text">Heure livraison: {{ checklist.heure_livraison }}</p>
-                        <p class="card-text">Ajouté le: {{ checklist.added_on|date:'d-m-Y' }}</p>
-                        <p class="card-text">Ajouté par: {{ checklist.conseillere }}</p>
-                    </div>
-                </div>
-            </a>
-            </div>
-        {% elif checklist.status == refuse %}
-        <div class="col-md-4 mb-4">
-            <a href="{% url 'checklistvoir-detail' checklist.id %}">
-            <div class="card border-danger mb-3">
-                <div class="card-body text-danger">
-                    <h5 class="card-title">{{ checklist.name }}</h5>
-                    <p class="card-text">Date événement: {{ checklist.date|date:'d-m-Y' }}</p>
-                    <p class="card-text">Heure livraison: {{ checklist.heure_livraison }}</p>
-                    <p class="card-text">Ajouté le: {{ checklist.added_on|date:'d-m-Y' }}</p>
-                    <p class="card-text">Ajouté par: {{ checklist.conseillere }}</p>
-                </div>
-            </div>
-        </a>
+    /* General page styles */
+    .agenda-title {
+        font-size: 2rem;
+        margin-bottom: 20px;
+        text-align: center;
+        color: #333;
+    }
+
+    /* Month selection styles */
+    .month-selection {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 30px;
+    }
+    .month-label {
+        font-size: 1rem;
+        margin-right: 10px;
+        align-self: center;
+    }
+    .month-dropdown {
+        padding: 10px;
+        font-size: 1rem;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        outline: none;
+        transition: border-color 0.3s ease;
+    }
+    .month-dropdown:hover {
+        border-color: #007bff;
+    }
+
+    /* General layout styling */
+    .agenda-container {
+        display: flex;
+        align-items: flex-start;
+        gap: 20px;
+        padding: 20px;
+    }
+
+    /* Calendar section */
+    .calendar-section {
+        width: 30%;
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .calendar {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        grid-gap: 10px;
+    }
+
+    .day {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .day-btn {
+        padding: 10px;
+        font-size: 0.9rem;
+        background-color: #ffffff;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        cursor: pointer;
+        width: 100%;
+        height: 40px;
+        text-align: center;
+        transition: background-color 0.3s ease;
+    }
+
+    .day-btn:hover {
+        background-color: #007bff;
+        color: white;
+    }
+
+    /* Checklist section */
+    .checklist-section {
+        width: 70%;
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .checklist-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .clickable-row {
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .clickable-row:hover {
+        filter: brightness(95%);
+    }
+    .status-valide {
+        background-color: #d4edda; /* Light green */
+    }
+    .status-en_cours {
+        background-color: #fff3cd; /* Light orange */
+    }
+    .status-refuse {
+        background-color: #f8d7da; /* Light red */
+    }
+    .checklist-table th,
+    .checklist-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+
+    .checklist-table th {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .checklist-table td a {
+        text-decoration: none;
+        color: #007bff;
+    }
+
+    .checklist-table td a:hover {
+        text-decoration: underline;
+    }
+
+    /* Responsiveness */
+    @media (max-width: 768px) {
+        .calendar {
+            grid-template-columns: repeat(7, 1fr);
+        }
+    }
+
+    @media (max-width: 480px) {
+        .calendar {
+            grid-template-columns: repeat(5, 1fr); /* Adjust for small screens */
+        }
+    }
+
+    /* Toggle form button */
+    #toggleFormButton {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        padding: 12px 24px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    #toggleFormButton:hover {
+        background-color: #0056b3;
+        transform: scale(1.05);
+    }
+
+    /* Form container styling */
+    #checklistForm {
+        display: none;
+        padding: 20px;
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-top: 20px;
+    }
+
+    .day-btn.selected {
+        background-color: #007bff;
+        color: white;
+        font-weight: bold;
+        border-color: #0056b3;
+    }
+
+   
+</style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
+
+<nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+    <div class="container">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li>
+                    <a href="{% url 'product_list' %}" class="nav__link">
+                        <i class="fa-brands fa-shopify"></i>
+                        <span>Voir liste des produits</span>
+                    </a>
+
+                </li>
+            </ul>
         </div>
-        {% elif checklist.status == valide %}
-        <div class="col-md-4 mb-4">
-            <a href="{% url 'checklistvoir-detail' checklist.id %}">
-            <div class="card border-success mb-3">
-                <div class="card-body text-success">
-                    <h5 class="card-title">{{ checklist.name }}</h5>
-                    <p class="card-text">Date événement: {{ checklist.date|date:'d-m-Y' }}</p>
-                    <p class="card-text">Heure livraison: {{ checklist.heure_livraison }}</p>
-                    <p class="card-text">Ajouté le: {{ checklist.added_on|date:'d-m-Y' }}</p>
-                    <p class="card-text">Ajouté par: {{ checklist.conseillere }}</p>
-                </div>
-            </div>
-        </a>
+    </div>
+</nav>
+
+
+
+<h1 class="text-center">Liste Checklist</h1>
+
+
+
+<hr>
+
+
+
+<div class="agenda-container">
+    <!-- Calendar Section -->
+    <div id="calendar-section" class="calendar-section">
+        <div class="month-selection">
+            <label for="month" class="month-label">Sélectionnez le mois :</label>
+            <select id="month" name="month" onchange="updateAgenda()" class="month-dropdown">
+                {% for month_name in french_months %}
+                    <option value="{{ forloop.counter0|add:1 }}" {% if forloop.counter0|add:1 == selected_month %}selected{% endif %}>
+                        {{ month_name }}
+                    </option>
+                {% endfor %}
+            </select>
         </div>
-        {% endif %}
-        {% empty %}
-            <div class="col">
-                <p>Pas de Checklist à ce jour</p>
-            </div>
-        {% endfor %}
+
+        <div id="calendar" class="calendar">
+            {% for day in days %}
+                <div class="day">
+                    <button class="day-btn" data-day="{{ day }}" onclick="getChecklists({{ day }})">
+                        {{ day }}
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Checklist Section -->
+    <div id="checklist-section" class="checklist-section">
+        <table class="checklist-table">
+            <thead>
+                <tr>
+                    <th>Heure</th>
+                    <th>Nom</th>
+                    <th>Convives</th>
+                    <th>Ajouté par</th>
+                    <th>Ajouté le</th>
+                </tr>
+            </thead>
+            <tbody id="checklist-list" data-detail-url="{% url 'checklistvoir-detail' checklist_id=0 %}">
+                <!-- Checklists will appear dynamically here -->
+            </tbody>
+        </table>
     </div>
 </div>
 
-<div class="container mt-5">
-<nav aria-label="Page navigation" style="align-items: center;">
-    <ul class="pagination">
-        {% if checklists.has_previous %}
-            <li class="page-item"><a class="page-link" href="?page=1">1ère page</a></li>
-            <li class="page-item"><a class="page-link" href="?page={{ checklists.previous_page_number }}">Précédent</a></li>
-        {% endif %}
-        <li class="page-item active"><a class="page-link" href="?page={{ checklists.number }}">{{ checklists.number }}</a></li>
-        {% if checklists.has_next %}
-            <li class="page-item"><a class="page-link" href="?page={{ checklists.next_page_number }}">Suivant</a></li>
-            <li class="page-item"><a class="page-link" href="?page={{ checklists.paginator.num_pages }}">Dernière page</a></li>
-        {% endif %}
-    </ul>
-</nav>
-</div>
-
-{% if messages %}
-<p>Debug message here</p>
-    {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    {% endfor %}
-{% endif %}
 
 
-  
+
+
+<!-- Include jQuery and Bootstrap Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.js"></script>
 <script>
+  
     setTimeout(function(){
        window.location.reload(1);
     }, 300000); // 300000 milliseconds = 5 minutes
-</script>
+
+    function updateAgenda() {
+        const month = document.getElementById('month').value;
+        window.location.href = '?month=' + month + '&day=1';  // Reload page with selected month and day set to 1
+    }
+
+    function getChecklists(day) {
     
+    const month = document.getElementById('month').value;
+    fetch(`/get_checklists_for_day/${day}/?month=${month}`)
+        .then(response => response.json())
+        .then(data => {
+            const checklistList = document.getElementById('checklist-list');
+            const baseUrl = checklistList.dataset.detailUrl.replace(/0\/$/, '');
+            checklistList.innerHTML = '';
+
+            // Clear any previously selected date
+            const allDayButtons = document.querySelectorAll('.day-btn');
+            allDayButtons.forEach(button => button.classList.remove('selected'));
+
+            // Highlight the selected date button
+            const selectedButton = document.querySelector(`.day-btn[data-day='${day}']`);
+            if (selectedButton) {
+                selectedButton.classList.add('selected');
+            }
+
+            if (data.checklists && data.checklists.length > 0) {
+                data.checklists.forEach(checklist => {
+                    const row = document.createElement('tr');
+                    row.classList.add('clickable-row');
+                    row.classList.add(`status-${checklist.status}`); // Add status class
+                    row.dataset.href = `${baseUrl}${checklist.id}/`;
+                    row.innerHTML = `
+                        <td>${formatTimeWithoutSeconds(checklist.heure_livraison)}</td>
+                        <td>${checklist.name}</td>
+                        <td>${checklist.nb_convive}</td>
+                        <td>${checklist.conseillere || 'N/A'}</td>
+                        <td>${formatDateTime(checklist.added_on)}</td>
+
+                        
+                    `;
+                    row.addEventListener('click', function() {
+                        window.location.href = this.dataset.href;
+                    });
+                    checklistList.appendChild(row);
+                });
+            } else {
+                checklistList.innerHTML = `
+                    <tr>
+                        <td colspan="4">Aucune checklist disponible pour ce jour.</td>
+                    </tr>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching checklists:', error);
+        });
+}
+
+function formatDateTime(isoDateString) {
+    const date = new Date(isoDateString); // Parse ISO date
+    const options = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false, // Use 24-hour format
+    };
+    return date.toLocaleString('fr-FR', options); // Format for French locale
+}
+
+function formatTimeWithoutSeconds(timeString) {
+    if (timeString.includes(':')) {
+        const parts = timeString.split(':');
+        return `${parts[0]}:${parts[1]}`; // Include only hours and minutes
+    }
+    return timeString; // Return as is if format is unexpected
+}
+
+
+
+
+
+
+
+    
+</script>
 
 {% endblock %}

@@ -24,6 +24,15 @@
     color: #4a90e2;
 }
 
+.card-body img {
+    transition: transform 0.3s ease;
+}
+
+.card-body img:hover {
+    transform: scale(1.05); /* Slightly enlarge the photo on hover */
+    cursor: pointer; /* Change cursor to pointer */
+}
+
 .btn-primary {
     background-color: #4a90e2;
     border: none;
@@ -140,7 +149,7 @@
         <span>Retour</span>
       </a>
     </li>
-    {% if livraison.recuperation == True%}
+    {% if livraison.recuperation == True %}
       <li>
         <a href="{% url 'create_recuplivreur' livraison.id %}" target="_blank" class="nav__link"><i class="fa-solid fa-dolly"></i>
           <span>Récupération</span>
@@ -148,7 +157,7 @@
       </li>
       {% else %}
       <li>
-        <a type="button" class="nav__link" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
+        <a type="button" class="nav__link" data-bs-toggle="offcanvas" data-bs-target="#uploadOffcanvas" role="button" aria-controls="offcanvasExample">
           <i class="fa-solid fa-camera"></i>
           <span>Photo</span>
         </a>
@@ -157,7 +166,7 @@
       {% if livraison.status == False %}
 
       <li>
-        <a type="button" class="nav__link" data-bs-toggle="offcanvas" href="#ofcanvasExample" role="button" aria-controls="offcanvasExample">
+        <a type="button" class="nav__link" data-bs-toggle="offcanvas" data-bs-target="#validateOffcanvas" role="button" aria-controls="offcanvasExample">
           <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i>
           <span>En cours</span>
         </a>
@@ -165,7 +174,7 @@
       {% else %}
 
       <li>
-        <a type="button" class="nav__link" data-bs-toggle="offcanvas" href="#ofcanvasExample" role="button" aria-controls="offcanvasExample">
+        <a type="button" class="nav__link" data-bs-toggle="offcanvas" data-bs-target="#validateOffcanvas" role="button" aria-controls="offcanvasExample">
           <i class="fa-solid fa-circle-check" style="color: green;"></i>
           <span>Validé</span>
         </a>
@@ -188,60 +197,45 @@
 </header>
 
 <div class="container">
+  <!-- Main Informations Section -->
   <div class="card shadow mb-4">
     <ul class="list-group list-group-flush">
-      <li class="list-group-item active">Informations</li>
-      <li class="list-group-item">
-        <div class="row g-4">
-          <!-- Nom -->
-          <div class="col-md-6">
-            <div class="card border-0">
-              <div class="card-body">
-                <h5 class="card-title">Nom</h5>
-                <p class="card-text">{{ livraison.nom }}</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Adresse -->
-          <div class="col-md-6">
-            <div class="card border-0">
-              <div class="card-body">
-                <h5 class="card-title">Adresse</h5>
-                <p class="card-text">
-                  <a href="https://maps.google.com/?q={{ livraison.adress }}, {{ livraison.zipcode }}, {{ livraison.city }}" target="_blank">
-                    {{ livraison.adress }}, {{ livraison.zipcode }}, {{ livraison.city }} {{ livraison.app }}, {{ livraison.ligne2 }}
-                  </a>
-                </p>
-                <hr>
-                <p class="card-text">
-                  <a href="#" data-bs-toggle="modal" data-bs-target="#dockModal">Aller au Dock</a>
-              </p>
-              </div>
-            </div>
-          </div>
-          <div class="modal fade" id="dockModal" tabindex="-1" aria-labelledby="dockModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="dockModalLabel">Adresse du Dock</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                      {% if matching_dock %}
-                    <p><strong>Adresse :</strong> {{ matching_dock.address }}</p>
-                    <p>{{ matching_dock.description }}</p>
-                    <img src="{{ matching_dock.photo.url }}" alt="Loading Dock" style="width:100%; height:auto;">
-                {% else %}
-                    <p>Pas de dock trouvé pour cette adresse</p>
-                {% endif %}
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                    </div>
+      <!-- Toggle Header -->
+      <li class="list-group-item active" data-bs-toggle="collapse" href="#informationContent" aria-expanded="false" aria-controls="informationContent" style="cursor: pointer;">
+        Informations Livraison
+      </li>
+    </ul>
+    <!-- Collapsible Content -->
+    <div id="informationContent" class="collapse">
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item">
+          <div class="row g-4">
+            <!-- Nom -->
+            <div class="col-md-6">
+              <div class="card border-0">
+                <div class="card-body">
+                  <h5 class="card-title">Nom</h5>
+                  <p class="card-text">{{ livraison.nom }}</p>
                 </div>
+              </div>
             </div>
-        </div>
+            <!-- Adresse -->
+            <div class="col-md-6">
+              <div class="card border-0">
+                <div class="card-body">
+                  <h5 class="card-title">Adresse</h5>
+                  <p class="card-text">
+                    <a href="https://maps.google.com/?q={{ livraison.adress }}, {{ livraison.zipcode }}, {{ livraison.city }}" target="_blank">
+                      {{ livraison.adress }}, {{ livraison.zipcode }}, {{ livraison.city }} {{ livraison.app }}, {{ livraison.ligne2 }}
+                    </a>
+                  </p>
+                  <hr>
+                  <p class="card-text">
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#dockModal">Aller au Dock</a>
+                  </p>
+                </div>
+              </div>
+            </div>
           <!-- Heure de Livraison -->
           <div class="col-md-6">
             <div class="card border-0">
@@ -253,25 +247,27 @@
           </div>
 
           <!-- Infos supplementaires -->
+          {% if livraison.infodetail %}
           <div class="col-md-6">
             <div class="card border-0">
-              <div class="card-body">
-                <h5 class="card-title text-warning">Infos Supplementaires</h5>
+              <div class="card-body" style="background-color: orange;">
+                <h5 class="card-title">Infos Supplementaires</h5>
                 <p class="card-text">{{ livraison.infodetail }}</p>
               </div>
             </div>
           </div>
-
+          {% endif %}
           <!-- Commentaire du Dispatch -->
+          {% if livraison.commentairedispatch %}
           <div class="col-md-6">
             <div class="card border-0">
-              <div class="card-body">
+              <div class="card-body" style="background-color: orange;">
                 <h5 class="card-title">Commentaire du Dispatch</h5>
                 <p class="card-text">{{ livraison.commentairedispatch }}</p>
               </div>
             </div>
           </div>
-
+          {% endif %}
           <!-- Commentaire du Livreur -->
           <div class="col-md-6">
             <div class="card border-0">
@@ -334,18 +330,35 @@
               </div>
             </div>
           </div>
-          
+          <!-- Livreur -->
+          <div class="col-md-6">
+            <div class="card border-0">
+              <div class="card-body">
+                <h5 class="card-title">Livreur</h5>
+                <p class="card-text">{{ livraison.statut.livreur.nom }}</p>
+              </div>
+            </div>
+          </div>
         </div>
       </li>
     </ul>
   </div>
+</div>
 
-  <!-- Client Information -->
-  <div class="card shadow mb-4">
+ <!-- Client Information Section -->
+ <div class="card shadow mb-4">
+  <ul class="list-group list-group-flush">
+    <!-- Toggle Header -->
+    <li class="list-group-item active" data-bs-toggle="collapse" href="#clientInfoContent" aria-expanded="false" aria-controls="clientInfoContent" style="cursor: pointer;">
+      Informations Client sur place
+    </li>
+  </ul>
+  <!-- Collapsible Content -->
+  <div id="clientInfoContent" class="collapse">
     <ul class="list-group list-group-flush">
-      <li class="list-group-item active">Informations Client sur place</li>
       <li class="list-group-item">
         <div class="row g-4">
+          <!-- Contact Client -->
           <div class="col-md-6">
             <div class="card border-0">
               <div class="card-body">
@@ -354,7 +367,7 @@
               </div>
             </div>
           </div>
-
+          <!-- Commandé par -->
           <div class="col-md-6">
             <div class="card border-0">
               <div class="card-body">
@@ -368,18 +381,146 @@
     </ul>
   </div>
 </div>
+
+<!-- Checklist Section -->
+<div class="card shadow mb-4">
+  <ul class="list-group list-group-flush">
+    <!-- Toggle Header -->
+    <li class="list-group-item active" data-bs-toggle="collapse" href="#checklistContent" aria-expanded="false" aria-controls="checklistContent" style="cursor: pointer;">
+      Informations Checklist
+    </li>
+  </ul>
+  <!-- Collapsible Content -->
+  <div id="checklistContent" class="collapse">
+    <ul class="list-group list-group-flush">
+      {% for item in checklist %}
+        <li class="list-group-item">
+            <div class="row g-4">
+                            {% if item.notechecklist %}
+                            <div class="col-md-6">
+                              <div class="card border-0">
+                                <div class="card-body" style="background-color: orange;">
+                                  <h5 class="card-title">Note</h5>
+                                  <p class="card-text">{{ item.notechecklist }}</p>
+                                </div>
+                              </div>
+                            </div>
+                            {% endif %}
+                            <div class="col-md-6">
+                              <div class="card border-0">
+                                <div class="card-body">
+                                  <h5 class="card-title">MD</h5>
+                                  <p class="card-text">{{ item.md.name }} (<a href="tel:{{ item.md.phone }}">{{ item.md.phone }}</a>)</p>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-md-6">
+                              <div class="card border-0">
+                                <div class="card-body">
+                                  <h5 class="card-title">Commentaire ventes</h5>
+                                  <p class="card-text">{{ item.commentairevente }}</p>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-md-6">
+                              <div class="card border-0">
+                                <div class="card-body">
+                                  <h5 class="card-title">Produits</h5>
+                                  <p class="card-text">
+                                    <ul>
+                                    {% for checklist_item in item.checklistitem_set.all %}
+                                        <li>{{ checklist_item.product.name }}: {{ checklist_item.quantity }}</li>
+                                    {% empty %}
+                                        <li>Aucun produit associé.</li>
+                                    {% endfor %}
+                                </ul>
+                              </p>
+                                </div>
+                              </div>
+                            </div>
+                            {% if livraison.recuperation %}
+                            <div class="col-md-6">
+                              <div class="card border-0">
+                                  <div class="card-body">
+                                      <h5 class="card-title">Photos Récup</h5>
+                                      <div class="row">
+                                          {% for photo in item.checklistrecupphoto_set.all %}
+                                              <div class="col-6 mb-2">
+                                                  <img src="{{ photo.image.url }}" alt="Photo" class="img-fluid rounded thumbnail" 
+                                                       data-bs-toggle="modal" 
+                                                       data-bs-target="#photoModal" 
+                                                       data-photo-url="{{ photo.image.url }}" 
+                                                       style="cursor: pointer;" />
+                                              </div>
+                                          {% empty %}
+                                              <div class="col-12">
+                                                  <p>Aucune photo disponible.</p>
+                                              </div>
+                                          {% endfor %}
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                          
+                          <!-- Modal for displaying full-sized images -->
+                          <div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
+                              <div class="modal-dialog modal-lg">
+                                  <div class="modal-content">
+                                      <div class="modal-header">
+                                          <h5 class="modal-title" id="photoModalLabel">Photo</h5>
+                                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                      </div>
+                                      <div class="modal-body">
+                                          <img id="modalImage" class="img-fluid rounded" src="" alt="Full Size Photo" />
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                          
+                          
+                            <div class="col-md-6">
+                              <div class="card border-0">
+                                <div class="card-body">
+                                  <h5 class="card-title">Rapport Récup</h5>
+                                  <p class="card-text">{{ item.rapportrecup }}</p>
+                                </div>
+                              </div>
+                            </div>
+                            {% endif %}
+                </div>
+            </div>
+        </li>
+    {% empty %}
+        <li class="list-group-item">Pas de checklist disponible.</li>
+    {% endfor %}
+    </ul>
+  </div>
+</div>
+
+<!-- Optional JavaScript if Bootstrap isn't toggling correctly -->
+<script>
+  document.querySelectorAll('.list-group-item.active').forEach(item => {
+    item.addEventListener('click', function() {
+      const content = document.getElementById(this.getAttribute('href').substring(1));
+      content.classList.toggle('show');
+    });
+  });
+</script>
+
+</div>
+
 <br>
 <br>
 <br>
 
 <!-- Validation Form -->
-<div class="offcanvas offcanvas-start" tabindex="-1" id="ofcanvasExample" aria-labelledby="offcanvasExampleLabel">
+<div class="offcanvas offcanvas-start" tabindex="-1" id="validateOffcanvas" aria-labelledby="validateOffcanvasLabel">
   <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="offcanvasExampleLabel">Valider Livraison</h5>
+    <h5 class="offcanvas-title" id="validateOffcanvasLabel">Valider Livraison</h5>
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
   <div class="offcanvas-body">
-    <form action="" method="POST">
+    <form action="{% url 'validate_livraison' livraison.id %}" method="POST">
       {% csrf_token %}
       {{ form.as_p }}
       <input type="submit" value="Valider" class="btn btn-primary">
@@ -388,25 +529,71 @@
 </div>
 
 <!-- Photo Upload Form -->
-<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+<div class="offcanvas offcanvas-start" tabindex="-1" id="uploadOffcanvas" aria-labelledby="uploadOffcanvasLabel">
   <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="offcanvasExampleLabel">Télécharger Photo</h5>
+    <h5 class="offcanvas-title" id="uploadOffcanvasLabel">Télécharger Photo</h5>
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
   <div class="offcanvas-body">
-    <form method="post" enctype="multipart/form-data">
+    <form action="{% url 'update_photo' livraison.id %}" method="POST" enctype="multipart/form-data">
       {% csrf_token %}
       {{ formbis.management_form }}
-        {% for form in formbis %}
-            <div>
-                {{ form.as_p }}
-            </div>
-        {% endfor %}
-      <button type="submit" class="btn btn-primary">Deposer les photos</button>
-  </form>
-  
+      {% for form in formbis %}
+        <div>
+          {{ form.as_p }}
+        </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-primary">Déposer les photos</button>
+    </form>
   </div>
 </div>
+
+
+<!-- Dock Modal -->
+<div class="modal fade" id="dockModal" tabindex="-1" aria-labelledby="dockModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="dockModalLabel">Adresse du Dock</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {% if matching_dock %}
+          <p><strong>Adresse :</strong> {{ matching_dock.address }}</p>
+          <p>{{ matching_dock.description }}</p>
+          <img src="{{ matching_dock.photo.url }}" alt="Loading Dock" style="width:100%; height:auto;">
+        {% else %}
+          <p>Pas de dock trouvé pour cette adresse</p>
+        {% endif %}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.list-group-item.active').forEach(item => {
+    item.addEventListener('click', function() {
+      const content = document.getElementById(this.getAttribute('href').substring(1));
+      content.classList.toggle('show');
+    });
+  });
+
+  // JavaScript to handle the photo modal
+  const photoModal = document.getElementById('photoModal');
+    const modalImage = document.getElementById('modalImage');
+
+    photoModal.addEventListener('show.bs.modal', function (event) {
+        // Get the button that triggered the modal
+        const button = event.relatedTarget; // Button that triggered the modal
+        const photoUrl = button.getAttribute('data-photo-url'); // Extract info from data-* attributes
+
+        // Update the modal's content
+        modalImage.src = photoUrl; // Set the source of the modal image
+    });
+</script>
 
 
 {% endblock %}

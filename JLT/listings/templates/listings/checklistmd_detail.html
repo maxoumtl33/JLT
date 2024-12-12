@@ -52,9 +52,23 @@
         cursor: pointer;
     }
 
+    .back-link {
+        color: #007bff;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        font-size: 1rem;
+    }
+    .back-link i {
+        margin-right: 8px;
+    }
+
 </style>
 
 <div class="container my-5">
+    <a href="{% url 'md_dashboard' %}" class="back-link">
+        <i class="fas fa-arrow-left"></i> Retour
+    </a>
     <div class="row">
         <div class="col-md-12">
             <h1 class="text-center mb-4">Contrat - {{ checklist.name }}</h1>
@@ -66,15 +80,15 @@
                 </div>
                 <div id="checklist-info" class="card-body">
                     <p><strong>Date:</strong> {{ checklist.date|date:"d F Y" }}</p>
-                    <p><strong>Heure de livraison:</strong> {{ checklist.livraison.heure_livraison }}</p>
+                    <p><strong>Heure de livraison:</strong> {{ checklist.heure_livraison }}</p>
                     <p><strong>Adresse:</strong> 
                         <a href="https://maps.google.com/?q={{ checklist.livraison.adress }}" target="_blank" class="text-decoration-none">
-                            {{ checklist.livraison.adress }}
+                            {{ checklist.lieu }}
                         </a>
                     </p>
-                    <p><strong>Numéro de contrat:</strong> {{ checklist.livraison.num_commande }}</p>
-                    <p><strong>Conseillère:</strong> {{ checklist.livraison.vendeur }}</p>
-                    <p><strong>Nombre de convives:</strong> {{ checklist.livraison.convives }}</p>
+                    <p><strong>Numéro de contrat:</strong> {{ checklist.num_contrat }}</p>
+                    <p><strong>Conseillère:</strong> {{ checklist.conseillere }}</p>
+                    <p><strong>Nombre de convives:</strong> {{ checklist.nb_convive }}</p>
                     <p><strong>MD:</strong> {{ checklist.md }}</p>
                     <p><strong>Livreur:</strong> {{ checklist.livraison.statut.livreur.nom }} / <a href="tel:{{ checklist.livraison.statut.livreur.phone }}">{{ checklist.livraison.statut.livreur.phone }}</a></p>
                     
@@ -88,6 +102,7 @@
                                 <tr>
                                     <th>Produits</th>
                                     <th>Quantité</th>
+                                    <th>Commentaire</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -95,6 +110,7 @@
                                     <tr>
                                         <td>{{ item.product.name }}</td>
                                         <td>{{ item.quantity }}</td>
+                                        <td>{{ item.commentaire }}</td>
                                     </tr>
                                 {% empty %}
                                     <tr>

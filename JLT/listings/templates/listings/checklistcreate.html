@@ -1,18 +1,160 @@
 {% extends 'listings/base.html' %}
 {% load static %}
+{% load custom_filters %}
 {% block content %}
-
+<link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.css" rel="stylesheet">
 <!-- Custom CSS -->
 <style>
     /* General styling */
     body {
         background-color: #f0f2f5;
     }
+
     h1, h2 {
         color: #343a40;
     }
     
+    /* General page styles */
+    .agenda-title {
+        font-size: 2rem;
+        margin-bottom: 20px;
+        text-align: center;
+        color: #333;
+    }
 
+    /* Month selection styles */
+    .month-selection {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 30px;
+    }
+    .month-label {
+        font-size: 1rem;
+        margin-right: 10px;
+        align-self: center;
+    }
+    .month-dropdown {
+        padding: 10px;
+        font-size: 1rem;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        outline: none;
+        transition: border-color 0.3s ease;
+    }
+    .month-dropdown:hover {
+        border-color: #007bff;
+    }
+
+    /* General layout styling */
+    .agenda-container {
+        display: flex;
+        align-items: flex-start;
+        gap: 20px;
+        padding: 20px;
+    }
+
+    /* Calendar section */
+    .calendar-section {
+        width: 30%;
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .calendar {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        grid-gap: 10px;
+    }
+
+    .day {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .day-btn {
+        padding: 10px;
+        font-size: 0.9rem;
+        background-color: #ffffff;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        cursor: pointer;
+        width: 100%;
+        height: 40px;
+        text-align: center;
+        transition: background-color 0.3s ease;
+    }
+
+    .day-btn:hover {
+        background-color: #007bff;
+        color: white;
+    }
+
+    /* Checklist section */
+    .checklist-section {
+        width: 70%;
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .checklist-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .clickable-row {
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .clickable-row:hover {
+        filter: brightness(95%);
+    }
+    .status-valide {
+        background-color: #d4edda; /* Light green */
+    }
+    .status-en_cours {
+        background-color: #fff3cd; /* Light orange */
+    }
+    .status-refuse {
+        background-color: #f8d7da; /* Light red */
+    }
+    .checklist-table th,
+    .checklist-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+
+    .checklist-table th {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .checklist-table td a {
+        text-decoration: none;
+        color: #007bff;
+    }
+
+    .checklist-table td a:hover {
+        text-decoration: underline;
+    }
+
+    /* Responsiveness */
+    @media (max-width: 768px) {
+        .calendar {
+            grid-template-columns: repeat(7, 1fr);
+        }
+    }
+
+    @media (max-width: 480px) {
+        .calendar {
+            grid-template-columns: repeat(5, 1fr); /* Adjust for small screens */
+        }
+    }
 
     /* Toggle form button */
     #toggleFormButton {
@@ -41,34 +183,11 @@
         margin-top: 20px;
     }
 
-    /* Checklist cards */
-    .card {
-        transition: transform 0.3s ease;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
-    .card:hover {
-        transform: translateY(-5px);
-    }
-    .card-title {
+    .day-btn.selected {
+        background-color: #007bff;
+        color: white;
         font-weight: bold;
-    }
-    .border-warning {
-        border-color: #ffc107 !important;
-    }
-    .border-danger {
-        border-color: #dc3545 !important;
-    }
-    .border-success {
-        border-color: #28a745 !important;
-    }
-    .text-warning {
-        color: #856404 !important;
-    }
-    .text-danger {
-        color: #721c24 !important;
-    }
-    .text-success {
-        color: #155724 !important;
+        border-color: #0056b3;
     }
 
    
@@ -85,98 +204,74 @@
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
                     <a href="{% url 'journees-list' %}" class="nav__link" style="margin-left: 20px;">
-                        <i class="fa-solid fa-truck me-2"></i>Retour
+                        <i class="fa-solid fa-truck me-2"></i>Livraisons
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'conseiller_dashboard' %}" class="nav__link" style="margin-left: 20px;">
+                        <i class="fa-solid fa-dashboard"></i>
+                        <span>Dashboard</span>
                     </a>
                 </li>
             </ul>
         </div>
     </div>
 </nav>
-{% if messages %}
-    <div class="container mt-3">
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endfor %}
-    </div>
-{% endif %}
 
-<h1 class="text-center">Création et liste Checklist</h1>
 
-<br>
-<br>
-<!-- Toggle Button for Form -->
-<div class="container text-center">
-    <button id="toggleFormButton">Créer une Checklist</button>
-</div>
-
-<!-- Create Checklist Form -->
-<div class="container mt-5">
-    <div id="checklistForm">
-        <h2 class="mb-4">Remplir le formulaire ci-dessous</h2>
-        <form method="post">
-            {% csrf_token %}
-            {{ form2.as_p }}
-            <button type="submit" class="btn btn-outline-primary w-100">Créer Checklist</button>
-        </form>
-    </div>
-</div>
+<h1 class="text-center">Liste Checklist</h1>
 
 
 
-<!-- Checklist List Section -->
-<div class="container mt-5">
-    <h2 class="mb-4">Liste des Checklists</h2>
+<hr>
 
-    <!-- Date Filter Form -->
-    <form method="get" class="d-flex align-items-center mb-4">
-        {{ form.date }}
-        <button type="submit" class="btn btn-primary ms-3">Filtrer</button>
-        <a href="{% url 'creerchecklist' %}" class="btn btn-secondary ms-2">Voir toute la liste</a>
-    </form>
 
-    <!-- Display Events -->
-    <div class="row">
-        {% for checklist in checklists %}
-            <div class="col-md-4 mb-4">
-                <a href="{% url 'checklist-detail' checklist.id %}">
-                <div class="card {% if checklist.status == encours %}border-warning{% elif checklist.status == refuse %}border-danger{% elif checklist.status == valide %}border-success{% endif %}">
-                    <div class="card-body {% if checklist.status == encours %}text-warning{% elif checklist.status == refuse %}text-danger{% elif checklist.status == valide %}text-success{% endif %}">
-                        <h5 class="card-title">{{ checklist.name }}</h5>
-                        <p class="card-text">Date événement: {{ checklist.date|date:'d-m-Y' }}</p>
-                        <p class="card-text">Heure livraison: {{ checklist.heure_livraison }}</p>
-                        <p class="card-text">Ajouté le: {{ checklist.added_on|date:'d-m-Y' }}</p>
-                        <p class="card-text">Ajouté par: {{ checklist.conseillere }}</p>
-                    </div>
+
+<div class="agenda-container">
+    <!-- Calendar Section -->
+    <div id="calendar-section" class="calendar-section">
+        <div class="month-selection">
+            <label for="month" class="month-label">Sélectionnez le mois :</label>
+            <select id="month" name="month" onchange="updateAgenda()" class="month-dropdown">
+                {% for month_name in french_months %}
+                    <option value="{{ forloop.counter0|add:1 }}" {% if forloop.counter0|add:1 == selected_month %}selected{% endif %}>
+                        {{ month_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div id="calendar" class="calendar">
+            {% for day in days %}
+                <div class="day">
+                    <button class="day-btn" data-day="{{ day }}" onclick="getChecklists({{ day }})">
+                        {{ day }}
+                    </button>
                 </div>
-                </a>
-            </div>
-        {% empty %}
-            <div class="col">
-                <p>Pas de Checklist à ce jour</p>
-            </div>
-        {% endfor %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Checklist Section -->
+    <div id="checklist-section" class="checklist-section">
+        <table class="checklist-table">
+            <thead>
+                <tr>
+                    <th>Heure</th>
+                    <th>Nom</th>
+                    <th>Convives</th>
+                    <th>Ajouté par</th>
+                    <th>Ajouté le</th>
+                </tr>
+            </thead>
+            <tbody id="checklist-list" data-detail-url="{% url 'checklist-detail' checklist_id=0 %}">
+                <!-- Checklists will appear dynamically here -->
+            </tbody>
+        </table>
     </div>
 </div>
 
-<!-- Pagination -->
-<div class="container mt-5 d-flex justify-content-center">
-    <nav aria-label="Page navigation">
-        <ul class="pagination">
-            {% if checklists.has_previous %}
-                <li class="page-item"><a class="page-link" href="?page=1">1ère page</a></li>
-                <li class="page-item"><a class="page-link" href="?page={{ checklists.previous_page_number }}">Précédent</a></li>
-            {% endif %}
-            <li class="page-item active"><a class="page-link" href="?page={{ checklists.number }}">{{ checklists.number }}</a></li>
-            {% if checklists.has_next %}
-                <li class="page-item"><a class="page-link" href="?page={{ checklists.next_page_number }}">Suivant</a></li>
-                <li class="page-item"><a class="page-link" href="?page={{ checklists.paginator.num_pages }}">Dernière page</a></li>
-            {% endif %}
-        </ul>
-    </nav>
-</div>
+
 
 
 
@@ -184,20 +279,99 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.js"></script>
 <script>
-    // Initialize Datepicker
-    $(document).ready(function(){
-        $('.datepicker').datepicker();
-
-        // Toggle form visibility
-        $('#toggleFormButton').click(function(){
-            $('#checklistForm').slideToggle(300);
-        });
-    });
-
+  
     setTimeout(function(){
        window.location.reload(1);
     }, 300000); // 300000 milliseconds = 5 minutes
+
+    function updateAgenda() {
+        const month = document.getElementById('month').value;
+        window.location.href = '?month=' + month + '&day=1';  // Reload page with selected month and day set to 1
+    }
+
+    function getChecklists(day) {
+    
+    const month = document.getElementById('month').value;
+    fetch(`/get_checklists_for_day/${day}/?month=${month}`)
+        .then(response => response.json())
+        .then(data => {
+            const checklistList = document.getElementById('checklist-list');
+            const baseUrl = checklistList.dataset.detailUrl.replace(/0\/$/, '');
+            checklistList.innerHTML = '';
+
+            // Clear any previously selected date
+            const allDayButtons = document.querySelectorAll('.day-btn');
+            allDayButtons.forEach(button => button.classList.remove('selected'));
+
+            // Highlight the selected date button
+            const selectedButton = document.querySelector(`.day-btn[data-day='${day}']`);
+            if (selectedButton) {
+                selectedButton.classList.add('selected');
+            }
+
+            if (data.checklists && data.checklists.length > 0) {
+                data.checklists.forEach(checklist => {
+                    const row = document.createElement('tr');
+                    row.classList.add('clickable-row');
+                    row.classList.add(`status-${checklist.status}`); // Add status class
+                    row.dataset.href = `${baseUrl}${checklist.id}/`;
+                    row.innerHTML = `
+                        <td>${formatTimeWithoutSeconds(checklist.heure_livraison)}</td>
+                        <td>${checklist.name}</td>
+                        <td>${checklist.nb_convive}</td>
+                        <td>${checklist.conseillere || 'N/A'}</td>
+                        <td>${formatDateTime(checklist.added_on)}</td>
+
+                        
+                    `;
+                    row.addEventListener('click', function() {
+                        window.location.href = this.dataset.href;
+                    });
+                    checklistList.appendChild(row);
+                });
+            } else {
+                checklistList.innerHTML = `
+                    <tr>
+                        <td colspan="4">Aucune checklist disponible pour ce jour.</td>
+                    </tr>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching checklists:', error);
+        });
+}
+
+function formatDateTime(isoDateString) {
+    const date = new Date(isoDateString); // Parse ISO date
+    const options = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false, // Use 24-hour format
+    };
+    return date.toLocaleString('fr-FR', options); // Format for French locale
+}
+
+function formatTimeWithoutSeconds(timeString) {
+    if (timeString.includes(':')) {
+        const parts = timeString.split(':');
+        return `${parts[0]}:${parts[1]}`; // Include only hours and minutes
+    }
+    return timeString; // Return as is if format is unexpected
+}
+
+
+
+
+
+
+
+    
 </script>
 
 {% endblock %}

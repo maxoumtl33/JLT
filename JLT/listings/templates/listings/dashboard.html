@@ -417,7 +417,78 @@
 </section>
 <br>
 
-<h1>Mes routes</h1>
+<h1>
+    Mes routes 
+    <a href="#" data-bs-toggle="modal" data-bs-target="#infoModal">
+        <i class="fa-solid fa-circle-info fa-bounce fa-2xs" style="color: #74C0FC;"></i>
+    </a>
+</h1>
+
+<!-- Modal Structure -->
+<div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="infoModalLabel">
+                    <i class="fa-solid fa-info-circle"></i> Information des Logos
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="row gy-3">
+                        <div class="col-12 col-md-6">
+                            <div class="d-flex align-items-center">
+                                <i class="fa-solid fa-mug-hot fa-2xl me-3" style="color: #533018;"></i>
+                                <p class="mb-0"><strong>Café Thermos</strong></p>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="d-flex align-items-center">
+                                <i class="fa-solid fa-mug-hot fa-2xl me-3" style="color: #74C0FC;"></i>
+                                <p class="mb-0"><strong>Thé Thermos</strong></p>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="d-flex align-items-center">
+                                <box-icon name="coffee-togo" color="#533018" size="md" class="me-3"></box-icon>
+                                <p class="mb-0"><strong>Café Jetable</strong></p>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="d-flex align-items-center">
+                                <box-icon name="coffee-togo" color="#74C0FC" size="md" class="me-3"></box-icon>
+                                <p class="mb-0"><strong>Thé Jetable</strong></p>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="d-flex align-items-center">
+                                <i class="fa-solid fa-fire-flame-curved fa-2xl me-3" style="color: #f4a15d;"></i>
+                                <p class="mb-0"><strong>Part Chaud</strong></p>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="d-flex align-items-center">
+                                <i class="fa-solid fa-cart-flatbed fa-2xl me-3"></i>
+                                <p class="mb-0"><strong>Checklist</strong></p>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="d-flex align-items-center">
+                                <i class="fa-solid fa-triangle-exclamation fa-xl me-3" style="color: #FFD43B;"></i>
+                                <p class="mb-0"><strong>Commentaire Important</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <div class="routes">
     {% for route in routes_with_livraisons %}
@@ -687,6 +758,11 @@
         {% else %}
         <i class="fa-solid fa-spinner fa-spin status-icon pending"></i> En attente
         {% endif %}
+        {% if livraison.commentairedispatch != None %}
+        <i class="fa-solid fa-triangle-exclamation fa-xl" style="color: #FFD43B;"></i>
+        {% endif %}
+      
+
     </div>
                     
             </div>

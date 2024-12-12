@@ -78,10 +78,6 @@
     .form1 {
         margin-bottom: 15px;
     }
-    .pink-bg {
-    background-color: pink;
-}
-
 </style>
 
 <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
@@ -155,27 +151,32 @@
     });
 </script>
 
-<h1 class="text-center my-4">Carte du matin</h1>
+<h1 class="text-center my-4">Carte du midi</h1>
 <div class="mapholder">
     <div id="map"></div>
     <script async src="https://maps.googleapis.com/maps/api/js?key={{key}}&loading=async&callback=initMap"></script>
 </div>
 
-<h1 class="text-center my-4">Créer les routes du matin</h1>
+<h1 class="text-center my-4">Créer les routes du midi</h1>
 <div style="display: flex; flex-wrap: wrap;">
-
     {% for a in routes21 %}
     <div class="column" data-statut="{{ a.id }}">
         <h2>{{ a.nom }}</h2>
         {% for task in todo_livraison %}
-        <div class="task {% if task.recuperation %}pink-bg{% endif %}" data-task-id="{{ task.id }}">
+        {% if task.statut.nom == a.nom and task.recuperation == True %}
+        <div class="task" data-task-id="{{ task.id }}" style="color: pink;">
             <a data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a>
         </div>
+        {% else %}
+        <div class="task" data-task-id="{{ task.id }}">
+            <a data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a>
+        </div>
+        {% endif %}
         {% endfor %}
     </div>
-{% endfor %}
+    {% endfor %}
 
-{% for a in routes %}
+    {% for a in routes %}
     <div class="column" data-statut="{{ a.id }}">
         <h1>Route N°{{ a.nom }}</h1>
         <p><a href="{% url 'routedetail' a.id %}" target="_blank"><i class="fa-solid fa-pen-to-square"></i></a></p>
@@ -185,14 +186,13 @@
         <hr>
         {% for task in route1 %}
         {% if task.statut.nom == a.nom %}
-        <div class="task {% if task.recuperation %}pink-bg{% endif %}" data-task-id="{{ task.id }}">
+        <div class="task" data-task-id="{{ task.id }}">
             <a data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a>
         </div>
         {% endif %}
         {% endfor %}
     </div>
-{% endfor %}
-
+    {% endfor %}
 </div>
 
 <h1 class="text-center my-4">Calculer les distances</h1>

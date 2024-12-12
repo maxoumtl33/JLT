@@ -261,6 +261,10 @@
     color: #4a4a4a;
     font-weight: 500;
 }
+.modal-custom {
+    max-width: 50%; /* Adjust maximum width as needed */
+    width: auto; /* Allow auto width to fill */
+}
 
 /* Modal Background */
 #photoModal {
@@ -339,10 +343,6 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto" >
                 <li class="nav-item">
-                    <a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModalDoc" style="margin-right: 20px;">
-                        <i class="fa-solid fa-file"></i><span>Documents</span></a>
-                </li>
-                <li class="nav-item">
                     <a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
                         <i class="fa-solid fa-basket-shopping"></i><span>Mes produits</span></a>
                 </li>
@@ -350,7 +350,7 @@
                     <a  type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModals" style="margin-left: 20px;"><i class="fa-solid fa-pen-to-square"></i><span>Modifier</span></a>
                 </li>
                 <li class="nav-item">
-                    <a  href="{% url 'creerchecklist' %}" class="nav__link" style="margin-left: 20px;"><i class="fa-solid fa-clipboard-list"></i><span>Retour</span></a>
+                    <a  href="{% url 'creerchecklist' %}" class="nav__link" style="margin-left: 20px;"><i class="fa-solid fa-clipboard-list"></i><span>Liste</span></a>
                 </li>
             </ul>
         </div>
@@ -385,11 +385,14 @@
     </div>
     
     <div style="text-align: center; margin-top: 20px; display: flex;">
-        <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#documentsModal" style="display: flex; margin-right: 20px; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);">
-            <i class="bi bi-folder"></i> Voir les documents
+        <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModalDoc" style="display: flex; margin-right: 20px; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);">
+            <i class="bi bi-folder"></i>  Ajouter documents
         </button>
-        <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModalbreuvage" style="display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);">
+        <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModalbreuvage" style="display: flex; margin-right: 20px; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);">
             <i class="fa-solid fa-champagne-glasses"></i>Ajouter breuvages
+        </button>
+        <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModalcommentaire" style="display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);">
+            <i class="fa-regular fa-comment"></i>Ajouter commentaire
         </button>
     </div>
    
@@ -649,7 +652,7 @@
 
 <!-- Modal for document upload -->
 <div class="modal fade modal-xlg" id="exampleModalDoc" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-custom">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Télécharger documents</h5>
@@ -673,14 +676,37 @@
         </div>
     </div>
 </div>
-
-
-
-
-
-
-<div class="modal fade modal-xlg" id="exampleModal3" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<!-- Modal for commentaire ventes -->
+<div class="modal fade" id="exampleModalcommentaire" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Ajouter un commentaire</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'checklist-detail' checklist.id %}" id="commentaireForm">
+                    {% csrf_token %}
+                    {{ commentaire_form.as_p }}
+                    <button type="submit" class="btn btn-primary" name="submit_commentaire">Envoyer</button>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+<div class="modal fade" id="exampleModal3" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-custom">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
@@ -708,7 +734,7 @@
 </div>
 
 <div class="modal fade modal-xlg" id="exampleModaljetable" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-custom">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
@@ -736,7 +762,7 @@
 </div>
 
 <div class="modal fade modal-xlg" id="exampleModalaccessoirededecor" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-custom">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
@@ -764,7 +790,7 @@
 </div>
 
 <div class="modal fade modal-xlg" id="exampleModalequipementdebar" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-custom">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
@@ -792,7 +818,7 @@
 </div>
 
 <div class="modal fade modal-xlg" id="exampleModalequipementpourservicecafe" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-custom">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
@@ -820,7 +846,7 @@
 </div>
 
 <div class="modal fade modal-xlg" id="exampleModalitemsdivers" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-custom">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
@@ -848,7 +874,7 @@
 </div>
 
 <div class="modal fade modal-xlg" id="exampleModaltableetlinge" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-custom">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
@@ -876,7 +902,7 @@
 </div>
 
 <div class="modal fade modal-xlg" id="exampleModalverrerie" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-custom">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
@@ -903,7 +929,7 @@
     </div>
 </div>
 <div class="modal fade modal-xlg" id="exampleModalporcelaine" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-custom">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
@@ -930,7 +956,7 @@
     </div>
 </div>
 <div class="modal fade modal-xlg" id="exampleModalmontage" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-custom">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
@@ -957,7 +983,7 @@
     </div>
 </div>
 <div class="modal fade modal-xlg" id="exampleModalcuisson" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-custom">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
@@ -984,7 +1010,7 @@
     </div>
 </div>
 <div class="modal fade modal-xlg" id="exampleModalservice" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-custom">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
@@ -1011,7 +1037,7 @@
     </div>
 </div>
 <div class="modal fade modal-xlg" id="exampleModalbreuvage" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-custom">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
@@ -1045,6 +1071,7 @@
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 <script>
+const checklistItemComments = {{ checklist_item_comments|safe }};
 
 document.getElementById('productSearch').addEventListener('input', function() {
     const query = this.value;
@@ -1052,8 +1079,12 @@ document.getElementById('productSearch').addEventListener('input', function() {
         .then(response => response.json())
         .then(data => {
             const productList = document.getElementById('productList');
-            productList.innerHTML = '';
+            productList.innerHTML = ''; // Clear existing entries
+
             data.products.forEach(product => {
+                // Access the comment placeholder from the JSON object
+                const commentPlaceholder = checklistItemComments[product.id] || 'Écrire un commentaire';
+
                 const productHTML = `
                     <div class="col-12 d-flex align-items-center justify-content-between product-item">
                         <div class="product-info d-flex align-items-center">
@@ -1072,6 +1103,16 @@ document.getElementById('productSearch').addEventListener('input', function() {
                                 <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
                                 <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
                             </div>
+
+                            <button type="button" class="btn btn-secondary me-2" onclick="toggleCommentInput(${product.id})">
+                                <i class="fa-regular fa-comment-dots"></i>
+                            </button>
+                            
+                            <div class="form-group me-2" id="comment-section-${product.id}" style="display: none;">
+                                <textarea class="form-control" id="commentaire-${product.id}" name="commentaire" 
+                                          placeholder="${commentPlaceholder}"></textarea>
+                            </div>
+
                             <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
                                 <i class="fa-solid fa-cart-plus me-2"></i> Valider
                             </button>
@@ -1080,6 +1121,9 @@ document.getElementById('productSearch').addEventListener('input', function() {
                 `;
                 productList.insertAdjacentHTML('beforeend', productHTML);
             });
+        })
+        .catch(error => {
+            console.error('Error fetching products:', error); // Log errors if any
         });
 });
 
@@ -1091,6 +1135,9 @@ document.getElementById('productSearch1').addEventListener('input', function() {
             const productList = document.getElementById('productList1');
             productList.innerHTML = '';
             data.products.forEach(product => {
+                // Access the comment placeholder from the JSON object
+                const commentPlaceholder = checklistItemComments[product.id] || 'Écrire un commentaire';
+
                 const productHTML = `
                     <div class="col-12 d-flex align-items-center justify-content-between product-item">
                         <div class="product-info d-flex align-items-center">
@@ -1109,6 +1156,16 @@ document.getElementById('productSearch1').addEventListener('input', function() {
                                 <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
                                 <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
                             </div>
+
+                            <button type="button" class="btn btn-secondary me-2" onclick="toggleCommentInput(${product.id})">
+                                <i class="fa-regular fa-comment-dots"></i>
+                            </button>
+                            
+                            <div class="form-group me-2" id="comment-section-${product.id}" style="display: none;">
+                                <textarea class="form-control" id="commentaire-${product.id}" name="commentaire" 
+                                          placeholder="${commentPlaceholder}"></textarea>
+                            </div>
+
                             <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
                                 <i class="fa-solid fa-cart-plus me-2"></i> Valider
                             </button>
@@ -1117,6 +1174,9 @@ document.getElementById('productSearch1').addEventListener('input', function() {
                 `;
                 productList.insertAdjacentHTML('beforeend', productHTML);
             });
+        })
+        .catch(error => {
+            console.error('Error fetching products:', error); // Log errors if any
         });
 });
 
@@ -1128,6 +1188,9 @@ document.getElementById('productSearch2').addEventListener('input', function() {
             const productList = document.getElementById('productList2');
             productList.innerHTML = '';
             data.products.forEach(product => {
+                // Access the comment placeholder from the JSON object
+                const commentPlaceholder = checklistItemComments[product.id] || 'Écrire un commentaire';
+
                 const productHTML = `
                     <div class="col-12 d-flex align-items-center justify-content-between product-item">
                         <div class="product-info d-flex align-items-center">
@@ -1146,6 +1209,16 @@ document.getElementById('productSearch2').addEventListener('input', function() {
                                 <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
                                 <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
                             </div>
+
+                            <button type="button" class="btn btn-secondary me-2" onclick="toggleCommentInput(${product.id})">
+                                <i class="fa-regular fa-comment-dots"></i>
+                            </button>
+                            
+                            <div class="form-group me-2" id="comment-section-${product.id}" style="display: none;">
+                                <textarea class="form-control" id="commentaire-${product.id}" name="commentaire" 
+                                          placeholder="${commentPlaceholder}"></textarea>
+                            </div>
+
                             <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
                                 <i class="fa-solid fa-cart-plus me-2"></i> Valider
                             </button>
@@ -1154,6 +1227,9 @@ document.getElementById('productSearch2').addEventListener('input', function() {
                 `;
                 productList.insertAdjacentHTML('beforeend', productHTML);
             });
+        })
+        .catch(error => {
+            console.error('Error fetching products:', error); // Log errors if any
         });
 });
 
@@ -1165,6 +1241,9 @@ document.getElementById('productSearch3').addEventListener('input', function() {
             const productList = document.getElementById('productList3');
             productList.innerHTML = '';
             data.products.forEach(product => {
+                // Access the comment placeholder from the JSON object
+                const commentPlaceholder = checklistItemComments[product.id] || 'Écrire un commentaire';
+
                 const productHTML = `
                     <div class="col-12 d-flex align-items-center justify-content-between product-item">
                         <div class="product-info d-flex align-items-center">
@@ -1183,6 +1262,16 @@ document.getElementById('productSearch3').addEventListener('input', function() {
                                 <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
                                 <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
                             </div>
+
+                            <button type="button" class="btn btn-secondary me-2" onclick="toggleCommentInput(${product.id})">
+                                <i class="fa-regular fa-comment-dots"></i>
+                            </button>
+                            
+                            <div class="form-group me-2" id="comment-section-${product.id}" style="display: none;">
+                                <textarea class="form-control" id="commentaire-${product.id}" name="commentaire" 
+                                          placeholder="${commentPlaceholder}"></textarea>
+                            </div>
+
                             <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
                                 <i class="fa-solid fa-cart-plus me-2"></i> Valider
                             </button>
@@ -1191,6 +1280,9 @@ document.getElementById('productSearch3').addEventListener('input', function() {
                 `;
                 productList.insertAdjacentHTML('beforeend', productHTML);
             });
+        })
+        .catch(error => {
+            console.error('Error fetching products:', error); // Log errors if any
         });
 });
 
@@ -1202,6 +1294,9 @@ document.getElementById('productSearch4').addEventListener('input', function() {
             const productList = document.getElementById('productList4');
             productList.innerHTML = '';
             data.products.forEach(product => {
+                // Access the comment placeholder from the JSON object
+                const commentPlaceholder = checklistItemComments[product.id] || 'Écrire un commentaire';
+
                 const productHTML = `
                     <div class="col-12 d-flex align-items-center justify-content-between product-item">
                         <div class="product-info d-flex align-items-center">
@@ -1220,6 +1315,16 @@ document.getElementById('productSearch4').addEventListener('input', function() {
                                 <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
                                 <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
                             </div>
+
+                            <button type="button" class="btn btn-secondary me-2" onclick="toggleCommentInput(${product.id})">
+                                <i class="fa-regular fa-comment-dots"></i>
+                            </button>
+                            
+                            <div class="form-group me-2" id="comment-section-${product.id}" style="display: none;">
+                                <textarea class="form-control" id="commentaire-${product.id}" name="commentaire" 
+                                          placeholder="${commentPlaceholder}"></textarea>
+                            </div>
+
                             <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
                                 <i class="fa-solid fa-cart-plus me-2"></i> Valider
                             </button>
@@ -1228,6 +1333,9 @@ document.getElementById('productSearch4').addEventListener('input', function() {
                 `;
                 productList.insertAdjacentHTML('beforeend', productHTML);
             });
+        })
+        .catch(error => {
+            console.error('Error fetching products:', error); // Log errors if any
         });
 });
 
@@ -1239,6 +1347,9 @@ document.getElementById('productSearch6').addEventListener('input', function() {
             const productList = document.getElementById('productList6');
             productList.innerHTML = '';
             data.products.forEach(product => {
+                // Access the comment placeholder from the JSON object
+                const commentPlaceholder = checklistItemComments[product.id] || 'Écrire un commentaire';
+
                 const productHTML = `
                     <div class="col-12 d-flex align-items-center justify-content-between product-item">
                         <div class="product-info d-flex align-items-center">
@@ -1257,6 +1368,16 @@ document.getElementById('productSearch6').addEventListener('input', function() {
                                 <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
                                 <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
                             </div>
+
+                            <button type="button" class="btn btn-secondary me-2" onclick="toggleCommentInput(${product.id})">
+                                <i class="fa-regular fa-comment-dots"></i>
+                            </button>
+                            
+                            <div class="form-group me-2" id="comment-section-${product.id}" style="display: none;">
+                                <textarea class="form-control" id="commentaire-${product.id}" name="commentaire" 
+                                          placeholder="${commentPlaceholder}"></textarea>
+                            </div>
+
                             <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
                                 <i class="fa-solid fa-cart-plus me-2"></i> Valider
                             </button>
@@ -1265,6 +1386,9 @@ document.getElementById('productSearch6').addEventListener('input', function() {
                 `;
                 productList.insertAdjacentHTML('beforeend', productHTML);
             });
+        })
+        .catch(error => {
+            console.error('Error fetching products:', error); // Log errors if any
         });
 });
 
@@ -1276,6 +1400,9 @@ document.getElementById('productSearch7').addEventListener('input', function() {
             const productList = document.getElementById('productList7');
             productList.innerHTML = '';
             data.products.forEach(product => {
+                // Access the comment placeholder from the JSON object
+                const commentPlaceholder = checklistItemComments[product.id] || 'Écrire un commentaire';
+
                 const productHTML = `
                     <div class="col-12 d-flex align-items-center justify-content-between product-item">
                         <div class="product-info d-flex align-items-center">
@@ -1294,6 +1421,16 @@ document.getElementById('productSearch7').addEventListener('input', function() {
                                 <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
                                 <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
                             </div>
+
+                            <button type="button" class="btn btn-secondary me-2" onclick="toggleCommentInput(${product.id})">
+                                <i class="fa-regular fa-comment-dots"></i>
+                            </button>
+                            
+                            <div class="form-group me-2" id="comment-section-${product.id}" style="display: none;">
+                                <textarea class="form-control" id="commentaire-${product.id}" name="commentaire" 
+                                          placeholder="${commentPlaceholder}"></textarea>
+                            </div>
+
                             <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
                                 <i class="fa-solid fa-cart-plus me-2"></i> Valider
                             </button>
@@ -1302,6 +1439,9 @@ document.getElementById('productSearch7').addEventListener('input', function() {
                 `;
                 productList.insertAdjacentHTML('beforeend', productHTML);
             });
+        })
+        .catch(error => {
+            console.error('Error fetching products:', error); // Log errors if any
         });
 });
 
@@ -1313,6 +1453,9 @@ document.getElementById('productSearch8').addEventListener('input', function() {
             const productList = document.getElementById('productList8');
             productList.innerHTML = '';
             data.products.forEach(product => {
+                // Access the comment placeholder from the JSON object
+                const commentPlaceholder = checklistItemComments[product.id] || 'Écrire un commentaire';
+
                 const productHTML = `
                     <div class="col-12 d-flex align-items-center justify-content-between product-item">
                         <div class="product-info d-flex align-items-center">
@@ -1331,6 +1474,16 @@ document.getElementById('productSearch8').addEventListener('input', function() {
                                 <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
                                 <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
                             </div>
+
+                            <button type="button" class="btn btn-secondary me-2" onclick="toggleCommentInput(${product.id})">
+                                <i class="fa-regular fa-comment-dots"></i>
+                            </button>
+                            
+                            <div class="form-group me-2" id="comment-section-${product.id}" style="display: none;">
+                                <textarea class="form-control" id="commentaire-${product.id}" name="commentaire" 
+                                          placeholder="${commentPlaceholder}"></textarea>
+                            </div>
+
                             <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
                                 <i class="fa-solid fa-cart-plus me-2"></i> Valider
                             </button>
@@ -1339,6 +1492,9 @@ document.getElementById('productSearch8').addEventListener('input', function() {
                 `;
                 productList.insertAdjacentHTML('beforeend', productHTML);
             });
+        })
+        .catch(error => {
+            console.error('Error fetching products:', error); // Log errors if any
         });
 });
 
@@ -1350,6 +1506,9 @@ document.getElementById('productSearch9').addEventListener('input', function() {
             const productList = document.getElementById('productList9');
             productList.innerHTML = '';
             data.products.forEach(product => {
+                // Access the comment placeholder from the JSON object
+                const commentPlaceholder = checklistItemComments[product.id] || 'Écrire un commentaire';
+
                 const productHTML = `
                     <div class="col-12 d-flex align-items-center justify-content-between product-item">
                         <div class="product-info d-flex align-items-center">
@@ -1368,6 +1527,16 @@ document.getElementById('productSearch9').addEventListener('input', function() {
                                 <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
                                 <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
                             </div>
+
+                            <button type="button" class="btn btn-secondary me-2" onclick="toggleCommentInput(${product.id})">
+                                <i class="fa-regular fa-comment-dots"></i>
+                            </button>
+                            
+                            <div class="form-group me-2" id="comment-section-${product.id}" style="display: none;">
+                                <textarea class="form-control" id="commentaire-${product.id}" name="commentaire" 
+                                          placeholder="${commentPlaceholder}"></textarea>
+                            </div>
+
                             <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
                                 <i class="fa-solid fa-cart-plus me-2"></i> Valider
                             </button>
@@ -1376,6 +1545,9 @@ document.getElementById('productSearch9').addEventListener('input', function() {
                 `;
                 productList.insertAdjacentHTML('beforeend', productHTML);
             });
+        })
+        .catch(error => {
+            console.error('Error fetching products:', error); // Log errors if any
         });
 });
 
@@ -1387,6 +1559,9 @@ document.getElementById('productSearch10').addEventListener('input', function() 
             const productList = document.getElementById('productList10');
             productList.innerHTML = '';
             data.products.forEach(product => {
+                // Access the comment placeholder from the JSON object
+                const commentPlaceholder = checklistItemComments[product.id] || 'Écrire un commentaire';
+
                 const productHTML = `
                     <div class="col-12 d-flex align-items-center justify-content-between product-item">
                         <div class="product-info d-flex align-items-center">
@@ -1405,6 +1580,16 @@ document.getElementById('productSearch10').addEventListener('input', function() 
                                 <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
                                 <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
                             </div>
+
+                            <button type="button" class="btn btn-secondary me-2" onclick="toggleCommentInput(${product.id})">
+                                <i class="fa-regular fa-comment-dots"></i>
+                            </button>
+                            
+                            <div class="form-group me-2" id="comment-section-${product.id}" style="display: none;">
+                                <textarea class="form-control" id="commentaire-${product.id}" name="commentaire" 
+                                          placeholder="${commentPlaceholder}"></textarea>
+                            </div>
+
                             <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
                                 <i class="fa-solid fa-cart-plus me-2"></i> Valider
                             </button>
@@ -1413,6 +1598,9 @@ document.getElementById('productSearch10').addEventListener('input', function() 
                 `;
                 productList.insertAdjacentHTML('beforeend', productHTML);
             });
+        })
+        .catch(error => {
+            console.error('Error fetching products:', error); // Log errors if any
         });
 });
 
@@ -1424,6 +1612,9 @@ document.getElementById('productSearch11').addEventListener('input', function() 
             const productList = document.getElementById('productList11');
             productList.innerHTML = '';
             data.products.forEach(product => {
+                // Access the comment placeholder from the JSON object
+                const commentPlaceholder = checklistItemComments[product.id] || 'Écrire un commentaire';
+
                 const productHTML = `
                     <div class="col-12 d-flex align-items-center justify-content-between product-item">
                         <div class="product-info d-flex align-items-center">
@@ -1442,6 +1633,16 @@ document.getElementById('productSearch11').addEventListener('input', function() 
                                 <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
                                 <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
                             </div>
+
+                            <button type="button" class="btn btn-secondary me-2" onclick="toggleCommentInput(${product.id})">
+                                <i class="fa-regular fa-comment-dots"></i>
+                            </button>
+                            
+                            <div class="form-group me-2" id="comment-section-${product.id}" style="display: none;">
+                                <textarea class="form-control" id="commentaire-${product.id}" name="commentaire" 
+                                          placeholder="${commentPlaceholder}"></textarea>
+                            </div>
+
                             <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
                                 <i class="fa-solid fa-cart-plus me-2"></i> Valider
                             </button>
@@ -1450,6 +1651,9 @@ document.getElementById('productSearch11').addEventListener('input', function() 
                 `;
                 productList.insertAdjacentHTML('beforeend', productHTML);
             });
+        })
+        .catch(error => {
+            console.error('Error fetching products:', error); // Log errors if any
         });
 });
 
@@ -1461,6 +1665,9 @@ document.getElementById('productSearch5').addEventListener('input', function() {
             const productList = document.getElementById('productList5');
             productList.innerHTML = '';
             data.products.forEach(product => {
+                // Access the comment placeholder from the JSON object
+                const commentPlaceholder = checklistItemComments[product.id] || 'Écrire un commentaire';
+
                 const productHTML = `
                     <div class="col-12 d-flex align-items-center justify-content-between product-item">
                         <div class="product-info d-flex align-items-center">
@@ -1479,6 +1686,16 @@ document.getElementById('productSearch5').addEventListener('input', function() {
                                 <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
                                 <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
                             </div>
+
+                            <button type="button" class="btn btn-secondary me-2" onclick="toggleCommentInput(${product.id})">
+                                <i class="fa-regular fa-comment-dots"></i>
+                            </button>
+                            
+                            <div class="form-group me-2" id="comment-section-${product.id}" style="display: none;">
+                                <textarea class="form-control" id="commentaire-${product.id}" name="commentaire" 
+                                          placeholder="${commentPlaceholder}"></textarea>
+                            </div>
+
                             <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
                                 <i class="fa-solid fa-cart-plus me-2"></i> Valider
                             </button>
@@ -1487,6 +1704,9 @@ document.getElementById('productSearch5').addEventListener('input', function() {
                 `;
                 productList.insertAdjacentHTML('beforeend', productHTML);
             });
+        })
+        .catch(error => {
+            console.error('Error fetching products:', error); // Log errors if any
         });
 });
 
@@ -1498,6 +1718,9 @@ document.getElementById('productSearch12').addEventListener('input', function() 
             const productList = document.getElementById('productList12');
             productList.innerHTML = '';
             data.products.forEach(product => {
+                // Access the comment placeholder from the JSON object
+                const commentPlaceholder = checklistItemComments[product.id] || 'Écrire un commentaire';
+
                 const productHTML = `
                     <div class="col-12 d-flex align-items-center justify-content-between product-item">
                         <div class="product-info d-flex align-items-center">
@@ -1516,6 +1739,16 @@ document.getElementById('productSearch12').addEventListener('input', function() 
                                 <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
                                 <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
                             </div>
+
+                            <button type="button" class="btn btn-secondary me-2" onclick="toggleCommentInput(${product.id})">
+                                <i class="fa-regular fa-comment-dots"></i>
+                            </button>
+                            
+                            <div class="form-group me-2" id="comment-section-${product.id}" style="display: none;">
+                                <textarea class="form-control" id="commentaire-${product.id}" name="commentaire" 
+                                          placeholder="${commentPlaceholder}"></textarea>
+                            </div>
+
                             <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
                                 <i class="fa-solid fa-cart-plus me-2"></i> Valider
                             </button>
@@ -1524,6 +1757,9 @@ document.getElementById('productSearch12').addEventListener('input', function() 
                 `;
                 productList.insertAdjacentHTML('beforeend', productHTML);
             });
+        })
+        .catch(error => {
+            console.error('Error fetching products:', error); // Log errors if any
         });
 });
 
@@ -1683,6 +1919,15 @@ function calculateDifference(productId) {
 setTimeout(function(){
        window.location.reload(1);
     }, 300000); // 300000 milliseconds = 5 minutes
+
+    function toggleCommentInput(productId) {
+    const commentSection = document.getElementById(`comment-section-${productId}`);
+    if (commentSection.style.display === 'none' || commentSection.style.display === '') {
+        commentSection.style.display = 'block';
+    } else {
+        commentSection.style.display = 'none';
+    }
+}
 
 </script>
 

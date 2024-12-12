@@ -18,11 +18,21 @@ from .forms import LivraisonDragFormtoday, TaskUpdateForm
 from .forms import LivraisonsVentesForm, RoutedetailForm
 from django.urls import reverse
 import json
+from django.shortcuts import render, redirect
+from django.core.paginator import Paginator
+from django.contrib import messages
+from .models import Checklist
+from .forms import ChecklistForm, DateFilterForm
+from django.utils import timezone
+import calendar
+from django.shortcuts import render
+from django.http import JsonResponse
+from .models import Checklist
 from .forms import DistanceForm
 from tablib import Dataset
 from .ressources import LivraisonResource
 from django.utils.timezone import now
-from datetime import datetime, timedelta, time
+from datetime import datetime, timedelta, time, date
 from .models import Recuperation
 import googlemaps
 from django.http import JsonResponse
@@ -336,46 +346,52 @@ class ChecklistItemDeleteAjaxView(View):
     
 def voir_checklist(request):
 
-    checklists = Checklist.objects.all().order_by('-added_on')
+    checklists = Checklist.objects.filter(is_active=True).order_by('-added_on')
     encours = "en_cours"
     valide = "valide"
     refuse = "refuse"
-    message = request.session.pop('checklist_created_message', None)
-    if message:
-        messages.success(request, message)
+    today = date.today()
+
+    current_year = date.today().year
+    years = [year for year in range(current_year - 5, current_year + 1)]
+    
+    selected_day = int(request.GET.get('day', 1))  # Default to the first day of the month if none selected
+    current_year = date.today().year
+    months = [(month, calendar.month_name[month]) for month in range(1, 13)]
+    selected_month = int(request.GET.get('month', today.month))
+    # Get the number of days in the selected month
+    _, num_days_in_month = calendar.monthrange(current_year, selected_month)
+    days_in_month = [day for day in range(1, num_days_in_month + 1)]  # Adjust days in month
+
+    french_months = [
+        "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+        "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+    ]
+
+    # Fetch checklists for the selected month
+    checklists = Checklist.objects.filter(date__month=int(selected_month))
     
     change_logs = ChecklistItemChangeLog.objects.all().order_by('-timestamp')
     change_logs_checklist = ChecklistChangeLog.objects.all().order_by('-timestamp')
-    if request.method == 'GET' and 'date' in request.GET:
-       form = DateFilterForm(request.GET)
-       if form.is_valid():
-            date = form.cleaned_data['date']
-            checklists = checklists.filter(date=date)
-    else:
-        form = DateFilterForm()
-
-    paginator = Paginator(checklists, 10)  # Show 10 events per page
-
-    page = request.GET.get('page')
-    try:
-        checklists = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        checklists = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g., 9999), deliver last page of results.
-        checklists = paginator.page(paginator.num_pages)
 
     context = {
 
         'checklists': checklists,
-        'form': form,
-        'message': message,
         'encours': encours,
         'valide': valide,
         'refuse': refuse,
         'change_logs': change_logs,
         'change_logs_checklist': change_logs_checklist,
+        'today': today,
+        'months': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],  # Months as numbers
+        'selected_month': selected_month,
+        'days': days_in_month,
+        'months': months,
+        'french_months': french_months,
+        'selected_day': selected_day,
+        'selected_date': date(current_year, selected_month, selected_day).strftime('%d %B %Y'),
+        'years': years,
+        'selected_year': current_year,
     }
     return render(request, 'listings/voir-checklist.html', context)
 
@@ -475,6 +491,7 @@ def add_to_checklist(request, checklist_id):
         checklist = get_object_or_404(Checklist, pk=checklist_id)
         product_id = request.POST.get('product_id')
         quantity = int(request.POST.get('quantity', 0))
+        commentaire = request.POST.get('commentaire')
         product = get_object_or_404(Product, pk=product_id)
 
         
@@ -482,12 +499,13 @@ def add_to_checklist(request, checklist_id):
         checklist_item, created = ChecklistItem.objects.get_or_create(
             checklist=checklist, 
             product=product,
-            defaults={'quantity': quantity}
+            defaults={'quantity': quantity, 'commentaire': commentaire}
         )
 
         if not created:
             checklist_item._changed_by = request.user
             checklist_item.quantity = quantity
+            checklist_item.commentaire = commentaire
             checklist_item.save()
 
         return JsonResponse({'success': True, 'message': 'Objet ajouté avec succès'})
@@ -507,7 +525,7 @@ def checklist_detail(request, checklist_id):
     checklist_item_quantities = {
         item.product_id: item.quantity for item in checklist_items
     }
-    
+    checklist_item_comments = {item.product_id: item.commentaire for item in checklist_items}
 
     # Define categories
     equipementdebase = "ÉQUIPEMENT DE BASE"
@@ -537,6 +555,7 @@ def checklist_detail(request, checklist_id):
 
     # Checklist form instance
     formbis = ChecklistForm(request.POST or None, instance=checklist, prefix='checklist_form')
+    commentaire_form = CommentaireForm(request.POST or None, instance=checklist, prefix='commentaire_form')
 
     if 'documents-TOTAL_FORMS' in request.POST and document_formset.is_valid():
         documents = document_formset.save(commit=False)
@@ -548,6 +567,12 @@ def checklist_detail(request, checklist_id):
     elif 'checklist_form-name' in request.POST and formbis.is_valid():
         formbis.save()
         return HttpResponseRedirect(reverse('checklist-detail', args=[checklist_id]))
+    
+    elif 'commentaire_form-commentairevente' in request.POST and commentaire_form.is_valid():
+        commentaire_form.save()
+        return HttpResponseRedirect(reverse('checklist-detail', args=[checklist_id]))
+
+
 
     # Filter products based on the search query
     if query:
@@ -575,63 +600,18 @@ def checklist_detail(request, checklist_id):
         'cuisson': cuisson,
         'service': service,
         'formbis': formbis,
+        'commentaire_form': commentaire_form,
         'document_formset': document_formset,
         'checklist_documents': checklist_documents,
         'recup_photos': recup_photos,
         'md_photos': md_photos,
         'checklist_item_quantities': checklist_item_quantities,
+        'checklist_item_comments': checklist_item_comments,
     }
     return render(request, 'listings/checklist_detail.html', context)
 
-def creerchecklist(request):
-    checklists = Checklist.objects.all().order_by('date')
-    encours = "en_cours"
-    valide = "valide"
-    refuse = "refuse"
 
 
-    if request.method == 'GET' and 'date' in request.GET:
-        form = DateFilterForm(request.GET)
-        if form.is_valid():
-            date = form.cleaned_data['date']
-            checklists = checklists.filter(date=date)
-    else:
-        form = DateFilterForm()
-
-    if request.method == 'POST':
-        form2 = ChecklistForm(request.POST)
-        if form2.is_valid():
-            form2.save()
-            messages.success(request, 'Nouvelle Checklist')
-            return redirect('creerchecklist')  # Replace with the name of the view you want to redirect to
-    
-    
-    else:
-        form = ChecklistForm()
-
-    paginator = Paginator(checklists, 10)  # Show 10 events per page
-
-    page = request.GET.get('page')
-    try:
-        checklists = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        checklists = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g., 9999), deliver last page of results.
-        checklists = paginator.page(paginator.num_pages)
-
-
-    context = {
-       'checklists': checklists,
-       'form': form,
-       'form2': ChecklistForm(),
-       'encours': encours,
-       'valide': valide,
-       'refuse': refuse,
-
-    }
-    return render(request, 'listings/checklistcreate.html', context)
 
 def edit_item(request, pk):
     item = get_object_or_404(ItemInv, pk=pk)
@@ -646,6 +626,165 @@ def edit_item(request, pk):
         form = ItemInvForm(instance=item)
     return render(request, 'listings/edit_item.html', {'form': form, 'item':item})
 
+
+@login_required
+def conseiller_dashboard(request):
+    encours = "en_cours"
+    valide = "valide"
+    refuse = "refuse"
+    conseiller_instance = get_object_or_404(Conseiller, user=request.user)
+    checklists = Checklist.objects.filter(conseillere=conseiller_instance)
+    active_checklists = checklists.filter(is_active=True)
+    inactive_checklists = checklists.filter(is_active=False)
+    paginator = Paginator(checklists, 10)  # 10 items per page
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Initialize both forms
+    checklist_form = ChecklistForm(initial={'conseillere': conseiller_instance})
+
+    if request.method == 'POST':
+        if 'create_checklist' in request.POST:
+            # Handle the checklist creation form
+            checklist_form = ChecklistForm(request.POST)
+            if checklist_form.is_valid():
+                checklist = checklist_form.save(commit=False)
+                checklist.conseillere = conseiller_instance
+                checklist.save()
+                messages.success(request, 'Nouvelle checklist créée.')
+                return redirect('conseiller_dashboard')
+            else:
+                messages.error(request, 'Veuillez corriger les erreurs dans le formulaire de création.')
+
+        elif 'toggle_checklist' in request.POST:
+            # Handle the toggle checklist action
+            checklist_id = request.POST.get('checklist_id')
+            try:
+                checklist = Checklist.objects.get(id=checklist_id, conseillere=conseiller_instance)
+                checklist.is_active = not checklist.is_active
+                checklist.save()
+                if checklist.is_active:
+                    messages.success(request, 'Checklist activée.')
+                else:
+                    messages.success(request, 'Checklist désactivée.')
+            except Checklist.DoesNotExist:
+                messages.error(request, 'Checklist non trouvée.')
+
+    context = {
+        'checklists': checklists,
+        'checklist_form': checklist_form,
+        'conseiller_instance': conseiller_instance,
+        'active_checklists': active_checklists,
+        'inactive_checklists': inactive_checklists,  # Update context to use checklist_form
+        'page_obj': page_obj,
+        'encours': encours,
+        'valide': valide,
+        'refuse': refuse,
+    }
+
+    return render(request, 'listings/conseiller_dashboard.html', context)
+
+def creerchecklist(request):
+    # Retrieve all checklists and define status labels
+    checklists = Checklist.objects.all().order_by('date')
+    encours = "en_cours"
+    valide = "valide"
+    refuse = "refuse"
+    today = date.today()
+
+    current_year = date.today().year
+    years = [year for year in range(current_year - 5, current_year + 1)]
+    
+    selected_day = int(request.GET.get('day', 1))  # Default to the first day of the month if none selected
+    current_year = date.today().year
+    months = [(month, calendar.month_name[month]) for month in range(1, 13)]
+    selected_month = int(request.GET.get('month', today.month))
+    # Get the number of days in the selected month
+    _, num_days_in_month = calendar.monthrange(current_year, selected_month)
+    days_in_month = [day for day in range(1, num_days_in_month + 1)]  # Adjust days in month
+
+    french_months = [
+        "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+        "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+    ]
+
+    # Fetch checklists for the selected month
+    checklists = Checklist.objects.filter(date__month=int(selected_month))
+
+
+    form2 = ChecklistForm()
+
+    if request.method == 'POST':
+        form2 = ChecklistForm(request.POST)
+        if form2.is_valid():
+            form2.save()
+            messages.success(request, 'Nouvelle Checklist')
+            return redirect('creerchecklist')
+
+ 
+
+    context = {
+        'checklists': checklists,
+        'form2': form2,
+        'encours': encours,
+        'valide': valide,
+        'refuse': refuse,
+        'today': today,
+        'months': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],  # Months as numbers
+        'selected_month': selected_month,
+        'days': days_in_month,
+        'months': months,
+        'french_months': french_months,
+        'selected_day': selected_day,
+        'selected_date': date(current_year, selected_month, selected_day).strftime('%d %B %Y'),
+        'years': years,
+        'selected_year': current_year,
+    }
+    
+    return render(request, 'listings/checklistcreate.html', context)
+
+
+from django.http import JsonResponse
+from django.utils.dateparse import parse_date
+from .models import Checklist
+import calendar
+from django.utils import formats
+
+def get_checklists_for_day(request, day):
+    # Get the selected month and year
+    selected_month = int(request.GET.get('month', date.today().month))
+    selected_year = int(request.GET.get('year', date.today().year))
+
+    # Ensure day is within the range of the selected month
+    _, num_days_in_month = calendar.monthrange(selected_year, selected_month)
+    day = min(int(day), num_days_in_month)  # Prevent out-of-range days
+
+    # Construct the date object for filtering checklists
+    selected_date = date(selected_year, selected_month, day)
+
+    selected_date_formatted = formats.date_format(selected_date, "j F Y", use_l10n=True)
+
+    # Retrieve only active checklists for the selected date
+    checklists = Checklist.objects.filter(date=selected_date, is_active=True).select_related('conseillere').values(
+        'id', 'name', 'date', 'heure_livraison', 'nb_convive', 'status', 
+        'conseillere__user__username', 'added_on'
+    )
+
+    # Prepare data for JSON response
+    checklists_list = list(checklists)
+    
+    # Format the date objects for JSON serialization
+    for checklist in checklists_list:
+        checklist['date'] = checklist['date'].strftime('%Y-%m-%d')
+        checklist['conseillere'] = checklist.get('conseillere__user__username', 'N/A')  # Get the username or set to 'N/A'
+
+    response_data = {
+        'checklists': checklists_list,
+        'selected_date': selected_date_formatted,
+    }
+
+    return JsonResponse(response_data)
 def import_items(request):
     if request.method == 'POST' and request.FILES['myfile']:
         myfile = request.FILES['myfile']
@@ -1427,6 +1566,7 @@ def journees_list(request):
                                                               'form':form,
                                                               'max':max,
                                                               'is_md': request.user.groups.filter(name='md').exists(),
+                                                              'is_ventes': request.user.groups.filter(name='ventes').exists(),
                                                               'is_livreur': request.user.groups.filter(name='livreurs').exists(),
                                                               'jef':jef,
                                                               'md':md,
@@ -1522,6 +1662,7 @@ def journee_detail(request, id):  # notez le paramètre id supplémentaire
             'livreur': livraison.statut.livreur.nom if livraison.statut.livreur else "Aucun livreur",  # Check if livreur exists
             'heure_depart': livraison.statut.heure_depart if livraison.statut else "Non défini",
             'recuperation': livraison.recuperation,
+            'status': livraison.status,
         }
         for livraison in livraisonss
     ]
@@ -1572,6 +1713,13 @@ def livreur_list(request):
     else:
         return redirect('home')
 
+def validate_livraison(request, livraison_id):
+    livraison = get_object_or_404(Livraison, id=livraison_id)
+    form = LivraisonForm(request.POST or None, instance=livraison)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        return redirect('livraison-detail', ip=livraison_id)
+    return redirect('livraison-detail', ip=livraison_id)
 
 def livreur_detail(request, pk):  # notez le paramètre id supplémentaire
     if request.user.is_authenticated :
@@ -1709,6 +1857,7 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
                                                                 })
     else:
         return redirect('home')
+
 def update_task(request, pk):
 
     task = get_object_or_404(Tacheafaire, pk=pk)
@@ -1890,7 +2039,12 @@ def product_list(request):
         page_obj = paginator.get_page(paginator.num_pages)
 
     # Return the context to the template
-    return render(request, 'listings/product_list.html', {'page_obj': page_obj, 'query': query})
+    return render(request, 'listings/product_list.html', {'page_obj': page_obj,
+                                                           'query': query,
+                                                           'is_ventes': request.user.groups.filter(name='ventes').exists(),
+                                                           'is_checklist': request.user.groups.filter(name='checklist').exists(),
+                                                           'is_admin': request.user.groups.filter(name='admin').exists(),
+                                                           })
 
 
 
@@ -1990,6 +2144,332 @@ def update_status(request):
     else:
         return JsonResponse({'message': 'Echec'})
 
+class MapAujourView(View):
+    def get(self, request):
+        key = settings.GOOGLE_API_KEY
+        form = DistanceForm
+        today = datetime.now().date()
+        tomorrow = today + timedelta(1)
+        matin = ['05h00', '05h15', '05h30', '05h45', '06h00', '06h15', '06h30', '06h45', '07h00', '07h15', '07h30', '07h45', '08h00','08h15', '08h30', '08h45', '09h00', '09h15', '09h30', '09h45', 'recup']
+        distances = Distances.objects.all()
+        todo_livraison = Livraison.objects.filter(date=today, heure_livraison__in = matin, place_id__isnull=False, statut__id= 21)
+        route1 = Livraison.objects.filter(date=today, heure_livraison__in = matin)
+        recups = Livraison.objects.filter(date=today, recuperation = True)
+        route2 = Livraison.objects.filter(statut__id= 2, date=today, heure_livraison__in = matin)
+        route3 = Livraison.objects.filter(statut__id= 3, date=today, heure_livraison__in = matin)
+        route4 = Livraison.objects.filter(statut__id= 4, date=today, heure_livraison__in = matin)
+        routesmatin = ['1','2','3','4','5','6']
+        routes21 = Route.objects.filter(id=21)
+        routes = Route.objects.filter(date=today, nom__in=routesmatin)
+        eligable_locations = Livraison.objects.order_by('position').filter(place_id__isnull=False, heure_livraison__in = matin, date=today)
+        livraisons =[]
+
+        for a in eligable_locations:
+            data = {
+                'lat': float(a.lat),
+                'lng': float(a.lng),
+                'place_id': a.place_id,
+                'nom': a.nom,
+                'heure_livraison': a.heure_livraison,
+                'adress' : a.adress,
+                'convives': a.convives,
+                'mode_envoi': a.mode_envoi,
+                'infodetail': a.infodetail,
+
+            }
+
+            livraisons.append(data)
+
+        context = {'key': key,
+                   'livraisons':livraisons,
+                   'form': form,
+                   'distances':distances,
+                   'routes':routes,
+                   'routesmatin':routesmatin,
+                   'route1':route1,
+                   'route2':route2,
+                   'route3':route3,
+                   'route4':route4,
+                   'recups': recups,
+                   'todo_livraison':todo_livraison,
+                   'routes21':routes21,
+                   'tomorrow':tomorrow,
+
+        }
+        return render(request, 'listings/mapmatinaujour.html', context)
+
+    def post(self, request):
+        form = DistanceForm(request.POST)
+        if form.is_valid():
+            from_location = form.cleaned_data['from_location']
+            from_location_info = Livraison.objects.get(nom=from_location)
+            from_adress_string = str(from_location_info.adress)+", "+str(from_location_info.zipcode)+", "+str(from_location_info.city)+", "+str(from_location_info.country)
+
+            to_location = form.cleaned_data['to_location']
+            to_location_info = Livraison.objects.get(nom=to_location)
+            to_adress_string = str(to_location_info.adress)+", "+str(to_location_info.zipcode)+", "+str(to_location_info.city)+", "+str(to_location_info.country)
+
+            mode = form.cleaned_data['mode']
+            now = datetime.now()
+
+            gmaps = googlemaps.Client(key= settings.GOOGLE_API_KEY)
+            calculate = gmaps.distance_matrix(
+                from_adress_string,
+                to_adress_string,
+                mode = mode,
+                departure_time = now
+            )
+            print(calculate)
+
+            duration_secons = calculate['rows'][0]['elements'][0]['duration']['value']
+            duration_minutes = duration_secons/60
+
+            distance_meters = calculate['rows'][0]['elements'][0]['distance']['value']
+            distance_km = distance_meters/1000
+
+            if 'duration_in_traffic' in calculate['rows'][0]['elements'][0]:
+                duration_in_traffic_seconds = calculate['rows'][0]['elements'][0]['duration_in_traffic']['value']
+                duration_in_traffic_minutes = duration_in_traffic_seconds/60
+            else:
+                duration_in_traffic_minutes = None
+
+            obj = Distances(
+                from_location = Livraison.objects.get(nom=from_location),
+                to_location = Livraison.objects.get(nom=to_location),
+                mode = mode,
+                distance_km = distance_km,
+                distance_mins = duration_minutes,
+                distance_traffic_mins = duration_in_traffic_minutes
+            )
+
+            obj.save()
+
+        return redirect('my_mapaujour_view')
+class MapApremAujourView(View):
+    def get(self, request):
+        key = settings.GOOGLE_API_KEY
+        form = DistanceForm
+        today = datetime.now().date()
+        tomorrow = today + timedelta(1)
+        distances = Distances.objects.all()
+        aprem = ['13h00', '13h15', '13h30', '13h45', '14h00', '14h15', '14h30', '14h45', '15h00', '15h15', '15h30', '15h45', '16h00', '16h15', '16h30', '16h45', '17h00', '17h15', '17h30', '17h45', '18h00', '18h15', '18h30', '18h45', '19h00', 'recup']
+        todo_livraison = Livraison.objects.filter(statut=21, date=today, heure_livraison__in = aprem, place_id__isnull=False)
+        routesaprem = ['6','7','8','9','10','11','12','13','14','15','16','17', '18','19','20']
+        routes = Route.objects.filter(date=today, nom__in=routesaprem)
+        route1 = Livraison.objects.filter(date=today, heure_livraison__in = aprem)
+        route7 = Livraison.objects.filter(statut='7', date=today, heure_livraison__in = aprem)
+        route8 = Livraison.objects.filter(date=today, heure_livraison__in = aprem)
+        route9 = Livraison.objects.filter(statut='9', date=today, heure_livraison__in = aprem)
+        route10 = Livraison.objects.filter(statut='27', date=today, heure_livraison__in = aprem)
+        route11 = Livraison.objects.filter(statut='11', date=today, heure_livraison__in = aprem)
+        route12 = Livraison.objects.filter(statut='12', date=today, heure_livraison__in = aprem)
+        route13 = Livraison.objects.filter(statut='13', date=today, heure_livraison__in = aprem)
+        route14 = Livraison.objects.filter(statut='14', date=today, heure_livraison__in = aprem)
+        route15 = Livraison.objects.filter(statut='15', date=today, heure_livraison__in = aprem)
+        route16 = Livraison.objects.filter(statut='16', date=today, heure_livraison__in = aprem)
+        route17 = Livraison.objects.filter(statut='17', date=today, heure_livraison__in = aprem)
+        route18 = Livraison.objects.filter(statut='18', date=today, heure_livraison__in = aprem)
+        route19 = Livraison.objects.filter(statut='19', date=today, heure_livraison__in = aprem)
+        route20 = Livraison.objects.filter(statut='20', date=today, heure_livraison__in = aprem)
+        routes21 = Route.objects.filter(id=21)
+        eligable_locations = Livraison.objects.filter(place_id__isnull=False, heure_livraison__in = aprem, date=today )
+        livraisons =[]
+        for a in eligable_locations:
+            data = {
+                'lat': float(a.lat),
+                'lng': float(a.lng),
+                'place_id': a.place_id,
+                'nom': a.nom,
+                'heure_livraison': a.heure_livraison,
+                'adress' : a.adress,
+                'convives': a.convives,
+                'mode_envoi': a.mode_envoi,
+                'infodetail': a.infodetail
+            }
+
+            livraisons.append(data)
+
+        context = {'key': key,
+                   'livraisons':livraisons,
+                   'form': form,
+                   'distances':distances,
+                   'route1':route1,
+                   'route8':route8,
+                   'route9':route9,
+                   'route10':route10,
+                   'route11':route11,
+                   'route12':route12,
+                   'route13':route13,
+                   'route14':route14,
+                   'route15':route15,
+                   'route16':route16,
+                   'route17':route17,
+                   'route18':route18,
+                   'route19':route19,
+                   'route20':route20,
+                   'routes':routes,
+                   'todo_livraison':todo_livraison,
+                   'routes21': routes21,
+
+
+        }
+        return render(request, 'listings/mapapremaujour.html', context)
+
+    def post(self, request):
+        form = DistanceForm(request.POST)
+        if form.is_valid():
+            from_location = form.cleaned_data['from_location']
+            from_location_info = Livraison.objects.get(nom=from_location)
+            from_adress_string = str(from_location_info.adress)+", "+str(from_location_info.zipcode)+", "+str(from_location_info.city)+", "+str(from_location_info.country)
+
+            to_location = form.cleaned_data['to_location']
+            to_location_info = Livraison.objects.get(nom=to_location)
+            to_adress_string = str(to_location_info.adress)+", "+str(to_location_info.zipcode)+", "+str(to_location_info.city)+", "+str(to_location_info.country)
+
+            mode = form.cleaned_data['mode']
+            now = datetime.now()
+
+            gmaps = googlemaps.Client(key= settings.GOOGLE_API_KEY)
+            calculate = gmaps.distance_matrix(
+                from_adress_string,
+                to_adress_string,
+                mode = mode,
+                departure_time = now
+            )
+            print(calculate)
+
+            duration_secons = calculate['rows'][0]['elements'][0]['duration']['value']
+            duration_minutes = duration_secons/60
+
+            distance_meters = calculate['rows'][0]['elements'][0]['distance']['value']
+            distance_km = distance_meters/1000
+
+            if 'duration_in_traffic' in calculate['rows'][0]['elements'][0]:
+                duration_in_traffic_seconds = calculate['rows'][0]['elements'][0]['duration_in_traffic']['value']
+                duration_in_traffic_minutes = duration_in_traffic_seconds/60
+            else:
+                duration_in_traffic_minutes = None
+
+            obj = Distances(
+                from_location = Livraison.objects.get(nom=from_location),
+                to_location = Livraison.objects.get(nom=to_location),
+                mode = mode,
+                distance_km = distance_km,
+                distance_mins = duration_minutes,
+                distance_traffic_mins = duration_in_traffic_minutes
+            )
+
+            obj.save()
+
+        return redirect('my_mapapremaujour_view')
+class MapMidiAujourView(View):
+    def get(self, request):
+        key = settings.GOOGLE_API_KEY
+        form = DistanceForm
+        today = datetime.now().date()
+        tomorrow = today + timedelta(1)
+        distances = Distances.objects.all()
+        midi = ['10h00', '10h15', '10h30', '10h45', '11h00', '11h15', '11h30', '11h45', '12h00', '12h15', '12h30', '12h45', 'recup']
+        todo_livraison = Livraison.objects.filter(statut=21, date=today, heure_livraison__in = midi, place_id__isnull=False)
+        routesmidi = ['2','3','4','5','6','7','8','9','10','11','12']
+        routes21 = Route.objects.filter(id=21)
+        routes = Route.objects.filter(date=today, nom__in=routesmidi)
+        route1 = Livraison.objects.filter(date=today, heure_livraison__in=midi)
+        route2 = Livraison.objects.filter(date=today, heure_livraison__in = midi)
+        route3 = Livraison.objects.filter(statut='3', date=today, heure_livraison__in = midi)
+        route4 = Livraison.objects.filter(statut='4', date=today, heure_livraison__in = midi)
+        route5 = Livraison.objects.filter(statut='5', date=today, heure_livraison__in = midi)
+        route6 = Livraison.objects.filter(statut='6', date=today, heure_livraison__in = midi)
+        route7 = Livraison.objects.filter(statut='7', date=today, heure_livraison__in = midi)
+        route8 = Livraison.objects.filter(statut='8', date=today, heure_livraison__in = midi)
+        route9 = Livraison.objects.filter(statut='9', date=today, heure_livraison__in = midi)
+
+        eligable_locations = Livraison.objects.filter(place_id__isnull=False, heure_livraison__in = midi, date=today)
+        livraisons =[]
+        for a in eligable_locations:
+            data = {
+                'lat': float(a.lat),
+                'lng': float(a.lng),
+                'place_id': a.place_id,
+                'nom': a.nom,
+                'heure_livraison': a.heure_livraison,
+                'adress' : a.adress,
+                'convives': a.convives,
+                'mode_envoi': a.mode_envoi,
+                'infodetail': a.infodetail
+            }
+
+            livraisons.append(data)
+
+        context = {'key': key,
+                   'livraisons':livraisons,
+                   'form': form,
+                   'distances':distances,
+                   'route2':route2,
+                   'route3':route3,
+                   'route4':route4,
+                   'route5':route5,
+                   'route6':route6,
+                   'route7':route7,
+                   'route8':route8,
+                   'route9':route9,
+                   'todo_livraison':todo_livraison,
+                   'route1':route1,
+                   'routes': routes,
+                   'routes21':routes21,
+
+        }
+        return render(request, 'listings/mapmidiaujour.html', context)
+
+    def post(self, request):
+        form = DistanceForm(request.POST)
+        if form.is_valid():
+            from_location = form.cleaned_data['from_location']
+            from_location_info = Livraison.objects.get(nom=from_location)
+            from_adress_string = str(from_location_info.adress)+", "+str(from_location_info.zipcode)+", "+str(from_location_info.city)+", "+str(from_location_info.country)
+
+            to_location = form.cleaned_data['to_location']
+            to_location_info = Livraison.objects.get(nom=to_location)
+            to_adress_string = str(to_location_info.adress)+", "+str(to_location_info.zipcode)+", "+str(to_location_info.city)+", "+str(to_location_info.country)
+
+            mode = form.cleaned_data['mode']
+            now = datetime.now()
+
+            gmaps = googlemaps.Client(key= settings.GOOGLE_API_KEY)
+            calculate = gmaps.distance_matrix(
+                from_adress_string,
+                to_adress_string,
+                mode = mode,
+                departure_time = now
+            )
+            print(calculate)
+
+            duration_secons = calculate['rows'][0]['elements'][0]['duration']['value']
+            duration_minutes = duration_secons/60
+
+            distance_meters = calculate['rows'][0]['elements'][0]['distance']['value']
+            distance_km = distance_meters/1000
+
+            if 'duration_in_traffic' in calculate['rows'][0]['elements'][0]:
+                duration_in_traffic_seconds = calculate['rows'][0]['elements'][0]['duration_in_traffic']['value']
+                duration_in_traffic_minutes = duration_in_traffic_seconds/60
+            else:
+                duration_in_traffic_minutes = None
+
+            obj = Distances(
+                from_location = Livraison.objects.get(nom=from_location),
+                to_location = Livraison.objects.get(nom=to_location),
+                mode = mode,
+                distance_km = distance_km,
+                distance_mins = duration_minutes,
+                distance_traffic_mins = duration_in_traffic_minutes
+            )
+
+            obj.save()
+
+        return redirect('my_mapmidiaujour_view')
+
+
 class MapView(View):
     def get(self, request):
         key = settings.GOOGLE_API_KEY
@@ -2000,6 +2480,7 @@ class MapView(View):
         distances = Distances.objects.all()
         todo_livraison = Livraison.objects.filter(date=tomorrow, heure_livraison__in = matin, place_id__isnull=False, statut__id= 21)
         route1 = Livraison.objects.filter(date=tomorrow, heure_livraison__in = matin)
+        recups = Livraison.objects.filter(date=tomorrow, recuperation = True)
         route2 = Livraison.objects.filter(statut__id= 2, date=tomorrow, heure_livraison__in = matin)
         route3 = Livraison.objects.filter(statut__id= 3, date=tomorrow, heure_livraison__in = matin)
         route4 = Livraison.objects.filter(statut__id= 4, date=tomorrow, heure_livraison__in = matin)
@@ -2035,6 +2516,7 @@ class MapView(View):
                    'route2':route2,
                    'route3':route3,
                    'route4':route4,
+                   'recups': recups,
                    'todo_livraison':todo_livraison,
                    'routes21':routes21,
                    'tomorrow':tomorrow,
@@ -3038,6 +3520,7 @@ def livraison_detail(request, ip):
     # Use Google Maps API to geocode address
     gmaps = googlemaps.Client(key=settings.GOOGLE_API_KEY)
     result = gmaps.geocode(adresse)
+    checklist = Checklist.objects.filter(livraison=livraison)
     
 
     return render(request, 'listings/livraison_detail.html', {
@@ -3051,6 +3534,7 @@ def livraison_detail(request, ip):
         'loic': loic,
         'maxime': maxime,
         'formbis': formbis,
+        'checklist': checklist,
         'dock_photos': dock_photos,
         'matching_dock': matching_dock,
     })
@@ -3094,6 +3578,9 @@ def livraisonstomorrow(request):
     livraisons = Livraison.objects.order_by('position')
     livraisonsok = Livraison.objects.filter(date=tomorrow, recuperation=False)
     livraisonrecup = Livraison.objects.filter(date=tomorrow, recuperation=True)
+    livraisonsmatinaujour =  Livraison.objects.order_by('position').filter(heure_livraison__in= matin, date =today)
+    livraisonsmidiaujour =  Livraison.objects.order_by('position').filter(heure_livraison__in=midi, date =today)
+    livraisonsapresmidiaujour =  Livraison.objects.order_by('position').filter(heure_livraison__in=apresmidi, date =today)
     livraisonsmatin =  Livraison.objects.order_by('position').filter(heure_livraison__in= matin, date =tomorrow)
     livraisonsmidi =  Livraison.objects.order_by('position').filter(heure_livraison__in=midi, date =tomorrow)
     livraisonsapresmidi =  Livraison.objects.order_by('position').filter(heure_livraison__in=apresmidi, date =tomorrow)
@@ -3120,10 +3607,9 @@ def livraisonstomorrow(request):
                'livraisonsmidinn':livraisonsmidinn,
                'livraisonsapresmidinn':livraisonsapresmidinn,
                'livraisonsapresmidin':livraisonsapresmidin,
-
-
-
-
+               'livraisonsmatinaujour':livraisonsmatinaujour,
+               'livraisonsmidiaujour':livraisonsmidiaujour,
+               'livraisonsapresmidiaujour':livraisonsapresmidiaujour,
                }
     if not request.user.is_superuser:
         return redirect('unauthorized')
@@ -3378,7 +3864,7 @@ def md_dashboard(request):
     md_instance = get_object_or_404(Md, user=request.user)  # This fetches the Md object for the logged-in user
     
     # Get related checklists for the Md instance
-    checklists = Checklist.objects.filter(md=md_instance)
+    checklists = Checklist.objects.filter(md=md_instance, is_active=True)
     
     # Handle date filtering if applicable
     if request.method == 'GET' and 'date' in request.GET:
@@ -3614,12 +4100,15 @@ def routesfrigo(request):
     return render(request, 'listings/routesfrigo.html', context)
 
 
+from datetime import datetime, timedelta
+from django.shortcuts import redirect
+
 def duplicate_model(request, model_id):
     original_object = Livraison.objects.get(pk=model_id)
     today = datetime.now().date()
-    tomorrow = today + timedelta(1)
+    tomorrow = today + timedelta(days=1)
 
-    # Create a new object with the same attributes as the original
+    # Create a new Livraison object
     new_object = Livraison()
     new_object.nom = original_object.nom
     new_object.mode_envoi = original_object.mode_envoi
@@ -3630,7 +4119,6 @@ def duplicate_model(request, model_id):
     new_object.commentairedispatch = original_object.commentairedispatch
     new_object.adress = original_object.adress
     new_object.infodetail = original_object.infodetail
-    new_object.heure_livraison = "."
     new_object.zipcode = original_object.zipcode
     new_object.app = original_object.app
     new_object.ligne2 = original_object.ligne2
@@ -3639,25 +4127,65 @@ def duplicate_model(request, model_id):
     new_object.nom_client = original_object.nom_client
     new_object.contact_site = original_object.contact_site
     new_object.date = tomorrow
-    new_object.heure_livraison = new_object.heure_livraison = "recup"
+    new_object.heure_livraison = "recup"
     new_object.date_livraison = original_object.date_livraison
-    new_object.statut = Route.objects.get(id=21)
+    new_object.statut = Route.objects.get(id=21)  # Ensure this is the correct route
     new_journee = Journee.objects.get(id=original_object.journee.id + 1)
     new_object.journee = new_journee
     new_object.lat = original_object.lat
     new_object.lng = original_object.lng
     new_object.place_id = original_object.place_id
+    new_object.livreur = original_object.livreur
 
-    # Save the new Livraison object
+    # Save the new Livraison object first
     new_object.save()
 
-    # Duplicate related Photo objects
+    # Duplicate related Photo objects for the Livraison
     for photo_instance in original_object.livraison_photos.all():
         new_photo = Photo()
         new_photo.livraison = new_object  # Associate the new photo with the new Livraison
         new_photo.image = photo_instance.image  # Copy the image
         new_photo.caption = photo_instance.caption  # Copy the caption if available
         new_photo.save()
+    
+
+    
+    print("Checklists to duplicate:", original_object.checklist_set.all())
+
+    # Duplicate related Checklists
+    for checklist in original_object.checklist_set.all():
+        new_checklist = Checklist()
+        new_checklist.name = checklist.name
+        new_checklist.livraison = new_object  # Associate with the duplicated Livraison
+        new_checklist.date = tomorrow  # Optionally set to tomorrow or keep original
+        new_checklist.lieu = checklist.lieu
+        new_checklist.num_contrat = checklist.num_contrat
+        new_checklist.nb_convive = checklist.nb_convive
+        new_checklist.heure_livraison = checklist.heure_livraison
+        new_checklist.md = checklist.md
+        new_checklist.status = checklist.status  # Keep the original status or reset if needed
+        new_checklist.rapportmd = checklist.rapportmd
+        new_checklist.rapportrecup = checklist.rapportrecup
+        new_checklist.commentairevente = checklist.commentairevente
+        new_checklist.notechecklist = checklist.notechecklist
+        new_checklist.conseillere = None
+        new_checklist.is_active = False
+        new_checklist.save()
+    
+        # Duplicate ChecklistItems
+        for item in checklist.checklistitem_set.all():
+            new_item = ChecklistItem()
+            new_item.checklist = new_checklist
+            new_item.product = item.product
+            new_item.quantity = item.quantity
+            new_item.status = item.status
+            new_item.save()
+
+        for photo in checklist.checklistrecupphoto_set.all():
+            new_photo = ChecklistRecupPhoto()
+            new_photo.checklist = new_checklist
+            new_photo.image = photo.image  # Copy the image
+            new_photo.save()
 
     # Redirect back to a page or render a template
     return redirect('recuptoday')  # Redirect to a specific URL name
