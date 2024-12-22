@@ -393,10 +393,15 @@ class Checklist(models.Model):
     is_active = models.BooleanField(default=True)  # New field
 
     def update_status(self):
-        # Check if all items are 'valide'
-        if self.checklistitem_set.filter(status='valide').count() == self.checklistitem_set.count():
+        # Exclude ChecklistItems where the quantity is 0
+        valid_items = self.checklistitem_set.filter(status='valide').exclude(quantity=0)
+        refused_items = self.checklistitem_set.filter(status='refuse').exclude(quantity=0)
+
+        # If all non-zero quantity items are 'valide', set the checklist to 'valide'
+        if valid_items.count() == self.checklistitem_set.exclude(quantity=0).count():
             self.status = 'valide'
-        elif self.checklistitem_set.filter(status='refuse').exists():
+        # If any non-zero quantity item is 'refuse', set the checklist to 'refuse'
+        elif refused_items.exists():
             self.status = 'refuse'
         else:
             self.status = 'en_cours'

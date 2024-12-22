@@ -211,7 +211,9 @@
     
   {% endif %}
   {% if is_checklist %}
-  
+  <a href="{% url 'voir_checklist' %}" class="btn btn-primary">
+    <span class="nav__name">Aller à mon dashboard</span>
+  </a>
   {% endif %}
   {% if is_chaud %}
   <div class="container my-4">

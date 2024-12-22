@@ -397,7 +397,7 @@ def voir_checklist(request):
 
 def checklistvoir_detail(request, checklist_id):
     checklist = get_object_or_404(Checklist, pk=checklist_id)
-    checklist_item = ChecklistItem.objects.filter(checklist=checklist)
+    checklist_item = ChecklistItem.objects.filter(checklist=checklist, quantity__gt=0)
     quantity_change_logs = QuantityChangeLog.objects.filter(
         checklist_item__checklist_id=checklist_id
     ).order_by('-timestamp')
@@ -528,7 +528,7 @@ from collections import defaultdict
 def checklist_detail(request, checklist_id):
     checklist = get_object_or_404(Checklist, pk=checklist_id)
     checklist_items = ChecklistItem.objects.filter(checklist=checklist, quantity__gt=0)
-    breuvages = ChecklistItem.objects.filter(checklist=checklist, product__category = "BREUVAGE")
+    breuvages = ChecklistItem.objects.filter(checklist=checklist, product__category__in=["ALCOOLFORT", "SANSALCOOL", "VINS",  "BIERES"], quantity__gt=0)
     checklist_documents = ChecklistDocument.objects.filter(checklist=checklist)
     recup_photos = ChecklistRecupPhoto.objects.filter(checklist=checklist)
     md_photos = ChecklistMDPhoto.objects.filter(checklist=checklist)
@@ -4059,14 +4059,14 @@ def ChecklistmdDetailView(request, pk):
     checklist = get_object_or_404(Checklist, pk=pk)
     md_photos = ChecklistMDPhoto.objects.filter(checklist=checklist)
     recup_photos = ChecklistRecupPhoto.objects.filter(checklist=checklist)
-    checklist_items = ChecklistItem.objects.filter(checklist=checklist)
+    checklist_items = ChecklistItem.objects.filter(checklist=checklist, quantity__gt=0)
     checklist_documents = ChecklistDocument.objects.filter(checklist=checklist)
     # Initialize the formsets and forms with unique prefixes
     formset = ChecklistMDPhotoFormSet(request.POST or None, request.FILES or None, prefix='formset', queryset=ChecklistMDPhoto.objects.filter(checklist=checklist))
     formset1 = ChecklistRecupPhotoFormSet(request.POST or None, request.FILES or None, prefix='formset1', queryset=ChecklistRecupPhoto.objects.filter(checklist=checklist))
     form = RapportForm(request.POST or None, prefix='form', instance=checklist)
     form1 = RapportRecupForm(request.POST or None, prefix='form1', instance=checklist)
-    checklist_itemsbreuvage = ChecklistItem.objects.filter(checklist_id=checklist, product__category="BREUVAGE")
+    checklist_itemsbreuvage = ChecklistItem.objects.filter(checklist_id=checklist, product__category__in=["ALCOOLFORT", "SANSALCOOL", "VINS",  "BIERES"], quantity__gt=0)
     
     for item in checklist_itemsbreuvage:
         item.remaining_quantity = item.quantity - (item.consumed_quantity or 0)

@@ -178,8 +178,8 @@
                             <form id="breuvagesReportForm">
                                 {% csrf_token %}
                                 <ul class="list-group">
-                                    {% for item in checklist_items %}
-                                        {% if item.product.category == "BREUVAGE" %}
+                                    {% for item in checklist_itemsbreuvage %}
+                                        
                                             <li class="list-group-item">
                                                 <div class="d-flex flex-column">
                                                     <span class="mb-2">{{ item.product.name }} - Total: {{ item.quantity }}</span>
@@ -192,7 +192,7 @@
                                                     </div>
                                                 </div>
                                             </li>
-                                        {% endif %}
+                                        
                                     {% endfor %}
                                 </ul>
                                 <div class="text-center mt-3">

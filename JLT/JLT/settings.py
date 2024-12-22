@@ -99,17 +99,11 @@ WSGI_APPLICATION = 'JLT.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'maxoufaya33$JLT',  # Replace with your database name
-        'USER': 'maxoufaya33',       # Replace with your MySQL username
-        'PASSWORD': 'Udk7ke25#',   # Replace with your MySQL password
-        'HOST': 'maxoufaya33.mysql.pythonanywhere-services.com',           # Or the IP address of your MySQL server
-        'PORT': '3306',                # Default MySQL port
-        'OPTIONS': {
-            'sql_mode': 'STRICT_TRANS_TABLES',  # Recommended for MySQL
-        },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',  # Path to your SQLite database file
     }
 }
+
 
 
 

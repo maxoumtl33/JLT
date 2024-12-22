@@ -101,6 +101,7 @@
                     <th scope="col">Produit</th>
                     <th scope="col">Quantité</th>
                     <th scope="col">Statut</th>
+                    <th scope="col">Commentaire</th>
                 </tr>
             </thead>
             <tbody>
@@ -133,13 +134,24 @@
                                 title="Refusé">
                                 <i class="fa-solid fa-times"></i>
                                 </button>
+
+                                <button type="button" class="btn btn-outline-warning btn-sm rounded-circle" 
+                                onclick="submitStatusForm('{{ checklist_product.id }}', 'en_cours')" 
+                                title="Encours">
+                                <i class="fa-solid fa-spinner fa-spin" style="color: #FFD43B;"></i>
+                                </button>
                             </form>
                         </td>
+                        <td class="align-middle">
+                            {{ checklist_product.commentaire }}
+                        </td>
+
                     </tr>
                 {% empty %}
                     <tr>
                         <td colspan="3" class="text-center text-muted">Pas de produits dans cette checklist.</td>
                     </tr>
+                    
                 {% endfor %}
             </tbody>
         </table>
