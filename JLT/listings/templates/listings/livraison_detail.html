@@ -535,7 +535,7 @@
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
   <div class="offcanvas-body">
-    <form action="{% url 'update_photo' livraison.id %}" method="POST" enctype="multipart/form-data">
+    <form method="POST" enctype="multipart/form-data">
       {% csrf_token %}
       {{ formbis.management_form }}
       {% for form in formbis %}
@@ -545,6 +545,7 @@
       {% endfor %}
       <button type="submit" class="btn btn-primary">Déposer les photos</button>
     </form>
+    
   </div>
 </div>
 

@@ -475,6 +475,13 @@
                         </div>
                         <div class="col-12 col-md-6">
                             <div class="d-flex align-items-center">
+                                <i class="fa-regular fa-snowflake fa-2xl me-3" style="color: #74C0FC;"></i>
+                                <p class="mb-0"><strong> Sac de glace</strong></p>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12 col-md-6">
+                            <div class="d-flex align-items-center">
                                 <i class="fa-solid fa-triangle-exclamation fa-xl me-3" style="color: #FFD43B;"></i>
                                 <p class="mb-0"><strong>Commentaire Important</strong></p>
                             </div>
@@ -758,9 +765,10 @@
         {% else %}
         <i class="fa-solid fa-spinner fa-spin status-icon pending"></i> En attente
         {% endif %}
-        {% if livraison.commentairedispatch != None %}
-        <i class="fa-solid fa-triangle-exclamation fa-xl" style="color: #FFD43B;"></i>
+        {% if livraison.commentairedispatch %}
+            <i class="fa-solid fa-triangle-exclamation fa-xl" style="color: #FFD43B;"></i>
         {% endif %}
+
       
 
     </div>

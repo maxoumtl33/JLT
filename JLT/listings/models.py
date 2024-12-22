@@ -82,7 +82,7 @@ class LoadingDock(models.Model):
     address = models.CharField(max_length=255)
     photo = models.ImageField(upload_to='listings/media/commandesdetail', blank=True, null=True)
     description = models.TextField(blank=True)
-    link = models.URLField(max_length=5000, blank=True, null=True)
+    link = models.URLField(max_length=350, blank=True, null=True)
     place_id = models.CharField(max_length=200, null=True, blank=True)
 
 
@@ -261,8 +261,8 @@ class Livraison(models.Model):
     date = models.fields.DateField(null=True, blank=True)
     date_livraison = models.fields.DateField(null=True, blank=True)
     commentaire = models.fields.CharField(null=True, blank=True, max_length=500)
-    commentairedispatch = models.fields.CharField(null=True, blank=True, max_length=500000, default=" ")
-    infodetail = models.fields.CharField(null=True, blank=True, max_length=500000, default=".")
+    commentairedispatch = models.fields.CharField(null=True, blank=True, max_length=350, default=" ")
+    infodetail = models.fields.CharField(null=True, blank=True, max_length=350)
     livreur = models.ForeignKey(Livreur, null=True, blank=True, on_delete=models.SET_NULL)
     journee = models.ForeignKey(Journee, null=True, blank=True, on_delete=models.SET_NULL)
     aidelivreur = models.fields.CharField(null=True, blank=True, max_length=100, choices=choicesaide, default=" ")
@@ -322,7 +322,14 @@ class Product(models.Model):
          ('ÉQUIPEMENT DE CUISSON','ÉQUIPEMENT DE CUISSON'),
          ('USTENSILES DE SERVICE','USTENSILES DE SERVICE'),
          ('BREUVAGE','BREUVAGE'),
-         ('ITEMS DIVERS','ITEMS DIVERS'))
+         ('ALCOOL FORT','ALCOOL FORT'),
+         ('BIERES','BIERES'),
+         ('VINS','VINS'),
+         ('SANS ALCOOL','SANS ALCOOL'),
+         
+         
+         
+         )
 
 
     name = models.CharField(max_length=100)

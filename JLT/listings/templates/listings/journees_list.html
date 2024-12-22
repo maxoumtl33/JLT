@@ -210,6 +210,37 @@
 
     
   {% endif %}
+  {% if is_checklist %}
+  
+  {% endif %}
+  {% if is_chaud %}
+  <div class="container my-4">
+    <h1 class="text-center mb-4">Livraisons - Part Chaud</h1>
+    <div class="row">
+        {% if livraisons %}
+            {% for livraison in livraisonschaud %}
+                <div class="col-12 col-md-6 mb-3">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ livraison.nom }}</h5>
+                            <p class="card-text">
+                                <strong>Chauffeur:</strong> {{ livraison.statut.livreur.nom }} / <a href="tel:{{ checklist.livraison.statut.livreur.phone }}">{{ livraison.statut.livreur.phone }}</a><br>
+                                <strong>Heure de départ:</strong> {{ livraison.statut.heure_depart }}<br>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-warning text-center">
+                    Aucun livraison "part chaud" disponible pour aujourd'hui.
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+  {% endif %}
   {% if is_ventes %}
   
 

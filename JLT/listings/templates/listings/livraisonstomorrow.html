@@ -95,9 +95,6 @@
     
     <!-- Buttons for creating routes -->
     <div class="text-center mb-4">
-        <button id="create-routes-tomorrow-btn" class="btn btn-custom"><i class="fas fa-route"></i> Creer routes pour le lendemain</button>
-        <button id="create-routes-day-after-tomorrow-btn" class="btn btn-custom"><i class="fas fa-route"></i>Creer routes pour dimanche</button>
-        <button id="create-routes-day-after-day-after-tomorrow-btn" class="btn btn-custom"><i class="fas fa-route"></i>Creer routes pour lundi</button>
         <form id="geocode-form" method="get" action="{% url 'geocode_all_livraisons' %}">
           <button type="button" class="btn btn-primary" onclick="triggerGeocode()">Geocode</button>
       </form>

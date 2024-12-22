@@ -157,8 +157,15 @@
     <script async src="https://maps.googleapis.com/maps/api/js?key={{key}}&loading=async&callback=initMap"></script>
 </div>
 
-<h1 class="text-center my-4">Créer les routes du midi</h1>
-<div style="display: flex; flex-wrap: wrap;">
+<h1 class="text-center my-4">Créer les routes</h1>
+<div class="text-center mb-4">
+    <form method="POST" action="{% url 'create_routeaujour' %}">
+        {% csrf_token %}
+        <input type="hidden" name="route_name" value="1">
+        <button type="submit" class="btn btn-success">Créer route
+        </button>
+    </form>
+</div><div style="display: flex; flex-wrap: wrap;">
     {% for a in routes21 %}
     <div class="column" data-statut="{{ a.id }}">
         <h2>{{ a.nom }}</h2>
@@ -178,7 +185,7 @@
 
     {% for a in routes %}
     <div class="column" data-statut="{{ a.id }}">
-        <h1>Route N°{{ a.nom }}</h1>
+        <h1>Route N° {{ a.nom }}</h1>
         <p><a href="{% url 'routedetail' a.id %}" target="_blank"><i class="fa-solid fa-pen-to-square"></i></a></p>
         <hr>
         <p>Livreur: {{ a.livreur }}</p>

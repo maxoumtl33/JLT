@@ -6,6 +6,9 @@
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+
 
 
 
@@ -347,9 +350,6 @@
                         <i class="fa-solid fa-basket-shopping"></i><span>Mes produits</span></a>
                 </li>
                 <li class="nav-item">
-                    <a  type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModals" style="margin-left: 20px;"><i class="fa-solid fa-pen-to-square"></i><span>Modifier</span></a>
-                </li>
-                <li class="nav-item">
                     <a  href="{% url 'creerchecklist' %}" class="nav__link" style="margin-left: 20px;"><i class="fa-solid fa-clipboard-list"></i><span>Liste</span></a>
                 </li>
             </ul>
@@ -381,15 +381,12 @@
             <p><strong><i class="bi bi-person-circle"></i> Conseiller(e):</strong> {{ checklist.conseillere }}</p>
             <p><strong><i class="bi bi-person-badge"></i> Nom du MD:</strong> {{ checklist.md }}</p>
         </div>
-    
+        <a  type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModals" style="margin-left: 20px;"><i class="fa-solid fa-pen-to-square"></i><span>Modifier</span></a>
     </div>
     
     <div style="text-align: center; margin-top: 20px; display: flex;">
         <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModalDoc" style="display: flex; margin-right: 20px; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);">
             <i class="bi bi-folder"></i>  Ajouter documents
-        </button>
-        <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModalbreuvage" style="display: flex; margin-right: 20px; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);">
-            <i class="fa-solid fa-champagne-glasses"></i>Ajouter breuvages
         </button>
         <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModalcommentaire" style="display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);">
             <i class="fa-regular fa-comment"></i>Ajouter commentaire
@@ -418,7 +415,7 @@
         <span>ACCESSOIRES DE DÉCOR</span>
     </div>
     <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalequipementdebar">
-        <i class="fas fa-wine-glass"></i>
+        <i class="fa-solid fa-champagne-glasses"></i>
         <span>ÉQUIPEMENT DE BAR</span>
     </div>
     <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalequipementpourservicecafe">
@@ -435,7 +432,7 @@
     </div>
     
     <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalverrerie">
-        <i class="fas fa-glass-martini-alt"></i>
+        <i class="fa-solid fa-wine-glass-empty"></i>
         <span>VERRERIE</span>
     </div>
     <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalporcelaine">
@@ -459,9 +456,31 @@
         <span>ITEMS DIVERS</span>
     </div>
 </div>
+<br>
 
+<h2 style="text-align: center; font-size: 1.8em; margin-bottom: 20px;">Liste des breuvages disponibles par catégories</h2>
 <hr>
-<h2>Rapports</h2>
+<div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; padding: 20px;">
+    <!-- Example Card Layout -->
+    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalalcoolfort">
+        <i class="fa-solid fa-martini-glass"></i>
+        <span>ALCOOL FORT</span>
+    </div>
+    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalbieres">
+        <i class="fa-solid fa-beer-mug-empty"></i>
+        <span>BIERES</span>
+    </div>
+    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalvins">
+        <i class="fa-solid fa-wine-bottle"></i>
+        <span>VINS</span>
+    </div>
+    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalsansalcool">
+        <i class="fa-solid fa-glass-water"></i>
+        <span>SANS ALCOOL</span>
+    </div>
+</div>
+<hr>
+<h2>Rapports MD</h2>
 <hr>
 
 <!-- Display RapportMD and RapportRecup Buttons -->
@@ -516,7 +535,7 @@
 </div>
 
 <hr>
-<h2>Photos</h2>
+<h2>Photos Evenement</h2>
 <hr>
 
 <!-- Display Photo Buttons -->
@@ -594,39 +613,56 @@
   <!-- Modal -->
   <div class="modal fade modal-xlg" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Produits dans la checklist</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Produits dans la checklist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Search Bar -->
+                <div class="mb-3">
+                    <input type="text" id="searchItems" class="form-control" placeholder="Rechercher un produit">
+                </div>
+
+                <!-- Item List -->
+                <ul id="itemList">
+                    {% for category, items in checklist_items_by_category.items %}
+                    <li class="category-group" data-category="{{ category }}">
+                        <h6 class="category-header" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#items-{{ forloop.counter }}">
+                            {{ category }}
+                        </h6>
+                        <ul class="collapse" id="items-{{ forloop.counter }}">
+                            {% for item in items %}
+                            <li class="item" data-name="{{ item.product.name }}">
+                                <span style="color: {% if item.status == encours %}orange{% elif item.status == valide %}green{% else %}red{% endif %};">
+                                    {{ item.product.name }} - Quantité: {{ item.quantity }}
+                                </span>
+                                {% if item.commentaire %}
+
+                                <i 
+                                    class="fa-solid fa-comment-dots" 
+                                    tabindex="0" 
+                                    data-bs-toggle="popover" 
+                                    data-bs-trigger="hover focus"  
+                                    data-bs-content="{{ item.commentaire }}">
+                                </i>
+                                {% endif %}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
         </div>
-        <div class="modal-body">
-            <ul>
-                {% for item in checklist_items %}
-                {% if item.status == encours %}
-                <li style="color: orange;">
-                    {{ item.product.name }} - Quantité: {{ item.quantity }} - Statut: {{ item.status }}
-                    <a href="#" class="delete-btn" data-url="{% url 'checklist-item-delete-ajax' item.pk %}"><i class="fa-solid fa-trash" style="color: #74C0FC;"></i></a>
-                </li>
-                {% elif item.status == valide %}
-                <li style="color: green;">
-                    {{ item.product.name }} - Quantité: {{ item.quantity }} - Statut: {{ item.status }}
-                    <a href="#" class="delete-btn" data-url="{% url 'checklist-item-delete-ajax' item.pk %}"><i class="fa-solid fa-trash" style="color: #74C0FC;"></i></a>
-                </li>
-                {% elif item.status == refuse %}
-                <li style="color: red;">
-                    {{ item.product.name }} - Quantité: {{ item.quantity }} - Statut: {{ item.status }}
-                    <a href="#" class="delete-btn" data-url="{% url 'checklist-item-delete-ajax' item.pk %}"><i class="fa-solid fa-trash" style="color: #74C0FC;"></i></a>
-                </li>
-                {% endif %}
-                {% endfor %}
-            </ul>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-        </div>
-      </div>
     </div>
-  </div>
+</div>
+
+
+
 
   <!-- Modal for modifying checklist -->
 <div class="modal fade modal-xlg" id="exampleModals" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -681,7 +717,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Ajouter un commentaire</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Ajouter un commentaire livreurs</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -717,21 +753,53 @@
                     <!-- Search Bar -->
                     <div class="input-group mb-3">
                         <input type="text" id="productSearch" class="form-control" placeholder="Rechercher un produit par nom">
-                        
                     </div>
 
-                    <div class="row gy-3" id="productList">
-                        {% for product in products %}
-                        {% if product.category == equipementdebase %}
-                            {% include 'listings/product_item.html' with product=product %}
-                        {% endif %}    
-                        {% endfor %}
-                    </div>
+                    <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="row gy-3">
+                            {% for product in products %}
+                            {% if product.category == equipementdebase %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity }})
+                                            </strong>
+                                        </h6>
+                                    </div>
+
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center" 
+                                               id="quantity-{{ product.id }}" name="quantities[]" 
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+
+                                    <textarea class="form-control" name="commentaires[]" 
+                                    placeholder="Écrire un commentaire">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+
+                                </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <!-- Single Submit Button -->
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 
 <div class="modal fade modal-xlg" id="exampleModaljetable" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-custom">
@@ -745,16 +813,46 @@
                     <!-- Search Bar -->
                     <div class="input-group mb-3">
                         <input type="text" id="productSearch1" class="form-control" placeholder="Rechercher un produit par nom">
-                        
                     </div>
+                    <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="row gy-3 rt">
+                            {% for product in products %}
+                            {% if product.category == jetable %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity }})
+                                            </strong>
+                                        </h6>
+                                    </div>
 
-                    <div class="row gy-3" id="productList1">
-                        {% for product in products %}
-                        {% if product.category == jetable %}
-                            {% include 'listings/product_item.html' with product=product %}
-                        {% endif %}    
-                        {% endfor %}
-                    </div>
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center" 
+                                               id="quantity-{{ product.id }}" name="quantities[]" 
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+
+                                    <textarea class="form-control" name="commentaires[]" 
+                                    placeholder="Écrire un commentaire">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+
+                                </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <!-- Single Submit Button -->
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -773,16 +871,46 @@
                     <!-- Search Bar -->
                     <div class="input-group mb-3">
                         <input type="text" id="productSearch2" class="form-control" placeholder="Rechercher un produit par nom">
-                        
                     </div>
+                    <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="row gy-3 rtt">
+                            {% for product in products %}
+                            {% if product.category == accessoirededecor %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity }})
+                                            </strong>
+                                        </h6>
+                                    </div>
 
-                    <div class="row gy-3" id="productList2">
-                        {% for product in products %}
-                        {% if product.category == accessoirededecor %}
-                            {% include 'listings/product_item.html' with product=product %}
-                        {% endif %}    
-                        {% endfor %}
-                    </div>
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center" 
+                                               id="quantity-{{ product.id }}" name="quantities[]" 
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+
+                                    <textarea class="form-control" name="commentaires[]" 
+                                    placeholder="Écrire un commentaire">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+
+                                </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <!-- Single Submit Button -->
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -801,16 +929,46 @@
                     <!-- Search Bar -->
                     <div class="input-group mb-3">
                         <input type="text" id="productSearch3" class="form-control" placeholder="Rechercher un produit par nom">
-                        
                     </div>
+                    <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="row gy-3 rttt">
+                            {% for product in products %}
+                            {% if product.category == equipementdebar %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity }})
+                                            </strong>
+                                        </h6>
+                                    </div>
 
-                    <div class="row gy-3" id="productList3">
-                        {% for product in products %}
-                        {% if product.category == equipementdebar %}
-                            {% include 'listings/product_item.html' with product=product %}
-                        {% endif %}    
-                        {% endfor %}
-                    </div>
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center" 
+                                               id="quantity-{{ product.id }}" name="quantities[]" 
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+
+                                    <textarea class="form-control" name="commentaires[]" 
+                                    placeholder="Écrire un commentaire">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+
+                                </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <!-- Single Submit Button -->
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -829,16 +987,46 @@
                     <!-- Search Bar -->
                     <div class="input-group mb-3">
                         <input type="text" id="productSearch4" class="form-control" placeholder="Rechercher un produit par nom">
-                        
                     </div>
+                    <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="row gy-3 rtttt">
+                            {% for product in products %}
+                            {% if product.category == equipementpourservicecafe %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity }})
+                                            </strong>
+                                        </h6>
+                                    </div>
 
-                    <div class="row gy-3" id="productList4">
-                        {% for product in products %}
-                        {% if product.category == equipementpourservicecafe %}
-                            {% include 'listings/product_item.html' with product=product %}
-                        {% endif %}    
-                        {% endfor %}
-                    </div>
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center" 
+                                               id="quantity-{{ product.id }}" name="quantities[]" 
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+
+                                    <textarea class="form-control" name="commentaires[]" 
+                                    placeholder="Écrire un commentaire">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+
+                                </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <!-- Single Submit Button -->
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -857,16 +1045,46 @@
                     <!-- Search Bar -->
                     <div class="input-group mb-3">
                         <input type="text" id="productSearch5" class="form-control" placeholder="Rechercher un produit par nom">
-                        
                     </div>
+                    <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="row gy-3 rttttt">
+                            {% for product in products %}
+                            {% if product.category == itemsdivers %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity }})
+                                            </strong>
+                                        </h6>
+                                    </div>
 
-                    <div class="row gy-3" id="productList5">
-                        {% for product in products %}
-                        {% if product.category == itemsdivers %}
-                            {% include 'listings/product_item.html' with product=product %}
-                        {% endif %}    
-                        {% endfor %}
-                    </div>
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center" 
+                                               id="quantity-{{ product.id }}" name="quantities[]" 
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+
+                                    <textarea class="form-control" name="commentaires[]" 
+                                    placeholder="Écrire un commentaire">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+
+                                </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <!-- Single Submit Button -->
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -885,16 +1103,46 @@
                     <!-- Search Bar -->
                     <div class="input-group mb-3">
                         <input type="text" id="productSearch6" class="form-control" placeholder="Rechercher un produit par nom">
-                        
                     </div>
+                    <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="row gy-3 rtttttt">
+                            {% for product in products %}
+                            {% if product.category == tableetlinge %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity }})
+                                            </strong>
+                                        </h6>
+                                    </div>
 
-                    <div class="row gy-3" id="productList6">
-                        {% for product in products %}
-                        {% if product.category == tableetlinge %}
-                            {% include 'listings/product_item.html' with product=product %}
-                        {% endif %}    
-                        {% endfor %}
-                    </div>
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center" 
+                                               id="quantity-{{ product.id }}" name="quantities[]" 
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+
+                                    <textarea class="form-control" name="commentaires[]" 
+                                    placeholder="Écrire un commentaire">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+
+                                </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <!-- Single Submit Button -->
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -913,16 +1161,46 @@
                     <!-- Search Bar -->
                     <div class="input-group mb-3">
                         <input type="text" id="productSearch7" class="form-control" placeholder="Rechercher un produit par nom">
-                        
                     </div>
+                    <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="row gy-3 rttttttt">
+                            {% for product in products %}
+                            {% if product.category == verrerie %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity }})
+                                            </strong>
+                                        </h6>
+                                    </div>
 
-                    <div class="row gy-3" id="productList7">
-                        {% for product in products %}
-                        {% if product.category == verrerie %}
-                            {% include 'listings/product_item.html' with product=product %}
-                        {% endif %}    
-                        {% endfor %}
-                    </div>
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center" 
+                                               id="quantity-{{ product.id }}" name="quantities[]" 
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+
+                                    <textarea class="form-control" name="commentaires[]" 
+                                    placeholder="Écrire un commentaire">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+
+                                </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <!-- Single Submit Button -->
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -940,16 +1218,46 @@
                     <!-- Search Bar -->
                     <div class="input-group mb-3">
                         <input type="text" id="productSearch8" class="form-control" placeholder="Rechercher un produit par nom">
-                        
                     </div>
+                    <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="row gy-3 rtttttttt">
+                            {% for product in products %}
+                            {% if product.category == porcelaine %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity }})
+                                            </strong>
+                                        </h6>
+                                    </div>
 
-                    <div class="row gy-3" id="productList8">
-                        {% for product in products %}
-                        {% if product.category == porcelaine %}
-                            {% include 'listings/product_item.html' with product=product %}
-                        {% endif %}    
-                        {% endfor %}
-                    </div>
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center" 
+                                               id="quantity-{{ product.id }}" name="quantities[]" 
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+
+                                    <textarea class="form-control" name="commentaires[]" 
+                                    placeholder="Écrire un commentaire">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+
+                                </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <!-- Single Submit Button -->
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -967,16 +1275,46 @@
                     <!-- Search Bar -->
                     <div class="input-group mb-3">
                         <input type="text" id="productSearch9" class="form-control" placeholder="Rechercher un produit par nom">
-                        
                     </div>
+                    <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="row gy-3 rttttttttt">
+                            {% for product in products %}
+                            {% if product.category == montage %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity }})
+                                            </strong>
+                                        </h6>
+                                    </div>
 
-                    <div class="row gy-3" id="productList9">
-                        {% for product in products %}
-                        {% if product.category == montage %}
-                            {% include 'listings/product_item.html' with product=product %}
-                        {% endif %}    
-                        {% endfor %}
-                    </div>
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center" 
+                                               id="quantity-{{ product.id }}" name="quantities[]" 
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+
+                                    <textarea class="form-control" name="commentaires[]" 
+                                    placeholder="Écrire un commentaire">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+
+                                </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <!-- Single Submit Button -->
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -994,16 +1332,46 @@
                     <!-- Search Bar -->
                     <div class="input-group mb-3">
                         <input type="text" id="productSearch10" class="form-control" placeholder="Rechercher un produit par nom">
-                        
                     </div>
+                    <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="row gy-3 rtttttttttt">
+                            {% for product in products %}
+                            {% if product.category == cuisson %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity }})
+                                            </strong>
+                                        </h6>
+                                    </div>
 
-                    <div class="row gy-3" id="productList10">
-                        {% for product in products %}
-                        {% if product.category == cuisson %}
-                            {% include 'listings/product_item.html' with product=product %}
-                        {% endif %}    
-                        {% endfor %}
-                    </div>
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center" 
+                                               id="quantity-{{ product.id }}" name="quantities[]" 
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+
+                                    <textarea class="form-control" name="commentaires[]" 
+                                    placeholder="Écrire un commentaire">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+
+                                </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <!-- Single Submit Button -->
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -1021,22 +1389,52 @@
                     <!-- Search Bar -->
                     <div class="input-group mb-3">
                         <input type="text" id="productSearch11" class="form-control" placeholder="Rechercher un produit par nom">
-                        
                     </div>
+                    <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="row gy-3 rttttttttttt">
+                            {% for product in products %}
+                            {% if product.category == service %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity }})
+                                            </strong>
+                                        </h6>
+                                    </div>
 
-                    <div class="row gy-3" id="productList11">
-                        {% for product in products %}
-                        {% if product.category == service %}
-                            {% include 'listings/product_item.html' with product=product %}
-                        {% endif %}    
-                        {% endfor %}
-                    </div>
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center" 
+                                               id="quantity-{{ product.id }}" name="quantities[]" 
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+
+                                    <textarea class="form-control" name="commentaires[]" 
+                                    placeholder="Écrire un commentaire">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+
+                                </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <!-- Single Submit Button -->
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<div class="modal fade modal-xlg" id="exampleModalbreuvage" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade modal-xlg" id="exampleModalalcoolfort" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-custom">
         <div class="modal-content">
             <div class="modal-header">
@@ -1048,22 +1446,222 @@
                     <!-- Search Bar -->
                     <div class="input-group mb-3">
                         <input type="text" id="productSearch12" class="form-control" placeholder="Rechercher un produit par nom">
-                        
                     </div>
+                    <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="row gy-3 rtttttttttttt">
+                            {% for product in products %}
+                            {% if product.category == alcoolfort %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity }})
+                                            </strong>
+                                        </h6>
+                                    </div>
 
-                    <div class="row gy-3" id="productList12">
-                        {% for product in products %}
-                        {% if product.category == breuvage %}
-                            {% include 'listings/product_item.html' with product=product %}
-                        {% endif %}    
-                        {% endfor %}
-                    </div>
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center" 
+                                               id="quantity-{{ product.id }}" name="quantities[]" 
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+
+                                    <textarea class="form-control" name="commentaires[]" 
+                                    placeholder="Écrire un commentaire">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+
+                                </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <!-- Single Submit Button -->
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
+<div class="modal fade modal-xlg" id="exampleModalbieres" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-custom">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <!-- Search Bar -->
+                    <div class="input-group mb-3">
+                        <input type="text" id="productSearch13" class="form-control" placeholder="Rechercher un produit par nom">
+                    </div>
+                    <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="row gy-3 rttttttttttttt">
+                            {% for product in products %}
+                            {% if product.category == bieres %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity }})
+                                            </strong>
+                                        </h6>
+                                    </div>
 
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center" 
+                                               id="quantity-{{ product.id }}" name="quantities[]" 
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+
+                                    <textarea class="form-control" name="commentaires[]" 
+                                    placeholder="Écrire un commentaire">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+
+                                </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <!-- Single Submit Button -->
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade modal-xlg" id="exampleModalvins" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-custom">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <!-- Search Bar -->
+                    <div class="input-group mb-3">
+                        <input type="text" id="productSearch14" class="form-control" placeholder="Rechercher un produit par nom">
+                    </div>
+                    <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="row gy-3 rtttttttttttttt">
+                            {% for product in products %}
+                            {% if product.category == vins %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity }})
+                                            </strong>
+                                        </h6>
+                                    </div>
+
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center" 
+                                               id="quantity-{{ product.id }}" name="quantities[]" 
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+
+                                    <textarea class="form-control" name="commentaires[]" 
+                                    placeholder="Écrire un commentaire">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+
+                                </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <!-- Single Submit Button -->
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade modal-xlg" id="exampleModalsansalcool" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-custom">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <!-- Search Bar -->
+                    <div class="input-group mb-3">
+                        <input type="text" id="productSearch15" class="form-control" placeholder="Rechercher un produit par nom">
+                    </div>
+                    <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="row gy-3 rttttttttttttttt">
+                            {% for product in products %}
+                            {% if product.category == sansalcool %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity }})
+                                            </strong>
+                                        </h6>
+                                    </div>
+
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center" 
+                                               id="quantity-{{ product.id }}" name="quantities[]" 
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+
+                                    <textarea class="form-control" name="commentaires[]" 
+                                    placeholder="Écrire un commentaire">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+
+                                </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <!-- Single Submit Button -->
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 
   </div>
@@ -1073,17 +1671,22 @@
 <script>
 const checklistItemComments = {{ checklist_item_comments|safe }};
 
-document.getElementById('productSearch').addEventListener('input', function() {
+// Object to track quantities and comments for products
+const productDataCache = {};
+
+document.getElementById('productSearch').addEventListener('input', function () {
     const query = this.value;
+
     fetch(`{% url 'search_productsbase' checklist.id %}?query=${query}`)
         .then(response => response.json())
         .then(data => {
-            const productList = document.getElementById('productList');
-            productList.innerHTML = ''; // Clear existing entries
+            const productListContainer = document.querySelector('.modal-body .row.gy-3'); // Target the product list inside the modal
+            productListContainer.innerHTML = ''; // Clear existing entries
 
             data.products.forEach(product => {
-                // Access the comment placeholder from the JSON object
-                const commentPlaceholder = checklistItemComments[product.id] || 'Écrire un commentaire';
+                // Use cached values if they exist, otherwise use the server response
+                const cachedQuantity = productDataCache[product.id]?.quantity || product.checklist_quantity || 0;
+                const cachedComment = productDataCache[product.id]?.comment || product.commentaire || '';
 
                 const productHTML = `
                     <div class="col-12 d-flex align-items-center justify-content-between product-item">
@@ -1092,34 +1695,45 @@ document.getElementById('productSearch').addEventListener('input', function() {
                                 <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
                             </h6>
                         </div>
-                        <form id="checklistForm-${product.id}" action="{% url 'add_to_checklist' checklist.id %}" method="post" class="d-flex align-items-center product-form justify-content-end">
-                            {% csrf_token %}
-                            <input type="hidden" name="product_id" value="${product.id}">
-                            <input type="hidden" name="product_name" value="${product.name}">
-                            <input type="hidden" name="status" id="status-${product.id}" value="">
-                            <input type="hidden" id="initial-quantity-${product.id}" value="${product.checklist_quantity || 0}">
 
-                            <div class="form-group d-flex align-items-center me-2">
-                                <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
-                                <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
-                            </div>
+                        <input type="hidden" name="product_ids[]" value="${product.id}">
 
-                            <button type="button" class="btn btn-secondary me-2" onclick="toggleCommentInput(${product.id})">
-                                <i class="fa-regular fa-comment-dots"></i>
-                            </button>
-                            
-                            <div class="form-group me-2" id="comment-section-${product.id}" style="display: none;">
-                                <textarea class="form-control" id="commentaire-${product.id}" name="commentaire" 
-                                          placeholder="${commentPlaceholder}"></textarea>
-                            </div>
+                        <div class="form-group d-flex align-items-center me-2">
+                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                            <input type="number" class="form-control text-center quantity-input" 
+                                   id="quantity-${product.id}" name="quantities[]" 
+                                   min="0" value="${cachedQuantity}" required
+                                   data-product-id="${product.id}">
+                        </div>
 
-                            <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
-                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
-                            </button>
-                        </form>
+                        <textarea class="form-control comment-input" name="commentaires[]" 
+          data-product-id="${product.id}" 
+          placeholder="${cachedComment || 'Écrire un commentaire'}">${cachedComment}</textarea>
+
                     </div>
                 `;
-                productList.insertAdjacentHTML('beforeend', productHTML);
+                productListContainer.insertAdjacentHTML('beforeend', productHTML);
+            });
+
+            // Attach event listeners to track input changes
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache[productId]) {
+                        productDataCache[productId] = {};
+                    }
+                    productDataCache[productId].quantity = this.value;
+                });
+            });
+
+            document.querySelectorAll('.comment-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache[productId]) {
+                        productDataCache[productId] = {};
+                    }
+                    productDataCache[productId].comment = this.value;
+                });
             });
         })
         .catch(error => {
@@ -1127,16 +1741,21 @@ document.getElementById('productSearch').addEventListener('input', function() {
         });
 });
 
-document.getElementById('productSearch1').addEventListener('input', function() {
+const productDataCache1 = {};
+
+document.getElementById('productSearch1').addEventListener('input', function () {
     const query = this.value;
+
     fetch(`{% url 'search_productsjetable' checklist.id %}?query=${query}`)
         .then(response => response.json())
         .then(data => {
-            const productList = document.getElementById('productList1');
-            productList.innerHTML = '';
+            const productListContainer = document.querySelector('.modal-body .row.gy-3.rt'); // Target the product list inside the modal
+            productListContainer.innerHTML = ''; // Clear existing entries
+
             data.products.forEach(product => {
-                // Access the comment placeholder from the JSON object
-                const commentPlaceholder = checklistItemComments[product.id] || 'Écrire un commentaire';
+                // Use cached values if they exist, otherwise use the server response
+                const cachedQuantity = productDataCache1[product.id]?.quantity || product.checklist_quantity || 0;
+                const cachedComment = productDataCache1[product.id]?.comment || product.commentaire || '';
 
                 const productHTML = `
                     <div class="col-12 d-flex align-items-center justify-content-between product-item">
@@ -1145,34 +1764,44 @@ document.getElementById('productSearch1').addEventListener('input', function() {
                                 <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
                             </h6>
                         </div>
-                        <form id="checklistForm-${product.id}" action="{% url 'add_to_checklist' checklist.id %}" method="post" class="d-flex align-items-center product-form justify-content-end">
-                            {% csrf_token %}
-                            <input type="hidden" name="product_id" value="${product.id}">
-                            <input type="hidden" name="product_name" value="${product.name}">
-                            <input type="hidden" name="status" id="status-${product.id}" value="">
-                            <input type="hidden" id="initial-quantity-${product.id}" value="${product.checklist_quantity || 0}">
 
-                            <div class="form-group d-flex align-items-center me-2">
-                                <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
-                                <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
-                            </div>
+                        <input type="hidden" name="product_ids[]" value="${product.id}">
 
-                            <button type="button" class="btn btn-secondary me-2" onclick="toggleCommentInput(${product.id})">
-                                <i class="fa-regular fa-comment-dots"></i>
-                            </button>
-                            
-                            <div class="form-group me-2" id="comment-section-${product.id}" style="display: none;">
-                                <textarea class="form-control" id="commentaire-${product.id}" name="commentaire" 
-                                          placeholder="${commentPlaceholder}"></textarea>
-                            </div>
+                        <div class="form-group d-flex align-items-center me-2">
+                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                            <input type="number" class="form-control text-center quantity-input" 
+                                   id="quantity-${product.id}" name="quantities[]" 
+                                   min="0" value="${cachedQuantity}" required
+                                   data-product-id="${product.id}">
+                        </div>
 
-                            <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
-                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
-                            </button>
-                        </form>
+                        <textarea class="form-control comment-input" name="commentaires[]" 
+                                  data-product-id="${product.id}" 
+                                  placeholder="Écrire un commentaire">${cachedComment}</textarea>
                     </div>
                 `;
-                productList.insertAdjacentHTML('beforeend', productHTML);
+                productListContainer.insertAdjacentHTML('beforeend', productHTML);
+            });
+
+            // Attach event listeners to track input changes
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache1[productId]) {
+                        productDataCache1[productId] = {};
+                    }
+                    productDataCache1[productId].quantity = this.value;
+                });
+            });
+
+            document.querySelectorAll('.comment-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache1[productId]) {
+                        productDataCache1[productId] = {};
+                    }
+                    productDataCache1[productId].comment = this.value;
+                });
             });
         })
         .catch(error => {
@@ -1180,16 +1809,21 @@ document.getElementById('productSearch1').addEventListener('input', function() {
         });
 });
 
-document.getElementById('productSearch2').addEventListener('input', function() {
+const productDataCache2 = {};
+
+document.getElementById('productSearch2').addEventListener('input', function () {
     const query = this.value;
+
     fetch(`{% url 'search_productsdecor' checklist.id %}?query=${query}`)
         .then(response => response.json())
         .then(data => {
-            const productList = document.getElementById('productList2');
-            productList.innerHTML = '';
+            const productListContainer = document.querySelector('.modal-body .row.gy-3.rtt'); // Target the product list inside the modal
+            productListContainer.innerHTML = ''; // Clear existing entries
+
             data.products.forEach(product => {
-                // Access the comment placeholder from the JSON object
-                const commentPlaceholder = checklistItemComments[product.id] || 'Écrire un commentaire';
+                // Use cached values if they exist, otherwise use the server response
+                const cachedQuantity = productDataCache2[product.id]?.quantity || product.checklist_quantity || 0;
+                const cachedComment = productDataCache2[product.id]?.comment || product.commentaire || '';
 
                 const productHTML = `
                     <div class="col-12 d-flex align-items-center justify-content-between product-item">
@@ -1198,51 +1832,65 @@ document.getElementById('productSearch2').addEventListener('input', function() {
                                 <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
                             </h6>
                         </div>
-                        <form id="checklistForm-${product.id}" action="{% url 'add_to_checklist' checklist.id %}" method="post" class="d-flex align-items-center product-form justify-content-end">
-                            {% csrf_token %}
-                            <input type="hidden" name="product_id" value="${product.id}">
-                            <input type="hidden" name="product_name" value="${product.name}">
-                            <input type="hidden" name="status" id="status-${product.id}" value="">
-                            <input type="hidden" id="initial-quantity-${product.id}" value="${product.checklist_quantity || 0}">
 
-                            <div class="form-group d-flex align-items-center me-2">
-                                <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
-                                <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
-                            </div>
+                        <input type="hidden" name="product_ids[]" value="${product.id}">
 
-                            <button type="button" class="btn btn-secondary me-2" onclick="toggleCommentInput(${product.id})">
-                                <i class="fa-regular fa-comment-dots"></i>
-                            </button>
-                            
-                            <div class="form-group me-2" id="comment-section-${product.id}" style="display: none;">
-                                <textarea class="form-control" id="commentaire-${product.id}" name="commentaire" 
-                                          placeholder="${commentPlaceholder}"></textarea>
-                            </div>
+                        <div class="form-group d-flex align-items-center me-2">
+                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                            <input type="number" class="form-control text-center quantity-input" 
+                                   id="quantity-${product.id}" name="quantities[]" 
+                                   min="0" value="${cachedQuantity}" required
+                                   data-product-id="${product.id}">
+                        </div>
 
-                            <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
-                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
-                            </button>
-                        </form>
+                        <textarea class="form-control comment-input" name="commentaires[]" 
+                                  data-product-id="${product.id}" 
+                                  placeholder="Écrire un commentaire">${cachedComment}</textarea>
                     </div>
                 `;
-                productList.insertAdjacentHTML('beforeend', productHTML);
+                productListContainer.insertAdjacentHTML('beforeend', productHTML);
+            });
+
+            // Attach event listeners to track input changes
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache2[productId]) {
+                        productDataCache2[productId] = {};
+                    }
+                    productDataCache2[productId].quantity = this.value;
+                });
+            });
+
+            document.querySelectorAll('.comment-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache2[productId]) {
+                        productDataCache2[productId] = {};
+                    }
+                    productDataCache2[productId].comment = this.value;
+                });
             });
         })
         .catch(error => {
             console.error('Error fetching products:', error); // Log errors if any
         });
 });
+
+const productDataCache3 = {};
 
 document.getElementById('productSearch3').addEventListener('input', function() {
     const query = this.value;
     fetch(`{% url 'search_productsbar' checklist.id %}?query=${query}`)
         .then(response => response.json())
         .then(data => {
-            const productList = document.getElementById('productList3');
-            productList.innerHTML = '';
+            const productListContainer = document.querySelector('.modal-body .row.gy-3.rttt'); // Target the product list inside the modal
+            productListContainer.innerHTML = ''; // Clear existing entries
+
             data.products.forEach(product => {
-                // Access the comment placeholder from the JSON object
-                const commentPlaceholder = checklistItemComments[product.id] || 'Écrire un commentaire';
+                // Use cached values if they exist, otherwise use the server response
+                const cachedQuantity = productDataCache3[product.id]?.quantity || product.checklist_quantity || 0;
+                const cachedComment = productDataCache3[product.id]?.comment || product.commentaire || '';
 
                 const productHTML = `
                     <div class="col-12 d-flex align-items-center justify-content-between product-item">
@@ -1251,51 +1899,65 @@ document.getElementById('productSearch3').addEventListener('input', function() {
                                 <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
                             </h6>
                         </div>
-                        <form id="checklistForm-${product.id}" action="{% url 'add_to_checklist' checklist.id %}" method="post" class="d-flex align-items-center product-form justify-content-end">
-                            {% csrf_token %}
-                            <input type="hidden" name="product_id" value="${product.id}">
-                            <input type="hidden" name="product_name" value="${product.name}">
-                            <input type="hidden" name="status" id="status-${product.id}" value="">
-                            <input type="hidden" id="initial-quantity-${product.id}" value="${product.checklist_quantity || 0}">
 
-                            <div class="form-group d-flex align-items-center me-2">
-                                <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
-                                <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
-                            </div>
+                        <input type="hidden" name="product_ids[]" value="${product.id}">
 
-                            <button type="button" class="btn btn-secondary me-2" onclick="toggleCommentInput(${product.id})">
-                                <i class="fa-regular fa-comment-dots"></i>
-                            </button>
-                            
-                            <div class="form-group me-2" id="comment-section-${product.id}" style="display: none;">
-                                <textarea class="form-control" id="commentaire-${product.id}" name="commentaire" 
-                                          placeholder="${commentPlaceholder}"></textarea>
-                            </div>
+                        <div class="form-group d-flex align-items-center me-2">
+                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                            <input type="number" class="form-control text-center quantity-input" 
+                                   id="quantity-${product.id}" name="quantities[]" 
+                                   min="0" value="${cachedQuantity}" required
+                                   data-product-id="${product.id}">
+                        </div>
 
-                            <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
-                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
-                            </button>
-                        </form>
+                        <textarea class="form-control comment-input" name="commentaires[]" 
+                                  data-product-id="${product.id}" 
+                                  placeholder="Écrire un commentaire">${cachedComment}</textarea>
                     </div>
                 `;
-                productList.insertAdjacentHTML('beforeend', productHTML);
+                productListContainer.insertAdjacentHTML('beforeend', productHTML);
+            });
+
+            // Attach event listeners to track input changes
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache3[productId]) {
+                        productDataCache3[productId] = {};
+                    }
+                    productDataCache3[productId].quantity = this.value;
+                });
+            });
+
+            document.querySelectorAll('.comment-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache3[productId]) {
+                        productDataCache3[productId] = {};
+                    }
+                    productDataCache3[productId].comment = this.value;
+                });
             });
         })
         .catch(error => {
             console.error('Error fetching products:', error); // Log errors if any
         });
 });
+
+const productDataCache4 = {};
 
 document.getElementById('productSearch4').addEventListener('input', function() {
     const query = this.value;
     fetch(`{% url 'search_productscafe' checklist.id %}?query=${query}`)
         .then(response => response.json())
         .then(data => {
-            const productList = document.getElementById('productList4');
-            productList.innerHTML = '';
+            const productListContainer = document.querySelector('.modal-body .row.gy-3.rtttt'); // Target the product list inside the modal
+            productListContainer.innerHTML = ''; // Clear existing entries
+
             data.products.forEach(product => {
-                // Access the comment placeholder from the JSON object
-                const commentPlaceholder = checklistItemComments[product.id] || 'Écrire un commentaire';
+                // Use cached values if they exist, otherwise use the server response
+                const cachedQuantity = productDataCache4[product.id]?.quantity || product.checklist_quantity || 0;
+                const cachedComment = productDataCache4[product.id]?.comment || product.commentaire || '';
 
                 const productHTML = `
                     <div class="col-12 d-flex align-items-center justify-content-between product-item">
@@ -1304,51 +1966,65 @@ document.getElementById('productSearch4').addEventListener('input', function() {
                                 <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
                             </h6>
                         </div>
-                        <form id="checklistForm-${product.id}" action="{% url 'add_to_checklist' checklist.id %}" method="post" class="d-flex align-items-center product-form justify-content-end">
-                            {% csrf_token %}
-                            <input type="hidden" name="product_id" value="${product.id}">
-                            <input type="hidden" name="product_name" value="${product.name}">
-                            <input type="hidden" name="status" id="status-${product.id}" value="">
-                            <input type="hidden" id="initial-quantity-${product.id}" value="${product.checklist_quantity || 0}">
 
-                            <div class="form-group d-flex align-items-center me-2">
-                                <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
-                                <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
-                            </div>
+                        <input type="hidden" name="product_ids[]" value="${product.id}">
 
-                            <button type="button" class="btn btn-secondary me-2" onclick="toggleCommentInput(${product.id})">
-                                <i class="fa-regular fa-comment-dots"></i>
-                            </button>
-                            
-                            <div class="form-group me-2" id="comment-section-${product.id}" style="display: none;">
-                                <textarea class="form-control" id="commentaire-${product.id}" name="commentaire" 
-                                          placeholder="${commentPlaceholder}"></textarea>
-                            </div>
+                        <div class="form-group d-flex align-items-center me-2">
+                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                            <input type="number" class="form-control text-center quantity-input" 
+                                   id="quantity-${product.id}" name="quantities[]" 
+                                   min="0" value="${cachedQuantity}" required
+                                   data-product-id="${product.id}">
+                        </div>
 
-                            <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
-                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
-                            </button>
-                        </form>
+                        <textarea class="form-control comment-input" name="commentaires[]" 
+                                  data-product-id="${product.id}" 
+                                  placeholder="Écrire un commentaire">${cachedComment}</textarea>
                     </div>
                 `;
-                productList.insertAdjacentHTML('beforeend', productHTML);
+                productListContainer.insertAdjacentHTML('beforeend', productHTML);
+            });
+
+            // Attach event listeners to track input changes
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache4[productId]) {
+                        productDataCache4[productId] = {};
+                    }
+                    productDataCache4[productId].quantity = this.value;
+                });
+            });
+
+            document.querySelectorAll('.comment-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache4[productId]) {
+                        productDataCache4[productId] = {};
+                    }
+                    productDataCache4[productId].comment = this.value;
+                });
             });
         })
         .catch(error => {
             console.error('Error fetching products:', error); // Log errors if any
         });
 });
+
+const productDataCache6 = {};
 
 document.getElementById('productSearch6').addEventListener('input', function() {
     const query = this.value;
     fetch(`{% url 'search_productstable' checklist.id %}?query=${query}`)
         .then(response => response.json())
         .then(data => {
-            const productList = document.getElementById('productList6');
-            productList.innerHTML = '';
+            const productListContainer = document.querySelector('.modal-body .row.gy-3.rtttttt'); // Target the product list inside the modal
+            productListContainer.innerHTML = ''; // Clear existing entries
+
             data.products.forEach(product => {
-                // Access the comment placeholder from the JSON object
-                const commentPlaceholder = checklistItemComments[product.id] || 'Écrire un commentaire';
+                // Use cached values if they exist, otherwise use the server response
+                const cachedQuantity = productDataCache6[product.id]?.quantity || product.checklist_quantity || 0;
+                const cachedComment = productDataCache6[product.id]?.comment || product.commentaire || '';
 
                 const productHTML = `
                     <div class="col-12 d-flex align-items-center justify-content-between product-item">
@@ -1357,51 +2033,65 @@ document.getElementById('productSearch6').addEventListener('input', function() {
                                 <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
                             </h6>
                         </div>
-                        <form id="checklistForm-${product.id}" action="{% url 'add_to_checklist' checklist.id %}" method="post" class="d-flex align-items-center product-form justify-content-end">
-                            {% csrf_token %}
-                            <input type="hidden" name="product_id" value="${product.id}">
-                            <input type="hidden" name="product_name" value="${product.name}">
-                            <input type="hidden" name="status" id="status-${product.id}" value="">
-                            <input type="hidden" id="initial-quantity-${product.id}" value="${product.checklist_quantity || 0}">
 
-                            <div class="form-group d-flex align-items-center me-2">
-                                <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
-                                <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
-                            </div>
+                        <input type="hidden" name="product_ids[]" value="${product.id}">
 
-                            <button type="button" class="btn btn-secondary me-2" onclick="toggleCommentInput(${product.id})">
-                                <i class="fa-regular fa-comment-dots"></i>
-                            </button>
-                            
-                            <div class="form-group me-2" id="comment-section-${product.id}" style="display: none;">
-                                <textarea class="form-control" id="commentaire-${product.id}" name="commentaire" 
-                                          placeholder="${commentPlaceholder}"></textarea>
-                            </div>
+                        <div class="form-group d-flex align-items-center me-2">
+                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                            <input type="number" class="form-control text-center quantity-input" 
+                                   id="quantity-${product.id}" name="quantities[]" 
+                                   min="0" value="${cachedQuantity}" required
+                                   data-product-id="${product.id}">
+                        </div>
 
-                            <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
-                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
-                            </button>
-                        </form>
+                        <textarea class="form-control comment-input" name="commentaires[]" 
+                                  data-product-id="${product.id}" 
+                                  placeholder="Écrire un commentaire">${cachedComment}</textarea>
                     </div>
                 `;
-                productList.insertAdjacentHTML('beforeend', productHTML);
+                productListContainer.insertAdjacentHTML('beforeend', productHTML);
+            });
+
+            // Attach event listeners to track input changes
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache6[productId]) {
+                        productDataCache6[productId] = {};
+                    }
+                    productDataCache6[productId].quantity = this.value;
+                });
+            });
+
+            document.querySelectorAll('.comment-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache6[productId]) {
+                        productDataCache6[productId] = {};
+                    }
+                    productDataCache6[productId].comment = this.value;
+                });
             });
         })
         .catch(error => {
             console.error('Error fetching products:', error); // Log errors if any
         });
 });
+
+const productDataCache7 = {};
 
 document.getElementById('productSearch7').addEventListener('input', function() {
     const query = this.value;
     fetch(`{% url 'search_productsverre' checklist.id %}?query=${query}`)
         .then(response => response.json())
         .then(data => {
-            const productList = document.getElementById('productList7');
-            productList.innerHTML = '';
+            const productListContainer = document.querySelector('.modal-body .row.gy-3.rttttttt'); // Target the product list inside the modal
+            productListContainer.innerHTML = ''; // Clear existing entries
+
             data.products.forEach(product => {
-                // Access the comment placeholder from the JSON object
-                const commentPlaceholder = checklistItemComments[product.id] || 'Écrire un commentaire';
+                // Use cached values if they exist, otherwise use the server response
+                const cachedQuantity = productDataCache7[product.id]?.quantity || product.checklist_quantity || 0;
+                const cachedComment = productDataCache7[product.id]?.comment || product.commentaire || '';
 
                 const productHTML = `
                     <div class="col-12 d-flex align-items-center justify-content-between product-item">
@@ -1410,51 +2100,65 @@ document.getElementById('productSearch7').addEventListener('input', function() {
                                 <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
                             </h6>
                         </div>
-                        <form id="checklistForm-${product.id}" action="{% url 'add_to_checklist' checklist.id %}" method="post" class="d-flex align-items-center product-form justify-content-end">
-                            {% csrf_token %}
-                            <input type="hidden" name="product_id" value="${product.id}">
-                            <input type="hidden" name="product_name" value="${product.name}">
-                            <input type="hidden" name="status" id="status-${product.id}" value="">
-                            <input type="hidden" id="initial-quantity-${product.id}" value="${product.checklist_quantity || 0}">
 
-                            <div class="form-group d-flex align-items-center me-2">
-                                <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
-                                <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
-                            </div>
+                        <input type="hidden" name="product_ids[]" value="${product.id}">
 
-                            <button type="button" class="btn btn-secondary me-2" onclick="toggleCommentInput(${product.id})">
-                                <i class="fa-regular fa-comment-dots"></i>
-                            </button>
-                            
-                            <div class="form-group me-2" id="comment-section-${product.id}" style="display: none;">
-                                <textarea class="form-control" id="commentaire-${product.id}" name="commentaire" 
-                                          placeholder="${commentPlaceholder}"></textarea>
-                            </div>
+                        <div class="form-group d-flex align-items-center me-2">
+                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                            <input type="number" class="form-control text-center quantity-input" 
+                                   id="quantity-${product.id}" name="quantities[]" 
+                                   min="0" value="${cachedQuantity}" required
+                                   data-product-id="${product.id}">
+                        </div>
 
-                            <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
-                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
-                            </button>
-                        </form>
+                        <textarea class="form-control comment-input" name="commentaires[]" 
+                                  data-product-id="${product.id}" 
+                                  placeholder="Écrire un commentaire">${cachedComment}</textarea>
                     </div>
                 `;
-                productList.insertAdjacentHTML('beforeend', productHTML);
+                productListContainer.insertAdjacentHTML('beforeend', productHTML);
+            });
+
+            // Attach event listeners to track input changes
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache7[productId]) {
+                        productDataCache7[productId] = {};
+                    }
+                    productDataCache7[productId].quantity = this.value;
+                });
+            });
+
+            document.querySelectorAll('.comment-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache7[productId]) {
+                        productDataCache7[productId] = {};
+                    }
+                    productDataCache7[productId].comment = this.value;
+                });
             });
         })
         .catch(error => {
             console.error('Error fetching products:', error); // Log errors if any
         });
 });
+
+const productDataCache8 = {};
 
 document.getElementById('productSearch8').addEventListener('input', function() {
     const query = this.value;
     fetch(`{% url 'search_productsporcelaine' checklist.id %}?query=${query}`)
         .then(response => response.json())
         .then(data => {
-            const productList = document.getElementById('productList8');
-            productList.innerHTML = '';
+            const productListContainer = document.querySelector('.modal-body .row.gy-3.rtttttttt'); // Target the product list inside the modal
+            productListContainer.innerHTML = ''; // Clear existing entries
+
             data.products.forEach(product => {
-                // Access the comment placeholder from the JSON object
-                const commentPlaceholder = checklistItemComments[product.id] || 'Écrire un commentaire';
+                // Use cached values if they exist, otherwise use the server response
+                const cachedQuantity = productDataCache8[product.id]?.quantity || product.checklist_quantity || 0;
+                const cachedComment = productDataCache8[product.id]?.comment || product.commentaire || '';
 
                 const productHTML = `
                     <div class="col-12 d-flex align-items-center justify-content-between product-item">
@@ -1463,51 +2167,66 @@ document.getElementById('productSearch8').addEventListener('input', function() {
                                 <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
                             </h6>
                         </div>
-                        <form id="checklistForm-${product.id}" action="{% url 'add_to_checklist' checklist.id %}" method="post" class="d-flex align-items-center product-form justify-content-end">
-                            {% csrf_token %}
-                            <input type="hidden" name="product_id" value="${product.id}">
-                            <input type="hidden" name="product_name" value="${product.name}">
-                            <input type="hidden" name="status" id="status-${product.id}" value="">
-                            <input type="hidden" id="initial-quantity-${product.id}" value="${product.checklist_quantity || 0}">
 
-                            <div class="form-group d-flex align-items-center me-2">
-                                <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
-                                <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
-                            </div>
+                        <input type="hidden" name="product_ids[]" value="${product.id}">
 
-                            <button type="button" class="btn btn-secondary me-2" onclick="toggleCommentInput(${product.id})">
-                                <i class="fa-regular fa-comment-dots"></i>
-                            </button>
-                            
-                            <div class="form-group me-2" id="comment-section-${product.id}" style="display: none;">
-                                <textarea class="form-control" id="commentaire-${product.id}" name="commentaire" 
-                                          placeholder="${commentPlaceholder}"></textarea>
-                            </div>
+                        <div class="form-group d-flex align-items-center me-2">
+                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                            <input type="number" class="form-control text-center quantity-input" 
+                                   id="quantity-${product.id}" name="quantities[]" 
+                                   min="0" value="${cachedQuantity}" required
+                                   data-product-id="${product.id}">
+                        </div>
 
-                            <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
-                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
-                            </button>
-                        </form>
+                        <textarea class="form-control comment-input" name="commentaires[]" 
+                                  data-product-id="${product.id}" 
+                                  placeholder="Écrire un commentaire">${cachedComment}</textarea>
                     </div>
                 `;
-                productList.insertAdjacentHTML('beforeend', productHTML);
+                productListContainer.insertAdjacentHTML('beforeend', productHTML);
+            });
+
+            // Attach event listeners to track input changes
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache8[productId]) {
+                        productDataCache8[productId] = {};
+                    }
+                    productDataCache8[productId].quantity = this.value;
+                });
+            });
+
+            document.querySelectorAll('.comment-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache8[productId]) {
+                        productDataCache8[productId] = {};
+                    }
+                    productDataCache8[productId].comment = this.value;
+                });
             });
         })
         .catch(error => {
             console.error('Error fetching products:', error); // Log errors if any
         });
 });
+
+const productDataCache9 = {};
+
 
 document.getElementById('productSearch9').addEventListener('input', function() {
     const query = this.value;
     fetch(`{% url 'search_productscanape' checklist.id %}?query=${query}`)
         .then(response => response.json())
         .then(data => {
-            const productList = document.getElementById('productList9');
-            productList.innerHTML = '';
+            const productListContainer = document.querySelector('.modal-body .row.gy-3.rttttttttt'); // Target the product list inside the modal
+            productListContainer.innerHTML = ''; // Clear existing entries
+
             data.products.forEach(product => {
-                // Access the comment placeholder from the JSON object
-                const commentPlaceholder = checklistItemComments[product.id] || 'Écrire un commentaire';
+                // Use cached values if they exist, otherwise use the server response
+                const cachedQuantity = productDataCache9[product.id]?.quantity || product.checklist_quantity || 0;
+                const cachedComment = productDataCache9[product.id]?.comment || product.commentaire || '';
 
                 const productHTML = `
                     <div class="col-12 d-flex align-items-center justify-content-between product-item">
@@ -1516,51 +2235,66 @@ document.getElementById('productSearch9').addEventListener('input', function() {
                                 <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
                             </h6>
                         </div>
-                        <form id="checklistForm-${product.id}" action="{% url 'add_to_checklist' checklist.id %}" method="post" class="d-flex align-items-center product-form justify-content-end">
-                            {% csrf_token %}
-                            <input type="hidden" name="product_id" value="${product.id}">
-                            <input type="hidden" name="product_name" value="${product.name}">
-                            <input type="hidden" name="status" id="status-${product.id}" value="">
-                            <input type="hidden" id="initial-quantity-${product.id}" value="${product.checklist_quantity || 0}">
 
-                            <div class="form-group d-flex align-items-center me-2">
-                                <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
-                                <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
-                            </div>
+                        <input type="hidden" name="product_ids[]" value="${product.id}">
 
-                            <button type="button" class="btn btn-secondary me-2" onclick="toggleCommentInput(${product.id})">
-                                <i class="fa-regular fa-comment-dots"></i>
-                            </button>
-                            
-                            <div class="form-group me-2" id="comment-section-${product.id}" style="display: none;">
-                                <textarea class="form-control" id="commentaire-${product.id}" name="commentaire" 
-                                          placeholder="${commentPlaceholder}"></textarea>
-                            </div>
+                        <div class="form-group d-flex align-items-center me-2">
+                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                            <input type="number" class="form-control text-center quantity-input" 
+                                   id="quantity-${product.id}" name="quantities[]" 
+                                   min="0" value="${cachedQuantity}" required
+                                   data-product-id="${product.id}">
+                        </div>
 
-                            <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
-                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
-                            </button>
-                        </form>
+                        <textarea class="form-control comment-input" name="commentaires[]" 
+                                  data-product-id="${product.id}" 
+                                  placeholder="Écrire un commentaire">${cachedComment}</textarea>
                     </div>
                 `;
-                productList.insertAdjacentHTML('beforeend', productHTML);
+                productListContainer.insertAdjacentHTML('beforeend', productHTML);
+            });
+
+            // Attach event listeners to track input changes
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache9[productId]) {
+                        productDataCache9[productId] = {};
+                    }
+                    productDataCache9[productId].quantity = this.value;
+                });
+            });
+
+            document.querySelectorAll('.comment-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache9[productId]) {
+                        productDataCache9[productId] = {};
+                    }
+                    productDataCache9[productId].comment = this.value;
+                });
             });
         })
         .catch(error => {
             console.error('Error fetching products:', error); // Log errors if any
         });
 });
+
+const productDataCache10 = {};
+
 
 document.getElementById('productSearch10').addEventListener('input', function() {
     const query = this.value;
     fetch(`{% url 'search_productscuisson' checklist.id %}?query=${query}`)
         .then(response => response.json())
         .then(data => {
-            const productList = document.getElementById('productList10');
-            productList.innerHTML = '';
+            const productListContainer = document.querySelector('.modal-body .row.gy-3.rtttttttttt'); // Target the product list inside the modal
+            productListContainer.innerHTML = ''; // Clear existing entries
+
             data.products.forEach(product => {
-                // Access the comment placeholder from the JSON object
-                const commentPlaceholder = checklistItemComments[product.id] || 'Écrire un commentaire';
+                // Use cached values if they exist, otherwise use the server response
+                const cachedQuantity = productDataCache10[product.id]?.quantity || product.checklist_quantity || 0;
+                const cachedComment = productDataCache10[product.id]?.comment || product.commentaire || '';
 
                 const productHTML = `
                     <div class="col-12 d-flex align-items-center justify-content-between product-item">
@@ -1569,51 +2303,66 @@ document.getElementById('productSearch10').addEventListener('input', function() 
                                 <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
                             </h6>
                         </div>
-                        <form id="checklistForm-${product.id}" action="{% url 'add_to_checklist' checklist.id %}" method="post" class="d-flex align-items-center product-form justify-content-end">
-                            {% csrf_token %}
-                            <input type="hidden" name="product_id" value="${product.id}">
-                            <input type="hidden" name="product_name" value="${product.name}">
-                            <input type="hidden" name="status" id="status-${product.id}" value="">
-                            <input type="hidden" id="initial-quantity-${product.id}" value="${product.checklist_quantity || 0}">
 
-                            <div class="form-group d-flex align-items-center me-2">
-                                <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
-                                <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
-                            </div>
+                        <input type="hidden" name="product_ids[]" value="${product.id}">
 
-                            <button type="button" class="btn btn-secondary me-2" onclick="toggleCommentInput(${product.id})">
-                                <i class="fa-regular fa-comment-dots"></i>
-                            </button>
-                            
-                            <div class="form-group me-2" id="comment-section-${product.id}" style="display: none;">
-                                <textarea class="form-control" id="commentaire-${product.id}" name="commentaire" 
-                                          placeholder="${commentPlaceholder}"></textarea>
-                            </div>
+                        <div class="form-group d-flex align-items-center me-2">
+                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                            <input type="number" class="form-control text-center quantity-input" 
+                                   id="quantity-${product.id}" name="quantities[]" 
+                                   min="0" value="${cachedQuantity}" required
+                                   data-product-id="${product.id}">
+                        </div>
 
-                            <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
-                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
-                            </button>
-                        </form>
+                        <textarea class="form-control comment-input" name="commentaires[]" 
+                                  data-product-id="${product.id}" 
+                                  placeholder="Écrire un commentaire">${cachedComment}</textarea>
                     </div>
                 `;
-                productList.insertAdjacentHTML('beforeend', productHTML);
+                productListContainer.insertAdjacentHTML('beforeend', productHTML);
+            });
+
+            // Attach event listeners to track input changes
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache10[productId]) {
+                        productDataCache10[productId] = {};
+                    }
+                    productDataCache10[productId].quantity = this.value;
+                });
+            });
+
+            document.querySelectorAll('.comment-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache10[productId]) {
+                        productDataCache10[productId] = {};
+                    }
+                    productDataCache10[productId].comment = this.value;
+                });
             });
         })
         .catch(error => {
             console.error('Error fetching products:', error); // Log errors if any
         });
 });
+
+const productDataCache11 = {};
+
 
 document.getElementById('productSearch11').addEventListener('input', function() {
     const query = this.value;
     fetch(`{% url 'search_productsservice' checklist.id %}?query=${query}`)
         .then(response => response.json())
         .then(data => {
-            const productList = document.getElementById('productList11');
-            productList.innerHTML = '';
+            const productListContainer = document.querySelector('.modal-body .row.gy-3.rttttttttttt'); // Target the product list inside the modal
+            productListContainer.innerHTML = ''; // Clear existing entries
+
             data.products.forEach(product => {
-                // Access the comment placeholder from the JSON object
-                const commentPlaceholder = checklistItemComments[product.id] || 'Écrire un commentaire';
+                // Use cached values if they exist, otherwise use the server response
+                const cachedQuantity = productDataCache11[product.id]?.quantity || product.checklist_quantity || 0;
+                const cachedComment = productDataCache11[product.id]?.comment || product.commentaire || '';
 
                 const productHTML = `
                     <div class="col-12 d-flex align-items-center justify-content-between product-item">
@@ -1622,51 +2371,66 @@ document.getElementById('productSearch11').addEventListener('input', function() 
                                 <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
                             </h6>
                         </div>
-                        <form id="checklistForm-${product.id}" action="{% url 'add_to_checklist' checklist.id %}" method="post" class="d-flex align-items-center product-form justify-content-end">
-                            {% csrf_token %}
-                            <input type="hidden" name="product_id" value="${product.id}">
-                            <input type="hidden" name="product_name" value="${product.name}">
-                            <input type="hidden" name="status" id="status-${product.id}" value="">
-                            <input type="hidden" id="initial-quantity-${product.id}" value="${product.checklist_quantity || 0}">
 
-                            <div class="form-group d-flex align-items-center me-2">
-                                <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
-                                <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
-                            </div>
+                        <input type="hidden" name="product_ids[]" value="${product.id}">
 
-                            <button type="button" class="btn btn-secondary me-2" onclick="toggleCommentInput(${product.id})">
-                                <i class="fa-regular fa-comment-dots"></i>
-                            </button>
-                            
-                            <div class="form-group me-2" id="comment-section-${product.id}" style="display: none;">
-                                <textarea class="form-control" id="commentaire-${product.id}" name="commentaire" 
-                                          placeholder="${commentPlaceholder}"></textarea>
-                            </div>
+                        <div class="form-group d-flex align-items-center me-2">
+                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                            <input type="number" class="form-control text-center quantity-input" 
+                                   id="quantity-${product.id}" name="quantities[]" 
+                                   min="0" value="${cachedQuantity}" required
+                                   data-product-id="${product.id}">
+                        </div>
 
-                            <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
-                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
-                            </button>
-                        </form>
+                        <textarea class="form-control comment-input" name="commentaires[]" 
+                                  data-product-id="${product.id}" 
+                                  placeholder="Écrire un commentaire">${cachedComment}</textarea>
                     </div>
                 `;
-                productList.insertAdjacentHTML('beforeend', productHTML);
+                productListContainer.insertAdjacentHTML('beforeend', productHTML);
+            });
+
+            // Attach event listeners to track input changes
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache11[productId]) {
+                        productDataCache11[productId] = {};
+                    }
+                    productDataCache11[productId].quantity = this.value;
+                });
+            });
+
+            document.querySelectorAll('.comment-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache11[productId]) {
+                        productDataCache11[productId] = {};
+                    }
+                    productDataCache11[productId].comment = this.value;
+                });
             });
         })
         .catch(error => {
             console.error('Error fetching products:', error); // Log errors if any
         });
 });
+
+const productDataCache5 = {};
+
 
 document.getElementById('productSearch5').addEventListener('input', function() {
     const query = this.value;
     fetch(`{% url 'search_productsdivers' checklist.id %}?query=${query}`)
         .then(response => response.json())
         .then(data => {
-            const productList = document.getElementById('productList5');
-            productList.innerHTML = '';
+            const productListContainer = document.querySelector('.modal-body .row.gy-3.rttttt'); // Target the product list inside the modal
+            productListContainer.innerHTML = ''; // Clear existing entries
+
             data.products.forEach(product => {
-                // Access the comment placeholder from the JSON object
-                const commentPlaceholder = checklistItemComments[product.id] || 'Écrire un commentaire';
+                // Use cached values if they exist, otherwise use the server response
+                const cachedQuantity = productDataCache5[product.id]?.quantity || product.checklist_quantity || 0;
+                const cachedComment = productDataCache5[product.id]?.comment || product.commentaire || '';
 
                 const productHTML = `
                     <div class="col-12 d-flex align-items-center justify-content-between product-item">
@@ -1675,51 +2439,66 @@ document.getElementById('productSearch5').addEventListener('input', function() {
                                 <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
                             </h6>
                         </div>
-                        <form id="checklistForm-${product.id}" action="{% url 'add_to_checklist' checklist.id %}" method="post" class="d-flex align-items-center product-form justify-content-end">
-                            {% csrf_token %}
-                            <input type="hidden" name="product_id" value="${product.id}">
-                            <input type="hidden" name="product_name" value="${product.name}">
-                            <input type="hidden" name="status" id="status-${product.id}" value="">
-                            <input type="hidden" id="initial-quantity-${product.id}" value="${product.checklist_quantity || 0}">
 
-                            <div class="form-group d-flex align-items-center me-2">
-                                <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
-                                <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
-                            </div>
+                        <input type="hidden" name="product_ids[]" value="${product.id}">
 
-                            <button type="button" class="btn btn-secondary me-2" onclick="toggleCommentInput(${product.id})">
-                                <i class="fa-regular fa-comment-dots"></i>
-                            </button>
-                            
-                            <div class="form-group me-2" id="comment-section-${product.id}" style="display: none;">
-                                <textarea class="form-control" id="commentaire-${product.id}" name="commentaire" 
-                                          placeholder="${commentPlaceholder}"></textarea>
-                            </div>
+                        <div class="form-group d-flex align-items-center me-2">
+                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                            <input type="number" class="form-control text-center quantity-input" 
+                                   id="quantity-${product.id}" name="quantities[]" 
+                                   min="0" value="${cachedQuantity}" required
+                                   data-product-id="${product.id}">
+                        </div>
 
-                            <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
-                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
-                            </button>
-                        </form>
+                        <textarea class="form-control comment-input" name="commentaires[]" 
+                                  data-product-id="${product.id}" 
+                                  placeholder="Écrire un commentaire">${cachedComment}</textarea>
                     </div>
                 `;
-                productList.insertAdjacentHTML('beforeend', productHTML);
+                productListContainer.insertAdjacentHTML('beforeend', productHTML);
+            });
+
+            // Attach event listeners to track input changes
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache5[productId]) {
+                        productDataCache5[productId] = {};
+                    }
+                    productDataCache5[productId].quantity = this.value;
+                });
+            });
+
+            document.querySelectorAll('.comment-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache5[productId]) {
+                        productDataCache5[productId] = {};
+                    }
+                    productDataCache5[productId].comment = this.value;
+                });
             });
         })
         .catch(error => {
             console.error('Error fetching products:', error); // Log errors if any
         });
 });
+
+const productDataCache12 = {};
+
 
 document.getElementById('productSearch12').addEventListener('input', function() {
     const query = this.value;
-    fetch(`{% url 'search_productsbreuvage' checklist.id %}?query=${query}`)
+    fetch(`{% url 'search_productsalcoolfort' checklist.id %}?query=${query}`)
         .then(response => response.json())
         .then(data => {
-            const productList = document.getElementById('productList12');
-            productList.innerHTML = '';
+            const productListContainer = document.querySelector('.modal-body .row.gy-3.rtttttttttttt'); // Target the product list inside the modal
+            productListContainer.innerHTML = ''; // Clear existing entries
+
             data.products.forEach(product => {
-                // Access the comment placeholder from the JSON object
-                const commentPlaceholder = checklistItemComments[product.id] || 'Écrire un commentaire';
+                // Use cached values if they exist, otherwise use the server response
+                const cachedQuantity = productDataCache12[product.id]?.quantity || product.checklist_quantity || 0;
+                const cachedComment = productDataCache12[product.id]?.comment || product.commentaire || '';
 
                 const productHTML = `
                     <div class="col-12 d-flex align-items-center justify-content-between product-item">
@@ -1728,34 +2507,44 @@ document.getElementById('productSearch12').addEventListener('input', function() 
                                 <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
                             </h6>
                         </div>
-                        <form id="checklistForm-${product.id}" action="{% url 'add_to_checklist' checklist.id %}" method="post" class="d-flex align-items-center product-form justify-content-end">
-                            {% csrf_token %}
-                            <input type="hidden" name="product_id" value="${product.id}">
-                            <input type="hidden" name="product_name" value="${product.name}">
-                            <input type="hidden" name="status" id="status-${product.id}" value="">
-                            <input type="hidden" id="initial-quantity-${product.id}" value="${product.checklist_quantity || 0}">
 
-                            <div class="form-group d-flex align-items-center me-2">
-                                <label for="quantity-${product.id}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
-                                <input type="number" class="form-control quantity text-center" id="quantity-${product.id}" name="quantity" min="0" value="${product.checklist_quantity || 0}" required style="width: 80px;">
-                            </div>
+                        <input type="hidden" name="product_ids[]" value="${product.id}">
 
-                            <button type="button" class="btn btn-secondary me-2" onclick="toggleCommentInput(${product.id})">
-                                <i class="fa-regular fa-comment-dots"></i>
-                            </button>
-                            
-                            <div class="form-group me-2" id="comment-section-${product.id}" style="display: none;">
-                                <textarea class="form-control" id="commentaire-${product.id}" name="commentaire" 
-                                          placeholder="${commentPlaceholder}"></textarea>
-                            </div>
+                        <div class="form-group d-flex align-items-center me-2">
+                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                            <input type="number" class="form-control text-center quantity-input" 
+                                   id="quantity-${product.id}" name="quantities[]" 
+                                   min="0" value="${cachedQuantity}" required
+                                   data-product-id="${product.id}">
+                        </div>
 
-                            <button type="button" onclick="submitChecklistForm(${product.id})" class="btn btn-primary d-flex align-items-center custom-submit-btn">
-                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
-                            </button>
-                        </form>
+                        <textarea class="form-control comment-input" name="commentaires[]" 
+                                  data-product-id="${product.id}" 
+                                  placeholder="Écrire un commentaire">${cachedComment}</textarea>
                     </div>
                 `;
-                productList.insertAdjacentHTML('beforeend', productHTML);
+                productListContainer.insertAdjacentHTML('beforeend', productHTML);
+            });
+
+            // Attach event listeners to track input changes
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache12[productId]) {
+                        productDataCache12[productId] = {};
+                    }
+                    productDataCache12[productId].quantity = this.value;
+                });
+            });
+
+            document.querySelectorAll('.comment-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache12[productId]) {
+                        productDataCache12[productId] = {};
+                    }
+                    productDataCache12[productId].comment = this.value;
+                });
             });
         })
         .catch(error => {
@@ -1763,6 +2552,208 @@ document.getElementById('productSearch12').addEventListener('input', function() 
         });
 });
 
+const productDataCache13 = {};
+
+document.getElementById('productSearch13').addEventListener('input', function() {
+    const query = this.value;
+    fetch(`{% url 'search_productsbieres' checklist.id %}?query=${query}`)
+        .then(response => response.json())
+        .then(data => {
+            const productListContainer = document.querySelector('.modal-body .row.gy-3.rttttttttttttt'); // Target the product list inside the modal
+            productListContainer.innerHTML = ''; // Clear existing entries
+
+            data.products.forEach(product => {
+                // Use cached values if they exist, otherwise use the server response
+                const cachedQuantity = productDataCache13[product.id]?.quantity || product.checklist_quantity || 0;
+                const cachedComment = productDataCache13[product.id]?.comment || product.commentaire || '';
+
+                const productHTML = `
+                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                        <div class="product-info d-flex align-items-center">
+                            <h6 class="product-name mb-0 me-3">${product.name} 
+                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                            </h6>
+                        </div>
+
+                        <input type="hidden" name="product_ids[]" value="${product.id}">
+
+                        <div class="form-group d-flex align-items-center me-2">
+                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                            <input type="number" class="form-control text-center quantity-input" 
+                                   id="quantity-${product.id}" name="quantities[]" 
+                                   min="0" value="${cachedQuantity}" required
+                                   data-product-id="${product.id}">
+                        </div>
+
+                        <textarea class="form-control comment-input" name="commentaires[]" 
+                                  data-product-id="${product.id}" 
+                                  placeholder="Écrire un commentaire">${cachedComment}</textarea>
+                    </div>
+                `;
+                productListContainer.insertAdjacentHTML('beforeend', productHTML);
+            });
+
+            // Attach event listeners to track input changes
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache13[productId]) {
+                        productDataCache13[productId] = {};
+                    }
+                    productDataCache13[productId].quantity = this.value;
+                });
+            });
+
+            document.querySelectorAll('.comment-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache13[productId]) {
+                        productDataCache13[productId] = {};
+                    }
+                    productDataCache13[productId].comment = this.value;
+                });
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching products:', error); // Log errors if any
+        });
+});
+
+
+const productDataCache14 = {};
+
+document.getElementById('productSearch14').addEventListener('input', function() {
+    const query = this.value;
+    fetch(`{% url 'search_productsvins' checklist.id %}?query=${query}`)
+        .then(response => response.json())
+        .then(data => {
+            const productListContainer = document.querySelector('.modal-body .row.gy-3.rtttttttttttttt'); // Target the product list inside the modal
+            productListContainer.innerHTML = ''; // Clear existing entries
+
+            data.products.forEach(product => {
+                // Use cached values if they exist, otherwise use the server response
+                const cachedQuantity = productDataCache14[product.id]?.quantity || product.checklist_quantity || 0;
+                const cachedComment = productDataCache14[product.id]?.comment || product.commentaire || '';
+
+                const productHTML = `
+                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                        <div class="product-info d-flex align-items-center">
+                            <h6 class="product-name mb-0 me-3">${product.name} 
+                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                            </h6>
+                        </div>
+
+                        <input type="hidden" name="product_ids[]" value="${product.id}">
+
+                        <div class="form-group d-flex align-items-center me-2">
+                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                            <input type="number" class="form-control text-center quantity-input" 
+                                   id="quantity-${product.id}" name="quantities[]" 
+                                   min="0" value="${cachedQuantity}" required
+                                   data-product-id="${product.id}">
+                        </div>
+
+                        <textarea class="form-control comment-input" name="commentaires[]" 
+                                  data-product-id="${product.id}" 
+                                  placeholder="Écrire un commentaire">${cachedComment}</textarea>
+                    </div>
+                `;
+                productListContainer.insertAdjacentHTML('beforeend', productHTML);
+            });
+
+            // Attach event listeners to track input changes
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache14[productId]) {
+                        productDataCache14[productId] = {};
+                    }
+                    productDataCache14[productId].quantity = this.value;
+                });
+            });
+
+            document.querySelectorAll('.comment-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache14[productId]) {
+                        productDataCache14[productId] = {};
+                    }
+                    productDataCache14[productId].comment = this.value;
+                });
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching products:', error); // Log errors if any
+        });
+});
+
+
+const productDataCache15 = {};
+
+document.getElementById('productSearch15').addEventListener('input', function() {
+    const query = this.value;
+    fetch(`{% url 'search_productssansalcool' checklist.id %}?query=${query}`)
+    .then(response => response.json())
+        .then(data => {
+            const productListContainer = document.querySelector('.modal-body .row.gy-3.rttttttttttttttt'); // Target the product list inside the modal
+            productListContainer.innerHTML = ''; // Clear existing entries
+
+            data.products.forEach(product => {
+                // Use cached values if they exist, otherwise use the server response
+                const cachedQuantity = productDataCache15[product.id]?.quantity || product.checklist_quantity || 0;
+                const cachedComment = productDataCache15[product.id]?.comment || product.commentaire || '';
+
+                const productHTML = `
+                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                        <div class="product-info d-flex align-items-center">
+                            <h6 class="product-name mb-0 me-3">${product.name} 
+                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                            </h6>
+                        </div>
+
+                        <input type="hidden" name="product_ids[]" value="${product.id}">
+
+                        <div class="form-group d-flex align-items-center me-2">
+                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                            <input type="number" class="form-control text-center quantity-input" 
+                                   id="quantity-${product.id}" name="quantities[]" 
+                                   min="0" value="${cachedQuantity}" required
+                                   data-product-id="${product.id}">
+                        </div>
+
+                        <textarea class="form-control comment-input" name="commentaires[]" 
+                                  data-product-id="${product.id}" 
+                                  placeholder="Écrire un commentaire">${cachedComment}</textarea>
+                    </div>
+                `;
+                productListContainer.insertAdjacentHTML('beforeend', productHTML);
+            });
+
+            // Attach event listeners to track input changes
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache15[productId]) {
+                        productDataCache15[productId] = {};
+                    }
+                    productDataCache15[productId].quantity = this.value;
+                });
+            });
+
+            document.querySelectorAll('.comment-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache15[productId]) {
+                        productDataCache15[productId] = {};
+                    }
+                    productDataCache15[productId].comment = this.value;
+                });
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching products:', error); // Log errors if any
+        });
+});
 
     $(document).ready(function() {
     // Delete button functionality
@@ -1916,9 +2907,6 @@ function calculateDifference(productId) {
     }
 }
 
-setTimeout(function(){
-       window.location.reload(1);
-    }, 300000); // 300000 milliseconds = 5 minutes
 
     function toggleCommentInput(productId) {
     const commentSection = document.getElementById(`comment-section-${productId}`);
@@ -1928,6 +2916,61 @@ setTimeout(function(){
         commentSection.style.display = 'none';
     }
 }
+
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+    // Select all modals you want to apply the behavior to
+    const modals = document.querySelectorAll('#exampleModal3, #exampleModaljetable, #exampleModalaccessoirededecor, #exampleModalequipementdebar, #exampleModalequipementpourservicecafe, #exampleModalitemsdivers, #exampleModaltableetlinge, #exampleModalverrerie, #exampleModalporcelaine, #exampleModalmontage, #exampleModalcuisson, #exampleModalservice, #exampleModalalcoolfort, #exampleModalbieres, #exampleModalvins, #exampleModalsansalcool');
+
+    // Loop through each modal and add the event listener
+    modals.forEach(modal => {
+        modal.addEventListener('hide.bs.modal', function (event) {
+            const confirmClose = confirm("Voulez-vous vraiment fermer cette fenêtre ?");
+            if (!confirmClose) {
+                event.preventDefault(); // Prevent the modal from closing
+            }
+        });
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('searchItems');
+    const itemList = document.getElementById('itemList');
+    const categories = itemList.querySelectorAll('.category-group');
+
+    function filterItems() {
+        const searchQuery = searchInput.value.toLowerCase();
+
+        categories.forEach(category => {
+            const items = category.querySelectorAll('.item');
+            let categoryVisible = false;
+
+            items.forEach(item => {
+                const itemName = item.getAttribute('data-name').toLowerCase();
+                if (itemName.includes(searchQuery)) {
+                    item.style.display = '';
+                    categoryVisible = true;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            // Show/hide category based on item visibility
+            category.style.display = categoryVisible ? '' : 'none';
+        });
+    }
+
+    searchInput.addEventListener('input', filterItems);
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Initialize all popovers
+    const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+    const popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+        return new bootstrap.Popover(popoverTriggerEl);
+    });
+});
 
 </script>
 
