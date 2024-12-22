@@ -17,6 +17,8 @@ import django_dyn_dt
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+import pymysql
+pymysql.install_as_MySQLdb()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -101,7 +103,7 @@ DATABASES = {
         'NAME': 'maxoufaya33$JLT',  # Replace with your database name
         'USER': 'maxoufaya33',       # Replace with your MySQL username
         'PASSWORD': 'Udk7ke25#',   # Replace with your MySQL password
-        'HOST': '127.0.0.1',           # Or the IP address of your MySQL server
+        'HOST': 'maxoufaya33.mysql.pythonanywhere-services.com',           # Or the IP address of your MySQL server
         'PORT': '3306',                # Default MySQL port
         'OPTIONS': {
             'sql_mode': 'STRICT_TRANS_TABLES',  # Recommended for MySQL
