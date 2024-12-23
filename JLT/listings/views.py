@@ -532,6 +532,7 @@ def checklist_detail(request, checklist_id):
     checklist_documents = ChecklistDocument.objects.filter(checklist=checklist)
     recup_photos = ChecklistRecupPhoto.objects.filter(checklist=checklist)
     md_photos = ChecklistMDPhoto.objects.filter(checklist=checklist)
+    categories = Product.objects.values_list('category', flat=True).distinct()
     products = Product.objects.all()
     query = request.GET.get('query')
     checklist_item_quantities = {
@@ -610,6 +611,7 @@ def checklist_detail(request, checklist_id):
         'valide': valide,
         'refuse': refuse,
         'checklist': checklist,
+        'categories':categories,
         'checklist_items': checklist_items,
         'products': products,
         'equipementdebase': equipementdebase,
