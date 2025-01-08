@@ -261,7 +261,7 @@ class Livraison(models.Model):
     date = models.fields.DateField(null=True, blank=True)
     date_livraison = models.fields.DateField(null=True, blank=True)
     commentaire = models.fields.CharField(null=True, blank=True, max_length=500)
-    commentairedispatch = models.fields.CharField(null=True, blank=True, max_length=350, default=" ")
+    commentairedispatch = models.fields.CharField(null=True, blank=True, max_length=350)
     infodetail = models.fields.CharField(null=True, blank=True, max_length=350)
     livreur = models.ForeignKey(Livreur, null=True, blank=True, on_delete=models.SET_NULL)
     journee = models.ForeignKey(Journee, null=True, blank=True, on_delete=models.SET_NULL)
@@ -315,20 +315,17 @@ class Product(models.Model):
          ('ACCESSOIRES DE DÉCOR', 'ACCESSOIRES DE DÉCOR'),
          ('ÉQUIPEMENT DE BAR', 'ÉQUIPEMENT DE BAR'),
          ('ÉQUIPEMENT POUR SERVICE CAFÉ','ÉQUIPEMENT POUR SERVICE CAFÉ'),
+         ('ITEMS DIVERS', 'ITEMS DIVERS'),
          ('TABLE ET LINGE DE TABLE','TABLE ET LINGE DE TABLE'),
          ('VERRERIE','VERRERIE'),
          ('PORCELAINE ET COUTELLERIE','PORCELAINE ET COUTELLERIE'),
          ('ÉQUIPEMENT POUR MONTAGE CANAPÉS','ÉQUIPEMENT POUR MONTAGE CANAPÉS'),
          ('ÉQUIPEMENT DE CUISSON','ÉQUIPEMENT DE CUISSON'),
          ('USTENSILES DE SERVICE','USTENSILES DE SERVICE'),
-         ('BREUVAGE','BREUVAGE'),
          ('ALCOOL FORT','ALCOOL FORT'),
          ('BIERES','BIERES'),
          ('VINS','VINS'),
          ('SANS ALCOOL','SANS ALCOOL'),
-         
-         
-         
          )
 
 

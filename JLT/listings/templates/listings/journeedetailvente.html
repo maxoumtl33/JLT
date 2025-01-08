@@ -180,7 +180,7 @@ nav.nav {
 
 <!-- Main Content -->
 <div class="container mt-5">
-  <h1 class="text-center">LIVRAISONS DU JOUR</h1>
+  <h1 class="text-center">{{ journees }}</h1>
   <p class="text-center">{{ livraisonsok|length }} livraisons et {{ recuperationes|length }} récupérations aujourd'hui</p>
 
   <!-- Table -->
@@ -198,21 +198,21 @@ nav.nav {
     </thead>
     <tbody>
       {% for livraison in livraisons %}
-        {% if livraison.recuperation == True and livraison.date == journees.date %}
-        <tr style="background-color: #F1B3DA;">
-          <td><strong>{{ livraison.statut.heure_depart }}</strong></td>
-          <td><strong>{{ livraison.nom }}</strong></td>
-          <td><strong>{{ livraison.infodetail }}</strong></td>
-          <td><strong>{{ livraison.heure_livraison }}</strong></td>
-          <td><strong>{{ livraison.statut.livreur }}</strong></td>
-          <td>
+        {% if livraison.date == journees.date and livraison.recuperation == True %}
+        <tr>
+          <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.heure_depart }}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{ livraison.nom }}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{ livraison.infodetail }}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.livreur }}</strong></td>
+          <td style="background-color: #F1B3DA;">
             {% if livraison.status == True %}
               <strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong>
             {% else %}
               <strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong>
             {% endif %}
           </td>
-          <td><a href="{% url 'livraisonventesdetail' livraison.id %}" class="btn"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+          <td style="background-color: #F1B3DA;"><a href="{% url 'livraisonventesdetail' livraison.id %}" class="btn"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
         </tr>
         {% elif livraison.date == journees.date %}
         <tr>

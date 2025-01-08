@@ -32,6 +32,21 @@ class ProductForm(forms.ModelForm):
         model = ChecklistItem
         fields = ['product']
 
+class ProductsForm(forms.ModelForm):
+    class Meta:
+        model = Product
+        fields = ['name', 'category']  # Include fields you want in the form
+        labels = {
+            'name': 'Nom du produit',  # Change the label for the 'name' field
+            'category': 'Categorie',  # Change the label for the 'category' field
+        }
+
+    # You can also add custom validation or styling if needed.
+    def __init__(self, *args, **kwargs):
+        super(ProductsForm, self).__init__(*args, **kwargs)
+        self.fields['category'].widget = forms.Select(choices=Product.choices)  # Explicitly set choices if needed
+
+
 class LivraisonForm(ModelForm):
     class Meta:
         model = Livraison

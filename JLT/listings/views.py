@@ -397,7 +397,7 @@ def voir_checklist(request):
 
 def checklistvoir_detail(request, checklist_id):
     checklist = get_object_or_404(Checklist, pk=checklist_id)
-    checklist_item = ChecklistItem.objects.filter(checklist=checklist)
+    checklist_item = ChecklistItem.objects.filter(checklist=checklist, quantity__gt=0)
     quantity_change_logs = QuantityChangeLog.objects.filter(
         checklist_item__checklist_id=checklist_id
     ).order_by('-timestamp')
@@ -525,10 +525,12 @@ def add_to_checklist(request, checklist_id):
 
 from collections import defaultdict
 
+
 def checklist_detail(request, checklist_id):
     checklist = get_object_or_404(Checklist, pk=checklist_id)
     checklist_items = ChecklistItem.objects.filter(checklist=checklist, quantity__gt=0)
-    breuvages = ChecklistItem.objects.filter(checklist=checklist, product__category__in=["ALCOOLFORT", "SANSALCOOL", "VINS",  "BIERES"], quantity__gt=0)
+    checklist_products = checklist_items.values_list('product__id', flat=True)
+    breuvages = ChecklistItem.objects.filter(checklist=checklist, product__category__in=["ALCOOL FORT", "SANS ALCOOL", "VINS",  "BIERES"], quantity__gt=0)
     checklist_documents = ChecklistDocument.objects.filter(checklist=checklist)
     recup_photos = ChecklistRecupPhoto.objects.filter(checklist=checklist)
     md_photos = ChecklistMDPhoto.objects.filter(checklist=checklist)
@@ -542,7 +544,7 @@ def checklist_detail(request, checklist_id):
     for item in checklist_items:
         checklist_items_by_category[item.product.category].append(item)
 
-    # Get unique product categories
+   # Get unique product categories
     product_categories = Product.choices
 
     # Define categories
@@ -558,7 +560,6 @@ def checklist_detail(request, checklist_id):
     montage = "ÉQUIPEMENT POUR MONTAGE CANAPÉS"
     cuisson = "ÉQUIPEMENT DE CUISSON"
     service = "USTENSILES DE SERVICE"
-    breuvage = "BREUVAGE"
     alcoolfort = "ALCOOL FORT"
     bieres = "BIERES"
     sansalcool = "SANS ALCOOL"
@@ -579,6 +580,16 @@ def checklist_detail(request, checklist_id):
     formbis = ChecklistForm(request.POST or None, instance=checklist, prefix='checklist_form')
     commentaire_form = CommentaireForm(request.POST or None, instance=checklist, prefix='commentaire_form')
 
+    # Handle ProductForm for creating a new product
+    if request.method == 'POST' and 'product-form' in request.POST:
+        product_form = ProductsForm(request.POST)
+        if product_form.is_valid():
+            product_form.save()  # Save the new product
+            return HttpResponseRedirect(reverse('checklist-detail', args=[checklist_id]))  # Redirect to avoid duplicate submissions
+    else:
+        product_form = ProductsForm()
+
+    # Handle document formset submission
     if 'documents-TOTAL_FORMS' in request.POST and document_formset.is_valid():
         documents = document_formset.save(commit=False)
         for document in documents:
@@ -586,21 +597,27 @@ def checklist_detail(request, checklist_id):
             document.save()
         return HttpResponseRedirect(reverse('checklist-detail', args=[checklist_id]))
 
+    # Handle checklist form submission
     elif 'checklist_form-name' in request.POST and formbis.is_valid():
         formbis.save()
         return HttpResponseRedirect(reverse('checklist-detail', args=[checklist_id]))
-    
+
+    # Handle commentaire form submission
     elif 'commentaire_form-commentairevente' in request.POST and commentaire_form.is_valid():
         commentaire_form.save()
         return HttpResponseRedirect(reverse('checklist-detail', args=[checklist_id]))
-
-
 
     # Filter products based on the search query
     if query:
         products = products.filter(name__icontains=query)
 
+    # Group products by categories
+    products_by_category = defaultdict(list)
+    for product in products:
+        products_by_category[product.category].append(product)
+
     context = {
+        'products_by_category': dict(products_by_category),
         'encours':encours,
         'alcoolfort':alcoolfort,
         'bieres':bieres,
@@ -610,6 +627,7 @@ def checklist_detail(request, checklist_id):
         'valide': valide,
         'refuse': refuse,
         'checklist': checklist,
+        'checklist_products': checklist_products,
         'checklist_items': checklist_items,
         'products': products,
         'equipementdebase': equipementdebase,
@@ -620,7 +638,6 @@ def checklist_detail(request, checklist_id):
         'itemsdivers': itemsdivers,
         'tableetlinge': tableetlinge,
         'verrerie': verrerie,
-        'breuvage': breuvage,
         'porcelaine': porcelaine,
         'montage': montage,
         'cuisson': cuisson,
@@ -631,13 +648,13 @@ def checklist_detail(request, checklist_id):
         'checklist_documents': checklist_documents,
         'recup_photos': recup_photos,
         'md_photos': md_photos,
+        'product_form': product_form,
         'checklist_item_quantities': checklist_item_quantities,
         'checklist_item_comments': checklist_item_comments,
         'checklist_items_by_category': dict(checklist_items_by_category),
         'product_categories': product_categories,
     }
     return render(request, 'listings/checklist_detail.html', context)
-
 
 
 
@@ -2284,7 +2301,7 @@ class MapAujourView(View):
                 'adress' : a.adress,
                 'convives': a.convives,
                 'mode_envoi': a.mode_envoi,
-                'infodetail': a.infodetail,
+                
 
             }
 
@@ -2383,7 +2400,6 @@ class MapApremAujourView(View):
                 'adress' : a.adress,
                 'convives': a.convives,
                 'mode_envoi': a.mode_envoi,
-                'infodetail': a.infodetail
             }
 
             livraisons.append(data)
@@ -2496,7 +2512,6 @@ class MapMidiAujourView(View):
                 'adress': a.adress,
                 'convives': a.convives,
                 'mode_envoi': a.mode_envoi,
-                'infodetail': a.infodetail
             }
             livraisons.append(data)
 
@@ -2564,13 +2579,19 @@ class MapMidiAujourView(View):
 
         return redirect('my_mapmidiaujour_view')
 
+from django.db.models.functions import Cast
+from django.db.models import IntegerField
+
 class CreateRouteAujourView(View):
     def post(self, request):
         # Get today's date
         today = datetime.now().date()
 
         # Get the highest `nom` for routes created today
-        existing_routes = Route.objects.filter(date=today).order_by('-nom')
+        existing_routes = Route.objects.filter(date=today).annotate(
+            nom_as_int=Cast('nom', IntegerField())  # Cast `nom` to an integer
+        ).order_by('-nom_as_int')
+
         if existing_routes.exists():
             last_nom = int(existing_routes.first().nom)
         else:
@@ -2582,8 +2603,9 @@ class CreateRouteAujourView(View):
         # Create the new route with incremented `nom`
         Route.objects.create(date=today, nom=new_nom)
 
-        # Return a JSON response to confirm success
+        # Redirect back to the referring page
         return redirect(request.META.get('HTTP_REFERER', '/'))
+
 class CreateRouteView(View):
     def post(self, request):
         # Get today's date
@@ -2591,7 +2613,10 @@ class CreateRouteView(View):
         tomorrow = today + timedelta(1)
 
         # Get the highest `nom` for routes created today
-        existing_routes = Route.objects.filter(date=tomorrow).order_by('-nom')
+        existing_routes = Route.objects.filter(date=tomorrow).annotate(
+            nom_as_int=Cast('nom', IntegerField())  # Cast `nom` to an integer
+        ).order_by('-nom_as_int')
+
         if existing_routes.exists():
             last_nom = int(existing_routes.first().nom)
         else:
@@ -2603,7 +2628,7 @@ class CreateRouteView(View):
         # Create the new route with incremented `nom`
         Route.objects.create(date=tomorrow, nom=new_nom)
 
-        # Return a JSON response to confirm success
+        # Redirect back to the referring page
         return redirect(request.META.get('HTTP_REFERER', '/'))
 class CreateRouteTodayView(View):
     def post(self, request):
@@ -2612,7 +2637,10 @@ class CreateRouteTodayView(View):
         tomorrow = today + timedelta(2)
 
         # Get the highest `nom` for routes created today
-        existing_routes = Route.objects.filter(date=tomorrow).order_by('-nom')
+        existing_routes = Route.objects.filter(date=tomorrow).annotate(
+            nom_as_int=Cast('nom', IntegerField())  # Cast `nom` to an integer
+        ).order_by('-nom_as_int')
+
         if existing_routes.exists():
             last_nom = int(existing_routes.first().nom)
         else:
@@ -2624,7 +2652,7 @@ class CreateRouteTodayView(View):
         # Create the new route with incremented `nom`
         Route.objects.create(date=tomorrow, nom=new_nom)
 
-        # Return a JSON response to confirm success
+        # Redirect back to the referring page
         return redirect(request.META.get('HTTP_REFERER', '/'))
 class CreateRouteDimView(View):
     def post(self, request):
@@ -2633,7 +2661,10 @@ class CreateRouteDimView(View):
         tomorrow = today + timedelta(3)
 
         # Get the highest `nom` for routes created today
-        existing_routes = Route.objects.filter(date=tomorrow).order_by('-nom')
+        existing_routes = Route.objects.filter(date=tomorrow).annotate(
+            nom_as_int=Cast('nom', IntegerField())  # Cast `nom` to an integer
+        ).order_by('-nom_as_int')
+
         if existing_routes.exists():
             last_nom = int(existing_routes.first().nom)
         else:
@@ -2645,7 +2676,7 @@ class CreateRouteDimView(View):
         # Create the new route with incremented `nom`
         Route.objects.create(date=tomorrow, nom=new_nom)
 
-        # Return a JSON response to confirm success
+        # Redirect back to the referring page
         return redirect(request.META.get('HTTP_REFERER', '/'))
 
 
@@ -2679,7 +2710,6 @@ class MapView(View):
                 'adress' : a.adress,
                 'convives': a.convives,
                 'mode_envoi': a.mode_envoi,
-                'infodetail': a.infodetail,
 
             }
 
@@ -2782,7 +2812,6 @@ class MapApremView(View):
                 'adress' : a.adress,
                 'convives': a.convives,
                 'mode_envoi': a.mode_envoi,
-                'infodetail': a.infodetail
             }
 
             livraisons.append(data)
@@ -2888,7 +2917,6 @@ class MapMidiView(View):
                 'adress' : a.adress,
                 'convives': a.convives,
                 'mode_envoi': a.mode_envoi,
-                'infodetail': a.infodetail
             }
 
             livraisons.append(data)
@@ -2993,7 +3021,6 @@ class MapApremTodayView(View):
                 'adress' : a.adress,
                 'convives': a.convives,
                 'mode_envoi': a.mode_envoi,
-                'infodetail': a.infodetail
             }
 
             livraisons.append(data)
@@ -3274,7 +3301,6 @@ class MapApremDimView(View):
                 'adress' : a.adress,
                 'convives': a.convives,
                 'mode_envoi': a.mode_envoi,
-                'infodetail': a.infodetail
             }
 
             livraisons.append(data)
@@ -4066,7 +4092,7 @@ def ChecklistmdDetailView(request, pk):
     formset1 = ChecklistRecupPhotoFormSet(request.POST or None, request.FILES or None, prefix='formset1', queryset=ChecklistRecupPhoto.objects.filter(checklist=checklist))
     form = RapportForm(request.POST or None, prefix='form', instance=checklist)
     form1 = RapportRecupForm(request.POST or None, prefix='form1', instance=checklist)
-    checklist_itemsbreuvage = ChecklistItem.objects.filter(checklist_id=checklist, product__category__in=["ALCOOLFORT", "SANSALCOOL", "VINS",  "BIERES"], quantity__gt=0)
+    checklist_itemsbreuvage = ChecklistItem.objects.filter(checklist_id=checklist, product__category__in=["ALCOOL FORT", "SANS ALCOOL", "VINS",  "BIERES"], quantity__gt=0)
     
     for item in checklist_itemsbreuvage:
         item.remaining_quantity = item.quantity - (item.consumed_quantity or 0)
