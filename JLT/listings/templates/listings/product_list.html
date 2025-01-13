@@ -43,10 +43,12 @@
 </nav>
 
 <div class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="mb-0 text-primary">Liste des Produits</h3>
-        <input type="text" id="searchInput" class="form-control w-25" placeholder="Rechercher un produit..." onkeyup="filterProducts()">
-    </div>
+    <form method="get" class="d-flex justify-content-end mb-3">
+        <input type="text" name="query" value="{{ query }}" class="form-control w-25" placeholder="Rechercher un produit...">
+        <button type="submit" class="btn btn-primary ms-2">Rechercher</button>
+        <a href="{% url 'product_list' %}" class="btn btn-primary ms-2">Liste produits</a>
+    </form>
+    
 
     <div class="row">
         {% for product in page_obj %}
@@ -81,29 +83,58 @@
         {% if is_paginated %}
         <nav>
             <ul class="pagination">
+                <!-- Previous Page Link -->
                 {% if page_obj.has_previous %}
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
-                        <span aria-hidden="true">&laquo;</span>
+                    <a class="page-link" href="?query={{ query }}&page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                        &laquo;
                     </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link" aria-label="Previous">&laquo;</span>
                 </li>
                 {% endif %}
+                
+                <!-- Page Number Links -->
                 {% for num in page_obj.paginator.page_range %}
-                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                {% if page_obj.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
                 </li>
+                {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                <li class="page-item">
+                    <a class="page-link" href="?query={{ query }}&page={{ num }}">{{ num }}</a>
+                </li>
+                {% elif num == 1 or num == page_obj.paginator.num_pages %}
+                <li class="page-item">
+                    <a class="page-link" href="?query={{ query }}&page={{ num }}">{{ num }}</a>
+                </li>
+                {% elif forloop.first or forloop.last %}
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+                {% endif %}
                 {% endfor %}
+                
+                <!-- Next Page Link -->
                 {% if page_obj.has_next %}
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
-                        <span aria-hidden="true">&raquo;</span>
+                    <a class="page-link" href="?query={{ query }}&page={{ page_obj.next_page_number }}" aria-label="Next">
+                        &raquo;
                     </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link" aria-label="Next">&raquo;</span>
                 </li>
                 {% endif %}
             </ul>
         </nav>
         {% endif %}
     </div>
+    
+    
 </div>
 
 <script>

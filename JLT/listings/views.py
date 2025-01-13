@@ -75,6 +75,50 @@ from django.db.models import Q
 from django.db import transaction
 from django.contrib import messages
 
+
+# views.py
+from django.shortcuts import redirect
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.forms import PasswordChangeForm
+from listings.models import UserProfile  # Replace with your app name
+
+def user_login(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            login(request, user)
+
+            # Check if user needs to change their password
+            try:
+                user_profile = user.userprofile
+                if user_profile.force_password_change:
+                    return redirect(reverse('password_change'))  # Redirect to the password change view
+            except UserProfile.DoesNotExist:
+                pass  # Handle case if the user doesn't have a profile
+
+            return redirect('home')  # Redirect to the home page or dashboard
+    return render(request, 'listings/login.html')
+
+
+# views.py
+from django.contrib.auth.views import PasswordChangeView
+from listings.models import UserProfile
+
+class CustomPasswordChangeView(PasswordChangeView):
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        
+        # After password change, reset the 'force_password_change' flag
+        user_profile = self.request.user.userprofile
+        user_profile.force_password_change = False
+        user_profile.save()
+        
+        return response
+
+
 @login_required
 def create_ordercuisine(request):
     query = request.GET.get('q')  # Get the search query from the request
@@ -1376,11 +1420,42 @@ def save_breuvages_report(request, checklist_id):
         return JsonResponse({"success": True})
     return JsonResponse({"success": False})
 
+# views.py
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from listings.models import Livraison, Livreur, UserProfile  # Adjust 'your_app' to your app name
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from listings.models import Livraison, Livreur, UserProfile
+
+@login_required
 def home(request):
-    livraisons  = Livraison.objects.all()
+    user = request.user
+
+    # Ensure the user has a UserProfile
+    if hasattr(user, 'userprofile'):
+        user_profile = user.userprofile
+
+        # If `force_password_change` is True, redirect to the password change page
+        if user_profile.force_password_change:
+            return redirect('password_change')
+    else:
+        # Optionally create a UserProfile if missing (for testing purposes)
+        # UserProfile.objects.create(user=user)
+
+        return redirect('error_page')  # Or handle the error gracefully
+
+    livraisons = Livraison.objects.all()
     livreurs = Livreur.objects.all()
-    return render(request, 'listings/home.html', context={'livraisons': livraisons,
-                                                              'livreurs': livreurs})
+
+    return render(request, 'listings/home.html', {
+        'livraisons': livraisons,
+        'livreurs': livreurs,
+    })
+
+
+
 
 def livraisons_list(request):
 
@@ -1911,6 +1986,30 @@ def view_shifts_by_date(request):
         'selected_date': selected_date
     })
 
+from django.contrib.auth.views import PasswordChangeView
+
+class CustomPasswordChangeView(PasswordChangeView):
+    template_name = 'registration/password_change_form.html'
+    success_url = reverse_lazy('home')  # Redirect to 'home' after success
+
+    def form_valid(self, form):
+        # Debugging: Print user information
+        print(f"User: {self.request.user.username}")
+
+        # Update the `force_password_change` flag
+        if hasattr(self.request.user, 'userprofile'):
+            user_profile = self.request.user.userprofile
+            print(f"Before Update - force_password_change: {user_profile.force_password_change}")
+            
+            user_profile.force_password_change = False
+            user_profile.save()
+            
+            print(f"After Update - force_password_change: {user_profile.force_password_change}")
+        else:
+            print("UserProfile does not exist for this user.")
+
+        # Call the base form_valid method and redirect to success_url
+        return super().form_valid(form)
 def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
     if request.user.is_authenticated :
         journee = Journee.objects.get(id=id)
@@ -2143,39 +2242,39 @@ def unauthorized_view(request):
     return render(request, 'listings/pasauthorise.html', status=403)
 
 
+
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 def product_list(request):
-    query = request.GET.get('query', '')  # Get the search query (if any)
-    
-    # Retrieve all products
-    products = Product.objects.all()
+    # Get the search query (if any)
+    query = request.GET.get('query', '').strip()
 
-    # Apply filter if there is a query
-    if query:
-        products = products.filter(name__icontains=query)  # Filter by name containing query
+    # Filter products based on the search query
+    products = Product.objects.filter(name__icontains=query) if query else Product.objects.all()
 
-    # Paginate the products (10 products per page)
-    paginator = Paginator(products, 10)
+    # Paginate the filtered products (10 products per page)
+    paginator = Paginator(products, 12)
     page_number = request.GET.get('page')
 
     try:
-        # Try to get the page object for the requested page number
         page_obj = paginator.get_page(page_number)
     except PageNotAnInteger:
-        # If the page number is not an integer, display the first page
         page_obj = paginator.get_page(1)
     except EmptyPage:
-        # If the page number is out of range (too large), display the last page
         page_obj = paginator.get_page(paginator.num_pages)
 
-    # Return the context to the template
-    return render(request, 'listings/product_list.html', {'page_obj': page_obj,
-                                                           'query': query,
-                                                           'is_ventes': request.user.groups.filter(name='ventes').exists(),
-                                                           'is_checklist': request.user.groups.filter(name='checklist').exists(),
-                                                           'is_admin': request.user.groups.filter(name='admin').exists(),
-                                                           })
+    # Check user group memberships
+    user_groups = request.user.groups.values_list('name', flat=True)
+    context = {
+        'page_obj': page_obj,
+        'query': query,
+        'is_ventes': 'ventes' in user_groups,
+        'is_checklist': 'checklist' in user_groups,
+        'is_admin': 'admin' in user_groups,
+        'is_paginated': paginator.num_pages > 1,
+    }
+
+    return render(request, 'listings/product_list.html', context)
 
 
 

@@ -6,10 +6,24 @@ from django.conf.urls.static import static
 from listings.views import save_positions
 from listings.views import *
 from django.urls import path, include
+from listings.views import CustomPasswordChangeView, home
+from django.views.generic import TemplateView
+from django.contrib.auth.views import LoginView
+from django.contrib.auth import views as auth_views
+
+
 urlpatterns = [
+    
+path(
+        'members/password_change/',
+        CustomPasswordChangeView.as_view(),
+        name='password_change',
+    ),
+path('password_change_done/', TemplateView.as_view(template_name="registration/password_change_done.html"), name='password_change_done'),
 path('admin/', admin.site.urls, name ="admin"),
 path('login/', views.custom_login, name='login'),
 path('livraison/<int:ip>/', views.livraison_detail, name='livraison-detail'),
+path('accounts/login/', LoginView.as_view(template_name='registration/login.html'), name='login'),
 path('update_position/', save_positions, name='save_position'),
 path('create-route/', views.CreateRouteView.as_view(), name='create_route'),
 path('create-routeaujour/', views.CreateRouteAujourView.as_view(), name='create_routeaujour'),

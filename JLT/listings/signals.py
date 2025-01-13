@@ -22,3 +22,33 @@ from .models import ChecklistItem
 def update_checklist_status(sender, instance, **kwargs):
     checklist = instance.checklist
     checklist.update_status()
+
+
+# signals.py
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from .models import UserProfile
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    instance.userprofile.save()
+
+
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.contrib.auth.signals import user_logged_in
+from listings.models import UserProfile
+
+@receiver(user_logged_in)
+def check_password_change(sender, request, user, **kwargs):
+    if hasattr(user, 'userprofile') and user.userprofile.force_password_change:
+        print(f"User {user.username} needs to change their password!")
+
+
