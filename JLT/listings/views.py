@@ -395,7 +395,8 @@ def voir_checklist(request):
     valide = "valide"
     refuse = "refuse"
     today = date.today()
-
+    selected_datee = date.today()  # Or retrieve based on user input
+    checklists_of_the_day = Checklist.objects.filter(date=today, is_active=True)
     current_year = date.today().year
     years = [year for year in range(current_year - 5, current_year + 1)]
     
@@ -425,11 +426,13 @@ def voir_checklist(request):
         'valide': valide,
         'refuse': refuse,
         'change_logs': change_logs,
+        'selected_datee': selected_datee,
         'change_logs_checklist': change_logs_checklist,
         'today': today,
         'months': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],  # Months as numbers
         'selected_month': selected_month,
         'days': days_in_month,
+        'checklists_of_the_day': checklists_of_the_day,
         'months': months,
         'french_months': french_months,
         'selected_day': selected_day,
@@ -2120,9 +2123,10 @@ def update_photo_task(request, pk):
 # Admin view for creating shifts
 
 
+@login_required
 def create_shift(request):
-    # Get the list of livreur for which shifts will be created
-    liste_livreur = Livreur.objects.filter(nom__in=['Maxime', 'Alessandro', 'Mohammad', 'Osnel', 'Samuel', 'Jef', 'Zayd'])
+    # Dynamically fetch all Livreur objects from the database
+    liste_livreur = Livreur.objects.all()
 
     if request.method == 'POST':
         for livreur in liste_livreur:
@@ -2132,21 +2136,25 @@ def create_shift(request):
             # Get shift data from POST request
             shift_date = request.POST.get(f"shift_date_{livreur.id}")
             shift_start = request.POST.get(f"shift_start_{livreur.id}")
-           
-            # Check that shift date is provided (start time can be empty)
-            if not shift_date:
-                return render(request, 'listings/create_shift.html', {'error': 'La date est requise.'})
 
-            # Validate start time if it's provided (optional field)
+            # Validate that the shift date is provided
+            if not shift_date:
+                return render(request, 'listings/create_shift.html', {
+                    'liste_livreur': liste_livreur,
+                    'error': 'La date est requise.',
+                })
+
+            # Validate the start time format if it's provided
             if shift_start:
                 try:
                     datetime.strptime(shift_start, '%H:%M')
                 except ValueError:
-                    return render(request, 'listings/create_shift.html', {'error': 'Le format de l\'heure de début est invalide. Veuillez entrer l\'heure au format HH:MM.'})
+                    return render(request, 'listings/create_shift.html', {
+                        'liste_livreur': liste_livreur,
+                        'error': 'Le format de l\'heure de début est invalide. Veuillez entrer l\'heure au format HH:MM.',
+                    })
 
-            
-
-            # Create shift if not in repos
+            # Create shift if the driver is not in repos
             if is_repos:
                 Shift.objects.create(
                     livreur=livreur,
@@ -2155,7 +2163,7 @@ def create_shift(request):
                     notes="Repos"
                 )
             else:
-                # If repos is not checked, create a shift with start and end time if provided
+                # Create a shift with a start time if provided
                 Shift.objects.create(
                     livreur=livreur,
                     date=shift_date,
@@ -2166,9 +2174,10 @@ def create_shift(request):
         # Redirect after creating shifts
         return redirect('acceuilresponsables')
 
-    # Handle GET request to render the page with livreur list
+    # Handle GET request to render the page with the list of livreurs
     if not request.user.is_superuser:
         return redirect('unauthorized')
+
     return render(request, 'listings/create_shift.html', {'liste_livreur': liste_livreur})
 
 def responsableschoixjournee(request):

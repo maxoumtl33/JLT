@@ -81,7 +81,16 @@
         <p><strong>Conseiller(e) :</strong> {{ checklist.conseillere }}</p>
         <p><strong>Nom du MD :</strong> {{ checklist.md }}</p>
     </div>
+    <!-- Print Button -->
+    <button class="btn btn-info mb-4" onclick="printChecklist()">Imprimer la Checklist</button>
 
+    <!-- Hidden Section for Printing -->
+    <div id="print-section" style="display: none;">
+        <h1>Checklist: {{ checklist.name }}</h1>
+        <p><strong>Date événement :</strong> {{ checklist.date|date:"d/m/Y" }}</p>
+        <p><strong>Lieu événement :</strong> {{ checklist.lieu }}</p>
+        <p><strong>Heure de livraison :</strong> {{ checklist.heure_livraison }}</p>
+    </div>
      <!-- Form for adding a note to the checklist -->
      <h3 class="mt-4">Ajouter une note pour les livreurs</h3>
      <form method="POST" action="{% url 'checklistvoir-detail' checklist.id %}">
@@ -198,6 +207,27 @@ function submitStatusForm(itemId, statusValue) {
     document.getElementById('status_' + itemId).closest('form').submit();
 }
 
+function printChecklist() {
+    // Get the print section content
+    const printContent = document.getElementById('print-section').innerHTML;
+
+    // Open a new window or document for printing
+    const printWindow = window.open('', '', 'height=600,width=800');
+    printWindow.document.write('<html><head><title>Imprimer la Checklist</title>');
+    printWindow.document.write('<style>body { font-family: Arial, sans-serif; padding: 20px; }</style>'); // Optional styling
+    printWindow.document.write('</head><body>');
+    printWindow.document.write(printContent);
+    printWindow.document.write('</body></html>');
+
+    // Close the document to ensure everything is loaded before printing
+    printWindow.document.close();
+
+    // Trigger the print dialog
+    printWindow.print();
+
+    // Optional: Close the print window after printing
+    printWindow.close();
+}
 
 </script>
 {% endblock %}

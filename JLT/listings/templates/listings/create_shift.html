@@ -2,7 +2,7 @@
 {% load static %}
 {% block content %}
 <style>
-    /* Simplified and Enhanced Styling */
+    /* General Styling */
     body {
         font-family: Arial, sans-serif;
         background-color: #f8f9fa;
@@ -53,7 +53,8 @@
     }
 
     input[type="date"],
-    input[type="time"] {
+    input[type="time"],
+    textarea {
         width: 100%;
         padding: 10px;
         font-size: 16px;
@@ -63,7 +64,8 @@
     }
 
     input[type="date"]:focus,
-    input[type="time"]:focus {
+    input[type="time"]:focus,
+    textarea:focus {
         border-color: #1176F5;
     }
 
@@ -83,6 +85,8 @@
     .btn-primary:hover {
         background-color: #0d63cc;
     }
+
+    /* Bottom Navbar */
     .bottom-navbar {
         position: fixed;
         bottom: 0;
@@ -93,6 +97,7 @@
         box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
         z-index: 1000;
     }
+
     .bottom-navbar ul {
         list-style: none;
         display: flex;
@@ -100,19 +105,21 @@
         margin: 0;
         padding: 0;
     }
+
     .bottom-navbar ul li {
         flex: 1;
         text-align: center;
     }
-    .bottom-navbar ul li a {
-    color: white;
-    text-decoration: none;
-    font-size: 16px;
-}
 
-.bottom-navbar ul li a:hover {
-    text-decoration: underline;
-}
+    .bottom-navbar ul li a {
+        color: white;
+        text-decoration: none;
+        font-size: 16px;
+    }
+
+    .bottom-navbar ul li a:hover {
+        text-decoration: underline;
+    }
 
     /* Responsive Adjustments */
     @media (max-width: 768px) {
@@ -155,13 +162,13 @@
                     <input type="time" name="shift_start_{{ livreur.id }}" class="form-control">
                 </div>
     
-        
                 <!-- Repos checkbox -->
                 <div class="form-check">
                     <input type="checkbox" name="repos_{{ livreur.id }}" class="form-check-input" id="repos_{{ livreur.id }}">
                     <label class="form-check-label" for="repos_{{ livreur.id }}">En Repos</label>
                 </div>
-                
+    
+                <!-- Note field -->
                 <div class="form-group">
                     <label for="note_{{ livreur.id }}">Note</label>
                     <textarea name="note_{{ livreur.id }}" rows="3" class="form-control" placeholder="Ajouter une note..."></textarea>
@@ -171,14 +178,15 @@
     
         <button type="submit" class="btn btn-primary">Créer Planning</button>
     </form>
-    
-    
-
-    <nav class="bottom-navbar">
-        <ul>
-            <li><a href="{% url 'acceuilresponsables' %}" class="nav__link"><i class="fa-solid fa-user-ninja"></i><span class="nav__name">Menu Admin</span></a></li>
-        </ul>
-    </nav>
 </div>
+<br>
+<br>
+<br>
+<!-- Bottom Navigation -->
+<nav class="bottom-navbar">
+    <ul>
+        <li><a href="{% url 'acceuilresponsables' %}" class="nav__link"><i class="fa-solid fa-user-ninja"></i><span class="nav__name">Menu Admin</span></a></li>
+    </ul>
+</nav>
 
 {% endblock %}

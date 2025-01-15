@@ -190,7 +190,11 @@
         border-color: #0056b3;
     }
 
-   
+    #date-selector {
+        width: auto; /* Adjust the width automatically */
+        max-width: 200px; /* Set a maximum width */
+        margin-right: 10px; /* Add some space to the right */
+    }
 </style>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
@@ -218,6 +222,31 @@
 
 <h1 class="text-center">Liste Checklist</h1>
 
+<!-- Date Picker -->
+<label for="date-selector" class="form-label">Sélectionnez une date :</label>
+<input type="date" id="date-selector" class="form-control mb-3" />
+
+
+
+<div id="print-section" style="display: none;">
+    {% for checklist in checklists %}
+    {% if checklist.is_active %}
+    <div class="page" data-checklist-date="{{ checklist.date|date:"Y-m-d" }}">
+        <h1>{{ checklist.name }}</h1>
+        <p><strong>Date :</strong> {{ checklist.date|date:"d/m/Y" }}</p>
+        <p><strong>Adresse :</strong> {{ checklist.lieu }}</p>
+        <p><strong>Heure de livraison :</strong> {{ checklist.heure_livraison }}</p>
+        {% if checklist.notechecklist %}
+        <p><strong>Infos :</strong> {{ checklist.notechecklist }}</p>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% endfor %}
+</div>
+
+<!-- Print Button -->
+<button onclick="printActiveChecklistsByDate()" class="btn btn-primary">Imprimer</button>
+</div>
 
 
 <hr>
@@ -362,7 +391,70 @@ function formatTimeWithoutSeconds(timeString) {
     return timeString; // Return as is if format is unexpected
 }
 
+function printActiveChecklistsByDate() {
+    // Get the selected date
+    const selectedDate = document.getElementById('date-selector').value;
 
+    if (!selectedDate) {
+        alert('Veuillez sélectionner une date avant d\'imprimer.');
+        return;
+    }
+
+    // Filter checklists based on the selected date and is_active status
+    const allChecklists = document.querySelectorAll('#print-section .page');
+    const filteredChecklists = Array.from(allChecklists).filter(checklist => {
+        const checklistDate = checklist.getAttribute('data-checklist-date');
+        const isActive = checklist.style.display !== 'none'; // Ensure the checklist is active
+
+        return checklistDate === selectedDate && isActive;
+    });
+
+    if (filteredChecklists.length === 0) {
+        alert('Aucune checklist active trouvée pour la date sélectionnée.');
+        return;
+    }
+
+    // Create a new print window
+    const printWindow = window.open('', '', 'height=600,width=800');
+    printWindow.document.write('<html><head><title>Imprimer les Checklists</title>');
+    printWindow.document.write('<style>');
+    printWindow.document.write(`
+        @page {
+            size: A4 landscape; /* Mode paysage */
+            margin: 0; /* Pas de marges */
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        .page {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100vh; /* Hauteur complète de la page */
+            font-size: 3rem; /* Texte plus grand */
+            text-align: center;
+            box-sizing: border-box;
+            padding: 20px;
+            page-break-after: always; /* Une page par checklist */
+        }
+    `);
+    printWindow.document.write('</style>');
+    printWindow.document.write('</head><body>');
+
+    // Add the filtered checklists to the print window
+    filteredChecklists.forEach(checklist => {
+        printWindow.document.write(checklist.outerHTML);
+    });
+
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    printWindow.print();
+    printWindow.close();
+}
 
 
 
