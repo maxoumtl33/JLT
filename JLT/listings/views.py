@@ -395,11 +395,12 @@ def voir_checklist(request):
     valide = "valide"
     refuse = "refuse"
     today = date.today()
+    tomorrow = timezone.now().date() + timedelta(days=1)
     selected_datee = date.today()  # Or retrieve based on user input
     checklists_of_the_day = Checklist.objects.filter(date=today, is_active=True)
     current_year = date.today().year
     years = [year for year in range(current_year - 5, current_year + 1)]
-    
+    livraisons = Livraison.objects.filter(date=tomorrow, recuperation = False)
     selected_day = int(request.GET.get('day', 1))  # Default to the first day of the month if none selected
     current_year = date.today().year
     months = [(month, calendar.month_name[month]) for month in range(1, 13)]
@@ -439,6 +440,7 @@ def voir_checklist(request):
         'selected_date': date(current_year, selected_month, selected_day).strftime('%d %B %Y'),
         'years': years,
         'selected_year': current_year,
+        'livraisons': livraisons,
     }
     return render(request, 'listings/voir-checklist.html', context)
 

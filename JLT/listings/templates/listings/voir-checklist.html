@@ -218,40 +218,58 @@
     </div>
 </nav>
 
+<hr>
 
+<h1 class="text-center">Imprimer Checklists et Livraisons</h1>
+<br>
+<div class="container">
+    <!-- Date Picker -->
+    <label for="date-selector" class="form-label">Sélectionnez une date :</label>
+    <input type="date" id="date-selector" class="form-control mb-3" />
 
-<h1 class="text-center">Liste Checklist</h1>
-
-<!-- Date Picker -->
-<label for="date-selector" class="form-label">Sélectionnez une date :</label>
-<input type="date" id="date-selector" class="form-control mb-3" />
-
-
-
-<div id="print-section" style="display: none;">
-    {% for checklist in checklists %}
-    {% if checklist.is_active %}
-    <div class="page" data-checklist-date="{{ checklist.date|date:"Y-m-d" }}">
-        <h1>{{ checklist.name }}</h1>
-        <p><strong>Date :</strong> {{ checklist.date|date:"d/m/Y" }}</p>
-        <p><strong>Adresse :</strong> {{ checklist.lieu }}</p>
-        <p><strong>Heure de livraison :</strong> {{ checklist.heure_livraison }}</p>
-        {% if checklist.notechecklist %}
-        <p><strong>Infos :</strong> {{ checklist.notechecklist }}</p>
+    <!-- Print Section for Checklists -->
+    <div id="print-section" style="display: none;">
+        {% for checklist in checklists %}
+        {% if checklist.is_active %}
+        <div class="page" data-checklist-date="{{ checklist.date|date:"Y-m-d" }}">
+            <h1>{{ checklist.name }}</h1>
+            <p><strong>Date :</strong> {{ checklist.date|date:"d/m/Y" }}</p>
+            <p><strong>Adresse :</strong> {{ checklist.lieu }}</p>
+            <p><strong>Heure de livraison :</strong> {{ checklist.heure_livraison }}</p>
+            {% if checklist.notechecklist %}
+            <p><strong>Infos :</strong> {{ checklist.notechecklist }}</p>
+            {% endif %}
+        </div>
         {% endif %}
+        {% endfor %}
     </div>
-    {% endif %}
-    {% endfor %}
-</div>
 
-<!-- Print Button -->
-<button onclick="printActiveChecklistsByDate()" class="btn btn-primary">Imprimer</button>
+    <!-- Print Buttons -->
+    <div class="d-flex justify-content-between mb-3">
+        <button onclick="printActiveChecklistsByDate()" class="btn btn-primary">Imprimer Checklists</button>
+        <button onclick="printLivraisons()" class="btn btn-primary">Imprimer livraisons</button>
+    </div>
+
+    {% if livraisons %}
+    <div id="livraisons" style="display: none;">
+        {% for livraison in livraisons %}
+            <div class="livraison-page">
+                <h1>{{ livraison.nom }}</h1>
+                <h2>{{ livraison.heure_livraison }}</h2>
+            </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>Aucune livraison prévue pour demain.</p>
+    {% endif %}
 </div>
 
 
 <hr>
 
 
+
+<h1 class="text-center">Liste Checklist</h1>
 
 <div class="agenda-container">
     <!-- Calendar Section -->
@@ -277,6 +295,8 @@
             {% endfor %}
         </div>
     </div>
+
+    
 
     <!-- Checklist Section -->
     <div id="checklist-section" class="checklist-section">
@@ -457,6 +477,58 @@ function printActiveChecklistsByDate() {
 }
 
 
+function printLivraisons() {
+    // Récupère le contenu de la section à imprimer
+    const printContent = document.getElementById('livraisons').innerHTML;
+
+    // Ouvre une nouvelle fenêtre pour l'impression
+    const printWindow = window.open('', '', 'height=600,width=800');
+    printWindow.document.write('<html><head><title>Imprimer les Livraisons</title>');
+    printWindow.document.write('<style>');
+    printWindow.document.write(`
+        @page {
+            size: A4 landscape; /* Mode paysage */
+            margin: 0; /* Pas de marges */
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        .livraison-page {
+            page-break-after: always; /* Une livraison par page */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100vh; /* Hauteur complète de la page */
+            font-size: 3rem; /* Texte plus grand */
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        h1 {
+            font-size: 5rem; /* Taille de police plus grande pour le nom */
+        }
+        h2 {
+            font-size: 4rem; /* Taille de police plus grande pour l'heure de départ */
+        }
+    `);
+    printWindow.document.write('</style>');
+    printWindow.document.write('</head><body>');
+    printWindow.document.write(printContent);
+    printWindow.document.write('</body></html>');
+
+    // Ferme le document pour garantir que tout est chargé avant l'impression
+    printWindow.document.close();
+
+    // Déclenche la boîte de dialogue d'impression
+    printWindow.print();
+
+    // Facultatif : ferme la fenêtre après l'impression
+    printWindow.close();
+}
 
 
 

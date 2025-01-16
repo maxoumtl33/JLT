@@ -86,10 +86,17 @@
 
     <!-- Hidden Section for Printing -->
     <div id="print-section" style="display: none;">
-        <h1>Checklist: {{ checklist.name }}</h1>
-        <p><strong>Date événement :</strong> {{ checklist.date|date:"d/m/Y" }}</p>
-        <p><strong>Lieu événement :</strong> {{ checklist.lieu }}</p>
-        <p><strong>Heure de livraison :</strong> {{ checklist.heure_livraison }}</p>
+        {% if checklist.is_active %}
+        <div class="page" data-checklist-date="{{ checklist.date|date:"Y-m-d" }}">
+            <h1>{{ checklist.name }}</h1>
+            <p><strong>Date :</strong> {{ checklist.date|date:"d/m/Y" }}</p>
+            <p><strong>Adresse :</strong> {{ checklist.lieu }}</p>
+            <p><strong>Heure de livraison :</strong> {{ checklist.heure_livraison }}</p>
+            {% if checklist.notechecklist %}
+            <p><strong>Infos :</strong> {{ checklist.notechecklist }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
     </div>
      <!-- Form for adding a note to the checklist -->
      <h3 class="mt-4">Ajouter une note pour les livreurs</h3>
@@ -208,24 +215,49 @@ function submitStatusForm(itemId, statusValue) {
 }
 
 function printChecklist() {
-    // Get the print section content
+    // Récupère le contenu de la section à imprimer
     const printContent = document.getElementById('print-section').innerHTML;
 
-    // Open a new window or document for printing
+    // Ouvre une nouvelle fenêtre pour l'impression
     const printWindow = window.open('', '', 'height=600,width=800');
-    printWindow.document.write('<html><head><title>Imprimer la Checklist</title>');
-    printWindow.document.write('<style>body { font-family: Arial, sans-serif; padding: 20px; }</style>'); // Optional styling
+    printWindow.document.write('<html><head><title>Imprimer les Checklists</title>');
+    printWindow.document.write('<style>');
+    printWindow.document.write(`
+        @page {
+            size: A4 landscape; /* Mode paysage */
+            margin: 0; /* Pas de marges */
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        .page {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100vh; /* Hauteur complète de la page */
+            font-size: 3rem; /* Texte plus grand */
+            text-align: center;
+            box-sizing: border-box;
+            padding: 20px;
+            page-break-after: always; /* Une page par checklist */
+        }
+    `);
+    printWindow.document.write('</style>');
     printWindow.document.write('</head><body>');
     printWindow.document.write(printContent);
     printWindow.document.write('</body></html>');
 
-    // Close the document to ensure everything is loaded before printing
+    // Ferme le document pour garantir que tout est chargé avant l'impression
     printWindow.document.close();
 
-    // Trigger the print dialog
+    // Déclenche la boîte de dialogue d'impression
     printWindow.print();
 
-    // Optional: Close the print window after printing
+    // Facultatif : ferme la fenêtre après l'impression
     printWindow.close();
 }
 
