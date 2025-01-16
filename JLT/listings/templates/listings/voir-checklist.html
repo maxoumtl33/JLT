@@ -248,9 +248,7 @@
     <div class="d-flex justify-content-between mb-3">
         <button onclick="printActiveChecklistsByDate()" class="btn btn-primary">Imprimer Checklists</button>
         <button onclick="printLivraisons()" class="btn btn-primary">Imprimer livraisons</button>
-    </div>
-
-    {% if livraisons %}
+        {% if livraisons %}
     <div id="livraisons" style="display: none;">
         {% for livraison in livraisons %}
             <div class="livraison-page">
@@ -263,6 +261,9 @@
     <p>Aucune livraison prévue pour demain.</p>
     {% endif %}
 </div>
+    </div>
+
+    
 
 
 <hr>
