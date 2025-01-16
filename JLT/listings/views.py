@@ -18,6 +18,7 @@ from .forms import LivraisonDragFormtoday, TaskUpdateForm
 from .forms import LivraisonsVentesForm, RoutedetailForm
 from django.urls import reverse
 import json
+from django.db.models.functions import TruncDate
 from django.shortcuts import render, redirect
 from django.core.paginator import Paginator
 from django.contrib import messages
@@ -389,18 +390,18 @@ class ChecklistItemDeleteAjaxView(View):
         return JsonResponse(response_data)
     
 def voir_checklist(request):
-
-    checklists = Checklist.objects.filter(is_active=True).order_by('-added_on')
+    today = date.today()  # Get today's date
+    checklists = Checklist.objects.filter(date=today, is_active=True)
     encours = "en_cours"
     valide = "valide"
     refuse = "refuse"
-    today = date.today()
+    
     tomorrow = timezone.now().date() + timedelta(days=1)
     selected_datee = date.today()  # Or retrieve based on user input
     checklists_of_the_day = Checklist.objects.filter(date=today, is_active=True)
-    current_year = date.today().year
+    current_year = today.year
     years = [year for year in range(current_year - 5, current_year + 1)]
-    livraisons = Livraison.objects.filter(date=tomorrow, recuperation = False)
+    livraisons = Livraison.objects.filter(date=selected_datee, recuperation=False)
     selected_day = int(request.GET.get('day', 1))  # Default to the first day of the month if none selected
     current_year = date.today().year
     months = [(month, calendar.month_name[month]) for month in range(1, 13)]
