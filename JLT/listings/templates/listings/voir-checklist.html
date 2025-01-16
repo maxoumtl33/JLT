@@ -224,48 +224,51 @@
 <div class="container">
     <h1 class="text-center mb-4">Imprimer Checklists et Livraisons</h1>
 
-    <!-- Date Picker for Checklists -->
-    <div class="mb-4">
-        <label for="checklist-date-selector" class="form-label">Sélectionnez une date pour les Checklists :</label>
-        <input type="date" id="checklist-date-selector" class="form-control" />
+    <!-- Date Picker Section -->
+    <label for="checklist-date" class="form-label">Date pour les Checklists :</label>
+    <input type="date" id="checklist-date" class="form-control mb-4" />
+
+    <label for="livraison-date" class="form-label">Date pour les Livraisons :</label>
+    <input type="date" id="livraison-date" class="form-control mb-4" />
+
+    <!-- Print Buttons -->
+    <div class="d-flex justify-content-between">
+        <button onclick="printChecklists()" class="btn btn-primary">Imprimer Checklists</button>
+        <button onclick="printLivraisons()" class="btn btn-primary">Imprimer Livraisons</button>
     </div>
 
-    <!-- Print Button for Checklists -->
-    <button onclick="printChecklists()" class="btn btn-primary mb-4">Imprimer Checklists</button>
-
-    <!-- Date Picker for Livraisons -->
-    <div class="mb-4">
-        <label for="livraison-date-selector" class="form-label">Sélectionnez une date pour les Livraisons :</label>
-        <input type="date" id="livraison-date-selector" class="form-control" />
-    </div>
-
-    <!-- Print Button for Livraisons -->
-    <button onclick="printLivraisons()" class="btn btn-primary">Imprimer Livraisons</button>
-
+    <!-- Checklist Section -->
     <div id="checklist-section" style="display: none;">
         {% for checklist in checklists %}
+        {% if checklist.is_active %}
         <div class="page" data-checklist-date="{{ checklist.date|date:'Y-m-d' }}">
+            <h1>{{ checklist.date|date:"d/m/Y" }}</h1>
             <h1>{{ checklist.name }}</h1>
-            <p><strong> {{ checklist.date|date:"d/m/Y" }}</strong></p>
-            <p><strong> {{ checklist.lieu }}</strong></p>
-            <p><strong> {{ checklist.heure_livraison }}</strong></p>
+            <h1>{{ checklist.lieu }}</h1>
+            <h1>{{ checklist.heure_livraison }}</h1>
             {% if checklist.notechecklist %}
-            <p style="color: orange;"><strong> {{ checklist.notechecklist }}</strong></p>
+            <h1 style="color: orange;">{{ checklist.notechecklist }}</h1>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+    <!-- Livraison Section -->
+    <div id="livraison-section" style="display: none;">
+        {% for livraison in livraisons %}
+        <div class="livraison-page" data-livraison-date="{{ livraison.date|date:'Y-m-d' }}">
+            <h1>{{ livraison.date|date:"d/m/Y" }}</h1>
+            <h1>{{ livraison.nom }}</h1>
+            <h1>{{ livraison.heure_livraison }}</h1>
+            {% if livraison.infodetail %}
+            <h1 style="color: orange;">{{ livraison.infodetail }}</h1>
             {% endif %}
         </div>
         {% endfor %}
     </div>
-    
-    <div id="livraison-section" style="display: none;">
-        {% for livraison in livraisons %}
-        <div class="livraison-page" data-date="{{ livraison.date|date:'Y-m-d' }}">
-            <h1>{{ livraison.date|date:"d/m/Y" }}</h1>
-            <h1>{{ livraison.nom }}</h1>
-            <h1>{{ livraison.heure_livraison }}</h1>
-        </div>
-        {% endfor %}
-    </div>
 </div>
+
 
 
     
@@ -425,13 +428,13 @@ function filterByDate(containerSelector, attribute, selectedDate) {
 }
 
 function openPrintWindow(content, title) {
-    const printWindow = window.open('', '', 'height=800,width=1000');
+    const printWindow = window.open('', '', 'height=800,width=1200');
     printWindow.document.write('<html><head><title>' + title + '</title>');
     printWindow.document.write('<style>');
     printWindow.document.write(`
         @media print {
             @page {
-                size: A4 portrait;
+                size: A4 landscape; /* Landscape mode */
                 margin: 20mm;
             }
             body {
@@ -449,12 +452,12 @@ function openPrintWindow(content, title) {
                 margin: 0;
             }
             h1 {
-                font-size: 48px;
+                font-size: 48px; /* Larger font for headings */
                 font-weight: bold;
                 margin-bottom: 30px;
             }
             p {
-                font-size: 32px;
+                font-size: 32px; /* Larger font for paragraphs */
                 margin: 10px 0;
             }
         }
@@ -463,28 +466,24 @@ function openPrintWindow(content, title) {
     printWindow.document.write(content);
     printWindow.document.close();
     printWindow.print();
+    printWindow.close();
 }
 
-
-// Helper function to filter by date
 function filterByDate(containerSelector, attribute, selectedDate) {
     const items = document.querySelectorAll(containerSelector);
     return Array.from(items).filter(item => item.getAttribute(attribute) === selectedDate);
 }
 
-// Print checklists
 function printChecklists() {
-    const dateSelector = document.getElementById('checklist-date-selector');
-    const selectedDate = dateSelector.value;
+    const selectedDate = document.getElementById('checklist-date').value;
     if (!selectedDate) {
-        alert('Veuillez sélectionner une date pour les Checklists.');
+        alert('Veuillez sélectionner une date pour les checklists.');
         return;
     }
 
     const filteredItems = filterByDate('.page', 'data-checklist-date', selectedDate);
-
     if (filteredItems.length === 0) {
-        alert('Aucun checklist trouvé pour la date sélectionnée.');
+        alert('Aucune checklist trouvée pour la date sélectionnée.');
         return;
     }
 
@@ -492,17 +491,14 @@ function printChecklists() {
     openPrintWindow(content, 'Imprimer les Checklists');
 }
 
-// Print livraisons
 function printLivraisons() {
-    const dateSelector = document.getElementById('livraison-date-selector');
-    const selectedDate = dateSelector.value;
+    const selectedDate = document.getElementById('livraison-date').value;
     if (!selectedDate) {
-        alert('Veuillez sélectionner une date pour les Livraisons.');
+        alert('Veuillez sélectionner une date pour les livraisons.');
         return;
     }
 
-    const filteredItems = filterByDate('.livraison-page', 'data-date', selectedDate);
-
+    const filteredItems = filterByDate('.livraison-page', 'data-livraison-date', selectedDate);
     if (filteredItems.length === 0) {
         alert('Aucune livraison trouvée pour la date sélectionnée.');
         return;
@@ -511,6 +507,7 @@ function printLivraisons() {
     const content = filteredItems.map(item => item.outerHTML).join('');
     openPrintWindow(content, 'Imprimer les Livraisons');
 }
+
 
 
 
