@@ -3780,6 +3780,8 @@ def livraison_detail(request, ip):
     matching_dock = None
     dock_photos = None
 
+    
+
     if livraison.place_id:
         matching_dock = LoadingDock.objects.filter(place_id=livraison.place_id).first()
         dock_photos = matching_dock.photo if matching_dock else None
@@ -3825,6 +3827,9 @@ def livraison_detail(request, ip):
     # Use Google Maps API to geocode address
     gmaps = googlemaps.Client(key=settings.GOOGLE_API_KEY)
     checklist = Checklist.objects.filter(livraison=livraison)
+    for item in checklist:
+        item.filtered_checklist_items = item.checklistitem_set.filter(quantity__gt=0)
+        print(f"Checklist: {item.name}, Filtered Items: {item.filtered_checklist_items.count()}")
     
 
     return render(request, 'listings/livraison_detail.html', {
