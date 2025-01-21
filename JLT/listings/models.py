@@ -307,6 +307,8 @@ class Livraison(models.Model):
         return f'{self.nom}'
 
 
+
+
 class Photo(models.Model):
     livraison = models.ForeignKey('Livraison', on_delete=models.CASCADE, related_name='livraison_photos')
     image = models.ImageField(upload_to='listings/media/commandesdetail')
@@ -421,6 +423,11 @@ class Checklist(models.Model):
             self.status = 'en_cours'
 
         self.save()
+
+    def save(self, *args, **kwargs):
+        if self.num_contrat and not self.num_contrat.startswith('CMD-'):
+            self.num_contrat = 'CMD-' + self.num_contrat
+        super(Checklist, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.name

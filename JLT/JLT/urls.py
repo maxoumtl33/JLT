@@ -22,6 +22,7 @@ path(
 path('password_change_done/', TemplateView.as_view(template_name="registration/password_change_done.html"), name='password_change_done'),
 path('admin/', admin.site.urls, name ="admin"),
 path('login/', views.custom_login, name='login'),
+path('associate_livraison/<int:checklist_id>/', views.associate_livraison, name='associate_livraison'),
 path('livraison/<int:ip>/', views.livraison_detail, name='livraison-detail'),
 path('accounts/login/', LoginView.as_view(template_name='registration/login.html'), name='login'),
 path('update_position/', save_positions, name='save_position'),

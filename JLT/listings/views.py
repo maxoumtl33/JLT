@@ -617,7 +617,7 @@ def checklist_detail(request, checklist_id):
     encours = "en_cours"
     valide = "valide"
     refuse = "refuse"
-
+    user_groups = request.user.groups.values_list('name', flat=True)
     # Document formset for uploading multiple documents
     document_formset = ChecklistDocumentFormSet(
         request.POST or None,
@@ -703,6 +703,7 @@ def checklist_detail(request, checklist_id):
         'checklist_item_comments': checklist_item_comments,
         'checklist_items_by_category': dict(checklist_items_by_category),
         'product_categories': product_categories,
+        'is_admin': 'admin' in user_groups,
     }
     return render(request, 'listings/checklist_detail.html', context)
 
@@ -959,6 +960,7 @@ from django.shortcuts import render, redirect
 from .models import Product, QuantityChangeLog
 from django.contrib.auth.models import User
 
+@login_required
 def update_product_quantity(request, product_id):
     product = Product.objects.get(id=product_id)
     
@@ -1013,7 +1015,23 @@ def view_quantity_change_logs(request, product_id):
 
 
 
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Checklist, Livraison
 
+def associate_livraison(request, checklist_id):
+    checklist = get_object_or_404(Checklist, id=checklist_id)
+    
+    # Find Livraison that has the same num_commande as the checklist
+    livraison = Livraison.objects.filter(num_commande=checklist.num_contrat).first()
+
+    if livraison:
+        checklist.livraison = livraison
+        checklist.save()
+        messages.success(request, "Livraison associée avec succès")
+    else:
+        messages.error(request, "Pas de livraison trouvée")
+
+    return redirect('checklist-detail', checklist_id=checklist.id)
 
 
 

@@ -143,18 +143,6 @@
         text-decoration: underline;
     }
 
-    /* Responsiveness */
-    @media (max-width: 768px) {
-        .calendar {
-            grid-template-columns: repeat(7, 1fr);
-        }
-    }
-
-    @media (max-width: 480px) {
-        .calendar {
-            grid-template-columns: repeat(5, 1fr); /* Adjust for small screens */
-        }
-    }
 
     /* Toggle form button */
     #toggleFormButton {
@@ -195,6 +183,78 @@
         max-width: 200px; /* Set a maximum width */
         margin-right: 10px; /* Add some space to the right */
     }
+
+    /* Responsive adjustments */
+@media (max-width: 768px) {
+    .agenda-container {
+        flex-direction: column;
+    }
+    .calendar-section, .checklist-section {
+        width: 100%;
+    }
+
+    .calendar {
+        grid-template-columns: repeat(7, 1fr); /* Maintain 7-day structure */
+        gap: 5px; /* Reduce spacing */
+    }
+
+    .day-btn {
+        font-size: 0.8rem;
+        height: 30px; /* Smaller buttons */
+        padding: 5px;
+    }
+
+    .checklist-table {
+        font-size: 0.9rem; /* Smaller font in tables */
+    }
+
+    .checklist-table th, .checklist-table td {
+        padding: 6px;
+    }
+}
+
+@media (max-width: 480px) {
+    .calendar {
+        grid-template-columns: repeat(5, 1fr); /* Adjust to fit smaller screens */
+    }
+
+    .day-btn {
+        font-size: 0.7rem;
+        height: 28px;
+        padding: 4px;
+    }
+
+    .agenda-title {
+        font-size: 1.5rem; /* Smaller title font */
+    }
+
+    .month-dropdown {
+        font-size: 0.9rem;
+        padding: 8px;
+    }
+
+    /* Table scrolling for very small screens */
+    .checklist-section {
+        overflow-x: auto;
+    }
+
+    .checklist-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap; /* Prevent table wrapping */
+    }
+
+    .checklist-table tr {
+        display: inline-block; /* Stack rows for scrolling */
+        width: 100%;
+    }
+
+    .checklist-table th, .checklist-table td {
+        display: block;
+        text-align: left;
+    }
+}
+
 </style>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">

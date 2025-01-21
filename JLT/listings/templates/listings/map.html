@@ -174,11 +174,15 @@
     <div class="column" data-statut="{{ a.id }}">
         <h2>{{ a.nom }}</h2>
         {% for task in todo_livraison %}
-        <div class="task {% if task.recuperation %}pink-bg{% endif %}" data-task-id="{{ task.id }}">
+        {% if task.statut.nom == a.nom and task.recuperation == True %}
+        <div class="task" data-task-id="{{ task.id }}" style="background-color: pink;">
             <a data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a>
         </div>
-        {% endfor %}
-    </div>
+        {% else %}
+        <div class="task" data-task-id="{{ task.id }}">
+            <a data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a>
+        </div>
+        {% endif %}
 {% endfor %}
 
 {% for a in routes %}

@@ -370,12 +370,27 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
                 <!-- "Vérifier" button on the left -->
+                
                 <li class="nav-item">
                     <a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#verifierModal">
-                        <i class="fa-solid fa-square-check" style="color: #63E6BE;"></i><span>Vérifier</span>
+                        <i class="fa-solid fa-square-check" style="color: #63E6BE;"></i><span>Vérifier Checklist</span>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#verifierbModal" style="margin-left: 20px;">
+                        <i class="fa-solid fa-square-check" style="color: #63E6BE;"></i><span>Vérifier Breuvages</span>
+                    </a>
+                </li>
+                
+                {% if is_admin %}
+                <li>
+                    <a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#associer" style="margin-left: 20px;">
+                        <i class="fa-solid fa-square-check" style="color: #63E6BE;"></i><span>Associer</span>
+                    </a>
+                </li>
+                {% endif %}
             </ul>
+
             <ul class="navbar-nav ms-auto">
                 <!-- Other navigation items on the right -->
                 <li class="nav-item">
@@ -418,6 +433,36 @@
         </div>
     </div>
 </div>
+<!-- Modal -->
+<div class="modal fade" id="associer" tabindex="-1" aria-labelledby="associer" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productModalLabel">Associer checklist et livraison</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h3>Checklist Details</h3>
+    <p>Checklist: {{ checklist.name }}</p>
+    <p>Num Commande: {{ checklist.num_contrat }}</p>
+    
+    <!-- Button to associate Livraison -->
+    <form method="POST" action="{% url 'associate_livraison' checklist.id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Associer</button>
+    </form>
+
+    {% if messages %}
+    <div class="alert alert-info">
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+{% endif %}
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="container mt-5">
     <hr>
@@ -435,7 +480,7 @@
     
         <div class="info-card">
             <p><strong><i class="bi bi-clock"></i> Heure de livraison:</strong> {{ checklist.heure_livraison }}</p>
-            <p><strong><i class="bi bi-file-earmark-text"></i> Numéro de contrat:</strong> CMD-{{ checklist.num_contrat }}</p>
+            <p><strong><i class="bi bi-file-earmark-text"></i> Numéro de contrat:</strong> {{ checklist.num_contrat }}</p>
         </div>
     
         <div class="info-card">
@@ -676,7 +721,7 @@
     <div class="modal-dialog modal-xl-custom"> <!-- Extra-large modal -->
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="productModalLabel">Vérification</h5>
+                <h5 class="modal-title" id="productModalLabel">Vérification Checklist</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body-verif">
@@ -953,13 +998,13 @@
                     </div>
                     <div class="col-md-6 p-0">
                         <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
-                        <h5 class="m-0">ITEMS DIVERS</h5>
-                    </div>
+                        <h5 class="m-0">USTENSILES DE SERVICE</h5>
+                        </div>
                         <table class="table table-bordered table-hover">
                             
                             <tbody>
                                 {% for product in products %}
-                                {% if product.category == itemsdivers %}
+                                {% if product.category == service %}
                                 <tr>
                                     <td class="small-cell"
                                         {% if product.id in checklist_products %}
@@ -982,11 +1027,12 @@
                                 {% endwith %}
                                     </td>
                                 </tr>
-                                {% endif %}
+                                    {% endif %}
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
+                    
                     <div class="col-md-6 p-0">
                         <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
                         <h5 class="m-0">ÉQUIPEMENT DE CUISSON</h5>
@@ -1029,13 +1075,13 @@
                     </div>
                     <div class="col-md-6 p-0">
                         <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
-                        <h5 class="m-0">USTENSILES DE SERVICE</h5>
-                        </div>
+                        <h5 class="m-0">ITEMS DIVERS</h5>
+                    </div>
                         <table class="table table-bordered table-hover">
                             
                             <tbody>
                                 {% for product in products %}
-                                {% if product.category == service %}
+                                {% if product.category == itemsdivers %}
                                 <tr>
                                     <td class="small-cell"
                                         {% if product.id in checklist_products %}
@@ -1058,7 +1104,7 @@
                                 {% endwith %}
                                     </td>
                                 </tr>
-                                    {% endif %}
+                                {% endif %}
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -1067,6 +1113,146 @@
             </div>
                 </div>
             </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="verifierbModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl-custom"> <!-- Extra-large modal -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productModalLabel">Vérification Breuvages</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body-verif">
+                <div class="container d-flex flex-wrap g-0"> <!-- Flexbox container with no gutter -->
+                    
+                    <div class="col-md-6 p-0">
+                        <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
+                            <h5 class="m-0">ALCOOL FORT</h5>
+                        </div>
+                        <table class="table table-bordered table-hover m-0">
+                            <tbody>
+                                {% for product in products %}
+                                {% if product.category == alcoolfort %}
+                                <tr>
+                                    <td class="small-cell" {% if product.id in checklist_products %} 
+                                        style="background-color: rgb(137, 192, 243); color: white;" {% endif %}>
+                                        {{ product.name }}
+                                    </td>
+                                    <td class="small-cell" {% if product.id in checklist_products %} 
+                                        style="background-color: rgb(137, 192, 243); color: white;" {% endif %}>
+                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                        {% if checklist_item %}
+                                            {{ checklist_item.quantity }}
+                                        {% else %}
+                                            0
+                                        {% endif %}
+                                        {% endwith %}
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+            
+                    
+                    <div class="col-md-6 p-0">
+                        <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
+                            <h5 class="m-0">BIERES</h5>
+                        </div>
+                        <table class="table table-bordered table-hover m-0">
+                            <tbody>
+                                {% for product in products %}
+                                {% if product.category == bieres %}
+                                <tr>
+                                    <td class="small-cell" {% if product.id in checklist_products %} 
+                                        style="background-color: rgb(137, 192, 243); color: white;" {% endif %}>
+                                        {{ product.name }}
+                                    </td>
+                                    <td class="small-cell" {% if product.id in checklist_products %} 
+                                        style="background-color: rgb(137, 192, 243); color: white;" {% endif %}>
+                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                        {% if checklist_item %}
+                                            {{ checklist_item.quantity }}
+                                        {% else %}
+                                            0
+                                        {% endif %}
+                                        {% endwith %}
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-6 p-0">
+                        <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
+                            <h5 class="m-0">SANS ALCOOL</h5>
+                        </div>
+                        <table class="table table-bordered table-hover m-0">
+                            <tbody>
+                                {% for product in products %}
+                                {% if product.category == sansalcool %}
+                                <tr>
+                                    <td class="small-cell" {% if product.id in checklist_products %} 
+                                        style="background-color: rgb(137, 192, 243); color: white;" {% endif %}>
+                                        {{ product.name }}
+                                    </td>
+                                    <td class="small-cell" {% if product.id in checklist_products %} 
+                                        style="background-color: rgb(137, 192, 243); color: white;" {% endif %}>
+                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                        {% if checklist_item %}
+                                            {{ checklist_item.quantity }}
+                                        {% else %}
+                                            0
+                                        {% endif %}
+                                        {% endwith %}
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+            
+                    
+                    <div class="col-md-6 p-0">
+                        <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
+                            <h5 class="m-0">VINS</h5>
+                        </div>
+                        <table class="table table-bordered table-hover m-0">
+                            <tbody>
+                                {% for product in products %}
+                                {% if product.category == vins %}
+                                <tr>
+                                    <td class="small-cell" {% if product.id in checklist_products %} 
+                                        style="background-color: rgb(137, 192, 243); color: white;" {% endif %}>
+                                        {{ product.name }}
+                                    </td>
+                                    <td class="small-cell" {% if product.id in checklist_products %} 
+                                        style="background-color: rgb(137, 192, 243); color: white;" {% endif %}>
+                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                        {% if checklist_item %}
+                                            {{ checklist_item.quantity }}
+                                        {% else %}
+                                            0
+                                        {% endif %}
+                                        {% endwith %}
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+            </div>
+            </div>
+
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
             </div>
@@ -1094,7 +1280,9 @@
                 <ul id="itemList">
                     {% for category, items in checklist_items_by_category.items %}
                     <li class="category-group" data-category="{{ category }}">
-                        <h6 class="category-header" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#items-{{ forloop.counter }}">
+                        <h6 class="category-header" 
+                            style="cursor: pointer;" 
+                            data-bs-target="#items-{{ forloop.counter }}">
                             {{ category }}
                         </h6>
                         <ul class="collapse" id="items-{{ forloop.counter }}">
@@ -1104,7 +1292,6 @@
                                     {{ item.product.name }} - Quantité: {{ item.quantity }}
                                 </span>
                                 {% if item.commentaire %}
-
                                 <i 
                                     class="fa-solid fa-comment-dots" 
                                     tabindex="0" 
@@ -1126,6 +1313,8 @@
         </div>
     </div>
 </div>
+
+
 
 
 
@@ -2256,6 +2445,28 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+
+document.addEventListener('DOMContentLoaded', function () {
+        const categoryHeaders = document.querySelectorAll('.category-header');
+
+        categoryHeaders.forEach(header => {
+            header.addEventListener('click', function () {
+                const target = document.querySelector(this.getAttribute('data-bs-target'));
+
+                if (target.classList.contains('show')) {
+                    target.classList.remove('show');
+                } else {
+                    // Collapse other open sections
+                    document.querySelectorAll('.collapse.show').forEach(openSection => {
+                        openSection.classList.remove('show');
+                    });
+
+                    // Expand the clicked section
+                    target.classList.add('show');
+                }
+            });
+        });
+    });
 
 document.addEventListener('DOMContentLoaded', function () {
     // Select all toggle-comment buttons
@@ -3613,67 +3824,6 @@ function calculateDifference(productId) {
         commentSection.style.display = 'none';
     }
 }
-
-
-
-document.addEventListener('DOMContentLoaded', function () {
-    const modals = document.querySelectorAll('.modal');
-
-    modals.forEach(modal => {
-        let isPrompting = false;
-
-        modal.addEventListener('hide.bs.modal', function (event) {
-            if (!modal.dataset.confirmed && !isPrompting) {
-                event.preventDefault();
-                isPrompting = true;
-
-                const confirmClose = confirm("Voulez-vous vraiment fermer cette fenêtre ?");
-                if (confirmClose) {
-                    modal.dataset.confirmed = "true";
-                    const bootstrapModal = bootstrap.Modal.getInstance(modal);
-                    if (bootstrapModal) {
-                        bootstrapModal.hide();
-                    }
-                }
-                isPrompting = false;
-            } else {
-                modal.dataset.confirmed = "false";
-            }
-        });
-
-        modal.addEventListener('hidden.bs.modal', function () {
-            cleanUpModal(modal);
-        });
-
-        modal.addEventListener('shown.bs.modal', function () {
-            resetModalStyles();
-        });
-    });
-
-    // Function to reset body and modal-specific styles
-    function resetModalStyles() {
-        document.body.classList.add('modal-open');
-        document.body.style.overflow = 'hidden'; // Prevent background scroll
-    }
-
-    // Function to clean up modal and restore scrolling
-    function cleanUpModal(modal) {
-        modal.dataset.confirmed = "false";
-        const backdrops = document.querySelectorAll('.modal-backdrop');
-        backdrops.forEach(backdrop => backdrop.remove());
-
-        document.body.classList.remove('modal-open');
-        document.body.style.overflow = ''; // Restore background scrolling
-    }
-
-    window.addEventListener('beforeunload', function () {
-        const backdrops = document.querySelectorAll('.modal-backdrop');
-        backdrops.forEach(backdrop => backdrop.remove());
-        document.body.classList.remove('modal-open');
-        document.body.style.overflow = '';
-    });
-});
-
 
 
 
