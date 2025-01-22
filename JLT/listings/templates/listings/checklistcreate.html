@@ -213,11 +213,33 @@
                         <span>Dashboard</span>
                     </a>
                 </li>
+                <li>
+                    <button type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#productModal" style="margin-left: 20px;">
+                        <i class="fa-solid fa-circle-plus"></i><span>Créer produit</span>
+                    </button>
+                </li>
             </ul>
         </div>
     </div>
 </nav>
 
+<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productModalLabel">Créer nouveau produit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    {{ product_form.as_p }}
+                    <button type="submit" name="product-form" class="btn btn-primary">Créer produit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 <h1 class="text-center">Liste Checklist</h1>
 
@@ -317,12 +339,15 @@
                     row.classList.add('clickable-row');
                     row.classList.add(`status-${checklist.status}`); // Add status class
                     row.dataset.href = `${baseUrl}${checklist.id}/`;
+                        // Parse the date and add 5 hours
+                    const originalDate = new Date(checklist.added_on);
+                    const updatedDate = new Date(originalDate.getTime() + 5 * 60 * 60 * 1000); // Add 5 hours in milliseconds
                     row.innerHTML = `
                         <td>${formatTimeWithoutSeconds(checklist.heure_livraison)}</td>
                         <td>${checklist.name}</td>
                         <td>${checklist.nb_convive}</td>
                         <td>${checklist.conseillere || 'N/A'}</td>
-                        <td>${formatDateTime(checklist.added_on)}</td>
+                        <td>${formatDateTime(updatedDate)}</td>
 
                         
                     `;

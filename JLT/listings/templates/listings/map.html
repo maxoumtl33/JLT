@@ -183,7 +183,9 @@
             <a data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a>
         </div>
         {% endif %}
-{% endfor %}
+        {% endfor %}
+    </div>
+    {% endfor %}
 
 {% for a in routes %}
     <div class="column" data-statut="{{ a.id }}">

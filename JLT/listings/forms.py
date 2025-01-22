@@ -47,10 +47,18 @@ class ProductsForm(forms.ModelForm):
         self.fields['category'].widget = forms.Select(choices=Product.choices)  # Explicitly set choices if needed
 
 
-class LivraisonForm(ModelForm):
+class LivraisonForm(forms.ModelForm):
     class Meta:
         model = Livraison
-        fields = ('status','commentaire')
+        fields = ('status', 'commentaire')
+        widgets = {
+            'status': forms.HiddenInput(),  # Hide the status field as it will be set automatically
+            'commentaire': forms.Textarea(attrs={
+                'placeholder': 'Ajoutez un commentaire...',
+                'class': 'form-control',
+                'rows': 4,
+            }),
+        }
 
 class LivraisonFeuilleForm(ModelForm):
     class Meta:

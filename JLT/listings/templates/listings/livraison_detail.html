@@ -3,6 +3,59 @@
 {% block content %}
 <style>
 
+.swipe-container {
+  position: relative;
+  width: 100%;
+  height: 60px;
+  background-color: #f8f8f8;
+  border-radius: 30px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.swipe-button {
+  position: absolute;
+  left: 0;
+  height: 50px;
+  width: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: left 0.3s ease, background-color 0.2s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.swipe-text {
+  font-size: 16px;
+  color: white;
+  user-select: none;
+  pointer-events: none;
+  text-transform: uppercase;
+}
+
+.swipe-button.dragging {
+  transition: none;
+}
+
+
+.swipe-container:hover .swipe-button {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.swipe-button.done {
+  background-color: #2196f3; /* Blue color once swipe is complete */
+  left: 100%;
+  transform: translateX(-100%);
+  box-shadow: none;
+}
+
+
+
 
 .card {
     margin-bottom: 20px;
@@ -50,23 +103,23 @@
      padding: 0;
      box-sizing: border-box;
  }
- 
+
  body {
      font-family: Arial, sans-serif;
      padding: 20px;
      background-color: #f9f9f9;
  }
- 
+
  /* Heading */
  h1 {
      text-align: center;
      color: #333;
      margin-bottom: 20px;
  }
- 
- 
 
- 
+
+
+
  /* Footer Navigation Bar (Fixed to bottom) */
  .bottom-navbar {
      position: fixed;
@@ -78,7 +131,7 @@
      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
      z-index: 1000; /* Ensures it's above other content */
  }
- 
+
  .bottom-navbar ul {
      list-style: none;
      display: flex;
@@ -86,46 +139,46 @@
      margin: 0;
      padding: 0;
  }
- 
+
  .bottom-navbar ul li {
      flex: 1;
      text-align: center;
  }
- 
+
  .bottom-navbar ul li a {
      color: white;
      text-decoration: none;
      font-size: 16px;
  }
- 
+
  .bottom-navbar ul li a:hover {
      text-decoration: underline;
  }
- 
+
  /* Responsive Design */
  @media (max-width: 768px) {
      .header-container {
          flex-direction: column;
          text-align: center;
      }
- 
+
      .navbar ul {
          flex-direction: column;
      }
- 
+
      .navbar ul li {
          margin: 10px 0;
      }
- 
+
      .stats-section {
          flex-direction: column;
          align-items: center;
      }
- 
+
      .map-section {
          padding: 10px;
      }
- 
+
      .order {
          font-size: 14px;
      }
@@ -137,11 +190,11 @@
      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
      margin: 20px;
  }
- 
- 
+
+
  }
- 
- 
+
+
  </style>
 <nav class="bottom-navbar">
   <ul>
@@ -181,7 +234,7 @@
       </li>
       {% endif %}
 
-            
+
     </ul>
 </nav>
 
@@ -319,7 +372,7 @@
           </div>
 
           <!-- Photo Livraison -->
-   
+
           <div class="col-md-6">
             <div class="card border-0">
               <div class="card-body">
@@ -434,13 +487,14 @@
                                     <ul>
                                       {% if item.filtered_checklist_items %}
                                           {% for checklist_item in item.filtered_checklist_items %}
-                                              <li>{{ checklist_item.product.name }}: {{ checklist_item.quantity }}</li>
+                                              <li><strong>{{ checklist_item.quantity }}</strong> <strong style="margin-left: 10px;">{{ checklist_item.product.name }}</strong>
+                                              </li>
                                           {% endfor %}
                                       {% else %}
                                           <li>Aucun produit associé.</li>
                                       {% endif %}
                                   </ul>
-                                  
+
                               </p>
                                 </div>
                               </div>
@@ -453,10 +507,10 @@
                                       <div class="row">
                                           {% for photo in item.checklistrecupphoto_set.all %}
                                               <div class="col-6 mb-2">
-                                                  <img src="{{ photo.image.url }}" alt="Photo" class="img-fluid rounded thumbnail" 
-                                                       data-bs-toggle="modal" 
-                                                       data-bs-target="#photoModal" 
-                                                       data-photo-url="{{ photo.image.url }}" 
+                                                  <img src="{{ photo.image.url }}" alt="Photo" class="img-fluid rounded thumbnail"
+                                                       data-bs-toggle="modal"
+                                                       data-bs-target="#photoModal"
+                                                       data-photo-url="{{ photo.image.url }}"
                                                        style="cursor: pointer;" />
                                               </div>
                                           {% empty %}
@@ -468,7 +522,7 @@
                                   </div>
                               </div>
                           </div>
-                          
+
                           <!-- Modal for displaying full-sized images -->
                           <div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
                               <div class="modal-dialog modal-lg">
@@ -483,8 +537,8 @@
                                   </div>
                               </div>
                           </div>
-                          
-                          
+
+
                             <div class="col-md-6">
                               <div class="card border-0">
                                 <div class="card-body">
@@ -527,13 +581,24 @@
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
   <div class="offcanvas-body">
-    <form action="{% url 'validate_livraison' livraison.id %}" method="POST">
+    <form id="validateForm" action="{% url 'validate_livraison' livraison.id %}" method="POST">
       {% csrf_token %}
-      {{ form.as_p }}
-      <input type="submit" value="Valider" class="btn btn-primary">
+    <div class="mb-3">
+        <label for="commentaire" class="form-label">Commentaire</label>
+        <textarea id="commentaire" name="commentaire" class="form-control" rows="3" placeholder="Ajouter un commentaire" required></textarea>
+    </div>
+    <div class="swipe-container">
+        <div id="swipeButton" class="swipe-button">
+            <span class="swipe-text"><i class="fa-solid fa-circle-check" style="color: #63E6BE;"></i></span>
+        </div>
+    </div>
     </form>
   </div>
 </div>
+
+
+
+
 
 <!-- Photo Upload Form -->
 <div class="offcanvas offcanvas-start" tabindex="-1" id="uploadOffcanvas" aria-labelledby="uploadOffcanvasLabel">
@@ -552,7 +617,7 @@
       {% endfor %}
       <button type="submit" class="btn btn-primary">Déposer les photos</button>
     </form>
-    
+
   </div>
 </div>
 
@@ -582,6 +647,65 @@
 </div>
 
 <script>
+
+const swipeButton = document.getElementById('swipeButton');
+const commentaire = document.getElementById('commentaire');
+const form = document.getElementById('validateForm');
+let isDragging = false;
+let startX = 0;
+
+swipeButton.addEventListener('mousedown', (e) => {
+    e.preventDefault(); // Prevent any default action
+    isDragging = true;
+    startX = e.clientX; // Store the initial x position
+    swipeButton.classList.add('dragging');
+});
+
+document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+
+    // Calculate the offset from the initial position
+    const offset = Math.max(0, Math.min(e.clientX - startX, form.offsetWidth - swipeButton.offsetWidth));
+    swipeButton.style.left = `${offset}px`; // Move the swipe button
+
+    // Check if the button is swiped all the way to the right
+    if (offset >= form.offsetWidth - swipeButton.offsetWidth) {
+        // You can change the button color or style for visual feedback
+        swipeButton.style.backgroundColor = '#45a049'; // Change color on proper swipe
+    } else {
+        // Reset color if not complete
+        swipeButton.style.backgroundColor = '#4caf50';
+    }
+});
+
+document.addEventListener('mouseup', () => {
+    if (isDragging) {
+        const offset = parseFloat(swipeButton.style.left); // Get the current position
+        
+        // Check if the swipe button reached the end
+        if (offset >= form.offsetWidth - swipeButton.offsetWidth) {
+            validateLivraison(); // If reached, validate
+        } else {
+            resetButton(); // Reset to start position if not
+        }
+    }
+});
+
+document.addEventListener('mouseleave', () => {
+    if (isDragging) resetButton(); // Reset if mouse leaves the document
+});
+
+function validateLivraison() {
+    // Submit form directly when swiped all the way
+    form.submit(); 
+}
+
+function resetButton() {
+    isDragging = false;
+    swipeButton.style.left = '0'; // Reset button position
+    swipeButton.classList.remove('dragging');
+}
+
   document.querySelectorAll('.list-group-item.active').forEach(item => {
     item.addEventListener('click', function() {
       const content = document.getElementById(this.getAttribute('href').substring(1));
@@ -591,7 +715,7 @@
 
   // JavaScript to handle the photo modal
   const photoModal = document.getElementById('photoModal');
-    const modalImage = document.getElementById('modalImage');
+  const modalImage = document.getElementById('modalImage');
 
     photoModal.addEventListener('show.bs.modal', function (event) {
         // Get the button that triggered the modal
@@ -601,6 +725,11 @@
         // Update the modal's content
         modalImage.src = photoUrl; // Set the source of the modal image
     });
+
+
+
+
+
 </script>
 
 

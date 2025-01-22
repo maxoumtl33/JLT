@@ -1,6 +1,11 @@
 {% extends 'listings/base.html' %}
 {% load static %}
 {% load custom_filters %}
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+{% if LANGUAGE_CODE != "fr" %}
+    {% trans "French" as fr %}
+{% endif %}
 {% block content %}
 <link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.css" rel="stylesheet">
 <!-- Custom CSS -->
@@ -302,8 +307,7 @@
         {% for checklist in checklists %}
         {% if checklist.is_active %}
         <div class="page" data-checklist-date="{{ checklist.date|date:'Y-m-d' }}">
-            <h1 style="display: none;">{{ checklist.date|date:"d/m/Y" }}</h1>
-            <h1>{{ checklist.livraison.journee }}</h1>
+            <h1>{{ checklist.date|date:"l d F Y" }}</h1>
             <h1>{{ checklist.name }}</h1>
             <p><strong>{{ checklist.heure_livraison }}</strong></p>
             {% if checklist.notechecklist %}
@@ -433,12 +437,15 @@
                     row.classList.add('clickable-row');
                     row.classList.add(`status-${checklist.status}`); // Add status class
                     row.dataset.href = `${baseUrl}${checklist.id}/`;
+                    // Parse the date and add 5 hours
+                    const originalDate = new Date(checklist.added_on);
+                    const updatedDate = new Date(originalDate.getTime() + 5 * 60 * 60 * 1000); // Add 5 hours in milliseconds
                     row.innerHTML = `
                         <td>${formatTimeWithoutSeconds(checklist.heure_livraison)}</td>
                         <td>${checklist.name}</td>
                         <td>${checklist.nb_convive}</td>
                         <td>${checklist.conseillere || 'N/A'}</td>
-                        <td>${formatDateTime(checklist.added_on)}</td>
+                        <td>${formatDateTime(updatedDate)}</td>
 
 
                     `;

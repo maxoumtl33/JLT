@@ -739,6 +739,7 @@ def conseiller_dashboard(request):
 
     # Initialize both forms
     checklist_form = ChecklistForm(initial={'conseillere': conseiller_instance})
+    product_form = ProductsForm()
 
     if request.method == 'POST':
         if 'create_checklist' in request.POST:
@@ -767,6 +768,14 @@ def conseiller_dashboard(request):
             except Checklist.DoesNotExist:
                 messages.error(request, 'Checklist non trouvée.')
 
+        elif 'product-form' in request.POST:
+            # Handle product creation form
+            product_form = ProductsForm(request.POST)
+            if product_form.is_valid():
+                product_form.save()
+                messages.success(request, 'Nouveau produit créé avec succès.')
+                return redirect('creerchecklist')
+
     context = {
         'checklists': checklists,
         'checklist_form': checklist_form,
@@ -776,6 +785,7 @@ def conseiller_dashboard(request):
         'page_obj': page_obj,
         'encours': encours,
         'valide': valide,
+        'product_form': product_form,
         'refuse': refuse,
     }
 
@@ -799,7 +809,7 @@ def creerchecklist(request):
     # Get the number of days in the selected month
     _, num_days_in_month = calendar.monthrange(current_year, selected_month)
     days_in_month = [day for day in range(1, num_days_in_month + 1)]  # Adjust days in month
-
+    
     french_months = [
         "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
         "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
@@ -812,11 +822,24 @@ def creerchecklist(request):
     form2 = ChecklistForm()
 
     if request.method == 'POST':
-        form2 = ChecklistForm(request.POST)
-        if form2.is_valid():
-            form2.save()
-            messages.success(request, 'Nouvelle Checklist')
-            return redirect('creerchecklist')
+        if 'product-form' in request.POST:
+            # Handle product creation form
+            product_form = ProductsForm(request.POST)
+            if product_form.is_valid():
+                product_form.save()
+                messages.success(request, 'Nouveau produit créé avec succès.')
+                return redirect('creerchecklist')
+        else:
+            # Handle checklist form
+            form2 = ChecklistForm(request.POST)
+            if form2.is_valid():
+                form2.save()
+                messages.success(request, 'Nouvelle Checklist')
+                return redirect('creerchecklist')
+    else:
+        product_form = ProductsForm()
+        form2 = ChecklistForm()
+
 
  
 
@@ -827,6 +850,7 @@ def creerchecklist(request):
         'valide': valide,
         'refuse': refuse,
         'today': today,
+        'product_form': product_form,
         'months': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],  # Months as numbers
         'selected_month': selected_month,
         'days': days_in_month,
@@ -1945,11 +1969,24 @@ def livreur_list(request):
 
 def validate_livraison(request, livraison_id):
     livraison = get_object_or_404(Livraison, id=livraison_id)
-    form = LivraisonForm(request.POST or None, instance=livraison)
-    if request.method == 'POST' and form.is_valid():
-        form.save()
-        return redirect('livraison-detail', ip=livraison_id)
-    return redirect('livraison-detail', ip=livraison_id)
+    
+    if request.method == 'POST':
+        form = LivraisonForm(request.POST, instance=livraison)
+        if form.is_valid():
+            livraison = form.save(commit=False)
+            livraison.status = True  # Set status to True.
+            livraison.save()
+
+            # If it's an AJAX request, return JSON response
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'redirect_url': reverse('livraison-detail', args=[livraison.id]),  # Ensure you pass the correct argument
+                })
+            return redirect('livraison-detail', ip=livraison.id)  # Use `ip` or `livraison_id` based on your URL config
+    
+    return redirect('livraison-detail', ip=livraison.id)  # Again, use `ip` or `livraison_id` accordingly
+
 
 def livreur_detail(request, pk):  # notez le paramètre id supplémentaire
     if request.user.is_authenticated :
@@ -4492,14 +4529,17 @@ def duplicate_model(request, model_id):
         new_checklist.is_active = False
         new_checklist.save()
     
-        # Duplicate ChecklistItems
+    
+        # Duplicate ChecklistItems but do not update the inventory
         for item in checklist.checklistitem_set.all():
             new_item = ChecklistItem()
             new_item.checklist = new_checklist
             new_item.product = item.product
             new_item.quantity = item.quantity
             new_item.status = item.status
+            new_item.skip_inventory_update = True  # Set the flag to skip inventory update
             new_item.save()
+
 
         for photo in checklist.checklistrecupphoto_set.all():
             new_photo = ChecklistRecupPhoto()
@@ -4509,3 +4549,53 @@ def duplicate_model(request, model_id):
 
     # Redirect back to a page or render a template
     return redirect('recuptoday')  # Redirect to a specific URL name
+
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+
+def duplicate_checklist(request, checklist_id):
+    original_checklist = get_object_or_404(Checklist, pk=checklist_id)
+
+    # Duplicate the checklist itself
+    new_checklist = Checklist.objects.create(
+        name=f"Copie de {original_checklist.name}",
+        livraison=None,
+        date=original_checklist.date,
+        lieu=original_checklist.lieu,
+        num_contrat=None,
+        nb_convive=original_checklist.nb_convive,
+        heure_livraison=original_checklist.heure_livraison,
+        md=None,
+        added_on=timezone.now() - timedelta(hours=5),
+        status='en_cours',
+        rapportmd=None,
+        rapportrecup=None,
+        commentairevente=None,
+        notechecklist=None,
+        conseillere=original_checklist.conseillere,
+        is_active=True  # Assume the duplicate is active by default
+    )
+
+    # Duplicate the checklist items (if needed)
+    for item in original_checklist.checklistitem_set.all():
+        ChecklistItem.objects.create(
+            checklist=new_checklist,
+            product=item.product,
+            quantity=item.quantity,
+            is_completed=item.is_completed,
+            status=item.status,
+            consumed_quantity=item.consumed_quantity,
+            unconsumed_quantity=item.unconsumed_quantity,
+            commentaire=item.commentaire,
+        )
+
+    # Duplicate documents (correct the field name to 'document')
+    for document in original_checklist.checklistdocument_set.all():
+        ChecklistDocument.objects.create(
+            checklist=new_checklist,
+            document=document.document,  # Use 'document' as the field name
+            uploaded_at=document.uploaded_at,  # Preserve the uploaded timestamp
+        )
+
+    # Redirect to the detail view of the new checklist
+    return HttpResponseRedirect(reverse('checklist-detail', args=[new_checklist.id]))
