@@ -116,3 +116,7 @@ def get_itemss(checklist_items, product_id):
         return checklist_items.get(product_id=product_id)
     except ChecklistItem.DoesNotExist:
         return None
+    
+@register.filter(name='add_class')
+def add_class(field, css_class):
+    return field.as_widget(attrs={"class": css_class})

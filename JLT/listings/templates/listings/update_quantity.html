@@ -37,6 +37,12 @@
                     </form>
                 </div>
             </div>
+            <!-- Add the new button -->
+            <div class="text-center mt-4">
+                <a href="{% url 'adjust_product_quantity' %}" class="btn btn-secondary btn-lg">
+                    Ajuster la quantité
+                </a>
+            </div>
         </div>
     {% else %}
         <div class="container py-5">
@@ -46,4 +52,6 @@
             </div>
         </div>
     {% endif %}
+
+
 {% endblock %}
