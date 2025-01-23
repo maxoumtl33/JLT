@@ -213,6 +213,11 @@ def order_listcuisine(request):
         'search_date': search_date
     })
 
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.contrib import messages
+
+
 def mark_order_donecuisine(request, order_id):
     order = OrderCuisine.objects.get(id=order_id)
     order.is_done = True
@@ -447,56 +452,56 @@ def voir_checklist(request):
 
 def checklistvoir_detail(request, checklist_id):
     checklist = get_object_or_404(Checklist, pk=checklist_id)
-    checklist_item = ChecklistItem.objects.filter(checklist=checklist, quantity__gt=0)
+    checklist_items = ChecklistItem.objects.filter(checklist=checklist, quantity__gt=0)
     quantity_change_logs = QuantityChangeLog.objects.filter(
         checklist_item__checklist_id=checklist_id
     ).order_by('-timestamp')
-    change_logs = ChecklistItemChangeLog.objects.filter(checklist_item__checklist=checklist).order_by('-timestamp')
+    
     products = Product.objects.all()
-    encours = "en_cours"
-    valide = "valide"
-    refuse = "refuse"
 
-    # Process the checklist note form if submitted
     if request.method == 'POST':
-        # Check if the form is for updating the note
-        if 'note' in request.POST:
-            note = request.POST.get('note')
-            if note is not None:
-                checklist.notechecklist = note  # Save the note to the model
-                checklist.save()
-            return redirect('checklistvoir-detail', checklist_id=checklist_id)  # Redirect back to the same page
-
-        # Process the checklist item status change form
         item_id = request.POST.get('item_id')
         status = request.POST.get('status')
+        quantity_change = int(request.POST.get('quantity_change', 0))  # Get quantity change value
 
         if item_id and status:
             checklist_item = get_object_or_404(ChecklistItem, id=item_id, checklist=checklist)
+            product = checklist_item.product  # Get the associated product
+
+
+            if status == 'refuse':
+                messages.warning(request, f'Le produit {checklist_item.product.name} a été refusé.')
+
+            # Adjust the product's inventory
+            if quantity_change != 0:
+                product.adjust_quantity(quantity_change)  # Adjust inventory
+                product.save()
+
+                # Log the quantity change
+                QuantityChangeLog.objects.create(
+                    checklist_item=checklist_item,
+                    previous_quantity=checklist_item.quantity,
+                    new_quantity=checklist_item.quantity + quantity_change,
+                    quantity_change=quantity_change,
+                    changed_by=request.user,
+                )
+
+            # Update the checklist item's status
             checklist_item.status = status
             checklist_item.save()
 
-            # Update checklist status based on items' statuses
+            # Optionally update the checklist's overall status
             checklist.update_status()
 
-            return redirect('checklistvoir-detail', checklist_id=checklist_id)
-
-    # Prepare checklist items to be displayed with their statuses
-    items = ChecklistItem.objects.filter(checklist=checklist)
+            return redirect('checklistvoir-detail', checklist_id=checklist.id)
 
     context = {
         'checklist': checklist,
-        'checklist_item': checklist_item,
+        'checklist_item': checklist_items,
         'products': products,
-        'items': items,
-        'encours': encours,
-        'valide': valide,
-        'refuse': refuse,
         'quantity_change_logs': quantity_change_logs,
-        'change_logs': change_logs,
     }
     return render(request, 'listings/checklistevoir_detail.html', context)
-
 
 def product_detail(request, item_id):
     item = get_object_or_404(ItemInv, pk=item_id)
@@ -707,7 +712,23 @@ def checklist_detail(request, checklist_id):
     }
     return render(request, 'listings/checklist_detail.html', context)
 
+@csrf_exempt
+def adjust_product_quantity(request):
+    if request.method == 'POST':
+        form = AdjustProductQuantityForm(request.POST)
+        if form.is_valid():
+            product = form.cleaned_data['product']
+            quantity = form.cleaned_data['quantity']
+            if product.quantity >= quantity:
+                product.adjust_quantity(-quantity)
+                messages.success(request, f"{quantity} {product.name} ont bien été enlevé.")
+            else:
+                messages.error(request, f"Stock insuffisant pour {product.name}. Disponible: {product.quantity}.")
+            return redirect('adjust_product_quantity')  # Replace with your desired redirect URL
+    else:
+        form = AdjustProductQuantityForm()
 
+    return render(request, 'listings/adjust_quantity.html', {'form': form})
 
 def edit_item(request, pk):
     item = get_object_or_404(ItemInv, pk=pk)

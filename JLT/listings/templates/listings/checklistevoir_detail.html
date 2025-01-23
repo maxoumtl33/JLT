@@ -130,48 +130,48 @@
                             {{ checklist_product.quantity }}
                         </td>
                         <td class="align-middle status-cell">
-                            <form method="post" action="{% url 'checklistvoir-detail' checklist.id %}">
+                            <form method="post" action="{% url 'checklistvoir-detail' checklist.id %}" id="status-form-{{ checklist_product.id }}">
                                 {% csrf_token %}
                                 <input type="hidden" name="item_id" value="{{ checklist_product.id }}">
-                                
-                                <!-- Hidden input to store the selected status -->
                                 <input type="hidden" name="status" id="status_{{ checklist_product.id }}" value="">
-
-                                <!-- "Validé" Button with a check icon -->
+                                <!-- Hidden input for quantity -->
+                                <input type="hidden" id="quantity-{{ checklist_product.id }}" value="{{ checklist_product.quantity }}">
+    
+                                <!-- "Validé" Button -->
                                 <button type="button" class="btn btn-outline-success btn-sm rounded-circle" 
-                                onclick="submitStatusForm('{{ checklist_product.id }}', 'valide')" 
-                                title="Validé">
-                                <i class="fa-solid fa-check"></i>
+                                        onclick="submitStatusForm('{{ checklist_product.id }}', 'valide')"
+                                        title="Validé">
+                                    <i class="fa-solid fa-check"></i>
                                 </button>
-
-                                <!-- "Refusé" Button with an X icon -->
+    
+                                <!-- "Refusé" Button -->
                                 <button type="button" class="btn btn-outline-danger btn-sm rounded-circle" 
-                                onclick="submitStatusForm('{{ checklist_product.id }}', 'refuse')" 
-                                title="Refusé">
-                                <i class="fa-solid fa-times"></i>
+                                        onclick="submitStatusForm('{{ checklist_product.id }}', 'refuse')"
+                                        title="Refusé">
+                                    <i class="fa-solid fa-times"></i>
                                 </button>
-
+    
+                                <!-- "En cours" Button -->
                                 <button type="button" class="btn btn-outline-warning btn-sm rounded-circle" 
-                                onclick="submitStatusForm('{{ checklist_product.id }}', 'en_cours')" 
-                                title="Encours">
-                                <i class="fa-solid fa-spinner fa-spin" style="color: #FFD43B;"></i>
+                                        onclick="submitStatusForm('{{ checklist_product.id }}', 'en_cours')"
+                                        title="En cours">
+                                    <i class="fa-solid fa-spinner fa-spin" style="color: #FFD43B;"></i>
                                 </button>
                             </form>
                         </td>
                         <td class="align-middle">
                             {{ checklist_product.commentaire }}
                         </td>
-
                     </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="3" class="text-center text-muted">Pas de produits dans cette checklist.</td>
+                        <td colspan="4" class="text-center text-muted">Pas de produits dans cette checklist.</td>
                     </tr>
-                    
                 {% endfor %}
             </tbody>
         </table>
     </div>
+    
 
     <h3 class="mt-4">Changement de quantité</h3>
     <br>
@@ -207,12 +207,45 @@
 <script>
 
 function submitStatusForm(itemId, statusValue) {
+
+    
+    // Debugging statements
+    console.log('Submitting form for item ID:', itemId, 'with status:', statusValue);
+
+    // Get the form
+    const form = document.getElementById('status-form-' + itemId);
+
     // Set the hidden status input value
     document.getElementById('status_' + itemId).value = statusValue;
 
+    // Get the quantity from a visible or hidden field associated with the item
+    const quantityElement = document.getElementById('quantity-' + itemId);
+    const itemQuantity = parseInt(quantityElement ? quantityElement.value : 0);
+
+    if (isNaN(itemQuantity)) {
+        console.error('Invalid quantity for item ID:', itemId);
+        return; // Do not proceed if the quantity is invalid
+    }
+
+    // Create or update the hidden input for quantity change
+    let quantityChangeInput = form.querySelector('input[name="quantity_change"]');
+    if (!quantityChangeInput) {
+        quantityChangeInput = document.createElement('input');
+        quantityChangeInput.type = 'hidden';
+        quantityChangeInput.name = 'quantity_change';
+        form.appendChild(quantityChangeInput);
+    }
+
+    // Set the quantity change value based on the action
+    quantityChangeInput.value = statusValue === 'valide' ? -itemQuantity : itemQuantity;
+
+    // Debugging statement to verify quantity
+    console.log('Quantity Change Value:', quantityChangeInput.value);
+
     // Submit the form
-    document.getElementById('status_' + itemId).closest('form').submit();
+    form.submit();
 }
+
 
 function printChecklist() {
     // Récupère le contenu de la section à imprimer

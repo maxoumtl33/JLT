@@ -21,6 +21,21 @@ ChecklistDocumentFormSet = modelformset_factory(
     extra=8  # Number of empty file upload fields displayed initially
 )
 
+from django import forms
+from django_select2.forms import Select2Widget
+from .models import Product
+
+class AdjustProductQuantityForm(forms.Form):
+    product = forms.ModelChoiceField(
+        queryset=Product.objects.all(),
+        widget=Select2Widget(attrs={'class': 'select2'}),
+        label="Sélectionner un produit",  # Label for the field itself
+        empty_label="-- Choisissez un produit --"  # Label for the default empty choice
+    )
+    quantity = forms.IntegerField(min_value=1, label="Quantité")
+
+
+
 
 class ChecklistItemForm(forms.ModelForm):
     class Meta:

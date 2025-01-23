@@ -492,8 +492,9 @@ class ChecklistItem(models.Model):
     consumed_quantity = models.PositiveIntegerField(default=0)  # Amount that has been consumed
     unconsumed_quantity = models.PositiveIntegerField(default=0)  # Amount that remains unconsumed
     commentaire = models.CharField(max_length=100, null=True)
-    
-    skip_inventory_update = False  # New flag to skip inventory updates
+
+    # Remove or comment this line if you won't use it
+    # skip_inventory_update = False  
 
     class Meta:
         unique_together = ('checklist', 'product', 'status')
@@ -525,12 +526,13 @@ class ChecklistItem(models.Model):
 
         super().save(*args, **kwargs)
 
-        if self.product and not self.skip_inventory_update:
-            self.product.adjust_quantity(-quantity_difference)
+        # Comment out or remove this section to prevent inventory updates
+        # if self.product and not self.skip_inventory_update:
+        #     self.product.adjust_quantity(-quantity_difference)
 
     def delete(self, *args, **kwargs):
         if self.product:
-            self.product.adjust_quantity(self.quantity)
+            self.product.adjust_quantity(self.quantity) # Optional: Only if you want to handle deletions
         super().delete(*args, **kwargs)
 
 class QuantityChangeLog(models.Model):

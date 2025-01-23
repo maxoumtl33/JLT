@@ -589,7 +589,7 @@
     </div>
     <div class="swipe-container">
         <div id="swipeButton" class="swipe-button">
-            <span class="swipe-text"><i class="fa-solid fa-circle-check" style="color: #63E6BE;"></i></span>
+            <span class="swipe-text"><i class="fa-solid fa-circle-arrow-right" style="color: #63E6BE;"></i></i></span>
         </div>
     </div>
     </form>
@@ -654,34 +654,34 @@ const form = document.getElementById('validateForm');
 let isDragging = false;
 let startX = 0;
 
-swipeButton.addEventListener('mousedown', (e) => {
-    e.preventDefault(); // Prevent any default action
+const startDrag = (e) => {
+    e.preventDefault();
     isDragging = true;
-    startX = e.clientX; // Store the initial x position
+    // for mobile and desktop
+    startX = e.touches ? e.touches[0].clientX : e.clientX; // Use touches for touchscreen devices
     swipeButton.classList.add('dragging');
-});
+};
 
-document.addEventListener('mousemove', (e) => {
+const dragMove = (e) => {
     if (!isDragging) return;
 
     // Calculate the offset from the initial position
-    const offset = Math.max(0, Math.min(e.clientX - startX, form.offsetWidth - swipeButton.offsetWidth));
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX; // Use touches for touchscreen devices
+    const offset = Math.max(0, Math.min(clientX - startX, form.offsetWidth - swipeButton.offsetWidth));
     swipeButton.style.left = `${offset}px`; // Move the swipe button
 
     // Check if the button is swiped all the way to the right
     if (offset >= form.offsetWidth - swipeButton.offsetWidth) {
-        // You can change the button color or style for visual feedback
         swipeButton.style.backgroundColor = '#45a049'; // Change color on proper swipe
     } else {
-        // Reset color if not complete
-        swipeButton.style.backgroundColor = '#4caf50';
+        swipeButton.style.backgroundColor = '#4caf50'; // Reset color
     }
-});
+};
 
-document.addEventListener('mouseup', () => {
+const endDrag = () => {
     if (isDragging) {
         const offset = parseFloat(swipeButton.style.left); // Get the current position
-        
+
         // Check if the swipe button reached the end
         if (offset >= form.offsetWidth - swipeButton.offsetWidth) {
             validateLivraison(); // If reached, validate
@@ -689,15 +689,22 @@ document.addEventListener('mouseup', () => {
             resetButton(); // Reset to start position if not
         }
     }
-});
+};
 
-document.addEventListener('mouseleave', () => {
-    if (isDragging) resetButton(); // Reset if mouse leaves the document
-});
+document.addEventListener('mouseup', endDrag);
+document.addEventListener('mouseleave', resetButton);
+
+swipeButton.addEventListener('mousedown', startDrag);
+swipeButton.addEventListener('touchstart', startDrag); // Touch start event for mobile
+
+document.addEventListener('mousemove', dragMove);
+document.addEventListener('touchmove', dragMove); // Touch move event for mobile
+
+document.addEventListener('mouseup', endDrag);
+document.addEventListener('touchend', endDrag); // Touch end event for mobile
 
 function validateLivraison() {
-    // Submit form directly when swiped all the way
-    form.submit(); 
+    form.submit(); // Directly submit the form
 }
 
 function resetButton() {
