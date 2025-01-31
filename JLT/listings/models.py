@@ -352,9 +352,8 @@ class Product(models.Model):
     quantity = models.IntegerField(default=0)
     category = models.CharField(max_length=100, choices= choices)
 
-    def adjust_quantity(self, amount):
-        """Adjust the product quantity."""
-        self.quantity += amount
+    def adjust_quantity(self, quantity_change):
+        self.quantity += quantity_change
         self.save()
 
 
@@ -482,6 +481,8 @@ class ChecklistItem(models.Model):
         ('en_cours', 'En cours'),
         ('valide', 'Validé'),
         ('refuse', 'Refusé'),
+        ('pending', 'pending'),
+        ('complete', 'complete')
     ]
 
     checklist = models.ForeignKey(Checklist, on_delete=models.CASCADE)
@@ -492,6 +493,10 @@ class ChecklistItem(models.Model):
     consumed_quantity = models.PositiveIntegerField(default=0)  # Amount that has been consumed
     unconsumed_quantity = models.PositiveIntegerField(default=0)  # Amount that remains unconsumed
     commentaire = models.CharField(max_length=100, null=True)
+    com = models.CharField(max_length=100, null=True)
+    previous_quantity = models.PositiveIntegerField(default=0)
+    previous_status = models.CharField(max_length=100, null=True)
+    is_stock_updated = models.BooleanField(default=False)
 
     # Remove or comment this line if you won't use it
     # skip_inventory_update = False  
@@ -505,46 +510,55 @@ class ChecklistItem(models.Model):
             raise ValidationError('This product already has a status in this checklist.')
 
     def save(self, *args, **kwargs):
-        if self.pk is None:
-            quantity_difference = self.quantity
-            previous_quantity = 0
-        else:
-            original = ChecklistItem.objects.get(pk=self.pk)
-            quantity_difference = self.quantity - original.quantity
-            previous_quantity = original.quantity
-            if quantity_difference != 0:
-                QuantityChangeLog.objects.create(
-                    checklist_item=self,
-                    previous_quantity=previous_quantity,
-                    new_quantity=self.quantity,
-                    quantity_change=quantity_difference,
-                    changed_by=self._changed_by  # This should be set in the view
-                )
+        if self.pk:  # If the object exists, retrieve the previous state
+            try:
+                original = ChecklistItem.objects.get(pk=self.pk)
+            except ChecklistItem.DoesNotExist:
+                original = None
 
-                # Set status to 'en_cours' if quantity changes
-                self.status = 'en_cours'
+            if original:
+                self.previous_quantity = original.quantity
+                self.previous_status = original.status  # Store previous status
+
+                # If quantity changes, update status to 'pending'
+                if self.quantity != original.quantity:
+                    self.status = 'pending'  
+                    self.com = 'complete'
+
+                    # Log the changes
+                    QuantityChangeLog.objects.create(
+                        checklist_item=self,
+                        previous_quantity=original.quantity,
+                        new_quantity=self.quantity,
+                        quantity_change=self.quantity - original.quantity,
+                        changed_by=getattr(self, '_changed_by', None),
+                        previous_status=original.status,  # Log previous status
+                    )
 
         super().save(*args, **kwargs)
 
-        # Comment out or remove this section to prevent inventory updates
-        # if self.product and not self.skip_inventory_update:
-        #     self.product.adjust_quantity(-quantity_difference)
+
+
 
     def delete(self, *args, **kwargs):
         if self.product:
             self.product.adjust_quantity(self.quantity) # Optional: Only if you want to handle deletions
         super().delete(*args, **kwargs)
 
+
+
 class QuantityChangeLog(models.Model):
     checklist_item = models.ForeignKey(ChecklistItem, on_delete=models.CASCADE)
     previous_quantity = models.IntegerField()
     new_quantity = models.IntegerField()
     quantity_change = models.IntegerField()  # The difference between previous and new quantity
+    previous_status = models.CharField(max_length=20, null=True, blank=True)  # Log the previous status
     changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Change log for {self.checklist_item.product.name} - {self.timestamp}"
+
 
 
 class ChecklistItemChangeLog(models.Model):

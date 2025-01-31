@@ -14,11 +14,12 @@ class ChecklistDocumentForm(forms.ModelForm):
     class Meta:
         model = ChecklistDocument
         fields = ['document']
+    
 
 ChecklistDocumentFormSet = modelformset_factory(
     ChecklistDocument,
     form=ChecklistDocumentForm,
-    extra=8  # Number of empty file upload fields displayed initially
+    extra=5  # Number of empty file upload fields displayed initially
 )
 
 from django import forms

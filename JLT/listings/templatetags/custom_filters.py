@@ -4,6 +4,9 @@ from listings.models import ChecklistItem
 
 register = template.Library()
 
+
+
+
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key, None)
@@ -120,3 +123,7 @@ def get_itemss(checklist_items, product_id):
 @register.filter(name='add_class')
 def add_class(field, css_class):
     return field.as_widget(attrs={"class": css_class})
+
+
+
+

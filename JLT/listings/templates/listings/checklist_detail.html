@@ -330,6 +330,10 @@
         transition: background-color 0.3s;
     }
 
+    .modal-body .form-row {
+        margin-bottom: 15px;  /* Adjust this value to increase or decrease the spacing */
+    }
+
     .download-btn:hover {
         background-color: #0056b3;
     }
@@ -756,6 +760,23 @@
                                         {% endif %}
                                         {% endwith %}
                                     </td>
+                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                    {% if checklist_item and checklist_item.commentaire %}
+                                    <td class="small-cell"
+                                        {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;"
+                                        {% endif %}>
+                                        <i
+                                            class="fa-solid fa-comment-dots"
+                                            tabindex="0"
+                                            data-bs-toggle="popover"
+                                            data-bs-trigger="hover focus"
+                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                            >
+                                        </i>
+                                    </td>
+                                    {% endif %}
+                                    {% endwith %}
                                 </tr>
                                 {% endif %}
                                 {% endfor %}
@@ -787,6 +808,23 @@
                                         {% endif %}
                                         {% endwith %}
                                     </td>
+                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                    {% if checklist_item and checklist_item.commentaire %}
+                                    <td class="small-cell"
+                                        {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;"
+                                        {% endif %}>
+                                        <i
+                                            class="fa-solid fa-comment-dots"
+                                            tabindex="0"
+                                            data-bs-toggle="popover"
+                                            data-bs-trigger="hover focus"
+                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                            >
+                                        </i>
+                                    </td>
+                                    {% endif %}
+                                    {% endwith %}
                                 </tr>
                                 {% endif %}
                                 {% endfor %}
@@ -818,6 +856,23 @@
                                         {% endif %}
                                         {% endwith %}
                                     </td>
+                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                    {% if checklist_item and checklist_item.commentaire %}
+                                    <td class="small-cell"
+                                        {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;"
+                                        {% endif %}>
+                                        <i
+                                            class="fa-solid fa-comment-dots"
+                                            tabindex="0"
+                                            data-bs-toggle="popover"
+                                            data-bs-trigger="hover focus"
+                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                            >
+                                        </i>
+                                    </td>
+                                    {% endif %}
+                                    {% endwith %}
                                 </tr>
                                 {% endif %}
                                 {% endfor %}
@@ -849,6 +904,23 @@
                                         {% endif %}
                                         {% endwith %}
                                     </td>
+                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                    {% if checklist_item and checklist_item.commentaire %}
+                                    <td class="small-cell"
+                                        {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;"
+                                        {% endif %}>
+                                        <i
+                                            class="fa-solid fa-comment-dots"
+                                            tabindex="0"
+                                            data-bs-toggle="popover"
+                                            data-bs-trigger="hover focus"
+                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                            >
+                                        </i>
+                                    </td>
+                                    {% endif %}
+                                    {% endwith %}
                                 </tr>
                                 {% endif %}
                                 {% endfor %}
@@ -879,6 +951,23 @@
                                         {% endif %}
                                         {% endwith %}
                                     </td>
+                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                    {% if checklist_item and checklist_item.commentaire %}
+                                    <td class="small-cell"
+                                        {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;"
+                                        {% endif %}>
+                                        <i
+                                            class="fa-solid fa-comment-dots"
+                                            tabindex="0"
+                                            data-bs-toggle="popover"
+                                            data-bs-trigger="hover focus"
+                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                            >
+                                        </i>
+                                    </td>
+                                    {% endif %}
+                                    {% endwith %}
                                 </tr>
                                     {% endif %}
                                 {% endfor %}
@@ -909,6 +998,23 @@
                                         {% endif %}
                                         {% endwith %}
                                     </td>
+                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                    {% if checklist_item and checklist_item.commentaire %}
+                                    <td class="small-cell"
+                                        {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;"
+                                        {% endif %}>
+                                        <i
+                                            class="fa-solid fa-comment-dots"
+                                            tabindex="0"
+                                            data-bs-toggle="popover"
+                                            data-bs-trigger="hover focus"
+                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                            >
+                                        </i>
+                                    </td>
+                                    {% endif %}
+                                    {% endwith %}
                                 </tr>
                                     {% endif %}
                                 {% endfor %}
@@ -940,6 +1046,23 @@
                                         {% endif %}
                                         {% endwith %}
                                     </td>
+                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                    {% if checklist_item and checklist_item.commentaire %}
+                                    <td class="small-cell"
+                                        {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;"
+                                        {% endif %}>
+                                        <i
+                                            class="fa-solid fa-comment-dots"
+                                            tabindex="0"
+                                            data-bs-toggle="popover"
+                                            data-bs-trigger="hover focus"
+                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                            >
+                                        </i>
+                                    </td>
+                                    {% endif %}
+                                    {% endwith %}
                                 </tr>
                                 {% endif %}
                                 {% endfor %}
@@ -972,6 +1095,23 @@
                                         {% endif %}
                                         {% endwith %}
                                     </td>
+                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                    {% if checklist_item and checklist_item.commentaire %}
+                                    <td class="small-cell"
+                                        {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;"
+                                        {% endif %}>
+                                        <i
+                                            class="fa-solid fa-comment-dots"
+                                            tabindex="0"
+                                            data-bs-toggle="popover"
+                                            data-bs-trigger="hover focus"
+                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                            >
+                                        </i>
+                                    </td>
+                                    {% endif %}
+                                    {% endwith %}
                                 </tr>
                                 {% endif %}
                                 {% endfor %}
@@ -1002,6 +1142,23 @@
                                         {% endif %}
                                         {% endwith %}
                                     </td>
+                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                    {% if checklist_item and checklist_item.commentaire %}
+                                    <td class="small-cell"
+                                        {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;"
+                                        {% endif %}>
+                                        <i
+                                            class="fa-solid fa-comment-dots"
+                                            tabindex="0"
+                                            data-bs-toggle="popover"
+                                            data-bs-trigger="hover focus"
+                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                            >
+                                        </i>
+                                    </td>
+                                    {% endif %}
+                                    {% endwith %}
                                 </tr>
                                     {% endif %}
                                 {% endfor %}
@@ -1033,6 +1190,23 @@
                                         {% endif %}
                                         {% endwith %}
                                     </td>
+                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                    {% if checklist_item and checklist_item.commentaire %}
+                                    <td class="small-cell"
+                                        {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;"
+                                        {% endif %}>
+                                        <i
+                                            class="fa-solid fa-comment-dots"
+                                            tabindex="0"
+                                            data-bs-toggle="popover"
+                                            data-bs-trigger="hover focus"
+                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                            >
+                                        </i>
+                                    </td>
+                                    {% endif %}
+                                    {% endwith %}
                                 </tr>
                                     {% endif %}
                                 {% endfor %}
@@ -1063,6 +1237,23 @@
                                         {% endif %}
                                         {% endwith %}
                                     </td>
+                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                    {% if checklist_item and checklist_item.commentaire %}
+                                    <td class="small-cell"
+                                        {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;"
+                                        {% endif %}>
+                                        <i
+                                            class="fa-solid fa-comment-dots"
+                                            tabindex="0"
+                                            data-bs-toggle="popover"
+                                            data-bs-trigger="hover focus"
+                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                            >
+                                        </i>
+                                    </td>
+                                    {% endif %}
+                                    {% endwith %}
                                     </tr>
                                         {% endif %}
                                     {% endfor %}
@@ -1093,6 +1284,23 @@
                                         {% endif %}
                                         {% endwith %}
                                     </td>
+                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                    {% if checklist_item and checklist_item.commentaire %}
+                                    <td class="small-cell"
+                                        {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;"
+                                        {% endif %}>
+                                        <i
+                                            class="fa-solid fa-comment-dots"
+                                            tabindex="0"
+                                            data-bs-toggle="popover"
+                                            data-bs-trigger="hover focus"
+                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                            >
+                                        </i>
+                                    </td>
+                                    {% endif %}
+                                    {% endwith %}
                                     </tr>
                                     {% endif %}
                                     {% endfor %}
@@ -1105,8 +1313,8 @@
 
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                <button type="button" class="btn btn-primary" onclick="printModalsContent()"><i class="fa-solid fa-print"></i></button>
-                <button type="button" class="btn btn-secondary" onclick="generatePDF()">
+                
+                <button type="button" class="btn btn-primary" onclick="generatePDF()">
                     <i class="fa-solid fa-file-pdf"></i>
                 </button>
             </div>
@@ -1147,6 +1355,23 @@
                                         {% endif %}
                                         {% endwith %}
                                     </td>
+                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                    {% if checklist_item and checklist_item.commentaire %}
+                                    <td class="small-cell"
+                                        {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;"
+                                        {% endif %}>
+                                        <i
+                                            class="fa-solid fa-comment-dots"
+                                            tabindex="0"
+                                            data-bs-toggle="popover"
+                                            data-bs-trigger="hover focus"
+                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                            >
+                                        </i>
+                                    </td>
+                                    {% endif %}
+                                    {% endwith %}
                                 </tr>
                                 {% endif %}
                                 {% endfor %}
@@ -1176,6 +1401,24 @@
                                         {% endif %}
                                         {% endwith %}
                                     </td>
+                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                    {% if checklist_item and checklist_item.commentaire %}
+                                    <td class="small-cell"
+                                        {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;"
+                                        {% endif %}>
+                                        <i
+                                            class="fa-solid fa-comment-dots"
+                                            tabindex="0"
+                                            data-bs-toggle="popover"
+                                            data-bs-trigger="hover focus"
+                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                            >
+                                        </i>
+                                    </td>
+                                    {% endif %}
+                                    {% endwith %}
+
                                 </tr>
                                 {% endif %}
                                 {% endfor %}
@@ -1205,6 +1448,23 @@
                                         {% endif %}
                                         {% endwith %}
                                     </td>
+                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                    {% if checklist_item and checklist_item.commentaire %}
+                                    <td class="small-cell"
+                                        {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;"
+                                        {% endif %}>
+                                        <i
+                                            class="fa-solid fa-comment-dots"
+                                            tabindex="0"
+                                            data-bs-toggle="popover"
+                                            data-bs-trigger="hover focus"
+                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                            >
+                                        </i>
+                                    </td>
+                                    {% endif %}
+                                    {% endwith %}
                                 </tr>
                                 {% endif %}
                                 {% endfor %}
@@ -1234,6 +1494,23 @@
                                         {% endif %}
                                         {% endwith %}
                                     </td>
+                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                    {% if checklist_item and checklist_item.commentaire %}
+                                    <td class="small-cell"
+                                        {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;"
+                                        {% endif %}>
+                                        <i
+                                            class="fa-solid fa-comment-dots"
+                                            tabindex="0"
+                                            data-bs-toggle="popover"
+                                            data-bs-trigger="hover focus"
+                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                            >
+                                        </i>
+                                    </td>
+                                    {% endif %}
+                                    {% endwith %}
                                 </tr>
                                 {% endif %}
                                 {% endfor %}
@@ -1245,8 +1522,7 @@
 
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                <button type="button" class="btn btn-primary" onclick="printModalContent()"><i class="fa-solid fa-print"></i></button>
-                <button type="button" class="btn btn-secondary" onclick="generatePDFb()">
+                <button type="button" class="btn btn-primary" onclick="generatePDFb()">
                     <i class="fa-solid fa-file-pdf"></i>
                 </button>
             </div>
@@ -1343,6 +1619,7 @@
 </div>
 
 <!-- Modal for document upload -->
+<!-- Modal for document upload -->
 <div class="modal fade modal-xlg" id="exampleModalDocr" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-custom">
         <div class="modal-content">
@@ -1356,7 +1633,19 @@
                     {{ document_formset.management_form }}
 
                     {% for form in document_formset %}
-                        {{ form.as_p }}
+                        <div class="form-row">
+                            <!-- Explicitly render the file input field -->
+                            <div class="mb-3">
+                                {{ form.document }}  <!-- This renders only the file input box, no URL display -->
+                            </div>
+
+
+                            
+                            <!-- Trash Bin Icon for deleting document -->
+                            <button type="button" class="btn btn-danger delete-doc" data-doc-id="{{ form.instance.id }}">
+                                <i class="fas fa-trash"></i> <!-- Font Awesome Trash Icon -->
+                            </button>
+                        </div>
                     {% endfor %}
 
                     <button type="submit" name="submit_documents" class="btn btn-primary">Ajouter Document</button>
@@ -1368,6 +1657,13 @@
         </div>
     </div>
 </div>
+
+
+
+
+
+
+
 <!-- Modal for commentaire ventes -->
 <div class="modal fade" id="exampleModalcommentaire" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -1441,7 +1737,7 @@
                                             <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="Écrire un commentaire"
+                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                                 style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
@@ -1507,7 +1803,7 @@
                                             <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="Écrire un commentaire"
+                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                                 style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
@@ -1572,7 +1868,7 @@
                                             <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="Écrire un commentaire"
+                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                                 style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
@@ -1637,7 +1933,7 @@
                                             <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="Écrire un commentaire"
+                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                                 style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
@@ -1702,7 +1998,7 @@
                                             <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="Écrire un commentaire"
+                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                                 style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
@@ -1767,7 +2063,7 @@
                                             <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="Écrire un commentaire"
+                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                                 style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
@@ -1832,7 +2128,7 @@
                                             <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="Écrire un commentaire"
+                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                                 style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
@@ -1897,7 +2193,7 @@
                                             <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="Écrire un commentaire"
+                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                                 style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
@@ -1961,7 +2257,7 @@
                                             <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="Écrire un commentaire"
+                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                                 style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
@@ -2025,7 +2321,7 @@
                                             <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="Écrire un commentaire"
+                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                                 style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
@@ -2089,7 +2385,7 @@
                                             <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="Écrire un commentaire"
+                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                                 style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
@@ -2153,7 +2449,7 @@
                                             <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="Écrire un commentaire"
+                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                                 style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
@@ -2218,7 +2514,7 @@
                                             <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="Écrire un commentaire"
+                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                                 style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
@@ -2282,7 +2578,7 @@
                                             <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="Écrire un commentaire"
+                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                                 style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
@@ -2346,7 +2642,7 @@
                                             <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="Écrire un commentaire"
+                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                                 style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
@@ -2410,7 +2706,7 @@
                                             <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="Écrire un commentaire"
+                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                                 style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
@@ -2439,51 +2735,178 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
 <script>
+
+document.querySelectorAll('.edit-doc').forEach(button => {
+    button.addEventListener('click', function () {
+        const docId = this.getAttribute('data-doc-id');
+        // You can open a modal or redirect to an edit page
+        window.location.href = `/edit-document/${docId}/`; // Example redirection to an edit page
+    });
+});
+
+
+// Wait for the DOM to be ready
+document.addEventListener("DOMContentLoaded", function () {
+        const deleteButtons = document.querySelectorAll('.delete-doc');  // Get all delete buttons
+
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const docId = this.getAttribute('data-doc-id');  // Get the document ID
+
+                // Send AJAX request to delete the document
+                fetch(`/delete_document/${docId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'  // Include CSRF token
+                    },
+                    body: JSON.stringify({
+                        'doc_id': docId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Remove the document from the page
+                        this.closest('.form-row').remove();  // Remove the form row of the deleted document
+                    } else {
+                        alert('Error deleting document.');
+                    }
+                });
+            });
+        });
+    });
+
+function toggleCommentInput(productId) {
+    const commentSection = document.getElementById(`comment-section-${productId}`);
+    if (commentSection.style.display === 'none' || commentSection.style.display === '') {
+        commentSection.style.display = 'block';
+    } else {
+        commentSection.style.display = 'none';
+    }
+}
 
 async function generatePDFb() {
     const { jsPDF } = window.jspdf;
 
-    // Select the modal content
+    // Select dynamic data
+    const checklistName = document.querySelector('#checklistName').textContent.trim();
+    const date = document.querySelector('#date').textContent.trim();
+    const conseiller = document.querySelector('#conseiller').textContent.trim();
+    const numContrat = document.querySelector('#numContrat').textContent.trim();
+
     const modalContent = document.querySelector('#verifierbModal .modal-body-verif');
     if (!modalContent) {
-        alert("Modal content not found!");
+        alert("Le contenu de la modal est introuvable !");
+        return;
+    }
+    const clonedContent = modalContent.cloneNode(true);
+
+    const categories = clonedContent.querySelectorAll('.col-md-6');
+    const validCategories = Array.from(categories).filter(category => {
+        const rows = category.querySelectorAll('tr');
+        let hasValidItems = false;
+
+        rows.forEach(row => {
+            const quantityCell = row.children[1];
+            const commentaireCell = row.children[2]?.querySelector('i')?.getAttribute('data-bs-content') || '';
+            
+            // Retain row if quantity > 0 or there is a commentaire
+            if ((quantityCell && parseInt(quantityCell.textContent.trim()) > 0) || commentaireCell) {
+                hasValidItems = true;
+            } else {
+                row.remove(); // Remove rows with no quantity and no commentaire
+            }
+        });
+
+        if (!hasValidItems) {
+            category.remove();
+        }
+
+        return hasValidItems;
+    });
+
+    if (validCategories.length === 0) {
+        alert("Aucune catégorie valide pour le PDF !");
         return;
     }
 
-    // Get the dimensions of the A4 page
     const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4',
     });
 
-    const pageWidth = pdf.internal.pageSize.getWidth(); // A4 width in mm
-    const pageHeight = pdf.internal.pageSize.getHeight(); // A4 height in mm
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    let cursorY = 10;
 
-    // Use html2canvas to render the content
-    const canvas = await html2canvas(modalContent, {
-        scale: 2, // Higher scale for better quality
+    // Add header
+    pdf.setFont("Arial", "bold");
+    pdf.setFontSize(16);
+    pdf.text(`Breuvage pour ${checklistName}`, pageWidth / 2, cursorY, { align: "center" });
+    cursorY += 10;
+    pdf.setFontSize(12);
+    pdf.text(`${date}`, pageWidth / 2, cursorY, { align: "center" });
+    cursorY += 5;
+    pdf.text(`${conseiller}`, pageWidth / 2, cursorY, { align: "center" });
+    cursorY += 5;
+    pdf.text(`${numContrat}`, pageWidth / 2, cursorY, { align: "center" });
+    cursorY += 10;
+
+    validCategories.forEach(category => {
+        const categoryName = category.querySelector('h5').textContent.trim();
+        const rows = category.querySelectorAll('tr');
+        const headers = ["Nom de l'article", "Quantité", "Commentaire"];
+        const data = Array.from(rows).map(row => {
+            const cells = row.querySelectorAll('td');
+            const commentaire = cells[2]?.querySelector('i')?.getAttribute('data-bs-content') || '';
+            return [
+                cells[0]?.textContent.trim() || '', // Item Name
+                cells[1]?.textContent.trim() || '', // Quantity
+                commentaire // Commentaire
+            ];
+        });
+
+        // Estimate table height
+        const estimatedTableHeight = (data.length + 1) * 10; // Approx 10mm per row including header
+
+        // Check if the table fits on the current page
+        if (cursorY + 20 + estimatedTableHeight > pageHeight) {
+            pdf.addPage();
+            cursorY = 10;
+        }
+
+        // Add category name
+        pdf.setFontSize(14);
+        pdf.text(categoryName, pageWidth / 2, cursorY, { align: "center" });
+        cursorY += 10;
+
+        // Add table
+        pdf.autoTable({
+            head: [headers],
+            body: data,
+            startY: cursorY,
+            theme: 'grid',
+            styles: {
+                font: 'Arial',
+                halign: 'center',
+                valign: 'middle',
+            },
+            headStyles: {
+                fillColor: [200, 200, 200],
+                textColor: 0,
+                fontStyle: 'bold',
+            },
+            margin: { left: 30, right: 30 },
+        });
+
+        cursorY = pdf.lastAutoTable.finalY + 10; // Update cursorY
     });
 
-    const imgData = canvas.toDataURL('image/png');
-    const imgWidth = canvas.width; // Width of the rendered content
-    const imgHeight = canvas.height; // Height of the rendered content
-
-    // Scale to fit the content within the A4 page dimensions
-    const scaleFactor = Math.min(pageWidth / imgWidth, pageHeight / imgHeight);
-    const renderWidth = imgWidth * scaleFactor; // Adjusted width
-    const renderHeight = imgHeight * scaleFactor; // Adjusted height
-
-    // Center the content on the page
-    const xOffset = (pageWidth - renderWidth) / 2;
-    const yOffset = (pageHeight - renderHeight) / 2;
-
-    // Add the scaled image to the PDF
-    pdf.addImage(imgData, 'PNG', xOffset, yOffset, renderWidth, renderHeight);
-
-    // Save the PDF
     pdf.save('Verification-Breuvages.pdf');
 }
 
@@ -2492,87 +2915,171 @@ async function generatePDFb() {
 async function generatePDF() {
     const { jsPDF } = window.jspdf;
 
-    // Select the modal content
+    // Select dynamic data
+    const checklistName = document.querySelector('#checklistName').textContent.trim();
+    const date = document.querySelector('#date').textContent.trim();
+    const conseiller = document.querySelector('#conseiller').textContent.trim();
+    const numContrat = document.querySelector('#numContrat').textContent.trim();
+
     const modalContent = document.querySelector('#verifierModal .modal-body-verif');
     if (!modalContent) {
-        alert("Modal content not found!");
+        alert("Le contenu de la modal est introuvable !");
+        return;
+    }
+    const clonedContent = modalContent.cloneNode(true);
+
+    const categories = clonedContent.querySelectorAll('.col-md-6');
+    const validCategories = Array.from(categories).filter(category => {
+        const rows = category.querySelectorAll('tr');
+        let hasValidItems = false;
+
+        rows.forEach(row => {
+            const quantityCell = row.children[1];
+            if (quantityCell && parseInt(quantityCell.textContent.trim()) > 0) {
+                hasValidItems = true;
+            } else {
+                row.remove(); // Remove rows with quantity = 0
+            }
+        });
+
+        if (!hasValidItems) {
+            category.remove();
+        }
+
+        return hasValidItems;
+    });
+
+    if (validCategories.length === 0) {
+        alert("Aucune catégorie valide pour le PDF !");
         return;
     }
 
-    // Get the dimensions of the A4 page
     const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4',
     });
 
-    const pageWidth = pdf.internal.pageSize.getWidth(); // A4 width in mm
-    const pageHeight = pdf.internal.pageSize.getHeight(); // A4 height in mm
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    let cursorY = 10;
 
-    // Use html2canvas to render the content
-    const canvas = await html2canvas(modalContent, {
-        scale: 2, // Higher scale for better quality
+    // Add header
+    pdf.setFont("Arial", "bold");
+    pdf.setFontSize(16);
+    pdf.text(`${checklistName}`, pageWidth / 2, cursorY, { align: "center" });
+    cursorY += 10;
+    pdf.setFontSize(12);
+    pdf.text(`${date}`, pageWidth / 2, cursorY, { align: "center" });
+    cursorY += 5;
+    pdf.text(`${conseiller}`, pageWidth / 2, cursorY, { align: "center" });
+    cursorY += 5;
+    pdf.text(`${numContrat}`, pageWidth / 2, cursorY, { align: "center" });
+    cursorY += 10;
+
+    validCategories.forEach(category => {
+        const categoryName = category.querySelector('h5').textContent.trim();
+        const rows = category.querySelectorAll('tr');
+        const headers = ["Nom de l'article", "Quantité", "Commentaire"];
+        const data = Array.from(rows).map(row => {
+        const cells = row.querySelectorAll('td');
+        const commentaire = cells[2]?.querySelector('i')?.getAttribute('data-bs-content') || '';
+        return [
+            cells[0]?.textContent.trim() || '', // Item Name
+            cells[1]?.textContent.trim() || '', // Quantity
+            commentaire // Commentaire
+        ];
     });
 
-    const imgData = canvas.toDataURL('image/png');
-    const imgWidth = canvas.width; // Width of the rendered content
-    const imgHeight = canvas.height; // Height of the rendered content
+        // Estimate table height
+        const estimatedTableHeight = (data.length + 1) * 10; // Approx 10mm per row including header
 
-    // Scale to fit the content within the A4 page dimensions
-    const scaleFactor = Math.min(pageWidth / imgWidth, pageHeight / imgHeight);
-    const renderWidth = imgWidth * scaleFactor; // Adjusted width
-    const renderHeight = imgHeight * scaleFactor; // Adjusted height
+        // Check if the table fits on the current page
+        if (cursorY + 20 + estimatedTableHeight > pageHeight) {
+            pdf.addPage();
+            cursorY = 10;
+        }
 
-    // Center the content on the page
-    const xOffset = (pageWidth - renderWidth) / 2;
-    const yOffset = (pageHeight - renderHeight) / 2;
+        // Add category name
+        pdf.setFontSize(14);
+        pdf.text(categoryName, pageWidth / 2, cursorY, { align: "center" });
+        cursorY += 10;
 
-    // Add the scaled image to the PDF
-    pdf.addImage(imgData, 'PNG', xOffset, yOffset, renderWidth, renderHeight);
+        // Add table
+        pdf.autoTable({
+            head: [headers],
+            body: data,
+            startY: cursorY,
+            theme: 'grid',
+            styles: {
+                font: 'Arial',
+                halign: 'center',
+                valign: 'middle',
+            },
+            headStyles: {
+                fillColor: [200, 200, 200],
+                textColor: 0,
+                fontStyle: 'bold',
+            },
+            margin: { left: 30, right: 30 },
+        });
 
-    // Save the PDF
+        cursorY = pdf.lastAutoTable.finalY + 10; // Update cursorY
+    });
+
     pdf.save('Verification-Checklist.pdf');
 }
 
 function printModalsContent() {
-    const checklistName = document.querySelector('#checklistName').textContent; // Assuming an element ID for checklist name
-    const date = document.querySelector('#date').textContent; // Assuming an element ID for date
-    const conseiller = document.querySelector('#conseiller').textContent; // Assuming an element ID for conseiller
-    const numContrat = document.querySelector('#numContrat').textContent; // Assuming an element ID for num_contrat
+    const checklistName = document.querySelector('#checklistName').textContent;
+    const date = document.querySelector('#date').textContent;
+    const conseiller = document.querySelector('#conseiller').textContent;
+    const numContrat = document.querySelector('#numContrat').textContent;
 
-    // Select the modal content
+    // Clone the modal content
     const modalContent = document.querySelector('#verifierModal .modal-body-verif');
-    
-    // Clone the content to manipulate without affecting the DOM
     const clonedContent = modalContent.cloneNode(true);
 
-    // Filter out categories without items that have a quantity > 0
+    // Iterate through categories and rows, ensuring comments are included
     const categories = clonedContent.querySelectorAll('.col-md-6');
     categories.forEach(category => {
         const rows = category.querySelectorAll('tr');
         let hasItems = false;
 
         rows.forEach(row => {
-            const quantityCell = row.children[1];
+            const quantityCell = row.children[1];  // Assuming quantity is in the second column
+            const commentCell = row.children[2];  // Assuming comment is in the third column
+
             if (quantityCell && parseInt(quantityCell.textContent.trim()) > 0) {
-                hasItems = true; // Mark to keep the category
-                row.style.backgroundColor = 'transparent'; // Ensure no background color
-                row.style.color = ''; // Reset text color
+                hasItems = true;
+
+                // Check if comment exists
+                if (commentCell) {
+                    const commentText = commentCell.textContent.trim();
+
+                    if (commentText) {
+                        // If there is a comment, display it in uppercase and bold
+                        commentCell.textContent = commentText.toUpperCase();
+                        commentCell.style.fontWeight = 'bold';
+                    } else {
+                        // If no comment exists, leave the cell empty or display "NO COMMENT"
+                        commentCell.textContent = 'NO COMMENT';  // This can be customized
+                    }
+                }
             } else {
-                row.remove(); // Remove row if quantity is zero
+                row.remove();  // Remove the row if quantity is 0 or missing
             }
         });
 
-        // Remove category if no items with quantity > 0
         if (!hasItems) {
-            category.remove();
+            category.remove();  // Remove the category if no items with quantity > 0
         }
     });
 
     // Open a new print window
     const printWindow = window.open('', '_blank');
 
-    // Write the gathered data and content into the new window
+    // Write the content into the new window, including the print style and data
     printWindow.document.write(`
     <html>
     <head>
@@ -2615,13 +3122,11 @@ function printModalsContent() {
                     font-family: Arial, sans-serif;
                 }
                 td.print-bold {
-                    font-weight: 900; /* Augmente au maximum le niveau de gras */
-                    font-family: "Arial Black", Arial, sans-serif; /* Police très épaisse */
-                    text-shadow: 0.5px 0.5px 0.5px rgba(0, 0, 0, 0.5); /* Ajoute une ombre subtile pour renforcer le contraste */
-                    letter-spacing: 0.5px; /* Légère augmentation de l'espacement des lettres pour un meilleur impact visuel */
+                    font-weight: 900;
+                    font-family: "Arial Black", Arial, sans-serif;
+                    text-shadow: 0.5px 0.5px 0.5px rgba(0, 0, 0, 0.5);
+                    letter-spacing: 0.5px;
                 }
-
-
                 img {
                     max-width: 100%;
                     height: auto;
@@ -2646,26 +3151,21 @@ function printModalsContent() {
         </div>
     </body>
     </html>
-`);
+    `);
 
-
-
-    // Close the document stream and trigger the print dialog
     printWindow.document.close();
     printWindow.focus();
     printWindow.print();
-
-    // Close the print window after printing
     printWindow.close();
 }
 
 
 
 function printModalContent() {
-    const checklistName = document.querySelector('#checklistName').textContent; // Assuming an element ID for checklist name
-    const date = document.querySelector('#date').textContent; // Assuming an element ID for date
-    const conseiller = document.querySelector('#conseiller').textContent; // Assuming an element ID for conseiller
-    const numContrat = document.querySelector('#numContrat').textContent; // Assuming an element ID for num_contrat
+    const checklistName = document.querySelector('#checklistName').textContent;
+    const date = document.querySelector('#date').textContent;
+    const conseiller = document.querySelector('#conseiller').textContent;
+    const numContrat = document.querySelector('#numContrat').textContent;
 
     // Select the modal content
     const modalContent = document.querySelector('#verifierbModal .modal-body-verif');
@@ -2680,13 +3180,27 @@ function printModalContent() {
         let hasItems = false;
 
         rows.forEach(row => {
-            const quantityCell = row.children[1];
+            const quantityCell = row.children[1]; // Second column contains the quantity
+            const commentCell = row.children[2]; // Third column contains the comment
+
             if (quantityCell && parseInt(quantityCell.textContent.trim()) > 0) {
                 hasItems = true; // Mark to keep the category
                 row.style.backgroundColor = 'transparent'; // Ensure no background color
                 row.style.color = ''; // Reset text color
+
+                // Ensure comment is visible
+                if (commentCell) {
+                    const commentText = commentCell.textContent.trim(); // Get the comment text
+                    console.log('Comment Text:', commentText); // Debugging: Check what we get
+                    if (commentText) {
+                        commentCell.textContent = commentText.toUpperCase(); // Convert to uppercase
+                        commentCell.style.fontWeight = 'bold'; // Optional, for emphasis
+                    } else {
+                        commentCell.textContent = commentText; // Display a placeholder if no comment
+                    }
+                }
             } else {
-                row.remove(); // Remove row if quantity is zero
+                row.remove(); // Remove row if quantity is zero or missing
             }
         });
 
@@ -2742,13 +3256,11 @@ function printModalContent() {
                     font-family: Arial, sans-serif;
                 }
                 td.print-bold {
-                    font-weight: 900; /* Augmente au maximum le niveau de gras */
-                    font-family: "Arial Black", Arial, sans-serif; /* Police très épaisse */
-                    text-shadow: 0.5px 0.5px 0.5px rgba(0, 0, 0, 0.5); /* Ajoute une ombre subtile pour renforcer le contraste */
-                    letter-spacing: 0.5px; /* Légère augmentation de l'espacement des lettres pour un meilleur impact visuel */
+                    font-weight: 900;
+                    font-family: "Arial Black", Arial, sans-serif;
+                    text-shadow: 0.5px 0.5px 0.5px rgba(0, 0, 0, 0.5);
+                    letter-spacing: 0.5px;
                 }
-
-
                 img {
                     max-width: 100%;
                     height: auto;
@@ -2773,9 +3285,7 @@ function printModalContent() {
         </div>
     </body>
     </html>
-`);
-
-
+    `);
 
     // Close the document stream and trigger the print dialog
     printWindow.document.close();
@@ -2880,9 +3390,10 @@ document.getElementById('productSearch').addEventListener('input', function () {
                                 <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
                             </button>
                             <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="Écrire un commentaire"
+                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                     style="display: none;">${cachedComment}</textarea>
                         </div>
+                    
 
                     </div>
                 `;
@@ -2900,15 +3411,24 @@ document.getElementById('productSearch').addEventListener('input', function () {
                 });
             });
 
-            document.querySelectorAll('.comment-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache[productId]) {
-                        productDataCache[productId] = {};
+            document.querySelectorAll('.toggle-comment').forEach(button => {
+            button.addEventListener('click', function () {
+                const targetId = this.getAttribute('data-target'); // Get the target textarea ID
+                const commentTextarea = document.querySelector(targetId);
+
+                if (commentTextarea) {
+                    // Toggle visibility
+                    if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
+                        commentTextarea.style.display = 'block';
+                        this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
+                    } else {
+                        commentTextarea.style.display = 'none';
+                        this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
                     }
-                    productDataCache[productId].comment = this.value;
-                });
+                }
             });
+        });
+
         })
         .catch(error => {
             console.error('Error fetching products:', error); // Log errors if any
@@ -2954,7 +3474,7 @@ document.getElementById('productSearch1').addEventListener('input', function () 
                                 <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
                             </button>
                             <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="Écrire un commentaire"
+                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                     style="display: none;">${cachedComment}</textarea>
                         </div>
                     </div>
@@ -2973,15 +3493,24 @@ document.getElementById('productSearch1').addEventListener('input', function () 
                 });
             });
 
-            document.querySelectorAll('.comment-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache1[productId]) {
-                        productDataCache1[productId] = {};
+            document.querySelectorAll('.toggle-comment').forEach(button => {
+            button.addEventListener('click', function () {
+                const targetId = this.getAttribute('data-target'); // Get the target textarea ID
+                const commentTextarea = document.querySelector(targetId);
+
+                if (commentTextarea) {
+                    // Toggle visibility
+                    if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
+                        commentTextarea.style.display = 'block';
+                        this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
+                    } else {
+                        commentTextarea.style.display = 'none';
+                        this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
                     }
-                    productDataCache1[productId].comment = this.value;
-                });
+                }
             });
+        
+        });
         })
         .catch(error => {
             console.error('Error fetching products:', error); // Log errors if any
@@ -3027,7 +3556,7 @@ document.getElementById('productSearch2').addEventListener('input', function () 
                                 <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
                             </button>
                             <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="Écrire un commentaire"
+                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                     style="display: none;">${cachedComment}</textarea>
                         </div>
                     </div>
@@ -3046,15 +3575,23 @@ document.getElementById('productSearch2').addEventListener('input', function () 
                 });
             });
 
-            document.querySelectorAll('.comment-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache2[productId]) {
-                        productDataCache2[productId] = {};
-                    }
-                    productDataCache2[productId].comment = this.value;
-                });
-            });
+            document.querySelectorAll('.toggle-comment').forEach(button => {
+    button.addEventListener('click', function () {
+        const targetId = this.getAttribute('data-target'); // Get the target textarea ID
+        const commentTextarea = document.querySelector(targetId);
+
+        if (commentTextarea) {
+            // Toggle visibility
+            if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
+                commentTextarea.style.display = 'block';
+                this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
+            } else {
+                commentTextarea.style.display = 'none';
+                this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
+            }
+        }
+    });
+});
         })
         .catch(error => {
             console.error('Error fetching products:', error); // Log errors if any
@@ -3099,7 +3636,7 @@ document.getElementById('productSearch3').addEventListener('input', function() {
                                 <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
                             </button>
                             <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="Écrire un commentaire"
+                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                     style="display: none;">${cachedComment}</textarea>
                         </div>
                     </div>
@@ -3118,15 +3655,24 @@ document.getElementById('productSearch3').addEventListener('input', function() {
                 });
             });
 
-            document.querySelectorAll('.comment-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache3[productId]) {
-                        productDataCache3[productId] = {};
-                    }
-                    productDataCache3[productId].comment = this.value;
-                });
-            });
+            document.querySelectorAll('.toggle-comment').forEach(button => {
+    button.addEventListener('click', function () {
+        const targetId = this.getAttribute('data-target'); // Get the target textarea ID
+        const commentTextarea = document.querySelector(targetId);
+
+        if (commentTextarea) {
+            // Toggle visibility
+            if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
+                commentTextarea.style.display = 'block';
+                this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
+            } else {
+                commentTextarea.style.display = 'none';
+                this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
+            }
+        }
+    });
+});
+
         })
         .catch(error => {
             console.error('Error fetching products:', error); // Log errors if any
@@ -3171,7 +3717,7 @@ document.getElementById('productSearch4').addEventListener('input', function() {
                                 <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
                             </button>
                             <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="Écrire un commentaire"
+                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                     style="display: none;">${cachedComment}</textarea>
                         </div>
                     </div>
@@ -3190,15 +3736,24 @@ document.getElementById('productSearch4').addEventListener('input', function() {
                 });
             });
 
-            document.querySelectorAll('.comment-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache4[productId]) {
-                        productDataCache4[productId] = {};
-                    }
-                    productDataCache4[productId].comment = this.value;
-                });
-            });
+            document.querySelectorAll('.toggle-comment').forEach(button => {
+    button.addEventListener('click', function () {
+        const targetId = this.getAttribute('data-target'); // Get the target textarea ID
+        const commentTextarea = document.querySelector(targetId);
+
+        if (commentTextarea) {
+            // Toggle visibility
+            if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
+                commentTextarea.style.display = 'block';
+                this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
+            } else {
+                commentTextarea.style.display = 'none';
+                this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
+            }
+        }
+    });
+});
+
         })
         .catch(error => {
             console.error('Error fetching products:', error); // Log errors if any
@@ -3243,7 +3798,7 @@ document.getElementById('productSearch6').addEventListener('input', function() {
                                 <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
                             </button>
                             <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="Écrire un commentaire"
+                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                     style="display: none;">${cachedComment}</textarea>
                         </div>
                     </div>
@@ -3315,7 +3870,7 @@ document.getElementById('productSearch7').addEventListener('input', function() {
                                 <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
                             </button>
                             <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="Écrire un commentaire"
+                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                     style="display: none;">${cachedComment}</textarea>
                         </div>
                     </div>
@@ -3334,15 +3889,24 @@ document.getElementById('productSearch7').addEventListener('input', function() {
                 });
             });
 
-            document.querySelectorAll('.comment-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache7[productId]) {
-                        productDataCache7[productId] = {};
-                    }
-                    productDataCache7[productId].comment = this.value;
-                });
-            });
+            document.querySelectorAll('.toggle-comment').forEach(button => {
+    button.addEventListener('click', function () {
+        const targetId = this.getAttribute('data-target'); // Get the target textarea ID
+        const commentTextarea = document.querySelector(targetId);
+
+        if (commentTextarea) {
+            // Toggle visibility
+            if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
+                commentTextarea.style.display = 'block';
+                this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
+            } else {
+                commentTextarea.style.display = 'none';
+                this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
+            }
+        }
+    });
+});
+
         })
         .catch(error => {
             console.error('Error fetching products:', error); // Log errors if any
@@ -3387,7 +3951,7 @@ document.getElementById('productSearch8').addEventListener('input', function() {
                                 <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
                             </button>
                             <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="Écrire un commentaire"
+                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                     style="display: none;">${cachedComment}</textarea>
                         </div>
                     </div>
@@ -3406,15 +3970,24 @@ document.getElementById('productSearch8').addEventListener('input', function() {
                 });
             });
 
-            document.querySelectorAll('.comment-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache8[productId]) {
-                        productDataCache8[productId] = {};
-                    }
-                    productDataCache8[productId].comment = this.value;
-                });
-            });
+            document.querySelectorAll('.toggle-comment').forEach(button => {
+    button.addEventListener('click', function () {
+        const targetId = this.getAttribute('data-target'); // Get the target textarea ID
+        const commentTextarea = document.querySelector(targetId);
+
+        if (commentTextarea) {
+            // Toggle visibility
+            if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
+                commentTextarea.style.display = 'block';
+                this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
+            } else {
+                commentTextarea.style.display = 'none';
+                this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
+            }
+        }
+    });
+});
+
         })
         .catch(error => {
             console.error('Error fetching products:', error); // Log errors if any
@@ -3460,7 +4033,7 @@ document.getElementById('productSearch9').addEventListener('input', function() {
                                 <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
                             </button>
                             <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="Écrire un commentaire"
+                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                     style="display: none;">${cachedComment}</textarea>
                         </div>
                     </div>
@@ -3479,15 +4052,24 @@ document.getElementById('productSearch9').addEventListener('input', function() {
                 });
             });
 
-            document.querySelectorAll('.comment-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache9[productId]) {
-                        productDataCache9[productId] = {};
-                    }
-                    productDataCache9[productId].comment = this.value;
-                });
-            });
+            document.querySelectorAll('.toggle-comment').forEach(button => {
+    button.addEventListener('click', function () {
+        const targetId = this.getAttribute('data-target'); // Get the target textarea ID
+        const commentTextarea = document.querySelector(targetId);
+
+        if (commentTextarea) {
+            // Toggle visibility
+            if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
+                commentTextarea.style.display = 'block';
+                this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
+            } else {
+                commentTextarea.style.display = 'none';
+                this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
+            }
+        }
+    });
+});
+
         })
         .catch(error => {
             console.error('Error fetching products:', error); // Log errors if any
@@ -3533,7 +4115,7 @@ document.getElementById('productSearch10').addEventListener('input', function() 
                                 <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
                             </button>
                             <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="Écrire un commentaire"
+                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                     style="display: none;">${cachedComment}</textarea>
                         </div>
                     </div>
@@ -3552,15 +4134,24 @@ document.getElementById('productSearch10').addEventListener('input', function() 
                 });
             });
 
-            document.querySelectorAll('.comment-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache10[productId]) {
-                        productDataCache10[productId] = {};
-                    }
-                    productDataCache10[productId].comment = this.value;
-                });
-            });
+            document.querySelectorAll('.toggle-comment').forEach(button => {
+    button.addEventListener('click', function () {
+        const targetId = this.getAttribute('data-target'); // Get the target textarea ID
+        const commentTextarea = document.querySelector(targetId);
+
+        if (commentTextarea) {
+            // Toggle visibility
+            if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
+                commentTextarea.style.display = 'block';
+                this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
+            } else {
+                commentTextarea.style.display = 'none';
+                this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
+            }
+        }
+    });
+});
+
         })
         .catch(error => {
             console.error('Error fetching products:', error); // Log errors if any
@@ -3606,7 +4197,7 @@ document.getElementById('productSearch11').addEventListener('input', function() 
                                 <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
                             </button>
                             <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="Écrire un commentaire"
+                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                     style="display: none;">${cachedComment}</textarea>
                         </div>
                     </div>
@@ -3625,15 +4216,24 @@ document.getElementById('productSearch11').addEventListener('input', function() 
                 });
             });
 
-            document.querySelectorAll('.comment-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache11[productId]) {
-                        productDataCache11[productId] = {};
-                    }
-                    productDataCache11[productId].comment = this.value;
-                });
-            });
+            document.querySelectorAll('.toggle-comment').forEach(button => {
+    button.addEventListener('click', function () {
+        const targetId = this.getAttribute('data-target'); // Get the target textarea ID
+        const commentTextarea = document.querySelector(targetId);
+
+        if (commentTextarea) {
+            // Toggle visibility
+            if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
+                commentTextarea.style.display = 'block';
+                this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
+            } else {
+                commentTextarea.style.display = 'none';
+                this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
+            }
+        }
+    });
+});
+
         })
         .catch(error => {
             console.error('Error fetching products:', error); // Log errors if any
@@ -3679,7 +4279,7 @@ document.getElementById('productSearch5').addEventListener('input', function() {
                                 <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
                             </button>
                             <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="Écrire un commentaire"
+                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                     style="display: none;">${cachedComment}</textarea>
                         </div>
                     </div>
@@ -3698,15 +4298,24 @@ document.getElementById('productSearch5').addEventListener('input', function() {
                 });
             });
 
-            document.querySelectorAll('.comment-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache5[productId]) {
-                        productDataCache5[productId] = {};
-                    }
-                    productDataCache5[productId].comment = this.value;
-                });
-            });
+            document.querySelectorAll('.toggle-comment').forEach(button => {
+    button.addEventListener('click', function () {
+        const targetId = this.getAttribute('data-target'); // Get the target textarea ID
+        const commentTextarea = document.querySelector(targetId);
+
+        if (commentTextarea) {
+            // Toggle visibility
+            if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
+                commentTextarea.style.display = 'block';
+                this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
+            } else {
+                commentTextarea.style.display = 'none';
+                this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
+            }
+        }
+    });
+});
+
         })
         .catch(error => {
             console.error('Error fetching products:', error); // Log errors if any
@@ -3752,7 +4361,7 @@ document.getElementById('productSearch12').addEventListener('input', function() 
                                 <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
                             </button>
                             <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="Écrire un commentaire"
+                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                     style="display: none;">${cachedComment}</textarea>
                         </div>
                     </div>
@@ -3771,15 +4380,24 @@ document.getElementById('productSearch12').addEventListener('input', function() 
                 });
             });
 
-            document.querySelectorAll('.comment-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache12[productId]) {
-                        productDataCache12[productId] = {};
-                    }
-                    productDataCache12[productId].comment = this.value;
-                });
-            });
+            document.querySelectorAll('.toggle-comment').forEach(button => {
+    button.addEventListener('click', function () {
+        const targetId = this.getAttribute('data-target'); // Get the target textarea ID
+        const commentTextarea = document.querySelector(targetId);
+
+        if (commentTextarea) {
+            // Toggle visibility
+            if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
+                commentTextarea.style.display = 'block';
+                this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
+            } else {
+                commentTextarea.style.display = 'none';
+                this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
+            }
+        }
+    });
+});
+
         })
         .catch(error => {
             console.error('Error fetching products:', error); // Log errors if any
@@ -3824,7 +4442,7 @@ document.getElementById('productSearch13').addEventListener('input', function() 
                                 <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
                             </button>
                             <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="Écrire un commentaire"
+                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                     style="display: none;">${cachedComment}</textarea>
                         </div>
                     </div>
@@ -3843,15 +4461,24 @@ document.getElementById('productSearch13').addEventListener('input', function() 
                 });
             });
 
-            document.querySelectorAll('.comment-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache13[productId]) {
-                        productDataCache13[productId] = {};
-                    }
-                    productDataCache13[productId].comment = this.value;
-                });
-            });
+            document.querySelectorAll('.toggle-comment').forEach(button => {
+    button.addEventListener('click', function () {
+        const targetId = this.getAttribute('data-target'); // Get the target textarea ID
+        const commentTextarea = document.querySelector(targetId);
+
+        if (commentTextarea) {
+            // Toggle visibility
+            if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
+                commentTextarea.style.display = 'block';
+                this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
+            } else {
+                commentTextarea.style.display = 'none';
+                this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
+            }
+        }
+    });
+});
+
         })
         .catch(error => {
             console.error('Error fetching products:', error); // Log errors if any
@@ -3897,7 +4524,7 @@ document.getElementById('productSearch14').addEventListener('input', function() 
                                 <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
                             </button>
                             <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="Écrire un commentaire"
+                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                     style="display: none;">${cachedComment}</textarea>
                         </div>
                     </div>
@@ -3916,15 +4543,24 @@ document.getElementById('productSearch14').addEventListener('input', function() 
                 });
             });
 
-            document.querySelectorAll('.comment-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache14[productId]) {
-                        productDataCache14[productId] = {};
-                    }
-                    productDataCache14[productId].comment = this.value;
-                });
-            });
+            document.querySelectorAll('.toggle-comment').forEach(button => {
+    button.addEventListener('click', function () {
+        const targetId = this.getAttribute('data-target'); // Get the target textarea ID
+        const commentTextarea = document.querySelector(targetId);
+
+        if (commentTextarea) {
+            // Toggle visibility
+            if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
+                commentTextarea.style.display = 'block';
+                this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
+            } else {
+                commentTextarea.style.display = 'none';
+                this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
+            }
+        }
+    });
+});
+
         })
         .catch(error => {
             console.error('Error fetching products:', error); // Log errors if any
@@ -3970,7 +4606,7 @@ document.getElementById('productSearch15').addEventListener('input', function() 
                                 <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
                             </button>
                             <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="Écrire un commentaire"
+                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                     style="display: none;">${cachedComment}</textarea>
                         </div>
                     </div>
@@ -3989,15 +4625,24 @@ document.getElementById('productSearch15').addEventListener('input', function() 
                 });
             });
 
-            document.querySelectorAll('.comment-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache15[productId]) {
-                        productDataCache15[productId] = {};
-                    }
-                    productDataCache15[productId].comment = this.value;
-                });
-            });
+            document.querySelectorAll('.toggle-comment').forEach(button => {
+    button.addEventListener('click', function () {
+        const targetId = this.getAttribute('data-target'); // Get the target textarea ID
+        const commentTextarea = document.querySelector(targetId);
+
+        if (commentTextarea) {
+            // Toggle visibility
+            if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
+                commentTextarea.style.display = 'block';
+                this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
+            } else {
+                commentTextarea.style.display = 'none';
+                this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
+            }
+        }
+    });
+});
+
         })
         .catch(error => {
             console.error('Error fetching products:', error); // Log errors if any
@@ -4157,14 +4802,7 @@ function calculateDifference(productId) {
 }
 
 
-    function toggleCommentInput(productId) {
-    const commentSection = document.getElementById(`comment-section-${productId}`);
-    if (commentSection.style.display === 'none' || commentSection.style.display === '') {
-        commentSection.style.display = 'block';
-    } else {
-        commentSection.style.display = 'none';
-    }
-}
+    
 
 
 

@@ -394,6 +394,34 @@ class ChecklistItemDeleteAjaxView(View):
             response_data = {'status': 'error', 'message': 'Objet non trouvé'}
         return JsonResponse(response_data)
     
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+from django.utils.dateparse import parse_date
+from django.db.models import F
+
+@require_GET
+def get_checklist_items_for_date(request):
+    date_str = request.GET.get('date')
+    
+    if not date_str:
+        return JsonResponse({'error': 'No date provided'}, status=400)
+
+    parsed_date = parse_date(date_str)  # Convert string to date
+    if not parsed_date:
+        return JsonResponse({'error': 'Invalid date format'}, status=400)
+
+    checklist_items = ChecklistItem.objects.filter(
+        checklist__date=parsed_date,
+        checklist__is_active=True,
+        quantity__gt=0
+    ).annotate(
+        product_name=F('product__name')
+    ).values('product_name', 'quantity', 'status')
+
+    return JsonResponse({'items': list(checklist_items)}, safe=False)
+
+
+
 def voir_checklist(request):
     today = date.today()  # Get today's date
     checklists = Checklist.objects.filter(is_active=True)
@@ -450,55 +478,101 @@ def voir_checklist(request):
     }
     return render(request, 'listings/voir-checklist.html', context)
 
+from django.shortcuts import get_object_or_404, redirect, render
+from django.http import JsonResponse
+from .models import Checklist, ChecklistItem, QuantityChangeLog
+
 def checklistvoir_detail(request, checklist_id):
     checklist = get_object_or_404(Checklist, pk=checklist_id)
-    checklist_items = ChecklistItem.objects.filter(checklist=checklist, quantity__gt=0)
-    quantity_change_logs = QuantityChangeLog.objects.filter(
-        checklist_item__checklist_id=checklist_id
-    ).order_by('-timestamp')
-    
-    products = Product.objects.all()
+
+    normal_items = ChecklistItem.objects.filter(checklist=checklist, quantity__gt=0).exclude(commentaire__regex=r'\bnt\b')
+    nt_items = ChecklistItem.objects.filter(checklist=checklist, quantity__gt=0, commentaire__regex=r'\bnt\b')
+
+    for item in normal_items:
+        last_log = QuantityChangeLog.objects.filter(checklist_item=item).order_by('-timestamp').first()
+        item.previous_status = last_log.previous_status if last_log else "N/A"
+        item.previous_quantity = last_log.previous_quantity if last_log else item.quantity  
+
+    for item in nt_items:
+        if item.status != 'valide':
+            item.status = 'valide'
+            item.save()
+
+    quantity_change_logs = QuantityChangeLog.objects.filter(checklist_item__checklist_id=checklist_id).order_by('-timestamp')
 
     if request.method == 'POST':
+
+        note = request.POST.get('note')
+        if note is not None:  
+            checklist.notechecklist = note
+            checklist.save()
+            return redirect('checklistvoir-detail', checklist_id=checklist.id)
+
         item_id = request.POST.get('item_id')
         status = request.POST.get('status')
-        quantity_change = int(request.POST.get('quantity_change', 0))  # Get quantity change value
+        quantity = int(request.POST.get('quantity', 0))
+        previous_quantity = int(request.POST.get('previous_quantity', 0))
+        current_quantity = int(request.POST.get('current_quantity', 0))
+        quantity_change = current_quantity - previous_quantity
+        checklist_item = get_object_or_404(ChecklistItem, id=item_id, checklist=checklist)
+        product = checklist_item.product
 
-        if item_id and status:
+        if product:
+        
             checklist_item = get_object_or_404(ChecklistItem, id=item_id, checklist=checklist)
-            product = checklist_item.product  # Get the associated product
+            product = checklist_item.product
 
-
-            if status == 'refuse':
-                messages.warning(request, f'Le produit {checklist_item.product.name} a été refusé.')
-
-            # Adjust the product's inventory
-            if quantity_change != 0:
-                product.adjust_quantity(quantity_change)  # Adjust inventory
+            if status == 'remettrestock' and product:
+                product.adjust_quantity(quantity)
+                checklist_item.is_stock_updated = True 
                 product.save()
 
-                # Log the quantity change
-                QuantityChangeLog.objects.create(
-                    checklist_item=checklist_item,
-                    previous_quantity=checklist_item.quantity,
-                    new_quantity=checklist_item.quantity + quantity_change,
-                    quantity_change=quantity_change,
-                    changed_by=request.user,
-                )
+            if status == 'remettrestockchange' and product:
+                product.adjust_quantity(quantity)
+                checklist_item.is_stock_updated = True 
+                product.save()
 
-            # Update the checklist item's status
-            checklist_item.status = status
-            checklist_item.save()
+            # Store previous status for logging
+            previous_status = checklist_item.status
+            if status == 'valide' and product:
+                product.adjust_quantity(-quantity_change)
+                product.save()
 
-            # Optionally update the checklist's overall status
-            checklist.update_status()
+            if status == 'complete' and product:
+                product.adjust_quantity(-current_quantity)  # Subtract quantity
+                product.save()
+            
 
-            return redirect('checklistvoir-detail', checklist_id=checklist.id)
+            if status == 'denied' and product:
+                checklist_item.status = status
+                checklist_item.save()
+
+            if status == 'en_cours':
+                checklist_item.product.quantity += checklist_item.quantity  # Add the checklist item’s quantity to the product quantity
+                checklist_item.product.save()  # Save the updated product quantity
+
+            if status == 'refuse':
+                checklist_item.product.quantity += current_quantity  # Add the checklist item’s quantity to the product quantity
+                checklist_item.product.save()  # Save the updated product quantity
+
+            if status == 'deniedprevious':
+                checklist_item.product.quantity += previous_quantity  # Add the checklist item’s quantity to the product quantity
+                checklist_item.product.save()  # Save the updated product quantity
+
+            product.save()
+
+        checklist_item.status = status
+        checklist_item.save()
+
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': 'Mise à jour réussie!'})  # ✅ Include success message
+
+        return redirect('checklistvoir-detail', checklist_id=checklist.id)
 
     context = {
         'checklist': checklist,
-        'checklist_item': checklist_items,
-        'products': products,
+        'normal_items': normal_items,
+        'nt_items': nt_items,
         'quantity_change_logs': quantity_change_logs,
     }
     return render(request, 'listings/checklistevoir_detail.html', context)
@@ -510,6 +584,34 @@ def product_detail(request, item_id):
         'item': item,
     }
     return render(request, 'listings/product_detail.html', context)
+
+    
+from django.shortcuts import get_object_or_404, redirect
+from django.http import JsonResponse
+from .models import ChecklistItem, Product
+
+def validate_checklist_item(request, checklist_item_id):
+    checklist_item = get_object_or_404(ChecklistItem, id=checklist_item_id)
+    product = checklist_item.product
+
+    if checklist_item.status == 'pending':
+        # Calculate the difference between current and previous quantity
+        quantity_difference = checklist_item.quantity - checklist_item.previous_quantity
+    else:
+        # Directly subtract the quantity
+        quantity_difference = checklist_item.quantity
+
+    # Update product quantity
+    product.quantity -= quantity_difference
+    product.save()
+
+    # Mark checklist item as validated
+    checklist_item.status = 'validated'
+    checklist_item.previous_quantity = checklist_item.quantity  # Update previous quantity
+    checklist_item.save()
+
+    return JsonResponse({'success': True, 'new_product_quantity': product.quantity})
+
 
 def inventory(request):
     products = Product.objects.all()
@@ -555,26 +657,36 @@ def add_to_checklist(request, checklist_id):
                 product = Product.objects.get(pk=product_id)
                 quantity = int(quantity)  # Ensure quantity is an integer
 
-                # Get or create the ChecklistItem
-                checklist_item, created = ChecklistItem.objects.get_or_create(
-                    checklist=checklist,
-                    product=product,
-                    defaults={'quantity': quantity, 'commentaire': commentaire}
-                )
+                # Debugging - Print values
+                print(f"Product ID: {product_id}, Quantity: {quantity}, Comment: '{commentaire}'")
+                
+                # Check the condition for quantity 0 with a comment
+                if quantity >= 0:
+                    # Get or create the ChecklistItem
+                    checklist_item, created = ChecklistItem.objects.get_or_create(
+                        checklist=checklist,
+                        product=product,
+                        defaults={'quantity': quantity, 'commentaire': commentaire}
+                    )
 
-                if not created:
-                    checklist_item._changed_by = request.user
-                    checklist_item.quantity = quantity
 
-                    # Only update commentaire if it's changed
-                    if commentaire and commentaire != checklist_item.commentaire:
-                        checklist_item.commentaire = commentaire
+                    if not created:
+                        checklist_item._changed_by = request.user
+                        checklist_item.quantity = quantity
 
-                    checklist_item.save()
+                        # Only update commentaire if it's changed
+                        if commentaire.strip() and commentaire != checklist_item.commentaire:
+                            checklist_item.commentaire = commentaire
+
+                        checklist_item.save()
+
+                else:
+                    # If quantity is 0 and no comment, skip this product
+                    print(f"Item not added for Product ID: {product_id} due to missing comment.")
+                    # You can also set a flash message or handle this case in your UI
 
             except Product.DoesNotExist:
                 return JsonResponse({'success': False, 'message': f'Product ID {product_id} not found.'})
-
 
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
@@ -646,11 +758,19 @@ def checklist_detail(request, checklist_id):
 
     # Handle document formset submission
     if 'documents-TOTAL_FORMS' in request.POST and document_formset.is_valid():
+        # Save new or updated documents
         documents = document_formset.save(commit=False)
-        for document in documents:
-            document.checklist = checklist
-            document.save()
+        for i, document in enumerate(documents):
+            # Check if the delete checkbox is checked for the document form
+            delete_checkbox = request.POST.get(f"delete_{document_formset.forms[i].prefix}")
+            if delete_checkbox:
+                document.delete()  # Delete the document if the checkbox is checked
+            else:
+                document.checklist = checklist  # Assign checklist to the document if it's not marked for deletion
+                document.save()
+
         return HttpResponseRedirect(reverse('checklist-detail', args=[checklist_id]))
+
 
     # Handle checklist form submission
     elif 'checklist_form-name' in request.POST and formbis.is_valid():
@@ -711,6 +831,33 @@ def checklist_detail(request, checklist_id):
         'is_admin': 'admin' in user_groups,
     }
     return render(request, 'listings/checklist_detail.html', context)
+
+
+def edit_document(request, doc_id):
+    document = get_object_or_404(ChecklistDocument, id=doc_id)
+    
+    if request.method == 'POST':
+        form = ChecklistDocumentForm(request.POST, request.FILES, instance=document)
+        if form.is_valid():
+            form.save()
+            return redirect('checklist-detail', checklist_id=document.checklist.id)  # Redirect back to the checklist detail
+    else:
+        form = ChecklistDocumentForm(instance=document)
+
+    return render(request, 'listings/edit_document.html', {'form': form, 'document': document})
+
+@csrf_exempt
+def delete_document(request, doc_id):
+    if request.method == 'POST':
+        try:
+            # Get the document by ID and delete it
+            document = ChecklistDocument.objects.get(id=doc_id)
+            document.delete()
+            return JsonResponse({'success': True})
+        except ChecklistDocument.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Document not found'})
+
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
 
 @csrf_exempt
 def adjust_product_quantity(request):
@@ -4604,7 +4751,7 @@ def duplicate_checklist(request, checklist_id):
             product=item.product,
             quantity=item.quantity,
             is_completed=item.is_completed,
-            status=item.status,
+            status="en_cours",
             consumed_quantity=item.consumed_quantity,
             unconsumed_quantity=item.unconsumed_quantity,
             commentaire=item.commentaire,

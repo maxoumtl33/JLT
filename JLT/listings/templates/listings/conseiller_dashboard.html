@@ -140,6 +140,7 @@
             <thead class="table-primary">
                 <tr class="text-center">
                     <th>Nom</th>
+                    <th>Convives</th>
                     <th>Date</th>
                     <th>Ajouté le</th>
                     <th>Statut</th>
@@ -152,6 +153,7 @@
                 {% for checklist in checklists %}
                 <tr class="text-center">
                     <td>{{ checklist.name }}</td>
+                    <td>{{ checklist.nb_convive }}</td>
                     <td>{{ checklist.date|date:"l d F Y" }}</td>
                     <td>{{ checklist.added_on }}</td>
                     <td>
