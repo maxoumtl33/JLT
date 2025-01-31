@@ -62,6 +62,89 @@
 
 </style>
 
+{% if is_chefcuisine %}
+<div style="text-align: center;">
+  <div class="body">
+    <h1 style="text-align: center;">LIVRAISONS DU JOUR</h1>
+    <br>
+    <br>
+    <p style="text-align: center;">{{ livraisonsok|length }} livraisons et {{ livraisonsrecup|length }} récupérations aujourd'hui</p>
+   
+    <a href="{% url 'creerchecklist' %}" class="btn btn-primary mt-3">Voir Checklists</a>
+    <br>
+    <br>
+    <table class="table table-hover">
+        <thead class="thead-dark">
+          <tr>
+            
+            <th scope="col" style="color: #303FBA;">Heure départ</th>
+            <th scope="col" style="color: #303FBA;">Nom du contrat</th>
+            <th scope="col" style="color: #303FBA;">Infos</th>
+            <th scope="col" style="color: #303FBA;">Heure livraison</th>
+            <th scope="col" style="color: #303FBA;">Livreur</th>
+            <th scope="col" style="color: #303FBA;">Aide livreur</th>
+            <th scope="col" style="color: #303FBA;">Route</th>
+            <th scope="col" style="color: #303FBA;">Status</th>
+            {% if user.username == ventes %}
+            <th scope="col" style="color: #303FBA;">Modifier</th>
+            {% endif %}
+
+
+  
+  
+          </tr>
+        </thead>
+        <tbody>
+            {% for livraison in livraisons %}
+            {% if livraison.recuperation == True %}
+          <tr>
+            
+            <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.heure_depart }}</strong></td>
+            <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
+            <td style="background-color: #F1B3DA;"><strong>{{livraison.infodetail}}</strong></td>
+            <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
+            <td style="background-color: #F1B3DA;"><strong>{{livraison.statut.livreur}}</strong></td>
+            <td style="background-color: #F1B3DA;"><strong>{{livraison.aidelivreur}}</strong></td>
+            <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.nom }}</strong></td>
+            {% if livraison.status == True %}
+            <td><strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong></td>
+              {% else %}
+            <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
+            {% endif %}
+            {% if user.username == ventes %}
+          <td><a href="{% url 'livraisonventesdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+          {% endif %}
+            </tr>
+            {% else %}
+            <tr>
+            
+            <td><strong>{{ livraison.statut.heure_depart }}</strong></td>
+            <td><strong>{{livraison.nom}}</strong></td>
+            <td><strong>{{livraison.infodetail}}</strong></td>
+            <td><strong>{{ livraison.heure_livraison }}</strong></td>
+            <td><strong>{{livraison.statut.livreur}}</strong></td>
+            <td><strong>{{livraison.aidelivreur}}</strong></td>
+            <td><strong>{{ livraison.statut.nom }}</strong></td>
+            {% if livraison.status == True %}
+            <td><strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong></td>
+              {% else %}
+            <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
+            {% endif %}
+            {% if user.username == ventes %}
+          <td><a href="{% url 'livraisonventesdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+          {% endif %}
+          </tr>
+          {% endif %}
+          {% endfor %}
+          
+        </tbody>
+      </table>
+    </div>
+</div>
+
+
+{% endif %}
+
 <div class="button-container">
   {% if is_md %}
   <a href="{% url 'md_dashboard' %}" class="btn btn-primary">

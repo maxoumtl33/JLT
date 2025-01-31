@@ -194,7 +194,7 @@
 </style>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
-
+{% if is_vente %}
 <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
     <div class="container">
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -292,7 +292,62 @@
         </table>
     </div>
 </div>
+{% endif %}
+{% if is_chefcuisine %}
+<h1 class="text-center">Liste Checklist</h1>
 
+
+
+<a href="{% url 'journees-list' %}" class="btn btn-primary mt-3">Voir Livraisons</a>
+
+<hr>
+
+
+
+<div class="agenda-container">
+    <!-- Calendar Section -->
+    <div id="calendar-section" class="calendar-section">
+        <div class="month-selection">
+            <label for="month" class="month-label">Sélectionnez le mois :</label>
+            <select id="month" name="month" onchange="updateAgenda()" class="month-dropdown">
+                {% for month_name in french_months %}
+                    <option value="{{ forloop.counter0|add:1 }}" {% if forloop.counter0|add:1 == selected_month %}selected{% endif %}>
+                        {{ month_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div id="calendar" class="calendar">
+            {% for day in days %}
+                <div class="day">
+                    <button class="day-btn" data-day="{{ day }}" onclick="getChecklists({{ day }})">
+                        {{ day }}
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Checklist Section -->
+    <div id="checklist-section" class="checklist-section">
+        <table class="checklist-table">
+            <thead>
+                <tr>
+                    <th>Heure</th>
+                    <th>Nom</th>
+                    <th>Convives</th>
+                    <th>Ajouté par</th>
+                    <th>Ajouté le</th>
+                </tr>
+            </thead>
+            <tbody id="checklist-list" data-detail-url="{% url 'checklist-detail' checklist_id=0 %}">
+                <!-- Checklists will appear dynamically here -->
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
 
 
 

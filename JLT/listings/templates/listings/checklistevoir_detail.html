@@ -63,7 +63,30 @@
             flex-direction: column;
         }
     }
+    .alert-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;  /* Ensures it stays above other elements */
+    min-width: 250px;
+    max-width: 350px;
+}
+
+.alert {
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
 </style>
+
+{% if messages %}
+    <div class="alert-container">
+        {% for message in messages %}
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
 
 <div class="container content-container">
     <a href="{% url 'voir_checklist' %}" class="back-link">
@@ -127,12 +150,6 @@
                 <tr>
                     <td class="align-middle" style="background-color: {% if checklist_product.status == 'en_cours' %}#ff9800{% elif checklist_product.status == 'valide' %}#4caf50{% elif checklist_product.status == 'refuse' %}#f44336{% elif checklist_product.status == 'complete' %}#4caf50{% elif checklist_product.status == 'pending' %}#ff9800{% elif checklist_product.status == 'denied' %}#f44336{% elif checklist_product.status == 'deniedprevious' %}#f44336{% endif %};">{{ checklist_product.product.name }}</td>
                     <td class="align-middle" style="background-color: {% if checklist_product.status == 'en_cours' %}#ff9800{% elif checklist_product.status == 'valide' %}#4caf50{% elif checklist_product.status == 'pending' %}#ff9800{% elif checklist_product.status == 'refuse' %}#f44336{% elif checklist_product.status == 'complete' %}#4caf50{% elif checklist_product.status == 'denied' %}#f44336{% elif checklist_product.status == 'deniedprevious' %}#f44336{% endif %};">{{ checklist_product.quantity }}<br>
-                        <small>
-                            <strong>Previous Quantity:</strong> {{ checklist_product.previous_quantity }} /
-                            <strong>Current Quantity:</strong> {{ checklist_product.quantity }}<br>
-                            <strong>Previous Status:</strong> {{ checklist_product.previous_status }} /
-                            <strong>Current Status:</strong> {{ checklist_product.status }}
-                        </small>
                     </td>
                     <td class="align-middle">
                         <form method="post" action="{% url 'checklistvoir-detail' checklist.id %}" id="status-form-{{ checklist_product.id }}">

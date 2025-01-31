@@ -829,6 +829,8 @@ def checklist_detail(request, checklist_id):
         'checklist_items_by_category': dict(checklist_items_by_category),
         'product_categories': product_categories,
         'is_admin': 'admin' in user_groups,
+        'is_chefcuisine': request.user.groups.filter(name='chefcuisine').exists(),
+        'is_vente': request.user.groups.filter(name='vente').exists(),
     }
     return render(request, 'listings/checklist_detail.html', context)
 
@@ -1028,6 +1030,8 @@ def creerchecklist(request):
         'selected_date': date(current_year, selected_month, selected_day).strftime('%d %B %Y'),
         'years': years,
         'selected_year': current_year,
+        'is_chefcuisine': request.user.groups.filter(name='chefcuisine').exists(),
+        'is_vente': request.user.groups.filter(name='vente').exists(),
     }
     
     return render(request, 'listings/checklistcreate.html', context)
@@ -1990,6 +1994,7 @@ def journees_list(request):
                                                               'is_ventes': request.user.groups.filter(name='ventes').exists(),
                                                               'is_livreur': request.user.groups.filter(name='livreurs').exists(),
                                                               'is_chaud': request.user.groups.filter(name='chaud').exists(),
+                                                              'is_chefcuisine': request.user.groups.filter(name='chefcuisine').exists(),
                                                               'jef':jef,
                                                               'md':md,
                                                               'loic':loic})

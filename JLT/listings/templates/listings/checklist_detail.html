@@ -362,8 +362,33 @@
     .modal-body-verif {
     font-size: 11px; /* Apply to all text inside modal */
     }
+    .alert-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;  /* Ensures it stays above other elements */
+    min-width: 250px;
+    max-width: 350px;
+}
+
+.alert {
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
 </style>
 
+{% if is_vente %}
+
+{% if messages %}
+    <div class="alert-container">
+        {% for message in messages %}
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
 
 
 <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
@@ -462,18 +487,10 @@
         <button type="submit" class="btn btn-primary">Associer</button>
     </form>
 
-    {% if messages %}
-    <div class="alert alert-info">
-        {% for message in messages %}
-            <p>{{ message }}</p>
-        {% endfor %}
-    </div>
-{% endif %}
             </div>
         </div>
     </div>
 </div>
-
 <div class="container mt-5">
     <hr>
     <div style="text-align: center; margin-bottom: 30px;">
@@ -1558,7 +1575,7 @@
                         <ul class="collapse" id="items-{{ forloop.counter }}">
                             {% for item in items %}
                             <li class="item" data-name="{{ item.product.name }}">
-                                <span style="color: {% if item.status == encours %}#ea7006{% elif item.status == valide %}green{% else %}red{% endif %};">
+                                <span style="color: {% if item.status == 'en_cours' %}#ff9800{% elif item.status == 'valide' %}#4caf50{% elif item.status == 'refuse' %}#f44336{% elif item.status == 'complete' %}#4caf50{% elif item.status == 'pending' %}#ff9800{% elif item.status == 'denied' %}#f44336{% elif item.status == 'deniedprevious' %}#f44336{% endif %};">
                                     <strong>{{ item.product.name }} - Quantité: {{ item.quantity }}</strong>
                                 </span>
                                 {% if item.commentaire %}
@@ -2731,7 +2748,59 @@
 
   </div>
 
+{% endif %}
+{% if is_chefcuisine %}
+<div class="container mt-4">
+    <a href="{% url 'creerchecklist'%}" class="btn btn-primary mt-3">Retour liste checklists</a>
+    <br>
+    <br>
+    <h2 class="text-center">Produits de la Checklist - {{ checklist.name }}</h2>
+    <h3 class="text-center">{{ checklist.date }}</h3>
+    <table class="table table-striped mt-3">
+        <thead class="thead-dark">
+            <tr>
+                <th>Produit</th>
+                <th>Quantité</th>
+                <th>Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in checklist_items %}
+            <tr>
+                <td>{{ item.product.name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>
+                    <span class="badge 
+    {% if item.status in 'valide,complete' %}badge-success
+    {% elif item.status in 'refuse,denied,deniedprevious' %}badge-danger
+    {% elif item.status in 'en_cours,pending' %}badge-warning
+    {% else %}badge-secondary{% endif %}">
+    {% if item.status in 'valide,complete' %}
+        Validé
+    {% elif item.status in 'refuse,denied,deniedprevious' %}
+        Refusé
+    {% elif item.status in 'en_cours,pending' %}
+        En cours
+    {% elif item.status in 'remettrestock, remettrestockchange' %}
+        Annulé
+    {% else %}
+        {{ item.status }}
+    {% endif %}
+</span>
 
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" class="text-center">Aucun item trouvé</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+</div>
+
+{% endif %}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>

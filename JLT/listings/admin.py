@@ -20,6 +20,10 @@ from import_export.admin import ImportExportModelAdmin
 from .models import Livraison
 #from listings.models import Route
 
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user',)
+
+admin.site.register(UserProfile, UserProfileAdmin)
 
 class ChecklistItemAdmin(admin.ModelAdmin):
     list_display = ['product', 'checklist', 'status', 'quantity', 'is_completed']
@@ -79,4 +83,3 @@ admin.site.register(Group)
 admin.site.register(Md)
 admin.site.register(ChecklistDocument)
 admin.site.register(Conseiller)
-admin.site.register(UserProfile)

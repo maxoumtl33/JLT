@@ -8,7 +8,7 @@ from datetime import timedelta
 
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True)
     force_password_change = models.BooleanField(default=False)
 
     def __str__(self):
@@ -408,20 +408,23 @@ class Checklist(models.Model):
     is_active = models.BooleanField(default=True)  # New field
 
     def update_status(self):
-        # Exclude ChecklistItems where the quantity is 0
-        valid_items = self.checklistitem_set.filter(status='valide').exclude(quantity=0)
-        refused_items = self.checklistitem_set.filter(status='refuse').exclude(quantity=0)
+        # Exclude ChecklistItems where quantity is 0
+        non_zero_items = self.checklistitem_set.exclude(quantity=0)
+        
+        valid_items = non_zero_items.filter(status__in=['valide', 'complete'])
+        refused_items = non_zero_items.filter(status__in=['refuse', 'denied', 'deniedprevious'])
 
-        # If all non-zero quantity items are 'valide', set the checklist to 'valide'
-        if valid_items.count() == self.checklistitem_set.exclude(quantity=0).count():
+        # If all non-zero quantity items are 'valide' or 'complete', set checklist status to 'valide'
+        if valid_items.count() == non_zero_items.count() and non_zero_items.exists():
             self.status = 'valide'
-        # If any non-zero quantity item is 'refuse', set the checklist to 'refuse'
+        # If any non-zero quantity item is 'refuse' or similar, set checklist status to 'refuse'
         elif refused_items.exists():
             self.status = 'refuse'
         else:
-            self.status = 'en_cours'
+            self.status = 'en_cours'  # Default status if neither fully valid nor refused
 
         self.save()
+
 
     def save(self, *args, **kwargs):
         if self.num_contrat and not self.num_contrat.startswith('CMD-'):
