@@ -5,6 +5,8 @@
 {% block content %}
 
 <style>
+    
+
     .column {
         float: left;
         width: 30%;
@@ -78,6 +80,29 @@
     .form1 {
         margin-bottom: 15px;
     }
+    .pink-bg {
+    background-color: pink;
+}
+#date-picker {
+        width: 200px; /* Adjust the width as needed */
+        padding: 8px; /* Add some padding for better touch targets */
+        border-radius: 4px; /* Slightly rounded corners */
+        border: 1px solid #ccc; /* Lighter border for a modern look */
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* Optional shadow for depth */
+        transition: border-color 0.2s; /* Smooth transition effect */
+    }
+
+    #date-picker:focus {
+        border-color: #007bff; /* Blue border when focused */
+        outline: none; /* Remove default outline */
+    }
+
+    .text-center {
+    display: flex;              /* Enable flexbox */
+    flex-direction: column;     /* Stack items vertically */
+    align-items: center;       /* Center items horizontally */
+    justify-content: center;    /* Center items vertically if needed */
+}
 </style>
 
 <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
@@ -86,43 +111,238 @@
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
+<h1 class="text-center my-4">Carte du midi</h1>
+<h2 class="text-center my-4">{{ selected_date }}</h2>
+<br>
+<div class="text-center mb-4">
+    <label for="date-picker"><strong>Sélectionnez une date :</strong></label>
+    <input type="date" id="date-picker" class="form-control text-center" value="{{ selected_date|date:'Y-m-d' }}">
+</div>
+<br>
+<div class="mapholder">
+    <div id="map"></div>
+
+</div>
+
+<h1 class="text-center my-4">Créer les routes</h1>
+<div class="text-center mb-4">
+    <form method="POST" action="{% url 'create_routeaujour' %}">
+        {% csrf_token %}
+        <input type="hidden" name="selected_date" value="{{ selected_date }}">
+        <input type="hidden" name="route_name" value="1">
+        <button type="submit" class="btn btn-success">Créer route</button>
+    </form>
+</div>
+
+<div style="display: flex; flex-wrap: wrap;" id="sortable-table">
+    {% for a in routes21 %}
+    <div class="column" data-id="{{ a.id }}" data-statut="{{ a.id }}">
+        <h2>{{ a.nom }}</h2>
+        {% for task in todo_livraison %}
+        {% if task.statut.nom == a.nom and task.recuperation == True %}
+        <div class="task" data-task-id="{{ task.id }}" style="background-color: pink;">
+            <a data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a>
+        </div>
+        {% else %}
+        <div class="task" data-task-id="{{ task.id }}">
+            <a data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a>
+        </div>
+        {% endif %}
+    {% endfor %}
+    </div>
+    {% endfor %}
+
+
+    {% for a in routes %}
+    <div class="column" data-id="{{ a.id }}" data-statut="{{ a.id }}">
+        <h1>Route N° {{ a.nom }}</h1>
+        <p class="d-flex justify-content-between align-items-center">
+            <a href="#" class="edit-route" data-id="{{ a.id }}" data-nom="{{ a.nom }}" data-livreur="{{ a.livreur }}" data-heure="{{ a.heure_depart }}" data-toggle="modal" data-commentaire="{{ a.commentaire }}" data-target="#routeDetailModal">
+                <i class="fa-solid fa-pen-to-square"></i>
+            </a>
+            
+            <button class="edit-routes border-0 bg-transparent p-0" data-id="{{ a.id }}" data-nom="{{ a.nom }}">
+                <i class="fa-solid fa-sort fa-xl" style="color: #74C0FC;"></i>
+            </button>
+        </p>
+        
+        <hr>
+        <p>Livreur: {{ a.livreur }}</p>
+        <p>Heure départ: {{ a.heure_depart }}</p>
+        <hr>
+        <div class="tasks-container" data-column-id="{{ a.id }}">
+            <table id="sortable-livraisons" class="table">
+                <thead>
+                </thead>
+                <tbody>
+                    {% for task in route1 %}
+                        {% if task.statut.nom == a.nom %}
+                            <tr class="task" data-task-id="{{ task.id }}" data-position="{{ forloop.counter0 }}">
+                                <td {% if task.recuperation %}style="background-color: #F1B3DA;"{% endif %}>{{ task.nom }}</td>
+                                <td {% if task.recuperation %}style="background-color: #F1B3DA;"{% endif %}>
+                                    <a data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}" class="btn">
+                                        <i class="fa-solid fa-circle-info"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+                
+            </table>
+            
+        
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="modal fade" id="editRoutesModal" tabindex="-1" role="dialog" aria-labelledby="editRouteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Modifier l'ordre des livraisons</h5>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Heure Livraison</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody id="sortable-livraisons-modal">
+                        <!-- Livraisons will be inserted here dynamically -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="save-order">Enregistrer l'ordre</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Structure -->
+<div class="modal fade" id="routeDetailModal" tabindex="-1" role="dialog" aria-labelledby="routeDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="routeDetailModalLabel">Assigner livreur + heure départ</h5>
+            </div>
+            <div class="modal-body">
+                <form id="routeDetailForm" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        {{ routedetail_form.livreur.label_tag }}
+                        {{ routedetail_form.livreur }}
+                    </div>
+                    <br>
+                    <div class="form-group">
+                        {{ routedetail_form.heure_depart.label_tag }}
+                        {{ routedetail_form.heure_depart }}
+                    </div>
+                    <br>
+                    <div class="form-group">
+                        {{ routedetail_form.commentaire.label_tag }}
+                        {{ routedetail_form.commentaire }}  <!-- Ensure the commentaire field is included here -->
+                    </div>
+                    <br>
+                    <button type="submit" class="btn btn-primary">Valider</button>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+</div>
+<br>
+<br>
+<br>
+<br>
+<nav class="bottom-navbar">
+    <ul>
+        <li><a href="{% url 'acceuilresponsables'%}" class="nav__link"><i class="fa-solid fa-user-ninja"></i><span class="nav__name">Menu Admin</span></a></li>
+        <li><a href="{% url 'livraisonstomorrow'%}" class="nav__link"><i class="fa-solid fa-location-dot"></i><span class="nav__name">Dispatch</span></a></li>
+    </ul>
+</nav>
+
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<script async src="https://maps.googleapis.com/maps/api/js?key={{ key }}&callback=initMap" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+
+
+    
 <script>
-    let map;
+   let map;
 
-    function initMap() {
-        const livraisons = {{ livraisons|safe }};
-        const firstLocation = livraisons[0];
-        const infoWindows = [];
-
-        map = new google.maps.Map(document.getElementById("map"), {
-            center: { lat: firstLocation.lat, lng: firstLocation.lng },
-            zoom: 10.5,
-        });
-
-        livraisons.forEach(livraison => {
-            const markerInfo = `${livraison.nom} / ${livraison.heure_livraison} / ${livraison.mode_envoi} / ${livraison.convives}`;
-            const marker = new google.maps.Marker({
-                position: { lat: livraison.lat, lng: livraison.lng },
-                map: map,
-                title: markerInfo,
-            });
-
-            const infowindow = new google.maps.InfoWindow({
-                content: markerInfo,
-            });
-
-            infoWindows.push(infowindow);
-
-            marker.addListener('click', () => {
-                infoWindows.forEach(iw => iw.close());
-                infowindow.open(map, marker);
-            });
-        });
+function initMap() {
+    const livraisons = {{ livraisons|safe }};
+    if (livraisons.length === 0) {
+        console.error('No livraisons available for the selected date.');
+        return; // Exit the function if there are no livraisons
     }
 
-    window.initMap = initMap;
+    const firstLocation = livraisons[0];
+    map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: firstLocation.lat, lng: firstLocation.lng },
+        zoom: 10.5,
+    });
 
-    $(document).ready(function() {
+    // Object to group livraisons by coordinates
+    const markersMap = {};
+
+    livraisons.forEach(livraison => {
+        const position = `${livraison.lat},${livraison.lng}`;
+        
+        // Group deliveries by position
+        if (!markersMap[position]) {
+            markersMap[position] = []; // Initialize array for this position
+        }
+        markersMap[position].push(livraison); // Add the livraison to the array
+    });
+
+    for (const position in markersMap) {
+        const livraisonsAtPosition = markersMap[position];
+
+        // Select the first livraison for marker placement
+        const firstLivraison = livraisonsAtPosition[0]; // Use first to get lat/lng
+        const markerInfo = livraisonsAtPosition.map(l => `${l.nom} / ${l.heure_livraison} / ${l.mode_envoi} / ${l.convives}`).join('<br>');
+
+        // Define marker options
+        const markerOptions = {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: livraisonsAtPosition[0].heure_livraison === 'recup' ? '#F1B3DA' : '#74C0FC',
+            fillOpacity: 1,
+            scale: 10,
+            strokeColor: '#FFFFFF',
+            strokeWeight: 4,
+        };
+
+        // Create the marker
+        const marker = new google.maps.Marker({
+            position: { lat: parseFloat(firstLivraison.lat), lng: parseFloat(firstLivraison.lng) },
+            map: map,
+            title: `Deliveries at this location`,
+            icon: markerOptions
+        });
+
+        // Create an info window that shows details of all livraisons
+        const infowindow = new google.maps.InfoWindow({
+            content: markerInfo,
+        });
+
+        marker.addListener('click', () => {
+            infowindow.open(map, marker);
+        });
+    }
+}
+
+$(document).ready(function() {
         $('[data-toggle="popover"]').popover();
         $(".task").draggable({
             revert: 'invalid',
@@ -149,107 +369,122 @@
             }
         });
     });
+
+
+
+    document.getElementById("date-picker").addEventListener("change", function () {
+    let selectedDate = this.value;
+    window.location.href = `?date=${selectedDate}`; // Redirect to the new date’s route
+});
+
+$(document).ready(function() {
+    $(document).on('click', '.edit-route', function(event) {
+        event.preventDefault(); // Prevent the default anchor click behavior
+
+        const routeId = $(this).data('id');
+        const routeNom = $(this).data('nom');
+        const routeLivreur = $(this).data('livreur');
+        const routeHeure = $(this).data('heure');
+        const routeCommentaire = $(this).data('commentaire');
+
+        // Update the form action URL
+        $('#routeDetailForm').attr('action', '/route/update/' + routeId + '/');
+        
+        // Update form fields with data
+        $('#id_livreur').val(routeLivreur);
+        $('#id_heure_depart').val(routeHeure);
+        $('#id_commentaire').val(routeCommentaire);  // Populate commentaire field
+
+        // Show the modal
+        $('#routeDetailModal').modal('show'); // This line ensures the modal is displayed
+    });
+});
+
+
+$(document).ready(function() {
+    let selectedRouteId = null;
+
+    $(".edit-routes").on("click", function() {
+        selectedRouteId = $(this).data("id");  // Get selected route ID
+
+        // Fetch route livraisons
+        $.ajax({
+            url: `/get-route-livraisons/${selectedRouteId}/`, // Django view to get livraisons
+            method: "GET",
+            success: function(data) {
+                let tbody = $("#sortable-livraisons-modal");
+                tbody.empty();
+
+                data.livraisons.forEach(liv => {
+                    let bgColor = liv.heure_livraison === 'recup' ? 'style="background-color: #F1B3DA;"' : '';
+
+                    tbody.append(`
+                        <tr class="sortable-item" data-livraison-id="${liv.id}">
+                            <td ${bgColor}>${liv.nom}</td>
+                            <td ${bgColor}>${liv.heure_livraison}</td>
+                        </tr>
+                    `);
+                });
+
+
+                // Make the table rows sortable
+                new Sortable(tbody[0], {
+                    animation: 150,
+                });
+
+                // Open the modal
+                $("#editRoutesModal").modal("show");
+            }
+        });
+    });
+
+    // Save new order
+    $("#save-order").on("click", function() {
+        let updatedOrder = [];
+        $("#sortable-livraisons-modal tr").each(function(index) {
+            updatedOrder.push({
+                id: $(this).data("livraison-id"),
+                position: index
+            });
+        });
+
+        // Send updated order to Django
+        $.ajax({
+            url: "/update-livraison-positions/",
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCookie("csrftoken")
+            },
+            contentType: "application/json",
+            data: JSON.stringify({ positions: updatedOrder, route_id: selectedRouteId }),
+            success: function(response) {
+                alert("Ordre mis à jour !");
+                $("#editRoutesModal").modal("hide"); // Fixed modal ID
+                location.reload();
+            },
+            error: function() {
+                alert("Erreur lors de la mise à jour");
+            }
+        });
+    });
+
+    // CSRF Token Function
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+
+
 </script>
-
-<h1 class="text-center my-4">Carte du midi</h1>
-<div class="mapholder">
-    <div id="map"></div>
-    <script async src="https://maps.googleapis.com/maps/api/js?key={{key}}&loading=async&callback=initMap"></script>
-</div>
-
-<h1 class="text-center my-4">Créer les routes</h1>
-<div class="text-center mb-4">
-    <form method="POST" action="{% url 'create_routeaujour' %}">
-        {% csrf_token %}
-        <input type="hidden" name="route_name" value="1">
-        <button type="submit" class="btn btn-success">Créer route
-        </button>
-    </form>
-</div><div style="display: flex; flex-wrap: wrap;">
-    {% for a in routes21 %}
-    <div class="column" data-statut="{{ a.id }}">
-        <h2>{{ a.nom }}</h2>
-        {% for task in todo_livraison %}
-        {% if task.statut.nom == a.nom and task.recuperation == True %}
-        <div class="task" data-task-id="{{ task.id }}" style="background-color: pink;">
-            <a data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a>
-        </div>
-        {% else %}
-        <div class="task" data-task-id="{{ task.id }}">
-            <a data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a>
-        </div>
-        {% endif %}
-        {% endfor %}
-    </div>
-    {% endfor %}
-
-    {% for a in routes %}
-    <div class="column" data-statut="{{ a.id }}">
-        <h1>Route N° {{ a.nom }}</h1>
-        <p><a href="{% url 'routedetail' a.id %}" target="_blank"><i class="fa-solid fa-pen-to-square"></i></a></p>
-        <hr>
-        <p>Livreur: {{ a.livreur }}</p>
-        <p>Heure départ: {{ a.heure_depart }}</p>
-        <hr>
-        {% for task in route1 %}
-        {% if task.statut.nom == a.nom %}
-        <div class="task" data-task-id="{{ task.id }}">
-            <a data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a>
-        </div>
-        {% endif %}
-        {% endfor %}
-    </div>
-    {% endfor %}
-</div>
-
-<h1 class="text-center my-4">Calculer les distances</h1>
-<table id="ourtable3" class="table table-striped">
-    <thead class="thead-dark">
-        <tr>
-            <th>De</th>
-            <th>Vers</th>
-            <th>Mode</th>
-            <th>Distance km</th>
-            <th>Durée min moyenne</th>
-            <th>Durée mins trafic actuel</th>
-            <th>Supprimer</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for distance in distances %}
-        <tr>
-            <td>{{ distance.from_location }}</td>
-            <td>{{ distance.to_location }}</td>
-            <td>{{ distance.mode }}</td>
-            <td>{{ distance.distance_km }}</td>
-            <td>{{ distance.distance_mins }}</td>
-            <td>{{ distance.distance_traffic_mins }}</td>
-            <td><a href="{% url 'deletedistance' distance.id %}">Supprimer</a></td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-<nav class="bottom-navbar">
-    <ul>
-        <li><a href="{% url 'acceuilresponsables'%}" class="nav__link"><i class="fa-solid fa-user-ninja"></i><span class="nav__name">Menu Admin</span></a></li>
-        <li><a href="{% url 'livraisonstomorrow'%}" class="nav__link"><i class="fa-solid fa-location-dot"></i><span class="nav__name">Dispatch</span></a></li>
-    </ul>
-</nav>
-
-<br><br>
-<form method="POST" class="container">
-    {% csrf_token %}
-    <div class="form1">
-        {{ form.from_location|as_crispy_field }}
-    </div>
-    <div class="form1">
-        {{ form.to_location|as_crispy_field }}
-    </div>
-    <div class="form1">
-        {{ form.mode|as_crispy_field }}
-    </div>
-    <button class="btn btn-primary" type="submit">Calculer</button>
-</form>
-
 {% endblock %}

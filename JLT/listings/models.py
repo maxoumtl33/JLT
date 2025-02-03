@@ -176,6 +176,7 @@ class Route(models.Model):
      livreur = models.ForeignKey(Livreur, null=True, blank=True, on_delete=models.SET_NULL)
      heure_depart = models.fields.CharField(null=True, blank=True, max_length=100, choices= choiceheures, default=" ")
      date = models.DateField(default=date.today)
+     commentaire = models.fields.CharField(max_length=100, blank=True)
      def __str__(self):
         return f'{self.nom}'
 
@@ -276,6 +277,7 @@ class Livraison(models.Model):
     heure_livraison = models.fields.CharField(null=True, blank=True, max_length=100, default=".")
     client = models.ForeignKey(Client, null=True, blank=True, on_delete=models.SET_NULL)
     date = models.fields.DateField(null=True, blank=True)
+    period = models.CharField(max_length=20, choices=[("matin", "Matin"), ("midi", "Midi"), ("apres_midi", "Après-midi")], null=True, blank=True)
     date_livraison = models.fields.DateField(null=True, blank=True)
     commentaire = models.fields.CharField(null=True, blank=True, max_length=500)
     commentairedispatch = models.fields.CharField(null=True, blank=True, max_length=350)

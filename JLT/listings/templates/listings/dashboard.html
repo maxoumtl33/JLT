@@ -253,12 +253,19 @@
     }
 
     .route-header {
-        display: flex;
-        justify-content: space-between;
-        padding: 10px;
-        background-color: #e3e3e3;
-        cursor: pointer;
-    }
+    display: flex;
+    align-items: center; /* Align items vertically */
+    padding: 10px;
+    background-color: #e3e3e3;
+    cursor: pointer;
+    gap: 10px; /* Add some space between elements */
+}
+
+.route-header p {
+    margin: 0; /* Remove default margin */
+    white-space: nowrap; /* Prevent text from wrapping */
+}
+
 
     .route-header i {
         transition: transform 0.3s;
@@ -539,7 +546,8 @@
     {% for route in routes_with_livraisons %}
     <div class="route-container">
         <div class="route-header" onclick="toggleDeliveries(this)">
-            Départ {{ route.heure_depart }} / Route N°{{ route.nom }}
+            <p>Route N°{{ route.nom }} / Départ: {{ route.heure_depart }} /</p>
+            <p style="color: orange;">{{ route.commentaire }}</p>
             <i class="fa-solid fa-chevron-down"></i>
         </div>
 

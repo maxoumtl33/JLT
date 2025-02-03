@@ -149,7 +149,7 @@ class DistanceFormAprem(ModelForm):
 class LivraisonDragForm(forms.ModelForm):
     class Meta:
         model = Livraison
-        fields = ('infodetail','heure_livraison','statut', 'commentairedispatch', 'recuperation')
+        fields = ('nom', 'infodetail', 'commentairedispatch','heure_livraison', 'recuperation')
 
 class LivraisonDragFormtoday(forms.ModelForm):
     class Meta:
@@ -170,7 +170,7 @@ class LivraisonsVentesForm(forms.ModelForm):
 class RoutedetailForm(forms.ModelForm):
     class Meta:
         model = Route
-        fields = ('livreur', 'heure_depart')
+        fields = ('livreur', 'heure_depart', 'commentaire')
 
 class LoadingDockForm(forms.ModelForm):
     class Meta:

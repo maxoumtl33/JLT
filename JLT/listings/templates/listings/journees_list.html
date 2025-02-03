@@ -73,6 +73,15 @@
     <a href="{% url 'creerchecklist' %}" class="btn btn-primary mt-3">Voir Checklists</a>
     <br>
     <br>
+    <form action="{% url 'logout' %}" method="post" class="logout-form">
+      {% csrf_token %}
+      <button type="submit" class="logout-button" style="color: red;">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          Déconnexion
+      </button>
+  </form>
+    <br>
+    <br>
     <table class="table table-hover">
         <thead class="thead-dark">
           <tr>
