@@ -96,6 +96,208 @@ from django.http import JsonResponse
 from .models import Livraison
 from .forms import LivraisonDragForm
 
+import pandas as pd
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .models import Livraison
+
+from django.shortcuts import render, redirect
+from .forms import XLSXUploadForm  # Ensure you import the form
+
+from django.http import JsonResponse
+import pandas as pd
+import io
+
+
+def import_xlsx(request):
+    print("📂 import_xlsx view was called!")
+    form = XLSXUploadForm()
+    if request.method == 'POST':
+        print("✅ POST request received!")
+        form = XLSXUploadForm(request.POST, request.FILES)
+        
+        if form.is_valid():
+            print("✔️ Form is valid!")
+            file = form.cleaned_data['file']
+
+            if not file:
+                print("❌ No file received.")
+                messages.error(request, "❌ No file uploaded. Please select a file.")
+                return redirect('import_xlsx')
+
+            try:
+                df = pd.read_excel(file, skiprows=3)  # Skip first 3 rows
+                print("📊 File read successfully!")
+
+                print("Columns found in file:", df.columns)  # Debugging
+
+                # Correct column renaming
+                df.rename(columns={
+                    "Nom de l'événement": "new_column1",
+                    "Adresse": "new_column2",
+                    "APP": "new_column3",
+                    "Ligne 2": "new_column4",
+                    "Code postal": "new_column5",
+                    "Nb convives": "new_column6",
+                    "Mode d'envoi": "new_column7",
+                    "Heure livraison": "new_column8",
+                    "# Commande": "new_column9",
+                    "Nom du client commandé": "new_column10",
+                    "Livraison et personne à contacter sur le site": "new_column11",
+                    "Informations supplémentaires": "new_column12",
+                    "Nom du conseiller": "new_column13"
+                }, inplace=True)
+
+                df.insert(0, 'id', '')  # Insert empty 'id' column
+
+                print("🛠️ Transformed DataFrame columns:", df.columns)
+
+                # Convert DataFrame to model instances
+                for index, row in df.iterrows():
+                    print(f"➡️ Processing row {index + 1}")
+                    try:
+                        Livraison.objects.create(
+                            nom=row['new_column1'],
+                            adress=row['new_column2'],
+                            app=row['new_column3'],
+                            ligne2=row['new_column4'],
+                            zipcode=row['new_column5'],
+                            convives=row['new_column6'],
+                            mode_envoi=row['new_column7'],
+                            heure_livraison=row['new_column8'],
+                            num_commande=row['new_column9'],
+                            nom_client=row['new_column10'],
+                            contact_site=row['new_column11'],
+                            infodetail=row['new_column12'],
+                            vendeur=row['new_column13'],
+                        )
+                        print(f"✅ Livraison created for row {index + 1}")
+                    except Exception as e:
+                        print(f"❌ Error creating row {index + 1}: {e}")
+
+                messages.success(request, "✅ File imported successfully!")
+                print("🎉 Import completed successfully!")
+            except Exception as e:
+                print(f"❌ Error processing file: {e}")
+                messages.error(request, f"❌ Error processing file: {e}")
+
+        return redirect('livraisons_without_date')
+
+
+    return render(request, 'listings/import_xlsx.html', {'form': form})
+
+
+
+
+from django.http import JsonResponse
+import json
+from .models import Journee
+
+def create_journee(request):
+    if request.method == "POST" and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        try:
+            data = json.loads(request.body)
+            print(f"Received data: {data}")  # Log the received data
+
+            name = data.get('name')
+            date = data.get('date')
+
+            if not name or not date:
+                return JsonResponse({"success": False, "error": "Missing required fields"}, status=400)
+
+            # Create the journee
+            journee = Journee.objects.create(
+                nom=name,
+                date=date
+            )
+            return JsonResponse({
+                "success": True,
+                "journee": {
+                    "id": journee.id,
+                    "name": journee.nom,
+                    "date": journee.date
+                }
+            })
+
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+    else:
+        return JsonResponse({"success": False, "error": "Invalid request method"}, status=400)
+
+
+from django.shortcuts import render, get_list_or_404
+from .models import Livraison
+
+def livraisons_without_date(request):
+    livraisons = Livraison.objects.filter(date__isnull=True)  # Fetch only those without a date
+    journees = Journee.objects.all()
+    return render(request, 'listings/livraisons_without_date.html', {'livraisons': livraisons, 'journees':journees,})
+
+from django.shortcuts import get_object_or_404, redirect
+from .models import Livraison
+from django.contrib import messages
+
+def delete_livraison(request, livraison_id):
+    livraison = get_object_or_404(Livraison, id=livraison_id)
+    livraison.delete()
+    messages.success(request, "🚀 Livraison deleted successfully!")
+    return redirect('livraisons_without_date')  # Redirect back to the list
+
+
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+from .models import Livraison, Journee
+
+from django.shortcuts import redirect, get_object_or_404
+from django.contrib import messages
+from listings.models import Livraison, Journee
+
+def bulk_edit_livraisons(request):
+    if request.method == "POST":
+        selected_ids = request.POST.getlist('selected_ids')  # Get selected Livraison IDs
+        bulk_date = request.POST.get('bulk_date')  # Get bulk date
+        bulk_journee = request.POST.get('bulk_journee')  # Get bulk journee ID
+        action = request.POST.get("action")  # Determine action (edit or delete)
+
+        if not selected_ids:
+            messages.error(request, "❌ No livraisons selected.")
+            return redirect('livraisons_without_date')
+
+        if action == "delete":
+            # 🚮 Delete selected livraisons
+            Livraison.objects.filter(id__in=selected_ids).delete()
+            messages.success(request, f"🗑️ {len(selected_ids)} livraisons deleted!")
+            return redirect('livraisons_without_date')
+
+        elif action == "edit":
+            # 🛠 Edit selected livraisons
+            for livraison_id in selected_ids:
+                livraison = get_object_or_404(Livraison, id=livraison_id)
+
+                # Update individual fields
+                livraison.nom = request.POST.get(f"nom_{livraison_id}", livraison.nom)
+                livraison.convives = request.POST.get(f"convives_{livraison_id}", livraison.convives)
+
+                # Apply bulk date to both `date` and `date_livraison`
+                if bulk_date:
+                    livraison.date = bulk_date
+                    livraison.date_livraison = bulk_date
+
+                # Apply bulk journee
+                if bulk_journee:
+                    livraison.journee = get_object_or_404(Journee, id=bulk_journee)
+
+                livraison.save()
+
+            messages.success(request, f"✅ {len(selected_ids)} livraisons updated!")
+
+        return redirect('livraisons_without_date')
+
+    return redirect('livraisons_without_date')
+
+
 def edit_task_form(request, task_id):
     task = get_object_or_404(Livraison, id=task_id)
     
@@ -4069,6 +4271,7 @@ from .models import Livraison
 def livraisonstomorrow(request):
     date_str = request.GET.get('date', datetime.now().date().strftime('%Y-%m-%d'))
     selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    form = XLSXUploadForm()
 
     matin = ['05h00', '05h15', '05h30', '05h45', '06h00', '06h15', '06h30', '06h45', 
              '07h00', '07h15', '07h30', '07h45', '08h00', '08h15', '08h30', '08h45', 
@@ -4087,6 +4290,7 @@ def livraisonstomorrow(request):
 
     context = {
         'selected_date': selected_date.strftime('%Y-%m-%d'),
+        'form':form,
         'livraisons_par_periode': [
             ('MATIN', livraisonsmatin, 'my_mapaujour_view'),
             ('MIDI', livraisonsmidi, 'my_mapmidiaujour_view'),
@@ -4095,6 +4299,9 @@ def livraisonstomorrow(request):
     }
 
     return render(request, 'listings/livraisonstomorrow.html', context)
+
+def success_page(request):
+    return render(request, 'listings/success.html')
 
 def livraisonstoday(request):
     recuperation = "oui"

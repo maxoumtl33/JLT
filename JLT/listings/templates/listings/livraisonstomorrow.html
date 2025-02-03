@@ -32,16 +32,74 @@
 .bottom-navbar ul li a:hover {
     text-decoration: underline;
 }
+
+.date-picker-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.date-picker-container input {
+    width: 100%;
+    max-width: 300px; /* Adjust the width as needed */
+    margin-bottom: 10px; /* Space between date picker and button */
+}
 </style>
 
 <div class="container">
     <h1 class="text-center mb-4">Livraisons</h1>
 
-    <div class="text-center mb-4">
-        <form id="geocode-form" method="get" action="{% url 'geocode_all_livraisons' %}">
-          <button type="button" class="btn btn-primary" onclick="triggerGeocode()">Geocode</button>
-      </form>
+    <div class="text-center mb-4 d-flex justify-content-center align-items-center">
+        <div class="geocode mx-2">
+            <form id="geocode-form" method="get" action="{% url 'geocode_all_livraisons' %}">
+                <button type="button" class="btn btn-primary" onclick="triggerGeocode()">Geocode</button>
+            </form>
+        </div>
+    
+        <div class="xlsx mx-2">
+            <!-- Trigger Button -->
+<button id="importBtn" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#uploadModal">📂 Import XLSX</button>
+
+<!-- Modal -->
+<div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="uploadModalLabel">Import XLSX File</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="uploadForm" method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <div class="text-center mt-3">
+            <button type="submit" class="btn btn-primary">Upload & Import</button>
+          </div>
+        </form>
+      </div>
     </div>
+  </div>
+</div>
+
+        </div>
+    
+        <div class="journee mx-2">
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            <!-- Create Journee Button and Date Picker -->
+            <div class="date-picker-container">
+                <input type="date" id="selected-date" name="selected-date" class="form-control mb-3">
+                <button type="button" class="btn btn-success" onclick="createJourneeFromSelectedDate()">Creer journee</button>
+            </div>
+        </div>
+        <div class="sansdate mx-2">
+        <a href="{% url 'livraisons_without_date'%}" class="btn btn-primary">Livraisons sans date</a>
+        </div>
+        
+    </div>
+    
+
+    <div id="message" style="display: none; color: green;"></div>
 
     <div class="text-center mb-4">
         <label for="date-picker"><strong>Sélectionnez une date :</strong></label>
@@ -153,6 +211,96 @@ function triggerGeocode() {
             });
         });
     }
+
+    $(document).ready(function() {
+    // Show modal when clicking the import button
+    $("#importBtn").click(function() {
+        $("#uploadModal").show();
+    });
+
+    // Handle form submission via AJAX
+    $("#uploadForm").submit(function(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        var formData = new FormData(this); // Get form data
+
+        $.ajax({
+            url: "{% url 'import_xlsx' %}",  // Django URL for the import function
+            method: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                $("#message").text("✅ File imported successfully!").show();
+                $("#uploadModal").hide(); // Hide modal after import
+                window.location.href = "{% url 'livraisonstomorrow' %}";
+            },
+            error: function() {
+                alert("⚠️ Error importing file. Check your file format.");
+            }
+        });
+    });
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+    async function createJourneeFromSelectedDate() {
+        const selectedDate = document.getElementById("selected-date").value;
+        
+        if (!selectedDate) {
+            console.error("No date selected.");
+            return; // Exit if no date is selected
+        }
+
+        // Ensure selectedDate is valid
+        const dateParts = selectedDate.split('-'); // Split the date string into [year, month, day]
+        const date = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2])); // Create a date object in UTC
+
+        // Adjust to the correct day by setting the time to 12:00:00 UTC
+        date.setUTCHours(12, 0, 0, 0);
+
+        // Format the name of the day in French (do not capitalize the month)
+        const name = date.toLocaleDateString('fr-FR', {
+            weekday: 'long', day: '2-digit', month: 'long'
+        });
+
+        // Capitalize only the weekday, not the month
+        const nameCapitalized = name.replace(/^(\w)/, match => match.toUpperCase())
+                                   .replace(/ (\w)/g, match => match.toLowerCase());
+
+        const formattedDate = date.toISOString().split('T')[0]; // Format date as 'YYYY-MM-DD'
+
+        // Get CSRF token from hidden input
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        try {
+            const response = await fetch('/create_journee/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',  // Ensure it is set for AJAX request
+                    'X-CSRFToken': csrfToken  // Add CSRF token here
+                },
+                body: JSON.stringify({
+                    name: nameCapitalized,
+                    date: formattedDate
+                })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                console.log('Journee created successfully!');
+            } else {
+                console.error(data.error);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    }
+
+    // Attach the function to the button click event
+    document.querySelector('.btn-success').addEventListener('click', createJourneeFromSelectedDate);
+});
+
 </script>
 
 {% endblock %}

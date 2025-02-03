@@ -151,6 +151,13 @@ class LivraisonDragForm(forms.ModelForm):
         model = Livraison
         fields = ('nom', 'infodetail', 'commentairedispatch','heure_livraison', 'recuperation')
 
+
+
+
+class XLSXUploadForm(forms.Form):
+    file = forms.FileField(required=True)
+
+
 class LivraisonDragFormtoday(forms.ModelForm):
     class Meta:
         model = Livraison

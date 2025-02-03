@@ -107,7 +107,7 @@ path('subtract/<int:checklist_id>/', views.subtract_to_checklist, name='subtract
 path('voirchecklist/', views.voir_checklist, name='voir_checklist'),
 path('checklistvoir/<int:checklist_id>/', views.checklistvoir_detail, name='checklistvoir-detail'),
 path('edit_task_form/<int:task_id>/', views.edit_task_form, name='edit_task_form'),
-
+path('import-xlsx/', import_xlsx, name='import_xlsx'),
 path('checklist-item/<int:pk>/delete-ajax/', ChecklistItemDeleteAjaxView.as_view(), name='checklist-item-delete-ajax'),
 path('update_livraison/', views.update_livraison, name='update_livraison'),
 path('update_livraison_route/', views.update_livraison_route, name='update_livraison_route'),
@@ -117,8 +117,13 @@ path('create_routesnextnext/', create_routesnn, name='create_routesnn'),
 path('products/', views.product_list, name='product_list'),
 path('create-shift/', views.create_shift, name='create-shift'),
 path('responsablelist/', responsable_list, name='responsablelist'),
+path('success/', views.success_page, name='success_page'),
 path('geocode_all_livraisons/', views.geocode_all_livraisons, name='geocode_all_livraisons'),
 path('faq/', faq, name='faq'),
+path('create_journee/', create_journee, name='create_journee'),
+path('delete_livraison/<int:livraison_id>/', delete_livraison, name='delete_livraison'),  # ✅ Add this
+path('bulk_edit_livraisons/', bulk_edit_livraisons, name='bulk_edit_livraisons'),
+path('livraisons_without_date/', livraisons_without_date, name='livraisons_without_date'),
 path('product/<int:product_id>/change-logs/', views.view_quantity_change_logs, name='view_quantity_change_logs'),
 path('checklist/<int:checklist_id>/save_breuvages_report/', views.save_breuvages_report, name='save_breuvages_report'),
 path('checklist/<int:checklist_id>/breuvages/', views.get_breuvages_products, name='get_breuvages_products'),
@@ -161,7 +166,6 @@ path('order/<int:order_id>/delete/', views.delete_order_cuisine, name='delete_or
 
 
 htmx_urlpatterns = [
-    path('delete-livraison/<int:pk>/', views.delete_livraison, name='delete-livraison'),
     path('sort/', views.sort, name='sort'),
     path('edit/<int:pk>/', views.edit_item, name='edit_item'),
 ]

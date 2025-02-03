@@ -1,0 +1,145 @@
+{% extends "listings/base.html" %}
+{% block content %}
+
+<style>
+    .bottom-navbar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #333;
+        padding: 10px 0;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+    }
+    .bottom-navbar ul {
+        list-style: none;
+        display: flex;
+        justify-content: space-around;
+        margin: 0;
+        padding: 0;
+    }
+    .bottom-navbar ul li {
+        flex: 1;
+        text-align: center;
+    }
+    .bottom-navbar ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.bottom-navbar ul li a:hover {
+    text-decoration: underline;
+}
+</style>
+
+<h2>📦 Livraisons sans dates</h2>
+
+<form method="POST" action="{% url 'bulk_edit_livraisons' %}" style="max-width: 1000px; margin: auto;">
+    {% csrf_token %}
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+        <!-- 📅 Select a single date to apply to all selected livraisons -->
+        <label for="bulk_date"><strong>📅 Date et date de livraison:</strong></label>
+        <input type="date" id="bulk_date" name="bulk_date" style="padding: 5px; border-radius: 5px; border: 1px solid #ccc;">
+
+        <!-- 📦 Select a single journee to apply to all selected livraisons -->
+        <label for="bulk_journee"><strong>🗓️ Journée:</strong></label>
+        <select id="bulk_journee" name="bulk_journee" style="padding: 5px; border-radius: 5px; border: 1px solid #ccc;">
+            <option value="">-- Selectionner Journée --</option>
+            {% for jour in journees %}
+                <option value="{{ jour.id }}">{{ jour.nom }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <table border="1" style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead style="background: #f4f4f4;">
+            <tr>
+                <th style="padding: 10px; text-align: center;"><input type="checkbox" id="select_all"> Select All</th>
+                <th style="padding: 10px;">Nom</th>
+                <th style="padding: 10px;">Convives</th>
+                <th style="padding: 10px;">Date</th>
+                <th style="padding: 10px;">Date Livraison</th>
+                <th style="padding: 10px;">Journée</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for livraison in livraisons %}
+            <tr style="border-bottom: 1px solid #ddd;">
+                <td style="text-align: center; padding: 10px;">
+                    <input type="checkbox" name="selected_ids" value="{{ livraison.id }}" style="width: 18px; height: 18px;">
+                </td>
+                <td><input type="text" name="nom_{{ livraison.id }}" value="{{ livraison.nom }}" style="width: 100%; padding: 5px;"></td>
+                <td><input type="number" name="convives_{{ livraison.id }}" value="{{ livraison.convives }}" style="width: 100%; padding: 5px;"></td>
+                <td><input type="date" name="date_{{ livraison.id }}" value="{{ livraison.date|date:'Y-m-d' }}" style="padding: 5px;"></td>
+                <td><input type="date" name="date_livraison_{{ livraison.id }}" value="{{ livraison.date_livraison|date:'Y-m-d' }}" style="padding: 5px;"></td>
+                <td>
+                    <select name="journee_{{ livraison.id }}" style="padding: 5px;">
+                        {% for jour in journees %}
+                            <option value="{{ jour.id }}" {% if livraison.journee.id == jour.id %}selected{% endif %}>
+                                {{ jour.nom }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+        <button type="submit" name="action" value="edit" style="background: #28a745; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">
+            ✏️ Modifier la selection
+        </button>
+        <button type="submit" name="action" value="delete" style="background: #dc3545; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">
+            🗑️ Effacer la selection
+        </button>
+    </div>
+    <nav class="bottom-navbar">
+        <ul>
+            <li><a href="{% url 'livraisonstomorrow'%}" class="nav__link"><i class="fa-solid fa-location-dot"></i><span class="nav__name">Dispatch</span></a></li>
+            <li><button type="submit" name="action" value="edit" style="background: #28a745; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">
+                ✏️ Modifier la selection
+            </button></li>
+            <li><button type="submit" name="action" value="delete" style="background: #dc3545; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">
+                🗑️ Effacer la selection
+            </button></li>
+        </ul>
+    </nav>
+</form>
+
+<br>
+<br>
+<br>
+<br>
+
+
+<!-- ✅ Select All Checkboxes -->
+<script>
+document.getElementById("select_all").addEventListener("change", function() {
+    let checkboxes = document.querySelectorAll("input[name='selected_ids']");
+    checkboxes.forEach(cb => cb.checked = this.checked);
+});
+
+// ✅ Apply bulk date and journee to selected livraisons
+document.getElementById("bulk_date").addEventListener("change", function() {
+    let selectedIds = document.querySelectorAll("input[name='selected_ids']:checked");
+    selectedIds.forEach(cb => {
+        let id = cb.value;
+        document.querySelector(`input[name='date_${id}']`).value = this.value;
+        document.querySelector(`input[name='date_livraison_${id}']`).value = this.value;
+    });
+});
+
+document.getElementById("bulk_journee").addEventListener("change", function() {
+    let selectedIds = document.querySelectorAll("input[name='selected_ids']:checked");
+    selectedIds.forEach(cb => {
+        let id = cb.value;
+        document.querySelector(`select[name='journee_${id}']`).value = this.value;
+    });
+});
+</script>
+
+{% endblock %}

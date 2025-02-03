@@ -184,6 +184,13 @@
                                         <i class="fa-solid fa-circle-info"></i>
                                     </a>
                                 </td>
+                                <td {% if task.recuperation %}style="background-color: #F1B3DA;"{% endif %}>
+                                    <!-- Button to trigger the modal -->
+                                    <button type="button" class="btn edit-task" data-toggle="modal" data-target="#editModal" data-task-id="{{ task.id }}">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
+                                    
+                                </td>
                             </tr>
                         {% endif %}
                     {% endfor %}
@@ -196,6 +203,26 @@
     </div>
     {% endfor %}
 </div>
+<!-- Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Modifier la livraison</h5>
+                
+            </div>
+            <div class="modal-body">
+                <!-- The form will be injected here by JavaScript -->
+                <form id="editForm" method="post">
+                    {% csrf_token %}
+                    <div id="modalFormContent"></div> <!-- The form content will be injected here -->
+                    <button type="submit" class="btn btn-primary">Valider</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <div class="modal fade" id="editRoutesModal" tabindex="-1" role="dialog" aria-labelledby="editRouteModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
@@ -275,8 +302,6 @@
 <script async src="https://maps.googleapis.com/maps/api/js?key={{ key }}&callback=initMap" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
 
-
-    
 <script>
    let map;
 
@@ -483,6 +508,55 @@ $(document).ready(function() {
         }
         return cookieValue;
     }
+});
+$(document).on('click', '.edit-task', function(event) {
+    event.preventDefault(); // Prevent default behavior
+
+    var taskId = $(this).data('task-id'); // Get the task ID from the button
+
+    $.ajax({
+        url: '/edit_task_form/' + taskId + '/', // Endpoint for fetching task details
+        method: 'GET',
+        success: function(response) {
+            // Assuming the server returns form HTML
+            $('#modalFormContent').html(response.form_html);
+            $('#editForm').attr('action', '/edit_task_form/' + taskId + '/'); // Update the form action URL
+
+            // Show the modal after the form is injected
+            $('#editModal').modal('show');
+        },
+        error: function(xhr, status, error) {
+            console.error("Error loading form:", error);
+        }
+    });
+});
+
+// Handle the form submission via AJAX
+$(document).on('submit', '#editForm', function(event) {
+    event.preventDefault(); // Prevent the form from submitting normally
+
+    var form = $(this);
+    var taskId = $(this).data('task-id'); // Task ID from the form (if necessary)
+
+    $.ajax({
+        url: form.attr('action'), // This is the URL you set for form submission
+        method: 'POST',
+        data: form.serialize(), // Serialize form data for sending
+        success: function(response) {
+            // Handle the success response (e.g., update the UI, close the modal, etc.)
+            if (response.success) {
+                alert('Task updated successfully!');
+                $('#editModal').modal('hide'); // Hide the modal
+                // Optionally, you can update the task data on the page dynamically
+                location.reload();
+            } else {
+                alert('There was an error updating the task.');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("Error submitting form:", error);
+        }
+    });
 });
 
 
