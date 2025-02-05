@@ -515,6 +515,9 @@ class ChecklistItem(models.Model):
             raise ValidationError('This product already has a status in this checklist.')
 
     def save(self, *args, **kwargs):
+        if self.commentaire:
+            self.commentaire = self.commentaire.lower()
+            
         if self.pk:  # If the object exists, retrieve the previous state
             try:
                 original = ChecklistItem.objects.get(pk=self.pk)

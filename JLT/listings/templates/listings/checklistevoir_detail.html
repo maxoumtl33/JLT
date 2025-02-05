@@ -407,7 +407,11 @@
                 <td style="background-color: orange;">{{ log.previous_quantity }}</td>
                 <td style="background-color: orange;">{{ log.new_quantity }}</td>
                 <td style="background-color: orange;">{{ log.quantity_change }}</td>
-                {% if log.previous_status == 'complete' %}
+                {% if log.checklist_item.commentaire == 'nt' %}
+                <td style="text-align: center;">
+                    <span style="color: green;">Pas besoin d'ajouter au stock</span>
+                </td>
+                {% elif log.previous_status == 'complete' %}
                 <td style="text-align: center;">
                     {% if log.checklist_item.is_stock_updated %}
                         <span style="color: green;">Ajouté au stock ✅</span>

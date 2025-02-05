@@ -120,6 +120,7 @@ path('responsablelist/', responsable_list, name='responsablelist'),
 path('success/', views.success_page, name='success_page'),
 path('geocode_all_livraisons/', views.geocode_all_livraisons, name='geocode_all_livraisons'),
 path('faq/', faq, name='faq'),
+path('checklists/associate-all/', associate_all_livraisons, name='associate_all_livraisons'),
 path('create_journee/', create_journee, name='create_journee'),
 path('delete_livraison/<int:livraison_id>/', delete_livraison, name='delete_livraison'),  # ✅ Add this
 path('bulk_edit_livraisons/', bulk_edit_livraisons, name='bulk_edit_livraisons'),

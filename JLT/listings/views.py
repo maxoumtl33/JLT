@@ -149,6 +149,7 @@ def import_xlsx(request):
                 }, inplace=True)
 
                 df.insert(0, 'id', '')  # Insert empty 'id' column
+                df = df.fillna('')
 
                 print("🛠️ Transformed DataFrame columns:", df.columns)
 
@@ -727,7 +728,7 @@ def checklistvoir_detail(request, checklist_id):
 
     normal_items = ChecklistItem.objects.filter(checklist=checklist, quantity__gt=0).exclude(commentaire__regex=r'\bnt\b')
     nt_items = ChecklistItem.objects.filter(checklist=checklist, quantity__gt=0, commentaire__regex=r'\bnt\b')
-
+    nt_items_ids = set(nt_items.values_list('id', flat=True))
     for item in normal_items:
         last_log = QuantityChangeLog.objects.filter(checklist_item=item).order_by('-timestamp').first()
         item.previous_status = last_log.previous_status if last_log else "N/A"
@@ -814,6 +815,7 @@ def checklistvoir_detail(request, checklist_id):
         'normal_items': normal_items,
         'nt_items': nt_items,
         'quantity_change_logs': quantity_change_logs,
+        'nt_items_ids': nt_items_ids,
     }
     return render(request, 'listings/checklistevoir_detail.html', context)
 
@@ -1470,6 +1472,26 @@ def associate_livraison(request, checklist_id):
 
     return redirect('checklist-detail', checklist_id=checklist.id)
 
+def associate_all_livraisons(request):
+    """
+    Associates all checklists to their corresponding Livraison where num_commande matches num_contrat.
+    """
+    checklists = Checklist.objects.all()
+    associated_count = 0
+
+    for checklist in checklists:
+        livraison = Livraison.objects.filter(num_commande=checklist.num_contrat).first()
+        if livraison:
+            checklist.livraison = livraison
+            checklist.save()
+            associated_count += 1
+
+    if associated_count > 0:
+        messages.success(request, f"{associated_count} checklists ont été associées avec succès.")
+    else:
+        messages.warning(request, "Aucune checklist n'a pu être associée.")
+
+    return redirect('livraisonstomorrow')  # Update with your actual checklist listing view
 
 
 def tacheslist(request):

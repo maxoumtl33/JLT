@@ -45,7 +45,30 @@
     max-width: 300px; /* Adjust the width as needed */
     margin-bottom: 10px; /* Space between date picker and button */
 }
+.alert-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;  /* Ensures it stays above other elements */
+    min-width: 250px;
+    max-width: 350px;
+}
+
+.alert {
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
 </style>
+
+{% if messages %}
+    <div class="alert-container">
+        {% for message in messages %}
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
 
 <div class="container">
     <h1 class="text-center mb-4">Livraisons</h1>
@@ -96,6 +119,31 @@
         <a href="{% url 'livraisons_without_date'%}" class="btn btn-primary">Livraisons sans date</a>
         </div>
         
+        <div class="associer">
+            <a type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#associer">
+               <span>Associer</span>
+            </a>
+            <div class="modal fade" id="associer" tabindex="-1" aria-labelledby="associer" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="productModalLabel">Associer toutes les checklists aux livraisons</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous associer toutes les checklists à leur livraison correspondante ?</p>
+            
+                            <!-- Bulk Association Form -->
+                            <form method="POST" action="{% url 'associate_all_livraisons' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary">Associer</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
     </div>
     
 
