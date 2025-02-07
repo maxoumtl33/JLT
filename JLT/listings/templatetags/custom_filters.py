@@ -21,6 +21,11 @@ def status_color(status):
     return color_map.get(status, '#000')  # Default to black if status is not in map
 
 @register.filter
+def dict_key(dictionary, key):
+    """Fetch value from dictionary for the given key."""
+    return dictionary.get(key, {})
+
+@register.filter
 def subtract(value, arg):
     try:
         return value - arg

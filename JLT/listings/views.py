@@ -894,6 +894,9 @@ def add_to_checklist(request, checklist_id):
         quantities = request.POST.getlist('quantities[]')
         commentaires = request.POST.getlist('commentaires[]')
 
+        # Initialize a flag to check if any item was processed
+        item_added_or_updated = False
+
         for product_id, quantity, commentaire in zip(product_ids, quantities, commentaires):
             try:
                 product = Product.objects.get(pk=product_id)
@@ -911,8 +914,8 @@ def add_to_checklist(request, checklist_id):
                         defaults={'quantity': quantity, 'commentaire': commentaire}
                     )
 
-
                     if not created:
+                        # This item already exists, so we are modifying it
                         checklist_item._changed_by = request.user
                         checklist_item.quantity = quantity
 
@@ -921,14 +924,17 @@ def add_to_checklist(request, checklist_id):
                             checklist_item.commentaire = commentaire
 
                         checklist_item.save()
-
-                else:
-                    # If quantity is 0 and no comment, skip this product
-                    print(f"Item not added for Product ID: {product_id} due to missing comment.")
-                    # You can also set a flash message or handle this case in your UI
+                    else:
+                        # New item added
+                        item_added_or_updated = True  # Mark that at least one item was added
 
             except Product.DoesNotExist:
                 return JsonResponse({'success': False, 'message': f'Product ID {product_id} not found.'})
+
+        # If any item was added or updated, change status to 'modifié'
+        if item_added_or_updated:
+            checklist.statusro = 'modifié'  # Set status to 'modifié'
+            checklist.save()
 
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
@@ -1011,12 +1017,17 @@ def checklist_detail(request, checklist_id):
                 document.checklist = checklist  # Assign checklist to the document if it's not marked for deletion
                 document.save()
 
+        checklist.save()
+
         return HttpResponseRedirect(reverse('checklist-detail', args=[checklist_id]))
 
 
     # Handle checklist form submission
     elif 'checklist_form-name' in request.POST and formbis.is_valid():
+        if checklist.statusro == 'verifié':
+                checklist.statusro = 'modifié'  # Update the status to 'modifié'
         formbis.save()
+        checklist.save()
         return HttpResponseRedirect(reverse('checklist-detail', args=[checklist_id]))
 
     # Handle commentaire form submission
@@ -1203,6 +1214,29 @@ def conseiller_dashboard(request):
 
     return render(request, 'listings/conseiller_dashboard.html', context)
 
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt  # Only use this if you're handling CSRF tokens manually; otherwise, set properly in your templates
+def update_checklist_status(request, checklist_id):
+    if request.method == 'POST':
+        try:
+            checklist = Checklist.objects.get(id=checklist_id)
+            checklist.statusro = 'verifié'  # Update status to 'verifié'
+            checklist.save()
+            return JsonResponse({'status': 'success'})
+        except Checklist.DoesNotExist:
+            return JsonResponse({'error': 'Checklist not found'}, status=404)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+
+
+from django.db.models import Max
+
+
+
 def creerchecklist(request):
     # Retrieve all checklists and define status labels
     checklists = Checklist.objects.all().order_by('date')
@@ -1232,6 +1266,29 @@ def creerchecklist(request):
 
 
     form2 = ChecklistForm()
+    selected_date = date(current_year, selected_month, selected_day)
+    # Assume created and modified status are marked by a boolean or similar field
+    created_checklists = Checklist.objects.filter(date=selected_date, created=True)
+    modified_checklists = Checklist.objects.filter(date=selected_date, modified=True)
+
+    created_count = created_checklists.count()
+    modified_count = modified_checklists.count()
+
+    days_counts = {}
+    for day in days_in_month:
+        day_date = date(current_year, selected_month, day)
+        created_count = Checklist.objects.filter(date=day_date, statusro='nouveau').count()
+        modified_count = Checklist.objects.filter(date=day_date, statusro='modifié').count()
+        
+        # Fetch the checklist status for the day (assuming one or more checklists)
+        status = Checklist.objects.filter(date=day_date).aggregate(status=Max('status'))  # Adjust accordingly
+        days_counts[day] = {
+            'created_count': created_count,
+            'modified_count': modified_count,
+            'status': status['status'] if status['status'] else 'none',  # Use 'none' for fallback
+        }
+
+
 
     if request.method == 'POST':
         if 'product-form' in request.POST:
@@ -1262,6 +1319,9 @@ def creerchecklist(request):
         'valide': valide,
         'refuse': refuse,
         'today': today,
+        'days_counts': days_counts,
+        'created_count': created_count,
+        'modified_count': modified_count,
         'product_form': product_form,
         'months': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],  # Months as numbers
         'selected_month': selected_month,
@@ -1287,6 +1347,7 @@ import calendar
 from django.utils import formats
 
 def get_checklists_for_day(request, day):
+
     # Get the selected month and year
     selected_month = int(request.GET.get('month', date.today().month))
     selected_year = int(request.GET.get('year', date.today().year))
@@ -1303,9 +1364,11 @@ def get_checklists_for_day(request, day):
     # Retrieve only active checklists for the selected date
     checklists = Checklist.objects.filter(date=selected_date, is_active=True).select_related('conseillere').values(
         'id', 'name', 'date', 'heure_livraison', 'nb_convive', 'status', 
-        'conseillere__user__username', 'added_on'
+        'conseillere__user__username', 'added_on', 'statusro'
     )
 
+    created_count = Checklist.objects.filter(date=selected_date, created=True).count()
+    modified_count = Checklist.objects.filter(date=selected_date, modified=True).count()
     # Prepare data for JSON response
     checklists_list = list(checklists)
     
@@ -1316,10 +1379,13 @@ def get_checklists_for_day(request, day):
 
     response_data = {
         'checklists': checklists_list,
+        'createdCount': created_count,
+        'modifiedCount': modified_count,
         'selected_date': selected_date_formatted,
     }
 
     return JsonResponse(response_data)
+
 def import_items(request):
     if request.method == 'POST' and request.FILES['myfile']:
         myfile = request.FILES['myfile']

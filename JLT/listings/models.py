@@ -386,9 +386,18 @@ def four_hours_ago():
 
 class Checklist(models.Model):
     STATUS_CHOICES = [
+        
         ('en_cours', 'En cours'),
         ('valide', 'Validé'),
         ('refuse', 'Refusé'),
+        
+    ]
+
+    STATUS_RO_CHOICES = [
+        ('nouveau', 'Nouveau'),
+        ('modifié', 'Modifié'),
+        ('verifié', 'Verifié')
+
     ]
 
     name = models.CharField(max_length=100)
@@ -402,12 +411,15 @@ class Checklist(models.Model):
     md = models.ForeignKey(Md, null=True, on_delete=models.SET_NULL, blank=True)
     added_on = models.DateTimeField(default=four_hours_ago)    
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='en_cours')
+    statusro = models.CharField(max_length=20, choices=STATUS_RO_CHOICES, default='nouveau')
     rapportmd = models.TextField(blank=True, null=True)
     rapportrecup = models.TextField(blank=True, null=True)
     commentairevente = models.TextField(blank=True, null=True)
     notechecklist = models.TextField(blank=True, null=True)
     conseillere = models.ForeignKey(Conseiller, on_delete=models.CASCADE, related_name='checklists', null=True, blank=True)
     is_active = models.BooleanField(default=True)  # New field
+    created = models.BooleanField(default=False)
+    modified = models.BooleanField(default=False)
 
     def update_status(self):
         # Exclude ChecklistItems where quantity is 0
@@ -431,6 +443,17 @@ class Checklist(models.Model):
     def save(self, *args, **kwargs):
         if self.num_contrat and not self.num_contrat.startswith('CMD-'):
             self.num_contrat = 'CMD-' + self.num_contrat
+
+        if self.pk is None:
+            self.statusro = 'nouveau'
+        else:
+            # Only set to 'modifié' if it was previously verified
+            if self.statusro == 'verifié':
+                self.statusro = 'modifié'  # Mark as modified if it's already verified
+
+       
+            
+
         super(Checklist, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -517,7 +540,7 @@ class ChecklistItem(models.Model):
     def save(self, *args, **kwargs):
         if self.commentaire:
             self.commentaire = self.commentaire.lower()
-            
+
         if self.pk:  # If the object exists, retrieve the previous state
             try:
                 original = ChecklistItem.objects.get(pk=self.pk)

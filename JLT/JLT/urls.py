@@ -124,6 +124,7 @@ path('checklists/associate-all/', associate_all_livraisons, name='associate_all_
 path('create_journee/', create_journee, name='create_journee'),
 path('delete_livraison/<int:livraison_id>/', delete_livraison, name='delete_livraison'),  # ✅ Add this
 path('bulk_edit_livraisons/', bulk_edit_livraisons, name='bulk_edit_livraisons'),
+path('update_checklist_status/<int:checklist_id>/', views.update_checklist_status, name='update_checklist_status'),
 path('livraisons_without_date/', livraisons_without_date, name='livraisons_without_date'),
 path('product/<int:product_id>/change-logs/', views.view_quantity_change_logs, name='view_quantity_change_logs'),
 path('checklist/<int:checklist_id>/save_breuvages_report/', views.save_breuvages_report, name='save_breuvages_report'),

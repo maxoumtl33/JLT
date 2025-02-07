@@ -33,26 +33,7 @@
 </head>
 <body>
 
-    <script>
-        const messaging = firebase.messaging();
 
-// Request permission to send notifications
-Notification.requestPermission().then((permission) => {
-    if (permission === 'granted') {
-        console.log('Notification permission granted.');
-        // Get the token for the device
-        messaging.getToken({ vapidKey: 'YOUR_PUBLIC_VAPID_KEY' }).then((token) => {
-            console.log('FCM Token:', token);
-            // You can send this token to your server to store it
-        }).catch((err) => { 
-            console.log('Unable to get token: ', err);
-        });
-    } else {
-        console.log('Unable to get permission to notify.');
-    }
-});
-
-    </script>
     {% block content %}
 
 
