@@ -149,7 +149,7 @@
             {% for checklist_product in normal_items %}
                 <tr>
                     <td class="align-middle" style="background-color: {% if checklist_product.status == 'en_cours' %}#ff9800{% elif checklist_product.status == 'valide' %}#4caf50{% elif checklist_product.status == 'refuse' %}#f44336{% elif checklist_product.status == 'complete' %}#4caf50{% elif checklist_product.status == 'pending' %}#ff9800{% elif checklist_product.status == 'denied' %}#f44336{% elif checklist_product.status == 'deniedprevious' %}#f44336{% endif %};">{{ checklist_product.product.name }}</td>
-                    <td class="align-middle" style="background-color: {% if checklist_product.status == 'en_cours' %}#ff9800{% elif checklist_product.status == 'valide' %}#4caf50{% elif checklist_product.status == 'pending' %}#ff9800{% elif checklist_product.status == 'refuse' %}#f44336{% elif checklist_product.status == 'complete' %}#4caf50{% elif checklist_product.status == 'denied' %}#f44336{% elif checklist_product.status == 'deniedprevious' %}#f44336{% endif %};">{{ checklist_product.quantity }}<br>
+                    <td class="align-middle" style="background-color: {% if checklist_product.status == 'en_cours' %}#ff9800{% elif checklist_product.status == 'valide' %}#4caf50{% elif checklist_product.status == 'pending' %}#ff9800{% elif checklist_product.status == 'refuse' %}#f44336{% elif checklist_product.status == 'complete' %}#4caf50{% elif checklist_product.status == 'denied' %}#f44336{% elif checklist_product.status == 'deniedprevious' %}#f44336{% endif %};">{{ checklist_product.quantity }} <br>
                     </td>
                     <td class="align-middle">
                         <form method="post" action="{% url 'checklistvoir-detail' checklist.id %}" id="status-form-{{ checklist_product.id }}">
@@ -200,14 +200,9 @@
 
                             {% endif %}
                             
-                            {% if checklist_product.status == 'pending' and checklist_product.previous_status == 'complete' %}
-                            <button type="button" class="btn btn-outline-success btn-sm rounded-circle" 
-                            onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'valide')"
-                            title="Validé">
-                            <i class="fa-solid fa-check"></i>
-                            </button>
+                            {% if checklist_product.status == 'complete' and checklist_product.previous_status == 'pending' %}
                             <button type="button" class="btn btn-outline-danger btn-sm rounded-circle" 
-                                        onclick="submitStatusForm('{{ checklist_product.id }}', 'deniedprevious')"
+                                        onclick="submitStatusForm('{{ checklist_product.id }}', 'refuse')"
                                         title="Refusé">
                                         <i class="fa-solid fa-ban"></i>
                                 </button>
@@ -235,6 +230,21 @@
                             
 
                             {% endif %}
+                            {% if checklist_product.status == 'pending' and checklist_product.previous_status == 'pending' %}
+                            <button type="button" class="btn btn-outline-success btn-sm rounded-circle" 
+                            onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                            title="Validé">
+                            <i class="fa-solid fa-check"></i>
+                            </button>
+                            {% endif %}
+                            {% if checklist_product.status == 'complete' and checklist_product.previous_status == 'pending' %}
+                            <button type="button" class="btn btn-outline-success btn-sm rounded-circle" 
+                            onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                            title="Validé">
+                            <i class="fa-solid fa-check"></i>
+                            </button>
+                            {% endif %}
+
                             {% if checklist_product.status == 'complete' and checklist_product.previous_status == 'complete' %}
                             <button type="button" class="btn btn-outline-danger btn-sm rounded-circle" 
                                         onclick="submitStatusForm('{{ checklist_product.id }}', 'refuse')"
@@ -330,6 +340,13 @@
                             {% endif %}
 
                             {% if checklist_product.previous_status == 'N/A' and checklist_product.status == 'denied' %}
+                            <button type="button" class="btn btn-outline-success btn-sm rounded-circle" 
+                                        onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                                        title="Validé">
+                                        <i class="fa-solid fa-check"></i>
+                                </button>
+                            {% endif %}
+                            {% if checklist_product.previous_status == 'en_cours' and checklist_product.status == 'denied' %}
                             <button type="button" class="btn btn-outline-success btn-sm rounded-circle" 
                                         onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
                                         title="Validé">

@@ -412,6 +412,7 @@ class Checklist(models.Model):
     added_on = models.DateTimeField(default=four_hours_ago)    
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='en_cours')
     statusro = models.CharField(max_length=20, choices=STATUS_RO_CHOICES, default='nouveau')
+    previous_statusro = models.CharField(max_length=100, null=True)
     rapportmd = models.TextField(blank=True, null=True)
     rapportrecup = models.TextField(blank=True, null=True)
     commentairevente = models.TextField(blank=True, null=True)
@@ -441,23 +442,30 @@ class Checklist(models.Model):
 
 
     def save(self, *args, **kwargs):
+        # If the instance already exists in the database, retrieve its current state
+        if self.pk is not None:
+            original = Checklist.objects.get(pk=self.pk)
+            self.previous_statusro = original.statusro
+
+        # Prepend 'CMD-' to num_contrat if not already present
         if self.num_contrat and not self.num_contrat.startswith('CMD-'):
             self.num_contrat = 'CMD-' + self.num_contrat
 
+        # For new checklists, set statusro to 'nouveau'
         if self.pk is None:
             self.statusro = 'nouveau'
-        else:
-            # Only set to 'modifié' if it was previously verified
-            if self.statusro == 'verifié':
-                self.statusro = 'modifié'  # Mark as modified if it's already verified
 
-       
-            
+        # Check the condition and set statusro accordingly
+        if self.statusro == 'modifié' and self.previous_statusro == 'nouveau':
+            self.statusro = 'nouveau'
+        
 
         super(Checklist, self).save(*args, **kwargs)
 
-    def __str__(self):
-        return self.name
+
+
+
+
     
 
 

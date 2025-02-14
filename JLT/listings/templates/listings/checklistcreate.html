@@ -6,134 +6,11 @@
 <!-- Custom CSS -->
 <style>
     /* General styling */
-    body {
-        background-color: #f0f2f5;
-    }
-
-    h1, h2 {
-        color: #343a40;
-    }
-    
-    /* General page styles */
-    .agenda-title {
-        font-size: 2rem;
-        margin-bottom: 20px;
-        text-align: center;
-        color: #333;
-    }
-
-    /* Month selection styles */
-    .month-selection {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 30px;
-    }
-    .month-label {
-        font-size: 1rem;
-        margin-right: 10px;
-        align-self: center;
-    }
-    .month-dropdown {
-        padding: 10px;
-        font-size: 1rem;
-        border-radius: 5px;
-        border: 1px solid #ccc;
-        outline: none;
-        transition: border-color 0.3s ease;
-    }
-    .month-dropdown:hover {
-        border-color: #007bff;
-    }
-
-    .day-btn {
-    position: relative; /* Allow absolute positioning of badges within the button */
+body {
+    background-color: #f0f2f5;
 }
 
-.badge {
-    position: absolute;
-    font-size: 0.75rem;
-    padding: 4px 6px;
-    border-radius: 12px;
-}
-
-.badge-warning {
-    background-color: #ffc107;
-    color: #212529;
-}
-
-.badge-info {
-    background-color: #17a2b8;
-    color: #ffffff;
-}
-
-.badge-alert {
-    cursor: pointer; /* Change cursor to pointer for clarity */
-    position: relative; /* Allow positioning for hover effect */
-}
-
-    /* General layout styling */
-    .agenda-container {
-        display: flex;
-        align-items: flex-start;
-        gap: 20px;
-        padding: 20px;
-    }
-
-    /* Calendar section */
-    .calendar-section {
-        width: 30%;
-        background-color: #f9f9f9;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .calendar {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        grid-gap: 10px;
-    }
-
-    .day {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .day-btn {
-        position: relative;
-        padding: 10px;
-        font-size: 0.9rem;
-        background-color: #ffffff;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        cursor: pointer;
-        width: 100%;
-        height: 60px;
-        text-align: center;
-        transition: background-color 0.3s ease;
-    }
-
-    .day-btn:hover {
-        background-color: #007bff;
-        color: white;
-    }
-
-    /* Checklist section */
-    .checklist-section {
-        width: 70%;
-        background-color: #ffffff;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .checklist-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .clickable-row {
+.clickable-row {
         cursor: pointer;
         transition: background-color 0.3s;
     }
@@ -163,75 +40,172 @@
     .status-refuse {
         background-color: #f8d7da; /* Light red */
     }
-    .checklist-table th,
-    .checklist-table td {
-        border: 1px solid #ddd;
-        padding: 8px;
-        text-align: left;
-    }
 
-    .checklist-table th {
-        background-color: #007bff;
-        color: white;
-    }
+h1, h2 {
+    color: #343a40;
+}
 
-    .checklist-table td a {
-        text-decoration: none;
-        color: #007bff;
-    }
+/* General page styles */
+.agenda-title {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #333;
+}
 
-    .checklist-table td a:hover {
-        text-decoration: underline;
-    }
+/* Month selection styles */
+.month-selection {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+.month-label {
+    font-size: 1rem;
+    margin-right: 10px;
+    align-self: center;
+}
+.month-dropdown {
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+.month-dropdown:hover {
+    border-color: #007bff;
+}
 
-    /* Responsiveness */
-    @media (max-width: 768px) {
-        .calendar {
-            grid-template-columns: repeat(7, 1fr);
-        }
-    }
+/* General layout styling */
+.agenda-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 20px;
+}
 
-    @media (max-width: 480px) {
-        .calendar {
-            grid-template-columns: repeat(5, 1fr); /* Adjust for small screens */
-        }
-    }
+/* Calendar section */
+.calendar-section {
+    width: 45%;
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
 
-    /* Toggle form button */
-    #toggleFormButton {
-        background-color: #007bff;
-        color: #fff;
-        border: none;
-        padding: 12px 24px;
-        font-size: 16px;
-        cursor: pointer;
-        border-radius: 6px;
-        transition: all 0.3s ease;
-        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    #toggleFormButton:hover {
-        background-color: #0056b3;
-        transform: scale(1.05);
-    }
+.calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 7 equal columns */
+    grid-gap: 10px;
+}
 
-    /* Form container styling */
-    #checklistForm {
-        display: none;
-        padding: 20px;
-        background: #ffffff;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        margin-top: 20px;
-    }
+.day {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-    .day-btn.selected {
-        background-color: #007bff;
-        color: white;
-        font-weight: bold;
-        border-color: #0056b3;
-    }
+.day-btn {
+    position: relative;
+    padding: 10px;
+    font-size: 0.9rem;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+    height: 60px;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
 
-   
+.day-btn:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+/* Checklist section */
+.checklist-section {
+    width: 55%;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.checklist-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.checklist-table th, .checklist-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.checklist-table th {
+    background-color: #007bff;
+    color: white;
+}
+
+.checklist-table td a {
+    text-decoration: none;
+    color: #007bff;
+}
+
+.checklist-table td a:hover {
+    text-decoration: underline;
+}
+
+/* Responsiveness */
+@media (max-width: 768px) {
+    .calendar {
+        grid-template-columns: repeat(7, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .calendar {
+        grid-template-columns: repeat(5, 1fr); /* Adjust for small screens */
+    }
+}
+
+/* Toggle form button */
+#toggleFormButton {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+#toggleFormButton:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
+/* Form container styling */
+#checklistForm {
+    display: none;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+/* Selected day button style */
+.day-btn.selected {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+    border-color: #0056b3;
+}
+
 </style>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
@@ -376,27 +350,37 @@
         </div>
 
         <div id="calendar" class="calendar">
+            <div class="day">
+                <strong>Dimanche</strong>
+            </div>
+            <div class="day">
+                <strong>Lundi</strong>
+            </div>
+            <div class="day">
+                <strong>Mardi</strong>
+            </div>
+            <div class="day">
+                <strong>Mercredi</strong>
+            </div>
+            <div class="day">
+                <strong>Jeudi</strong>
+            </div>
+            <div class="day">
+                <strong>Vendredi</strong>
+            </div>
+            <div class="day">
+                <strong>Samedi</strong>
+            </div>
+
             {% for day in days %}
                 <div class="day">
-                    <button class="day-btn" data-day="{{ day }}" onclick="getChecklists({{ day }})">
+                    <button class="day-btn" data-day="{{ day }}" onclick="getChecklists({{ day }})" {% if day == '' %}disabled{% endif %}>
                         {{ day }}
                     </button>
                 </div>
             {% endfor %}
         </div>
-
-        
-
-        
-        
-        
-        
-        
-        
-        
-        
     </div>
-
 
     <!-- Checklist Section -->
     <div id="checklist-section" class="checklist-section">
@@ -405,7 +389,6 @@
                 <tr>
                     <th>Heure</th>
                     <th>Nom</th>
-                    <th>Convives</th>
                     <th>Ajouté par</th>
                     <th>Ajouté le</th>
                 </tr>
@@ -416,6 +399,7 @@
         </table>
     </div>
 </div>
+
 {% endif %}
 {% endif %}
 
@@ -535,7 +519,6 @@
                     row.innerHTML = `
                         <td>${formatTimeWithoutSeconds(checklist.heure_livraison)}</td>
                         <td>${checklist.name}</td>
-                        <td>${checklist.nb_convive}</td>
                         <td>${checklist.conseillere || 'N/A'}</td>
                         <td>${formatDateTime(updatedDate)}</td>
 
@@ -558,28 +541,7 @@
             console.error('Error fetching checklists:', error);
         });
 }
-function updateChecklistStatus(checklistId) {
-    // AJAX request to update checklist status to 'verifié'
-    fetch(`/update_checklist_status/${checklistId}/`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCSRFToken(),
-        },
-        body: JSON.stringify({ statusro: 'verifié' })
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Failed to update checklist status');
-        }
-        return response.json();
-    })
-    .then(data => {
-        // Redirect to the checklist detail page after successful status update
-        window.location.href = `/checklist/${checklistId}/`;
-    })
-    .catch(error => console.error('Error updating checklist status:', error));
-}
+
 
 
 function getChecklistsRoxanne(day) {
@@ -618,8 +580,7 @@ function getChecklistsRoxanne(day) {
                         <td>${checklist.nb_convive}</td>
                         <td>${checklist.conseillere || 'N/A'}</td>
                         <td>${formatDateTime(updatedDate)}</td>
-                        <td>${checklist.statusro}</td>
-                        
+                        <td>${checklist.statusro}</td>                       
                     `;
 
                     checklistList.appendChild(row);
@@ -638,6 +599,28 @@ function getChecklistsRoxanne(day) {
             }
         })
         .catch(error => console.error('Erreur lors de la récupération des checklists:', error));
+}
+function updateChecklistStatus(checklistId) {
+    // AJAX request to update checklist status to 'verifié'
+    fetch(`/update_checklist_status/${checklistId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken(),
+        },
+        body: JSON.stringify({ statusro: 'verifié' })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to update checklist status');
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Redirect to the checklist detail page after successful status update
+        window.location.href = `/checklist/${checklistId}/`;
+    })
+    .catch(error => console.error('Error updating checklist status:', error));
 }
 
 

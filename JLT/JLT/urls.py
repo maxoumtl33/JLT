@@ -21,6 +21,7 @@ path(
     ),
 path('password_change_done/', TemplateView.as_view(template_name="registration/password_change_done.html"), name='password_change_done'),
 path('select2/', include('django_select2.urls')),
+path('items/<str:category>/', view_items_by_category, name='view_items_by_category'),
 path('validate_checklist/<int:checklist_item_id>/', validate_checklist_item, name='validate_checklist'),
 path('edit-document/<int:doc_id>/', views.edit_document, name='edit-document'),
 path('delete_document/<int:doc_id>/', views.delete_document, name='delete_document'),

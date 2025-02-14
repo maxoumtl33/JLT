@@ -6,6 +6,7 @@ from .models import Tacheafaire
 from .models import Journee
 from .models import Photo
 from .models import Phototaches
+from django.db.models import Sum
 from .models import Route, Recupfrigo
 from django.views.generic.list import ListView
 from .models import Distances
@@ -662,16 +663,15 @@ def get_checklist_items_for_date(request):
     return JsonResponse({'items': list(checklist_items)}, safe=False)
 
 
-
+@require_GET
 def voir_checklist(request):
     today = date.today()  # Get today's date
     checklists = Checklist.objects.filter(is_active=True)
     encours = "en_cours"
+    today = date.today()
     valide = "valide"
     refuse = "refuse"
-    
     tomorrow = timezone.now().date() + timedelta(days=1)
-    selected_datee = date.today()  # Or retrieve based on user input
     checklists_of_the_day = Checklist.objects.filter(date=today, is_active=True)
     current_year = today.year
     years = [year for year in range(current_year - 5, current_year + 1)]
@@ -695,14 +695,42 @@ def voir_checklist(request):
     change_logs = ChecklistItemChangeLog.objects.all().order_by('-timestamp')
     change_logs_checklist = ChecklistChangeLog.objects.all().order_by('-timestamp')
 
+    selected_date_str = request.GET.get('selected_datee')  # Get selected date from request
+
+    if selected_date_str:
+        selected_datee = datetime.strptime(selected_date_str, '%Y-%m-%d').date()  # Parse date
+    else:
+        selected_datee = tomorrow  # Default to today if no date is selected
+
+    checklist_item_totals = (
+        ChecklistItem.objects.filter(checklist__date=selected_datee)
+        .values('product__name')  # Assuming `Product` has the `name` field
+        .annotate(total_quantity=Sum('quantity'))
+        .filter(total_quantity__gt=0)
+          .order_by('product__category', 'product__name')  # Filter to only include items with quantity > 0
+    )
+
+    
+    # Prepare the response data
+    # Prepare the response data
+    data = {
+        'checklist_item_totals': list(checklist_item_totals),  # Convert queryset to a list
+        'selected_datee': selected_datee,
+    }
+
+    # Check if the request is an AJAX request
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse(data)
+
+
     context = {
 
         'checklists': checklists,
         'encours': encours,
         'valide': valide,
         'refuse': refuse,
+        'today': today,
         'change_logs': change_logs,
-        'selected_datee': selected_datee,
         'change_logs_checklist': change_logs_checklist,
         'today': today,
         'months': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],  # Months as numbers
@@ -714,10 +742,24 @@ def voir_checklist(request):
         'selected_day': selected_day,
         'selected_date': date(current_year, selected_month, selected_day).strftime('%d %B %Y'),
         'years': years,
+        'checklist_item_totals': checklist_item_totals,
         'selected_year': current_year,
         'livraisons': livraisons,
     }
     return render(request, 'listings/voir-checklist.html', context)
+
+
+def view_items_by_category(request, category):
+    # Fetch checklist items for the specified category
+    checklist_items = ChecklistItem.objects.filter(product__category=category)
+    
+    context = {
+        'checklist_items': checklist_items,
+        'category': category,
+    }
+    
+    return render(request, 'listings/items_by_category.html', context)
+
 
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse
@@ -983,11 +1025,13 @@ def checklist_detail(request, checklist_id):
     valide = "valide"
     refuse = "refuse"
     user_groups = request.user.groups.values_list('name', flat=True)
+    checklist_documents = ChecklistDocument.objects.filter(checklist=checklist)
+
     # Document formset for uploading multiple documents
     document_formset = ChecklistDocumentFormSet(
         request.POST or None,
         request.FILES or None,
-        queryset=ChecklistDocument.objects.filter(checklist=checklist),
+        queryset=checklist_documents,  # Current documents associated with the checklist
         prefix='documents'
     )
 
@@ -1004,22 +1048,19 @@ def checklist_detail(request, checklist_id):
     else:
         product_form = ProductsForm()
 
-    # Handle document formset submission
-    if 'documents-TOTAL_FORMS' in request.POST and document_formset.is_valid():
-        # Save new or updated documents
-        documents = document_formset.save(commit=False)
-        for i, document in enumerate(documents):
-            # Check if the delete checkbox is checked for the document form
-            delete_checkbox = request.POST.get(f"delete_{document_formset.forms[i].prefix}")
-            if delete_checkbox:
-                document.delete()  # Delete the document if the checkbox is checked
-            else:
-                document.checklist = checklist  # Assign checklist to the document if it's not marked for deletion
-                document.save()
+     # Handle document formset submission
+    if request.method == 'POST':
+        if document_formset.is_valid():  # Check if the formset is valid
+            for form in document_formset:
+                if form.cleaned_data.get('DELETE', False):
+                    form.instance.delete()  # Delete the document if the checkbox is checked
+                else:
+                    new_document = form.save(commit=False)  # Don’t commit yet
+                    new_document.checklist = checklist  # Assign checklist to the new document
+                    new_document.save()  # Now save the new document
 
-        checklist.save()
-
-        return HttpResponseRedirect(reverse('checklist-detail', args=[checklist_id]))
+            # Redirect after successful upload to prevent duplicate submissions
+            return HttpResponseRedirect(reverse('checklist-detail', args=[checklist_id]))  # Redirect to avoid duplicate submissions
 
 
     # Handle checklist form submission
@@ -1152,13 +1193,20 @@ def conseiller_dashboard(request):
     valide = "valide"
     refuse = "refuse"
     conseiller_instance = get_object_or_404(Conseiller, user=request.user)
-    checklists = Checklist.objects.filter(conseillere=conseiller_instance)
+    checklists = Checklist.objects.filter(conseillere=conseiller_instance).order_by("added_on")
     active_checklists = checklists.filter(is_active=True)
     inactive_checklists = checklists.filter(is_active=False)
-    paginator = Paginator(checklists, 10)  # 10 items per page
-
+    paginator = Paginator(checklists, 10)  # Show 10 checklists per page
     page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    
+    # Retrieve the page object
+    try:
+        page_obj = paginator.page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)  # If page is not an integer, deliver first page
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)  # If page is out of range, deliver last page
+    
 
     # Initialize both forms
     checklist_form = ChecklistForm(initial={'conseillere': conseiller_instance})
@@ -1200,16 +1248,18 @@ def conseiller_dashboard(request):
                 return redirect('creerchecklist')
 
     context = {
-        'checklists': checklists,
         'checklist_form': checklist_form,
         'conseiller_instance': conseiller_instance,
         'active_checklists': active_checklists,
         'inactive_checklists': inactive_checklists,  # Update context to use checklist_form
-        'page_obj': page_obj,
         'encours': encours,
         'valide': valide,
         'product_form': product_form,
         'refuse': refuse,
+        'page_obj': page_obj,
+        'checklists': checklists,
+        'today': timezone.now().date(),  # Pass the current date
+
     }
 
     return render(request, 'listings/conseiller_dashboard.html', context)
@@ -1255,6 +1305,17 @@ def creerchecklist(request):
     # Get the number of days in the selected month
     _, num_days_in_month = calendar.monthrange(current_year, selected_month)
     days_in_month = [day for day in range(1, num_days_in_month + 1)]  # Adjust days in month
+
+    # Get the starting day of the month (0 = Monday, 1 = Tuesday, ..., 6 = Sunday)
+    first_day_of_month = date(current_year, selected_month, 1).weekday()  # Returns 0-6, Monday-Sunday
+    first_day_of_month = (first_day_of_month + 1) % 7  # Adjust to make Sunday = 0
+
+    # Pad the beginning of the month with empty days
+    padded_days = [''] * first_day_of_month + days_in_month
+
+        # Limit to a maximum of 7 rows (7 days x 6 rows if overflow, note that normally only one row will be needed to display)
+    # Calculate how many rows we need (84 slots for a month max, but we are only showing 7 rows)
+    num_rows = (len(padded_days) + 6) // 7  # To fill the calendar
     
     french_months = [
         "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
@@ -1325,7 +1386,7 @@ def creerchecklist(request):
         'product_form': product_form,
         'months': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],  # Months as numbers
         'selected_month': selected_month,
-        'days': days_in_month,
+        'days': padded_days,
         'months': months,
         'french_months': french_months,
         'selected_day': selected_day,
@@ -1364,7 +1425,7 @@ def get_checklists_for_day(request, day):
     # Retrieve only active checklists for the selected date
     checklists = Checklist.objects.filter(date=selected_date, is_active=True).select_related('conseillere').values(
         'id', 'name', 'date', 'heure_livraison', 'nb_convive', 'status', 
-        'conseillere__user__username', 'added_on', 'statusro'
+        'conseillere__user__username', 'added_on', 'statusro', 'previous_statusro'
     )
 
     created_count = Checklist.objects.filter(date=selected_date, created=True).count()
@@ -4451,7 +4512,7 @@ def livraisonsresp(request):
 def recuptoday(request):
     today = datetime.now().date()
     tomorrow = today + timedelta(1)
-    recups = ["Porcelaine", "Chaud et porcelaine", "Porcelaine et bois", "Plateau de bois", "Froid et bois", "Chaud et jetable", "Froid et porcelaine"]
+    recups = ["Porcelaine", "Chaud et porcelaine", "Porcelaine et bois", "Plateau de bois", "Froid et bois", "Chaud et jetable", "Froid et porcelaine", "Porcelaine / chaud en vrac"]
 
     # Querysets
     recuperations = Livraison.objects.filter(recuperation=False, date=today, mode_envoi__in=recups)
@@ -5008,13 +5069,6 @@ def duplicate_checklist(request, checklist_id):
             commentaire=item.commentaire,
         )
 
-    # Duplicate documents (correct the field name to 'document')
-    for document in original_checklist.checklistdocument_set.all():
-        ChecklistDocument.objects.create(
-            checklist=new_checklist,
-            document=document.document,  # Use 'document' as the field name
-            uploaded_at=document.uploaded_at,  # Preserve the uploaded timestamp
-        )
 
     # Redirect to the detail view of the new checklist
     return HttpResponseRedirect(reverse('checklist-detail', args=[new_checklist.id]))

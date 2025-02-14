@@ -220,7 +220,7 @@ class ChecklistForm(forms.ModelForm):
     num_contrat = forms.CharField(label='Numéro de contrat', max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
     nb_convive = forms.IntegerField(label='Nombre de convives', widget=forms.NumberInput(attrs={'class': 'form-control'}))
     heure_livraison = forms.TimeField(label='Heure de livraison', widget=forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}))
-    conseillere = forms.ModelChoiceField(queryset=Conseiller.objects.all(), widget=forms.HiddenInput())   
+    conseillere = forms.ModelChoiceField(queryset=Conseiller.objects.all())   
 
 
 class SearchFormInv(forms.Form):
