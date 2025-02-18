@@ -210,7 +210,7 @@ h1, h2 {
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
 {% if is_ventes or is_admin %}
-<nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+<nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
     <div class="container">
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -277,7 +277,31 @@ h1, h2 {
                 {% endfor %}
             </select>
         </div>
+        <div id="calendar" class="calendar">
+            <div class="day">
+                <strong>Dimanche</strong>
+            </div>
+            <div class="day">
+                <strong>Lundi</strong>
+            </div>
+            <div class="day">
+                <strong>Mardi</strong>
+            </div>
+            <div class="day">
+                <strong>Mercredi</strong>
+            </div>
+            <div class="day">
+                <strong>Jeudi</strong>
+            </div>
+            <div class="day">
+                <strong>Vendredi</strong>
+            </div>
+            <div class="day">
+                <strong>Samedi</strong>
+            </div>
 
+        
+        </div>
         <div class="calendar">
             {% for day in days %}
                 <div class="day">
@@ -301,7 +325,7 @@ h1, h2 {
         </div>
         
 
-        
+    
         
         
         

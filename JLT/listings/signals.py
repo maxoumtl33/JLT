@@ -33,7 +33,7 @@ from .models import UserProfile
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
-from listings.models import UserProfile
+from listings.models import *
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
@@ -58,3 +58,10 @@ def check_password_change(sender, request, user, **kwargs):
         print(f"User {user.username} needs to change their password!")
 
 
+@receiver(post_save, sender=Product)
+def log_product_creation(sender, instance, created, **kwargs):
+    if created:  # This checks if the product was just created
+        user = None
+        if hasattr(instance, '_current_user'):
+            user = instance._current_user
+        ProductLog.objects.create(product=instance, created_by=user)

@@ -19,8 +19,10 @@ class ChecklistDocumentForm(forms.ModelForm):
 ChecklistDocumentFormSet = modelformset_factory(
     ChecklistDocument,
     form=ChecklistDocumentForm,
-    extra=5  # Number of empty file upload fields displayed initially
+    extra=1,  # Ensures a new empty form always exists
+    can_delete=True
 )
+
 
 from django import forms
 from django_select2.forms import Select2Widget
@@ -58,9 +60,6 @@ class ProductsForm(forms.ModelForm):
         }
 
     # You can also add custom validation or styling if needed.
-    def __init__(self, *args, **kwargs):
-        super(ProductsForm, self).__init__(*args, **kwargs)
-        self.fields['category'].widget = forms.Select(choices=Product.choices)  # Explicitly set choices if needed
 
 
 class LivraisonForm(forms.ModelForm):

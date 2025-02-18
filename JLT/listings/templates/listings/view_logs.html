@@ -39,6 +39,28 @@
             {% endfor %}
         </tbody>
     </table>
+    <br>
+    <br>
+    <br>
+
+    <h3 class="mb-4">Historique des creations de produits</h3>
+    
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Crée par</th>
+                <th>Crée à</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in product_logs %}
+                <tr>
+                    <td>{{ log.created_by.username }}</td>
+                    <td>{{ log.adjusted_created_at|date:"Y-m-d H:i:s" }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
     <!-- Back Button -->
     <a href="{% url 'product_list' %}" class="btn btn-secondary mt-4">Retour à la liste des produits</a>

@@ -83,3 +83,5 @@ admin.site.register(Group)
 admin.site.register(Md)
 admin.site.register(ChecklistDocument)
 admin.site.register(Conseiller)
+admin.site.register(Category)
+

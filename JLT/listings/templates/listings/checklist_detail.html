@@ -391,7 +391,7 @@
 {% endif %}
 
 
-<nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+<nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
     <div class="container">
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -426,6 +426,12 @@
                     <button type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#productModal">
                         <i class="fa-solid fa-circle-plus"></i><span>Créer produit</span>
                     </button>
+                </li>
+                <li>
+                    <a href="{% url 'conseiller_dashboard' %}" class="nav__link" style="margin-left: 20px;">
+                        <i class="fa-solid fa-dashboard"></i>
+                        <span>Dashboard</span>
+                    </a>
                 </li>
                 <li class="nav-item">
                     <a type="button" class="nav__link" style="margin-left: 20px;" data-bs-toggle="modal" data-bs-target="#exampleModal">
@@ -529,7 +535,16 @@
 
     <hr>
 
-
+    {% if is_cfcdn %}
+    <h2 style="text-align: center; font-size: 1.8em; margin-bottom: 20px;">CFCDN</h2>
+    <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; padding: 20px;">
+        <!-- Example Card Layout -->
+        <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalcfcdn">
+            <i class="fa-solid fa-skull"></i>
+            <span>CFCDN</span>
+        </div>
+    </div>
+{% else %}
 <h2 style="text-align: center; font-size: 1.8em; margin-bottom: 20px;">Liste des produits disponibles par catégories</h2>
 <hr>
 
@@ -589,6 +604,8 @@
         <span>ITEMS DIVERS</span>
     </div>
 </div>
+
+{% endif %}
 <br>
 
 <h2 style="text-align: center; font-size: 1.8em; margin-bottom: 20px;">Liste des breuvages disponibles par catégories</h2>
@@ -610,6 +627,73 @@
     <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalsansalcool">
         <i class="fa-solid fa-glass-water"></i>
         <span>SANS ALCOOL</span>
+    </div>
+</div>
+<br>
+<br>
+
+<div class="modal fade modal-xlg" id="exampleModalcfcdn" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-custom">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <!-- Search Bar -->
+                    <div class="input-group mb-3">
+                        <input type="text" id="productSearch16" class="form-control" placeholder="Rechercher un produit par nom">
+                    </div>
+                    <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="row gy-3 rttttttttttttttt">
+                            {% for product in products %}
+                            {% if product.is_cfcdn %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity }})
+                                            </strong>
+                                        </h6>
+                                    </div>
+
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center"
+                                               id="quantity-{{ product.id }}" name="quantities[]"
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+
+                                    <!-- Comment Button -->
+                                    <div class="form-group">
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
+                                        </button>
+                                        <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
+                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+                                    </div>
+
+                                </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <!-- Single Submit Button -->
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 <hr>
@@ -1541,30 +1625,21 @@
                 <div class="mb-3">
                     <input type="text" id="searchItems" class="form-control" placeholder="Rechercher un produit">
                 </div>
-
                 <!-- Item List -->
                 <ul id="itemList">
                     {% for category, items in checklist_items_by_category.items %}
                     <li class="category-group" data-category="{{ category }}">
-                        <h6 class="category-header"
-                            style="cursor: pointer;"
-                            data-bs-target="#items-{{ forloop.counter }}">
+                        <h6 style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#items-{{ forloop.counter }}" class="category-header">
                             {{ category }}
                         </h6>
                         <ul class="collapse" id="items-{{ forloop.counter }}">
                             {% for item in items %}
                             <li class="item" data-name="{{ item.product.name }}">
-                                <span style="color: {% if item.status == 'en_cours' %}#ff9800{% elif item.status == 'valide' %}#4caf50{% elif item.status == 'refuse' %}#f44336{% elif item.status == 'complete' %}#4caf50{% elif item.status == 'pending' %}#ff9800{% elif item.status == 'denied' %}#f44336{% elif item.status == 'deniedprevious' %}#f44336{% endif %};">
+                                <span style="color: {% if item.status == 'en_cours' %}#ff9800{% elif item.status == 'valide' %}#4caf50{% elif item.status == 'refuse' %}#f44336{% elif item.status == 'complete' %}#4caf50{% elif item.status == 'pending' %}#ff9800{% endif %};">
                                     <strong>{{ item.product.name }} - Quantité: {{ item.quantity }}</strong>
                                 </span>
                                 {% if item.commentaire %}
-                                <i
-                                    class="fa-solid fa-comment-dots"
-                                    tabindex="0"
-                                    data-bs-toggle="popover"
-                                    data-bs-trigger="hover focus"
-                                    data-bs-content="{{ item.commentaire }}">
-                                </i>
+                                <i class="fa-solid fa-comment-dots" tabindex="0" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-content="{{ item.commentaire }}"></i>
                                 {% endif %}
                             </li>
                             {% endfor %}
@@ -1579,6 +1654,8 @@
         </div>
     </div>
 </div>
+
+
 
 
 
@@ -1614,33 +1691,49 @@
     </div>
 </div>
 
-<!-- Modal for document upload -->
-<!-- Modal for document upload -->
-<div class="modal fade modal-xlg" id="exampleModalDocr" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-custom">
+<!-- Modal for Document Management -->
+<div class="modal fade" id="exampleModalDocr" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Télécharger Documents</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form method="post" enctype="multipart/form-data">
+                <form id="document-form" method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     {{ document_formset.management_form }}
 
-                    {% for form in document_formset %}
-                        <div class="form-row">
-                            <div class="mb-3">
-                                {{ form.document }}  <!-- Renders the file input field -->
+                    <div id="document-forms">
+                        {% for form in document_formset %}
+                            <div class="form-row document-form">
+                                <div class="mb-3">
+                                    {{ form.document.label }}
+                                    {{ form.document }}  <!-- File input -->
+                                    {% if form.instance.id %}
+                                        <button type="button" class="btn btn-danger delete-doc" data-doc-id="{{ form.instance.id }}">
+                                            <i class="fas fa-trash"></i> Supprimer
+                                        </button>
+                                    {% endif %}
+                                </div>
                             </div>
-                            <!-- Trash Bin Icon for deleting document -->
-                            <button type="button" class="btn btn-danger delete-doc" data-doc-id="{{ form.instance.id }}">
-                                <i class="fas fa-trash"></i> <!-- Font Awesome Trash Icon -->
-                            </button>
-                        </div>
-                    {% endfor %}
+                        {% endfor %}
+                    </div>
 
-                    <button type="submit" name="submit_documents" class="btn btn-primary">Ajouter Document</button>
+                    <!-- Hidden empty form template -->
+                    <div id="empty-form" class="d-none">
+                        <div class="form-row document-form">
+                            <div class="mb-3">
+                                {{ document_formset.empty_form.document.label }}
+                                {{ document_formset.empty_form.document }}  <!-- File input -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Button to add new file input dynamically -->
+                    <button type="button" id="add-document" class="btn btn-success">+ Ajouter un Document</button>
+
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
                 </form>
             </div>
             <div class="modal-footer">
@@ -1649,6 +1742,15 @@
         </div>
     </div>
 </div>
+
+
+
+    
+
+
+
+
+
 
 
 
@@ -1704,7 +1806,7 @@
                         {% csrf_token %}
                         <div class="row gy-3">
                             {% for product in products %}
-                            {% if product.category == equipementdebase %}
+                            {% if product.is_base %}
                                 <div class="col-12 d-flex align-items-center justify-content-between product-item">
                                     <div class="product-info d-flex align-items-center">
                                         <h6 class="product-name mb-0 me-3">
@@ -1770,7 +1872,7 @@
                         {% csrf_token %}
                         <div class="row gy-3 rt">
                             {% for product in products %}
-                            {% if product.category == jetable %}
+                            {% if product.is_jetable %}
                                 <div class="col-12 d-flex align-items-center justify-content-between product-item">
                                     <div class="product-info d-flex align-items-center">
                                         <h6 class="product-name mb-0 me-3">
@@ -1835,7 +1937,7 @@
                         {% csrf_token %}
                         <div class="row gy-3 rtt">
                             {% for product in products %}
-                            {% if product.category == accessoirededecor %}
+                            {% if product.is_decor %}
                                 <div class="col-12 d-flex align-items-center justify-content-between product-item">
                                     <div class="product-info d-flex align-items-center">
                                         <h6 class="product-name mb-0 me-3">
@@ -1900,7 +2002,7 @@
                         {% csrf_token %}
                         <div class="row gy-3 rttt">
                             {% for product in products %}
-                            {% if product.category == equipementdebar %}
+                            {% if product.is_bar %}
                                 <div class="col-12 d-flex align-items-center justify-content-between product-item">
                                     <div class="product-info d-flex align-items-center">
                                         <h6 class="product-name mb-0 me-3">
@@ -1965,7 +2067,7 @@
                         {% csrf_token %}
                         <div class="row gy-3 rtttt">
                             {% for product in products %}
-                            {% if product.category == equipementpourservicecafe %}
+                            {% if product.is_cafe %}
                                 <div class="col-12 d-flex align-items-center justify-content-between product-item">
                                     <div class="product-info d-flex align-items-center">
                                         <h6 class="product-name mb-0 me-3">
@@ -2030,7 +2132,7 @@
                         {% csrf_token %}
                         <div class="row gy-3 rttttt">
                             {% for product in products %}
-                            {% if product.category == itemsdivers %}
+                            {% if product.is_divers %}
                                 <div class="col-12 d-flex align-items-center justify-content-between product-item">
                                     <div class="product-info d-flex align-items-center">
                                         <h6 class="product-name mb-0 me-3">
@@ -2095,7 +2197,7 @@
                         {% csrf_token %}
                         <div class="row gy-3 rtttttt">
                             {% for product in products %}
-                            {% if product.category == tableetlinge %}
+                            {% if product.is_table %}
                                 <div class="col-12 d-flex align-items-center justify-content-between product-item">
                                     <div class="product-info d-flex align-items-center">
                                         <h6 class="product-name mb-0 me-3">
@@ -2160,7 +2262,7 @@
                         {% csrf_token %}
                         <div class="row gy-3 rttttttt">
                             {% for product in products %}
-                            {% if product.category == verrerie %}
+                            {% if product.is_verre %}
                                 <div class="col-12 d-flex align-items-center justify-content-between product-item">
                                     <div class="product-info d-flex align-items-center">
                                         <h6 class="product-name mb-0 me-3">
@@ -2224,7 +2326,7 @@
                         {% csrf_token %}
                         <div class="row gy-3 rtttttttt">
                             {% for product in products %}
-                            {% if product.category == porcelaine %}
+                            {% if product.is_porcelaine %}
                                 <div class="col-12 d-flex align-items-center justify-content-between product-item">
                                     <div class="product-info d-flex align-items-center">
                                         <h6 class="product-name mb-0 me-3">
@@ -2288,7 +2390,7 @@
                         {% csrf_token %}
                         <div class="row gy-3 rttttttttt">
                             {% for product in products %}
-                            {% if product.category == montage %}
+                            {% if product.is_canape %}
                                 <div class="col-12 d-flex align-items-center justify-content-between product-item">
                                     <div class="product-info d-flex align-items-center">
                                         <h6 class="product-name mb-0 me-3">
@@ -2352,7 +2454,7 @@
                         {% csrf_token %}
                         <div class="row gy-3 rtttttttttt">
                             {% for product in products %}
-                            {% if product.category == cuisson %}
+                            {% if product.is_cuisson %}
                                 <div class="col-12 d-flex align-items-center justify-content-between product-item">
                                     <div class="product-info d-flex align-items-center">
                                         <h6 class="product-name mb-0 me-3">
@@ -2416,7 +2518,7 @@
                         {% csrf_token %}
                         <div class="row gy-3 rttttttttttt">
                             {% for product in products %}
-                            {% if product.category == service %}
+                            {% if product.is_service %}
                                 <div class="col-12 d-flex align-items-center justify-content-between product-item">
                                     <div class="product-info d-flex align-items-center">
                                         <h6 class="product-name mb-0 me-3">
@@ -2481,7 +2583,7 @@
                         {% csrf_token %}
                         <div class="row gy-3 rtttttttttttt">
                             {% for product in products %}
-                            {% if product.category == alcoolfort %}
+                            {% if product.is_alcool %}
                                 <div class="col-12 d-flex align-items-center justify-content-between product-item">
                                     <div class="product-info d-flex align-items-center">
                                         <h6 class="product-name mb-0 me-3">
@@ -2545,7 +2647,7 @@
                         {% csrf_token %}
                         <div class="row gy-3 rttttttttttttt">
                             {% for product in products %}
-                            {% if product.category == bieres %}
+                            {% if product.is_bieres %}
                                 <div class="col-12 d-flex align-items-center justify-content-between product-item">
                                     <div class="product-info d-flex align-items-center">
                                         <h6 class="product-name mb-0 me-3">
@@ -2609,7 +2711,7 @@
                         {% csrf_token %}
                         <div class="row gy-3 rtttttttttttttt">
                             {% for product in products %}
-                            {% if product.category == vins %}
+                            {% if product.is_vins %}
                                 <div class="col-12 d-flex align-items-center justify-content-between product-item">
                                     <div class="product-info d-flex align-items-center">
                                         <h6 class="product-name mb-0 me-3">
@@ -2673,7 +2775,7 @@
                         {% csrf_token %}
                         <div class="row gy-3 rttttttttttttttt">
                             {% for product in products %}
-                            {% if product.category == sansalcool %}
+                            {% if product.is_sansalcool %}
                                 <div class="col-12 d-flex align-items-center justify-content-between product-item">
                                     <div class="product-info d-flex align-items-center">
                                         <h6 class="product-name mb-0 me-3">
@@ -2720,6 +2822,7 @@
         </div>
     </div>
 </div>
+
 
 
   </div>
@@ -2784,46 +2887,31 @@
 
 <script>
 
-document.querySelectorAll('.edit-doc').forEach(button => {
-    button.addEventListener('click', function () {
-        const docId = this.getAttribute('data-doc-id');
-        // You can open a modal or redirect to an edit page
-        window.location.href = `/edit-document/${docId}/`; // Example redirection to an edit page
+
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    let addButton = document.getElementById("add-document");
+    let formContainer = document.getElementById("document-forms");
+    let emptyForm = document.getElementById("empty-form").innerHTML;
+    let totalForms = document.querySelector("#id_documents-TOTAL_FORMS");
+
+    addButton.addEventListener("click", function () {
+        let newFormIndex = parseInt(totalForms.value);
+        let newFormHtml = emptyForm.replace(/__prefix__/g, newFormIndex);
+
+        let newFormElement = document.createElement("div");
+        newFormElement.innerHTML = newFormHtml;
+        newFormElement.classList.add("document-form");
+
+        formContainer.appendChild(newFormElement);
+        totalForms.value = newFormIndex + 1;
     });
 });
 
 
-// Wait for the DOM to be ready
-document.addEventListener("DOMContentLoaded", function () {
-        const deleteButtons = document.querySelectorAll('.delete-doc');  // Get all delete buttons
 
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', function () {
-                const docId = this.getAttribute('data-doc-id');  // Get the document ID
-
-                // Send AJAX request to delete the document
-                fetch(`/delete_document/${docId}/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}'  // Include CSRF token
-                    },
-                    body: JSON.stringify({
-                        'doc_id': docId
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Remove the document from the page
-                        this.closest('.form-row').remove();  // Remove the form row of the deleted document
-                    } else {
-                        alert('Error deleting document.');
-                    }
-                });
-            });
-        });
-    });
 
 function toggleCommentInput(productId) {
     const commentSection = document.getElementById(`comment-section-${productId}`);
@@ -4618,6 +4706,87 @@ const productDataCache15 = {};
 document.getElementById('productSearch15').addEventListener('input', function() {
     const query = this.value;
     fetch(`{% url 'search_productssansalcool' checklist.id %}?query=${query}`)
+    .then(response => response.json())
+        .then(data => {
+            const productListContainer = document.querySelector('.modal-body .row.gy-3.rttttttttttttttt'); // Target the product list inside the modal
+            productListContainer.innerHTML = ''; // Clear existing entries
+
+            data.products.forEach(product => {
+                // Use cached values if they exist, otherwise use the server response
+                const cachedQuantity = productDataCache15[product.id]?.quantity || product.checklist_quantity || 0;
+                const cachedComment = productDataCache15[product.id]?.comment || product.commentaire || '';
+
+                const productHTML = `
+                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                        <div class="product-info d-flex align-items-center">
+                            <h6 class="product-name mb-0 me-3">${product.name}
+                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                            </h6>
+                        </div>
+
+                        <input type="hidden" name="product_ids[]" value="${product.id}">
+
+                        <div class="form-group d-flex align-items-center me-2">
+                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                            <input type="number" class="form-control text-center quantity-input"
+                                   id="quantity-${product.id}" name="quantities[]"
+                                   min="0" value="${cachedQuantity}" required
+                                   data-product-id="${product.id}">
+                        </div>
+
+                        <div class="form-group">
+                            <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-${product.id}">
+                                <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
+                            </button>
+                            <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
+                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                    style="display: none;">${cachedComment}</textarea>
+                        </div>
+                    </div>
+                `;
+                productListContainer.insertAdjacentHTML('beforeend', productHTML);
+            });
+
+            // Attach event listeners to track input changes
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const productId = this.dataset.productId;
+                    if (!productDataCache15[productId]) {
+                        productDataCache15[productId] = {};
+                    }
+                    productDataCache15[productId].quantity = this.value;
+                });
+            });
+
+            document.querySelectorAll('.toggle-comment').forEach(button => {
+    button.addEventListener('click', function () {
+        const targetId = this.getAttribute('data-target'); // Get the target textarea ID
+        const commentTextarea = document.querySelector(targetId);
+
+        if (commentTextarea) {
+            // Toggle visibility
+            if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
+                commentTextarea.style.display = 'block';
+                this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
+            } else {
+                commentTextarea.style.display = 'none';
+                this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
+            }
+        }
+    });
+});
+
+        })
+        .catch(error => {
+            console.error('Error fetching products:', error); // Log errors if any
+        });
+});
+
+const productDataCache16 = {};
+
+document.getElementById('productSearch16').addEventListener('input', function() {
+    const query = this.value;
+    fetch(`{% url 'search_productscfcdn' checklist.id %}?query=${query}`)
     .then(response => response.json())
         .then(data => {
             const productListContainer = document.querySelector('.modal-body .row.gy-3.rttttttttttttttt'); // Target the product list inside the modal

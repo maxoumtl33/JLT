@@ -23,6 +23,9 @@
     .checklist-header {
         margin-bottom: 20px;
     }
+    .nav-item{
+        margin-left: 20px;
+    }
 </style>
 
 {% if messages %}
@@ -46,29 +49,29 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a href="{% url 'journees-list' %}" class="nav-link">
+                    <a href="{% url 'journees-list' %}" class="nav__link">
                         <i class="fa-solid fa-truck me-2"></i>Livraisons
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{% url 'creerchecklist' %}" class="nav-link">
+                    <a href="{% url 'creerchecklist' %}" class="nav__link">
                         <i class="fa-solid fa-cart-flatbed me-2"></i>Liste Checklist
                     </a>
                 </li>
                 <li class="nav-item">
-                    <button type="button" class="nav-link" data-bs-toggle="modal" data-bs-target="#createChecklistModal">
+                    <button type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#createChecklistModal">
                         <i class="fa-solid fa-circle-plus me-2" style="color: #63E6BE;"></i>Créer Checklist
                     </button>
                 </li>
                 <li class="nav-item">
-                    <button type="button" class="nav-link" data-bs-toggle="modal" data-bs-target="#productModal">
+                    <button type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#productModal">
                         <i class="fa-solid fa-circle-plus me-2"></i>Créer produit
                     </button>
                 </li>
                 <li class="nav-item">
                     <form action="{% url 'logout' %}" method="post" class="d-inline">
                         {% csrf_token %}
-                        <button type="submit" class="nav-link" style="color: red;">
+                        <button type="submit" class="nav__link" style="color: red;">
                             <i class="fa-solid fa-arrow-right-from-bracket me-2"></i>Déconnexion
                         </button>
                     </form>
@@ -119,8 +122,8 @@
     <div class="mb-4 d-flex justify-content-between align-items-center">
         <input type="text" id="searchInput" class="form-control" placeholder="Rechercher une checklist..." onkeyup="filterChecklists()" style="width: 300px;">
         <div class="form-check">
-            <input type="checkbox" class="form-check-input" id="hideCompleted" onchange="filterChecklistshide()" checked>
-            <label class="form-check-label" for="hideCompleted">Décocher pour afficher anciennes checklists</label>
+            <input type="checkbox" class="form-check-input" id="hideCompleted" onchange="filterChecklistshide()">
+            <label class="form-check-label" for="hideCompleted">Cocher pour cacher anciennes checklists</label>
         </div>
     </div>
 

@@ -328,31 +328,36 @@ class Phototaches(models.Model):
         return f'Photo for {self.tache.nom} - {self.caption or "No Caption"}'
 
 
-
-class Product(models.Model):
+class Category(models.Model):
     choices = (
-         ('ÉQUIPEMENT DE BASE', 'ÉQUIPEMENT DE BASE'),
-         ('JETABLE', 'JETABLE'),
-         ('ACCESSOIRES DE DÉCOR', 'ACCESSOIRES DE DÉCOR'),
-         ('ÉQUIPEMENT DE BAR', 'ÉQUIPEMENT DE BAR'),
-         ('ÉQUIPEMENT POUR SERVICE CAFÉ','ÉQUIPEMENT POUR SERVICE CAFÉ'),
-         ('ITEMS DIVERS', 'ITEMS DIVERS'),
-         ('TABLE ET LINGE DE TABLE','TABLE ET LINGE DE TABLE'),
-         ('VERRERIE','VERRERIE'),
-         ('PORCELAINE ET COUTELLERIE','PORCELAINE ET COUTELLERIE'),
-         ('ÉQUIPEMENT POUR MONTAGE CANAPÉS','ÉQUIPEMENT POUR MONTAGE CANAPÉS'),
-         ('ÉQUIPEMENT DE CUISSON','ÉQUIPEMENT DE CUISSON'),
-         ('USTENSILES DE SERVICE','USTENSILES DE SERVICE'),
-         ('ALCOOL FORT','ALCOOL FORT'),
-         ('BIERES','BIERES'),
-         ('VINS','VINS'),
-         ('SANS ALCOOL','SANS ALCOOL'),
-         )
+        ('ÉQUIPEMENT DE BASE', 'ÉQUIPEMENT DE BASE'),
+        ('JETABLE', 'JETABLE'),
+        ('ACCESSOIRES DE DÉCOR', 'ACCESSOIRES DE DÉCOR'),
+        ('ÉQUIPEMENT DE BAR', 'ÉQUIPEMENT DE BAR'),
+        ('ÉQUIPEMENT POUR SERVICE CAFÉ','ÉQUIPEMENT POUR SERVICE CAFÉ'),
+        ('ITEMS DIVERS', 'ITEMS DIVERS'),
+        ('TABLE ET LINGE DE TABLE','TABLE ET LINGE DE TABLE'),
+        ('VERRERIE','VERRERIE'),
+        ('PORCELAINE ET COUTELLERIE','PORCELAINE ET COUTELLERIE'),
+        ('ÉQUIPEMENT POUR MONTAGE CANAPÉS','ÉQUIPEMENT POUR MONTAGE CANAPÉS'),
+        ('ÉQUIPEMENT DE CUISSON','ÉQUIPEMENT DE CUISSON'),
+        ('USTENSILES DE SERVICE','USTENSILES DE SERVICE'),
+        ('ALCOOL FORT','ALCOOL FORT'),
+        ('BIERES','BIERES'),
+        ('VINS','VINS'),
+        ('SANS ALCOOL','SANS ALCOOL'),
+        ('CFCDN', 'CFCDN'),
+    )
+    name = models.CharField(max_length=100, choices=choices, unique=True)
 
-
+    def __str__(self):
+        return self.name
+        
+class Product(models.Model):
+    
     name = models.CharField(max_length=100)
     quantity = models.IntegerField(default=0)
-    category = models.CharField(max_length=100, choices= choices)
+    category = models.ManyToManyField(Category)
 
     def adjust_quantity(self, quantity_change):
         self.quantity += quantity_change
@@ -361,6 +366,14 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+class ProductLog(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='logs')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Product: {self.product.name}, Created by: {self.created_by.username if self.created_by else 'Unknown'} at {self.created_at}"
 
 class Md(models.Model):
     name = models.CharField(max_length=100)
@@ -492,17 +505,17 @@ class ChecklistRecupPhoto(models.Model):
 class ChecklistDocument(models.Model):
     checklist = models.ForeignKey(Checklist, on_delete=models.CASCADE)
     document = models.FileField(upload_to='listings/media/commandesdetail')
-    uploaded_at = models.DateTimeField(auto_now_add=True)
+    uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)  # Keeps original timestamp
+    adjusted_created_at = models.DateTimeField(null=True, blank=True)  # Stores modified timestamp
 
     def __str__(self):
         return f"Document for {self.checklist.name}"
-    
+
     def save(self, *args, **kwargs):
-        # Set uploaded_at to 5 hours earlier only if it's being created (not updated)
-        if not self.pk:  # This checks if it's a new instance
-            self.uploaded_at = timezone.now() - timedelta(hours=5)
+        if not self.pk:  # Only modify for new instances
+            self.adjusted_created_at = timezone.now() - timedelta(hours=5)
         super().save(*args, **kwargs)
-    
 
 
 from django.core.exceptions import ValidationError

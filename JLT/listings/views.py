@@ -987,53 +987,106 @@ def checklist_detail(request, checklist_id):
     checklist = get_object_or_404(Checklist, pk=checklist_id)
     checklist_items = ChecklistItem.objects.filter(checklist=checklist, quantity__gt=0)
     checklist_products = checklist_items.values_list('product__id', flat=True)
-    breuvages = ChecklistItem.objects.filter(checklist=checklist, product__category__in=["ALCOOL FORT", "SANS ALCOOL", "VINS",  "BIERES"], quantity__gt=0)
+    breuvages = ChecklistItem.objects.filter(checklist=checklist, product__category__name__in=["ALCOOL FORT", "SANS ALCOOL", "VINS",  "BIERES"], quantity__gt=0)
     checklist_documents = ChecklistDocument.objects.filter(checklist=checklist)
     recup_photos = ChecklistRecupPhoto.objects.filter(checklist=checklist)
     md_photos = ChecklistMDPhoto.objects.filter(checklist=checklist)
-    products = Product.objects.all()
+    products = Product.objects.prefetch_related('category').all()  # Prefetch categories to avoid additional queries
+    bieres_category = Category.objects.get(name="BIERES")
+    vins_category = Category.objects.get(name="VINS")
+    alcool_category = Category.objects.get(name="ALCOOL FORT")
+    sansalcool_category = Category.objects.get(name="SANS ALCOOL")
+    base_category = Category.objects.get(name="ÉQUIPEMENT DE BASE")
+    jetable_category = Category.objects.get(name="JETABLE")
+    decor_category = Category.objects.get(name="ACCESSOIRES DE DÉCOR")
+    bar_category = Category.objects.get(name="ÉQUIPEMENT DE BAR")
+    cafe_category = Category.objects.get(name="ÉQUIPEMENT POUR SERVICE CAFÉ")
+    table_category = Category.objects.get(name="TABLE ET LINGE DE TABLE")
+    verre_category = Category.objects.get(name="VERRERIE")
+    porcelaine_category = Category.objects.get(name="PORCELAINE ET COUTELLERIE")
+    canape_category = Category.objects.get(name="ÉQUIPEMENT POUR MONTAGE CANAPÉS")
+    cuisson_category = Category.objects.get(name="ÉQUIPEMENT DE CUISSON")
+    service_category = Category.objects.get(name="USTENSILES DE SERVICE")
+    divers_category = Category.objects.get(name="ITEMS DIVERS")
+    cfcdn_category = Category.objects.get(name="CFCDN")
+
+
+    for product in products:
+        product.is_bieres = bieres_category in product.category.all()
+        product.is_vins = vins_category in product.category.all()
+        product.is_alcool = alcool_category in product.category.all()
+        product.is_sansalcool = sansalcool_category in product.category.all()
+        product.is_base = base_category in product.category.all()
+        product.is_jetable = jetable_category in product.category.all()
+        product.is_decor = decor_category in product.category.all()
+        product.is_bar = bar_category in product.category.all()
+        product.is_cafe = cafe_category in product.category.all()
+        product.is_table = table_category in product.category.all()
+        product.is_verre = verre_category in product.category.all()
+        product.is_porcelaine = porcelaine_category in product.category.all()
+        product.is_canape = canape_category in product.category.all()
+        product.is_cuisson = cuisson_category in product.category.all()
+        product.is_service = service_category in product.category.all()
+        product.is_divers = divers_category in product.category.all()
+        product.is_cfcdn = cfcdn_category in product.category.all()
+
     query = request.GET.get('query')
     checklist_item_quantities = {
         item.product_id: item.quantity for item in checklist_items
     }
     checklist_item_comments = {item.product_id: item.commentaire for item in checklist_items}
-    checklist_items_by_category = defaultdict(list)
-    for item in checklist_items:
-        checklist_items_by_category[item.product.category].append(item)
+
+    checklist_itemss = ChecklistItem.objects.select_related('product').filter(checklist=checklist).prefetch_related('product__category')
+    
+    checklist_items_by_category = {}
+
+    for item in checklist_itemss:
+        product = item.product
+        for category in product.category.all():  # Iterate over each category of the product
+            if category.name not in checklist_items_by_category:
+                checklist_items_by_category[category.name] = []
+            checklist_items_by_category[category.name].append({
+                'product': product,
+                'quantity': item.quantity,
+                'status': item.status,
+                'commentaire': item.commentaire,
+                'com': item.com,
+                'is_completed': item.is_completed,
+                'consumed_quantity': item.consumed_quantity,
+                'unconsumed_quantity': item.unconsumed_quantity,
+            })
 
    # Get unique product categories
-    product_categories = Product.choices
 
-    # Define categories
-    equipementdebase = "ÉQUIPEMENT DE BASE"
-    jetable = "JETABLE"
-    accessoirededecor = "ACCESSOIRES DE DÉCOR"
-    equipementdebar = "ÉQUIPEMENT DE BAR"
-    equipementpourservicecafe = "ÉQUIPEMENT POUR SERVICE CAFÉ"
-    itemsdivers = "ITEMS DIVERS"
-    tableetlinge = "TABLE ET LINGE DE TABLE"
-    verrerie = "VERRERIE"
-    porcelaine = "PORCELAINE ET COUTELLERIE"
-    montage = "ÉQUIPEMENT POUR MONTAGE CANAPÉS"
-    cuisson = "ÉQUIPEMENT DE CUISSON"
-    service = "USTENSILES DE SERVICE"
-    alcoolfort = "ALCOOL FORT"
-    bieres = "BIERES"
-    sansalcool = "SANS ALCOOL"
-    vins = "VINS"
-    encours = "en_cours"
-    valide = "valide"
-    refuse = "refuse"
+    product_categories = Product.category
+
+
     user_groups = request.user.groups.values_list('name', flat=True)
     checklist_documents = ChecklistDocument.objects.filter(checklist=checklist)
 
-    # Document formset for uploading multiple documents
+    # Create the formset (always include an extra form)
     document_formset = ChecklistDocumentFormSet(
         request.POST or None,
         request.FILES or None,
-        queryset=checklist_documents,  # Current documents associated with the checklist
+        queryset=checklist_documents,  # Existing docs
         prefix='documents'
     )
+    if not document_formset.forms:
+        document_formset = ChecklistDocumentFormSet(queryset=ChecklistDocument.objects.none(), prefix='documents')
+
+    if request.method == 'POST' and document_formset.is_valid():
+        for form in document_formset:
+            if form.cleaned_data.get('DELETE', False):
+                form.instance.delete()
+            else:
+                document_instance = form.save(commit=False)
+                document_instance.checklist = checklist
+                document_instance.uploaded_by = request.user
+                document_instance.save()
+
+        # 🔹 After saving, reinitialize the formset to include at least one blank form
+        return redirect('checklist-detail', checklist_id=checklist.id)
+
 
     # Checklist form instance
     formbis = ChecklistForm(request.POST or None, instance=checklist, prefix='checklist_form')
@@ -1043,28 +1096,17 @@ def checklist_detail(request, checklist_id):
     if request.method == 'POST' and 'product-form' in request.POST:
         product_form = ProductsForm(request.POST)
         if product_form.is_valid():
-            product_form.save()  # Save the new product
+            product = product_form.save(commit=False)
+            product._current_user = request.user
+            product.save()
             return HttpResponseRedirect(reverse('checklist-detail', args=[checklist_id]))  # Redirect to avoid duplicate submissions
     else:
         product_form = ProductsForm()
 
-     # Handle document formset submission
-    if request.method == 'POST':
-        if document_formset.is_valid():  # Check if the formset is valid
-            for form in document_formset:
-                if form.cleaned_data.get('DELETE', False):
-                    form.instance.delete()  # Delete the document if the checkbox is checked
-                else:
-                    new_document = form.save(commit=False)  # Don’t commit yet
-                    new_document.checklist = checklist  # Assign checklist to the new document
-                    new_document.save()  # Now save the new document
-
-            # Redirect after successful upload to prevent duplicate submissions
-            return HttpResponseRedirect(reverse('checklist-detail', args=[checklist_id]))  # Redirect to avoid duplicate submissions
 
 
     # Handle checklist form submission
-    elif 'checklist_form-name' in request.POST and formbis.is_valid():
+    if 'checklist_form-name' in request.POST and formbis.is_valid():
         if checklist.statusro == 'verifié':
                 checklist.statusro = 'modifié'  # Update the status to 'modifié'
         formbis.save()
@@ -1085,32 +1127,15 @@ def checklist_detail(request, checklist_id):
     for product in products:
         products_by_category[product.category].append(product)
 
+    is_cfcdn = "cfcdn" in checklist.name.lower()
+
     context = {
         'products_by_category': dict(products_by_category),
-        'encours':encours,
-        'alcoolfort':alcoolfort,
-        'bieres':bieres,
-        'sansalcool':sansalcool,
-        'vins':vins,
         'breuvages': breuvages,
-        'valide': valide,
-        'refuse': refuse,
         'checklist': checklist,
         'checklist_products': checklist_products,
         'checklist_items': checklist_items,
         'products': products,
-        'equipementdebase': equipementdebase,
-        'jetable': jetable,
-        'accessoirededecor': accessoirededecor,
-        'equipementdebar': equipementdebar,
-        'equipementpourservicecafe': equipementpourservicecafe,
-        'itemsdivers': itemsdivers,
-        'tableetlinge': tableetlinge,
-        'verrerie': verrerie,
-        'porcelaine': porcelaine,
-        'montage': montage,
-        'cuisson': cuisson,
-        'service': service,
         'formbis': formbis,
         'commentaire_form': commentaire_form,
         'document_formset': document_formset,
@@ -1120,11 +1145,12 @@ def checklist_detail(request, checklist_id):
         'product_form': product_form,
         'checklist_item_quantities': checklist_item_quantities,
         'checklist_item_comments': checklist_item_comments,
-        'checklist_items_by_category': dict(checklist_items_by_category),
+        'checklist_items_by_category': checklist_items_by_category,
         'product_categories': product_categories,
         'is_admin': 'admin' in user_groups,
         'is_chefcuisine': request.user.groups.filter(name='chefcuisine').exists(),
         'is_ventes': request.user.groups.filter(name='ventes').exists(),
+        'is_cfcdn': is_cfcdn,
     }
     return render(request, 'listings/checklist_detail.html', context)
 
@@ -1193,7 +1219,7 @@ def conseiller_dashboard(request):
     valide = "valide"
     refuse = "refuse"
     conseiller_instance = get_object_or_404(Conseiller, user=request.user)
-    checklists = Checklist.objects.filter(conseillere=conseiller_instance).order_by("added_on")
+    checklists = Checklist.objects.filter(conseillere=conseiller_instance).order_by("-date")
     active_checklists = checklists.filter(is_active=True)
     inactive_checklists = checklists.filter(is_active=False)
     paginator = Paginator(checklists, 10)  # Show 10 checklists per page
@@ -1243,7 +1269,9 @@ def conseiller_dashboard(request):
             # Handle product creation form
             product_form = ProductsForm(request.POST)
             if product_form.is_valid():
-                product_form.save()
+                product = product_form.save(commit=False)
+                product._current_user = request.user
+                product.save()
                 messages.success(request, 'Nouveau produit créé avec succès.')
                 return redirect('creerchecklist')
 
@@ -1566,15 +1594,21 @@ from datetime import timedelta
 def view_quantity_change_logs(request, product_id):
     product = Product.objects.get(id=product_id)
     logs = QuantityProductChangeLog.objects.filter(product=product).order_by('-timestamp')
-
+    product_logs = ProductLog.objects.filter(product=product).order_by('-created_at')
     # Calculate the difference for each log entry and adjust timestamp
     for log in logs:
         log.difference = log.new_quantity - log.previous_quantity
         log.adjusted_timestamp = log.timestamp - timedelta(hours=5)  # Subtract 5 hours
 
+    adjusted_logs = []
+    for log in product_logs:
+        log.adjusted_created_at = log.created_at - timedelta(hours=5)
+        adjusted_logs.append(log)
+
     context = {
         'product': product,
         'logs': logs,
+        'product_logs': adjusted_logs,
     }
     
     return render(request, 'listings/view_logs.html', context)
@@ -1670,7 +1704,7 @@ from .models import Product
 def search_productsbase(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
-    products = Product.objects.filter(name__icontains=query, category = "ÉQUIPEMENT DE BASE") if query else Product.objects.filter( category = "ÉQUIPEMENT DE BASE")
+    products = Product.objects.filter(name__icontains=query, category = 1) if query else Product.objects.filter( category = 1)
     
     product_data = []
     for product in products:
@@ -1688,10 +1722,31 @@ def search_productsbase(request, checklist_id):
     
     return JsonResponse({'products': product_data})
 
+def search_productscfcdn(request, checklist_id):
+    query = request.GET.get('query', '')
+    checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
+    products = Product.objects.filter(name__icontains=query, category = 17) if query else Product.objects.filter( category = 17)
+    
+    product_data = []
+    for product in products:
+        # Get the quantity for each product from the checklist
+        checklist_item = checklist_items.filter(product=product).first()
+        quantity = checklist_item.quantity if checklist_item else 0
+        
+        product_data.append({
+            'id': product.id,
+            'name': product.name,
+            'quantity': product.quantity,
+            'checklist_quantity': quantity,  # Add this to send the checklist quantity
+            'commentaire': checklist_item.commentaire if checklist_item else '',  # Ensure commentaire is included
+        })
+    return JsonResponse({'products': product_data})
+
+
 def search_productsjetable(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
-    products = Product.objects.filter(name__icontains=query, category = "JETABLE") if query else Product.objects.filter( category = "JETABLE")
+    products = Product.objects.filter(name__icontains=query, category = 2) if query else Product.objects.filter( category = 2)
     
     product_data = []
     for product in products:
@@ -1711,7 +1766,7 @@ def search_productsjetable(request, checklist_id):
 def search_productsdecor(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
-    products = Product.objects.filter(name__icontains=query, category = "ACCESSOIRES DE DÉCOR") if query else Product.objects.filter( category = "ACCESSOIRES DE DÉCOR")
+    products = Product.objects.filter(name__icontains=query, category = 3) if query else Product.objects.filter( category = 3)
     
     product_data = []
     for product in products:
@@ -1732,7 +1787,7 @@ def search_productsdecor(request, checklist_id):
 def search_productsbar(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
-    products = Product.objects.filter(name__icontains=query, category = "ÉQUIPEMENT DE BAR") if query else Product.objects.filter( category = "ÉQUIPEMENT DE BAR")
+    products = Product.objects.filter(name__icontains=query, category = 4) if query else Product.objects.filter( category = 4)
     
     product_data = []
     for product in products:
@@ -1753,7 +1808,7 @@ def search_productsbar(request, checklist_id):
 def search_productscafe(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
-    products = Product.objects.filter(name__icontains=query, category = "ÉQUIPEMENT POUR SERVICE CAFÉ") if query else Product.objects.filter( category = "ÉQUIPEMENT POUR SERVICE CAFÉ")
+    products = Product.objects.filter(name__icontains=query, category = 5) if query else Product.objects.filter( category = 5)
     
     product_data = []
     for product in products:
@@ -1790,7 +1845,7 @@ def get_breuvages_products(request, checklist_id):
 def search_productstable(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
-    products = Product.objects.filter(name__icontains=query, category = "TABLE ET LINGE DE TABLE") if query else Product.objects.filter( category = "TABLE ET LINGE DE TABLE")
+    products = Product.objects.filter(name__icontains=query, category = 7) if query else Product.objects.filter( category = 7)
     
     product_data = []
     for product in products:
@@ -1811,7 +1866,7 @@ def search_productstable(request, checklist_id):
 def search_productsverre(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
-    products = Product.objects.filter(name__icontains=query, category = "VERRERIE") if query else Product.objects.filter( category = "VERRERIE")
+    products = Product.objects.filter(name__icontains=query, category = 8) if query else Product.objects.filter( category = 8)
     
     product_data = []
     for product in products:
@@ -1832,7 +1887,7 @@ def search_productsverre(request, checklist_id):
 def search_productsporcelaine(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
-    products = Product.objects.filter(name__icontains=query, category = "PORCELAINE ET COUTELLERIE") if query else Product.objects.filter( category = "PORCELAINE ET COUTELLERIE")
+    products = Product.objects.filter(name__icontains=query, category = 9) if query else Product.objects.filter( category = 9)
     
     product_data = []
     for product in products:
@@ -1853,7 +1908,7 @@ def search_productsporcelaine(request, checklist_id):
 def search_productscanape(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
-    products = Product.objects.filter(name__icontains=query, category = "ÉQUIPEMENT POUR MONTAGE CANAPÉS") if query else Product.objects.filter( category = "ÉQUIPEMENT POUR MONTAGE CANAPÉS")
+    products = Product.objects.filter(name__icontains=query, category = 10) if query else Product.objects.filter( category = 10)
     
     product_data = []
     for product in products:
@@ -1874,7 +1929,7 @@ def search_productscanape(request, checklist_id):
 def search_productscuisson(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
-    products = Product.objects.filter(name__icontains=query, category = "ÉQUIPEMENT DE CUISSON") if query else Product.objects.filter( category = "ÉQUIPEMENT DE CUISSON")
+    products = Product.objects.filter(name__icontains=query, category = 11) if query else Product.objects.filter( category = 11)
     
     product_data = []
     for product in products:
@@ -1894,7 +1949,7 @@ def search_productscuisson(request, checklist_id):
 def search_productsservice(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
-    products = Product.objects.filter(name__icontains=query, category = "USTENSILES DE SERVICE") if query else Product.objects.filter( category = "USTENSILES DE SERVICE")
+    products = Product.objects.filter(name__icontains=query, category = 12) if query else Product.objects.filter( category = 12)
     
     product_data = []
     for product in products:
@@ -1914,7 +1969,7 @@ def search_productsservice(request, checklist_id):
 def search_productsdivers(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
-    products = Product.objects.filter(name__icontains=query, category = "ITEMS DIVERS") if query else Product.objects.filter( category = "ITEMS DIVERS")
+    products = Product.objects.filter(name__icontains=query, category = 6) if query else Product.objects.filter( category = 6)
     
     product_data = []
     for product in products:
@@ -1935,7 +1990,7 @@ def search_productsdivers(request, checklist_id):
 def search_productsalcoolfort(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
-    products = Product.objects.filter(name__icontains=query, category = "ALCOOL FORT") if query else Product.objects.filter( category = "ALCOOL FORT")
+    products = Product.objects.filter(name__icontains=query, category = 13) if query else Product.objects.filter( category = 13)
     
     product_data = []
     for product in products:
@@ -1955,7 +2010,7 @@ def search_productsalcoolfort(request, checklist_id):
 def search_productsbieres(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
-    products = Product.objects.filter(name__icontains=query, category = "BIERES") if query else Product.objects.filter( category = "BIERES")
+    products = Product.objects.filter(name__icontains=query, category = 14) if query else Product.objects.filter( category = 14)
     
     product_data = []
     for product in products:
@@ -1975,7 +2030,7 @@ def search_productsbieres(request, checklist_id):
 def search_productsvins(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
-    products = Product.objects.filter(name__icontains=query, category = "VINS") if query else Product.objects.filter( category = "VINS")
+    products = Product.objects.filter(name__icontains=query, category = 15) if query else Product.objects.filter( category = 15)
     
     product_data = []
     for product in products:
@@ -1995,7 +2050,7 @@ def search_productsvins(request, checklist_id):
 def search_productssansalcool(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
-    products = Product.objects.filter(name__icontains=query, category = "SANS ALCOOL") if query else Product.objects.filter( category = "SANS ALCOOL")
+    products = Product.objects.filter(name__icontains=query, category = 16) if query else Product.objects.filter( category = 16)
     
     product_data = []
     for product in products:
