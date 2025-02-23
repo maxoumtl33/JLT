@@ -350,7 +350,9 @@ text-decoration: underline;
           
         
                 <tr>
-                  <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.livreur }}</strong></td>
+                  <td style="background-color: #F1B3DA;"><strong>{% for livreur in livraison.statut.livreur.all %}
+                    {{ livreur.nom }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}</strong></td>
                   <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.heure_depart }}</strong></td>
                   <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
                   <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
@@ -366,7 +368,9 @@ text-decoration: underline;
                 </tr>
                 {% elif livraison.date == journee.date and livraison.status == False %}
                 <tr>
-                  <td ><strong>{{ livraison.statut.livreur }}</strong></td>
+                  <td ><strong>{% for livreur in livraison.statut.livreur.all %}
+                    {{ livreur.nom }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}</strong></td>
                   <td><strong>{{ livraison.statut.heure_depart }}</strong></td>
                   <td ><strong>{{livraison.nom}}</strong></td>
                   <td ><strong>{{ livraison.heure_livraison }}</strong></td>

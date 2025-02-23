@@ -1,0 +1,203 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% load custom_filters %}
+{% block content %}
+<style>
+    /* General Styles remain unchanged */
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f9fa;
+        padding: 20px;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+    }
+
+    h1 {
+        text-align: center;
+        color: #1176F5;
+        margin-bottom: 30px;
+        font-size: 2rem; /* Larger font size for visibility */
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        font-weight: bold;
+        color: #333;
+    }
+
+    .form-group select,
+    .form-group input[type="date"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .btn-primary {
+        background-color: #1176F5;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        display: block;
+        width: 100%;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: #0d63cc;
+    }
+
+    /* Stats Card Styles */
+    .stats-card {
+        background-color: #f1f5f9;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+        text-align: center;
+        transition: box-shadow 0.3s;
+    }
+
+    .stats-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Table styling */
+.checklist-table {
+    width: 100%;
+    border-collapse: collapse; /* Remove space between borders */
+}
+
+.checklist-table thead {
+    background-color: #1176F5; /* Header background color */
+    color: white; /* Header text color */
+}
+
+.checklist-table th, .checklist-table td {
+    padding: 12px; /* Cell padding */
+    border: 1px solid #ccc; /* Border for table cells */
+}
+
+.checklist-table th {
+    font-weight: bold; /* Bold text for header */
+}
+
+.checklist-table tbody tr:nth-child(odd) {
+    background-color: #f8f9fa; /* Alternate row color for better visibility */
+}
+
+.checklist-table tbody tr:hover {
+    background-color: #e2e2e2; /* Highlight row on hover */
+}
+
+input#searchInput {
+    width: 100%; /* Full width */
+    padding: 10px; /* Padding for aesthetics */
+    border-radius: 5px; /* Rounded corners */
+    border: 1px solid #ccc; /* Border color */
+    margin-bottom: 15px; /* Space below the search bar */
+}
+
+</style>
+
+<div class="container">
+    <h1>Tableau de Statistiques</h1>
+
+    <form method="get">
+        <div class="form-group">
+            <label for="start_date">Sélectionnez la Date Début :</label>
+            <input type="date" id="start_date" name="start_date" value="{{ start_date }}" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="end_date">Sélectionnez la Date Fin :</label>
+            <input type="date" id="end_date" name="end_date" value="{{ end_date }}" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Obtenir les Statistiques</button>
+    </form>
+    <br>
+    <br>
+    <h2 style="text-align: center;">Période du {{ start_date }} au {{ end_date }}</h2>
+    <br>
+    <div class="stats-card">
+        <h2>Total Livraisons : {{ total_livraisons }}</h2>
+    </div>
+    <div class="stats-card">
+        <h2>Total Récupérations : {{ total_recuperations }}</h2>
+    </div>
+    <div class="stats-card">
+        <h2>Total Checklists : {{ total_checklists }}</h2>
+    </div>
+    <div class="stats-card">
+        <h2>Total Quantité Produit : {{ total_checklist_items }}</h2>
+    </div>
+    <div class="stats-card">
+        <h2>Total Convives : {{ total_convives }}</h2>
+    </div>
+
+    <div class="stats-card">
+        <h2>Aperçu des Produits de Checklist</h2>
+        <br>
+        
+        <!-- Search Bar -->
+        <input type="text" id="searchInput" placeholder="Rechercher un Produit..." class="form-control" onkeyup="filterTable()">
+        
+        <table class="checklist-table" id="checklistTable">
+            <thead>
+                <tr>
+                    <th>Nom du Produit</th>
+                    <th>Quantité</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in checklist_items_data %}
+                    <tr>
+                        <td>{{ item.product__name }}</td>
+                        <td>{{ item.total_quantity }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+</div>
+<script>
+    function filterTable() {
+        // Get the input value from the search bar
+        const input = document.getElementById('searchInput');
+        const filter = input.value.toLowerCase(); // Convert to lowercase for case-insensitive search
+        const table = document.getElementById('checklistTable');
+        const rows = table.getElementsByTagName('tr');
+    
+        // Loop through all table rows, starting with index 1 to skip the header
+        for (let i = 1; i < rows.length; i++) {
+            const cells = rows[i].getElementsByTagName('td');
+            let match = false;
+    
+            // Check if any cell in the row matches the search input
+            for (let j = 0; j < cells.length; j++) {
+                if (cells[j].textContent.toLowerCase().indexOf(filter) > -1) {
+                    match = true;
+                    break;
+                }
+            }
+    
+            // Display the row if it matches the search input, otherwise hide it
+            rows[i].style.display = match ? '' : 'none';
+        }
+    }
+    </script>
+    
+
+{% endblock %}
+

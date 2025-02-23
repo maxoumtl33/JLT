@@ -174,9 +174,15 @@ class LivraisonsVentesForm(forms.ModelForm):
         fields = ('nom_client', 'contact_site', 'app')
 
 class RoutedetailForm(forms.ModelForm):
+    livreur = forms.ModelMultipleChoiceField(
+        queryset=Livreur.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        label='Livreurs'
+    )
+
     class Meta:
-        model = Route
-        fields = ('livreur', 'heure_depart', 'commentaire')
+        model = Route  # Replace with your actual model name
+        fields = ['livreur', 'heure_depart', 'commentaire']  # Ensure these fields match your model's fields
 
 class LoadingDockForm(forms.ModelForm):
     class Meta:

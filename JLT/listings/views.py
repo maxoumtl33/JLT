@@ -281,6 +281,7 @@ def bulk_edit_livraisons(request):
                 # Update individual fields
                 livraison.nom = request.POST.get(f"nom_{livraison_id}", livraison.nom)
                 livraison.convives = request.POST.get(f"convives_{livraison_id}", livraison.convives)
+                
 
                 # Apply bulk date to both `date` and `date_livraison`
                 if bulk_date:
@@ -1036,7 +1037,7 @@ def checklist_detail(request, checklist_id):
     }
     checklist_item_comments = {item.product_id: item.commentaire for item in checklist_items}
 
-    checklist_itemss = ChecklistItem.objects.select_related('product').filter(checklist=checklist).prefetch_related('product__category')
+    checklist_itemss = ChecklistItem.objects.select_related('product').filter(checklist=checklist, quantity__gt=0).prefetch_related('product__category')
     
     checklist_items_by_category = {}
 
@@ -2027,6 +2028,7 @@ def search_productsbieres(request, checklist_id):
         })
     
     return JsonResponse({'products': product_data})
+
 def search_productsvins(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
@@ -2047,6 +2049,7 @@ def search_productsvins(request, checklist_id):
         })
     
     return JsonResponse({'products': product_data})
+
 def search_productssansalcool(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
@@ -2351,32 +2354,29 @@ def journeerecupdetail(request, id):
 
 
 def journeedetailvente(request, id):
-   journees = Journee.objects.get(id=id)
-   livreurs = Livreur.objects.all()
-   livraisonsroute  = Livraison.objects.order_by('statut', 'position')
-   today = now().date()
-   livraisons = Livraison.objects.order_by('statut', 'position')
-   livraisonsok = Livraison.objects.filter(recuperation=False,date=journees.date)
-   recuperations = Livraison.objects.filter(recuperation=True, date=journees.date)
-   recuperationes = Livraison.objects.filter(recuperation = True, date=journees.date)
-   retourtraiteur = "oui"
-   retourtraiteurno = "non"
-   recuperation = "oui"
-   recuperationo = "non"
-   rien = "."
-   return render(request, 'listings/journeedetailvente.html', context={'livraisons': livraisons,
-                                                              'livreurs': livreurs,
-                                                              'journees' : journees,
-                                                              'today':today,
-                                                              'livraisonsok':livraisonsok,
-                                                              'livraisonsroute':livraisonsroute,
-                                                              'journees':journees,
-                                                              'recuperations':recuperations,
-                                                              'recuperationes':recuperationes,
-                                                              'recuperation':recuperation,
-                                                              'recuperationo':recuperationo,
+    journees = get_object_or_404(Journee, id=id)  # Use get_object_or_404 for better error handling
+    livreurs = Livreur.objects.all()
+    livraisonsroute = Livraison.objects.order_by('statut__position')
+    today = now().date()
+    
+    livraisons = Livraison.objects.order_by('statut', 'position').filter(date=journees.date)
+    livraisonsok = livraisons.filter(recuperation=False) 
+    recuperations = livraisons.filter(recuperation=True)
 
-                                                              })
+    context = {
+        'livraisons': livraisons,
+        'livreurs': livreurs,
+        'journees': journees,
+        'today': today,
+        'livraisonsok': livraisonsok,
+        'livraisonsroute': livraisonsroute,
+        'recuperations': recuperations,
+        'recuperation': "oui",
+        'recuperationo': "non",
+        'rien': ".",
+    }
+    
+    return render(request, 'listings/journeedetailvente.html', context)
 
 
 def journees_list(request):
@@ -2389,13 +2389,14 @@ def journees_list(request):
     loic = "Loic"
     jef = "Jef"
     md = "md"
-    livraisonschaud = Livraison.objects.order_by('statut', 'position').filter(
-        nom__icontains="part chaud",
-        statut__livreur__isnull=False,  # Ensure a livreur is linked
-        statut__heure_depart__isnull=False,
-        recuperation=False,
-        date=today
-    ).select_related('statut', 'statut__livreur')  # Optimize queries
+    livraisonschaud = Livraison.objects.filter(
+    nom__icontains="part chaud",
+    statut__livreur__isnull=False,  # Ensure a livreur is linked
+    statut__heure_depart__isnull=False,
+    recuperation=False,
+    date=today
+    ).prefetch_related('statut__livreur').distinct()  # Ensure distinct results
+
     
 
 
@@ -2526,9 +2527,10 @@ class RouteUpdateView(UpdateView):
     template_name = 'partial_template/route_form.html'
 
     def form_valid(self, form):
-        route = form.save(commit=False)
-        route.save()
-        return HttpResponseRedirect(self.request.META.get('HTTP_REFERER', '/'))
+        route = form.save(commit=False)  # Create the route instance without saving
+        route.save()  # Save the route instance
+        form.save_m2m()  # This saves the many-to-many relationships (livreurs)
+        return HttpResponseRedirect(self.request.META.get('HTTP_REFERER', '/'))  # Redirect back
 
 
 
@@ -2539,9 +2541,9 @@ def journee_detail(request, id):  # notez le paramètre id supplémentaire
     livraisonsroute = Livraison.objects.order_by('statut', 'position')
     today = now().date()
 
-    livraisonss = Livraison.objects.select_related('statut', 'statut__livreur') \
-        .filter(date=journees.date) \
-        .order_by('statut', 'position')
+    livraisonss = Livraison.objects.prefetch_related('statut__livreur') \
+    .filter(date=journees.date) \
+    .order_by('statut', 'position')
 
     # Convert to JSON-like structure with error handling for 'livreur'
     livraisons_data = [
@@ -2550,7 +2552,7 @@ def journee_detail(request, id):  # notez le paramètre id supplémentaire
             'nom': livraison.nom,
             'infodetail': livraison.infodetail if livraison.infodetail else "N/A",
             'heure_livraison': livraison.heure_livraison,
-            'livreur': livraison.statut.livreur.nom if livraison.statut.livreur else "Aucun livreur",  # Check if livreur exists
+            'livreurs': [livreur.nom for livreur in livraison.statut.livreur.all()] if livraison.statut else ["Aucun livreur"],  # Handle ManyToManyField
             'heure_depart': livraison.statut.heure_depart if livraison.statut else "Non défini",
             'recuperation': livraison.recuperation,
             'status': livraison.status,
@@ -2730,7 +2732,7 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
         retourtraiteur = "oui"
         taches = Tacheafaire.objects.filter(livreur = userid)
         routes = Livraison.objects.order_by('statut', 'position')
-        routess = Route.objects.filter(date = journee.date, livreur_id = livreur)
+        routess = Route.objects.filter(date = journee.date, livreur = livreur)
         routes_with_livraisons = []
         for route in routess:
             ordered_livraisons = route.livraisons.all().order_by('statut', 'position')
@@ -2819,29 +2821,137 @@ def update_photo_task(request, pk):
 # Admin view for creating shifts
 
 
+from django.shortcuts import render
+from django.db.models import Sum, Count
+from django.utils import timezone
+from .models import Livraison, Checklist, ChecklistItem
+
+def dashboard_stats(request):
+    today = timezone.now().date()  # Keep today as a date object
+    selected_date_str = request.GET.get('date', today.isoformat())  # This can be a string
+
+    # Parse selected_date as a date object
+    selected_date = timezone.datetime.strptime(selected_date_str, "%Y-%m-%d").date()
+
+    # Get start and end date strings
+    start_date_str = request.GET.get('start_date', today.isoformat())
+    end_date_str = request.GET.get('end_date', today.isoformat())
+
+    # Parse start and end dates
+    start_date = timezone.datetime.strptime(start_date_str, "%Y-%m-%d").date() if start_date_str else today
+    end_date = timezone.datetime.strptime(end_date_str, "%Y-%m-%d").date() if end_date_str else today
+
+    # Validate that end_date is not before start_date
+    if end_date < start_date:
+        end_date = start_date
+
+
+    # Fetch statistics
+    total_livraisons = Livraison.objects.filter(date__range=[start_date, end_date]).count()
+    total_recuperations = Livraison.objects.filter(date__range=[start_date, end_date], recuperation=True).count()
+    total_checklists = Checklist.objects.filter(date__range=[start_date, end_date]).count()
+    # Calculate total convives for livraisons in the selected date range
+    total_convives = Livraison.objects.filter(date__range=[start_date, end_date]).aggregate(total_convives=Sum('convives'))['total_convives'] or 0
+    
+
+    # Prepare counts of checklist items by status
+    checklist_stats = ChecklistItem.objects.filter(checklist__date__range=[start_date, end_date]).values('status').annotate(total=Count('id'))
+    status_totals = {status: 0 for status, _ in ChecklistItem.STATUS_CHOICES}
+    for stat in checklist_stats:
+        status_totals[stat['status']] = stat['total']
+
+    checklist_items = ChecklistItem.objects.all()
+    
+    # Get the selected checklist item
+    selected_item_id = request.GET.get('checklist_item')
+    selected_item_total = None
+    selected_item = None
+
+    if selected_item_id:
+        # Fetch the selected checklist item
+        selected_item = ChecklistItem.objects.filter(id=selected_item_id).first()
+        if selected_item:
+            # Calculate the total quantity for this checklist item within the selected period
+            selected_item_total = ChecklistItem.objects.filter(
+                product=selected_item.product,
+                checklist__date__range=[start_date, end_date]
+            ).aggregate(total_quantity=Sum('quantity'))['total_quantity'] or 0
+
+    checklist_items_data = ChecklistItem.objects.filter(checklist__date__range=[start_date, end_date], quantity__gt=0) \
+            .values('product__name') \
+            .annotate(total_quantity=Sum('quantity'))
+    
+    total_checklist_items = checklist_items_data.aggregate(total=Sum('total_quantity'))['total'] or 0
+
+    livraisons = Livraison.objects.filter(date__range=[start_date, end_date])
+    top_livraison_totals = Livraison.objects.filter(date__range=[start_date, end_date]) \
+        .values('nom', 'place_id') \
+        .annotate(total=Count('id')) \
+        .order_by('-total')[:3]  # Get the top 3 entries, focusing on names
+    
+    # Group livraisons by place_id and count them
+    livraison_counts = livraisons.values('place_id', 'nom').annotate(total=Count('id')).order_by('place_id')
+
+    # Group by letters in `nom`
+    grouped_livraisons = {}
+    for livraison in livraison_counts:
+        place_id = livraison['place_id']
+        nom = livraison['nom']
+        key = ''.join(sorted(nom))  # Create a key based on letters in the name
+
+        if key not in grouped_livraisons:
+            grouped_livraisons[key] = {
+                'nom': nom,
+                'place_id': place_id,
+                'total': 0,
+            }
+        
+        grouped_livraisons[key]['total'] += livraison['total']
+
+    context = {
+        'checklist_items': checklist_items,
+        'grouped_livraisons': grouped_livraisons,
+        'selected_date': selected_date,
+        'selected_item_total': selected_item_total,
+        'selected_item': selected_item,
+        'total_livraisons': total_livraisons,
+        'checklist_items_data': checklist_items_data,
+        'total_recuperations': total_recuperations,
+        'total_checklists': total_checklists,
+        'total_checklist_items': total_checklist_items,
+        'total_convives': total_convives,
+        'top_livraison_totals': top_livraison_totals,
+        'status_totals': status_totals,
+        'start_date': start_date,
+        'end_date': end_date,
+    }
+
+    return render(request, 'listings/dashboard_stats.html', context)
+
+
 @login_required
 def create_shift(request):
-    # Dynamically fetch all Livreur objects from the database
     liste_livreur = Livreur.objects.all()
 
     if request.method == 'POST':
+        global_shift_date = request.POST.get("global_shift_date")
+        
+        if not global_shift_date:
+            return render(request, 'listings/create_shift.html', {
+                'liste_livreur': liste_livreur,
+                'error': 'La date est requise.',
+            })
+
         for livreur in liste_livreur:
-            # Check if the driver is marked as 'repos'
             is_repos = f"repos_{livreur.id}" in request.POST
+            selected_start_time = request.POST.get(f"shift_start_{livreur.id}")
+            custom_start_time = request.POST.get(f"custom_start_time_{livreur.id}")
 
-            # Get shift data from POST request
-            shift_date = request.POST.get(f"shift_date_{livreur.id}")
-            shift_start = request.POST.get(f"shift_start_{livreur.id}")
-
-            # Validate that the shift date is provided
-            if not shift_date:
-                return render(request, 'listings/create_shift.html', {
-                    'liste_livreur': liste_livreur,
-                    'error': 'La date est requise.',
-                })
+            # Determine the start time preference
+            shift_start = custom_start_time or selected_start_time or None
 
             # Validate the start time format if it's provided
-            if shift_start:
+            if shift_start and shift_start != "":  # Ensure not empty
                 try:
                     datetime.strptime(shift_start, '%H:%M')
                 except ValueError:
@@ -2850,31 +2960,29 @@ def create_shift(request):
                         'error': 'Le format de l\'heure de début est invalide. Veuillez entrer l\'heure au format HH:MM.',
                     })
 
-            # Create shift if the driver is not in repos
+            # Create shift record
             if is_repos:
                 Shift.objects.create(
                     livreur=livreur,
-                    date=shift_date,
-                    start_time=None,  # No start time for repos
+                    date=global_shift_date,
+                    start_time=None,
                     notes="Repos"
                 )
             else:
-                # Create a shift with a start time if provided
                 Shift.objects.create(
                     livreur=livreur,
-                    date=shift_date,
-                    start_time=shift_start or None,  # Set start time to None if it's empty
+                    date=global_shift_date,
+                    start_time=shift_start,
                     notes=""
                 )
 
-        # Redirect after creating shifts
         return redirect('acceuilresponsables')
 
-    # Handle GET request to render the page with the list of livreurs
     if not request.user.is_superuser:
         return redirect('unauthorized')
 
     return render(request, 'listings/create_shift.html', {'liste_livreur': liste_livreur})
+
 
 def responsableschoixjournee(request):
 
@@ -3144,22 +3252,37 @@ def update_livraison_positions(request):
 
 
 class MapAujourView(View):
+
+    def post(self, request):
+        form = RoutedetailForm(request.POST)
+        if form.is_valid():
+            route_instance = form.save(commit=False)  # Create without saving to the database
+            route_instance.save()  # Save the instance
+            form.save_m2m()  # Save many-to-many relationships
+            messages.success(request, 'Route detail saved successfully!')
+            return redirect('your_redirect_view_name')  # Redirect appropriately
+        else:
+            messages.error(request, 'Please correct the errors below.')
+            return self.get(request)  # Re-render the form in case of errors
+
     def get(self, request):
         key = settings.GOOGLE_API_KEY
         date_str = request.GET.get('date', datetime.now().date().strftime('%Y-%m-%d'))
-        selected_date = datetime.strptime(date_str, '%Y-%m-%d').date() 
-        
+        selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+
         matin = ['05h00', '05h15', '05h30', '05h45', '06h00', '06h15', '06h30', '06h45', 
                  '07h00', '07h15', '07h30', '07h45', '08h00', '08h15', '08h30', '08h45', 
                  '09h00', '09h15', '09h30', '09h45', 'recup']
-        
+
         form = RoutedetailForm()
-        todo_livraison = Livraison.objects.filter(date=selected_date, heure_livraison__in = matin, place_id__isnull=False, statut__id= 21)
+
+        todo_livraison = Livraison.objects.filter(date=selected_date, heure_livraison__in=matin, place_id__isnull=False, statut__id=21)
         routes21 = Route.objects.filter(id=21)
         routes = Route.objects.filter(date=selected_date)
-        route1 = Livraison.objects.filter(date=selected_date, heure_livraison__in = matin).order_by('statut', 'position')
-        eligable_locations = Livraison.objects.order_by('statut', 'position').filter(place_id__isnull=False, heure_livraison__in = matin, date=selected_date)
-        livraisons =[]
+        route1 = Livraison.objects.filter(date=selected_date, heure_livraison__in=matin).order_by('statut', 'position')
+        eligable_locations = Livraison.objects.order_by('statut', 'position').filter(place_id__isnull=False, heure_livraison__in=matin, date=selected_date)
+
+        livraisons = []
 
         for a in eligable_locations:
             data = {
@@ -3168,29 +3291,25 @@ class MapAujourView(View):
                 'place_id': a.place_id,
                 'nom': a.nom,
                 'heure_livraison': a.heure_livraison,
-                'adress' : a.adress,
+                'adress': a.adress,
                 'convives': a.convives,
                 'mode_envoi': a.mode_envoi,
-                
-
-
             }
-
             livraisons.append(data)
 
         context = {
             'key': key,
             'livraisons': livraisons,
             'selected_date': selected_date.strftime('%Y-%m-%d'),
-            'routes': routes,  # Pass routes to the context
-            'todo_livraison':todo_livraison,
-            'routes21':routes21,
+            'routes': routes,
+            'todo_livraison': todo_livraison,
+            'routes21': routes21,
             'route1': route1,
             'routedetail_form': form,
         }
-        
-        return render(request, 'listings/mapmatinaujour.html', context)
 
+        return render(request, 'listings/mapmatinaujour.html', context)
+    
 class MapApremAujourView(View):
     def get(self, request):
         key = settings.GOOGLE_API_KEY

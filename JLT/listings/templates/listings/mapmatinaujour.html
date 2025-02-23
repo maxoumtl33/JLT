@@ -167,7 +167,11 @@
         </p>
         
         <hr>
-        <p>Livreur: {{ a.livreur }}</p>
+        <p>Livreurs:
+            {% for livreur in a.livreur.all %}
+                {{ livreur.nom }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+        </p>
         <p>Heure départ: {{ a.heure_depart }}</p>
         <hr>
         <div class="tasks-container" data-column-id="{{ a.id }}">
@@ -257,14 +261,14 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="routeDetailModalLabel">Assigner livreur + heure départ</h5>
+                <h5 class="modal-title" id="routeDetailModalLabel">Assigner livreurs + heure départ</h5>
             </div>
             <div class="modal-body">
-                <form id="routeDetailForm" method="POST">
+                <form id="routeDetailForm" method="POST" novalidate>
                     {% csrf_token %}
                     <div class="form-group">
                         {{ routedetail_form.livreur.label_tag }}
-                        {{ routedetail_form.livreur }}
+                        {{ routedetail_form.livreur }}  <!-- Multiple checkboxes for selecting livreurs -->
                     </div>
                     <br>
                     <div class="form-group">
@@ -274,16 +278,16 @@
                     <br>
                     <div class="form-group">
                         {{ routedetail_form.commentaire.label_tag }}
-                        {{ routedetail_form.commentaire }}  <!-- Ensure the commentaire field is included here -->
+                        {{ routedetail_form.commentaire }}
                     </div>
                     <br>
                     <button type="submit" class="btn btn-primary">Valider</button>
                 </form>
-                
             </div>
         </div>
     </div>
 </div>
+
 <br>
 <br>
 <br>

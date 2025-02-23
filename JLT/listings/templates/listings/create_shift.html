@@ -29,6 +29,9 @@
         border-radius: 8px;
         margin-bottom: 20px;
         transition: box-shadow 0.3s ease;
+        flex: 1 0 30%;  /* Responsive Flex Basis */
+        margin-right: 10px; /* Space between shifts */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Adding shadow for better visibility */
     }
 
     .livreur-shift:hover {
@@ -40,6 +43,13 @@
         font-size: 1.25rem;
         margin-bottom: 15px;
         text-align: center;
+    }
+
+    /* Flex Container for shifts */
+    .livreur-shift-container {
+        display: flex;
+        flex-wrap: wrap; /* Allow shifts to wrap to the next line */
+        gap: 20px; /* Spacing for individual shifts */
     }
 
     /* Form Group Styling */
@@ -141,52 +151,63 @@
     <form method="post">
         {% csrf_token %}
         <h3>Créer un planning pour les livreurs</h3>
-    
-        {% if error %}
-            <div class="alert alert-danger">{{ error }}</div>
-        {% endif %}
-    
-        {% for livreur in liste_livreur %}
-            <div class="livreur-shift">
-                <h4>{{ livreur.nom }}</h4>
-    
-                <!-- Shift date -->
-                <div class="form-group">
-                    <label for="shift_date_{{ livreur.id }}">Date de Shift</label>
-                    <input type="date" name="shift_date_{{ livreur.id }}" class="form-control" required>
-                </div>
-    
-                <!-- Shift start time -->
-                <div class="form-group">
-                    <label for="shift_start_{{ livreur.id }}">Heure de Début</label>
-                    <input type="time" name="shift_start_{{ livreur.id }}" class="form-control">
-                </div>
-    
-                <!-- Repos checkbox -->
-                <div class="form-check">
-                    <input type="checkbox" name="repos_{{ livreur.id }}" class="form-check-input" id="repos_{{ livreur.id }}">
-                    <label class="form-check-label" for="repos_{{ livreur.id }}">En Repos</label>
-                </div>
-    
-                <!-- Note field -->
-                <div class="form-group">
-                    <label for="note_{{ livreur.id }}">Note</label>
-                    <textarea name="note_{{ livreur.id }}" rows="3" class="form-control" placeholder="Ajouter une note..."></textarea>
-                </div>
-            </div>
-        {% endfor %}
-    
-        <button type="submit" class="btn btn-primary">Créer Planning</button>
-    </form>
-</div>
-<br>
-<br>
-<br>
-<!-- Bottom Navigation -->
-<nav class="bottom-navbar">
-    <ul>
-        <li><a href="{% url 'acceuilresponsables' %}" class="nav__link"><i class="fa-solid fa-user-ninja"></i><span class="nav__name">Menu Admin</span></a></li>
-    </ul>
-</nav>
 
-{% endblock %}
+        {% if error %}
+            <div class="alert alert-danger">
+            </div>
+            {% endif %}
+    
+            <!-- Global Date Selection -->
+            <div class="form-group">
+                <label for="global_shift_date">Date de Shift</label>
+                <input type="date" id="global_shift_date" name="global_shift_date" class="form-control" required>
+            </div>
+    
+            <!-- Flex Container for shifts -->
+            <div class="livreur-shift-container">
+                {% for livreur in liste_livreur %}
+                    <div class="livreur-shift">
+                        <h4>{{ livreur.nom }}</h4>
+    
+                        <!-- Shift start time with preselected values -->
+                        <div class="form-group">
+                            <label for="shift_start_{{ livreur.id }}">Heure de Début</label>
+                            <select name="shift_start_{{ livreur.id }}" class="form-control">
+                                <option value="06:00">Matin - 06:00</option>
+                                <option value="09:00">Pré-midi - 09:00</option>
+                                <option value="" selected>Autre (Sélectionner l'heure)</option>
+                            </select>
+                            <input type="time" name="custom_start_time_{{ livreur.id }}" class="form-control" placeholder="Ou entrez l'heure manuellement">
+                        </div>
+    
+                        <!-- Repos checkbox -->
+                        <div class="form-check">
+                            <input type="checkbox" name="repos_{{ livreur.id }}" class="form-check-input" id="repos_{{ livreur.id }}">
+                            <label class="form-check-label" for="repos_{{ livreur.id }}">En Repos</label>
+                        </div>
+    
+                        <!-- Note field -->
+                        <div class="form-group">
+                            <label for="note_{{ livreur.id }}">Note</label>
+                            <textarea name="note_{{ livreur.id }}" rows="3" class="form-control" placeholder="Ajouter une note..."></textarea>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+    
+            <button type="submit" class="btn btn-primary">Créer Planning</button>
+        </form>
+    </div>
+    
+    <br>
+    <br>
+    <br>
+    <!-- Bottom Navigation -->
+    <nav class="bottom-navbar">
+        <ul>
+            <li><a href="{% url 'acceuilresponsables' %}" class="nav__link"><i class="fa-solid fa-user-ninja"></i><span class="nav__name">Menu Admin</span></a></li>
+        </ul>
+    </nav>
+    
+    {% endblock %}
+    

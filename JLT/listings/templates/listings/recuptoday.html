@@ -106,7 +106,9 @@
           <tr style="color: #F1B3DA;">
             <td>{{ livraison.nom }}</td>
             <td>{{ livraison.mode_envoi }}</td>
-            <td>{{ livraison.statut.livreur }}</td>
+            <td>{% for livreur in livraison.statut.livreur.all %}
+              {{ livreur.nom }}{% if not forloop.last %}, {% endif %}
+          {% endfor %}</td>
             <td><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn btn-custom"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
             <td><a href="{% url 'duplicate-model' livraison.id %}" class="btn btn-custom"><i class="fa-solid fa-clone"></i></a></td>
           </tr>
@@ -134,7 +136,9 @@
           <tr style="color: #F1B3DA;">
             <td>{{ livraison.nom }}</td>
             <td>{{ livraison.mode_envoi }}</td>
-            <td>{{ livraison.statut.livreur }}</td>
+            <td>{% for livreur in livraison.statut.livreur.all %}
+              {{ livreur.nom }}{% if not forloop.last %}, {% endif %}
+          {% endfor %}</td>
             <td>{{ livraison.date_livraison }}</td>
             <td><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn btn-custom"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
             <td><a href="{% url 'duplicate-model' livraison.id %}" class="btn btn-custom"><i class="fa-solid fa-clone"></i></a></td>
@@ -179,7 +183,9 @@
           <tr style="color: #F1B3DA;">
             <td>{{ livraison.nom }}</td>
             <td>{{ livraison.mode_envoi }}</td>
-            <td>{{ livraison.statut.livreur }}</td>
+            <td>{% for livreur in livraison.statut.livreur.all %}
+              {{ livreur.nom }}{% if not forloop.last %}, {% endif %}
+          {% endfor %}</td>
             <td><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn btn-custom"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
           </tr>
         {% endfor %}

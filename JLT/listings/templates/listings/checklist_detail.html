@@ -16,6 +16,8 @@
 
 <style>
 
+    
+
     /* Styling for the document link */
     .document-link {
         text-decoration: none;
@@ -131,10 +133,11 @@
 
 
 
-    .product-item {
+.product-item {
         display: flex;
         align-items: center;
-        margin-right: 15px; /* Space between each product item */
+        justify-content: space-between;
+        width: 100%;  /* Ensures full width used */
     }
     .btn-danger, .btn-success {
         font-size: 16px;
@@ -149,8 +152,11 @@
     }
 
     .product-name {
-        font-weight: bold;
-        margin-right: 10px; /* Space between product name and buttons */
+        flex-shrink: 0;  /* Ensure name doesn't shrink */
+        overflow: hidden;
+        text-overflow: ellipsis;  /* Add ellipsis after overflow */
+        white-space: nowrap;  /* Prevent text wrapping */
+        margin-bottom: 0;
     }
 
     /* Styling for the plus and minus buttons */
@@ -370,6 +376,13 @@
     min-width: 250px;
     max-width: 350px;
 }
+.product-info {
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
+        /* Optional: Space between icon and text */
+        margin-right: 16px;
+    }
 
 .alert {
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
@@ -647,7 +660,7 @@
                     </div>
                     <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
                         {% csrf_token %}
-                        <div class="row gy-3 rttttttttttttttt">
+                        <div class="row gy-3 rtttttttttttttttt">
                             {% for product in products %}
                             {% if product.is_cfcdn %}
                                 <div class="col-12 d-flex align-items-center justify-content-between product-item">
@@ -824,7 +837,7 @@
                         <table class="table table-bordered table-hover m-0">
                             <tbody>
                                 {% for product in products %}
-                                {% if product.category == equipementdebase %}
+                                {% if product.is_base %}
                                 <tr>
                                     <td class="small-cell" {% if product.id in checklist_products %}
                                         style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
@@ -872,7 +885,7 @@
                         <table class="table table-bordered table-hover m-0">
                             <tbody>
                                 {% for product in products %}
-                                {% if product.category == tableetlinge %}
+                                {% if product.is_table %}
                                 <tr>
                                     <td class="small-cell" {% if product.id in checklist_products %}
                                         style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
@@ -920,7 +933,7 @@
                         <table class="table table-bordered table-hover m-0">
                             <tbody>
                                 {% for product in products %}
-                                {% if product.category == jetable %}
+                                {% if product.is_jetable %}
                                 <tr>
                                     <td class="small-cell" {% if product.id in checklist_products %}
                                         style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
@@ -968,7 +981,7 @@
                         <table class="table table-bordered table-hover m-0">
                             <tbody>
                                 {% for product in products %}
-                                {% if product.category == verrerie %}
+                                {% if product.is_verre %}
                                 <tr>
                                     <td class="small-cell" {% if product.id in checklist_products %}
                                         style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
@@ -1015,7 +1028,7 @@
 
                             <tbody>
                                 {% for product in products %}
-                                {% if product.category == accessoirededecor %}
+                                {% if product.is_decor %}
                                 <tr>
                                     <td class="small-cell" {% if product.id in checklist_products %}
                                         style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
@@ -1062,7 +1075,7 @@
 
                             <tbody>
                                 {% for product in products %}
-                                {% if product.category == porcelaine %}
+                                {% if product.is_porcelaine %}
                                 <tr>
                                     <td class="small-cell" {% if product.id in checklist_products %}
                                         style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
@@ -1110,7 +1123,7 @@
 
                             <tbody>
                                 {% for product in products %}
-                                {% if product.category == equipementdebar %}
+                                {% if product.is_bar %}
                                 <tr>
                                     <td class="small-cell" {% if product.id in checklist_products %}
                                         style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
@@ -1206,7 +1219,7 @@
 
                             <tbody>
                                 {% for product in products %}
-                                {% if product.category == service %}
+                                {% if product.is_service %}
                                 <tr>
                                     <td class="small-cell" {% if product.id in checklist_products %}
                                         style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
@@ -1254,7 +1267,7 @@
 
                             <tbody>
                                 {% for product in products %}
-                                {% if product.category == cuisson %}
+                                {% if product.is_cuisson %}
                                 <tr>
                                     <td class="small-cell" {% if product.id in checklist_products %}
                                         style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
@@ -1301,7 +1314,7 @@
 
                                 <tbody>
                                     {% for product in products %}
-                                    {% if product.category == equipementpourservicecafe %}
+                                    {% if product.is_cafe %}
                                     <tr>
                                         <td class="small-cell" {% if product.id in checklist_products %}
                                         style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
@@ -1348,7 +1361,7 @@
 
                                 <tbody>
                                     {% for product in products %}
-                                    {% if product.category == itemsdivers %}
+                                    {% if product.is_divers %}
                                     <tr>
                                         <td class="small-cell" {% if product.id in checklist_products %}
                                         style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
@@ -1419,7 +1432,7 @@
                         <table class="table table-bordered table-hover m-0">
                             <tbody>
                                 {% for product in products %}
-                                {% if product.category == alcoolfort %}
+                                {% if product.is_alcool %}
                                 <tr>
                                     <td class="small-cell" {% if product.id in checklist_products %}
                                         style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
@@ -1465,7 +1478,7 @@
                         <table class="table table-bordered table-hover m-0">
                             <tbody>
                                 {% for product in products %}
-                                {% if product.category == bieres %}
+                                {% if product.is_bieres %}
                                 <tr>
                                     <td class="small-cell" {% if product.id in checklist_products %}
                                         style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
@@ -1512,7 +1525,7 @@
                         <table class="table table-bordered table-hover m-0">
                             <tbody>
                                 {% for product in products %}
-                                {% if product.category == sansalcool %}
+                                {% if product.is_sansalcool %}
                                 <tr>
                                     <td class="small-cell" {% if product.id in checklist_products %}
                                         style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
@@ -1558,7 +1571,7 @@
                         <table class="table table-bordered table-hover m-0">
                             <tbody>
                                 {% for product in products %}
-                                {% if product.category == vins %}
+                                {% if product.is_vins %}
                                 <tr>
                                     <td class="small-cell" {% if product.id in checklist_products %}
                                         style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
@@ -1635,7 +1648,7 @@
                         <ul class="collapse" id="items-{{ forloop.counter }}">
                             {% for item in items %}
                             <li class="item" data-name="{{ item.product.name }}">
-                                <span style="color: {% if item.status == 'en_cours' %}#ff9800{% elif item.status == 'valide' %}#4caf50{% elif item.status == 'refuse' %}#f44336{% elif item.status == 'complete' %}#4caf50{% elif item.status == 'pending' %}#ff9800{% endif %};">
+                                <span style="color: {% if item.status == 'en_cours' %}#ff9800{% elif item.status == 'valide' %}#4caf50{% elif item.status == 'refuse' %}#f44336{% elif item.status == 'denied' %}#f44336{% elif item.status == 'complete' %}#4caf50{% elif item.status == 'pending' %}#ff9800{% endif %};">
                                     <strong>{{ item.product.name }} - Quantité: {{ item.quantity }}</strong>
                                 </span>
                                 {% if item.commentaire %}
@@ -2993,7 +3006,7 @@ async function generatePDFb() {
     validCategories.forEach(category => {
         const categoryName = category.querySelector('h5').textContent.trim();
         const rows = category.querySelectorAll('tr');
-        const headers = ["Nom de l'article", "Quantité", "Commentaire"];
+        const headers = ["Nom de l'article", "Quantité","Consommé","Restant", "Commentaire"];
         const data = Array.from(rows).map(row => {
             const cells = row.querySelectorAll('td');
             const commentaire = cells[2]?.querySelector('i')?.getAttribute('data-bs-content') || '';
@@ -4267,22 +4280,20 @@ document.getElementById('productSearch10').addEventListener('input', function() 
                 });
             });
 
-            document.querySelectorAll('.toggle-comment').forEach(button => {
-    button.addEventListener('click', function () {
-        const targetId = this.getAttribute('data-target'); // Get the target textarea ID
-        const commentTextarea = document.querySelector(targetId);
-
-        if (commentTextarea) {
-            // Toggle visibility
-            if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
-                commentTextarea.style.display = 'block';
-                this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
+            document.addEventListener("DOMContentLoaded", function() {
+    const commentButtons = document.querySelectorAll('.toggle-comment');
+    
+    commentButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const target = document.querySelector(this.dataset.target);
+            if (target.style.display === "none" || target.style.display === "") {
+                target.style.display = "block"; // Show comment textarea
             } else {
-                commentTextarea.style.display = 'none';
-                this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
+                target.style.display = "none"; // Hide comment textarea
             }
-        }
+        });
     });
+
 });
 
         })
@@ -4789,7 +4800,7 @@ document.getElementById('productSearch16').addEventListener('input', function() 
     fetch(`{% url 'search_productscfcdn' checklist.id %}?query=${query}`)
     .then(response => response.json())
         .then(data => {
-            const productListContainer = document.querySelector('.modal-body .row.gy-3.rttttttttttttttt'); // Target the product list inside the modal
+            const productListContainer = document.querySelector('.modal-body .row.gy-3.rtttttttttttttttt'); // Target the product list inside the modal
             productListContainer.innerHTML = ''; // Clear existing entries
 
             data.products.forEach(product => {

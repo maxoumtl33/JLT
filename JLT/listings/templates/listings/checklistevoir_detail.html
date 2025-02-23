@@ -208,6 +208,21 @@
                                 </button>
                             {% endif %}
 
+                            {% if checklist_product.status == 'pending' and checklist_product.previous_status == 'complete' %}
+                            <button type="button" class="btn btn-outline-success btn-sm rounded-circle" 
+                                        onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'valide')"
+                                        title="Validé">
+                                        <i class="fa-solid fa-check"></i>
+                                </button>
+                            {% endif %}
+                            {% if checklist_product.status == 'pending' and checklist_product.previous_status == 'valide' %}
+                            <button type="button" class="btn btn-outline-success btn-sm rounded-circle" 
+                                        onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'valide')"
+                                        title="Validé">
+                                        <i class="fa-solid fa-check"></i>
+                                </button>
+                            {% endif %}
+
                             {% if checklist_product.status == 'pending' and checklist_product.previous_status == 'en_cours' %}
                             <button type="button" class="btn btn-outline-success btn-sm rounded-circle" 
                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
@@ -237,13 +252,7 @@
                             <i class="fa-solid fa-check"></i>
                             </button>
                             {% endif %}
-                            {% if checklist_product.status == 'complete' and checklist_product.previous_status == 'pending' %}
-                            <button type="button" class="btn btn-outline-success btn-sm rounded-circle" 
-                            onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
-                            title="Validé">
-                            <i class="fa-solid fa-check"></i>
-                            </button>
-                            {% endif %}
+                            
 
                             {% if checklist_product.status == 'complete' and checklist_product.previous_status == 'complete' %}
                             <button type="button" class="btn btn-outline-danger btn-sm rounded-circle" 

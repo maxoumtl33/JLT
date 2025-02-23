@@ -57,9 +57,11 @@
     <table border="1" style="width: 100%; border-collapse: collapse; text-align: left;">
         <thead style="background: #f4f4f4;">
             <tr>
-                <th style="padding: 10px; text-align: center;"><input type="checkbox" id="select_all"> Select All</th>
+                <th style="padding: 10px; text-align: center;"><input type="checkbox" id="select_all">tous</th>
                 <th style="padding: 10px;">Nom</th>
                 <th style="padding: 10px;">Convives</th>
+                <th style="padding: 10px;">Heure livraison</th>
+                <th style="padding: 10px;">Adresse</th>
                 <th style="padding: 10px;">Date</th>
                 <th style="padding: 10px;">Date Livraison</th>
                 <th style="padding: 10px;">Journée</th>
@@ -73,6 +75,8 @@
                 </td>
                 <td><input type="text" name="nom_{{ livraison.id }}" value="{{ livraison.nom }}" style="width: 100%; padding: 5px;"></td>
                 <td><input type="number" name="convives_{{ livraison.id }}" value="{{ livraison.convives }}" style="width: 100%; padding: 5px;"></td>
+                <td><input type="text" name="heure_{{ livraison.id }}" value="{{ livraison.heure_livraison}}" style="width: 100%; padding: 5px;"></td>
+                <td><input type="text" name="adress_{{ livraison.id }}" value="{{ livraison.adress }}" style="width: 100%; padding: 5px;"></td>
                 <td><input type="date" name="date_{{ livraison.id }}" value="{{ livraison.date|date:'Y-m-d' }}" style="padding: 5px;"></td>
                 <td><input type="date" name="date_livraison_{{ livraison.id }}" value="{{ livraison.date_livraison|date:'Y-m-d' }}" style="padding: 5px;"></td>
                 <td>

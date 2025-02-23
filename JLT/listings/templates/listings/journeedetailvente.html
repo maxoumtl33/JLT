@@ -204,7 +204,9 @@ nav.nav {
           <td style="background-color: #F1B3DA;"><strong>{{ livraison.nom }}</strong></td>
           <td style="background-color: #F1B3DA;"><strong>{{ livraison.infodetail }}</strong></td>
           <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
-          <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.livreur }}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{% for livreur in livraison.statut.livreur.all %}
+            {{ livreur.nom }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}</strong></td>
           <td style="background-color: #F1B3DA;">
             {% if livraison.status == True %}
               <strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong>
@@ -220,7 +222,9 @@ nav.nav {
           <td><strong>{{ livraison.nom }}</strong></td>
           <td><strong>{{ livraison.infodetail }}</strong></td>
           <td><strong>{{ livraison.heure_livraison }}</strong></td>
-          <td><strong>{{ livraison.statut.livreur }}</strong></td>
+          <td><strong>{% for livreur in livraison.statut.livreur.all %}
+            {{ livreur.nom }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}</strong></td>
           <td>
             {% if livraison.status == True %}
               <strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong>

@@ -414,74 +414,73 @@ body {
   console.log("Delivery locations data:", livraisons);
 
   function renderDeliveries() {
-      const tableBody = document.getElementById('delivery-data');
-      const deliveryCards = document.getElementById('delivery-cards');
+    const tableBody = document.getElementById('delivery-data');
+    const deliveryCards = document.getElementById('delivery-cards');
 
-      // Clear previous data
-      tableBody.innerHTML = '';
-      deliveryCards.innerHTML = '';
+    // Clear previous data
+    tableBody.innerHTML = '';
+    deliveryCards.innerHTML = '';
 
-      // Check if the deliveries array is not empty
-      if (!livraisons || livraisons.length === 0) {
-          console.error("No deliveries data found.");
-          return;
-      }
-
-livraisons.forEach(livraison => {
-    console.log("Processing delivery:", livraison);
-
-    const { nom, infodetail, heure_livraison, heure_depart, livreur, id, recuperation, date, status } = livraison;
-
-    // Check if essential properties exist
-    if (!nom || !infodetail || !heure_livraison) {
-        console.error("Missing essential delivery properties:", livraison);
+    // Check if the deliveries array is not empty
+    if (!livraisons || livraisons.length === 0) {
+        console.error("No deliveries data found.");
         return;
     }
 
-    // Determine the status icon based on the value of 'status'
-    const statusIcon = status ? 
-        '<i class="fa-regular fa-circle-check" style="color: #63E6BE;"></i>' : 
-        '<i class="fa-solid fa-spinner fa-spin" style="color: #ff9214;"></i>';
+    livraisons.forEach(livraison => {
+        console.log("Processing delivery:", livraison);
 
-    if (recuperation === true) {
+        const {
+            nom,
+            infodetail,
+            heure_livraison,
+            heure_depart,
+            livreurs, // This will now be an array of livreur names
+            id,
+            recuperation,
+            status
+        } = livraison;
+
+        // Check if essential properties exist
+        if (!nom || !infodetail || !heure_livraison) {
+            console.error("Missing essential delivery properties:", livraison);
+            return;
+        }
+
+        // Join the livreurs into a string
+        const livreursDisplay = livreurs.length > 0 
+            ? livreurs.join(', ') 
+            : 'Aucun livreur';
+
+        // Determine the status icon based on the value of 'status'
+        const statusIcon = status ? 
+            '<i class="fa-regular fa-circle-check" style="color: #63E6BE;"></i>' : 
+            '<i class="fa-solid fa-spinner fa-spin" style="color: #ff9214;"></i>';
+
         const baseUrl = "{% url 'livraison-detail' 0 %}".replace('0', id);
-
-        // Create a new table row with background color
+        
+        // Create a new table row
         const row = document.createElement('tr');
-        row.innerHTML = `
-            <td style="background-color: #F1B3DA;">${heure_depart || 'N/A'}</td>
-            <td style="background-color: #F1B3DA;">${nom || 'N/A'}</td>
-            <td style="background-color: #F1B3DA;">${infodetail || 'N/A'}</td>
-            <td style="background-color: #F1B3DA;">${heure_livraison || 'N/A'}</td>
-            <td style="background-color: #F1B3DA;">${livreur || 'N/A'}</td>
-            <td><a href="${baseUrl}" class="view-details">Voir</a></td>
-            <td>${statusIcon}</td>
-        `;
-        tableBody.appendChild(row);
-    } else if (recuperation === false) {
-        const baseUrl = "{% url 'livraison-detail' 0 %}".replace('0', id);
-
-        // Create a new table row without background color
-        const row = document.createElement('tr');
+        
+        // Populate the row with delivery data
         row.innerHTML = `
             <td>${heure_depart || 'N/A'}</td>
             <td>${nom || 'N/A'}</td>
             <td>${infodetail || 'N/A'}</td>
             <td>${heure_livraison || 'N/A'}</td>
-            <td>${livreur || 'N/A'}</td>
+            <td>${livreursDisplay}</td> <!-- Display the list of livreurs -->
             <td><a href="${baseUrl}" class="view-details">Voir</a></td>
             <td>${statusIcon}</td>
         `;
+        
+        // Append the row to the table body
         tableBody.appendChild(row);
-    }
-});
+    });
+}
 
+// Call the function on page load
+window.onload = renderDeliveries;
 
-
-  }
-
-  // Call the function on page load
-  window.onload = renderDeliveries;
 </script>
 
 

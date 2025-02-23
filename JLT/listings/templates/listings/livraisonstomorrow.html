@@ -183,7 +183,9 @@
                                 <td {% if livraison.recuperation %}style="background-color: #F1B3DA;"{% endif %}><strong>{{ livraison.nom }}</strong></td>
                                 <td {% if livraison.recuperation %}style="background-color: #F1B3DA;"{% endif %}><strong>{{ livraison.infodetail }}</strong></td>
                                 <td {% if livraison.recuperation %}style="background-color: #F1B3DA;"{% endif %}><strong>{{ livraison.heure_livraison }}</strong></td>
-                                <td {% if livraison.recuperation %}style="background-color: #F1B3DA;"{% endif %}><strong>{{ livraison.statut.livreur }}</strong></td>
+                                <td {% if livraison.recuperation %}style="background-color: #F1B3DA;"{% endif %}><strong>{% for livreur in livraison.statut.livreur.all %}
+                                    {{ livreur.nom }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}</strong></td>
                                 <td>
                                     {% if livraison.lng %}
                                         <i class="fa-solid fa-location-dot" style="color: #63E6BE;"></i>

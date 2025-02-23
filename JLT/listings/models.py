@@ -173,7 +173,7 @@ class Route(models.Model):
          ('20h00', '20h00'),
      )
      nom = models.fields.CharField(max_length=100)
-     livreur = models.ForeignKey(Livreur, null=True, blank=True, on_delete=models.SET_NULL)
+     livreur = models.ManyToManyField('Livreur', blank=True, related_name='routes')
      heure_depart = models.fields.CharField(null=True, blank=True, max_length=100, choices= choiceheures, default=" ")
      date = models.DateField(default=date.today)
      commentaire = models.fields.CharField(max_length=100, blank=True)
@@ -282,7 +282,7 @@ class Livraison(models.Model):
     commentaire = models.fields.CharField(null=True, blank=True, max_length=500)
     commentairedispatch = models.fields.CharField(null=True, blank=True, max_length=350)
     infodetail = models.fields.CharField(null=True, blank=True, max_length=350)
-    livreur = models.ForeignKey(Livreur, null=True, blank=True, on_delete=models.SET_NULL)
+    livreur = models.ManyToManyField('Livreur', blank=True, related_name='livraisons')
     journee = models.ForeignKey(Journee, null=True, blank=True, on_delete=models.SET_NULL)
     aidelivreur = models.fields.CharField(null=True, blank=True, max_length=100, choices=choicesaide, default=" ")
     retourtraiteur = models.fields.CharField(null=True, blank=True, max_length = 3, choices=choices, default="non")

@@ -148,6 +148,7 @@ path('checklist/<int:checklist_id>/search_productsvins/', views.search_productsv
 path('checklist/<int:checklist_id>/search_productssansalcool/', views.search_productssansalcool, name='search_productssansalcool'),
 path('checklist/<int:checklist_id>/search_productscfcdn/', views.search_productscfcdn, name='search_productscfcdn'),
 path('md_dashboard/', views.md_dashboard, name='md_dashboard'),
+path('dashboard_stats/', views.dashboard_stats, name='dashboard_stats'),
 path('conseiller-dashboard/', views.conseiller_dashboard, name='conseiller_dashboard'),
 path('shifts/', views.view_shifts_by_date, name='view_shifts_by_date'),
 path('create-loading-dock/', create_loading_dock, name='create_loading_dock'),
