@@ -16,8 +16,6 @@
 
 <style>
 
-    
-
     /* Styling for the document link */
     .document-link {
         text-decoration: none;
@@ -152,11 +150,8 @@
     }
 
     .product-name {
-        flex-shrink: 0;  /* Ensure name doesn't shrink */
-        overflow: hidden;
-        text-overflow: ellipsis;  /* Add ellipsis after overflow */
-        white-space: nowrap;  /* Prevent text wrapping */
-        margin-bottom: 0;
+        font-weight: bold;
+        margin-right: 10px; /* Space between product name and buttons */
     }
 
     /* Styling for the plus and minus buttons */
@@ -376,13 +371,6 @@
     min-width: 250px;
     max-width: 350px;
 }
-.product-info {
-        flex-grow: 1;
-        display: flex;
-        align-items: center;
-        /* Optional: Space between icon and text */
-        margin-right: 16px;
-    }
 
 .alert {
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
@@ -1406,7 +1394,7 @@
 
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                
+
                 <button type="button" class="btn btn-primary" onclick="generatePDF()">
                     <i class="fa-solid fa-file-pdf"></i>
                 </button>
@@ -1758,7 +1746,7 @@
 
 
 
-    
+
 
 
 
@@ -2862,7 +2850,7 @@
                 <td>{{ item.product.name }}</td>
                 <td>{{ item.quantity }}</td>
                 <td>
-                    <span class="badge 
+                    <span class="badge
     {% if item.status in 'valide,complete' %}badge-success
     {% elif item.status in 'refuse,denied,deniedprevious' %}badge-danger
     {% elif item.status in 'en_cours,pending' %}badge-warning
@@ -2889,7 +2877,7 @@
             {% endfor %}
         </tbody>
     </table>
-    
+
 </div>
 
 {% endif %}
@@ -2959,7 +2947,7 @@ async function generatePDFb() {
         rows.forEach(row => {
             const quantityCell = row.children[1];
             const commentaireCell = row.children[2]?.querySelector('i')?.getAttribute('data-bs-content') || '';
-            
+
             // Retain row if quantity > 0 or there is a commentaire
             if ((quantityCell && parseInt(quantityCell.textContent.trim()) > 0) || commentaireCell) {
                 hasValidItems = true;
@@ -3315,7 +3303,7 @@ function printModalContent() {
 
     // Select the modal content
     const modalContent = document.querySelector('#verifierbModal .modal-body-verif');
-    
+
     // Clone the content to manipulate without affecting the DOM
     const clonedContent = modalContent.cloneNode(true);
 
@@ -3539,7 +3527,7 @@ document.getElementById('productSearch').addEventListener('input', function () {
                                     name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                     style="display: none;">${cachedComment}</textarea>
                         </div>
-                    
+
 
                     </div>
                 `;
@@ -3655,7 +3643,7 @@ document.getElementById('productSearch1').addEventListener('input', function () 
                     }
                 }
             });
-        
+
         });
         })
         .catch(error => {
@@ -4282,7 +4270,7 @@ document.getElementById('productSearch10').addEventListener('input', function() 
 
             document.addEventListener("DOMContentLoaded", function() {
     const commentButtons = document.querySelectorAll('.toggle-comment');
-    
+
     commentButtons.forEach(button => {
         button.addEventListener('click', function() {
             const target = document.querySelector(this.dataset.target);
@@ -5027,7 +5015,7 @@ function calculateDifference(productId) {
 }
 
 
-    
+
 
 
 

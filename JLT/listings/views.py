@@ -1035,17 +1035,20 @@ def checklist_detail(request, checklist_id):
     checklist_item_quantities = {
         item.product_id: item.quantity for item in checklist_items
     }
-    checklist_item_comments = {item.product_id: item.commentaire for item in checklist_items}
+   
 
     checklist_itemss = ChecklistItem.objects.select_related('product').filter(checklist=checklist, quantity__gt=0).prefetch_related('product__category')
     
-    checklist_items_by_category = {}
+    from collections import defaultdict
+
+    checklist_items_by_category = defaultdict(list)
+    checklist_item_comments = {}
 
     for item in checklist_itemss:
         product = item.product
-        for category in product.category.all():  # Iterate over each category of the product
-            if category.name not in checklist_items_by_category:
-                checklist_items_by_category[category.name] = []
+        checklist_item_comments[product.id] = item.commentaire  # Track comment by product ID
+
+        for category in product.category.all():
             checklist_items_by_category[category.name].append({
                 'product': product,
                 'quantity': item.quantity,
@@ -1059,7 +1062,8 @@ def checklist_detail(request, checklist_id):
 
    # Get unique product categories
 
-    product_categories = Product.category
+    product_categories = Category.objects.filter(product__isnull=False).distinct()
+
 
 
     user_groups = request.user.groups.values_list('name', flat=True)
@@ -1088,22 +1092,25 @@ def checklist_detail(request, checklist_id):
         # 🔹 After saving, reinitialize the formset to include at least one blank form
         return redirect('checklist-detail', checklist_id=checklist.id)
 
-
+    
     # Checklist form instance
     formbis = ChecklistForm(request.POST or None, instance=checklist, prefix='checklist_form')
     commentaire_form = CommentaireForm(request.POST or None, instance=checklist, prefix='commentaire_form')
+    product_form = ProductsForm
 
-    # Handle ProductForm for creating a new product
-    if request.method == 'POST' and 'product-form' in request.POST:
-        product_form = ProductsForm(request.POST)
-        if product_form.is_valid():
-            product = product_form.save(commit=False)
-            product._current_user = request.user
-            product.save()
-            return HttpResponseRedirect(reverse('checklist-detail', args=[checklist_id]))  # Redirect to avoid duplicate submissions
-    else:
-        product_form = ProductsForm()
+    if request.method == 'POST':
+        if 'product-form' in request.POST:
+            product_form = ProductsForm(request.POST, user=request.user)
+            if product_form.is_valid():
+                product = product_form.save()
+                
+                # Log the product creation
+                ProductLog.objects.create(product=product, created_by=request.user)
+                
+                messages.success(request, 'Nouveau produit créé avec succès.')
+                return HttpResponseRedirect(reverse('checklist-detail', args=[checklist_id]))
 
+ 
 
 
     # Handle checklist form submission
@@ -1126,7 +1133,8 @@ def checklist_detail(request, checklist_id):
     # Group products by categories
     products_by_category = defaultdict(list)
     for product in products:
-        products_by_category[product.category].append(product)
+        for category in product.category.all():
+            products_by_category[category.name].append(product)
 
     is_cfcdn = "cfcdn" in checklist.name.lower()
 
@@ -1380,12 +1388,17 @@ def creerchecklist(request):
 
 
 
+    product_form = ProductsForm
+
     if request.method == 'POST':
         if 'product-form' in request.POST:
-            # Handle product creation form
-            product_form = ProductsForm(request.POST)
+            product_form = ProductsForm(request.POST, user=request.user)
             if product_form.is_valid():
-                product_form.save()
+                product = product_form.save()
+                
+                # Log the product creation
+                ProductLog.objects.create(product=product, created_by=request.user)
+                
                 messages.success(request, 'Nouveau produit créé avec succès.')
                 return redirect('creerchecklist')
         else:
@@ -5146,7 +5159,6 @@ def duplicate_model(request, model_id):
     new_object.lat = original_object.lat
     new_object.lng = original_object.lng
     new_object.place_id = original_object.place_id
-    new_object.livreur = original_object.livreur
 
     # Save the new Livraison object first
     new_object.save()

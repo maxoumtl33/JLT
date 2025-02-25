@@ -462,15 +462,17 @@ body {
         // Create a new table row
         const row = document.createElement('tr');
         
+        const backgroundColor = recuperation ? '#F1B3DA' : '';
+
         // Populate the row with delivery data
         row.innerHTML = `
-            <td>${heure_depart || 'N/A'}</td>
-            <td>${nom || 'N/A'}</td>
-            <td>${infodetail || 'N/A'}</td>
-            <td>${heure_livraison || 'N/A'}</td>
-            <td>${livreursDisplay}</td> <!-- Display the list of livreurs -->
-            <td><a href="${baseUrl}" class="view-details">Voir</a></td>
-            <td>${statusIcon}</td>
+            <td style="background-color: ${backgroundColor};">${heure_depart || 'N/A'}</td>
+            <td style="background-color: ${backgroundColor};">${nom || 'N/A'}</td>
+            <td style="background-color: ${backgroundColor};">${infodetail || 'N/A'}</td>
+            <td style="background-color: ${backgroundColor};">${heure_livraison || 'N/A'}</td>
+            <td style="background-color: ${backgroundColor};">${livreursDisplay}</td>
+            <td style="background-color: ${backgroundColor};"><a href="${baseUrl}" class="view-details">Voir</a></td>
+            <td style="background-color: ${backgroundColor};">${statusIcon}</td>
         `;
         
         // Append the row to the table body

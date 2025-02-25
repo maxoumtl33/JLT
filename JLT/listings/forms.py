@@ -59,7 +59,19 @@ class ProductsForm(forms.ModelForm):
             'category': 'Categorie',  # Change the label for the 'category' field
         }
 
-    # You can also add custom validation or styling if needed.
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)  # Pop the user from kwargs
+        super().__init__(*args, **kwargs)
+
+    def save(self, commit=True):
+        product = super().save(commit=False)
+        if self.user:  # This will set the 'created_by' if the user is passed
+            product.created_by = self.user  # If 'created_by' is a part of Product, ensure it is declared in the model
+        if commit:
+            product.save()
+            self.save_m2m()  # Save the ManyToMany relationship
+        return product
+
 
 
 class LivraisonForm(forms.ModelForm):

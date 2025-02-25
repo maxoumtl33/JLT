@@ -358,6 +358,7 @@ class Product(models.Model):
     name = models.CharField(max_length=100)
     quantity = models.IntegerField(default=0)
     category = models.ManyToManyField(Category)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     def adjust_quantity(self, quantity_change):
         self.quantity += quantity_change
