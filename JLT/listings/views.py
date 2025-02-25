@@ -1036,19 +1036,17 @@ def checklist_detail(request, checklist_id):
         item.product_id: item.quantity for item in checklist_items
     }
    
-
+    checklist_item_comments = {item.product_id: item.commentaire for item in checklist_items}
     checklist_itemss = ChecklistItem.objects.select_related('product').filter(checklist=checklist, quantity__gt=0).prefetch_related('product__category')
     
-    from collections import defaultdict
 
-    checklist_items_by_category = defaultdict(list)
-    checklist_item_comments = {}
+    checklist_items_by_category = {}
 
     for item in checklist_itemss:
         product = item.product
-        checklist_item_comments[product.id] = item.commentaire  # Track comment by product ID
-
-        for category in product.category.all():
+        for category in product.category.all():  # Iterate over each category of the product
+            if category.name not in checklist_items_by_category:
+                checklist_items_by_category[category.name] = []
             checklist_items_by_category[category.name].append({
                 'product': product,
                 'quantity': item.quantity,
@@ -1400,6 +1398,7 @@ def creerchecklist(request):
                 ProductLog.objects.create(product=product, created_by=request.user)
                 
                 messages.success(request, 'Nouveau produit créé avec succès.')
+
                 return redirect('creerchecklist')
         else:
             # Handle checklist form
