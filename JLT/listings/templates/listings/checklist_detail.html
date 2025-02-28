@@ -656,8 +656,7 @@
                                         <h6 class="product-name mb-0 me-3">
                                             {{ product.name }}
                                             <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
-                                                ({{ product.quantity }})
-                                            </strong>
+                                                ({{ product.quantity|floatformat:0 }})                                            </strong>
                                         </h6>
                                     </div>
 
@@ -1813,8 +1812,7 @@
                                         <h6 class="product-name mb-0 me-3">
                                             {{ product.name }}
                                             <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
-                                                ({{ product.quantity }})
-                                            </strong>
+                                                ({{ product.quantity|strip_zero_decimal }})                                            </strong>
                                         </h6>
                                     </div>
 
@@ -1829,12 +1827,13 @@
 
                                     <!-- Comment Button -->
                                     <div class="form-group">
-                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-{{ product.id }}">
-                                            <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                                style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}">
+                                                {{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
                                 </div>
@@ -1879,8 +1878,7 @@
                                         <h6 class="product-name mb-0 me-3">
                                             {{ product.name }}
                                             <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
-                                                ({{ product.quantity }})
-                                            </strong>
+                                                ({{ product.quantity|strip_zero_decimal }})                                            </strong>
                                         </h6>
                                     </div>
 
@@ -1895,12 +1893,13 @@
 
                                     <!-- Comment Button -->
                                     <div class="form-group">
-                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-{{ product.id }}">
-                                            <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                                style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}">
+                                                {{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
                                 </div>
@@ -1944,8 +1943,7 @@
                                         <h6 class="product-name mb-0 me-3">
                                             {{ product.name }}
                                             <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
-                                                ({{ product.quantity }})
-                                            </strong>
+                                                ({{ product.quantity|strip_zero_decimal }})                                            </strong>
                                         </h6>
                                     </div>
 
@@ -1960,12 +1958,13 @@
 
                                     <!-- Comment Button -->
                                     <div class="form-group">
-                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-{{ product.id }}">
-                                            <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                                style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}">
+                                                {{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
                                 </div>
@@ -2009,8 +2008,7 @@
                                         <h6 class="product-name mb-0 me-3">
                                             {{ product.name }}
                                             <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
-                                                ({{ product.quantity }})
-                                            </strong>
+                                                ({{ product.quantity|strip_zero_decimal }})                                            </strong>
                                         </h6>
                                     </div>
 
@@ -2025,12 +2023,13 @@
 
                                     <!-- Comment Button -->
                                     <div class="form-group">
-                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-{{ product.id }}">
-                                            <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                                style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}">
+                                                {{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
                                 </div>
@@ -2074,8 +2073,7 @@
                                         <h6 class="product-name mb-0 me-3">
                                             {{ product.name }}
                                             <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
-                                                ({{ product.quantity }})
-                                            </strong>
+                                                ({{ product.quantity|strip_zero_decimal }})                                            </strong>
                                         </h6>
                                     </div>
 
@@ -2090,12 +2088,13 @@
 
                                     <!-- Comment Button -->
                                     <div class="form-group">
-                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-{{ product.id }}">
-                                            <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                                style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}">
+                                                {{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
                                 </div>
@@ -2139,8 +2138,7 @@
                                         <h6 class="product-name mb-0 me-3">
                                             {{ product.name }}
                                             <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
-                                                ({{ product.quantity }})
-                                            </strong>
+                                                ({{ product.quantity|strip_zero_decimal }})                                            </strong>
                                         </h6>
                                     </div>
 
@@ -2155,12 +2153,13 @@
 
                                     <!-- Comment Button -->
                                     <div class="form-group">
-                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-{{ product.id }}">
-                                            <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                                style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}">
+                                                {{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
                                 </div>
@@ -2204,8 +2203,7 @@
                                         <h6 class="product-name mb-0 me-3">
                                             {{ product.name }}
                                             <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
-                                                ({{ product.quantity }})
-                                            </strong>
+                                                ({{ product.quantity|strip_zero_decimal }})                                            </strong>
                                         </h6>
                                     </div>
 
@@ -2220,12 +2218,13 @@
 
                                     <!-- Comment Button -->
                                     <div class="form-group">
-                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-{{ product.id }}">
-                                            <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                                style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}">
+                                                {{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
                                 </div>
@@ -2269,8 +2268,7 @@
                                         <h6 class="product-name mb-0 me-3">
                                             {{ product.name }}
                                             <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
-                                                ({{ product.quantity }})
-                                            </strong>
+                                                ({{ product.quantity|strip_zero_decimal }})                                            </strong>
                                         </h6>
                                     </div>
 
@@ -2285,12 +2283,13 @@
 
                                     <!-- Comment Button -->
                                     <div class="form-group">
-                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-{{ product.id }}">
-                                            <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                                style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}">
+                                                {{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
                                 </div>
@@ -2333,8 +2332,7 @@
                                         <h6 class="product-name mb-0 me-3">
                                             {{ product.name }}
                                             <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
-                                                ({{ product.quantity }})
-                                            </strong>
+                                                ({{ product.quantity|strip_zero_decimal }})                                            </strong>
                                         </h6>
                                     </div>
 
@@ -2349,12 +2347,13 @@
 
                                     <!-- Comment Button -->
                                     <div class="form-group">
-                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-{{ product.id }}">
-                                            <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                                style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}">
+                                                {{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
                                 </div>
@@ -2395,9 +2394,8 @@
                                 <div class="col-12 d-flex align-items-center justify-content-between product-item">
                                     <div class="product-info d-flex align-items-center">
                                         <h6 class="product-name mb-0 me-3">
-                                            {{ product.name }}
-                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
-                                                ({{ product.quantity }})
+                                            ({{ product.quantity|floatformat:0 }})                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity|strip_zero_decimal }})
                                             </strong>
                                         </h6>
                                     </div>
@@ -2413,12 +2411,13 @@
 
                                     <!-- Comment Button -->
                                     <div class="form-group">
-                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-{{ product.id }}">
-                                            <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                                style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}">
+                                                {{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
                                 </div>
@@ -2461,8 +2460,7 @@
                                         <h6 class="product-name mb-0 me-3">
                                             {{ product.name }}
                                             <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
-                                                ({{ product.quantity }})
-                                            </strong>
+                                                ({{ product.quantity|strip_zero_decimal }})                                           </strong>
                                         </h6>
                                     </div>
 
@@ -2476,14 +2474,17 @@
                                     </div>
 
                                     <!-- Comment Button -->
+                                    
                                     <div class="form-group">
-                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-{{ product.id }}">
-                                            <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                                style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}">
+                                                {{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
+                                    
 
                                 </div>
                             {% endif %}
@@ -2525,8 +2526,7 @@
                                         <h6 class="product-name mb-0 me-3">
                                             {{ product.name }}
                                             <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
-                                                ({{ product.quantity }})
-                                            </strong>
+                                                ({{ product.quantity|strip_zero_decimal }})                                            </strong>
                                         </h6>
                                     </div>
 
@@ -2541,12 +2541,13 @@
 
                                     <!-- Comment Button -->
                                     <div class="form-group">
-                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-{{ product.id }}">
-                                            <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                                style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}">
+                                                {{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
                                 </div>
@@ -2590,8 +2591,7 @@
                                         <h6 class="product-name mb-0 me-3">
                                             {{ product.name }}
                                             <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
-                                                ({{ product.quantity }})
-                                            </strong>
+                                                ({{ product.quantity|strip_zero_decimal }})                                           </strong>
                                         </h6>
                                     </div>
 
@@ -2606,12 +2606,13 @@
 
                                     <!-- Comment Button -->
                                     <div class="form-group">
-                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-{{ product.id }}">
-                                            <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                                style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}">
+                                                {{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
                                 </div>
@@ -2654,8 +2655,7 @@
                                         <h6 class="product-name mb-0 me-3">
                                             {{ product.name }}
                                             <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
-                                                ({{ product.quantity }})
-                                            </strong>
+                                                ({{ product.quantity|strip_zero_decimal }})                                            </strong>
                                         </h6>
                                     </div>
 
@@ -2670,12 +2670,13 @@
 
                                     <!-- Comment Button -->
                                     <div class="form-group">
-                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-{{ product.id }}">
-                                            <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                                style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}">
+                                                {{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
                                 </div>
@@ -2718,8 +2719,7 @@
                                         <h6 class="product-name mb-0 me-3">
                                             {{ product.name }}
                                             <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
-                                                ({{ product.quantity }})
-                                            </strong>
+                                                ({{ product.quantity|strip_zero_decimal }})                                           </strong>
                                         </h6>
                                     </div>
 
@@ -2734,12 +2734,13 @@
 
                                     <!-- Comment Button -->
                                     <div class="form-group">
-                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-{{ product.id }}">
-                                            <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                                style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}">
+                                                {{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
                                 </div>
@@ -2782,8 +2783,7 @@
                                         <h6 class="product-name mb-0 me-3">
                                             {{ product.name }}
                                             <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
-                                                ({{ product.quantity }})
-                                            </strong>
+                                                ({{ product.quantity|strip_zero_decimal }})                                            </strong>
                                         </h6>
                                     </div>
 
@@ -2798,12 +2798,13 @@
 
                                     <!-- Comment Button -->
                                     <div class="form-group">
-                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-{{ product.id }}">
-                                            <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
                                         </button>
                                         <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                                style="display: none;">{{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}">
+                                                {{ checklist_item_comments|get_item:product.id|default:'' }}</textarea>
                                     </div>
 
                                 </div>
@@ -2994,7 +2995,7 @@ async function generatePDFb() {
     validCategories.forEach(category => {
         const categoryName = category.querySelector('h5').textContent.trim();
         const rows = category.querySelectorAll('tr');
-        const headers = ["Nom de l'article", "Quantité","Consommé","Restant", "Commentaire"];
+        const headers = ["Nom de l'article", "Quantité","Commentaire","Consommé","Restant"];
         const data = Array.from(rows).map(row => {
             const cells = row.querySelectorAll('td');
             const commentaire = cells[2]?.querySelector('i')?.getAttribute('data-bs-content') || '';
@@ -3486,1383 +3487,1591 @@ const checklistItemComments = {{ checklist_item_comments|safe }};
 // Object to track quantities and comments for products
 const productDataCache = {};
 
-document.getElementById('productSearch').addEventListener('input', function () {
-    const query = this.value;
+// Bind the search input event
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('productSearch').addEventListener('input', function() {
+        const query = this.value;
+        fetch(`{% url 'search_productsbase' checklist.id %}?query=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                const productListContainer = document.querySelector('.modal-body .row.gy-3');
+                productListContainer.innerHTML = ''; // Clear existing entries
 
-    fetch(`{% url 'search_productsbase' checklist.id %}?query=${query}`)
-        .then(response => response.json())
-        .then(data => {
-            const productListContainer = document.querySelector('.modal-body .row.gy-3'); // Target the product list inside the modal
-            productListContainer.innerHTML = ''; // Clear existing entries
+                data.products.forEach(product => {
+                    // Use cached values if they exist, otherwise use the server response
+                    const cachedQuantity = productDataCache[product.id]?.quantity || product.checklist_quantity || 0;
+                    const cachedComment = productDataCache[product.id]?.comment || product.commentaire || '';
 
-            data.products.forEach(product => {
-                // Use cached values if they exist, otherwise use the server response
-                const cachedQuantity = productDataCache[product.id]?.quantity || product.checklist_quantity || 0;
-                const cachedComment = productDataCache[product.id]?.comment || product.commentaire || '';
+                    const productHTML = `
+                        <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                            <div class="product-info d-flex align-items-center">
+                                <h6 class="product-name mb-0 me-3">${product.name}
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                </h6>
+                            </div>
 
-                const productHTML = `
-                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
-                        <div class="product-info d-flex align-items-center">
-                            <h6 class="product-name mb-0 me-3">${product.name}
-                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
-                            </h6>
+                            <input type="hidden" name="product_ids[]" value="${product.id}">
+
+                            <div class="form-group d-flex align-items-center me-2">
+                                <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                                <input type="number" class="form-control text-center quantity-input"
+                                       id="quantity-${product.id}" name="quantities[]"
+                                       min="0" value="${cachedQuantity}" required
+                                       data-product-id="${product.id}">
+                            </div>
+
+                            <div class="form-group">
+                                <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="${product.id}">
+                                    <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
+                                </button>
+                                <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
+                                        name="commentaires[]" placeholder="Add your comment"
+                                        style="display: none;" data-product-id="${product.id}">${cachedComment}</textarea>
+                            </div>
                         </div>
-
-                        <input type="hidden" name="product_ids[]" value="${product.id}">
-
-                        <div class="form-group d-flex align-items-center me-2">
-                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
-                            <input type="number" class="form-control text-center quantity-input"
-                                   id="quantity-${product.id}" name="quantities[]"
-                                   min="0" value="${cachedQuantity}" required
-                                   data-product-id="${product.id}">
-                        </div>
-
-
-                        <div class="form-group">
-                            <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-${product.id}">
-                                <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
-                            </button>
-                            <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                    style="display: none;">${cachedComment}</textarea>
-                        </div>
-
-
-                    </div>
-                `;
-                productListContainer.insertAdjacentHTML('beforeend', productHTML);
-            });
-
-            // Attach event listeners to track input changes
-            document.querySelectorAll('.quantity-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache[productId]) {
-                        productDataCache[productId] = {};
-                    }
-                    productDataCache[productId].quantity = this.value;
+                    `;
+                    productListContainer.insertAdjacentHTML('beforeend', productHTML);
                 });
+
+                // Bind event listeners to the newly added elements
+                bindCommentToggleEvents();
+            })
+            .catch(error => {
+                console.error('Error fetching products:', error);
             });
-
-            document.querySelectorAll('.toggle-comment').forEach(button => {
-            button.addEventListener('click', function () {
-                const targetId = this.getAttribute('data-target'); // Get the target textarea ID
-                const commentTextarea = document.querySelector(targetId);
-
-                if (commentTextarea) {
-                    // Toggle visibility
-                    if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
-                        commentTextarea.style.display = 'block';
-                        this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
-                    } else {
-                        commentTextarea.style.display = 'none';
-                        this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
-                    }
-                }
-            });
-        });
-
-        })
-        .catch(error => {
-            console.error('Error fetching products:', error); // Log errors if any
-        });
-});
-
-const productDataCache1 = {};
-
-document.getElementById('productSearch1').addEventListener('input', function () {
-    const query = this.value;
-
-    fetch(`{% url 'search_productsjetable' checklist.id %}?query=${query}`)
-        .then(response => response.json())
-        .then(data => {
-            const productListContainer = document.querySelector('.modal-body .row.gy-3.rt'); // Target the product list inside the modal
-            productListContainer.innerHTML = ''; // Clear existing entries
-
-            data.products.forEach(product => {
-                // Use cached values if they exist, otherwise use the server response
-                const cachedQuantity = productDataCache1[product.id]?.quantity || product.checklist_quantity || 0;
-                const cachedComment = productDataCache1[product.id]?.comment || product.commentaire || '';
-
-                const productHTML = `
-                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
-                        <div class="product-info d-flex align-items-center">
-                            <h6 class="product-name mb-0 me-3">${product.name}
-                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
-                            </h6>
-                        </div>
-
-                        <input type="hidden" name="product_ids[]" value="${product.id}">
-
-                        <div class="form-group d-flex align-items-center me-2">
-                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
-                            <input type="number" class="form-control text-center quantity-input"
-                                   id="quantity-${product.id}" name="quantities[]"
-                                   min="0" value="${cachedQuantity}" required
-                                   data-product-id="${product.id}">
-                        </div>
-
-                        <div class="form-group">
-                            <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-${product.id}">
-                                <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
-                            </button>
-                            <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                    style="display: none;">${cachedComment}</textarea>
-                        </div>
-                    </div>
-                `;
-                productListContainer.insertAdjacentHTML('beforeend', productHTML);
-            });
-
-            // Attach event listeners to track input changes
-            document.querySelectorAll('.quantity-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache1[productId]) {
-                        productDataCache1[productId] = {};
-                    }
-                    productDataCache1[productId].quantity = this.value;
-                });
-            });
-
-            document.querySelectorAll('.toggle-comment').forEach(button => {
-            button.addEventListener('click', function () {
-                const targetId = this.getAttribute('data-target'); // Get the target textarea ID
-                const commentTextarea = document.querySelector(targetId);
-
-                if (commentTextarea) {
-                    // Toggle visibility
-                    if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
-                        commentTextarea.style.display = 'block';
-                        this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
-                    } else {
-                        commentTextarea.style.display = 'none';
-                        this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
-                    }
-                }
-            });
-
-        });
-        })
-        .catch(error => {
-            console.error('Error fetching products:', error); // Log errors if any
-        });
-});
-
-const productDataCache2 = {};
-
-document.getElementById('productSearch2').addEventListener('input', function () {
-    const query = this.value;
-
-    fetch(`{% url 'search_productsdecor' checklist.id %}?query=${query}`)
-        .then(response => response.json())
-        .then(data => {
-            const productListContainer = document.querySelector('.modal-body .row.gy-3.rtt'); // Target the product list inside the modal
-            productListContainer.innerHTML = ''; // Clear existing entries
-
-            data.products.forEach(product => {
-                // Use cached values if they exist, otherwise use the server response
-                const cachedQuantity = productDataCache2[product.id]?.quantity || product.checklist_quantity || 0;
-                const cachedComment = productDataCache2[product.id]?.comment || product.commentaire || '';
-
-                const productHTML = `
-                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
-                        <div class="product-info d-flex align-items-center">
-                            <h6 class="product-name mb-0 me-3">${product.name}
-                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
-                            </h6>
-                        </div>
-
-                        <input type="hidden" name="product_ids[]" value="${product.id}">
-
-                        <div class="form-group d-flex align-items-center me-2">
-                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
-                            <input type="number" class="form-control text-center quantity-input"
-                                   id="quantity-${product.id}" name="quantities[]"
-                                   min="0" value="${cachedQuantity}" required
-                                   data-product-id="${product.id}">
-                        </div>
-
-                        <div class="form-group">
-                            <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-${product.id}">
-                                <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
-                            </button>
-                            <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                    style="display: none;">${cachedComment}</textarea>
-                        </div>
-                    </div>
-                `;
-                productListContainer.insertAdjacentHTML('beforeend', productHTML);
-            });
-
-            // Attach event listeners to track input changes
-            document.querySelectorAll('.quantity-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache2[productId]) {
-                        productDataCache2[productId] = {};
-                    }
-                    productDataCache2[productId].quantity = this.value;
-                });
-            });
-
-            document.querySelectorAll('.toggle-comment').forEach(button => {
-    button.addEventListener('click', function () {
-        const targetId = this.getAttribute('data-target'); // Get the target textarea ID
-        const commentTextarea = document.querySelector(targetId);
-
-        if (commentTextarea) {
-            // Toggle visibility
-            if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
-                commentTextarea.style.display = 'block';
-                this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
-            } else {
-                commentTextarea.style.display = 'none';
-                this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
-            }
-        }
+        
+        // After updating the element list, bind the quantity change events
+        bindQuantityInputEvents();
     });
-});
-        })
-        .catch(error => {
-            console.error('Error fetching products:', error); // Log errors if any
-        });
-});
 
-const productDataCache3 = {};
-
-document.getElementById('productSearch3').addEventListener('input', function() {
-    const query = this.value;
-    fetch(`{% url 'search_productsbar' checklist.id %}?query=${query}`)
-        .then(response => response.json())
-        .then(data => {
-            const productListContainer = document.querySelector('.modal-body .row.gy-3.rttt'); // Target the product list inside the modal
-            productListContainer.innerHTML = ''; // Clear existing entries
-
-            data.products.forEach(product => {
-                // Use cached values if they exist, otherwise use the server response
-                const cachedQuantity = productDataCache3[product.id]?.quantity || product.checklist_quantity || 0;
-                const cachedComment = productDataCache3[product.id]?.comment || product.commentaire || '';
-
-                const productHTML = `
-                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
-                        <div class="product-info d-flex align-items-center">
-                            <h6 class="product-name mb-0 me-3">${product.name}
-                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
-                            </h6>
-                        </div>
-
-                        <input type="hidden" name="product_ids[]" value="${product.id}">
-
-                        <div class="form-group d-flex align-items-center me-2">
-                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
-                            <input type="number" class="form-control text-center quantity-input"
-                                   id="quantity-${product.id}" name="quantities[]"
-                                   min="0" value="${cachedQuantity}" required
-                                   data-product-id="${product.id}">
-                        </div>
-
-                        <div class="form-group">
-                            <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-${product.id}">
-                                <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
-                            </button>
-                            <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                    style="display: none;">${cachedComment}</textarea>
-                        </div>
-                    </div>
-                `;
-                productListContainer.insertAdjacentHTML('beforeend', productHTML);
-            });
-
-            // Attach event listeners to track input changes
-            document.querySelectorAll('.quantity-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache3[productId]) {
-                        productDataCache3[productId] = {};
-                    }
-                    productDataCache3[productId].quantity = this.value;
-                });
-            });
-
-            document.querySelectorAll('.toggle-comment').forEach(button => {
-    button.addEventListener('click', function () {
-        const targetId = this.getAttribute('data-target'); // Get the target textarea ID
-        const commentTextarea = document.querySelector(targetId);
-
-        if (commentTextarea) {
-            // Toggle visibility
-            if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
-                commentTextarea.style.display = 'block';
-                this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
-            } else {
-                commentTextarea.style.display = 'none';
-                this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
-            }
-        }
-    });
+    // Initial binding of events after DOM content is fully loaded
+    bindCommentToggleEvents();
+    bindQuantityInputEvents();
 });
 
-        })
-        .catch(error => {
-            console.error('Error fetching products:', error); // Log errors if any
-        });
-});
-
-const productDataCache4 = {};
-
-document.getElementById('productSearch4').addEventListener('input', function() {
-    const query = this.value;
-    fetch(`{% url 'search_productscafe' checklist.id %}?query=${query}`)
-        .then(response => response.json())
-        .then(data => {
-            const productListContainer = document.querySelector('.modal-body .row.gy-3.rtttt'); // Target the product list inside the modal
-            productListContainer.innerHTML = ''; // Clear existing entries
-
-            data.products.forEach(product => {
-                // Use cached values if they exist, otherwise use the server response
-                const cachedQuantity = productDataCache4[product.id]?.quantity || product.checklist_quantity || 0;
-                const cachedComment = productDataCache4[product.id]?.comment || product.commentaire || '';
-
-                const productHTML = `
-                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
-                        <div class="product-info d-flex align-items-center">
-                            <h6 class="product-name mb-0 me-3">${product.name}
-                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
-                            </h6>
-                        </div>
-
-                        <input type="hidden" name="product_ids[]" value="${product.id}">
-
-                        <div class="form-group d-flex align-items-center me-2">
-                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
-                            <input type="number" class="form-control text-center quantity-input"
-                                   id="quantity-${product.id}" name="quantities[]"
-                                   min="0" value="${cachedQuantity}" required
-                                   data-product-id="${product.id}">
-                        </div>
-
-                        <div class="form-group">
-                            <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-${product.id}">
-                                <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
-                            </button>
-                            <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                    style="display: none;">${cachedComment}</textarea>
-                        </div>
-                    </div>
-                `;
-                productListContainer.insertAdjacentHTML('beforeend', productHTML);
-            });
-
-            // Attach event listeners to track input changes
-            document.querySelectorAll('.quantity-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache4[productId]) {
-                        productDataCache4[productId] = {};
-                    }
-                    productDataCache4[productId].quantity = this.value;
-                });
-            });
-
-            document.querySelectorAll('.toggle-comment').forEach(button => {
-    button.addEventListener('click', function () {
-        const targetId = this.getAttribute('data-target'); // Get the target textarea ID
-        const commentTextarea = document.querySelector(targetId);
-
-        if (commentTextarea) {
-            // Toggle visibility
-            if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
-                commentTextarea.style.display = 'block';
-                this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
-            } else {
-                commentTextarea.style.display = 'none';
-                this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
-            }
-        }
-    });
-});
-
-        })
-        .catch(error => {
-            console.error('Error fetching products:', error); // Log errors if any
-        });
-});
-
-const productDataCache6 = {};
-
-document.getElementById('productSearch6').addEventListener('input', function() {
-    const query = this.value;
-    fetch(`{% url 'search_productstable' checklist.id %}?query=${query}`)
-        .then(response => response.json())
-        .then(data => {
-            const productListContainer = document.querySelector('.modal-body .row.gy-3.rtttttt'); // Target the product list inside the modal
-            productListContainer.innerHTML = ''; // Clear existing entries
-
-            data.products.forEach(product => {
-                // Use cached values if they exist, otherwise use the server response
-                const cachedQuantity = productDataCache6[product.id]?.quantity || product.checklist_quantity || 0;
-                const cachedComment = productDataCache6[product.id]?.comment || product.commentaire || '';
-
-                const productHTML = `
-                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
-                        <div class="product-info d-flex align-items-center">
-                            <h6 class="product-name mb-0 me-3">${product.name}
-                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
-                            </h6>
-                        </div>
-
-                        <input type="hidden" name="product_ids[]" value="${product.id}">
-
-                        <div class="form-group d-flex align-items-center me-2">
-                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
-                            <input type="number" class="form-control text-center quantity-input"
-                                   id="quantity-${product.id}" name="quantities[]"
-                                   min="0" value="${cachedQuantity}" required
-                                   data-product-id="${product.id}">
-                        </div>
-
-                        <div class="form-group">
-                            <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-${product.id}">
-                                <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
-                            </button>
-                            <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                    style="display: none;">${cachedComment}</textarea>
-                        </div>
-                    </div>
-                `;
-                productListContainer.insertAdjacentHTML('beforeend', productHTML);
-            });
-
-            // Attach event listeners to track input changes
-            document.querySelectorAll('.quantity-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache6[productId]) {
-                        productDataCache6[productId] = {};
-                    }
-                    productDataCache6[productId].quantity = this.value;
-                });
-            });
-
-            document.querySelectorAll('.comment-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache6[productId]) {
-                        productDataCache6[productId] = {};
-                    }
-                    productDataCache6[productId].comment = this.value;
-                });
-            });
-        })
-        .catch(error => {
-            console.error('Error fetching products:', error); // Log errors if any
-        });
-});
-
-const productDataCache7 = {};
-
-document.getElementById('productSearch7').addEventListener('input', function() {
-    const query = this.value;
-    fetch(`{% url 'search_productsverre' checklist.id %}?query=${query}`)
-        .then(response => response.json())
-        .then(data => {
-            const productListContainer = document.querySelector('.modal-body .row.gy-3.rttttttt'); // Target the product list inside the modal
-            productListContainer.innerHTML = ''; // Clear existing entries
-
-            data.products.forEach(product => {
-                // Use cached values if they exist, otherwise use the server response
-                const cachedQuantity = productDataCache7[product.id]?.quantity || product.checklist_quantity || 0;
-                const cachedComment = productDataCache7[product.id]?.comment || product.commentaire || '';
-
-                const productHTML = `
-                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
-                        <div class="product-info d-flex align-items-center">
-                            <h6 class="product-name mb-0 me-3">${product.name}
-                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
-                            </h6>
-                        </div>
-
-                        <input type="hidden" name="product_ids[]" value="${product.id}">
-
-                        <div class="form-group d-flex align-items-center me-2">
-                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
-                            <input type="number" class="form-control text-center quantity-input"
-                                   id="quantity-${product.id}" name="quantities[]"
-                                   min="0" value="${cachedQuantity}" required
-                                   data-product-id="${product.id}">
-                        </div>
-
-                        <div class="form-group">
-                            <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-${product.id}">
-                                <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
-                            </button>
-                            <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                    style="display: none;">${cachedComment}</textarea>
-                        </div>
-                    </div>
-                `;
-                productListContainer.insertAdjacentHTML('beforeend', productHTML);
-            });
-
-            // Attach event listeners to track input changes
-            document.querySelectorAll('.quantity-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache7[productId]) {
-                        productDataCache7[productId] = {};
-                    }
-                    productDataCache7[productId].quantity = this.value;
-                });
-            });
-
-            document.querySelectorAll('.toggle-comment').forEach(button => {
-    button.addEventListener('click', function () {
-        const targetId = this.getAttribute('data-target'); // Get the target textarea ID
-        const commentTextarea = document.querySelector(targetId);
-
-        if (commentTextarea) {
-            // Toggle visibility
-            if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
-                commentTextarea.style.display = 'block';
-                this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
-            } else {
-                commentTextarea.style.display = 'none';
-                this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
-            }
-        }
-    });
-});
-
-        })
-        .catch(error => {
-            console.error('Error fetching products:', error); // Log errors if any
-        });
-});
-
-const productDataCache8 = {};
-
-document.getElementById('productSearch8').addEventListener('input', function() {
-    const query = this.value;
-    fetch(`{% url 'search_productsporcelaine' checklist.id %}?query=${query}`)
-        .then(response => response.json())
-        .then(data => {
-            const productListContainer = document.querySelector('.modal-body .row.gy-3.rtttttttt'); // Target the product list inside the modal
-            productListContainer.innerHTML = ''; // Clear existing entries
-
-            data.products.forEach(product => {
-                // Use cached values if they exist, otherwise use the server response
-                const cachedQuantity = productDataCache8[product.id]?.quantity || product.checklist_quantity || 0;
-                const cachedComment = productDataCache8[product.id]?.comment || product.commentaire || '';
-
-                const productHTML = `
-                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
-                        <div class="product-info d-flex align-items-center">
-                            <h6 class="product-name mb-0 me-3">${product.name}
-                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
-                            </h6>
-                        </div>
-
-                        <input type="hidden" name="product_ids[]" value="${product.id}">
-
-                        <div class="form-group d-flex align-items-center me-2">
-                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
-                            <input type="number" class="form-control text-center quantity-input"
-                                   id="quantity-${product.id}" name="quantities[]"
-                                   min="0" value="${cachedQuantity}" required
-                                   data-product-id="${product.id}">
-                        </div>
-
-                        <div class="form-group">
-                            <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-${product.id}">
-                                <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
-                            </button>
-                            <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                    style="display: none;">${cachedComment}</textarea>
-                        </div>
-                    </div>
-                `;
-                productListContainer.insertAdjacentHTML('beforeend', productHTML);
-            });
-
-            // Attach event listeners to track input changes
-            document.querySelectorAll('.quantity-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache8[productId]) {
-                        productDataCache8[productId] = {};
-                    }
-                    productDataCache8[productId].quantity = this.value;
-                });
-            });
-
-            document.querySelectorAll('.toggle-comment').forEach(button => {
-    button.addEventListener('click', function () {
-        const targetId = this.getAttribute('data-target'); // Get the target textarea ID
-        const commentTextarea = document.querySelector(targetId);
-
-        if (commentTextarea) {
-            // Toggle visibility
-            if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
-                commentTextarea.style.display = 'block';
-                this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
-            } else {
-                commentTextarea.style.display = 'none';
-                this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
-            }
-        }
-    });
-});
-
-        })
-        .catch(error => {
-            console.error('Error fetching products:', error); // Log errors if any
-        });
-});
-
-const productDataCache9 = {};
-
-
-document.getElementById('productSearch9').addEventListener('input', function() {
-    const query = this.value;
-    fetch(`{% url 'search_productscanape' checklist.id %}?query=${query}`)
-        .then(response => response.json())
-        .then(data => {
-            const productListContainer = document.querySelector('.modal-body .row.gy-3.rttttttttt'); // Target the product list inside the modal
-            productListContainer.innerHTML = ''; // Clear existing entries
-
-            data.products.forEach(product => {
-                // Use cached values if they exist, otherwise use the server response
-                const cachedQuantity = productDataCache9[product.id]?.quantity || product.checklist_quantity || 0;
-                const cachedComment = productDataCache9[product.id]?.comment || product.commentaire || '';
-
-                const productHTML = `
-                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
-                        <div class="product-info d-flex align-items-center">
-                            <h6 class="product-name mb-0 me-3">${product.name}
-                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
-                            </h6>
-                        </div>
-
-                        <input type="hidden" name="product_ids[]" value="${product.id}">
-
-                        <div class="form-group d-flex align-items-center me-2">
-                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
-                            <input type="number" class="form-control text-center quantity-input"
-                                   id="quantity-${product.id}" name="quantities[]"
-                                   min="0" value="${cachedQuantity}" required
-                                   data-product-id="${product.id}">
-                        </div>
-
-                        <div class="form-group">
-                            <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-${product.id}">
-                                <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
-                            </button>
-                            <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                    style="display: none;">${cachedComment}</textarea>
-                        </div>
-                    </div>
-                `;
-                productListContainer.insertAdjacentHTML('beforeend', productHTML);
-            });
-
-            // Attach event listeners to track input changes
-            document.querySelectorAll('.quantity-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache9[productId]) {
-                        productDataCache9[productId] = {};
-                    }
-                    productDataCache9[productId].quantity = this.value;
-                });
-            });
-
-            document.querySelectorAll('.toggle-comment').forEach(button => {
-    button.addEventListener('click', function () {
-        const targetId = this.getAttribute('data-target'); // Get the target textarea ID
-        const commentTextarea = document.querySelector(targetId);
-
-        if (commentTextarea) {
-            // Toggle visibility
-            if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
-                commentTextarea.style.display = 'block';
-                this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
-            } else {
-                commentTextarea.style.display = 'none';
-                this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
-            }
-        }
-    });
-});
-
-        })
-        .catch(error => {
-            console.error('Error fetching products:', error); // Log errors if any
-        });
-});
-
-const productDataCache10 = {};
-
-
-document.getElementById('productSearch10').addEventListener('input', function() {
-    const query = this.value;
-    fetch(`{% url 'search_productscuisson' checklist.id %}?query=${query}`)
-        .then(response => response.json())
-        .then(data => {
-            const productListContainer = document.querySelector('.modal-body .row.gy-3.rtttttttttt'); // Target the product list inside the modal
-            productListContainer.innerHTML = ''; // Clear existing entries
-
-            data.products.forEach(product => {
-                // Use cached values if they exist, otherwise use the server response
-                const cachedQuantity = productDataCache10[product.id]?.quantity || product.checklist_quantity || 0;
-                const cachedComment = productDataCache10[product.id]?.comment || product.commentaire || '';
-
-                const productHTML = `
-                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
-                        <div class="product-info d-flex align-items-center">
-                            <h6 class="product-name mb-0 me-3">${product.name}
-                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
-                            </h6>
-                        </div>
-
-                        <input type="hidden" name="product_ids[]" value="${product.id}">
-
-                        <div class="form-group d-flex align-items-center me-2">
-                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
-                            <input type="number" class="form-control text-center quantity-input"
-                                   id="quantity-${product.id}" name="quantities[]"
-                                   min="0" value="${cachedQuantity}" required
-                                   data-product-id="${product.id}">
-                        </div>
-
-                        <div class="form-group">
-                            <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-${product.id}">
-                                <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
-                            </button>
-                            <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                    style="display: none;">${cachedComment}</textarea>
-                        </div>
-                    </div>
-                `;
-                productListContainer.insertAdjacentHTML('beforeend', productHTML);
-            });
-
-            // Attach event listeners to track input changes
-            document.querySelectorAll('.quantity-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache10[productId]) {
-                        productDataCache10[productId] = {};
-                    }
-                    productDataCache10[productId].quantity = this.value;
-                });
-            });
-
-            document.addEventListener("DOMContentLoaded", function() {
+// Function to bind toggle events to comment buttons
+function bindCommentToggleEvents() {
     const commentButtons = document.querySelectorAll('.toggle-comment');
 
     commentButtons.forEach(button => {
         button.addEventListener('click', function() {
-            const target = document.querySelector(this.dataset.target);
-            if (target.style.display === "none" || target.style.display === "") {
-                target.style.display = "block"; // Show comment textarea
-            } else {
-                target.style.display = "none"; // Hide comment textarea
+            const productId = this.getAttribute("data-product-id");
+            const target = document.querySelector(`textarea[data-product-id='${productId}']`);
+            if (target) {
+                target.style.display = (target.style.display === "none" || target.style.display === "") ? "block" : "none";
             }
         });
     });
+}
 
-});
-
-        })
-        .catch(error => {
-            console.error('Error fetching products:', error); // Log errors if any
+// Function to track input changes and update productDataCache10
+function bindQuantityInputEvents() {
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('input', function () {
+            const productId = this.dataset.productId;
+            if (!productDataCache[productId]) {
+                productDataCache[productId] = {};
+            }
+            productDataCache[productId].quantity = this.value;
         });
+    });
+}
+
+
+const productDataCache1 = {};
+
+// Bind the search input event
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('productSearch1').addEventListener('input', function() {
+        const query = this.value;
+        fetch(`{% url 'search_productsjetable' checklist.id %}?query=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                const productListContainer = document.querySelector('.modal-body .row.gy-3.rt');
+                productListContainer.innerHTML = ''; // Clear existing entries
+
+                data.products.forEach(product => {
+                    // Use cached values if they exist, otherwise use the server response
+                    const cachedQuantity = productDataCache1[product.id]?.quantity || product.checklist_quantity || 0;
+                    const cachedComment = productDataCache1[product.id]?.comment || product.commentaire || '';
+
+                    const productHTML = `
+                        <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                            <div class="product-info d-flex align-items-center">
+                                <h6 class="product-name mb-0 me-3">${product.name}
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                </h6>
+                            </div>
+
+                            <input type="hidden" name="product_ids[]" value="${product.id}">
+
+                            <div class="form-group d-flex align-items-center me-2">
+                                <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                                <input type="number" class="form-control text-center quantity-input"
+                                       id="quantity-${product.id}" name="quantities[]"
+                                       min="0" value="${cachedQuantity}" required
+                                       data-product-id="${product.id}">
+                            </div>
+
+                            <div class="form-group">
+                                <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="${product.id}">
+                                    <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
+                                </button>
+                                <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
+                                        name="commentaires[]" placeholder="Add your comment"
+                                        style="display: none;" data-product-id="${product.id}">${cachedComment}</textarea>
+                            </div>
+                        </div>
+                    `;
+                    productListContainer.insertAdjacentHTML('beforeend', productHTML);
+                });
+
+                // Bind event listeners to the newly added elements
+                bindCommentToggleEvents();
+            })
+            .catch(error => {
+                console.error('Error fetching products:', error);
+            });
+        
+        // After updating the element list, bind the quantity change events
+        bindQuantityInputEvents();
+    });
+
+    // Initial binding of events after DOM content is fully loaded
+    bindCommentToggleEvents();
+    bindQuantityInputEvents();
 });
+
+// Function to bind toggle events to comment buttons
+function bindCommentToggleEvents() {
+    const commentButtons = document.querySelectorAll('.toggle-comment');
+
+    commentButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute("data-product-id");
+            const target = document.querySelector(`textarea[data-product-id='${productId}']`);
+            if (target) {
+                target.style.display = (target.style.display === "none" || target.style.display === "") ? "block" : "none";
+            }
+        });
+    });
+}
+
+// Function to track input changes and update productDataCache10
+function bindQuantityInputEvents() {
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('input', function () {
+            const productId = this.dataset.productId;
+            if (!productDataCache1[productId]) {
+                productDataCache1[productId] = {};
+            }
+            productDataCache1[productId].quantity = this.value;
+        });
+    });
+}
+
+
+
+const productDataCache2 = {};
+
+// Bind the search input event
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('productSearch2').addEventListener('input', function() {
+        const query = this.value;
+        fetch(`{% url 'search_productsdecor' checklist.id %}?query=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                const productListContainer = document.querySelector('.modal-body .row.gy-3.rtt');
+                productListContainer.innerHTML = ''; // Clear existing entries
+
+                data.products.forEach(product => {
+                    // Use cached values if they exist, otherwise use the server response
+                    const cachedQuantity = productDataCache2[product.id]?.quantity || product.checklist_quantity || 0;
+                    const cachedComment = productDataCache2[product.id]?.comment || product.commentaire || '';
+
+                    const productHTML = `
+                        <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                            <div class="product-info d-flex align-items-center">
+                                <h6 class="product-name mb-0 me-3">${product.name}
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                </h6>
+                            </div>
+
+                            <input type="hidden" name="product_ids[]" value="${product.id}">
+
+                            <div class="form-group d-flex align-items-center me-2">
+                                <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                                <input type="number" class="form-control text-center quantity-input"
+                                       id="quantity-${product.id}" name="quantities[]"
+                                       min="0" value="${cachedQuantity}" required
+                                       data-product-id="${product.id}">
+                            </div>
+
+                            <div class="form-group">
+                                <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="${product.id}">
+                                    <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
+                                </button>
+                                <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
+                                        name="commentaires[]" placeholder="Add your comment"
+                                        style="display: none;" data-product-id="${product.id}">${cachedComment}</textarea>
+                            </div>
+                        </div>
+                    `;
+                    productListContainer.insertAdjacentHTML('beforeend', productHTML);
+                });
+
+                // Bind event listeners to the newly added elements
+                bindCommentToggleEvents();
+            })
+            .catch(error => {
+                console.error('Error fetching products:', error);
+            });
+        
+        // After updating the element list, bind the quantity change events
+        bindQuantityInputEvents();
+    });
+
+    // Initial binding of events after DOM content is fully loaded
+    bindCommentToggleEvents();
+    bindQuantityInputEvents();
+});
+
+// Function to bind toggle events to comment buttons
+function bindCommentToggleEvents() {
+    const commentButtons = document.querySelectorAll('.toggle-comment');
+
+    commentButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute("data-product-id");
+            const target = document.querySelector(`textarea[data-product-id='${productId}']`);
+            if (target) {
+                target.style.display = (target.style.display === "none" || target.style.display === "") ? "block" : "none";
+            }
+        });
+    });
+}
+
+// Function to track input changes and update productDataCache10
+function bindQuantityInputEvents() {
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('input', function () {
+            const productId = this.dataset.productId;
+            if (!productDataCache2[productId]) {
+                productDataCache2[productId] = {};
+            }
+            productDataCache2[productId].quantity = this.value;
+        });
+    });
+}
+
+
+const productDataCache3 = {};
+
+// Bind the search input event
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('productSearch3').addEventListener('input', function() {
+        const query = this.value;
+        fetch(`{% url 'search_productsbar' checklist.id %}?query=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                const productListContainer = document.querySelector('.modal-body .row.gy-3.rttt');
+                productListContainer.innerHTML = ''; // Clear existing entries
+
+                data.products.forEach(product => {
+                    // Use cached values if they exist, otherwise use the server response
+                    const cachedQuantity = productDataCache3[product.id]?.quantity || product.checklist_quantity || 0;
+                    const cachedComment = productDataCache3[product.id]?.comment || product.commentaire || '';
+
+                    const productHTML = `
+                        <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                            <div class="product-info d-flex align-items-center">
+                                <h6 class="product-name mb-0 me-3">${product.name}
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                </h6>
+                            </div>
+
+                            <input type="hidden" name="product_ids[]" value="${product.id}">
+
+                            <div class="form-group d-flex align-items-center me-2">
+                                <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                                <input type="number" class="form-control text-center quantity-input"
+                                       id="quantity-${product.id}" name="quantities[]"
+                                       min="0" value="${cachedQuantity}" required
+                                       data-product-id="${product.id}">
+                            </div>
+
+                            <div class="form-group">
+                                <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="${product.id}">
+                                    <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
+                                </button>
+                                <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
+                                        name="commentaires[]" placeholder="Add your comment"
+                                        style="display: none;" data-product-id="${product.id}">${cachedComment}</textarea>
+                            </div>
+                        </div>
+                    `;
+                    productListContainer.insertAdjacentHTML('beforeend', productHTML);
+                });
+
+                // Bind event listeners to the newly added elements
+                bindCommentToggleEvents();
+            })
+            .catch(error => {
+                console.error('Error fetching products:', error);
+            });
+        
+        // After updating the element list, bind the quantity change events
+        bindQuantityInputEvents();
+    });
+
+    // Initial binding of events after DOM content is fully loaded
+    bindCommentToggleEvents();
+    bindQuantityInputEvents();
+});
+
+// Function to bind toggle events to comment buttons
+function bindCommentToggleEvents() {
+    const commentButtons = document.querySelectorAll('.toggle-comment');
+
+    commentButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute("data-product-id");
+            const target = document.querySelector(`textarea[data-product-id='${productId}']`);
+            if (target) {
+                target.style.display = (target.style.display === "none" || target.style.display === "") ? "block" : "none";
+            }
+        });
+    });
+}
+
+// Function to track input changes and update productDataCache10
+function bindQuantityInputEvents() {
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('input', function () {
+            const productId = this.dataset.productId;
+            if (!productDataCache3[productId]) {
+                productDataCache3[productId] = {};
+            }
+            productDataCache3[productId].quantity = this.value;
+        });
+    });
+}
+
+
+const productDataCache4 = {};
+
+// Bind the search input event
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('productSearch4').addEventListener('input', function() {
+        const query = this.value;
+        fetch(`{% url 'search_productscafe' checklist.id %}?query=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                const productListContainer = document.querySelector('.modal-body .row.gy-3.rtttt');
+                productListContainer.innerHTML = ''; // Clear existing entries
+
+                data.products.forEach(product => {
+                    // Use cached values if they exist, otherwise use the server response
+                    const cachedQuantity = productDataCache4[product.id]?.quantity || product.checklist_quantity || 0;
+                    const cachedComment = productDataCache4[product.id]?.comment || product.commentaire || '';
+
+                    const productHTML = `
+                        <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                            <div class="product-info d-flex align-items-center">
+                                <h6 class="product-name mb-0 me-3">${product.name}
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                </h6>
+                            </div>
+
+                            <input type="hidden" name="product_ids[]" value="${product.id}">
+
+                            <div class="form-group d-flex align-items-center me-2">
+                                <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                                <input type="number" class="form-control text-center quantity-input"
+                                       id="quantity-${product.id}" name="quantities[]"
+                                       min="0" value="${cachedQuantity}" required
+                                       data-product-id="${product.id}">
+                            </div>
+
+                            <div class="form-group">
+                                <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="${product.id}">
+                                    <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
+                                </button>
+                                <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
+                                        name="commentaires[]" placeholder="Add your comment"
+                                        style="display: none;" data-product-id="${product.id}">${cachedComment}</textarea>
+                            </div>
+                        </div>
+                    `;
+                    productListContainer.insertAdjacentHTML('beforeend', productHTML);
+                });
+
+                // Bind event listeners to the newly added elements
+                bindCommentToggleEvents();
+            })
+            .catch(error => {
+                console.error('Error fetching products:', error);
+            });
+        
+        // After updating the element list, bind the quantity change events
+        bindQuantityInputEvents();
+    });
+
+    // Initial binding of events after DOM content is fully loaded
+    bindCommentToggleEvents();
+    bindQuantityInputEvents();
+});
+
+// Function to bind toggle events to comment buttons
+function bindCommentToggleEvents() {
+    const commentButtons = document.querySelectorAll('.toggle-comment');
+
+    commentButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute("data-product-id");
+            const target = document.querySelector(`textarea[data-product-id='${productId}']`);
+            if (target) {
+                target.style.display = (target.style.display === "none" || target.style.display === "") ? "block" : "none";
+            }
+        });
+    });
+}
+
+// Function to track input changes and update productDataCache10
+function bindQuantityInputEvents() {
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('input', function () {
+            const productId = this.dataset.productId;
+            if (!productDataCache4[productId]) {
+                productDataCache4[productId] = {};
+            }
+            productDataCache4[productId].quantity = this.value;
+        });
+    });
+}
+
+
+const productDataCache6 = {};
+
+// Bind the search input event
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('productSearch6').addEventListener('input', function() {
+        const query = this.value;
+        fetch(`{% url 'search_productstable' checklist.id %}?query=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                const productListContainer = document.querySelector('.modal-body .row.gy-3.rtttttt');
+                productListContainer.innerHTML = ''; // Clear existing entries
+
+                data.products.forEach(product => {
+                    // Use cached values if they exist, otherwise use the server response
+                    const cachedQuantity = productDataCache6[product.id]?.quantity || product.checklist_quantity || 0;
+                    const cachedComment = productDataCache6[product.id]?.comment || product.commentaire || '';
+
+                    const productHTML = `
+                        <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                            <div class="product-info d-flex align-items-center">
+                                <h6 class="product-name mb-0 me-3">${product.name}
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                </h6>
+                            </div>
+
+                            <input type="hidden" name="product_ids[]" value="${product.id}">
+
+                            <div class="form-group d-flex align-items-center me-2">
+                                <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                                <input type="number" class="form-control text-center quantity-input"
+                                       id="quantity-${product.id}" name="quantities[]"
+                                       min="0" value="${cachedQuantity}" required
+                                       data-product-id="${product.id}">
+                            </div>
+
+                            <div class="form-group">
+                                <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="${product.id}">
+                                    <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
+                                </button>
+                                <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
+                                        name="commentaires[]" placeholder="Add your comment"
+                                        style="display: none;" data-product-id="${product.id}">${cachedComment}</textarea>
+                            </div>
+                        </div>
+                    `;
+                    productListContainer.insertAdjacentHTML('beforeend', productHTML);
+                });
+
+                // Bind event listeners to the newly added elements
+                bindCommentToggleEvents();
+            })
+            .catch(error => {
+                console.error('Error fetching products:', error);
+            });
+        
+        // After updating the element list, bind the quantity change events
+        bindQuantityInputEvents();
+    });
+
+    // Initial binding of events after DOM content is fully loaded
+    bindCommentToggleEvents();
+    bindQuantityInputEvents();
+});
+
+// Function to bind toggle events to comment buttons
+function bindCommentToggleEvents() {
+    const commentButtons = document.querySelectorAll('.toggle-comment');
+
+    commentButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute("data-product-id");
+            const target = document.querySelector(`textarea[data-product-id='${productId}']`);
+            if (target) {
+                target.style.display = (target.style.display === "none" || target.style.display === "") ? "block" : "none";
+            }
+        });
+    });
+}
+
+// Function to track input changes and update productDataCache10
+function bindQuantityInputEvents() {
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('input', function () {
+            const productId = this.dataset.productId;
+            if (!productDataCache6[productId]) {
+                productDataCache6[productId] = {};
+            }
+            productDataCache6[productId].quantity = this.value;
+        });
+    });
+}
+
+
+const productDataCache7 = {};
+
+// Bind the search input event
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('productSearch7').addEventListener('input', function() {
+        const query = this.value;
+        fetch(`{% url 'search_productsverre' checklist.id %}?query=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                const productListContainer = document.querySelector('.modal-body .row.gy-3.rttttttt');
+                productListContainer.innerHTML = ''; // Clear existing entries
+
+                data.products.forEach(product => {
+                    // Use cached values if they exist, otherwise use the server response
+                    const cachedQuantity = productDataCache7[product.id]?.quantity || product.checklist_quantity || 0;
+                    const cachedComment = productDataCache7[product.id]?.comment || product.commentaire || '';
+
+                    const productHTML = `
+                        <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                            <div class="product-info d-flex align-items-center">
+                                <h6 class="product-name mb-0 me-3">${product.name}
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                </h6>
+                            </div>
+
+                            <input type="hidden" name="product_ids[]" value="${product.id}">
+
+                            <div class="form-group d-flex align-items-center me-2">
+                                <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                                <input type="number" class="form-control text-center quantity-input"
+                                       id="quantity-${product.id}" name="quantities[]"
+                                       min="0" value="${cachedQuantity}" required
+                                       data-product-id="${product.id}">
+                            </div>
+
+                            <div class="form-group">
+                                <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="${product.id}">
+                                    <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
+                                </button>
+                                <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
+                                        name="commentaires[]" placeholder="Add your comment"
+                                        style="display: none;" data-product-id="${product.id}">${cachedComment}</textarea>
+                            </div>
+                        </div>
+                    `;
+                    productListContainer.insertAdjacentHTML('beforeend', productHTML);
+                });
+
+                // Bind event listeners to the newly added elements
+                bindCommentToggleEvents();
+            })
+            .catch(error => {
+                console.error('Error fetching products:', error);
+            });
+        
+        // After updating the element list, bind the quantity change events
+        bindQuantityInputEvents();
+    });
+
+    // Initial binding of events after DOM content is fully loaded
+    bindCommentToggleEvents();
+    bindQuantityInputEvents();
+});
+
+// Function to bind toggle events to comment buttons
+function bindCommentToggleEvents() {
+    const commentButtons = document.querySelectorAll('.toggle-comment');
+
+    commentButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute("data-product-id");
+            const target = document.querySelector(`textarea[data-product-id='${productId}']`);
+            if (target) {
+                target.style.display = (target.style.display === "none" || target.style.display === "") ? "block" : "none";
+            }
+        });
+    });
+}
+
+// Function to track input changes and update productDataCache10
+function bindQuantityInputEvents() {
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('input', function () {
+            const productId = this.dataset.productId;
+            if (!productDataCache7[productId]) {
+                productDataCache7[productId] = {};
+            }
+            productDataCache7[productId].quantity = this.value;
+        });
+    });
+}
+
+
+const productDataCache8 = {};
+
+// Bind the search input event
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('productSearch8').addEventListener('input', function() {
+        const query = this.value;
+        fetch(`{% url 'search_productsporcelaine' checklist.id %}?query=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                const productListContainer = document.querySelector('.modal-body .row.gy-3.rtttttttt');
+                productListContainer.innerHTML = ''; // Clear existing entries
+
+                data.products.forEach(product => {
+                    // Use cached values if they exist, otherwise use the server response
+                    const cachedQuantity = productDataCache8[product.id]?.quantity || product.checklist_quantity || 0;
+                    const cachedComment = productDataCache8[product.id]?.comment || product.commentaire || '';
+
+                    const productHTML = `
+                        <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                            <div class="product-info d-flex align-items-center">
+                                <h6 class="product-name mb-0 me-3">${product.name}
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                </h6>
+                            </div>
+
+                            <input type="hidden" name="product_ids[]" value="${product.id}">
+
+                            <div class="form-group d-flex align-items-center me-2">
+                                <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                                <input type="number" class="form-control text-center quantity-input"
+                                       id="quantity-${product.id}" name="quantities[]"
+                                       min="0" value="${cachedQuantity}" required
+                                       data-product-id="${product.id}">
+                            </div>
+
+                            <div class="form-group">
+                                <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="${product.id}">
+                                    <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
+                                </button>
+                                <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
+                                        name="commentaires[]" placeholder="Add your comment"
+                                        style="display: none;" data-product-id="${product.id}">${cachedComment}</textarea>
+                            </div>
+                        </div>
+                    `;
+                    productListContainer.insertAdjacentHTML('beforeend', productHTML);
+                });
+
+                // Bind event listeners to the newly added elements
+                bindCommentToggleEvents();
+            })
+            .catch(error => {
+                console.error('Error fetching products:', error);
+            });
+        
+        // After updating the element list, bind the quantity change events
+        bindQuantityInputEvents();
+    });
+
+    // Initial binding of events after DOM content is fully loaded
+    bindCommentToggleEvents();
+    bindQuantityInputEvents();
+});
+
+// Function to bind toggle events to comment buttons
+function bindCommentToggleEvents() {
+    const commentButtons = document.querySelectorAll('.toggle-comment');
+
+    commentButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute("data-product-id");
+            const target = document.querySelector(`textarea[data-product-id='${productId}']`);
+            if (target) {
+                target.style.display = (target.style.display === "none" || target.style.display === "") ? "block" : "none";
+            }
+        });
+    });
+}
+
+// Function to track input changes and update productDataCache10
+function bindQuantityInputEvents() {
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('input', function () {
+            const productId = this.dataset.productId;
+            if (!productDataCache8[productId]) {
+                productDataCache8[productId] = {};
+            }
+            productDataCache8[productId].quantity = this.value;
+        });
+    });
+}
+
+
+const productDataCache9 = {};
+
+// Bind the search input event
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('productSearch9').addEventListener('input', function() {
+        const query = this.value;
+        fetch(`{% url 'search_productscanape' checklist.id %}?query=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                const productListContainer = document.querySelector('.modal-body .row.gy-3.rttttttttt');
+                productListContainer.innerHTML = ''; // Clear existing entries
+
+                data.products.forEach(product => {
+                    // Use cached values if they exist, otherwise use the server response
+                    const cachedQuantity = productDataCache9[product.id]?.quantity || product.checklist_quantity || 0;
+                    const cachedComment = productDataCache9[product.id]?.comment || product.commentaire || '';
+
+                    const productHTML = `
+                        <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                            <div class="product-info d-flex align-items-center">
+                                <h6 class="product-name mb-0 me-3">${product.name}
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                </h6>
+                            </div>
+
+                            <input type="hidden" name="product_ids[]" value="${product.id}">
+
+                            <div class="form-group d-flex align-items-center me-2">
+                                <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                                <input type="number" class="form-control text-center quantity-input"
+                                       id="quantity-${product.id}" name="quantities[]"
+                                       min="0" value="${cachedQuantity}" required
+                                       data-product-id="${product.id}">
+                            </div>
+
+                            <div class="form-group">
+                                <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="${product.id}">
+                                    <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
+                                </button>
+                                <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
+                                        name="commentaires[]" placeholder="Add your comment"
+                                        style="display: none;" data-product-id="${product.id}">${cachedComment}</textarea>
+                            </div>
+                        </div>
+                    `;
+                    productListContainer.insertAdjacentHTML('beforeend', productHTML);
+                });
+
+                // Bind event listeners to the newly added elements
+                bindCommentToggleEvents();
+            })
+            .catch(error => {
+                console.error('Error fetching products:', error);
+            });
+        
+        // After updating the element list, bind the quantity change events
+        bindQuantityInputEvents();
+    });
+
+    // Initial binding of events after DOM content is fully loaded
+    bindCommentToggleEvents();
+    bindQuantityInputEvents();
+});
+
+// Function to bind toggle events to comment buttons
+function bindCommentToggleEvents() {
+    const commentButtons = document.querySelectorAll('.toggle-comment');
+
+    commentButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute("data-product-id");
+            const target = document.querySelector(`textarea[data-product-id='${productId}']`);
+            if (target) {
+                target.style.display = (target.style.display === "none" || target.style.display === "") ? "block" : "none";
+            }
+        });
+    });
+}
+
+// Function to track input changes and update productDataCache10
+function bindQuantityInputEvents() {
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('input', function () {
+            const productId = this.dataset.productId;
+            if (!productDataCache9[productId]) {
+                productDataCache9[productId] = {};
+            }
+            productDataCache9[productId].quantity = this.value;
+        });
+    });
+}
+
+
+
+const productDataCache10 = {};
+
+// Bind the search input event
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('productSearch10').addEventListener('input', function() {
+        const query = this.value;
+        fetch(`{% url 'search_productscuisson' checklist.id %}?query=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                const productListContainer = document.querySelector('.modal-body .row.gy-3.rtttttttttt');
+                productListContainer.innerHTML = ''; // Clear existing entries
+
+                data.products.forEach(product => {
+                    // Use cached values if they exist, otherwise use the server response
+                    const cachedQuantity = productDataCache10[product.id]?.quantity || product.checklist_quantity || 0;
+                    const cachedComment = productDataCache10[product.id]?.comment || product.commentaire || '';
+
+                    const productHTML = `
+                        <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                            <div class="product-info d-flex align-items-center">
+                                <h6 class="product-name mb-0 me-3">${product.name}
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                </h6>
+                            </div>
+
+                            <input type="hidden" name="product_ids[]" value="${product.id}">
+
+                            <div class="form-group d-flex align-items-center me-2">
+                                <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                                <input type="number" class="form-control text-center quantity-input"
+                                       id="quantity-${product.id}" name="quantities[]"
+                                       min="0" value="${cachedQuantity}" required
+                                       data-product-id="${product.id}">
+                            </div>
+
+                            <div class="form-group">
+                                <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="${product.id}">
+                                    <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
+                                </button>
+                                <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
+                                        name="commentaires[]" placeholder="Add your comment"
+                                        style="display: none;" data-product-id="${product.id}">${cachedComment}</textarea>
+                            </div>
+                        </div>
+                    `;
+                    productListContainer.insertAdjacentHTML('beforeend', productHTML);
+                });
+
+                // Bind event listeners to the newly added elements
+                bindCommentToggleEvents();
+            })
+            .catch(error => {
+                console.error('Error fetching products:', error);
+            });
+        
+        // After updating the element list, bind the quantity change events
+        bindQuantityInputEvents();
+    });
+
+    // Initial binding of events after DOM content is fully loaded
+    bindCommentToggleEvents();
+    bindQuantityInputEvents();
+});
+
+// Function to bind toggle events to comment buttons
+function bindCommentToggleEvents() {
+    const commentButtons = document.querySelectorAll('.toggle-comment');
+
+    commentButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute("data-product-id");
+            const target = document.querySelector(`textarea[data-product-id='${productId}']`);
+            if (target) {
+                target.style.display = (target.style.display === "none" || target.style.display === "") ? "block" : "none";
+            }
+        });
+    });
+}
+
+// Function to track input changes and update productDataCache10
+function bindQuantityInputEvents() {
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('input', function () {
+            const productId = this.dataset.productId;
+            if (!productDataCache10[productId]) {
+                productDataCache10[productId] = {};
+            }
+            productDataCache10[productId].quantity = this.value;
+        });
+    });
+}
+
 
 const productDataCache11 = {};
 
+// Bind the search input event
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('productSearch11').addEventListener('input', function() {
+        const query = this.value;
+        fetch(`{% url 'search_productsservice' checklist.id %}?query=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                const productListContainer = document.querySelector('.modal-body .row.gy-3.rttttttttttt');
+                productListContainer.innerHTML = ''; // Clear existing entries
 
-document.getElementById('productSearch11').addEventListener('input', function() {
-    const query = this.value;
-    fetch(`{% url 'search_productsservice' checklist.id %}?query=${query}`)
-        .then(response => response.json())
-        .then(data => {
-            const productListContainer = document.querySelector('.modal-body .row.gy-3.rttttttttttt'); // Target the product list inside the modal
-            productListContainer.innerHTML = ''; // Clear existing entries
+                data.products.forEach(product => {
+                    // Use cached values if they exist, otherwise use the server response
+                    const cachedQuantity = productDataCache11[product.id]?.quantity || product.checklist_quantity || 0;
+                    const cachedComment = productDataCache11[product.id]?.comment || product.commentaire || '';
 
-            data.products.forEach(product => {
-                // Use cached values if they exist, otherwise use the server response
-                const cachedQuantity = productDataCache11[product.id]?.quantity || product.checklist_quantity || 0;
-                const cachedComment = productDataCache11[product.id]?.comment || product.commentaire || '';
+                    const productHTML = `
+                        <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                            <div class="product-info d-flex align-items-center">
+                                <h6 class="product-name mb-0 me-3">${product.name}
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                </h6>
+                            </div>
 
-                const productHTML = `
-                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
-                        <div class="product-info d-flex align-items-center">
-                            <h6 class="product-name mb-0 me-3">${product.name}
-                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
-                            </h6>
+                            <input type="hidden" name="product_ids[]" value="${product.id}">
+
+                            <div class="form-group d-flex align-items-center me-2">
+                                <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                                <input type="number" class="form-control text-center quantity-input"
+                                       id="quantity-${product.id}" name="quantities[]"
+                                       min="0" value="${cachedQuantity}" required
+                                       data-product-id="${product.id}">
+                            </div>
+
+                            <div class="form-group">
+                                <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="${product.id}">
+                                    <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
+                                </button>
+                                <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
+                                        name="commentaires[]" placeholder="Add your comment"
+                                        style="display: none;" data-product-id="${product.id}">${cachedComment}</textarea>
+                            </div>
                         </div>
-
-                        <input type="hidden" name="product_ids[]" value="${product.id}">
-
-                        <div class="form-group d-flex align-items-center me-2">
-                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
-                            <input type="number" class="form-control text-center quantity-input"
-                                   id="quantity-${product.id}" name="quantities[]"
-                                   min="0" value="${cachedQuantity}" required
-                                   data-product-id="${product.id}">
-                        </div>
-
-                        <div class="form-group">
-                            <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-${product.id}">
-                                <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
-                            </button>
-                            <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                    style="display: none;">${cachedComment}</textarea>
-                        </div>
-                    </div>
-                `;
-                productListContainer.insertAdjacentHTML('beforeend', productHTML);
-            });
-
-            // Attach event listeners to track input changes
-            document.querySelectorAll('.quantity-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache11[productId]) {
-                        productDataCache11[productId] = {};
-                    }
-                    productDataCache11[productId].quantity = this.value;
+                    `;
+                    productListContainer.insertAdjacentHTML('beforeend', productHTML);
                 });
+
+                // Bind event listeners to the newly added elements
+                bindCommentToggleEvents();
+            })
+            .catch(error => {
+                console.error('Error fetching products:', error);
             });
-
-            document.querySelectorAll('.toggle-comment').forEach(button => {
-    button.addEventListener('click', function () {
-        const targetId = this.getAttribute('data-target'); // Get the target textarea ID
-        const commentTextarea = document.querySelector(targetId);
-
-        if (commentTextarea) {
-            // Toggle visibility
-            if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
-                commentTextarea.style.display = 'block';
-                this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
-            } else {
-                commentTextarea.style.display = 'none';
-                this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
-            }
-        }
+        
+        // After updating the element list, bind the quantity change events
+        bindQuantityInputEvents();
     });
+
+    // Initial binding of events after DOM content is fully loaded
+    bindCommentToggleEvents();
+    bindQuantityInputEvents();
 });
 
-        })
-        .catch(error => {
-            console.error('Error fetching products:', error); // Log errors if any
+// Function to bind toggle events to comment buttons
+function bindCommentToggleEvents() {
+    const commentButtons = document.querySelectorAll('.toggle-comment');
+
+    commentButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute("data-product-id");
+            const target = document.querySelector(`textarea[data-product-id='${productId}']`);
+            if (target) {
+                target.style.display = (target.style.display === "none" || target.style.display === "") ? "block" : "none";
+            }
         });
-});
+    });
+}
+
+// Function to track input changes and update productDataCache10
+function bindQuantityInputEvents() {
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('input', function () {
+            const productId = this.dataset.productId;
+            if (!productDataCache11[productId]) {
+                productDataCache11[productId] = {};
+            }
+            productDataCache11[productId].quantity = this.value;
+        });
+    });
+}
+
 
 const productDataCache5 = {};
 
+// Bind the search input event
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('productSearch5').addEventListener('input', function() {
+        const query = this.value;
+        fetch(`{% url 'search_productsdivers' checklist.id %}?query=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                const productListContainer = document.querySelector('.modal-body .row.gy-3.rttttt');
+                productListContainer.innerHTML = ''; // Clear existing entries
 
-document.getElementById('productSearch5').addEventListener('input', function() {
-    const query = this.value;
-    fetch(`{% url 'search_productsdivers' checklist.id %}?query=${query}`)
-        .then(response => response.json())
-        .then(data => {
-            const productListContainer = document.querySelector('.modal-body .row.gy-3.rttttt'); // Target the product list inside the modal
-            productListContainer.innerHTML = ''; // Clear existing entries
+                data.products.forEach(product => {
+                    // Use cached values if they exist, otherwise use the server response
+                    const cachedQuantity = productDataCache5[product.id]?.quantity || product.checklist_quantity || 0;
+                    const cachedComment = productDataCache5[product.id]?.comment || product.commentaire || '';
 
-            data.products.forEach(product => {
-                // Use cached values if they exist, otherwise use the server response
-                const cachedQuantity = productDataCache5[product.id]?.quantity || product.checklist_quantity || 0;
-                const cachedComment = productDataCache5[product.id]?.comment || product.commentaire || '';
+                    const productHTML = `
+                        <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                            <div class="product-info d-flex align-items-center">
+                                <h6 class="product-name mb-0 me-3">${product.name}
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                </h6>
+                            </div>
 
-                const productHTML = `
-                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
-                        <div class="product-info d-flex align-items-center">
-                            <h6 class="product-name mb-0 me-3">${product.name}
-                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
-                            </h6>
+                            <input type="hidden" name="product_ids[]" value="${product.id}">
+
+                            <div class="form-group d-flex align-items-center me-2">
+                                <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                                <input type="number" class="form-control text-center quantity-input"
+                                       id="quantity-${product.id}" name="quantities[]"
+                                       min="0" value="${cachedQuantity}" required
+                                       data-product-id="${product.id}">
+                            </div>
+
+                            <div class="form-group">
+                                <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="${product.id}">
+                                    <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
+                                </button>
+                                <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
+                                        name="commentaires[]" placeholder="Add your comment"
+                                        style="display: none;" data-product-id="${product.id}">${cachedComment}</textarea>
+                            </div>
                         </div>
-
-                        <input type="hidden" name="product_ids[]" value="${product.id}">
-
-                        <div class="form-group d-flex align-items-center me-2">
-                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
-                            <input type="number" class="form-control text-center quantity-input"
-                                   id="quantity-${product.id}" name="quantities[]"
-                                   min="0" value="${cachedQuantity}" required
-                                   data-product-id="${product.id}">
-                        </div>
-
-                        <div class="form-group">
-                            <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-${product.id}">
-                                <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
-                            </button>
-                            <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                    style="display: none;">${cachedComment}</textarea>
-                        </div>
-                    </div>
-                `;
-                productListContainer.insertAdjacentHTML('beforeend', productHTML);
-            });
-
-            // Attach event listeners to track input changes
-            document.querySelectorAll('.quantity-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache5[productId]) {
-                        productDataCache5[productId] = {};
-                    }
-                    productDataCache5[productId].quantity = this.value;
+                    `;
+                    productListContainer.insertAdjacentHTML('beforeend', productHTML);
                 });
+
+                // Bind event listeners to the newly added elements
+                bindCommentToggleEvents();
+            })
+            .catch(error => {
+                console.error('Error fetching products:', error);
             });
-
-            document.querySelectorAll('.toggle-comment').forEach(button => {
-    button.addEventListener('click', function () {
-        const targetId = this.getAttribute('data-target'); // Get the target textarea ID
-        const commentTextarea = document.querySelector(targetId);
-
-        if (commentTextarea) {
-            // Toggle visibility
-            if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
-                commentTextarea.style.display = 'block';
-                this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
-            } else {
-                commentTextarea.style.display = 'none';
-                this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
-            }
-        }
+        
+        // After updating the element list, bind the quantity change events
+        bindQuantityInputEvents();
     });
+
+    // Initial binding of events after DOM content is fully loaded
+    bindCommentToggleEvents();
+    bindQuantityInputEvents();
 });
 
-        })
-        .catch(error => {
-            console.error('Error fetching products:', error); // Log errors if any
+// Function to bind toggle events to comment buttons
+function bindCommentToggleEvents() {
+    const commentButtons = document.querySelectorAll('.toggle-comment');
+
+    commentButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute("data-product-id");
+            const target = document.querySelector(`textarea[data-product-id='${productId}']`);
+            if (target) {
+                target.style.display = (target.style.display === "none" || target.style.display === "") ? "block" : "none";
+            }
         });
-});
+    });
+}
+
+// Function to track input changes and update productDataCache10
+function bindQuantityInputEvents() {
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('input', function () {
+            const productId = this.dataset.productId;
+            if (!productDataCache5[productId]) {
+                productDataCache5[productId] = {};
+            }
+            productDataCache5[productId].quantity = this.value;
+        });
+    });
+}
 
 const productDataCache12 = {};
 
+// Bind the search input event
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('productSearch12').addEventListener('input', function() {
+        const query = this.value;
+        fetch(`{% url 'search_productsalcoolfort' checklist.id %}?query=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                const productListContainer = document.querySelector('.modal-body .row.gy-3.rtttttttttttt');
+                productListContainer.innerHTML = ''; // Clear existing entries
 
-document.getElementById('productSearch12').addEventListener('input', function() {
-    const query = this.value;
-    fetch(`{% url 'search_productsalcoolfort' checklist.id %}?query=${query}`)
-        .then(response => response.json())
-        .then(data => {
-            const productListContainer = document.querySelector('.modal-body .row.gy-3.rtttttttttttt'); // Target the product list inside the modal
-            productListContainer.innerHTML = ''; // Clear existing entries
+                data.products.forEach(product => {
+                    // Use cached values if they exist, otherwise use the server response
+                    const cachedQuantity = productDataCache12[product.id]?.quantity || product.checklist_quantity || 0;
+                    const cachedComment = productDataCache12[product.id]?.comment || product.commentaire || '';
 
-            data.products.forEach(product => {
-                // Use cached values if they exist, otherwise use the server response
-                const cachedQuantity = productDataCache12[product.id]?.quantity || product.checklist_quantity || 0;
-                const cachedComment = productDataCache12[product.id]?.comment || product.commentaire || '';
+                    const productHTML = `
+                        <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                            <div class="product-info d-flex align-items-center">
+                                <h6 class="product-name mb-0 me-3">${product.name}
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                </h6>
+                            </div>
 
-                const productHTML = `
-                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
-                        <div class="product-info d-flex align-items-center">
-                            <h6 class="product-name mb-0 me-3">${product.name}
-                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
-                            </h6>
+                            <input type="hidden" name="product_ids[]" value="${product.id}">
+
+                            <div class="form-group d-flex align-items-center me-2">
+                                <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                                <input type="number" class="form-control text-center quantity-input"
+                                       id="quantity-${product.id}" name="quantities[]"
+                                       min="0" value="${cachedQuantity}" required
+                                       data-product-id="${product.id}">
+                            </div>
+
+                            <div class="form-group">
+                                <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="${product.id}">
+                                    <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
+                                </button>
+                                <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
+                                        name="commentaires[]" placeholder="Add your comment"
+                                        style="display: none;" data-product-id="${product.id}">${cachedComment}</textarea>
+                            </div>
                         </div>
-
-                        <input type="hidden" name="product_ids[]" value="${product.id}">
-
-                        <div class="form-group d-flex align-items-center me-2">
-                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
-                            <input type="number" class="form-control text-center quantity-input"
-                                   id="quantity-${product.id}" name="quantities[]"
-                                   min="0" value="${cachedQuantity}" required
-                                   data-product-id="${product.id}">
-                        </div>
-
-                        <div class="form-group">
-                            <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-${product.id}">
-                                <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
-                            </button>
-                            <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                    style="display: none;">${cachedComment}</textarea>
-                        </div>
-                    </div>
-                `;
-                productListContainer.insertAdjacentHTML('beforeend', productHTML);
-            });
-
-            // Attach event listeners to track input changes
-            document.querySelectorAll('.quantity-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache12[productId]) {
-                        productDataCache12[productId] = {};
-                    }
-                    productDataCache12[productId].quantity = this.value;
+                    `;
+                    productListContainer.insertAdjacentHTML('beforeend', productHTML);
                 });
+
+                // Bind event listeners to the newly added elements
+                bindCommentToggleEvents();
+            })
+            .catch(error => {
+                console.error('Error fetching products:', error);
             });
-
-            document.querySelectorAll('.toggle-comment').forEach(button => {
-    button.addEventListener('click', function () {
-        const targetId = this.getAttribute('data-target'); // Get the target textarea ID
-        const commentTextarea = document.querySelector(targetId);
-
-        if (commentTextarea) {
-            // Toggle visibility
-            if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
-                commentTextarea.style.display = 'block';
-                this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
-            } else {
-                commentTextarea.style.display = 'none';
-                this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
-            }
-        }
+        
+        // After updating the element list, bind the quantity change events
+        bindQuantityInputEvents();
     });
+
+    // Initial binding of events after DOM content is fully loaded
+    bindCommentToggleEvents();
+    bindQuantityInputEvents();
 });
 
-        })
-        .catch(error => {
-            console.error('Error fetching products:', error); // Log errors if any
+// Function to bind toggle events to comment buttons
+function bindCommentToggleEvents() {
+    const commentButtons = document.querySelectorAll('.toggle-comment');
+
+    commentButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute("data-product-id");
+            const target = document.querySelector(`textarea[data-product-id='${productId}']`);
+            if (target) {
+                target.style.display = (target.style.display === "none" || target.style.display === "") ? "block" : "none";
+            }
         });
-});
+    });
+}
+
+// Function to track input changes and update productDataCache10
+function bindQuantityInputEvents() {
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('input', function () {
+            const productId = this.dataset.productId;
+            if (!productDataCache12[productId]) {
+                productDataCache12[productId] = {};
+            }
+            productDataCache12[productId].quantity = this.value;
+        });
+    });
+}
+
+
 
 const productDataCache13 = {};
 
-document.getElementById('productSearch13').addEventListener('input', function() {
-    const query = this.value;
-    fetch(`{% url 'search_productsbieres' checklist.id %}?query=${query}`)
-        .then(response => response.json())
-        .then(data => {
-            const productListContainer = document.querySelector('.modal-body .row.gy-3.rttttttttttttt'); // Target the product list inside the modal
-            productListContainer.innerHTML = ''; // Clear existing entries
+// Bind the search input event
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('productSearch13').addEventListener('input', function() {
+        const query = this.value;
+        fetch(`{% url 'search_productsbieres' checklist.id %}?query=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                const productListContainer = document.querySelector('.modal-body .row.gy-3.rttttttttttttt');
+                productListContainer.innerHTML = ''; // Clear existing entries
 
-            data.products.forEach(product => {
-                // Use cached values if they exist, otherwise use the server response
-                const cachedQuantity = productDataCache13[product.id]?.quantity || product.checklist_quantity || 0;
-                const cachedComment = productDataCache13[product.id]?.comment || product.commentaire || '';
+                data.products.forEach(product => {
+                    // Use cached values if they exist, otherwise use the server response
+                    const cachedQuantity = productDataCache13[product.id]?.quantity || product.checklist_quantity || 0;
+                    const cachedComment = productDataCache13[product.id]?.comment || product.commentaire || '';
 
-                const productHTML = `
-                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
-                        <div class="product-info d-flex align-items-center">
-                            <h6 class="product-name mb-0 me-3">${product.name}
-                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
-                            </h6>
+                    const productHTML = `
+                        <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                            <div class="product-info d-flex align-items-center">
+                                <h6 class="product-name mb-0 me-3">${product.name}
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                </h6>
+                            </div>
+
+                            <input type="hidden" name="product_ids[]" value="${product.id}">
+
+                            <div class="form-group d-flex align-items-center me-2">
+                                <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                                <input type="number" class="form-control text-center quantity-input"
+                                       id="quantity-${product.id}" name="quantities[]"
+                                       min="0" value="${cachedQuantity}" required
+                                       data-product-id="${product.id}">
+                            </div>
+
+                            <div class="form-group">
+                                <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="${product.id}">
+                                    <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
+                                </button>
+                                <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
+                                        name="commentaires[]" placeholder="Add your comment"
+                                        style="display: none;" data-product-id="${product.id}">${cachedComment}</textarea>
+                            </div>
                         </div>
-
-                        <input type="hidden" name="product_ids[]" value="${product.id}">
-
-                        <div class="form-group d-flex align-items-center me-2">
-                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
-                            <input type="number" class="form-control text-center quantity-input"
-                                   id="quantity-${product.id}" name="quantities[]"
-                                   min="0" value="${cachedQuantity}" required
-                                   data-product-id="${product.id}">
-                        </div>
-
-                        <div class="form-group">
-                            <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-${product.id}">
-                                <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
-                            </button>
-                            <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                    style="display: none;">${cachedComment}</textarea>
-                        </div>
-                    </div>
-                `;
-                productListContainer.insertAdjacentHTML('beforeend', productHTML);
-            });
-
-            // Attach event listeners to track input changes
-            document.querySelectorAll('.quantity-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache13[productId]) {
-                        productDataCache13[productId] = {};
-                    }
-                    productDataCache13[productId].quantity = this.value;
+                    `;
+                    productListContainer.insertAdjacentHTML('beforeend', productHTML);
                 });
+
+                // Bind event listeners to the newly added elements
+                bindCommentToggleEvents();
+            })
+            .catch(error => {
+                console.error('Error fetching products:', error);
             });
-
-            document.querySelectorAll('.toggle-comment').forEach(button => {
-    button.addEventListener('click', function () {
-        const targetId = this.getAttribute('data-target'); // Get the target textarea ID
-        const commentTextarea = document.querySelector(targetId);
-
-        if (commentTextarea) {
-            // Toggle visibility
-            if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
-                commentTextarea.style.display = 'block';
-                this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
-            } else {
-                commentTextarea.style.display = 'none';
-                this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
-            }
-        }
+        
+        // After updating the element list, bind the quantity change events
+        bindQuantityInputEvents();
     });
+
+    // Initial binding of events after DOM content is fully loaded
+    bindCommentToggleEvents();
+    bindQuantityInputEvents();
 });
 
-        })
-        .catch(error => {
-            console.error('Error fetching products:', error); // Log errors if any
+// Function to bind toggle events to comment buttons
+function bindCommentToggleEvents() {
+    const commentButtons = document.querySelectorAll('.toggle-comment');
+
+    commentButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute("data-product-id");
+            const target = document.querySelector(`textarea[data-product-id='${productId}']`);
+            if (target) {
+                target.style.display = (target.style.display === "none" || target.style.display === "") ? "block" : "none";
+            }
         });
-});
+    });
+}
+
+// Function to track input changes and update productDataCache10
+function bindQuantityInputEvents() {
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('input', function () {
+            const productId = this.dataset.productId;
+            if (!productDataCache13[productId]) {
+                productDataCache13[productId] = {};
+            }
+            productDataCache13[productId].quantity = this.value;
+        });
+    });
+}
+
 
 
 const productDataCache14 = {};
 
-document.getElementById('productSearch14').addEventListener('input', function() {
-    const query = this.value;
-    fetch(`{% url 'search_productsvins' checklist.id %}?query=${query}`)
-        .then(response => response.json())
-        .then(data => {
-            const productListContainer = document.querySelector('.modal-body .row.gy-3.rtttttttttttttt'); // Target the product list inside the modal
-            productListContainer.innerHTML = ''; // Clear existing entries
+// Bind the search input event
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('productSearch14').addEventListener('input', function() {
+        const query = this.value;
+        fetch(`{% url 'search_productsvins' checklist.id %}?query=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                const productListContainer = document.querySelector('.modal-body .row.gy-3.rtttttttttttttt');
+                productListContainer.innerHTML = ''; // Clear existing entries
 
-            data.products.forEach(product => {
-                // Use cached values if they exist, otherwise use the server response
-                const cachedQuantity = productDataCache14[product.id]?.quantity || product.checklist_quantity || 0;
-                const cachedComment = productDataCache14[product.id]?.comment || product.commentaire || '';
+                data.products.forEach(product => {
+                    // Use cached values if they exist, otherwise use the server response
+                    const cachedQuantity = productDataCache14[product.id]?.quantity || product.checklist_quantity || 0;
+                    const cachedComment = productDataCache14[product.id]?.comment || product.commentaire || '';
 
-                const productHTML = `
-                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
-                        <div class="product-info d-flex align-items-center">
-                            <h6 class="product-name mb-0 me-3">${product.name}
-                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
-                            </h6>
+                    const productHTML = `
+                        <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                            <div class="product-info d-flex align-items-center">
+                                <h6 class="product-name mb-0 me-3">${product.name}
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                </h6>
+                            </div>
+
+                            <input type="hidden" name="product_ids[]" value="${product.id}">
+
+                            <div class="form-group d-flex align-items-center me-2">
+                                <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                                <input type="number" class="form-control text-center quantity-input"
+                                       id="quantity-${product.id}" name="quantities[]"
+                                       min="0" value="${cachedQuantity}" required
+                                       data-product-id="${product.id}">
+                            </div>
+
+                            <div class="form-group">
+                                <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="${product.id}">
+                                    <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
+                                </button>
+                                <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
+                                        name="commentaires[]" placeholder="Add your comment"
+                                        style="display: none;" data-product-id="${product.id}">${cachedComment}</textarea>
+                            </div>
                         </div>
-
-                        <input type="hidden" name="product_ids[]" value="${product.id}">
-
-                        <div class="form-group d-flex align-items-center me-2">
-                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
-                            <input type="number" class="form-control text-center quantity-input"
-                                   id="quantity-${product.id}" name="quantities[]"
-                                   min="0" value="${cachedQuantity}" required
-                                   data-product-id="${product.id}">
-                        </div>
-
-                        <div class="form-group">
-                            <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-${product.id}">
-                                <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
-                            </button>
-                            <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                    style="display: none;">${cachedComment}</textarea>
-                        </div>
-                    </div>
-                `;
-                productListContainer.insertAdjacentHTML('beforeend', productHTML);
-            });
-
-            // Attach event listeners to track input changes
-            document.querySelectorAll('.quantity-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache14[productId]) {
-                        productDataCache14[productId] = {};
-                    }
-                    productDataCache14[productId].quantity = this.value;
+                    `;
+                    productListContainer.insertAdjacentHTML('beforeend', productHTML);
                 });
+
+                // Bind event listeners to the newly added elements
+                bindCommentToggleEvents();
+            })
+            .catch(error => {
+                console.error('Error fetching products:', error);
             });
-
-            document.querySelectorAll('.toggle-comment').forEach(button => {
-    button.addEventListener('click', function () {
-        const targetId = this.getAttribute('data-target'); // Get the target textarea ID
-        const commentTextarea = document.querySelector(targetId);
-
-        if (commentTextarea) {
-            // Toggle visibility
-            if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
-                commentTextarea.style.display = 'block';
-                this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
-            } else {
-                commentTextarea.style.display = 'none';
-                this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
-            }
-        }
+        
+        // After updating the element list, bind the quantity change events
+        bindQuantityInputEvents();
     });
+
+    // Initial binding of events after DOM content is fully loaded
+    bindCommentToggleEvents();
+    bindQuantityInputEvents();
 });
 
-        })
-        .catch(error => {
-            console.error('Error fetching products:', error); // Log errors if any
+// Function to bind toggle events to comment buttons
+function bindCommentToggleEvents() {
+    const commentButtons = document.querySelectorAll('.toggle-comment');
+
+    commentButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute("data-product-id");
+            const target = document.querySelector(`textarea[data-product-id='${productId}']`);
+            if (target) {
+                target.style.display = (target.style.display === "none" || target.style.display === "") ? "block" : "none";
+            }
         });
-});
+    });
+}
+
+// Function to track input changes and update productDataCache10
+function bindQuantityInputEvents() {
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('input', function () {
+            const productId = this.dataset.productId;
+            if (!productDataCache14[productId]) {
+                productDataCache14[productId] = {};
+            }
+            productDataCache14[productId].quantity = this.value;
+        });
+    });
+}
+
 
 
 const productDataCache15 = {};
 
-document.getElementById('productSearch15').addEventListener('input', function() {
-    const query = this.value;
-    fetch(`{% url 'search_productssansalcool' checklist.id %}?query=${query}`)
-    .then(response => response.json())
-        .then(data => {
-            const productListContainer = document.querySelector('.modal-body .row.gy-3.rttttttttttttttt'); // Target the product list inside the modal
-            productListContainer.innerHTML = ''; // Clear existing entries
+// Bind the search input event
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('productSearch15').addEventListener('input', function() {
+        const query = this.value;
+        fetch(`{% url 'search_productssansalcool' checklist.id %}?query=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                const productListContainer = document.querySelector('.modal-body .row.gy-3.rttttttttttttttt');
+                productListContainer.innerHTML = ''; // Clear existing entries
 
-            data.products.forEach(product => {
-                // Use cached values if they exist, otherwise use the server response
-                const cachedQuantity = productDataCache15[product.id]?.quantity || product.checklist_quantity || 0;
-                const cachedComment = productDataCache15[product.id]?.comment || product.commentaire || '';
+                data.products.forEach(product => {
+                    // Use cached values if they exist, otherwise use the server response
+                    const cachedQuantity = productDataCache15[product.id]?.quantity || product.checklist_quantity || 0;
+                    const cachedComment = productDataCache15[product.id]?.comment || product.commentaire || '';
 
-                const productHTML = `
-                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
-                        <div class="product-info d-flex align-items-center">
-                            <h6 class="product-name mb-0 me-3">${product.name}
-                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
-                            </h6>
+                    const productHTML = `
+                        <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                            <div class="product-info d-flex align-items-center">
+                                <h6 class="product-name mb-0 me-3">${product.name}
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                </h6>
+                            </div>
+
+                            <input type="hidden" name="product_ids[]" value="${product.id}">
+
+                            <div class="form-group d-flex align-items-center me-2">
+                                <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                                <input type="number" class="form-control text-center quantity-input"
+                                       id="quantity-${product.id}" name="quantities[]"
+                                       min="0" value="${cachedQuantity}" required
+                                       data-product-id="${product.id}">
+                            </div>
+
+                            <div class="form-group">
+                                <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="${product.id}">
+                                    <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
+                                </button>
+                                <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
+                                        name="commentaires[]" placeholder="Add your comment"
+                                        style="display: none;" data-product-id="${product.id}">${cachedComment}</textarea>
+                            </div>
                         </div>
-
-                        <input type="hidden" name="product_ids[]" value="${product.id}">
-
-                        <div class="form-group d-flex align-items-center me-2">
-                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
-                            <input type="number" class="form-control text-center quantity-input"
-                                   id="quantity-${product.id}" name="quantities[]"
-                                   min="0" value="${cachedQuantity}" required
-                                   data-product-id="${product.id}">
-                        </div>
-
-                        <div class="form-group">
-                            <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-${product.id}">
-                                <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
-                            </button>
-                            <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                    style="display: none;">${cachedComment}</textarea>
-                        </div>
-                    </div>
-                `;
-                productListContainer.insertAdjacentHTML('beforeend', productHTML);
-            });
-
-            // Attach event listeners to track input changes
-            document.querySelectorAll('.quantity-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache15[productId]) {
-                        productDataCache15[productId] = {};
-                    }
-                    productDataCache15[productId].quantity = this.value;
+                    `;
+                    productListContainer.insertAdjacentHTML('beforeend', productHTML);
                 });
+
+                // Bind event listeners to the newly added elements
+                bindCommentToggleEvents();
+            })
+            .catch(error => {
+                console.error('Error fetching products:', error);
             });
-
-            document.querySelectorAll('.toggle-comment').forEach(button => {
-    button.addEventListener('click', function () {
-        const targetId = this.getAttribute('data-target'); // Get the target textarea ID
-        const commentTextarea = document.querySelector(targetId);
-
-        if (commentTextarea) {
-            // Toggle visibility
-            if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
-                commentTextarea.style.display = 'block';
-                this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
-            } else {
-                commentTextarea.style.display = 'none';
-                this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
-            }
-        }
+        
+        // After updating the element list, bind the quantity change events
+        bindQuantityInputEvents();
     });
+
+    // Initial binding of events after DOM content is fully loaded
+    bindCommentToggleEvents();
+    bindQuantityInputEvents();
 });
 
-        })
-        .catch(error => {
-            console.error('Error fetching products:', error); // Log errors if any
+// Function to bind toggle events to comment buttons
+function bindCommentToggleEvents() {
+    const commentButtons = document.querySelectorAll('.toggle-comment');
+
+    commentButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute("data-product-id");
+            const target = document.querySelector(`textarea[data-product-id='${productId}']`);
+            if (target) {
+                target.style.display = (target.style.display === "none" || target.style.display === "") ? "block" : "none";
+            }
         });
-});
+    });
+}
+
+// Function to track input changes and update productDataCache10
+function bindQuantityInputEvents() {
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('input', function () {
+            const productId = this.dataset.productId;
+            if (!productDataCache15[productId]) {
+                productDataCache15[productId] = {};
+            }
+            productDataCache15[productId].quantity = this.value;
+        });
+    });
+}
+
 
 const productDataCache16 = {};
 
-document.getElementById('productSearch16').addEventListener('input', function() {
-    const query = this.value;
-    fetch(`{% url 'search_productscfcdn' checklist.id %}?query=${query}`)
-    .then(response => response.json())
-        .then(data => {
-            const productListContainer = document.querySelector('.modal-body .row.gy-3.rtttttttttttttttt'); // Target the product list inside the modal
-            productListContainer.innerHTML = ''; // Clear existing entries
+// Bind the search input event
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('productSearch16').addEventListener('input', function() {
+        const query = this.value;
+        fetch(`{% url 'search_productscfcdn' checklist.id %}?query=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                const productListContainer = document.querySelector('.modal-body .row.gy-3.rtttttttttttttttt');
+                productListContainer.innerHTML = ''; // Clear existing entries
 
-            data.products.forEach(product => {
-                // Use cached values if they exist, otherwise use the server response
-                const cachedQuantity = productDataCache15[product.id]?.quantity || product.checklist_quantity || 0;
-                const cachedComment = productDataCache15[product.id]?.comment || product.commentaire || '';
+                data.products.forEach(product => {
+                    // Use cached values if they exist, otherwise use the server response
+                    const cachedQuantity = productDataCache16[product.id]?.quantity || product.checklist_quantity || 0;
+                    const cachedComment = productDataCache16[product.id]?.comment || product.commentaire || '';
 
-                const productHTML = `
-                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
-                        <div class="product-info d-flex align-items-center">
-                            <h6 class="product-name mb-0 me-3">${product.name}
-                                <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
-                            </h6>
+                    const productHTML = `
+                        <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                            <div class="product-info d-flex align-items-center">
+                                <h6 class="product-name mb-0 me-3">${product.name}
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                </h6>
+                            </div>
+
+                            <input type="hidden" name="product_ids[]" value="${product.id}">
+
+                            <div class="form-group d-flex align-items-center me-2">
+                                <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
+                                <input type="number" class="form-control text-center quantity-input"
+                                       id="quantity-${product.id}" name="quantities[]"
+                                       min="0" value="${cachedQuantity}" required
+                                       data-product-id="${product.id}">
+                            </div>
+
+                            <div class="form-group">
+                                <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="${product.id}">
+                                    <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
+                                </button>
+                                <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
+                                        name="commentaires[]" placeholder="Add your comment"
+                                        style="display: none;" data-product-id="${product.id}">${cachedComment}</textarea>
+                            </div>
                         </div>
-
-                        <input type="hidden" name="product_ids[]" value="${product.id}">
-
-                        <div class="form-group d-flex align-items-center me-2">
-                            <label for="quantity-${product.id}" class="form-label me-2">Quantité:</label>
-                            <input type="number" class="form-control text-center quantity-input"
-                                   id="quantity-${product.id}" name="quantities[]"
-                                   min="0" value="${cachedQuantity}" required
-                                   data-product-id="${product.id}">
-                        </div>
-
-                        <div class="form-group">
-                            <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-${product.id}">
-                                <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
-                            </button>
-                            <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                    name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                    style="display: none;">${cachedComment}</textarea>
-                        </div>
-                    </div>
-                `;
-                productListContainer.insertAdjacentHTML('beforeend', productHTML);
-            });
-
-            // Attach event listeners to track input changes
-            document.querySelectorAll('.quantity-input').forEach(input => {
-                input.addEventListener('input', function () {
-                    const productId = this.dataset.productId;
-                    if (!productDataCache15[productId]) {
-                        productDataCache15[productId] = {};
-                    }
-                    productDataCache15[productId].quantity = this.value;
+                    `;
+                    productListContainer.insertAdjacentHTML('beforeend', productHTML);
                 });
+
+                // Bind event listeners to the newly added elements
+                bindCommentToggleEvents();
+            })
+            .catch(error => {
+                console.error('Error fetching products:', error);
             });
-
-            document.querySelectorAll('.toggle-comment').forEach(button => {
-    button.addEventListener('click', function () {
-        const targetId = this.getAttribute('data-target'); // Get the target textarea ID
-        const commentTextarea = document.querySelector(targetId);
-
-        if (commentTextarea) {
-            // Toggle visibility
-            if (commentTextarea.style.display === 'none' || commentTextarea.style.display === '') {
-                commentTextarea.style.display = 'block';
-                this.innerHTML = '<i class="fa fa-times"></i>'; // Change button icon to indicate closing
-            } else {
-                commentTextarea.style.display = 'none';
-                this.innerHTML = '<i class="fa fa-comment-dots"></i>'; // Reset button icon
-            }
-        }
+        
+        // After updating the element list, bind the quantity change events
+        bindQuantityInputEvents();
     });
+
+    // Initial binding of events after DOM content is fully loaded
+    bindCommentToggleEvents();
+    bindQuantityInputEvents();
 });
 
-        })
-        .catch(error => {
-            console.error('Error fetching products:', error); // Log errors if any
+// Function to bind toggle events to comment buttons
+function bindCommentToggleEvents() {
+    const commentButtons = document.querySelectorAll('.toggle-comment');
+
+    commentButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute("data-product-id");
+            const target = document.querySelector(`textarea[data-product-id='${productId}']`);
+            if (target) {
+                target.style.display = (target.style.display === "none" || target.style.display === "") ? "block" : "none";
+            }
         });
-});
+    });
+}
 
-    $(document).ready(function() {
+// Function to track input changes and update productDataCache10
+function bindQuantityInputEvents() {
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('input', function () {
+            const productId = this.dataset.productId;
+            if (!productDataCache16[productId]) {
+                productDataCache16[productId] = {};
+            }
+            productDataCache16[productId].quantity = this.value;
+        });
+    });
+}
+
+
+    
+$(document).ready(function() {
     // Delete button functionality
     $('.delete-btn').on('click', function(event) {
         event.preventDefault();

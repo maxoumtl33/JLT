@@ -136,3 +136,12 @@ def add_class(field, css_class):
 
 
 
+@register.filter
+def strip_zero_decimal(value):
+    try:
+        value = float(value)
+        if value.is_integer():
+            return int(value)
+        return value
+    except (ValueError, TypeError):
+        return value

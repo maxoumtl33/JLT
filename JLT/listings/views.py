@@ -704,7 +704,7 @@ def voir_checklist(request):
         selected_datee = tomorrow  # Default to today if no date is selected
 
     checklist_item_totals = (
-        ChecklistItem.objects.filter(checklist__date=selected_datee)
+        ChecklistItem.objects.filter(checklist__date=selected_datee, checklist__is_active=True)
         .values('product__name')  # Assuming `Product` has the `name` field
         .annotate(total_quantity=Sum('quantity'))
         .filter(total_quantity__gt=0)
@@ -2859,15 +2859,15 @@ def dashboard_stats(request):
 
 
     # Fetch statistics
-    total_livraisons = Livraison.objects.filter(date__range=[start_date, end_date]).count()
+    total_livraisons = Livraison.objects.filter(date__range=[start_date, end_date], recuperation=False).count()
     total_recuperations = Livraison.objects.filter(date__range=[start_date, end_date], recuperation=True).count()
-    total_checklists = Checklist.objects.filter(date__range=[start_date, end_date]).count()
+    total_checklists = Checklist.objects.filter(date__range=[start_date, end_date], is_active=True).count()
     # Calculate total convives for livraisons in the selected date range
     total_convives = Livraison.objects.filter(date__range=[start_date, end_date]).aggregate(total_convives=Sum('convives'))['total_convives'] or 0
     
 
     # Prepare counts of checklist items by status
-    checklist_stats = ChecklistItem.objects.filter(checklist__date__range=[start_date, end_date]).values('status').annotate(total=Count('id'))
+    checklist_stats = ChecklistItem.objects.filter(checklist__date__range=[start_date, end_date], checklist__is_active=True).values('status').annotate(total=Count('id'))
     status_totals = {status: 0 for status, _ in ChecklistItem.STATUS_CHOICES}
     for stat in checklist_stats:
         status_totals[stat['status']] = stat['total']
@@ -2886,10 +2886,10 @@ def dashboard_stats(request):
             # Calculate the total quantity for this checklist item within the selected period
             selected_item_total = ChecklistItem.objects.filter(
                 product=selected_item.product,
-                checklist__date__range=[start_date, end_date]
+                checklist__date__range=[start_date, end_date], checklist__is_active=True
             ).aggregate(total_quantity=Sum('quantity'))['total_quantity'] or 0
 
-    checklist_items_data = ChecklistItem.objects.filter(checklist__date__range=[start_date, end_date], quantity__gt=0) \
+    checklist_items_data = ChecklistItem.objects.filter(checklist__date__range=[start_date, end_date], quantity__gt=0, checklist__is_active=True) \
             .values('product__name') \
             .annotate(total_quantity=Sum('quantity'))
     
