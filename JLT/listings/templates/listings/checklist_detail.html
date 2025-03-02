@@ -441,7 +441,7 @@
                 </li>
                 <li class="nav-item">
                     <a href="{% url 'creerchecklist' %}" class="nav__link" style="margin-left: 20px;">
-                        <i class="fa-solid fa-clipboard-list"></i><span>Liste</span>
+                        <i class="fa-solid fa-clipboard-list"></i><span>Checklists</span>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -546,8 +546,35 @@
         </div>
     </div>
 {% else %}
-<h2 style="text-align: center; font-size: 1.8em; margin-bottom: 20px;">Liste des produits disponibles par catégories</h2>
+<h2 style="text-align: center; font-size: 1.8em; margin-bottom: 20px;">
+    Liste des produits disponibles par catégories 
+    <i class="fas fa-info-circle" style="cursor: pointer; margin-left: 10px;" data-bs-toggle="modal" data-bs-target="#infoModal"></i>
+</h2>
 <hr>
+<!-- Information Modal -->
+<div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="infoModalLabel">Informations sur les produits</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Voici quelques informations importantes concernant les produits disponibles :</p>
+                <ul>
+                    <li>-> Les produits sont divisés en différentes catégories pour une meilleure organisation.</li>
+                    <br>
+                    <li>-> Cliquez sur chaque catégorie pour explorer les produits disponibles.</li>
+                    <br>
+                    <li>-> Assurez-vous de vérifier les quantités et les commentaires associés à chaque produit. Ajouter nt ou NT dans les commentaires si c'est un produit commandé par Nouvelle tablée.</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; padding: 20px;">
     <!-- Example Card Layout -->
@@ -1804,7 +1831,7 @@
 
                     <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
                         {% csrf_token %}
-                        <div class="row gy-3">
+                        <div class="row gy-3 rgh">
                             {% for product in products %}
                             {% if product.is_base %}
                                 <div class="col-12 d-flex align-items-center justify-content-between product-item">
@@ -3481,6 +3508,17 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 
+// Helper function to format quantity
+function formatQuantity(quantity) {
+    // Convert the quantity to a float
+    const numQuantity = parseFloat(quantity);
+    
+    // Return formatted quantity
+    // If the quantity is an integer, return without decimals
+    // Otherwise return with decimal places intact
+    return Number.isInteger(numQuantity) ? numQuantity.toFixed(0) : numQuantity.toString();
+}
+
 
 const checklistItemComments = {{ checklist_item_comments|safe }};
 
@@ -3494,19 +3532,19 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(`{% url 'search_productsbase' checklist.id %}?query=${query}`)
             .then(response => response.json())
             .then(data => {
-                const productListContainer = document.querySelector('.modal-body .row.gy-3');
+                const productListContainer = document.querySelector('.modal-body .row.gy-3.rgh');
                 productListContainer.innerHTML = ''; // Clear existing entries
 
                 data.products.forEach(product => {
                     // Use cached values if they exist, otherwise use the server response
-                    const cachedQuantity = productDataCache[product.id]?.quantity || product.checklist_quantity || 0;
+                    const cachedQuantity = formatQuantity(productDataCache[product.id]?.quantity || product.checklist_quantity || 0);
                     const cachedComment = productDataCache[product.id]?.comment || product.commentaire || '';
 
                     const productHTML = `
                         <div class="col-12 d-flex align-items-center justify-content-between product-item">
                             <div class="product-info d-flex align-items-center">
                                 <h6 class="product-name mb-0 me-3">${product.name}
-                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${formatQuantity(product.quantity)})</strong>
                                 </h6>
                             </div>
 
@@ -3525,7 +3563,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
                                 </button>
                                 <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                        name="commentaires[]" placeholder="Add your comment"
+                                        name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                         style="display: none;" data-product-id="${product.id}">${cachedComment}</textarea>
                             </div>
                         </div>
@@ -3599,7 +3637,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="col-12 d-flex align-items-center justify-content-between product-item">
                             <div class="product-info d-flex align-items-center">
                                 <h6 class="product-name mb-0 me-3">${product.name}
-                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${formatQuantity(product.quantity)})</strong>
                                 </h6>
                             </div>
 
@@ -3693,7 +3731,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="col-12 d-flex align-items-center justify-content-between product-item">
                             <div class="product-info d-flex align-items-center">
                                 <h6 class="product-name mb-0 me-3">${product.name}
-                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${formatQuantity(product.quantity)})</strong>
                                 </h6>
                             </div>
 
@@ -3786,7 +3824,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="col-12 d-flex align-items-center justify-content-between product-item">
                             <div class="product-info d-flex align-items-center">
                                 <h6 class="product-name mb-0 me-3">${product.name}
-                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${formatQuantity(product.quantity)})</strong>
                                 </h6>
                             </div>
 
@@ -3879,7 +3917,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="col-12 d-flex align-items-center justify-content-between product-item">
                             <div class="product-info d-flex align-items-center">
                                 <h6 class="product-name mb-0 me-3">${product.name}
-                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${formatQuantity(product.quantity)})</strong>
                                 </h6>
                             </div>
 
@@ -3972,7 +4010,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="col-12 d-flex align-items-center justify-content-between product-item">
                             <div class="product-info d-flex align-items-center">
                                 <h6 class="product-name mb-0 me-3">${product.name}
-                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${formatQuantity(product.quantity)})</strong>
                                 </h6>
                             </div>
 
@@ -4065,7 +4103,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="col-12 d-flex align-items-center justify-content-between product-item">
                             <div class="product-info d-flex align-items-center">
                                 <h6 class="product-name mb-0 me-3">${product.name}
-                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${formatQuantity(product.quantity)})</strong>
                                 </h6>
                             </div>
 
@@ -4158,7 +4196,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="col-12 d-flex align-items-center justify-content-between product-item">
                             <div class="product-info d-flex align-items-center">
                                 <h6 class="product-name mb-0 me-3">${product.name}
-                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${formatQuantity(product.quantity)})</strong>
                                 </h6>
                             </div>
 
@@ -4251,7 +4289,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="col-12 d-flex align-items-center justify-content-between product-item">
                             <div class="product-info d-flex align-items-center">
                                 <h6 class="product-name mb-0 me-3">${product.name}
-                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${formatQuantity(product.quantity)})</strong>
                                 </h6>
                             </div>
 
@@ -4345,7 +4383,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="col-12 d-flex align-items-center justify-content-between product-item">
                             <div class="product-info d-flex align-items-center">
                                 <h6 class="product-name mb-0 me-3">${product.name}
-                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${formatQuantity(product.quantity)})</strong>
                                 </h6>
                             </div>
 
@@ -4438,7 +4476,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="col-12 d-flex align-items-center justify-content-between product-item">
                             <div class="product-info d-flex align-items-center">
                                 <h6 class="product-name mb-0 me-3">${product.name}
-                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${formatQuantity(product.quantity)})</strong>
                                 </h6>
                             </div>
 
@@ -4531,7 +4569,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="col-12 d-flex align-items-center justify-content-between product-item">
                             <div class="product-info d-flex align-items-center">
                                 <h6 class="product-name mb-0 me-3">${product.name}
-                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${formatQuantity(product.quantity)})</strong>
                                 </h6>
                             </div>
 
@@ -4623,7 +4661,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="col-12 d-flex align-items-center justify-content-between product-item">
                             <div class="product-info d-flex align-items-center">
                                 <h6 class="product-name mb-0 me-3">${product.name}
-                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${formatQuantity(product.quantity)})</strong>
                                 </h6>
                             </div>
 
@@ -4717,7 +4755,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="col-12 d-flex align-items-center justify-content-between product-item">
                             <div class="product-info d-flex align-items-center">
                                 <h6 class="product-name mb-0 me-3">${product.name}
-                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${formatQuantity(product.quantity)})</strong>
                                 </h6>
                             </div>
 
@@ -4811,7 +4849,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="col-12 d-flex align-items-center justify-content-between product-item">
                             <div class="product-info d-flex align-items-center">
                                 <h6 class="product-name mb-0 me-3">${product.name}
-                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${formatQuantity(product.quantity)})</strong>
                                 </h6>
                             </div>
 
@@ -4905,7 +4943,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="col-12 d-flex align-items-center justify-content-between product-item">
                             <div class="product-info d-flex align-items-center">
                                 <h6 class="product-name mb-0 me-3">${product.name}
-                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${formatQuantity(product.quantity)})</strong>
                                 </h6>
                             </div>
 
@@ -4924,7 +4962,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
                                 </button>
                                 <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                        name="commentaires[]" placeholder="Add your comment"
+                                        name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                         style="display: none;" data-product-id="${product.id}">${cachedComment}</textarea>
                             </div>
                         </div>
@@ -4998,7 +5036,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="col-12 d-flex align-items-center justify-content-between product-item">
                             <div class="product-info d-flex align-items-center">
                                 <h6 class="product-name mb-0 me-3">${product.name}
-                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${product.quantity})</strong>
+                                    <strong style="color: ${product.quantity <= 0 ? 'red' : 'green'};">(${formatQuantity(product.quantity)})</strong>
                                 </h6>
                             </div>
 
@@ -5017,7 +5055,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <i class="fa fa-comment-dots"></i> <!-- Icon for writing a comment -->
                                 </button>
                                 <textarea id="comment-${product.id}" class="form-control mt-2 comment-textarea"
-                                        name="commentaires[]" placeholder="Add your comment"
+                                        name="commentaires[]" placeholder="nt pour nouvelle tablée"
                                         style="display: none;" data-product-id="${product.id}">${cachedComment}</textarea>
                             </div>
                         </div>

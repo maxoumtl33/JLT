@@ -74,11 +74,7 @@
     <h1 class="text-center mb-4">Livraisons</h1>
 
     <div class="text-center mb-4 d-flex justify-content-center align-items-center">
-        <div class="geocode mx-2">
-            <form id="geocode-form" method="get" action="{% url 'geocode_all_livraisons' %}">
-                <button type="button" class="btn btn-primary" onclick="triggerGeocode()">Geocode</button>
-            </form>
-        </div>
+        
     
         <div class="xlsx mx-2">
             <!-- Trigger Button -->
@@ -106,7 +102,11 @@
 </div>
 
         </div>
-    
+        <div class="geocode mx-2">
+            <form id="geocode-form" method="get" action="{% url 'geocode_all_livraisons' %}">
+                <button type="button" class="btn btn-primary" onclick="triggerGeocode()">Geocode</button>
+            </form>
+        </div>
         <div class="journee mx-2">
             <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
             <!-- Create Journee Button and Date Picker -->
@@ -149,11 +149,18 @@
 
     <div id="message" style="display: none; color: green;"></div>
 
+    <br>
+    <br>
+    <br>
+    <hr>
+<br>
     <div class="text-center mb-4">
         <label for="date-picker"><strong>Sélectionnez une date :</strong></label>
         <input type="date" id="date-picker" class="form-control" value="{{ selected_date|default:'' }}">
     </div>
-
+    <br>
+<hr>
+<br>
     {% for periode_data in livraisons_par_periode %}
     {% with periode=periode_data.0 livraisons=periode_data.1 map_url=periode_data.2 %}
         <div class="card mb-4">
@@ -296,30 +303,28 @@ document.addEventListener("DOMContentLoaded", function() {
     async function createJourneeFromSelectedDate() {
         const selectedDate = document.getElementById("selected-date").value;
         
+        // Check if a date is selected
         if (!selectedDate) {
-            console.error("No date selected.");
-            return; // Exit if no date is selected
+            alert("Veuillez sélectionner une date."); // Alert message instead of console error
+            return;
         }
 
-        // Ensure selectedDate is valid
-        const dateParts = selectedDate.split('-'); // Split the date string into [year, month, day]
-        const date = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2])); // Create a date object in UTC
+        // Create a Date object
+        const [year, month, day] = selectedDate.split('-');
+        const date = new Date(Date.UTC(year, month - 1, day)); // Create date object in UTC
 
-        // Adjust to the correct day by setting the time to 12:00:00 UTC
-        date.setUTCHours(12, 0, 0, 0);
-
-        // Format the name of the day in French (do not capitalize the month)
+        // Format the date for display
         const name = date.toLocaleDateString('fr-FR', {
             weekday: 'long', day: '2-digit', month: 'long'
         });
 
-        // Capitalize only the weekday, not the month
-        const nameCapitalized = name.replace(/^(\w)/, match => match.toUpperCase())
-                                   .replace(/ (\w)/g, match => match.toLowerCase());
+        // Format the name correctly (capitalize the weekday)
+        const nameCapitalized = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
 
-        const formattedDate = date.toISOString().split('T')[0]; // Format date as 'YYYY-MM-DD'
+        // ISO format for the backend
+        const formattedDate = date.toISOString().split('T')[0];
 
-        // Get CSRF token from hidden input
+        // Get CSRF token
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
         try {
@@ -327,8 +332,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',  // Ensure it is set for AJAX request
-                    'X-CSRFToken': csrfToken  // Add CSRF token here
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrfToken
                 },
                 body: JSON.stringify({
                     name: nameCapitalized,
@@ -336,14 +341,16 @@ document.addEventListener("DOMContentLoaded", function() {
                 })
             });
 
-            const data = await response.json();
-            if (data.success) {
-                console.log('Journee created successfully!');
+            if (response.ok) {
+                const result = await response.json(); // Parse response as JSON
+                alert("✅ Journée créée avec succès !"); // Success message
             } else {
-                console.error(data.error);
+                const errorData = await response.json(); // Parse error response
+                alert("⚠️ Erreur lors de la création de la journée : " + errorData.message);
             }
         } catch (error) {
             console.error("Error:", error);
+            alert("⚠️ Une erreur est survenue lors de la requête.");
         }
     }
 

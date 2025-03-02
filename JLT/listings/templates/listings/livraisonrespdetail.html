@@ -183,12 +183,6 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        {% if livraison.recuperation == recuperation %}
-        <h5 class="modal-title" id="exampleModalLabel">Récupération terminée ? check status puis valider pour confimer la récupération</h5>
-
-        {% else %}
-        <h5 class="modal-title" id="exampleModalLabel">{{livraison.nom}} / {{livraison.heure_livraison}}</h5>
-        {% endif %}        
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">

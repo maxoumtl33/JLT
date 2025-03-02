@@ -35,99 +35,118 @@
 </style>
 
 <h2>📦 Livraisons sans dates</h2>
+<div class="container-fluid">
+    <form method="POST" action="{% url 'bulk_edit_livraisons' %}" style="max-width: 1000px; margin: auto;">
+        {% csrf_token %}
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+            <label for="bulk_date"><strong>📅 Date et date de livraison:</strong></label>
+            <input type="date" id="bulk_date" name="bulk_date" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
 
-<form method="POST" action="{% url 'bulk_edit_livraisons' %}" style="max-width: 1000px; margin: auto;">
-    {% csrf_token %}
-    
-    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
-        <!-- 📅 Select a single date to apply to all selected livraisons -->
-        <label for="bulk_date"><strong>📅 Date et date de livraison:</strong></label>
-        <input type="date" id="bulk_date" name="bulk_date" style="padding: 5px; border-radius: 5px; border: 1px solid #ccc;">
+            <label for="bulk_journee"><strong>🗓️ Journée:</strong></label>
+            <select id="bulk_journee" name="bulk_journee" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
+                <option value="">-- Selectionner Journée --</option>
+                {% for jour in journees reversed %}
+                    <option value="{{ jour.id }}">{{ jour.nom }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
-        <!-- 📦 Select a single journee to apply to all selected livraisons -->
-        <label for="bulk_journee"><strong>🗓️ Journée:</strong></label>
-        <select id="bulk_journee" name="bulk_journee" style="padding: 5px; border-radius: 5px; border: 1px solid #ccc;">
-            <option value="">-- Selectionner Journée --</option>
-            {% for jour in journees %}
-                <option value="{{ jour.id }}">{{ jour.nom }}</option>
-            {% endfor %}
-        </select>
-    </div>
+        <table class="table table-striped mt-3" style=" border-collapse: collapse;">
+            <thead class="thead-dark">
+                <tr>
+                    <th style="padding: 15px; text-align: center; font-size: 18px;">
+                        <input type="checkbox" id="select_all"> tous
+                    </th>
+                    <th style="padding: 15px; font-size: 18px;text-align: center;">Nom</th>
+                    <th style="padding: 15px; font-size: 18px;text-align: center;">Convives</th>
+                    <th style="padding: 15px; font-size: 18px;text-align: center;">Heure livraison</th>
+                    <th style="padding: 15px; font-size: 18px;text-align: center;">Adresse</th>
+                    <th style="padding: 15px; font-size: 18px;text-align: center;">Date</th>
+                    <th style="padding: 15px; font-size: 18px;text-align: center;">Date Livraison</th>
+                    <th style="padding: 15px; font-size: 18px;text-align: center;">Journée</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for livraison in livraisons %}
+                <tr style="border-bottom: 1px solid #ddd;text-align: center;">
+                    <td style="text-align: center; padding: 15px;">
+                        <input type="checkbox" name="selected_ids" value="{{ livraison.id }}" style="width: 18px; height: 18px;">
+                    </td>
+                    <td>
+                        <input type="text" name="nom_{{ livraison.id }}" value="{{ livraison.nom }}" style="width: 300px; padding: 8px; font-size: 16px;">
+                    </td>
+                    <td>
+                        <input type="number" name="convives_{{ livraison.id }}" value="{{ livraison.convives }}" style="width: 60px; padding: 8px; font-size: 16px;">
+                    </td>
+                    <td>
+                        <input type="text" name="heure_{{ livraison.id }}" value="{{ livraison.heure_livraison}}" style="width: 70px; padding: 8px; font-size: 16px;">
+                    </td>
+                    <td>
+                        <input type="text" name="adress_{{ livraison.id }}" value="{{ livraison.adress }}" style="width: 200px; padding: 8px; font-size: 16px;">
+                    </td>
+                    <td>
+                        <input type="date" name="date_{{ livraison.id }}" value="{{ livraison.date|date:'Y-m-d' }}" style="padding: 8px; font-size: 16px; width: 90px;">
+                    </td>
+                    <td>
+                        <input type="date" name="date_livraison_{{ livraison.id }}" value="{{ livraison.date_livraison|date:'Y-m-d' }}" style="padding: 8px; font-size: 16px; width: 90px;">
+                    </td>
+                    <td>
+                        <select name="journee_{{ livraison.id }}" style="padding: 8px; font-size: 16px; width: 80px;">
+                            {% for jour in journees reversed %}
+                                <option value="{{ jour.id }}" {% if livraison.journee.id == jour.id %}selected{% endif %}>
+                                    {{ jour.nom }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
-    <table border="1" style="width: 100%; border-collapse: collapse; text-align: left;">
-        <thead style="background: #f4f4f4;">
-            <tr>
-                <th style="padding: 10px; text-align: center;"><input type="checkbox" id="select_all">tous</th>
-                <th style="padding: 10px;">Nom</th>
-                <th style="padding: 10px;">Convives</th>
-                <th style="padding: 10px;">Heure livraison</th>
-                <th style="padding: 10px;">Adresse</th>
-                <th style="padding: 10px;">Date</th>
-                <th style="padding: 10px;">Date Livraison</th>
-                <th style="padding: 10px;">Journée</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for livraison in livraisons %}
-            <tr style="border-bottom: 1px solid #ddd;">
-                <td style="text-align: center; padding: 10px;">
-                    <input type="checkbox" name="selected_ids" value="{{ livraison.id }}" style="width: 18px; height: 18px;">
-                </td>
-                <td><input type="text" name="nom_{{ livraison.id }}" value="{{ livraison.nom }}" style="width: 100%; padding: 5px;"></td>
-                <td><input type="number" name="convives_{{ livraison.id }}" value="{{ livraison.convives }}" style="width: 100%; padding: 5px;"></td>
-                <td><input type="text" name="heure_{{ livraison.id }}" value="{{ livraison.heure_livraison}}" style="width: 100%; padding: 5px;"></td>
-                <td><input type="text" name="adress_{{ livraison.id }}" value="{{ livraison.adress }}" style="width: 100%; padding: 5px;"></td>
-                <td><input type="date" name="date_{{ livraison.id }}" value="{{ livraison.date|date:'Y-m-d' }}" style="padding: 5px;"></td>
-                <td><input type="date" name="date_livraison_{{ livraison.id }}" value="{{ livraison.date_livraison|date:'Y-m-d' }}" style="padding: 5px;"></td>
-                <td>
-                    <select name="journee_{{ livraison.id }}" style="padding: 5px;">
-                        {% for jour in journees %}
-                            <option value="{{ jour.id }}" {% if livraison.journee.id == jour.id %}selected{% endif %}>
-                                {{ jour.nom }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <div style="display: flex; justify-content: space-between; margin-top: 15px;">
-        <button type="submit" name="action" value="edit" style="background: #28a745; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">
-            ✏️ Modifier la selection
-        </button>
-        <button type="submit" name="action" value="delete" style="background: #dc3545; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">
-            🗑️ Effacer la selection
-        </button>
-    </div>
-    <nav class="bottom-navbar">
-        <ul>
-            <li><a href="{% url 'livraisonstomorrow'%}" class="nav__link"><i class="fa-solid fa-location-dot"></i><span class="nav__name">Dispatch</span></a></li>
-            <li><button type="submit" name="action" value="edit" style="background: #28a745; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">
-                ✏️ Modifier la selection
-            </button></li>
-            <li><button type="submit" name="action" value="delete" style="background: #dc3545; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">
-                🗑️ Effacer la selection
-            </button></li>
-        </ul>
-    </nav>
-</form>
-
+        <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+            <button type="submit" name="action" value="edit" style="background: #28a745; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">
+                ✏️ Modifier la sélection
+            </button>
+            <button type="submit" name="action" value="delete" style="background: #dc3545; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">
+                🗑️ Effacer la sélection
+            </button>
+        </div>
+        
+        <nav class="bottom-navbar">
+            <ul>
+                <li>
+                    <a href="{% url 'livraisonstomorrow' %}" class="nav__link">
+                        <i class="fa-solid fa-location-dot"></i><span class="nav__name">Dispatch</span>
+                    </a>
+                </li>
+                <li>
+                    <button type="submit" name="action" value="edit" class="btn btn-success">
+                        ✏️ Modifier la sélection
+                    </button>
+                </li>
+                <li>
+                    <button type="submit" name="action" value="delete" class="btn btn-danger">
+                        🗑️ Effacer la sélection
+                    </button>
+                </li>
+            </ul>
+        </nav>
+    </form>
+</div>
 <br>
 <br>
 <br>
 <br>
 
-
-<!-- ✅ Select All Checkboxes -->
 <script>
 document.getElementById("select_all").addEventListener("change", function() {
     let checkboxes = document.querySelectorAll("input[name='selected_ids']");
     checkboxes.forEach(cb => cb.checked = this.checked);
 });
 
-// ✅ Apply bulk date and journee to selected livraisons
+// Apply bulk date and journee to selected livraisons
 document.getElementById("bulk_date").addEventListener("change", function() {
     let selectedIds = document.querySelectorAll("input[name='selected_ids']:checked");
     selectedIds.forEach(cb => {
@@ -145,5 +164,8 @@ document.getElementById("bulk_journee").addEventListener("change", function() {
     });
 });
 </script>
+
+
+
 
 {% endblock %}

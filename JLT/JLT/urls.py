@@ -164,6 +164,7 @@ path('orders_cuisine/<int:order_id>/delivered/', views.mark_order_deliveredcuisi
 path('user/orders/', views.user_order_list, name='user_order_list'),
 path('order/<int:order_id>/update/', views.update_order_cuisine, name='update_order_cuisine'),
 path('order/<int:order_id>/delete/', views.delete_order_cuisine, name='delete_order_cuisine'),
+path('route/delete/<int:route_id>/', delete_route, name='delete_route'),
 
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

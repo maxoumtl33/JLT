@@ -235,6 +235,7 @@ from .models import Livraison
 def livraisons_without_date(request):
     livraisons = Livraison.objects.filter(date__isnull=True)  # Fetch only those without a date
     journees = Journee.objects.all()
+    
     return render(request, 'listings/livraisons_without_date.html', {'livraisons': livraisons, 'journees':journees,})
 
 from django.shortcuts import get_object_or_404, redirect
@@ -762,6 +763,21 @@ def view_items_by_category(request, category):
     return render(request, 'listings/items_by_category.html', context)
 
 
+def delete_route(request, route_id):
+    if request.method == 'DELETE':
+        route = get_object_or_404(Route, id=route_id)
+
+        # Update the status of tasks associated with this route
+        livraisons = Livraison.objects.filter(statut=route)  # Assuming a ForeignKey relationship
+        livraisons.update(statut_id=21)  # Change 'statut_id' to 21, according to your model field
+
+        # After updating the tasks, delete the route
+        route.delete()
+
+        return JsonResponse({'success': True})
+
+    return JsonResponse({'success': False}, status=400)
+
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse
 from .models import Checklist, ChecklistItem, QuantityChangeLog
@@ -769,7 +785,13 @@ from .models import Checklist, ChecklistItem, QuantityChangeLog
 def checklistvoir_detail(request, checklist_id):
     checklist = get_object_or_404(Checklist, pk=checklist_id)
 
-    normal_items = ChecklistItem.objects.filter(checklist=checklist, quantity__gt=0).exclude(commentaire__regex=r'\bnt\b')
+    normal_items = (
+    ChecklistItem.objects
+    .filter(checklist=checklist, quantity__gt=0)
+    .exclude(commentaire__regex=r'\bnt\b')
+    .prefetch_related('product__category')  # Pre-fetch related category data
+    .order_by('product__category__name')    # Order by the name of the category
+)
     nt_items = ChecklistItem.objects.filter(checklist=checklist, quantity__gt=0, commentaire__regex=r'\bnt\b')
     nt_items_ids = set(nt_items.values_list('id', flat=True))
     for item in normal_items:

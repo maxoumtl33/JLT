@@ -87,14 +87,22 @@ class LivraisonForm(forms.ModelForm):
             }),
         }
 
-class LivraisonFeuilleForm(ModelForm):
+class LivraisonFeuilleForm(forms.ModelForm):
+    
     class Meta:
         model = Livraison
-        fields = ('nom','statut', 'heure_depart','aidelivreur',  'livreur', 'retourtraiteur', 'commentairedispatch', 'recuperation', 'status', 'date', 'journee')
+        fields = ('nom', 'statut',
+                  'commentairedispatch', 'recuperation', 'status', 'date', 'journee')
+     
+    def __init__(self, *args, **kwargs):
+        super(LivraisonFeuilleForm, self).__init__(*args, **kwargs)
+        
+        # Customizing 'statut' field to show only the option with id = 21
+        self.fields['statut'].queryset = self.fields['statut'].queryset.filter(id=21)
+        self.fields['statut'].label = "Route"  # Change the label of statut field
 
-modes = (
-    ("driving", "driving"),
-)
+        # Assuming 'journee' is a foreign key; modify queryset as needed
+        self.fields['journee'].queryset = self.fields['journee'].queryset.order_by('-date')  # Reverse order if date_created exists
 
 class OrderCuisineForm(forms.ModelForm):
     item = forms.ModelChoiceField(
@@ -125,6 +133,10 @@ class OrderCuisineForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(OrderCuisineForm, self).__init__(*args, **kwargs)
         self.fields['item'].queryset = ItemCuisine.objects.all()
+
+modes = (
+        ("driving", "driving"),
+    )
 
 class DistanceForm(ModelForm):
     today = datetime.now().date()
