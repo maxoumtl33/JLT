@@ -525,7 +525,7 @@
     </div>
 
     <div style="text-align: center; margin-top: 20px; display: flex;">
-        <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModalDocr" style="display: flex; margin-right: 20px; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);">
+        <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#documentModal" style="display: flex; margin-right: 20px; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);">
             <i class="bi bi-folder"></i>  Ajouter documents
         </button>
         <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModalcommentaire" style="display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);">
@@ -1718,51 +1718,36 @@
     </div>
 </div>
 
-<!-- Modal for Document Management -->
-<div class="modal fade" id="exampleModalDocr" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+<!-- Document Modal -->
+<div class="modal fade" id="documentModal" tabindex="-1" aria-labelledby="documentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Télécharger Documents</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title" id="documentModalLabel">Ajouter des documents</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <div class="modal-body">
-                <form id="document-form" method="post" enctype="multipart/form-data">
+                <form id="documentForm" method="post" enctype="multipart/form-data">
                     {% csrf_token %}
-                    {{ document_formset.management_form }}
-
-                    <div id="document-forms">
-                        {% for form in document_formset %}
-                            <div class="form-row document-form">
-                                <div class="mb-3">
-                                    {{ form.document.label }}
-                                    {{ form.document }}  <!-- File input -->
-                                    {% if form.instance.id %}
-                                        <button type="button" class="btn btn-danger delete-doc" data-doc-id="{{ form.instance.id }}">
-                                            <i class="fas fa-trash"></i> Supprimer
-                                        </button>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-
-                    <!-- Hidden empty form template -->
-                    <div id="empty-form" class="d-none">
-                        <div class="form-row document-form">
-                            <div class="mb-3">
-                                {{ document_formset.empty_form.document.label }}
-                                {{ document_formset.empty_form.document }}  <!-- File input -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Button to add new file input dynamically -->
-                    <button type="button" id="add-document" class="btn btn-success">+ Ajouter un Document</button>
-
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    <input type="file" name="document" class="form-control mb-2">
+                    <button type="submit" class="btn btn-success">Ajouter Document</button>
                 </form>
+                <hr>
+                <ul id="documentList">
+                    {% for document in checklist_documents %}
+                    <li>
+                        <a href="{{ document.document.url }}" target="_blank"><i class="fa-solid fa-eye fa-2xl" style="color: #74C0FC;"></i></a>
+                        <button class="delete-doc" data-id="{{ document.id }}" style="margin-left: 20px; margin-bottom: 30px;">
+                            <i class="fa-solid fa-trash fa-2xl" style="color: #f51919;"></i>
+                        </button>
+                    </li>
+                   
+                    {% endfor %}
+                </ul>
             </div>
+            
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
             </div>
@@ -2920,24 +2905,7 @@
 
 
 
-document.addEventListener("DOMContentLoaded", function () {
-    let addButton = document.getElementById("add-document");
-    let formContainer = document.getElementById("document-forms");
-    let emptyForm = document.getElementById("empty-form").innerHTML;
-    let totalForms = document.querySelector("#id_documents-TOTAL_FORMS");
 
-    addButton.addEventListener("click", function () {
-        let newFormIndex = parseInt(totalForms.value);
-        let newFormHtml = emptyForm.replace(/__prefix__/g, newFormIndex);
-
-        let newFormElement = document.createElement("div");
-        newFormElement.innerHTML = newFormHtml;
-        newFormElement.classList.add("document-form");
-
-        formContainer.appendChild(newFormElement);
-        totalForms.value = newFormIndex + 1;
-    });
-});
 
 
 
@@ -5108,73 +5076,6 @@ function bindQuantityInputEvents() {
 }
 
 
-    
-$(document).ready(function() {
-    // Delete button functionality
-    $('.delete-btn').on('click', function(event) {
-        event.preventDefault();
-        const button = $(this);
-        const url = button.data('url');
-
-        $.ajax({
-            url: url,
-            type: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}'  // Ensure CSRF token is set correctly
-            },
-            success: function(response) {
-                if (response.status === 'success') {
-                    button.closest('li').remove();  // Remove the item from the DOM
-                    alert(response.message);
-                    location.reload();
-                } else {
-                    alert(response.message);
-                }
-            },
-            error: function() {
-                alert("Erreur, veuillez reessayer.");
-            }
-        });
-    });
-
-    // Quantity adjustment functionality
-    document.querySelectorAll(".addAction").forEach(button => {
-        button.addEventListener("click", function() {
-            const productId = button.getAttribute("data-product-id");
-            const quantityInput = document.getElementById(`quantity-${productId}`);
-            const currentValue = parseInt(quantityInput.value);
-
-            // Update quantity
-            quantityInput.value = currentValue + 1;
-        });
-    });
-
-    document.querySelectorAll(".subtractAction").forEach(button => {
-        button.addEventListener("click", function() {
-            const productId = button.getAttribute("data-product-id");
-            const quantityInput = document.getElementById(`quantity-${productId}`);
-            const currentValue = parseInt(quantityInput.value);
-
-            // Ensure quantity does not go below 1
-            if (currentValue > 1) {
-                quantityInput.value = currentValue - 1;
-            }
-        });
-    });
-
-    // Separate validation for each form on submit
-    $('form.product-form').each(function() {
-        $(this).on('submit', function(event) {
-            var quantityInput = $(this).find('.quantity'); // Find the quantity input in this form
-            var quantity = parseInt(quantityInput.val());
-            if (isNaN(quantity) || quantity <= 0) {
-                event.preventDefault(); // Prevent form submission
-                alert('Rentrer une quantité valide.'); // Alert if quantity is invalid
-            }
-        });
-    });
-});
-
 // Handle quantity change and set status to 'en_cours'
 document.addEventListener("DOMContentLoaded", function () {
     const quantityFields = document.querySelectorAll('input[name="quantity"]');
@@ -5303,6 +5204,55 @@ document.addEventListener('DOMContentLoaded', function () {
     const popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
         return new bootstrap.Popover(popoverTriggerEl);
     });
+});
+
+
+$(document).ready(function() {
+    // Handle document form submission
+    $('#documentForm').submit(function(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        var formData = new FormData(this); // Collect form data
+
+        $.ajax({
+            url: "{% url 'upload_document' checklist.id %}", // Adjust your URL here
+            method: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(data) {
+                alert("Document téléchargé avec succès !");
+                // You might append the new document to the list here
+                location.reload(); // Optionally reload if you update the list dynamically
+            },
+            error: function(xhr, status, error) {
+                alert("Error");
+            }
+        });
+    });
+
+    $('.delete-doc').click(function() {
+    var docId = $(this).data('id');
+    if (confirm("Es-tu sûr de vouloir supprimer ce document ?")) {
+        $.ajax({
+            url: "/delete_document/" + docId + "/", // This path should match your urls.py
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            success: function(data) {
+                alert("Document supprimé !");
+                location.reload(); // Reload page or update the list dynamically
+            },
+            error: function(xhr, status, error) {
+                alert("Error");
+            }
+        });
+    }
+});
+
+
+    // Handle document edit, implement as needed...
 });
 
 </script>

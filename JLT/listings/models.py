@@ -503,19 +503,14 @@ class ChecklistRecupPhoto(models.Model):
     image = models.ImageField(upload_to='listings/media/commandesdetail')
 
 class ChecklistDocument(models.Model):
-    checklist = models.ForeignKey(Checklist, on_delete=models.CASCADE)
+    checklist = models.ForeignKey(Checklist, on_delete=models.CASCADE, related_name='documents')
     document = models.FileField(upload_to='listings/media/commandesdetail')
     uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)  # Keeps original timestamp
-    adjusted_created_at = models.DateTimeField(null=True, blank=True)  # Stores modified timestamp
+    uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Document for {self.checklist.name}"
 
-    def save(self, *args, **kwargs):
-        if not self.pk:  # Only modify for new instances
-            self.adjusted_created_at = timezone.now() - timedelta(hours=5)
-        super().save(*args, **kwargs)
 
 
 from django.core.exceptions import ValidationError
@@ -596,7 +591,6 @@ class ChecklistItem(models.Model):
         if self.product:
             self.product.adjust_quantity(self.quantity) # Optional: Only if you want to handle deletions
         super().delete(*args, **kwargs)
-
 
 
 class QuantityChangeLog(models.Model):

@@ -214,6 +214,8 @@
                                         <i class="fa-solid fa-ban"></i>
                                 </button>
 
+                                
+
                             {% endif %}
                             {% if checklist_product.status == 'complete' and checklist_product.previous_status == 'refuse' %}
                             
@@ -414,6 +416,9 @@
                                     <i class="fa-solid fa-ban"></i>
                                 </button>
                             {% endif %}
+                            <button type="button" class="btn btn-outline-primary btn-sm edit-item" data-id="{{ checklist_product.id }}" data-product="{{ checklist_product.product.id }}" data-quantity="{{ checklist_product.quantity }}" title="Edit Item" style="display: none;">
+                                <i class="fa-solid fa-edit"></i>
+                            </button>
 
 
                             <!-- Warning icon if quantity was changed -->
@@ -429,7 +434,41 @@
                     <td class="align-middle">{{ checklist_product.commentaire }}</td>
                 </tr>
             {% endfor %}
-            
+            <!-- Edit Item Modal -->
+<div class="modal fade" id="editItemModal" tabindex="-1" aria-labelledby="editItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editItemModalLabel">Edit Checklist Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editItemForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="edit-item-id" name="item_id">
+                    <div class="form-group">
+                        <label for="edit-product">Select Product:</label>
+                        <select id="edit-product" name="product" class="form-control">
+                            {% for product in products %}
+                                <option value="{{ product.id }}">{{ product.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-quantity">Quantity:</label>
+                        <input type="number" id="edit-quantity" name="quantity" class="form-control" required>
+
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveChanges">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
             <!-- NT items -->
             {% for checklist_product in nt_items %}
                 <tr>
@@ -730,6 +769,47 @@ function printChecklist() {
     // Facultatif : ferme la fenêtre après l'impression
     printWindow.close();
 }
+
+$(document).on('click', '.edit-item', function() {
+    const itemId = $(this).data('id');
+    const productId = $(this).data('product');
+    const quantity = $(this).data('quantity');
+    
+    // Set the values in the modal
+    $('#edit-item-id').val(itemId);
+    $('#edit-product').val(productId);
+    $('#edit-quantity').val(quantity);
+    
+    // Show the modal
+    $('#editItemModal').modal('show');
+});
+
+// Save changes button click handler
+$('#saveChanges').click(function() {
+    const itemId = $('#edit-item-id').val();
+    const productId = $('#edit-product').val();
+    const quantity = $('#edit-quantity').val();
+    
+    $.ajax({
+        url: "{% url 'update_checklist_item' %}",  // Adjust your URL here
+        method: "POST",
+        data: {
+            'item_id': itemId,
+            'product_id': productId,
+            'quantity': quantity,
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+        },
+        success: function(response) {
+            alert("Item updated successfully!");
+            location.reload(); // Optionally reload the page to reflect changes
+        },
+        error: function(xhr, status, error) {
+            alert("Error updating item");
+            console.error("Error:", error);
+        }
+    });
+});
+
 
 </script>
 {% endblock %}

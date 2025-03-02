@@ -782,6 +782,7 @@ from django.http import JsonResponse
 from .models import Checklist, ChecklistItem, QuantityChangeLog
 @login_required
 def checklistvoir_detail(request, checklist_id):
+    products = Product.objects.all()
     checklist = get_object_or_404(Checklist, pk=checklist_id)
 
     normal_items = (
@@ -877,6 +878,7 @@ def checklistvoir_detail(request, checklist_id):
     context = {
         'checklist': checklist,
         'normal_items': normal_items,
+        'products':products,
         'nt_items': nt_items,
         'quantity_change_logs': quantity_change_logs,
         'nt_items_ids': nt_items_ids,
@@ -1182,32 +1184,17 @@ def checklist_detail(request, checklist_id):
     }
     return render(request, 'listings/checklist_detail.html', context)
 
-@login_required
-def edit_document(request, doc_id):
-    document = get_object_or_404(ChecklistDocument, id=doc_id)
-    
-    if request.method == 'POST':
-        form = ChecklistDocumentForm(request.POST, request.FILES, instance=document)
-        if form.is_valid():
-            form.save()
-            return redirect('checklist-detail', checklist_id=document.checklist.id)  # Redirect back to the checklist detail
-    else:
-        form = ChecklistDocumentForm(instance=document)
 
-    return render(request, 'listings/edit_document.html', {'form': form, 'document': document})
 @login_required
-@csrf_exempt
-def delete_document(request, doc_id):
-    if request.method == 'POST':
-        try:
-            # Get the document by ID and delete it
-            document = ChecklistDocument.objects.get(id=doc_id)
-            document.delete()
-            return JsonResponse({'success': True})
-        except ChecklistDocument.DoesNotExist:
-            return JsonResponse({'success': False, 'error': 'Document not found'})
+@require_POST
+def delete_document(request, document_id):
+    document = get_object_or_404(ChecklistDocument, id=document_id)
+    # Check if user has permission to delete
+    if request.user == document.uploaded_by or request.user.is_superuser:
+        document.delete()
+        return JsonResponse({'success': True, 'message': 'Document deleted successfully.'})
+    return JsonResponse({'success': False, 'message': 'You do not have permission to delete this document.'})
 
-    return JsonResponse({'success': False, 'error': 'Invalid request'})
 @login_required
 @csrf_exempt
 def adjust_product_quantity(request):
@@ -1336,8 +1323,38 @@ def update_checklist_status(request, checklist_id):
             return JsonResponse({'error': 'Checklist not found'}, status=404)
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=400)
+@login_required
+@require_POST
+def update_checklist_item(request):
+    item_id = request.POST.get('item_id')
+    product_id = request.POST.get('product_id')
+    
+    # Safely convert quantity to integer
+    quantity = int(request.POST.get('quantity'))  # Convert to integer
 
+    # Get the checklist item
+    checklist_item = get_object_or_404(ChecklistItem, id=item_id)
+    
+    # Store original quantity for logging or processing
+    original_quantity = checklist_item.quantity
 
+    # Update the product and quantity
+    checklist_item.product_id = product_id  # Assuming product ID is passed
+    checklist_item.quantity = quantity
+
+    # Save the updated item
+    checklist_item.save()
+
+    # Here you may want to log the quantity change if needed
+    QuantityChangeLog.objects.create(
+        checklist_item=checklist_item,
+        previous_quantity=original_quantity,
+        new_quantity=quantity,
+        quantity_change=quantity - original_quantity,  # Ensure this operates on integers
+        changed_by=request.user
+    )
+
+    return JsonResponse({'success': True, 'message': 'Checklist item updated successfully.'})
 
 from django.db.models import Max
 
@@ -1461,7 +1478,19 @@ def creerchecklist(request):
     }
     
     return render(request, 'listings/checklistcreate.html', context)
-
+@login_required
+@require_POST
+def upload_document(request, checklist_id):
+    checklist = get_object_or_404(Checklist, id=checklist_id)
+    if request.FILES.get('document'):
+        document = ChecklistDocument(
+            checklist=checklist,
+            document=request.FILES['document'],
+            uploaded_by=request.user
+        )
+        document.save()
+        return JsonResponse({'success': True, 'message': 'Document uploaded successfully.'})
+    return JsonResponse({'success': False, 'message': 'No document uploaded.'})
 
 from django.http import JsonResponse
 from django.utils.dateparse import parse_date
