@@ -109,7 +109,7 @@ from django.http import JsonResponse
 import pandas as pd
 import io
 
-
+@login_required
 def import_xlsx(request):
     print("📂 import_xlsx view was called!")
     form = XLSXUploadForm()
@@ -194,7 +194,7 @@ def import_xlsx(request):
 from django.http import JsonResponse
 import json
 from .models import Journee
-
+@login_required
 def create_journee(request):
     if request.method == "POST" and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         try:
@@ -231,7 +231,7 @@ def create_journee(request):
 
 from django.shortcuts import render, get_list_or_404
 from .models import Livraison
-
+@login_required
 def livraisons_without_date(request):
     livraisons = Livraison.objects.filter(date__isnull=True)  # Fetch only those without a date
     journees = Journee.objects.all()
@@ -241,7 +241,7 @@ def livraisons_without_date(request):
 from django.shortcuts import get_object_or_404, redirect
 from .models import Livraison
 from django.contrib import messages
-
+@login_required
 def delete_livraison(request, livraison_id):
     livraison = get_object_or_404(Livraison, id=livraison_id)
     livraison.delete()
@@ -256,7 +256,7 @@ from .models import Livraison, Journee
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib import messages
 from listings.models import Livraison, Journee
-
+@login_required
 def bulk_edit_livraisons(request):
     if request.method == "POST":
         selected_ids = request.POST.getlist('selected_ids')  # Get selected Livraison IDs
@@ -301,7 +301,7 @@ def bulk_edit_livraisons(request):
 
     return redirect('livraisons_without_date')
 
-
+@login_required
 def edit_task_form(request, task_id):
     task = get_object_or_404(Livraison, id=task_id)
     
@@ -320,7 +320,7 @@ def edit_task_form(request, task_id):
         return JsonResponse({'form_html': form_html})
 
 
-
+@login_required
 def user_login(request):
     if request.method == 'POST':
         username = request.POST['username']
@@ -345,7 +345,7 @@ def user_login(request):
 # views.py
 from django.contrib.auth.views import PasswordChangeView
 from listings.models import UserProfile
-
+@login_required
 class CustomPasswordChangeView(PasswordChangeView):
     def form_valid(self, form):
         response = super().form_valid(form)
@@ -455,7 +455,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 
-
+@login_required
 def mark_order_donecuisine(request, order_id):
     order = OrderCuisine.objects.get(id=order_id)
     order.is_done = True
@@ -463,7 +463,7 @@ def mark_order_donecuisine(request, order_id):
     if not request.user.is_superuser:
         return redirect('unauthorized')
     return redirect('order_list_cuisine')
-
+@login_required
 def mark_order_deliveredcuisine(request, order_id):
     order = OrderCuisine.objects.get(id=order_id)
     order.is_delivered = True
@@ -477,7 +477,7 @@ from django.http import JsonResponse
 import googlemaps
 from django.conf import settings
 from .models import Livraison
-
+@login_required
 def geocode_all_livraisons(request):
     if request.method == 'GET':  # Ensure the request method is GET
         livraisons = Livraison.objects.filter(lat__isnull=True, lng__isnull=True, place_id__isnull=True)
@@ -519,7 +519,7 @@ import random
 
 TASK_NAMES = ['Nettoyer machines à café', 'Nettoyer intérieur des camions', 
               'Faire boites de thé + café', 'Nettoyer dock de livraison', 'Mettre essence camions']
-
+@login_required
 def create_random_task(request):
     # List of names to choose from
     livreur_names = ["Mohamed", "Samuel", "Alex", "Jef", "Zayd"]
@@ -557,7 +557,7 @@ def create_random_task(request):
         return redirect('unauthorized')
     return redirect('acceuilresponsables')
 
-
+@login_required
 @csrf_exempt
 @require_POST
 def create_routes(request):
@@ -580,7 +580,7 @@ def create_routes(request):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
-
+@login_required
 @csrf_exempt
 @require_POST
 def create_routesn(request):
@@ -603,7 +603,7 @@ def create_routesn(request):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
-
+@login_required
 @csrf_exempt
 @require_POST
 def create_routesnn(request):
@@ -626,7 +626,6 @@ def create_routesnn(request):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
-
 class ChecklistItemDeleteAjaxView(View):
     def post(self, request, *args, **kwargs):
         item_id = self.kwargs.get('pk')
@@ -642,7 +641,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 from django.utils.dateparse import parse_date
 from django.db.models import F
-
+@login_required
 @require_GET
 def get_checklist_items_for_date(request):
     date_str = request.GET.get('date')
@@ -664,7 +663,7 @@ def get_checklist_items_for_date(request):
 
     return JsonResponse({'items': list(checklist_items)}, safe=False)
 
-
+@login_required
 @require_GET
 def voir_checklist(request):
     today = date.today()  # Get today's date
@@ -750,7 +749,7 @@ def voir_checklist(request):
     }
     return render(request, 'listings/voir-checklist.html', context)
 
-
+@login_required
 def view_items_by_category(request, category):
     # Fetch checklist items for the specified category
     checklist_items = ChecklistItem.objects.filter(product__category=category)
@@ -762,7 +761,7 @@ def view_items_by_category(request, category):
     
     return render(request, 'listings/items_by_category.html', context)
 
-
+@login_required
 def delete_route(request, route_id):
     if request.method == 'DELETE':
         route = get_object_or_404(Route, id=route_id)
@@ -781,7 +780,7 @@ def delete_route(request, route_id):
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse
 from .models import Checklist, ChecklistItem, QuantityChangeLog
-
+@login_required
 def checklistvoir_detail(request, checklist_id):
     checklist = get_object_or_404(Checklist, pk=checklist_id)
 
@@ -883,7 +882,7 @@ def checklistvoir_detail(request, checklist_id):
         'nt_items_ids': nt_items_ids,
     }
     return render(request, 'listings/checklistevoir_detail.html', context)
-
+@login_required
 def product_detail(request, item_id):
     item = get_object_or_404(ItemInv, pk=item_id)
 
@@ -896,7 +895,7 @@ def product_detail(request, item_id):
 from django.shortcuts import get_object_or_404, redirect
 from django.http import JsonResponse
 from .models import ChecklistItem, Product
-
+@login_required
 def validate_checklist_item(request, checklist_item_id):
     checklist_item = get_object_or_404(ChecklistItem, id=checklist_item_id)
     product = checklist_item.product
@@ -919,7 +918,7 @@ def validate_checklist_item(request, checklist_item_id):
 
     return JsonResponse({'success': True, 'new_product_quantity': product.quantity})
 
-
+@login_required
 def inventory(request):
     products = Product.objects.all()
     context = {
@@ -927,7 +926,7 @@ def inventory(request):
     }
     return render(request, 'listings/inventory.html', context)
 
-
+@login_required
 def subtract_to_checklist(request, checklist_id):
 
     checklist_item = get_object_or_404(Checklist, pk=checklist_id)
@@ -949,7 +948,7 @@ import logging
 from django.http import JsonResponse
 
 logger = logging.getLogger(__name__)
-
+@login_required
 def add_to_checklist(request, checklist_id):
     if request.method == 'POST':
         checklist = get_object_or_404(Checklist, pk=checklist_id)
@@ -1005,7 +1004,7 @@ def add_to_checklist(request, checklist_id):
 
 from collections import defaultdict
 
-
+@login_required
 def checklist_detail(request, checklist_id):
     checklist = get_object_or_404(Checklist, pk=checklist_id)
     checklist_items = ChecklistItem.objects.filter(checklist=checklist, quantity__gt=0)
@@ -1183,7 +1182,7 @@ def checklist_detail(request, checklist_id):
     }
     return render(request, 'listings/checklist_detail.html', context)
 
-
+@login_required
 def edit_document(request, doc_id):
     document = get_object_or_404(ChecklistDocument, id=doc_id)
     
@@ -1196,7 +1195,7 @@ def edit_document(request, doc_id):
         form = ChecklistDocumentForm(instance=document)
 
     return render(request, 'listings/edit_document.html', {'form': form, 'document': document})
-
+@login_required
 @csrf_exempt
 def delete_document(request, doc_id):
     if request.method == 'POST':
@@ -1209,7 +1208,7 @@ def delete_document(request, doc_id):
             return JsonResponse({'success': False, 'error': 'Document not found'})
 
     return JsonResponse({'success': False, 'error': 'Invalid request'})
-
+@login_required
 @csrf_exempt
 def adjust_product_quantity(request):
     if request.method == 'POST':
@@ -1227,7 +1226,7 @@ def adjust_product_quantity(request):
         form = AdjustProductQuantityForm()
 
     return render(request, 'listings/adjust_quantity.html', {'form': form})
-
+@login_required
 def edit_item(request, pk):
     item = get_object_or_404(ItemInv, pk=pk)
     if request.method == 'POST':
@@ -1324,7 +1323,7 @@ def conseiller_dashboard(request):
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-
+@login_required
 @csrf_exempt  # Only use this if you're handling CSRF tokens manually; otherwise, set properly in your templates
 def update_checklist_status(request, checklist_id):
     if request.method == 'POST':
@@ -1343,7 +1342,7 @@ def update_checklist_status(request, checklist_id):
 from django.db.models import Max
 
 
-
+@login_required
 def creerchecklist(request):
     # Retrieve all checklists and define status labels
     checklists = Checklist.objects.all().order_by('date')
@@ -1469,7 +1468,7 @@ from django.utils.dateparse import parse_date
 from .models import Checklist
 import calendar
 from django.utils import formats
-
+@login_required
 def get_checklists_for_day(request, day):
 
     # Get the selected month and year
@@ -1509,7 +1508,7 @@ def get_checklists_for_day(request, day):
     }
 
     return JsonResponse(response_data)
-
+@login_required
 def import_items(request):
     if request.method == 'POST' and request.FILES['myfile']:
         myfile = request.FILES['myfile']
@@ -1554,7 +1553,7 @@ from django.http import HttpResponse
 from django.urls import reverse
 import qrcode
 from django.conf import settings
-
+@login_required
 def generate_qr_code(request, product_id):
     # Get product details
     product = Product.objects.get(id=product_id)
@@ -1625,7 +1624,7 @@ from django.shortcuts import render
 from .models import QuantityChangeLog
 
 from datetime import timedelta
-
+@login_required
 def view_quantity_change_logs(request, product_id):
     product = Product.objects.get(id=product_id)
     logs = QuantityProductChangeLog.objects.filter(product=product).order_by('-timestamp')
@@ -1652,7 +1651,7 @@ def view_quantity_change_logs(request, product_id):
 
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Checklist, Livraison
-
+@login_required
 def associate_livraison(request, checklist_id):
     checklist = get_object_or_404(Checklist, id=checklist_id)
     
@@ -1667,7 +1666,7 @@ def associate_livraison(request, checklist_id):
         messages.error(request, "Pas de livraison trouvée")
 
     return redirect('checklist-detail', checklist_id=checklist.id)
-
+@login_required
 def associate_all_livraisons(request):
     """
     Associates all checklists to their corresponding Livraison where num_commande matches num_contrat.
@@ -1689,7 +1688,7 @@ def associate_all_livraisons(request):
 
     return redirect('livraisonstomorrow')  # Update with your actual checklist listing view
 
-
+@login_required
 def tacheslist(request):
 
     today = now().date()
@@ -1709,6 +1708,7 @@ def tacheslist(request):
     if not request.user.is_superuser:
         return redirect('unauthorized')
     return render(request, 'listings/tacheslist.html', context)
+@login_required
 def inventory_list(request):
     items = ItemInv.objects.all()
     query = request.GET.get('query')
@@ -1722,7 +1722,7 @@ def inventory_list(request):
         'form': SearchFormInv()
     }
     return render(request, 'listings/inventory_list.html', context)
-
+@login_required
 @csrf_exempt
 def save_positions(request):
     if request.method == 'POST':
@@ -1735,7 +1735,7 @@ def save_positions(request):
 from django.http import JsonResponse
 from .models import Product
 
-
+@login_required
 def search_productsbase(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
@@ -1756,7 +1756,7 @@ def search_productsbase(request, checklist_id):
         })
     
     return JsonResponse({'products': product_data})
-
+@login_required
 def search_productscfcdn(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
@@ -1777,7 +1777,7 @@ def search_productscfcdn(request, checklist_id):
         })
     return JsonResponse({'products': product_data})
 
-
+@login_required
 def search_productsjetable(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
@@ -1797,7 +1797,7 @@ def search_productsjetable(request, checklist_id):
             'commentaire': checklist_item.commentaire if checklist_item else '',  # Ensure commentaire is included
         })
     return JsonResponse({'products': product_data})
-
+@login_required
 def search_productsdecor(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
@@ -1818,7 +1818,7 @@ def search_productsdecor(request, checklist_id):
         })
     
     return JsonResponse({'products': product_data})
-
+@login_required
 def search_productsbar(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
@@ -1839,7 +1839,7 @@ def search_productsbar(request, checklist_id):
         })
     
     return JsonResponse({'products': product_data})
-
+@login_required
 def search_productscafe(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
@@ -1860,7 +1860,7 @@ def search_productscafe(request, checklist_id):
         })
     
     return JsonResponse({'products': product_data})
-
+@login_required
 def get_breuvages_products(request, checklist_id):
     breuvages_items = ChecklistItem.objects.filter(checklist_id=checklist_id, product__category="BREUVAGE")
     
@@ -1876,7 +1876,7 @@ def get_breuvages_products(request, checklist_id):
     ]
     
     return JsonResponse({'products': product_data})
-
+@login_required
 def search_productstable(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
@@ -1897,7 +1897,7 @@ def search_productstable(request, checklist_id):
         })
     
     return JsonResponse({'products': product_data})
-
+@login_required
 def search_productsverre(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
@@ -1918,7 +1918,7 @@ def search_productsverre(request, checklist_id):
         })
     
     return JsonResponse({'products': product_data})
-
+@login_required
 def search_productsporcelaine(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
@@ -1939,7 +1939,7 @@ def search_productsporcelaine(request, checklist_id):
         })
     
     return JsonResponse({'products': product_data})
-
+@login_required
 def search_productscanape(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
@@ -1960,7 +1960,7 @@ def search_productscanape(request, checklist_id):
         })
     
     return JsonResponse({'products': product_data})
-
+@login_required
 def search_productscuisson(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
@@ -1981,6 +1981,7 @@ def search_productscuisson(request, checklist_id):
         })
     
     return JsonResponse({'products': product_data})
+@login_required
 def search_productsservice(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
@@ -2001,6 +2002,7 @@ def search_productsservice(request, checklist_id):
         })
     
     return JsonResponse({'products': product_data})
+@login_required
 def search_productsdivers(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
@@ -2021,7 +2023,7 @@ def search_productsdivers(request, checklist_id):
         })
     
     return JsonResponse({'products': product_data})
-
+@login_required
 def search_productsalcoolfort(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
@@ -2042,6 +2044,7 @@ def search_productsalcoolfort(request, checklist_id):
         })
     
     return JsonResponse({'products': product_data})
+@login_required
 def search_productsbieres(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
@@ -2062,7 +2065,7 @@ def search_productsbieres(request, checklist_id):
         })
     
     return JsonResponse({'products': product_data})
-
+@login_required
 def search_productsvins(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
@@ -2083,7 +2086,7 @@ def search_productsvins(request, checklist_id):
         })
     
     return JsonResponse({'products': product_data})
-
+@login_required
 def search_productssansalcool(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
@@ -2104,7 +2107,7 @@ def search_productssansalcool(request, checklist_id):
         })
     
     return JsonResponse({'products': product_data})
-
+@login_required
 def save_breuvages_report(request, checklist_id):
     if request.method == "POST":
         for item_id, consumed in request.POST.items():
@@ -2158,7 +2161,7 @@ def home(request):
 
 
 
-
+@login_required
 def livraisons_list(request):
 
     livraisons  = Livraison.objects.all()
@@ -2167,6 +2170,7 @@ def livraisons_list(request):
     return render(request, 'listings/livraisons_list.html', context={'livraisons': livraisons,
                                                               'livreurs': livreurs,
                                                               'journees' : journees})
+@login_required
 def responsable_list(request):
     today = now().date()
     livraisons  = Livraison.objects.order_by('statut', 'position').filter(date = today)
@@ -2212,6 +2216,7 @@ def responsable_list(request):
                                                               'form':form})
 
 # View to handle Recupfrigo and its items
+@login_required
 def create_recupfrigo(request):
     # Define the acceptable values for mode_envoi
     valid_modes_envoi = [
@@ -2260,6 +2265,7 @@ def create_recupfrigo(request):
         'livraisons': livraisons
     })
 # View to handle Recuplivreur and its items
+@login_required
 def create_recuplivreur(request, livraison_id):
     # Fetch the Livraison instance
     livraison = get_object_or_404(Livraison, id=livraison_id)
@@ -2300,7 +2306,7 @@ def create_recuplivreur(request, livraison_id):
         'livraison': livraison
     })
 
-
+@login_required
 def journeerecupdetail(request, id):
     journee = get_object_or_404(Journee, id=id)
     recupfrigo = Recupfrigo.objects.filter(date=journee.date)
@@ -2386,7 +2392,7 @@ def journeerecupdetail(request, id):
     return render(request, 'listings/journeerecupdetail.html', context)
 
 
-
+@login_required
 def journeedetailvente(request, id):
     journees = get_object_or_404(Journee, id=id)  # Use get_object_or_404 for better error handling
     livreurs = Livreur.objects.all()
@@ -2412,7 +2418,7 @@ def journeedetailvente(request, id):
     
     return render(request, 'listings/journeedetailvente.html', context)
 
-
+@login_required
 def journees_list(request):
     today = now().date()
     livraisons  = Livraison.objects.order_by('statut', 'position').filter(date = today)
@@ -2480,6 +2486,7 @@ def journees_list(request):
                                                               'loic':loic})
 
 # RecupFrigo detail view
+@login_required
 def recupfrigo_detail(request, id):
     recupfrigo = Recupfrigo.objects.get(id=id)
     items = recupfrigo.itemsfrigo.all()
@@ -2491,6 +2498,7 @@ def recupfrigo_detail(request, id):
 
 
 # Recuplivreur detail view
+@login_required
 def recuplivreur_detail(request, id):
     recuplivreur = Recuplivreur.objects.get(id=id)
     items = recuplivreur.items.all()
@@ -2501,7 +2509,7 @@ def recuplivreur_detail(request, id):
     })
 
 
-
+@login_required
 def recupslist(request):
     if request.user.is_authenticated:
         today = now().date()
@@ -2534,7 +2542,7 @@ def recupslist(request):
         })
     else:
         return redirect('home')
-
+@login_required
 def routedetail(request, id):  # notez le paramètre id supplémentaire
    
    route = Route.objects.get(id=id)
@@ -2567,7 +2575,7 @@ class RouteUpdateView(UpdateView):
         return HttpResponseRedirect(self.request.META.get('HTTP_REFERER', '/'))  # Redirect back
 
 
-
+@login_required
 def journee_detail(request, id):  # notez le paramètre id supplémentaire
     journees = get_object_or_404(Journee, id=id)
     livreurs = Livreur.objects.all()
@@ -2631,7 +2639,7 @@ def journee_detail(request, id):  # notez le paramètre id supplémentaire
                   })  # nous passons l'id au modèle
 
 
-
+@login_required
 def livreur_list(request):
     if request.user.is_authenticated:
         livreurs = Livreur.objects.exclude(user=request.user)
@@ -2639,7 +2647,7 @@ def livreur_list(request):
                                                                       })
     else:
         return redirect('home')
-
+@login_required
 def validate_livraison(request, livraison_id):
     livraison = get_object_or_404(Livraison, id=livraison_id)
     
@@ -2660,7 +2668,7 @@ def validate_livraison(request, livraison_id):
     
     return redirect('livraison-detail', ip=livraison.id)  # Again, use `ip` or `livraison_id` accordingly
 
-
+@login_required
 def livreur_detail(request, pk):  # notez le paramètre id supplémentaire
     if request.user.is_authenticated :
         livreur = Livreur.objects.get(user_id= pk)
@@ -2675,6 +2683,7 @@ def livreur_detail(request, pk):  # notez le paramètre id supplémentaire
                                                                 'journee' : journee})
     else:
         return redirect('home')
+@login_required
 def taskdetail(request, id):
     task = get_object_or_404(Tacheafaire, id=id)  # Get the task instance
     photoss = task.photo
@@ -2705,7 +2714,7 @@ def taskdetail(request, id):
         formbis = PhotoTachesFormSet(queryset=Phototaches.objects.filter(tache=task))  # Initialize formset with existing photos for the task
 
     return render(request, 'listings/taskdetail.html', {'task': task, 'form': form, 'formbis': formbis, 'photoss':photoss,})
-
+@login_required
 def view_shifts_by_date(request):
     # Get date from the request or use today’s date as default
     selected_date = request.GET.get('date', now().date())
@@ -2744,6 +2753,7 @@ class CustomPasswordChangeView(PasswordChangeView):
 
         # Call the base form_valid method and redirect to success_url
         return super().form_valid(form)
+@login_required
 def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
     if request.user.is_authenticated :
         journee = Journee.objects.get(id=id)
@@ -2822,7 +2832,7 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
                                                                 })
     else:
         return redirect('home')
-
+@login_required
 def update_task(request, pk):
 
     task = get_object_or_404(Tacheafaire, pk=pk)
@@ -2836,7 +2846,7 @@ def update_task(request, pk):
 
 
     return render(request, 'listings/update_task.html', {'task': task})
-
+@login_required
 def update_photo_task(request, pk):
     task = get_object_or_404(Tacheafaire, pk=pk)
 
@@ -2859,7 +2869,7 @@ from django.shortcuts import render
 from django.db.models import Sum, Count
 from django.utils import timezone
 from .models import Livraison, Checklist, ChecklistItem
-
+@login_required
 def dashboard_stats(request):
     today = timezone.now().date()  # Keep today as a date object
     selected_date_str = request.GET.get('date', today.isoformat())  # This can be a string
@@ -3017,7 +3027,7 @@ def create_shift(request):
 
     return render(request, 'listings/create_shift.html', {'liste_livreur': liste_livreur})
 
-
+@login_required
 def responsableschoixjournee(request):
 
     if request.method == 'POST':
@@ -3056,7 +3066,7 @@ def responsableschoixjournee(request):
                                                               'livreurs': livreurs,
                                                               'journees' : journees,
                                                               })
-
+@login_required
 def responsables(request, id):
     today = datetime.now().date()
     journee = Journee.objects.get(id=id)
@@ -3084,14 +3094,14 @@ def responsables(request, id):
                                                               'recuperationko':recuperationko,
                                                               'recuperation' : recuperation,
                                                               })
-
+@login_required
 def unauthorized_view(request):
     return render(request, 'listings/pasauthorise.html', status=403)
 
 
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
+@login_required
 def product_list(request):
     # Get the search query (if any)
     query = request.GET.get('query', '').strip()
@@ -3202,7 +3212,7 @@ class DistanceView(View):
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
-
+@login_required
 @csrf_exempt  # Remove this in production; use CSRF token instead
 def update_livraison_route(request):
     if request.method == "POST":
@@ -3231,7 +3241,7 @@ def update_livraison_route(request):
     return JsonResponse({"success": False, "error": "Invalid request"}, status=405)
 
 
-
+@login_required
 @csrf_exempt
 def update_livraison(request):
     if request.method == 'POST':
@@ -3257,7 +3267,7 @@ def update_livraison(request):
             return JsonResponse({'success': False, 'error': 'Route not found'})
     return JsonResponse({'success': False, 'error': 'Invalid request'})
 
-
+@login_required
 def update_status(request):
     if request.method == 'POST' and request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
         task_id = request.POST.get('livraison_id')
@@ -3272,7 +3282,7 @@ def update_status(request):
 
 from django.http import JsonResponse
 from .models import Livraison  # Adjust the import based on your models
-
+@login_required
 def get_route_livraisons(request, route_id):
     livraisons = Livraison.objects.filter(statut_id=route_id).order_by("position")
     data = [{"id": l.id, "nom": l.nom, "heure_livraison": l.heure_livraison, "mode_envoi": l.mode_envoi} for l in livraisons]
@@ -3283,7 +3293,7 @@ import json
 from django.http import JsonResponse
 from .models import Livraison
 from django.views.decorators.csrf import csrf_exempt
-
+@login_required
 @csrf_exempt
 def update_livraison_positions(request):
     if request.method == "POST":
@@ -4427,6 +4437,7 @@ class MapDimView(View):
             obj.save()
 
         return redirect('my_mapdim_view')
+@login_required
 def deleteDistance(request, pk):
     distance = Distances.objects.get(id= pk)
     if request.method == 'POST':
@@ -4517,7 +4528,7 @@ class GeocodingTodayView(View):
         return render(request, 'listings/geocodingtoday.html', context)
 
 from difflib import get_close_matches
-
+@login_required
 def livraison_detail(request, ip):
     livraison = get_object_or_404(Livraison, id=ip)
     adresse = livraison.adress
@@ -4597,7 +4608,7 @@ def livraison_detail(request, ip):
         'dock_photos': dock_photos,
         'matching_dock': matching_dock,
     })
-
+@login_required
 def update_photo(request, pk):
     livraison = get_object_or_404(Livraison, pk=pk)
     PhotoFormSet = modelformset_factory(Photo, fields=('image',), extra=1, can_delete=True)
@@ -4623,7 +4634,7 @@ def update_photo(request, pk):
     })
 
 
-
+@login_required
 def create_loading_dock(request):
     if request.method == 'POST':
         form = LoadingDockForm(request.POST, request.FILES)
@@ -4638,7 +4649,7 @@ def create_loading_dock(request):
 from datetime import datetime, timedelta
 from django.shortcuts import render, redirect
 from .models import Livraison
-
+@login_required
 def livraisonstomorrow(request):
     date_str = request.GET.get('date', datetime.now().date().strftime('%Y-%m-%d'))
     selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
@@ -4670,10 +4681,10 @@ def livraisonstomorrow(request):
     }
 
     return render(request, 'listings/livraisonstomorrow.html', context)
-
+@login_required
 def success_page(request):
     return render(request, 'listings/success.html')
-
+@login_required
 def livraisonstoday(request):
     recuperation = "oui"
     today = datetime.now().date()
@@ -4698,7 +4709,7 @@ def livraisonstoday(request):
         return redirect('unauthorized')
 
     return render(request, 'listings/livraisonstoday.html', context)
-
+@login_required
 def livraisonsresp(request):
     today = datetime.now().date()
     tomorrow = today + timedelta(1)
@@ -4730,7 +4741,7 @@ def livraisonsresp(request):
                                                               'tomorrow': tomorrow,
 
                                                               })
-
+@login_required
 def recuptoday(request):
     today = datetime.now().date()
     tomorrow = today + timedelta(1)
@@ -4752,7 +4763,7 @@ def recuptoday(request):
         'recupsencours': recupsencours,
         'recuperationstot': recuperationstot,
     })
-
+@login_required
 def faq(request):
     today = datetime.now().date()
     tomorrow = today + timedelta(1)
@@ -4760,7 +4771,7 @@ def faq(request):
     return render(request, 'listings/faq.html', context={
                                                               })
 
-
+@login_required
 def livraisonrespdetail(request, ip):
     today = datetime.now().date()
     tomorrow = today + timedelta(1)
@@ -4791,7 +4802,7 @@ def livraisonrespdetail(request, ip):
                                                               'tomorrow':tomorrow,
                                                               'formbis':formbis,
                                                               })
-
+@login_required
 def livraisonsventesdetail(request, pk):
     today = datetime.now().date()
     tomorrow = today + timedelta(1)
@@ -4821,7 +4832,7 @@ def livraisonsventesdetail(request, pk):
                                                               'tomorrow':tomorrow,
                                                               'formbis':formbis,
                                                               })
-
+@login_required
 def livraisonshier(request):
 
     today = datetime.now().date()
@@ -4884,7 +4895,7 @@ class Livraisonsdrag(ListView):
         return context
 
 
-
+@login_required
 def delete_livraison(request, pk):
     # remove the film from the user's list
 
@@ -4898,7 +4909,7 @@ def delete_livraison(request, pk):
     livraisons = Livraison.objects.filter(date=tomorrow)
 
     return render(request, 'listings/partials/livraisonslist.html', {'livraisons': livraisons})
-
+@login_required
 def sort(request):
     film_pks_order = request.POST.getlist('film_order')
     films = []
@@ -4953,7 +4964,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from .models import Checklist, ChecklistMDPhoto, ChecklistRecupPhoto
 from .forms import ChecklistMDPhotoFormSet, ChecklistRecupPhotoFormSet, RapportForm, RapportRecupForm
 
-
+@login_required
 def ChecklistmdDetailView(request, pk):
     checklist = get_object_or_404(Checklist, pk=pk)
     md_photos = ChecklistMDPhoto.objects.filter(checklist=checklist)
@@ -5018,7 +5029,7 @@ from django.shortcuts import redirect
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
-
+@login_required
 def custom_login(request):
     print("Custom login view triggered!")  # Check if the view is being called
     if request.method == 'POST':
@@ -5049,7 +5060,7 @@ def custom_login(request):
 
 
 
-
+@login_required
 def livraisonsdrag_detailtoday(request, pk):
     livraison = Livraison.objects.get(id=pk)
     context = {'livraison': livraison}
@@ -5067,7 +5078,7 @@ def livraisonsdrag_detailtoday(request, pk):
         return redirect('unauthorized')
     
     return render(request, 'listings/partials/edit-livraison-formtoday.html', context)
-
+@login_required
 def livraison_edit_formtoday(request, pk):
     livraison = Livraison.objects.get(id=pk)
     form = LivraisonDragFormtoday(instance=livraison)
@@ -5093,7 +5104,7 @@ class Livraisonsdragtoday(ListView):
         return livraisons
 
 
-
+@login_required
 def add_livraisontoday(request):
     nom = request.POST.get('filmname')
     date = request.POST.get('date')
@@ -5106,7 +5117,7 @@ def add_livraisontoday(request):
     livraisons = Livraison.objects.filter(date=today)
 
     return render(request, 'listings/partials/livraisonslisttoday.html', {'livraisons': livraisons})
-
+@login_required
 def livraisonsdrag_detail(request, pk):
     livraison = Livraison.objects.get(id=pk)
     context = {'livraison': livraison}
@@ -5123,7 +5134,7 @@ def livraisonsdrag_detail(request, pk):
     if not request.user.is_superuser:
         return redirect('unauthorized')
     return render(request, 'listings/partials/edit-livraison-form.html', context)
-
+@login_required
 def livraison_edit_form(request, livraison_id):
     livraison = get_object_or_404(Livraison, id=livraison_id)
     form = LivraisonDragForm(instance=livraison)
@@ -5139,13 +5150,13 @@ def livraison_edit_form(request, livraison_id):
         return redirect('unauthorized')
     return render(request, 'listings/partials/livraison_edit_form.html', {'form': form, 'livraison': livraison})
 
-
+@login_required
 def commentcamarche(request):
     context = {}
     if not request.user.is_superuser:
         return redirect('unauthorized')
     return render(request, 'listings/commentcamarche.html', context)
-
+@login_required
 def routesfrigo(request):
     today = timezone.now().date()
     routes = Route.objects.filter(date=today)
@@ -5161,7 +5172,7 @@ def routesfrigo(request):
 
 from datetime import datetime, timedelta
 from django.shortcuts import redirect
-
+@login_required
 def duplicate_model(request, model_id):
     original_object = Livraison.objects.get(pk=model_id)
     today = datetime.now().date()
@@ -5253,7 +5264,7 @@ def duplicate_model(request, model_id):
 
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
-
+@login_required
 def duplicate_checklist(request, checklist_id):
     original_checklist = get_object_or_404(Checklist, pk=checklist_id)
 

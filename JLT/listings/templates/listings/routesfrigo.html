@@ -91,6 +91,16 @@
     color: #127BFF;
   }
 
+  .delivery-item input[type="checkbox"] {
+    width: 24px;       /* Set a larger width */
+    height: 24px;      /* Set a larger height */
+    margin-right: 10px; /* Add space between the checkbox and text */
+    cursor: pointer;    /* Change cursor to pointer when hovering */
+    transform: scale(1.5); /* Scale up the checkbox */
+    -webkit-appearance: checkbox; /* Ensure correct appearance across browsers */
+    appearance: checkbox; /* Ensure correct appearance across browsers */
+}
+
     /* Responsive adjustments */
     @media (max-width: 768px) {
         .route-container {
@@ -111,13 +121,16 @@
 <h2>{{ journe.nom }}</h2>
 {% endfor %}
 
-
+<br>
+<br>
 
 <div class="routes">
     {% for route in routes %}
-    <div class="route-container">
+    <div class="route-container" id="route-{{ route.id }}">
         <div class="route-header" onclick="toggleDeliveries(this)">
-            Départ {{ route.heure_depart }} {{ route.livreur.nom }}
+            Départ {{ route.heure_depart }} {% for livreur in route.livreur.all %}
+            {{ livreur.nom }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
             <i class="fa-solid fa-chevron-down"></i>
         </div>
 
@@ -125,10 +138,12 @@
             {% if route.livraisons.all %}
             {% for livraison in route.livraisons.all %}
             {% if livraison.recuperation == False %}
-            <a href="{% url 'livraison-detail' livraison.id %}" style="text-decoration: none;">
+            
             <div class="delivery-item">
                 <h4>{{ livraison.nom }}</h4>
                 <p><strong>Heure Livraison:</strong> {{ livraison.heure_livraison }}</p>
+                <!-- Checkbox for delivery -->
+                <input type="checkbox" class="livraison-checkbox" onchange="checkAllDeliveries({{ route.id }})">
                 
                 {% if 'cambro' in livraison.infodetail|lower %}
                 <i class="fa-solid fa-box-archive fa-2xl" style="color: #a24716;"></i>                
@@ -311,10 +326,7 @@
    <box-icon name='coffee-togo' color='#74C0FC' size='md'></box-icon>
 {% endif %}
 
-            
-    {% if 'glace' in livraison.infodetail|lower %}
-    <i class="fa-regular fa-snowflake fa-2xl" style="color: #74C0FC;"></i>
-    {% endif %}
+        
     {% if '1 thé thermos' in livraison.infodetail|lower %}
     <i class="fa-solid fa-mug-hot fa-2xl" style="color: #74C0FC;"></i>
 {% elif '2 thé thermos' in livraison.infodetail|lower %}
@@ -374,10 +386,9 @@
                     <i class="fa-solid fa-fire-flame-curved fa-2xl" style="color: #f4a15d;"></i>
                     {% endif %}
                     {% if 'checklist' in livraison.infodetail|lower or 'checklist' in livraison.nom|lower %}
-                    <i class="fa-solid fa-cart-flatbed fa-2xl"></i>>
+                    <i class="fa-solid fa-cart-flatbed fa-2xl"></i>
                     {% endif %}
             </div>
-            </a>
             {% endif %}
         {% endfor %}
 {% else %}
@@ -393,8 +404,8 @@
 <br>
 <nav class="bottom-navbar">
     <ul>
-        <li><a  href="{% url 'journees-list'%}" class="nav__link"><i class="fa-solid fa-calendar-days"></i>
-            <span class="nav__name">Journées</span>
+        <li ><a  href="{% url 'journees-list'%}" class="nav__link"><i class="fa-solid fa-calendar-days"></i>
+            <span>Journées</span>
           </a></li>
       </ul>
   </nav>
@@ -411,6 +422,21 @@
         } else {
             deliveryList.style.display = "none";
             icon.classList.add('collapsed');
+        }
+    }
+
+    function checkAllDeliveries(routeId) {
+        const checkboxes = document.querySelectorAll(`#route-${routeId} .livraison-checkbox`);
+        const routeContainer = document.getElementById(`route-${routeId}`);
+
+        // Check if all checkboxes are checked
+        const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
+
+        // Change the route container's background color
+        if (allChecked) {
+            routeContainer.style.backgroundColor = '#d4edda'; // Light green for all checked
+        } else {
+            routeContainer.style.backgroundColor = 'white'; // Reset to white
         }
     }
 </script>
