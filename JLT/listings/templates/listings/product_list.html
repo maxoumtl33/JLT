@@ -30,18 +30,41 @@
                 </li>
                 {% endif %}
                 {% if is_admin %}
-                <li class="nav-item">
-                    <a href="{% url 'acceuilresponsables' %}" class="nav-link text-primary">
+                <li class="nav-item" style="margin-right: 15px;">
+                    <a href="{% url 'acceuilresponsables' %}" class="nav__link">
                         <i class="fa-solid fa-user-ninja"></i>
-                        Menu admin
+                        <span>Menu admin</span>
                     </a>
+                </li>
+                <li class="nav-item">
+                    <button type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#productModal">
+                        <i class="fa-solid fa-circle-plus"></i><span>Créer produit</span>
+                    </button>
                 </li>
                 {% endif %}
             </ul>
         </div>
     </div>
 </nav>
-
+<!-- Modal -->
+<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productModalLabel">Créer nouveau produit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Product creation form inside modal -->
+                <form method="POST">
+                    {% csrf_token %}
+                    {{ product_form.as_p }}
+                    <button type="submit" name="product-form" class="btn btn-primary">Créer produit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="container py-5">
     <form method="get" class="d-flex justify-content-end mb-3">
         <input type="text" name="query" value="{{ query }}" class="form-control w-25" placeholder="Rechercher un produit...">

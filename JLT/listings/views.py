@@ -1380,14 +1380,14 @@ def creerchecklist(request):
     ]
 
     # Fetch checklists for the selected month
-    checklists = Checklist.objects.filter(date__month=int(selected_month))
+    checklists = Checklist.objects.filter(date__month=int(selected_month), is_active=True)
 
 
     form2 = ChecklistForm()
     selected_date = date(current_year, selected_month, selected_day)
     # Assume created and modified status are marked by a boolean or similar field
-    created_checklists = Checklist.objects.filter(date=selected_date, created=True)
-    modified_checklists = Checklist.objects.filter(date=selected_date, modified=True)
+    created_checklists = Checklist.objects.filter(date=selected_date, created=True, is_active=True)
+    modified_checklists = Checklist.objects.filter(date=selected_date, modified=True, is_active=True)
 
     created_count = created_checklists.count()
     modified_count = modified_checklists.count()
@@ -1395,11 +1395,11 @@ def creerchecklist(request):
     days_counts = {}
     for day in days_in_month:
         day_date = date(current_year, selected_month, day)
-        created_count = Checklist.objects.filter(date=day_date, statusro='nouveau').count()
-        modified_count = Checklist.objects.filter(date=day_date, statusro='modifié').count()
+        created_count = Checklist.objects.filter(date=day_date, statusro='nouveau', is_active=True).count()
+        modified_count = Checklist.objects.filter(date=day_date, statusro='modifié', is_active=True).count()
         
         # Fetch the checklist status for the day (assuming one or more checklists)
-        status = Checklist.objects.filter(date=day_date).aggregate(status=Max('status'))  # Adjust accordingly
+        status = Checklist.objects.filter(date=day_date, is_active=True).aggregate(status=Max('status'))  # Adjust accordingly
         days_counts[day] = {
             'created_count': created_count,
             'modified_count': modified_count,
@@ -3112,6 +3112,19 @@ def product_list(request):
 
     # Check user group memberships
     user_groups = request.user.groups.values_list('name', flat=True)
+    product_form = ProductsForm
+
+    if request.method == 'POST':
+        if 'product-form' in request.POST:
+            product_form = ProductsForm(request.POST, user=request.user)
+            if product_form.is_valid():
+                product = product_form.save()
+                
+                # Log the product creation
+                ProductLog.objects.create(product=product, created_by=request.user)
+                
+                messages.success(request, 'Nouveau produit créé avec succès.')
+                return HttpResponseRedirect(reverse('product_list'))
     context = {
         'page_obj': page_obj,
         'query': query,
@@ -3119,6 +3132,7 @@ def product_list(request):
         'is_checklist': 'checklist' in user_groups,
         'is_admin': 'admin' in user_groups,
         'is_paginated': paginator.num_pages > 1,
+        'product_form': product_form,
     }
 
     return render(request, 'listings/product_list.html', context)
