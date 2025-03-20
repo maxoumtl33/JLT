@@ -792,6 +792,15 @@ def checklistvoir_detail(request, checklist_id):
     .prefetch_related('product__category')  # Pre-fetch related category data
     .order_by('product__category__name')    # Order by the name of the category
 )
+        # Group unique checklist items by product
+    checklist_items_map = {}
+    
+    for item in normal_items:
+        if item.product_id not in checklist_items_map:
+            checklist_items_map[item.product_id] = item  # Keep the first occurrence
+    
+    checklist_items_unique = checklist_items_map.values()  # Get the unique checklist items
+
     nt_items = ChecklistItem.objects.filter(checklist=checklist, quantity__gt=0, commentaire__regex=r'\bnt\b')
     nt_items_ids = set(nt_items.values_list('id', flat=True))
     for item in normal_items:
@@ -877,13 +886,14 @@ def checklistvoir_detail(request, checklist_id):
 
     context = {
         'checklist': checklist,
-        'normal_items': normal_items,
+        'normal_items': checklist_items_unique,
         'products':products,
         'nt_items': nt_items,
         'quantity_change_logs': quantity_change_logs,
         'nt_items_ids': nt_items_ids,
     }
     return render(request, 'listings/checklistevoir_detail.html', context)
+
 @login_required
 def product_detail(request, item_id):
     item = get_object_or_404(ItemInv, pk=item_id)
@@ -1009,7 +1019,7 @@ from collections import defaultdict
 @login_required
 def checklist_detail(request, checklist_id):
     checklist = get_object_or_404(Checklist, pk=checklist_id)
-    checklist_items = ChecklistItem.objects.filter(checklist=checklist, quantity__gt=0)
+    checklist_items = ChecklistItem.objects.filter(checklist=checklist, quantity__gt=0).select_related('product')
     checklist_products = checklist_items.values_list('product__id', flat=True)
     breuvages = ChecklistItem.objects.filter(checklist=checklist, product__category__name__in=["ALCOOL FORT", "SANS ALCOOL", "VINS",  "BIERES"], quantity__gt=0)
     checklist_documents = ChecklistDocument.objects.filter(checklist=checklist)
@@ -1058,9 +1068,9 @@ def checklist_detail(request, checklist_id):
     checklist_item_quantities = {
         item.product_id: item.quantity for item in checklist_items
     }
-   
-    checklist_item_comments = {item.product_id: item.commentaire for item in checklist_items}
     checklist_itemss = ChecklistItem.objects.select_related('product').filter(checklist=checklist, quantity__gt=0).prefetch_related('product__category')
+    checklist_item_comments = {item.product_id: item.commentaire for item in checklist_items}
+    
     
 
     checklist_items_by_category = {}
