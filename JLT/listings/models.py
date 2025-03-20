@@ -306,6 +306,9 @@ class Livraison(models.Model):
     contact_site = models.fields.CharField(null=True, blank=True, max_length=200, default=" ")
     vendeur = models.fields.CharField(null=True, blank=True, max_length=200, default=" ")
     position = models.IntegerField(default=0)
+    nom_client_signature = models.CharField(max_length=255, null=True, blank=True)
+    date_signature = models.DateField(null=True, blank=True)
+    signature = models.TextField(blank=True, null=True)  # Stores Base64 string
     photo = models.ImageField(upload_to='listings/media/commandesdetail', blank=True, null=True)
     def __str__(self):
         return f'{self.nom}'

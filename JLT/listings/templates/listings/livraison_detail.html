@@ -76,6 +76,10 @@
     font-size: 1.5rem;
     color: #4a90e2;
 }
+#signaturePad {
+    touch-action: none; /* Prevent scrolling while signing */
+    background-color: white; /* Ensure contrast */
+}
 
 .card-body img {
     transition: transform 0.3s ease;
@@ -420,6 +424,17 @@
               </div>
             </div>
           </div>
+          <div class="col-md-6">
+            <div class="card border-0">
+              <div class="card-body">
+                <h5 class="card-title">Signature</h5>
+                <p class="card-text">{{ livraison.nom_client_signature }}</p>
+                {% if livraison.signature %}
+                <img src="{{ livraison.signature }}" alt="Signature" width="150">
+                {% endif %}</p>
+              </div>
+            </div>
+          </div>
         </div>
       </li>
     </ul>
@@ -578,6 +593,25 @@
         <label for="commentaire" class="form-label">Commentaire</label>
         <textarea id="commentaire" name="commentaire" class="form-control" rows="3" placeholder="Ajouter un commentaire" required></textarea>
     </div>
+    <div class="mb-3">
+      <label for="nom_client_signature" class="form-label">Nom du Client</label>
+      <input 
+          type="text" 
+          id="nom_client_signature" 
+          name="nom_client_signature" 
+          class="form-control rounded-3 shadow-sm p-2" 
+          placeholder="Entrez le nom du client" 
+          required 
+          autocomplete="off">
+  </div>
+  
+
+    <label for="signaturePad">Signature</label>
+    <canvas id="signaturePad" width="300" height="150" style="border:1px solid #000; border-radius: 8px;"></canvas>
+    <button type="button" id="clearButton" class="btn btn-secondary btn-sm mt-2">Effacer</button>
+
+    <!-- Hidden Input for Signature -->
+    <input type="hidden" id="signatureInput" name="signature">
     <div class="swipe-container">
         <div id="swipeButton" class="swipe-button">
             <span class="swipe-text"><i class="fa-solid fa-circle-arrow-right" style="color: #63E6BE;"></i></i></span>
@@ -711,19 +745,88 @@ function resetButton() {
     });
   });
 
-  // JavaScript to handle the photo modal
-  const photoModal = document.getElementById('photoModal');
-  const modalImage = document.getElementById('modalImage');
+  
 
-    photoModal.addEventListener('show.bs.modal', function (event) {
-        // Get the button that triggered the modal
-        const button = event.relatedTarget; // Button that triggered the modal
-        const photoUrl = button.getAttribute('data-photo-url'); // Extract info from data-* attributes
+    document.addEventListener('DOMContentLoaded', function() {
+    const signaturePad = document.getElementById('signaturePad');
+    const signatureInput = document.getElementById('signatureInput');
+    const clearButton = document.getElementById('clearButton');
 
-        // Update the modal's content
-        modalImage.src = photoUrl; // Set the source of the modal image
-    });
+    if (!signaturePad || !signatureInput || !clearButton) {
+        console.error("One or more required elements are missing.");
+        return;
+    }
 
+    const ctx = signaturePad.getContext('2d');
+    if (!ctx) {
+        console.error("Canvas context could not be initialized.");
+        return;
+    }
+
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#000';
+
+    let drawing = false;
+
+    const getPosition = (e) => {
+        const rect = signaturePad.getBoundingClientRect();
+        const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+        const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+        return {
+            x: clientX - rect.left,
+            y: clientY - rect.top
+        };
+    };
+
+    const startDrawing = (e) => {
+        e.preventDefault();
+        drawing = true;
+        const pos = getPosition(e);
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+        console.log("Start Drawing:", pos);
+    };
+
+    const draw = (e) => {
+        if (!drawing) return;
+        e.preventDefault();
+        const pos = getPosition(e);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+        console.log("Drawing:", pos);
+    };
+
+    const stopDrawing = () => {
+        drawing = false;
+        saveSignature();
+        console.log("Stopped Drawing");
+    };
+
+    const clearSignature = () => {
+        ctx.clearRect(0, 0, signaturePad.width, signaturePad.height);
+        signatureInput.value = '';
+        console.log("Signature Cleared");
+    };
+
+    const saveSignature = () => {
+        const dataURL = signaturePad.toDataURL();
+        signatureInput.value = dataURL;
+        console.log("Signature Saved:", dataURL);
+    };
+
+    signaturePad.addEventListener('mousedown', startDrawing);
+    signaturePad.addEventListener('mousemove', draw);
+    signaturePad.addEventListener('mouseup', stopDrawing);
+    signaturePad.addEventListener('mouseleave', stopDrawing);
+
+    signaturePad.addEventListener('touchstart', startDrawing);
+    signaturePad.addEventListener('touchmove', draw);
+    signaturePad.addEventListener('touchend', stopDrawing);
+
+    clearButton.addEventListener('click', clearSignature);
+});
 
 
 

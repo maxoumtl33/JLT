@@ -5,6 +5,7 @@ from .models import Livreur
 from .models import Tacheafaire
 from .models import Journee
 from .models import Photo
+import base64
 from .models import Phototaches
 from django.db.models import Sum
 from .models import Route, Recupfrigo
@@ -116,7 +117,7 @@ def import_xlsx(request):
     if request.method == 'POST':
         print("✅ POST request received!")
         form = XLSXUploadForm(request.POST, request.FILES)
-        
+
         if form.is_valid():
             print("✔️ Form is valid!")
             file = form.cleaned_data['file']
@@ -238,7 +239,7 @@ from .models import Livraison
 def livraisons_without_date(request):
     livraisons = Livraison.objects.filter(date__isnull=True)  # Fetch only those without a date
     journees = Journee.objects.all()
-    
+
     return render(request, 'listings/livraisons_without_date.html', {'livraisons': livraisons, 'journees':journees,})
 
 from django.shortcuts import get_object_or_404, redirect
@@ -285,7 +286,7 @@ def bulk_edit_livraisons(request):
                 # Update individual fields
                 livraison.nom = request.POST.get(f"nom_{livraison_id}", livraison.nom)
                 livraison.convives = request.POST.get(f"convives_{livraison_id}", livraison.convives)
-                
+
 
                 # Apply bulk date to both `date` and `date_livraison`
                 if bulk_date:
@@ -307,7 +308,7 @@ def bulk_edit_livraisons(request):
 @login_required
 def edit_task_form(request, task_id):
     task = get_object_or_404(Livraison, id=task_id)
-    
+
     if request.method == 'POST':
         form = LivraisonDragForm(request.POST, instance=task)
         if form.is_valid():
@@ -329,7 +330,7 @@ def user_login(request):
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(request, username=username, password=password)
-        
+
         if user is not None:
             login(request, user)
 
@@ -352,12 +353,12 @@ from listings.models import UserProfile
 class CustomPasswordChangeView(PasswordChangeView):
     def form_valid(self, form):
         response = super().form_valid(form)
-        
+
         # After password change, reset the 'force_password_change' flag
         user_profile = self.request.user.userprofile
         user_profile.force_password_change = False
         user_profile.save()
-        
+
         return response
 
 
@@ -379,7 +380,7 @@ def create_ordercuisine(request):
             if ordered_quantity and int(ordered_quantity) > 0:
                 # Create or update the order
                 order, created = OrderCuisine.objects.get_or_create(
-                    user=request.user, 
+                    user=request.user,
                     item=item,
                     defaults={'ordered_quantity': ordered_quantity}
                 )
@@ -434,7 +435,7 @@ def delete_order_cuisine(request, order_id):
 @login_required
 def order_listcuisine(request):
     search_date = request.GET.get('search_date', None)
-    
+
     if search_date:
         # Convert string to date
         search_date = datetime.strptime(search_date, '%Y-%m-%d').date()
@@ -520,7 +521,7 @@ def geocode_all_livraisons(request):
 
 import random
 
-TASK_NAMES = ['Nettoyer machines à café', 'Nettoyer intérieur des camions', 
+TASK_NAMES = ['Nettoyer machines à café', 'Nettoyer intérieur des camions',
               'Faire boites de thé + café', 'Nettoyer dock de livraison', 'Mettre essence camions']
 @login_required
 def create_random_task(request):
@@ -639,7 +640,7 @@ class ChecklistItemDeleteAjaxView(View):
         except ChecklistItem.DoesNotExist:
             response_data = {'status': 'error', 'message': 'Objet non trouvé'}
         return JsonResponse(response_data)
-    
+
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 from django.utils.dateparse import parse_date
@@ -648,7 +649,7 @@ from django.db.models import F
 @require_GET
 def get_checklist_items_for_date(request):
     date_str = request.GET.get('date')
-    
+
     if not date_str:
         return JsonResponse({'error': 'No date provided'}, status=400)
 
@@ -695,7 +696,7 @@ def voir_checklist(request):
 
     # Fetch checklists for the selected month
     checklists = Checklist.objects.filter(date__month=int(selected_month))
-    
+
     change_logs = ChecklistItemChangeLog.objects.all().order_by('-timestamp')
     change_logs_checklist = ChecklistChangeLog.objects.all().order_by('-timestamp')
 
@@ -714,7 +715,7 @@ def voir_checklist(request):
           .order_by('product__category', 'product__name')  # Filter to only include items with quantity > 0
     )
 
-    
+
     # Prepare the response data
     # Prepare the response data
     data = {
@@ -756,12 +757,12 @@ def voir_checklist(request):
 def view_items_by_category(request, category):
     # Fetch checklist items for the specified category
     checklist_items = ChecklistItem.objects.filter(product__category=category)
-    
+
     context = {
         'checklist_items': checklist_items,
         'category': category,
     }
-    
+
     return render(request, 'listings/items_by_category.html', context)
 
 @login_required
@@ -797,11 +798,11 @@ def checklistvoir_detail(request, checklist_id):
 )
         # Group unique checklist items by product
     checklist_items_map = {}
-    
+
     for item in normal_items:
         if item.product_id not in checklist_items_map:
             checklist_items_map[item.product_id] = item  # Keep the first occurrence
-    
+
     checklist_items_unique = checklist_items_map.values()  # Get the unique checklist items
 
     nt_items = ChecklistItem.objects.filter(checklist=checklist, quantity__gt=0, commentaire__regex=r'\bnt\b')
@@ -809,7 +810,7 @@ def checklistvoir_detail(request, checklist_id):
     for item in normal_items:
         last_log = QuantityChangeLog.objects.filter(checklist_item=item).order_by('-timestamp').first()
         item.previous_status = last_log.previous_status if last_log else "N/A"
-        item.previous_quantity = last_log.previous_quantity if last_log else item.quantity  
+        item.previous_quantity = last_log.previous_quantity if last_log else item.quantity
 
     for item in nt_items:
         if item.status != 'valide':
@@ -821,7 +822,7 @@ def checklistvoir_detail(request, checklist_id):
     if request.method == 'POST':
 
         note = request.POST.get('note')
-        if note is not None:  
+        if note is not None:
             checklist.notechecklist = note
             checklist.save()
             return redirect('checklistvoir-detail', checklist_id=checklist.id)
@@ -836,18 +837,18 @@ def checklistvoir_detail(request, checklist_id):
         product = checklist_item.product
 
         if product:
-        
+
             checklist_item = get_object_or_404(ChecklistItem, id=item_id, checklist=checklist)
             product = checklist_item.product
 
             if status == 'remettrestock' and product:
                 product.adjust_quantity(quantity)
-                checklist_item.is_stock_updated = True 
+                checklist_item.is_stock_updated = True
                 product.save()
 
             if status == 'remettrestockchange' and product:
                 product.adjust_quantity(quantity)
-                checklist_item.is_stock_updated = True 
+                checklist_item.is_stock_updated = True
                 product.save()
 
             # Store previous status for logging
@@ -859,7 +860,7 @@ def checklistvoir_detail(request, checklist_id):
             if status == 'complete' and product:
                 product.adjust_quantity(-current_quantity)  # Subtract quantity
                 product.save()
-            
+
 
             if status == 'denied' and product:
                 checklist_item.status = status
@@ -906,7 +907,7 @@ def product_detail(request, item_id):
     }
     return render(request, 'listings/product_detail.html', context)
 
-    
+
 from django.shortcuts import get_object_or_404, redirect
 from django.http import JsonResponse
 from .models import ChecklistItem, Product
@@ -983,7 +984,7 @@ def add_to_checklist(request, checklist_id):
 
                 # Debugging - Print values
                 print(f"Product ID: {product_id}, Quantity: {quantity}, Comment: '{commentaire}'")
-                
+
                 # Check the condition for quantity 0 with a comment
                 if quantity >= 0:
                     # Get or create the ChecklistItem
@@ -1073,8 +1074,8 @@ def checklist_detail(request, checklist_id):
     }
     checklist_itemss = ChecklistItem.objects.select_related('product').filter(checklist=checklist, quantity__gt=0).prefetch_related('product__category')
     checklist_item_comments = {item.product_id: item.commentaire for item in checklist_items}
-    
-    
+
+
 
     checklist_items_by_category = {}
 
@@ -1126,7 +1127,7 @@ def checklist_detail(request, checklist_id):
         # 🔹 After saving, reinitialize the formset to include at least one blank form
         return redirect('checklist-detail', checklist_id=checklist.id)
 
-    
+
     # Checklist form instance
     formbis = ChecklistForm(request.POST or None, instance=checklist, prefix='checklist_form')
     commentaire_form = CommentaireForm(request.POST or None, instance=checklist, prefix='commentaire_form')
@@ -1137,14 +1138,14 @@ def checklist_detail(request, checklist_id):
             product_form = ProductsForm(request.POST, user=request.user)
             if product_form.is_valid():
                 product = product_form.save()
-                
+
                 # Log the product creation
                 ProductLog.objects.create(product=product, created_by=request.user)
-                
+
                 messages.success(request, 'Nouveau produit créé avec succès.')
                 return HttpResponseRedirect(reverse('checklist-detail', args=[checklist_id]))
 
- 
+
 
 
     # Handle checklist form submission
@@ -1252,7 +1253,7 @@ def conseiller_dashboard(request):
     inactive_checklists = checklists.filter(is_active=False)
     paginator = Paginator(checklists, 10)  # Show 10 checklists per page
     page_number = request.GET.get('page')
-    
+
     # Retrieve the page object
     try:
         page_obj = paginator.page(page_number)
@@ -1260,7 +1261,7 @@ def conseiller_dashboard(request):
         page_obj = paginator.page(1)  # If page is not an integer, deliver first page
     except EmptyPage:
         page_obj = paginator.page(paginator.num_pages)  # If page is out of range, deliver last page
-    
+
 
     # Initialize both forms
     checklist_form = ChecklistForm(initial={'conseillere': conseiller_instance})
@@ -1341,13 +1342,13 @@ def update_checklist_status(request, checklist_id):
 def update_checklist_item(request):
     item_id = request.POST.get('item_id')
     product_id = request.POST.get('product_id')
-    
+
     # Safely convert quantity to integer
     quantity = int(request.POST.get('quantity'))  # Convert to integer
 
     # Get the checklist item
     checklist_item = get_object_or_404(ChecklistItem, id=item_id)
-    
+
     # Store original quantity for logging or processing
     original_quantity = checklist_item.quantity
 
@@ -1383,7 +1384,7 @@ def creerchecklist(request):
 
     current_year = date.today().year
     years = [year for year in range(current_year - 5, current_year + 1)]
-    
+
     selected_day = int(request.GET.get('day', 1))  # Default to the first day of the month if none selected
     current_year = date.today().year
     months = [(month, calendar.month_name[month]) for month in range(1, 13)]
@@ -1402,7 +1403,7 @@ def creerchecklist(request):
         # Limit to a maximum of 7 rows (7 days x 6 rows if overflow, note that normally only one row will be needed to display)
     # Calculate how many rows we need (84 slots for a month max, but we are only showing 7 rows)
     num_rows = (len(padded_days) + 6) // 7  # To fill the calendar
-    
+
     french_months = [
         "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
         "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
@@ -1426,7 +1427,7 @@ def creerchecklist(request):
         day_date = date(current_year, selected_month, day)
         created_count = Checklist.objects.filter(date=day_date, statusro='nouveau', is_active=True).count()
         modified_count = Checklist.objects.filter(date=day_date, statusro='modifié', is_active=True).count()
-        
+
         # Fetch the checklist status for the day (assuming one or more checklists)
         status = Checklist.objects.filter(date=day_date, is_active=True).aggregate(status=Max('status'))  # Adjust accordingly
         days_counts[day] = {
@@ -1444,10 +1445,10 @@ def creerchecklist(request):
             product_form = ProductsForm(request.POST, user=request.user)
             if product_form.is_valid():
                 product = product_form.save()
-                
+
                 # Log the product creation
                 ProductLog.objects.create(product=product, created_by=request.user)
-                
+
                 messages.success(request, 'Nouveau produit créé avec succès.')
 
                 return redirect('creerchecklist')
@@ -1463,7 +1464,7 @@ def creerchecklist(request):
         form2 = ChecklistForm()
 
 
- 
+
 
     context = {
         'checklists': checklists,
@@ -1489,7 +1490,7 @@ def creerchecklist(request):
         'is_ventes': request.user.groups.filter(name='ventes').exists(),
         'is_admin': request.user.groups.filter(name='admin').exists(),
     }
-    
+
     return render(request, 'listings/checklistcreate.html', context)
 @login_required
 @require_POST
@@ -1528,7 +1529,7 @@ def get_checklists_for_day(request, day):
 
     # Retrieve only active checklists for the selected date
     checklists = Checklist.objects.filter(date=selected_date, is_active=True).select_related('conseillere').values(
-        'id', 'name', 'date', 'heure_livraison', 'nb_convive', 'status', 
+        'id', 'name', 'date', 'heure_livraison', 'nb_convive', 'status',
         'conseillere__user__username', 'added_on', 'statusro', 'previous_statusro'
     )
 
@@ -1536,7 +1537,7 @@ def get_checklists_for_day(request, day):
     modified_count = Checklist.objects.filter(date=selected_date, modified=True).count()
     # Prepare data for JSON response
     checklists_list = list(checklists)
-    
+
     # Format the date objects for JSON serialization
     for checklist in checklists_list:
         checklist['date'] = checklist['date'].strftime('%Y-%m-%d')
@@ -1600,13 +1601,13 @@ def generate_qr_code(request, product_id):
     # Get product details
     product = Product.objects.get(id=product_id)
     quantity = product.quantity  # You can include any relevant information for the QR code
-    
+
     # URL that will be encoded in the QR code
     product_url = reverse('product_quantity_update', args=[product_id])
-    
+
     # Generate the full URL including the domain
     full_url = request.build_absolute_uri(product_url)
-    
+
     # Create the QR code
     qr = qrcode.QRCode(
         version=1,
@@ -1616,10 +1617,10 @@ def generate_qr_code(request, product_id):
     )
     qr.add_data(full_url)  # Use the full URL with domain
     qr.make(fit=True)
-    
+
     # Create an image of the QR code
     img = qr.make_image(fill='black', back_color='white')
-    
+
     # Create an HTTP response with the image
     response = HttpResponse(content_type="image/png")
     img.save(response, "PNG")
@@ -1633,19 +1634,19 @@ from django.contrib.auth.models import User
 @login_required
 def update_product_quantity(request, product_id):
     product = Product.objects.get(id=product_id)
-    
+
     if request.method == 'POST':
         increment = request.POST.get('quantity')
-        
+
         # Ensure increment is a valid number
         if increment and increment.isdigit():
             # Get the previous quantity
             previous_quantity = product.quantity
-            
+
             # Add the increment to the current quantity
             product.quantity += int(increment)
             product.save()  # Save the updated product
-            
+
             # Log the change
             QuantityProductChangeLog.objects.create(
                 product=product,
@@ -1653,13 +1654,13 @@ def update_product_quantity(request, product_id):
                 new_quantity=product.quantity,
                 user=request.user,  # The user who made the change
             )
-            
+
             return redirect('product_list')  # Redirect to the product list or another page
-            
+
         else:
             # Handle invalid input (non-numeric or empty value)
             return render(request, 'listings/update_quantity.html', {'product': product, 'error': 'Veuillez entrer une quantité valide.'})
-    
+
     return render(request, 'listings/update_quantity.html', {'product': product})
 
 from django.shortcuts import render
@@ -1686,7 +1687,7 @@ def view_quantity_change_logs(request, product_id):
         'logs': logs,
         'product_logs': adjusted_logs,
     }
-    
+
     return render(request, 'listings/view_logs.html', context)
 
 
@@ -1696,7 +1697,7 @@ from .models import Checklist, Livraison
 @login_required
 def associate_livraison(request, checklist_id):
     checklist = get_object_or_404(Checklist, id=checklist_id)
-    
+
     # Find Livraison that has the same num_commande as the checklist
     livraison = Livraison.objects.filter(num_commande=checklist.num_contrat).first()
 
@@ -1782,13 +1783,13 @@ def search_productsbase(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
     products = Product.objects.filter(name__icontains=query, category = 1) if query else Product.objects.filter( category = 1)
-    
+
     product_data = []
     for product in products:
         # Get the quantity for each product from the checklist
         checklist_item = checklist_items.filter(product=product).first()
         quantity = checklist_item.quantity if checklist_item else 0
-        
+
         product_data.append({
             'id': product.id,
             'name': product.name,
@@ -1796,20 +1797,20 @@ def search_productsbase(request, checklist_id):
             'checklist_quantity': quantity,  # Add this to send the checklist quantity
             'commentaire': checklist_item.commentaire if checklist_item else '',  # Ensure commentaire is included
         })
-    
+
     return JsonResponse({'products': product_data})
 @login_required
 def search_productscfcdn(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
     products = Product.objects.filter(name__icontains=query, category = 17) if query else Product.objects.filter( category = 17)
-    
+
     product_data = []
     for product in products:
         # Get the quantity for each product from the checklist
         checklist_item = checklist_items.filter(product=product).first()
         quantity = checklist_item.quantity if checklist_item else 0
-        
+
         product_data.append({
             'id': product.id,
             'name': product.name,
@@ -1824,13 +1825,13 @@ def search_productsjetable(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
     products = Product.objects.filter(name__icontains=query, category = 2) if query else Product.objects.filter( category = 2)
-    
+
     product_data = []
     for product in products:
         # Get the quantity for each product from the checklist
         checklist_item = checklist_items.filter(product=product).first()
         quantity = checklist_item.quantity if checklist_item else 0
-        
+
         product_data.append({
             'id': product.id,
             'name': product.name,
@@ -1844,13 +1845,13 @@ def search_productsdecor(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
     products = Product.objects.filter(name__icontains=query, category = 3) if query else Product.objects.filter( category = 3)
-    
+
     product_data = []
     for product in products:
         # Get the quantity for each product from the checklist
         checklist_item = checklist_items.filter(product=product).first()
         quantity = checklist_item.quantity if checklist_item else 0
-        
+
         product_data.append({
             'id': product.id,
             'name': product.name,
@@ -1858,20 +1859,20 @@ def search_productsdecor(request, checklist_id):
             'checklist_quantity': quantity,  # Add this to send the checklist quantity
             'commentaire': checklist_item.commentaire if checklist_item else '',  # Ensure commentaire is included
         })
-    
+
     return JsonResponse({'products': product_data})
 @login_required
 def search_productsbar(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
     products = Product.objects.filter(name__icontains=query, category = 4) if query else Product.objects.filter( category = 4)
-    
+
     product_data = []
     for product in products:
         # Get the quantity for each product from the checklist
         checklist_item = checklist_items.filter(product=product).first()
         quantity = checklist_item.quantity if checklist_item else 0
-        
+
         product_data.append({
             'id': product.id,
             'name': product.name,
@@ -1879,20 +1880,20 @@ def search_productsbar(request, checklist_id):
             'checklist_quantity': quantity,  # Add this to send the checklist quantity
             'commentaire': checklist_item.commentaire if checklist_item else '',  # Ensure commentaire is included
         })
-    
+
     return JsonResponse({'products': product_data})
 @login_required
 def search_productscafe(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
     products = Product.objects.filter(name__icontains=query, category = 5) if query else Product.objects.filter( category = 5)
-    
+
     product_data = []
     for product in products:
         # Get the quantity for each product from the checklist
         checklist_item = checklist_items.filter(product=product).first()
         quantity = checklist_item.quantity if checklist_item else 0
-        
+
         product_data.append({
             'id': product.id,
             'name': product.name,
@@ -1900,12 +1901,12 @@ def search_productscafe(request, checklist_id):
             'checklist_quantity': quantity,  # Add this to send the checklist quantity
             'commentaire': checklist_item.commentaire if checklist_item else '',  # Ensure commentaire is included
         })
-    
+
     return JsonResponse({'products': product_data})
 @login_required
 def get_breuvages_products(request, checklist_id):
     breuvages_items = ChecklistItem.objects.filter(checklist_id=checklist_id, product__category="BREUVAGE")
-    
+
     product_data = [
         {
             'id': item.product.id,
@@ -1916,20 +1917,20 @@ def get_breuvages_products(request, checklist_id):
         }
         for item in breuvages_items
     ]
-    
+
     return JsonResponse({'products': product_data})
 @login_required
 def search_productstable(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
     products = Product.objects.filter(name__icontains=query, category = 7) if query else Product.objects.filter( category = 7)
-    
+
     product_data = []
     for product in products:
         # Get the quantity for each product from the checklist
         checklist_item = checklist_items.filter(product=product).first()
         quantity = checklist_item.quantity if checklist_item else 0
-        
+
         product_data.append({
             'id': product.id,
             'name': product.name,
@@ -1937,20 +1938,20 @@ def search_productstable(request, checklist_id):
             'checklist_quantity': quantity,  # Add this to send the checklist quantity
             'commentaire': checklist_item.commentaire if checklist_item else '',  # Ensure commentaire is included
         })
-    
+
     return JsonResponse({'products': product_data})
 @login_required
 def search_productsverre(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
     products = Product.objects.filter(name__icontains=query, category = 8) if query else Product.objects.filter( category = 8)
-    
+
     product_data = []
     for product in products:
         # Get the quantity for each product from the checklist
         checklist_item = checklist_items.filter(product=product).first()
         quantity = checklist_item.quantity if checklist_item else 0
-        
+
         product_data.append({
             'id': product.id,
             'name': product.name,
@@ -1958,20 +1959,20 @@ def search_productsverre(request, checklist_id):
             'checklist_quantity': quantity,  # Add this to send the checklist quantity
             'commentaire': checklist_item.commentaire if checklist_item else '',  # Ensure commentaire is included
         })
-    
+
     return JsonResponse({'products': product_data})
 @login_required
 def search_productsporcelaine(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
     products = Product.objects.filter(name__icontains=query, category = 9) if query else Product.objects.filter( category = 9)
-    
+
     product_data = []
     for product in products:
         # Get the quantity for each product from the checklist
         checklist_item = checklist_items.filter(product=product).first()
         quantity = checklist_item.quantity if checklist_item else 0
-        
+
         product_data.append({
             'id': product.id,
             'name': product.name,
@@ -1979,20 +1980,20 @@ def search_productsporcelaine(request, checklist_id):
             'checklist_quantity': quantity,  # Add this to send the checklist quantity
             'commentaire': checklist_item.commentaire if checklist_item else '',  # Ensure commentaire is included
         })
-    
+
     return JsonResponse({'products': product_data})
 @login_required
 def search_productscanape(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
     products = Product.objects.filter(name__icontains=query, category = 10) if query else Product.objects.filter( category = 10)
-    
+
     product_data = []
     for product in products:
         # Get the quantity for each product from the checklist
         checklist_item = checklist_items.filter(product=product).first()
         quantity = checklist_item.quantity if checklist_item else 0
-        
+
         product_data.append({
             'id': product.id,
             'name': product.name,
@@ -2000,20 +2001,20 @@ def search_productscanape(request, checklist_id):
             'checklist_quantity': quantity,  # Add this to send the checklist quantity
             'commentaire': checklist_item.commentaire if checklist_item else '',  # Ensure commentaire is included
         })
-    
+
     return JsonResponse({'products': product_data})
 @login_required
 def search_productscuisson(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
     products = Product.objects.filter(name__icontains=query, category = 11) if query else Product.objects.filter( category = 11)
-    
+
     product_data = []
     for product in products:
         # Get the quantity for each product from the checklist
         checklist_item = checklist_items.filter(product=product).first()
         quantity = checklist_item.quantity if checklist_item else 0
-        
+
         product_data.append({
             'id': product.id,
             'name': product.name,
@@ -2021,20 +2022,20 @@ def search_productscuisson(request, checklist_id):
             'checklist_quantity': quantity,  # Add this to send the checklist quantity
             'commentaire': checklist_item.commentaire if checklist_item else '',  # Ensure commentaire is included
         })
-    
+
     return JsonResponse({'products': product_data})
 @login_required
 def search_productsservice(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
     products = Product.objects.filter(name__icontains=query, category = 12) if query else Product.objects.filter( category = 12)
-    
+
     product_data = []
     for product in products:
         # Get the quantity for each product from the checklist
         checklist_item = checklist_items.filter(product=product).first()
         quantity = checklist_item.quantity if checklist_item else 0
-        
+
         product_data.append({
             'id': product.id,
             'name': product.name,
@@ -2042,20 +2043,20 @@ def search_productsservice(request, checklist_id):
             'checklist_quantity': quantity,  # Add this to send the checklist quantity
             'commentaire': checklist_item.commentaire if checklist_item else '',  # Ensure commentaire is included
         })
-    
+
     return JsonResponse({'products': product_data})
 @login_required
 def search_productsdivers(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
     products = Product.objects.filter(name__icontains=query, category = 6) if query else Product.objects.filter( category = 6)
-    
+
     product_data = []
     for product in products:
         # Get the quantity for each product from the checklist
         checklist_item = checklist_items.filter(product=product).first()
         quantity = checklist_item.quantity if checklist_item else 0
-        
+
         product_data.append({
             'id': product.id,
             'name': product.name,
@@ -2063,20 +2064,20 @@ def search_productsdivers(request, checklist_id):
             'checklist_quantity': quantity,  # Add this to send the checklist quantity
             'commentaire': checklist_item.commentaire if checklist_item else '',  # Ensure commentaire is included
         })
-    
+
     return JsonResponse({'products': product_data})
 @login_required
 def search_productsalcoolfort(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
     products = Product.objects.filter(name__icontains=query, category = 13) if query else Product.objects.filter( category = 13)
-    
+
     product_data = []
     for product in products:
         # Get the quantity for each product from the checklist
         checklist_item = checklist_items.filter(product=product).first()
         quantity = checklist_item.quantity if checklist_item else 0
-        
+
         product_data.append({
             'id': product.id,
             'name': product.name,
@@ -2084,20 +2085,20 @@ def search_productsalcoolfort(request, checklist_id):
             'checklist_quantity': quantity,  # Add this to send the checklist quantity
             'commentaire': checklist_item.commentaire if checklist_item else '',  # Ensure commentaire is included
         })
-    
+
     return JsonResponse({'products': product_data})
 @login_required
 def search_productsbieres(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
     products = Product.objects.filter(name__icontains=query, category = 14) if query else Product.objects.filter( category = 14)
-    
+
     product_data = []
     for product in products:
         # Get the quantity for each product from the checklist
         checklist_item = checklist_items.filter(product=product).first()
         quantity = checklist_item.quantity if checklist_item else 0
-        
+
         product_data.append({
             'id': product.id,
             'name': product.name,
@@ -2105,20 +2106,20 @@ def search_productsbieres(request, checklist_id):
             'checklist_quantity': quantity,  # Add this to send the checklist quantity
             'commentaire': checklist_item.commentaire if checklist_item else '',  # Ensure commentaire is included
         })
-    
+
     return JsonResponse({'products': product_data})
 @login_required
 def search_productsvins(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
     products = Product.objects.filter(name__icontains=query, category = 15) if query else Product.objects.filter( category = 15)
-    
+
     product_data = []
     for product in products:
         # Get the quantity for each product from the checklist
         checklist_item = checklist_items.filter(product=product).first()
         quantity = checklist_item.quantity if checklist_item else 0
-        
+
         product_data.append({
             'id': product.id,
             'name': product.name,
@@ -2126,20 +2127,20 @@ def search_productsvins(request, checklist_id):
             'checklist_quantity': quantity,  # Add this to send the checklist quantity
             'commentaire': checklist_item.commentaire if checklist_item else '',  # Ensure commentaire is included
         })
-    
+
     return JsonResponse({'products': product_data})
 @login_required
 def search_productssansalcool(request, checklist_id):
     query = request.GET.get('query', '')
     checklist_items = ChecklistItem.objects.filter(checklist_id=checklist_id)
     products = Product.objects.filter(name__icontains=query, category = 16) if query else Product.objects.filter( category = 16)
-    
+
     product_data = []
     for product in products:
         # Get the quantity for each product from the checklist
         checklist_item = checklist_items.filter(product=product).first()
         quantity = checklist_item.quantity if checklist_item else 0
-        
+
         product_data.append({
             'id': product.id,
             'name': product.name,
@@ -2147,7 +2148,7 @@ def search_productssansalcool(request, checklist_id):
             'checklist_quantity': quantity,  # Add this to send the checklist quantity
             'commentaire': checklist_item.commentaire if checklist_item else '',  # Ensure commentaire is included
         })
-    
+
     return JsonResponse({'products': product_data})
 @login_required
 def save_breuvages_report(request, checklist_id):
@@ -2156,14 +2157,14 @@ def save_breuvages_report(request, checklist_id):
             if item_id.startswith("consumed_"):
                 item_id = int(item_id.split("_")[1])
                 checklist_item = ChecklistItem.objects.get(id=item_id)
-                
+
                 consumed_quantity = int(consumed)
                 unconsumed_quantity = int(request.POST.get(f'unconsumed_{item_id}', 0))
-                
+
                 checklist_item.consumed_quantity = consumed_quantity
                 checklist_item.unconsumed_quantity = unconsumed_quantity
                 checklist_item.save()
-        
+
         return JsonResponse({"success": True})
     return JsonResponse({"success": False})
 
@@ -2311,7 +2312,7 @@ def create_recupfrigo(request):
 def create_recuplivreur(request, livraison_id):
     # Fetch the Livraison instance
     livraison = get_object_or_404(Livraison, id=livraison_id)
-    
+
     if request.method == 'POST':
         recuplivreur_form = RecuplivreurForm(request.POST)
         formset = RecuplivreurItemFormset(request.POST)
@@ -2325,7 +2326,7 @@ def create_recuplivreur(request, livraison_id):
             recuplivreur.date = livraison.date_livraison - timedelta(days=1) # Set the date from livraison
             recuplivreur.filled_by = request.user  # Track the user
             recuplivreur.filled_at = timezone.now()  # Track the timestamp
-            
+
             # Now save the recuplivreur object to the database
             recuplivreur.save()
 
@@ -2334,7 +2335,7 @@ def create_recuplivreur(request, livraison_id):
             for item in items:
                 item.recuplivreur = recuplivreur  # Set the recuplivreur for each item
                 item.save()
-            
+
             # Redirect after successful save
             return redirect(reverse('create_recuplivreur', args=[livraison_id]))
 
@@ -2440,9 +2441,9 @@ def journeedetailvente(request, id):
     livreurs = Livreur.objects.all()
     livraisonsroute = Livraison.objects.order_by('statut__position')
     today = now().date()
-    
+
     livraisons = Livraison.objects.order_by('statut', 'position').filter(date=journees.date)
-    livraisonsok = livraisons.filter(recuperation=False) 
+    livraisonsok = livraisons.filter(recuperation=False)
     recuperations = livraisons.filter(recuperation=True)
 
     context = {
@@ -2457,7 +2458,7 @@ def journeedetailvente(request, id):
         'recuperationo': "non",
         'rien': ".",
     }
-    
+
     return render(request, 'listings/journeedetailvente.html', context)
 
 @login_required
@@ -2479,7 +2480,7 @@ def journees_list(request):
     date=today
     ).prefetch_related('statut__livreur').distinct()  # Ensure distinct results
 
-    
+
 
 
     if request.method == 'GET' and 'date' in request.GET:
@@ -2503,7 +2504,7 @@ def journees_list(request):
         journees = paginator.page(paginator.num_pages)
 
     livreurs = Livreur.objects.all()
-    
+
     ventes = "Ventes"
     cuisine = "Cuisine"
     return render(request, 'listings/journees_list.html', context={'livraisons': livraisons,
@@ -2532,7 +2533,7 @@ def journees_list(request):
 def recupfrigo_detail(request, id):
     recupfrigo = Recupfrigo.objects.get(id=id)
     items = recupfrigo.itemsfrigo.all()
-    
+
     return render(request, 'listings/recupfrigo_detail.html', {
         'recupfrigo': recupfrigo,
         'items': items,
@@ -2544,7 +2545,7 @@ def recupfrigo_detail(request, id):
 def recuplivreur_detail(request, id):
     recuplivreur = Recuplivreur.objects.get(id=id)
     items = recuplivreur.items.all()
-    
+
     return render(request, 'listings/recuplivreur_detail.html', {
         'recuplivreur': recuplivreur,
         'items': items,
@@ -2556,11 +2557,11 @@ def recupslist(request):
     if request.user.is_authenticated:
         today = now().date()
         journees = Journee.objects.all().order_by('-date')
-        
-        
+
+
         # Initialize the form first
         form = DateFilterForm(request.GET or None)
-        
+
         # Process the form if it's a GET request and has a 'date' field
         if request.method == 'GET' and 'date' in request.GET:
             if form.is_valid():
@@ -2569,7 +2570,7 @@ def recupslist(request):
 
         paginator = Paginator(journees, 7)  # Show 7 items per page
         page = request.GET.get('page')
-        
+
         try:
             journees = paginator.page(page)
         except PageNotAnInteger:
@@ -2586,7 +2587,7 @@ def recupslist(request):
         return redirect('home')
 @login_required
 def routedetail(request, id):  # notez le paramètre id supplémentaire
-   
+
    route = Route.objects.get(id=id)
    today = datetime.now().date()
    tomorrow = today + timedelta(1)
@@ -2636,10 +2637,12 @@ def journee_detail(request, id):  # notez le paramètre id supplémentaire
             'nom': livraison.nom,
             'infodetail': livraison.infodetail if livraison.infodetail else "N/A",
             'heure_livraison': livraison.heure_livraison,
+            'heure_livraison_classement': livraison.heure_livraison_classement,
             'livreurs': [livreur.nom for livreur in livraison.statut.livreur.all()] if livraison.statut else ["Aucun livreur"],  # Handle ManyToManyField
             'heure_depart': livraison.statut.heure_depart if livraison.statut else "Non défini",
             'recuperation': livraison.recuperation,
             'status': livraison.status,
+            'statut.heure_depart': livraison.statut.heure_depart,
         }
         for livraison in livraisonss
     ]
@@ -2692,7 +2695,7 @@ def livreur_list(request):
 @login_required
 def validate_livraison(request, livraison_id):
     livraison = get_object_or_404(Livraison, id=livraison_id)
-    
+
     if request.method == 'POST':
         form = LivraisonForm(request.POST, instance=livraison)
         if form.is_valid():
@@ -2707,7 +2710,7 @@ def validate_livraison(request, livraison_id):
                     'redirect_url': reverse('livraison-detail', args=[livraison.id]),  # Ensure you pass the correct argument
                 })
             return redirect('livraison-detail', ip=livraison.id)  # Use `ip` or `livraison_id` based on your URL config
-    
+
     return redirect('livraison-detail', ip=livraison.id)  # Again, use `ip` or `livraison_id` accordingly
 
 @login_required
@@ -2733,7 +2736,7 @@ def taskdetail(request, id):
     if request.method == 'POST':
         form = TaskUpdateForm(request.POST, instance=task)
         formbis = PhotoTachesFormSet(request.POST, request.FILES, queryset=Phototaches.objects.filter(tache=task))
-        
+
         if form.is_valid():
             # Save the task instance first
             task = form.save()
@@ -2749,7 +2752,7 @@ def taskdetail(request, id):
             formbis.save_m2m()
 
             return redirect(request.META.get('HTTP_REFERER', 'task_list'))  # Redirect after save
-        
+
 
     else:
         form = TaskUpdateForm(instance=task)
@@ -2760,7 +2763,7 @@ def taskdetail(request, id):
 def view_shifts_by_date(request):
     # Get date from the request or use today’s date as default
     selected_date = request.GET.get('date', now().date())
-    
+
     # Fetch all shifts for that date
     shifts = Shift.objects.filter(date=selected_date).select_related('livreur')
     if not request.user.is_superuser:
@@ -2785,10 +2788,10 @@ class CustomPasswordChangeView(PasswordChangeView):
         if hasattr(self.request.user, 'userprofile'):
             user_profile = self.request.user.userprofile
             print(f"Before Update - force_password_change: {user_profile.force_password_change}")
-            
+
             user_profile.force_password_change = False
             user_profile.save()
-            
+
             print(f"After Update - force_password_change: {user_profile.force_password_change}")
         else:
             print("UserProfile does not exist for this user.")
@@ -2842,9 +2845,9 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
             'heure_livraison': livraison.heure_livraison,
         }
         for livraison in livraisonss
-        
+
     ]
-        
+
 
 
         return render(request, "listings/dashboard.html", context={'livreur':livreur,
@@ -2869,7 +2872,7 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
                                                                 'taches':taches,
                                                                 'tacheok':tacheok,
                                                                 'tacheko':tacheko,
-                                                                
+
 
                                                                 })
     else:
@@ -2938,7 +2941,7 @@ def dashboard_stats(request):
     total_checklists = Checklist.objects.filter(date__range=[start_date, end_date], is_active=True).count()
     # Calculate total convives for livraisons in the selected date range
     total_convives = Livraison.objects.filter(date__range=[start_date, end_date]).aggregate(total_convives=Sum('convives'))['total_convives'] or 0
-    
+
 
     # Prepare counts of checklist items by status
     checklist_stats = ChecklistItem.objects.filter(checklist__date__range=[start_date, end_date], checklist__is_active=True).values('status').annotate(total=Count('id'))
@@ -2947,7 +2950,7 @@ def dashboard_stats(request):
         status_totals[stat['status']] = stat['total']
 
     checklist_items = ChecklistItem.objects.all()
-    
+
     # Get the selected checklist item
     selected_item_id = request.GET.get('checklist_item')
     selected_item_total = None
@@ -2966,7 +2969,7 @@ def dashboard_stats(request):
     checklist_items_data = ChecklistItem.objects.filter(checklist__date__range=[start_date, end_date], quantity__gt=0, checklist__is_active=True) \
             .values('product__name') \
             .annotate(total_quantity=Sum('quantity'))
-    
+
     total_checklist_items = checklist_items_data.aggregate(total=Sum('total_quantity'))['total'] or 0
 
     livraisons = Livraison.objects.filter(date__range=[start_date, end_date])
@@ -2974,7 +2977,7 @@ def dashboard_stats(request):
         .values('nom', 'place_id') \
         .annotate(total=Count('id')) \
         .order_by('-total')[:3]  # Get the top 3 entries, focusing on names
-    
+
     # Group livraisons by place_id and count them
     livraison_counts = livraisons.values('place_id', 'nom').annotate(total=Count('id')).order_by('place_id')
 
@@ -2991,7 +2994,7 @@ def dashboard_stats(request):
                 'place_id': place_id,
                 'total': 0,
             }
-        
+
         grouped_livraisons[key]['total'] += livraison['total']
 
     context = {
@@ -3021,7 +3024,7 @@ def create_shift(request):
 
     if request.method == 'POST':
         global_shift_date = request.POST.get("global_shift_date")
-        
+
         if not global_shift_date:
             return render(request, 'listings/create_shift.html', {
                 'liste_livreur': liste_livreur,
@@ -3171,10 +3174,10 @@ def product_list(request):
             product_form = ProductsForm(request.POST, user=request.user)
             if product_form.is_valid():
                 product = product_form.save()
-                
+
                 # Log the product creation
                 ProductLog.objects.create(product=product, created_by=request.user)
-                
+
                 messages.success(request, 'Nouveau produit créé avec succès.')
                 return HttpResponseRedirect(reverse('product_list'))
     context = {
@@ -3249,7 +3252,7 @@ class DistanceView(View):
             obj.save()
 
         return redirect('my_distance_view')
-    
+
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -3370,8 +3373,8 @@ class MapAujourView(View):
         date_str = request.GET.get('date', datetime.now().date().strftime('%Y-%m-%d'))
         selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
 
-        matin = ['05h00', '05h15', '05h30', '05h45', '06h00', '06h15', '06h30', '06h45', 
-                 '07h00', '07h15', '07h30', '07h45', '08h00', '08h15', '08h30', '08h45', 
+        matin = ['05h00', '05h15', '05h30', '05h45', '06h00', '06h15', '06h30', '06h45',
+                 '07h00', '07h15', '07h30', '07h45', '08h00', '08h15', '08h30', '08h45',
                  '09h00', '09h15', '09h30', '09h45', 'recup']
 
         form = RoutedetailForm()
@@ -3409,12 +3412,12 @@ class MapAujourView(View):
         }
 
         return render(request, 'listings/mapmatinaujour.html', context)
-    
+
 class MapApremAujourView(View):
     def get(self, request):
         key = settings.GOOGLE_API_KEY
         date_str = request.GET.get('date', datetime.now().date().strftime('%Y-%m-%d'))
-        selected_date = datetime.strptime(date_str, '%Y-%m-%d').date() 
+        selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
         routes = Route.objects.filter(date=selected_date)
 
 
@@ -3427,7 +3430,7 @@ class MapApremAujourView(View):
 
         # Exclude routes to hide
         filtered_routes = routes.exclude(id__in=routes_to_hide)
-        
+
         form = RoutedetailForm()
         todo_livraison = Livraison.objects.filter(date=selected_date, heure_livraison__in = aprem, place_id__isnull=False, statut__id= 21)
         routes21 = Route.objects.filter(id=21)
@@ -3445,7 +3448,7 @@ class MapApremAujourView(View):
                 'adress' : a.adress,
                 'convives': a.convives,
                 'mode_envoi': a.mode_envoi,
-                
+
 
 
             }
@@ -3461,22 +3464,22 @@ class MapApremAujourView(View):
             'routes21':routes21,
             'route1': route1,
             'routedetail_form': form,
-            
+
 
         }
         return render(request, 'listings/mapapremaujour.html', context)
-    
+
 
 class MapMidiAujourView(View):
     def get(self, request):
         key = settings.GOOGLE_API_KEY
         date_str = request.GET.get('date', datetime.now().date().strftime('%Y-%m-%d'))
-        selected_date = datetime.strptime(date_str, '%Y-%m-%d').date() 
+        selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
         routes = Route.objects.filter(date=selected_date)
-        
+
 
         midi = ['10h00', '10h15', '10h30', '10h45', '11h00', '11h15', '11h30', '11h45', '12h00', '12h15', '12h30', '12h45', 'recup']
-        
+
         matin = ['05h00', '05h15', '05h30', '05h45', '06h00', '06h15', '06h30', '06h45', '07h00', '07h15', '07h30', '07h45', '08h00', '08h15', '08h30', '08h45', '09h00', '09h15', '09h30', '09h45']
         routes_to_hide = Route.objects.filter(
                 livraisons__heure_livraison__in=matin
@@ -3501,7 +3504,7 @@ class MapMidiAujourView(View):
                 'adress' : a.adress,
                 'convives': a.convives,
                 'mode_envoi': a.mode_envoi,
-                
+
 
 
             }
@@ -3517,7 +3520,7 @@ class MapMidiAujourView(View):
             'routes21':routes21,
             'route1': route1,
             'routedetail_form': form,
-            
+
         }
         return render(request, 'listings/mapmidiaujour.html', context)
 
@@ -3639,7 +3642,7 @@ class MapView(View):
         route4 = Livraison.objects.filter(statut__id= 4, date=tomorrow, heure_livraison__in = matin)
         routes21 = Route.objects.filter(id=21)
         routes = Route.objects.filter(date=tomorrow)
-       
+
         eligable_locations = Livraison.objects.order_by('statut', 'position').filter(place_id__isnull=False, heure_livraison__in = matin, date=tomorrow)
         livraisons =[]
 
@@ -4109,8 +4112,8 @@ class MapMidiTodayView(View):
 
             obj.save()
 
-        
-        return render(request, 'listings/maptodaymidi.html')  
+
+        return render(request, 'listings/maptodaymidi.html')
 class MapTodayView(View):
     def get(self, request):
         key = settings.GOOGLE_API_KEY
@@ -4122,7 +4125,7 @@ class MapTodayView(View):
         todo_livraison = Livraison.objects.filter(date=aftertomorrow, heure_livraison__in = matin, place_id__isnull=False, statut__id= 21)
         routes21 = Route.objects.filter(id=21)
         routes = Route.objects.filter(date=aftertomorrow)
-    
+
         route1 = Livraison.objects.filter(date=aftertomorrow)
         eligable_locations = Livraison.objects.filter(place_id__isnull=False, heure_livraison__in = matin, date=aftertomorrow )
         livraisons =[]
@@ -4295,7 +4298,7 @@ class MapApremDimView(View):
             )
 
             obj.save()
-    
+
             return render(request, 'listings/mapdimaprem.html')
 class MapMidiDimView(View):
     def get(self, request):
@@ -4384,7 +4387,7 @@ class MapMidiDimView(View):
             obj.save()
 
 
-        
+
         return render(request, 'listings/mapdimmidi.html')
 class MapDimView(View):
     def get(self, request):
@@ -4583,7 +4586,7 @@ def livraison_detail(request, ip):
     matching_dock = None
     dock_photos = None
 
-    
+
 
     if livraison.place_id:
         matching_dock = LoadingDock.objects.filter(place_id=livraison.place_id).first()
@@ -4602,7 +4605,7 @@ def livraison_detail(request, ip):
     if request.method == 'POST':
         form = LivraisonForm(request.POST, instance=livraison)
         photo_formset = PhotoFormSet(request.POST, request.FILES, queryset=Photo.objects.filter(livraison=livraison))
-        
+
         form_valid = form.is_valid()
         photo_formset_valid = photo_formset.is_valid()
 
@@ -4633,7 +4636,7 @@ def livraison_detail(request, ip):
     for item in checklist:
         item.filtered_checklist_items = item.checklistitem_set.filter(quantity__gt=0)
         print(f"Checklist: {item.name}, Filtered Items: {item.filtered_checklist_items.count()}")
-    
+
 
     return render(request, 'listings/livraison_detail.html', {
         'livraison': livraison,
@@ -4697,15 +4700,15 @@ def livraisonstomorrow(request):
     selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
     form = XLSXUploadForm()
 
-    matin = ['05h00', '05h15', '05h30', '05h45', '06h00', '06h15', '06h30', '06h45', 
-             '07h00', '07h15', '07h30', '07h45', '08h00', '08h15', '08h30', '08h45', 
+    matin = ['05h00', '05h15', '05h30', '05h45', '06h00', '06h15', '06h30', '06h45',
+             '07h00', '07h15', '07h30', '07h45', '08h00', '08h15', '08h30', '08h45',
              '09h00', '09h15', '09h30', '09h45', 'recup']
-    
-    midi = ['10h00', '10h15', '10h30', '10h45', '11h00', '11h15', '11h30', '11h45', 
+
+    midi = ['10h00', '10h15', '10h30', '10h45', '11h00', '11h15', '11h30', '11h45',
             '12h00', '12h15', '12h30', '12h45', 'recup']
-    
-    apresmidi = ['13h00', '13h15', '13h30', '13h45', '14h00', '14h15', '14h30', '14h45', 
-                 '15h00', '15h15', '15h30', '15h45', '16h00', '16h15', '16h30', '16h45', 
+
+    apresmidi = ['13h00', '13h15', '13h30', '13h45', '14h00', '14h15', '14h30', '14h45',
+                 '15h00', '15h15', '15h30', '15h45', '16h00', '16h15', '16h30', '16h45',
                  '17h00', '17h15', '17h30', '17h45', '18h00', '18h15', '18h30', '18h45', '19h00', 'recup']
 
     livraisonsmatin = Livraison.objects.filter(heure_livraison__in=matin, date=selected_date).order_by('statut', 'position')
@@ -4909,10 +4912,10 @@ class Livraisonsdrag(ListView):
         # Default queryset for the view
         today = datetime.now().date()
         tomorrow = today + timedelta(1)
-        
+
         # Query for tomorrow's deliveries (default queryset)
         livraisons = Livraison.objects.order_by('statut', 'position').filter(date=tomorrow)
-        
+
         return livraisons
 
     def get_context_data(self, **kwargs):
@@ -4974,10 +4977,10 @@ from django.contrib.auth.decorators import login_required
 def md_dashboard(request):
     # Get the Md instance related to the logged-in user
     md_instance = get_object_or_404(Md, user=request.user)  # This fetches the Md object for the logged-in user
-    
+
     # Get related checklists for the Md instance
     checklists = Checklist.objects.filter(md=md_instance, is_active=True)
-    
+
     # Handle date filtering if applicable
     if request.method == 'GET' and 'date' in request.GET:
         form = DateFilterForm(request.GET)
@@ -5019,7 +5022,7 @@ def ChecklistmdDetailView(request, pk):
     form = RapportForm(request.POST or None, prefix='form', instance=checklist)
     form1 = RapportRecupForm(request.POST or None, prefix='form1', instance=checklist)
     checklist_itemsbreuvage = ChecklistItem.objects.filter(checklist_id=checklist, product__category__in=["ALCOOL FORT", "SANS ALCOOL", "VINS",  "BIERES"], quantity__gt=0)
-    
+
     for item in checklist_itemsbreuvage:
         item.remaining_quantity = item.quantity - (item.consumed_quantity or 0)
 
@@ -5118,7 +5121,7 @@ def livraisonsdrag_detailtoday(request, pk):
     context['form'] = form
     if not request.user.is_superuser:
         return redirect('unauthorized')
-    
+
     return render(request, 'listings/partials/edit-livraison-formtoday.html', context)
 @login_required
 def livraison_edit_formtoday(request, pk):
@@ -5142,7 +5145,7 @@ class Livraisonsdragtoday(ListView):
         today = datetime.now().date()
         tomorrow = today + timedelta(1)
         livraisons = Livraison.objects.order_by('statut', 'position').filter(date=tomorrow)
-        
+
         return livraisons
 
 
@@ -5180,7 +5183,7 @@ def livraisonsdrag_detail(request, pk):
 def livraison_edit_form(request, livraison_id):
     livraison = get_object_or_404(Livraison, id=livraison_id)
     form = LivraisonDragForm(instance=livraison)
-    
+
     if request.method == 'POST':
         form = LivraisonDragForm(request.POST, instance=livraison)
         if form.is_valid():
@@ -5240,6 +5243,7 @@ def duplicate_model(request, model_id):
     new_object.contact_site = original_object.contact_site
     new_object.date = tomorrow
     new_object.heure_livraison = "recup"
+    new_object.heure_livraison_classement = original_object.heure_livraison_classement
     new_object.date_livraison = original_object.date_livraison
     new_object.statut = Route.objects.get(id=21)  # Ensure this is the correct route
     new_journee = Journee.objects.get(id=original_object.journee.id + 1)
@@ -5258,9 +5262,9 @@ def duplicate_model(request, model_id):
         new_photo.image = photo_instance.image  # Copy the image
         new_photo.caption = photo_instance.caption  # Copy the caption if available
         new_photo.save()
-    
 
-    
+
+
     print("Checklists to duplicate:", original_object.checklist_set.all())
 
     # Duplicate related Checklists
@@ -5282,8 +5286,8 @@ def duplicate_model(request, model_id):
         new_checklist.conseillere = None
         new_checklist.is_active = False
         new_checklist.save()
-    
-    
+
+
         # Duplicate ChecklistItems but do not update the inventory
         for item in checklist.checklistitem_set.all():
             new_item = ChecklistItem()
