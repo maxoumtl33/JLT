@@ -74,10 +74,7 @@
     text-transform: uppercase;
 }
 
-/* Table rows */
-.shift-table tbody tr:nth-child(even) {
-    background-color: #f2f2f2;
-}
+
 
 .shift-table tbody tr:hover {
     background-color: #e0f7fa;
@@ -343,7 +340,7 @@
                 </thead>
                 <tbody>
                     {% for shift in shifts %}
-                    <tr class="{% if 'Repos' in shift.notes %}repos-row{% endif %}">
+                        <tr class="{% if shift.notes and 'Repos' in shift.notes %}repos-row{% endif %}">
                             <td>{{ shift.livreur.nom }}</td>
                             <td>{% if shift.start_time %}{{ shift.start_time }}{% else %}{{ "" }}{% endif %}</td>
                             <td>{{ shift.notes }}</td>
@@ -355,6 +352,7 @@
             <p>Aucun planning disponible.</p>
         {% endif %}
     </div>
+    
 
     <div class="container mt-4">
         <div class="row justify-content-center">
@@ -452,7 +450,7 @@ document.getElementById('toggle-btn').addEventListener('click', function() {
     const livraisons = JSON.parse('{{ livraisonss|escapejs }}');
     const matin = ['05h00', '05h15', '05h30', '05h45', '06h00', '06h15', '06h30', '06h45', 
               '07h00', '07h15', '07h30', '07h45', '08h00', '08h15', '08h30', '08h45', 
-              '09h00', '09h15', '09h30', '09h45', 'recup'];
+              '09h00', '09h15', '09h30', '09h45'];
 
 const midi = ['10h00', '10h15', '10h30', '10h45', '11h00', '11h15', '11h30', '11h45', 
               '12h00', '12h15', '12h30', '12h45'];
@@ -460,7 +458,7 @@ const midi = ['10h00', '10h15', '10h30', '10h45', '11h00', '11h15', '11h30', '11
 const aprem = ['13h00', '13h15', '13h30', '13h45', '14h00', '14h15', '14h30', '14h45', 
                '15h00', '15h15', '15h30', '15h45', '16h00', '16h15', '16h30', '16h45', 
                '17h00', '17h15', '17h30', '17h45', '18h00', '18h15', '18h30', '18h45', 
-               '19h00', 'recup'];
+               '19h00'];
 
 function renderDeliveries(filter = null) {
     const tableBody = document.getElementById('delivery-data');
@@ -481,15 +479,22 @@ function renderDeliveries(filter = null) {
 
         // Create Table Row
         const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${livraison.heure_depart || 'N/A'}</td>
-            <td>${livraison.nom || 'N/A'}</td>
-            <td>${livraison.infodetail || 'N/A'}</td>
-            <td>${livraison.heure_livraison || 'N/A'}</td>
-            <td>${livraison.livreurs.join(', ') || 'Aucun'}</td>
-            <td><a href="#" class="view-details" data-id="${livraison.id}">Voir</a></td>
-            <td>${statusIcon}</td>`;
-        tableBody.appendChild(row);
+
+// Check if `livraison.recuperation` is true and apply background color
+const rowBackground = livraison.recuperation ? 'background-color: #F1B3DA;' : '';
+
+row.innerHTML = `
+    <td style="${rowBackground}">${livraison.heure_depart || 'N/A'}</td>
+    <td style="${rowBackground}">${livraison.nom || 'N/A'}</td>
+    <td style="${rowBackground}">${livraison.infodetail || 'N/A'}</td>
+    <td style="${rowBackground}">${livraison.heure_livraison || 'N/A'}</td>
+    <td style="${rowBackground}">${livraison.livreurs.join(', ') || 'Aucun'}</td>
+    <td style="${rowBackground}"><a href="#" class="view-details" data-id="${livraison.id}">Voir</a></td>
+    <td style="${rowBackground}">${statusIcon}</td>`;
+
+// Append row to table
+tableBody.appendChild(row);
+
 
         // Create Card
         const card = document.createElement('div');
@@ -502,9 +507,10 @@ function renderDeliveries(filter = null) {
             : '';
 
         // Set background color for recuperation
-        if (livraison.recuperation) {
-            card.style.backgroundColor = '#F1B3DA'; // Pink for recuperation
-        }
+        // Ensure recuperation is treated as a boolean
+if (livraison.recuperation === true || livraison.recuperation === "True") {
+    card.style.backgroundColor = '#F1B3DA'; // Pink for recuperation
+}
 
         card.innerHTML = `
             ${userTag} <!-- Font Awesome Icon on the top-right -->
@@ -548,13 +554,13 @@ function filterDeliveries(period, btn = null) {
 // Run the function on page load
 window.onload = renderDeliveries;
 
-document.querySelectorAll('.view-details').forEach(link => {
-    link.addEventListener('click', function(event) {
+document.addEventListener('click', function(event) {
+    if (event.target.classList.contains('view-details')) {
         event.preventDefault(); // Prevent default action
-        const livraisonId = link.getAttribute('data-id');
+        const livraisonId = event.target.getAttribute('data-id');
         const url = "{% url 'livraison-detail' 0 %}".replace('0', livraisonId);
         window.location.href = url; // Redirect to the correct URL
-    });
+    }
 });
 
 </script>

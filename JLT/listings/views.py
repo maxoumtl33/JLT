@@ -152,6 +152,9 @@ def import_xlsx(request):
                 df.insert(0, 'id', '')  # Insert empty 'id' column
                 df = df.fillna('')
 
+                # Add heure_livraison_classement with same content as heure_livraison
+                df['heure_livraison_classement'] = df['new_column8']
+
                 print("🛠️ Transformed DataFrame columns:", df.columns)
 
                 # Convert DataFrame to model instances
@@ -167,6 +170,7 @@ def import_xlsx(request):
                             convives=row['new_column6'],
                             mode_envoi=row['new_column7'],
                             heure_livraison=row['new_column8'],
+                            heure_livraison_classement=row['heure_livraison_classement'],  # Added field
                             num_commande=row['new_column9'],
                             nom_client=row['new_column10'],
                             contact_site=row['new_column11'],
@@ -184,7 +188,6 @@ def import_xlsx(request):
                 messages.error(request, f"❌ Error processing file: {e}")
 
         return redirect('livraisons_without_date')
-
 
     return render(request, 'listings/import_xlsx.html', {'form': form})
 

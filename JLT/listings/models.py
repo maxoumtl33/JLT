@@ -276,6 +276,7 @@ class Livraison(models.Model):
     nom = models.fields.CharField(max_length=100, null=True, blank=True,)
     heure_depart = models.fields.CharField(null=True, blank=True, max_length=100, choices= choiceheures, default=" ")
     heure_livraison = models.fields.CharField(null=True, blank=True, max_length=100, default=".")
+    heure_livraison_classement = models.fields.CharField(null=True, blank=True, max_length=100, default=".")
     client = models.ForeignKey(Client, null=True, blank=True, on_delete=models.SET_NULL)
     date = models.fields.DateField(null=True, blank=True)
     period = models.CharField(max_length=20, choices=[("matin", "Matin"), ("midi", "Midi"), ("apres_midi", "Après-midi")], null=True, blank=True)
