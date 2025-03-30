@@ -2823,7 +2823,8 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
         routes = Livraison.objects.order_by('statut', 'position')
         routess = Route.objects.filter(date = journee.date, livreur = livreur)
         routes_with_livraisons = routess.prefetch_related('livreur', 'livraisons').order_by('heure_depart')
-
+        for route in routes_with_livraisons:
+            route.livraisons = route.livraisons.all().order_by('status', 'position')
         if request.method == 'POST':
             form = VehicleForm(request.POST, request.FILES)
             if form.is_valid():

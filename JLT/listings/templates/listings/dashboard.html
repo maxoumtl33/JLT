@@ -681,7 +681,7 @@
         <!-- Delivery List Section -->
         <div class="delivery-list">
             {% if route.livraisons.all %}
-                {% for livraison in route.livraisons.all %}
+                {% for livraison in route.livraisons %}
                 <a href="{% url 'livraison-detail' livraison.id %}" class="delivery-link">
                     <div class="delivery-item" style="border-left: 5px solid; color: {{ livraison.recuperation|yesno:'#E5AACF,#127BFF' }};">
                         <div class="delivery-header">

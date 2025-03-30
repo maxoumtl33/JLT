@@ -340,6 +340,8 @@ class Livraison(models.Model):
     photo_recup = models.ImageField(upload_to='listings/media/commandesdetail', blank=True, null=True)
     def __str__(self):
         return f'{self.nom}'
+    class Meta:
+        ordering = ['status', 'position']  # Default ordering
 
 
 
