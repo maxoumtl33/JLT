@@ -117,7 +117,13 @@ from django.utils import timezone
 class Vehicle(models.Model):
     choicename = (
         ('KingKong', 'KingKong'),
-        ('Yeti', 'Yeti')
+        ('Yeti', 'Yeti'),
+        ('Pro Noir', 'Pro Noir'),
+        ('Pro Gris', 'Pro Gris'),
+        ('Transit Noir', 'Transit Noir'),
+        ('Petit Blanc', 'Petit Blanc'),
+        ('Econoline', 'Econoline'),
+        ('Caravane', 'Caravane'),
     )
     name = models.CharField(max_length=100, choices= choicename)
     photos = models.ImageField(upload_to='listings/media/commandesdetail', blank=True, null=True)
