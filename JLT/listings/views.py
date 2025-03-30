@@ -13,7 +13,7 @@ from django.views.generic.list import ListView
 from .models import Distances
 from .models import Checklist, Recuplivreur
 from django.shortcuts import get_object_or_404
-from .forms import LivraisonForm,PhotoTachesForm,PhotoTachesFormSet
+from .forms import *
 from .forms import LivraisonFeuilleForm
 from .forms import LivraisonDragForm
 from .forms import LivraisonDragFormtoday, TaskUpdateForm
@@ -58,7 +58,6 @@ from django.core.files import File
 from .forms import ItemInvForm
 from .forms import SearchFormInv
 from .models import Product, Checklist, ChecklistItem
-from .forms import PhotoForm, PhotoFormSet
 from .forms import RouteForm
 from .forms import *
 from .forms import ChecklistForm
@@ -2713,6 +2712,7 @@ def validate_livraison(request, livraison_id):
 
     return redirect('livraison-detail', ip=livraison.id)  # Again, use `ip` or `livraison_id` accordingly
 
+
 @login_required
 def livreur_detail(request, pk):  # notez le paramètre id supplémentaire
     if request.user.is_authenticated :
@@ -2822,17 +2822,26 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
         taches = Tacheafaire.objects.filter(livreur = userid)
         routes = Livraison.objects.order_by('statut', 'position')
         routess = Route.objects.filter(date = journee.date, livreur = livreur)
-        routes_with_livraisons = []
-        for route in routess:
-            ordered_livraisons = route.livraisons.all().order_by('statut', 'position')
-            routes_with_livraisons.append({
-                'route': route,
-                'livraisons': ordered_livraisons,
-                'nom': route.nom,
-                'heure_depart': route.heure_depart,
-                'commentaire': route.commentaire,
+        routes_with_livraisons = routess.prefetch_related('livreur', 'livraisons').order_by('heure_depart')
 
-            })
+        if request.method == 'POST':
+            form = VehicleForm(request.POST, request.FILES)
+            if form.is_valid():
+                vehicle = form.save(commit=False)
+                route_id = request.POST.get('route_vehicule')
+
+                # ✅ Correct ManyToManyField assignment
+                vehicle.save()
+                vehicle.routes.add(get_object_or_404(Route, id=route_id))  
+
+                return redirect('dashboard', pk=pk, id=id)
+            else:
+                print(form.errors)
+
+        else:
+            form = VehicleForm()
+
+
 
         livraisons_data = [
         {
@@ -2847,6 +2856,8 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
         for livraison in livraisonss
 
     ]
+        
+
 
 
 
@@ -2872,11 +2883,27 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
                                                                 'taches':taches,
                                                                 'tacheok':tacheok,
                                                                 'tacheko':tacheko,
+                                                                'form': form,
+                                                                
 
 
                                                                 })
     else:
         return redirect('home')
+
+
+
+@login_required
+def delete_vehicle(request, vehicle_id):
+    vehicle = get_object_or_404(Vehicle, id=vehicle_id)  # Retrieve vehicle
+    vehicle.delete()  # Delete the vehicle instance
+    messages.success(request, "Vehicle deleted successfully.")  # Set success message
+    
+    # Redirect back to the page that made the request
+    referer = request.META.get('HTTP_REFERER', '/')  # Get the Referer header or fallback to home
+    return HttpResponseRedirect(referer)  # Redirect to the referer
+
+
 @login_required
 def update_task(request, pk):
 
@@ -4602,31 +4629,38 @@ def livraison_detail(request, ip):
             livraison.place_id = place_id
             livraison.save()
 
-    if request.method == 'POST':
-        form = LivraisonForm(request.POST, instance=livraison)
-        photo_formset = PhotoFormSet(request.POST, request.FILES, queryset=Photo.objects.filter(livraison=livraison))
+    
+    # Initialize forms
+    form = LivraisonForm(instance=livraison)
+    photo_form = PhotoUploadForm()
 
-        form_valid = form.is_valid()
-        photo_formset_valid = photo_formset.is_valid()
+    if request.method == "POST":
+        # Handling the LivraisonForm submission
+        if 'livraison_form' in request.POST:
+            form = LivraisonForm(request.POST, instance=livraison)
+            current_signature = livraison.signature
 
-        if form_valid:
-            livraison = form.save()
+            if form.is_valid():
+                livraison = form.save(commit=False)
+                livraison.status = True  # Mark as validated
+                livraison.signature = current_signature  # Preserve signature
+                livraison.save()
+                
+                return redirect("livraison-detail", ip=livraison.id)
 
-        if photo_formset_valid:
-            photos = photo_formset.save(commit=False)
-            for photo in photos:
-                photo.livraison = livraison
-                photo.save()
-            for photo in photo_formset.deleted_objects:
-                photo.delete()
+        # Handling the PhotoUploadForm submission for 'imagerecup'
+        elif 'photo_form' in request.POST:
+            imagesrecup = request.FILES.getlist("imagerecup") 
+            images = request.FILES.getlist("image") # Fetching multiple uploaded files
+            if imagesrecup:  # Ensure at least one file is uploaded
+                for img in imagesrecup:
+                    PhotoRecup.objects.create(livraison=livraison, image=img)
+            elif images:
+                for img in images:
+                    Photo.objects.create(livraison=livraison, image=img)
 
-        # Redirect only if both form and formset are valid
-        if form_valid and photo_formset_valid:
-            return redirect('livraison-detail', ip=livraison.id)
+            return redirect("livraison-detail", ip=livraison.id) 
 
-    else:
-        form = LivraisonForm(instance=livraison)
-        photo_formset = PhotoFormSet(queryset=Photo.objects.filter(livraison=livraison))
 
 
 
@@ -4648,11 +4682,14 @@ def livraison_detail(request, ip):
         'adresse': adresse,
         'loic': loic,
         'maxime': maxime,
-        'formbis': photo_formset,
+        'photo_form': photo_form,
         'checklist': checklist,
         'dock_photos': dock_photos,
         'matching_dock': matching_dock,
     })
+from django.contrib.auth.decorators import user_passes_test
+
+
 @login_required
 def update_photo(request, pk):
     livraison = get_object_or_404(Livraison, pk=pk)

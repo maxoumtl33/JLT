@@ -272,11 +272,48 @@
     text-align: center;
 }
 
-
-
+.stats-section, .map-section, .routes-section, .taches-section {
+    padding: 15px;
+    border: 1px solid #ccc; /* Add a border for better visibility */
+    margin-bottom: 15px;
+    border-radius: 8px; /* Rounded corners */
+}
+.button-container {
+    display: flex; /* Use Flexbox */
+    flex-direction: column; /* Stack items vertically */
+    align-items: center; /* Center items horizontally */
+    margin: 20px 0; /* Optional: Add vertical spacing */
+}
+.btn-togglezz {
+    display: inline-block;
+    padding: 12px 20px; /* Increased padding for better click area */
+    margin-bottom: 10px; /* Space between buttons */
+    font-size: 16px; /* Text size */
+    color: white; /* Text color */
+    width: 40%;
+    background-color: #007bff; /* Primary background color */
+    border: none; /* No border */
+    border-radius: 5px; /* Slightly rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    text-align: center; /* Center text */
+    text-decoration: none; /* Remove underline */
+    transition: background-color 0.3s ease, transform 0.3s ease; /* Transition for hover effects */
+}
+.btn-togglezz:active {
+    background-color: #00428a; /* Even darker background when clicked */
+    transform: scale(0.98); /* Slightly shrink button when clicked */
+}
 .route-header i.fa-chevron-down {
     margin-top: 5px; /* Adds spacing between text and chevron */
     font-size: 18px; /* Adjust size if needed */
+}
+
+.chevron-icon {
+    transition: transform 0.3s;  /* Smooth transition for rotation */
+}
+
+.rotate {
+    transform: rotate(180deg);    /* Rotate icon when expanded */
 }
 
 
@@ -427,9 +464,23 @@
         <li><a href="{% url 'faq' %}" class="nav__link"><i class="fa-regular fa-circle-question"></i><span class="nav__name">FAQ</span></a></li>
     </ul>
 </nav>
-
+<!-- Button Container -->
+<div class="button-container">
+    <button id="toggleButtonStats" class="btn-togglezz btn-primary">
+        <i class="fa-solid fa-chart-line"></i> STATS
+    </button>
+    <button id="toggleButtonMap" class="btn-togglezz btn-primary">
+        <i class="fa-solid fa-map"></i> MAP
+    </button>
+    <button id="toggleButtonRoutes" class="btn-togglezz btn-primary">
+        <i class="fa-solid fa-route"></i> Routes
+    </button>
+    <button id="toggleButtonTaches" class="btn-togglezz btn-primary">
+        <i class="fa-solid fa-tasks"></i> Tâches
+    </button>
+</div>
 <!-- Stats Section -->
-<section class="stats-section">
+<section class="stats-section" id="statsSection">
     <div class="stat-box">
         <h3>Livraisons en cours</h3>
         <p id="totalDeliveries">{{ livraisonstatusko|length }}</p>
@@ -448,21 +499,23 @@
     </div>
     <div class="stat-box">
         <h3 style="color: black;">Tâches en cours</h3>
-        <p id="completedRecups">{{ tacheko|length }}</p>
+        <p id="ongoingTasks">{{ tacheko|length }}</p>
     </div>
     <div class="stat-box">
         <h3 style="color: black;">Tâches validées</h3>
-        <p id="completedRecups">{{ tacheok|length }}</p>
+        <p id="completedTasks">{{ tacheok|length }}</p>
     </div>
 </section>
 
+
 <!-- Map Section -->
-<section class="map-section">
+<section class="map-section" id="mapSection">
     <h2>Carte</h2>
     <div id="map"></div>
 </section>
-<br>
 
+
+<section class="routes-section" id="routesSection">
 <h1>
     Mes routes 
     <a href="#" data-bs-toggle="modal" data-bs-target="#infoModal">
@@ -552,99 +605,150 @@
 <div class="routes">
     {% for route in routes_with_livraisons %}
     <div class="route-container">
-        <div class="route-header" onclick="toggleDeliveries(this)">
-            <p>Route n°{{ route.nom }}</p>
-            <p><i class="fa-solid fa-clock"></i> Départ: {{ route.heure_depart }}</p>
-            {% if route.commentaire %}
-            <p style="color: orange;">
-                <i class="fa-solid fa-triangle-exclamation" style="color: #FFD43B;"></i> {{ route.commentaire }}
-            </p>
-            {% endif %}
-            <i class="fa-solid fa-chevron-down chevron-icon"></i>
+        <!-- Route Header Section -->
+        <div class="route-header" style="position: relative;">
+            <button type="button"  data-bs-toggle="modal" data-bs-target="#vehicleModal" style="position: absolute; top: 10px; right: 10px;">
+                <i class="fa-solid fa-truck-front fa-xl"></i>
+            </button>
+
+<!-- Modal Structure -->
+<div class="modal fade" id="vehicleModal" tabindex="-1" role="dialog" aria-labelledby="vehicleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="vehicleModalLabel">Choisir véhicule</h5>
+                
+            </div>
+            <div class="modal-body">
+                <form id="vehicleForm{{ route.id }}" method="post" enctype="multipart/form-data" action="{% url 'dashboard' id=journee.id pk=user.id %}">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <input type="hidden" name="route_vehicule" value="{{ route.id }}">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">fermer</button>
+                <button type="submit" form="vehicleForm{{ route.id }}" class="btn btn-primary">Enregistrer le Véhicule</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+            <!-- Route Details -->
+            <div class="route-info">
+                <p class="route-title">Route n°{{ route.nom }}</p>
+                <p><i class="fa-solid fa-person"></i> <strong>Livreur(s):</strong>
+                    {% for livreur in route.livreur.all %}
+                    {{ livreur.nom }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                        Aucun livreur assigné
+                    {% endfor %}
+                </p>
+                
+                    {% for vehicle in route.vehicles_list.all %}
+                        <span style="display: inline-flex; align-items: center;">  <!-- Flex container -->
+                             <!-- Wrap vehicle name in a separate span -->
+                            <form method="POST" action="{% url 'delete_vehicle' vehicle.id %}" style="margin-left: 5px;">
+                                {% csrf_token %}
+                                <i class="fa-solid fa-truck"></i> <strong>Truck:</strong>
+                               {{ vehicle.name }}
+                                <button type="submit" style="border: none; background: none; color: #ff0033; cursor: pointer;" onclick="return confirm('Supprimer le véhicule ?');">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </form>
+                        </span>
+                        {% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                        Aucun véhicule assigné
+                    {% endfor %}
+                
+                
+                
+                
+                
+                <p><i class="fa-solid fa-clock"></i> <strong>Départ:</strong> {{ route.heure_depart }}</p>
+                {% if route.commentaire %}
+                    <p class="route-comment" style="color: orange;">
+                        <i class="fa-solid fa-triangle-exclamation" style="color: #FFD43B;"></i> {{ route.commentaire }}
+                    </p>
+                {% endif %}
+                <i class="fa-solid fa-chevron-down chevron-icon" onclick="toggleDeliveries(this)"></i>
+            </div>
         </div>
 
+        <!-- Delivery List Section -->
         <div class="delivery-list">
             {% if route.livraisons.all %}
-            {% for livraison in route.livraisons.all %}
-            
-            <a href="{% url 'livraison-detail' livraison.id %}" style="text-decoration: none;">
-                <div class="delivery-item" 
-                     style="border-left: 5px solid; color: {{ livraison.recuperation|yesno:'#E5AACF,#127BFF' }};">
-                    
-                    <!-- Header with title -->
-                    <div class="delivery-header">
-                        <h4>{{ livraison.recuperation|yesno:"RECUPERATION,LIVRAISON" }} {{ livraison.nom }}</h4>
-                        <p><strong>Heure Livraison:</strong> {{ livraison.heure_livraison }}</p>
-                    </div>
-
-                    {% if livraison.infodetail %}
-                    <div>
+                {% for livraison in route.livraisons.all %}
+                <a href="{% url 'livraison-detail' livraison.id %}" class="delivery-link">
+                    <div class="delivery-item" style="border-left: 5px solid; color: {{ livraison.recuperation|yesno:'#E5AACF,#127BFF' }};">
+                        <div class="delivery-header">
+                            <h4>{{ livraison.recuperation|yesno:"RECUPERATION,LIVRAISON" }} {{ livraison.nom }}</h4>
+                            <p><strong>Heure Livraison:</strong> {{ livraison.heure_livraison }}</p>
+                        </div>
                         
-                            {{ livraison.infodetail|render_mugs|safe }}
-                            {{ livraison.infodetail|render_mugscafe|safe }}
-                            {{ livraison.infodetail|render_mugscafetherm|safe }}
-                    
-                            {% with 'thé jetable' as item %}
-                                {{ livraison.infodetail|generate_icons:item|safe }}
-                            {% endwith %}
+                        {% if livraison.infodetail %}
+                            <div class="delivery-icons-details">
+                                {{ livraison.infodetail|render_mugs|safe }}
+                                {{ livraison.infodetail|render_mugscafe|safe }}
+                                {{ livraison.infodetail|render_mugscafetherm|safe }}
 
-                            {% if 'cambro' in livraison.infodetail|lower %}
-                            <i class="fa-solid fa-box-archive" style="color: #a24716;"></i>
+                                {% with 'thé jetable' as item %}
+                                    {{ livraison.infodetail|generate_icons:item|safe }}
+                                {% endwith %}
+
+                                {% if 'cambro' in livraison.infodetail|lower %}
+                                    <i class="fa-solid fa-box-archive" style="color: #a24716;"></i>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+
+                        <div class="delivery-icons">
+                            {% if livraison.nom|contains_keyword:"part chaud" or livraison.infodetail|contains_keyword:"part chaud" %}
+                                <i class="fa-solid fa-fire-flame-curved" style="color: #f4a15d;"></i>
                             {% endif %}
-                            
                         
-                    </div>
-                    
-
-                    <br>
-                    {% endif %}
-
-                    <!-- Icons Row -->
-                    <div class="delivery-icons">
-
+                            {% if 'checklist' in livraison.infodetail|lower or 'checklist' in livraison.nom|lower %}
+                                <i class="fa-solid fa-cart-flatbed"></i>
+                            {% endif %}
                         
-                
-                        {% if livraison.nom|contains_keyword:"part chaud" or livraison.infodetail|contains_keyword:"part chaud" %}
-                        <i class="fa-solid fa-fire-flame-curved" style="color: #f4a15d;"></i>
-                        {% endif %}
-                
-                        {% if 'checklist' in livraison.infodetail|lower or 'checklist' in livraison.nom|lower %}
-                        <i class="fa-solid fa-cart-flatbed"></i>
-                        {% endif %}
-                
-                        {% if 'glace' in livraison.infodetail|lower %}
-                        <i class="fa-regular fa-snowflake" style="color: #74C0FC;"></i>
-                        {% endif %}
+                            {% if 'glace' in livraison.infodetail|lower %}
+                                <i class="fa-regular fa-snowflake" style="color: #74C0FC;"></i>
+                            {% endif %}
+                        </div>
+
+                        <div class="delivery-status">
+                            {% if livraison.status %}
+                                <i class="fa-solid fa-circle-check status-icon success"></i> Validée
+                            {% else %}
+                                <i class="fa-solid fa-spinner fa-spin status-icon pending"></i> En attente
+                            {% endif %}
+                            {% if livraison.commentairedispatch %}
+                                <i class="fa-solid fa-triangle-exclamation fa-2xl" style="color: #FFD43B;"></i>
+                            {% endif %}
+                        </div>
                     </div>
-
-                    <br>
-
-                    <!-- Additional details -->
-                    <div class="delivery-status">
-                        {% if livraison.status %}
-                        <i class="fa-solid fa-circle-check status-icon success"></i> Validée
-                        {% else %}
-                        <i class="fa-solid fa-spinner fa-spin status-icon pending"></i> En attente
-                        {% endif %}
-                        {% if livraison.commentairedispatch %}
-                        <i class="fa-solid fa-triangle-exclamation fa-2xl" style="color: #FFD43B;"></i>
-                        {% endif %}
-                    </div>
-                </div>
-            </a>
-
-            {% endfor %}
+                </a>
+                {% endfor %}
             {% else %}
-            <p>No deliveries found for this route.</p>
+                <p>No deliveries found for this route.</p>
             {% endif %}
         </div>
     </div>
     {% endfor %}
 </div>
+</section>
 
 
-<br>
-<br>
+
+
+
+
+
+<section class="taches-section" id="tachesSection">
+
 <h1>Mes Tâches du Jour</h1>
     <ul>
         {% for task in taches %}
@@ -662,15 +766,9 @@
         {% endif %}
         {% endfor %}
     </ul>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
+
+</section>
+
 <!-- Modal -->
 <div class="modal fade" id="offcanvasExample" tabindex="-1" aria-labelledby="offcanvasExampleLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -694,10 +792,12 @@
 </div>
 
  
-
+<br>
+<br>
   
 <!-- JavaScript -->
 <!-- Bootstrap Bundle with Popper -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
@@ -736,19 +836,65 @@
 
 
 
-function toggleDeliveries(element) {
-        const deliveryList = element.nextElementSibling;
-        const icon = element.querySelector('i');
+function toggleDeliveries(icon) {
+    const deliveryList = icon.closest('.route-header').nextElementSibling;  // Get the next sibling delivery list
+    icon.classList.toggle('rotate');  // Toggle the rotate class
 
-        if (deliveryList.style.display === "none" || deliveryList.style.display === "") {
-            deliveryList.style.display = "block";
-            icon.classList.remove('collapsed');
-        } else {
-            deliveryList.style.display = "none";
-            icon.classList.add('collapsed');
-        }
+    // Check visibility of the delivery list to toggle its display
+    if (deliveryList.style.display === "none" || deliveryList.style.display === "") {
+        deliveryList.style.display = "block";  // Show the delivery list
+    } else {
+        deliveryList.style.display = "none";   // Hide the delivery list
     }
+}
 
+document.getElementById("toggleButtonStats").addEventListener("click", function() {
+    var statsSection = document.getElementById("statsSection");
+    if (statsSection.style.display === "none" || statsSection.style.display === "") {
+        statsSection.style.display = "block";
+    } else {
+        statsSection.style.display = "none";
+    }
+});
+
+// Optionally, hide the section on page load
+document.getElementById("statsSection").style.display = "none";
+
+document.getElementById("toggleButtonMap").addEventListener("click", function() {
+    var statsSection = document.getElementById("mapSection");
+    if (statsSection.style.display === "none" || statsSection.style.display === "") {
+        statsSection.style.display = "block";
+    } else {
+        statsSection.style.display = "none";
+    }
+});
+
+// Optionally, hide the section on page load
+document.getElementById("mapSection").style.display = "none";
+
+document.getElementById("toggleButtonRoutes").addEventListener("click", function() {
+    var statsSection = document.getElementById("routesSection");
+    if (statsSection.style.display === "none" || statsSection.style.display === "") {
+        statsSection.style.display = "block";
+    } else {
+        statsSection.style.display = "none";
+    }
+});
+
+// Optionally, hide the section on page load
+document.getElementById("routesSection").style.display = "none";
+
+document.getElementById("toggleButtonTaches").addEventListener("click", function() {
+    var statsSection = document.getElementById("tachesSection");
+    if (statsSection.style.display === "none" || statsSection.style.display === "") {
+        statsSection.style.display = "block";
+    } else {
+        statsSection.style.display = "none";
+    }
+});
+
+// Optionally, hide the section on page load
+document.getElementById("tachesSection").style.display = "none";
 </script>
 
 <!-- Load Google Maps API -->

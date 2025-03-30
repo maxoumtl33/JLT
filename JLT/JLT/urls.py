@@ -42,6 +42,7 @@ path('livraisons_list/', views.livraisons_list, name = 'livraisons-list'),
 path('journees_list/', views.journees_list, name = 'journees-list'),
 path('journee/<int:id>/', views.journee_detail, name='journee-detail'),
 path('journeevente/<int:id>/', views.journeedetailvente, name='journeedetailvente'),
+path('vehicle/delete/<int:vehicle_id>/', delete_vehicle, name='delete_vehicle'),  # Add this line
 path('journee/<int:id>/livreur/<int:pk>', views.dashboard, name='dashboard'),
 path('livreur_list/', views.livreur_list, name = 'livreur-list'),
 path('responsables/journee/<int:id>/', views.responsables, name = 'responsables'),

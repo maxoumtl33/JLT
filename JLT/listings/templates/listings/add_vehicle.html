@@ -1,0 +1,9 @@
+
+{% block content %}
+  <h1>Add Vehicle</h1>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}  <!-- This will render the form with the hidden route field -->
+    <button type="submit" class="btn btn-primary">Enregistrer le Véhicule</button>
+</form>
+{% endblock %}

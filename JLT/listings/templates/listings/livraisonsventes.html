@@ -152,6 +152,38 @@ body {
                   </div>
                 </div>
               </div>
+              <br>
+              <div class="col-md-6">
+                        <h5 class="card-title"><strong>Photo Récupération</strong></h5>
+                        <div class="image-gallery">
+                            {% for photo in livraison.livraison_photos_recups.all %}
+                                <div class="col-md-3">
+                                    <!-- Small Thumbnail -->
+                                    <img src="{{ photo.image.url }}" 
+                                         class="img-fluid rounded shadow-sm" 
+                                         alt="Photo"
+                                         data-bs-toggle="modal" 
+                                         data-bs-target="#photoModal{{ forloop.counter }}">
+                                </div>
+              
+                                <!-- Bootstrap Modal for Large Image -->
+                                <div class="modal fade" id="photoModal{{ forloop.counter }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-body text-center">
+                                                <img src="{{ photo.image.url }}" class="img-fluid rounded" alt="Photo">
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+              </div>
               
               <!-- Modal -->
               <div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">

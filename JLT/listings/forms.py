@@ -217,11 +217,29 @@ class LoadingDockForm(forms.ModelForm):
             'photo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Description du Dock', 'rows': 4}),
         }
-        
-class PhotoForm(forms.ModelForm):
+class PhotoUploadForm(forms.ModelForm):
+    image = forms.FileField(required=True)
+
     class Meta:
         model = Photo
-        fields = ['image', 'caption']
+        fields = ("image",)
+
+class VehicleForm(forms.ModelForm):
+    class Meta:
+        model = Vehicle
+        fields = ['name', 'photos']
+        labels = {
+            'name': 'Véhicule',  # Change 'Vehicle Name' to whatever custom label you want
+            'photos': 'Photos',  # You can also change the label for photos if needed
+        }
+
+
+class PhotoRecupUploadForm(forms.ModelForm):
+    image = forms.FileField(required=True)
+
+    class Meta:
+        model = PhotoRecup
+        fields = ("image",)
 
 class PhotoTachesForm(forms.ModelForm):
     class Meta:
@@ -264,6 +282,13 @@ class QuantityUpdateForm(forms.Form):
 class DateFilterForm(forms.Form):
     date = forms.CharField(label='', widget=forms.DateInput(attrs={'type': 'date'}))
 
+
+
+
+
+
+
+
 class RouteForm(forms.ModelForm):
     class Meta:
         model = Route
@@ -274,14 +299,7 @@ class RouteForm(forms.ModelForm):
             'date': forms.DateInput(attrs={'type': 'date'}),
         }
 
-# Create a formset for the Photo model linked to the Livraison
-PhotoFormSet = inlineformset_factory(
-    Livraison,  # The parent model
-    Photo,      # The model the formset is for
-    form=PhotoForm,  # Use the PhotoForm we defined above
-    extra=3,  # Number of additional blank photo forms to display
-    
-)
+
 
 PhotoTachesFormSet = inlineformset_factory(
     Tacheafaire,  # The parent model

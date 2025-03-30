@@ -208,9 +208,10 @@
     </li>
     {% if livraison.recuperation == True %}
       <li>
-        <a href="{% url 'create_recuplivreur' livraison.id %}" target="_blank" class="nav__link"><i class="fa-solid fa-dolly"></i>
-          <span>Récupération</span>
-          </a>
+        <a type="button" class="nav__link" data-bs-toggle="offcanvas" data-bs-target="#uploadOffcanvasrecup" role="button" aria-controls="offcanvasExample">
+          <i class="fa-solid fa-camera"></i>
+          <span>Photo</span>
+        </a>
       </li>
       {% else %}
       <li>
@@ -242,7 +243,25 @@
     </ul>
 </nav>
 
+<div class="offcanvas offcanvas-start" tabindex="-1" id="uploadOffcanvasrecup" aria-labelledby="uploadOffcanvasLabelrecup">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="uploadOffcanvasLabelrecup">Déposer photos récup</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+  
+      <div class="mb-3">
+          <label for="photo-upload" class="form-label">Ajouter des photos</label>
+          <input type="file" name="imagerecup" id="photo-upload" class="form-control" multiple>
+      </div>
+  
+      <button type="submit" name="photo_form" class="btn btn-primary">Déposer</button>
+  </form>
 
+  </div>
+</div>
 <header>
   <div class="header-container text-center py-3">
     {% if livraison.recuperation == True %}
@@ -377,16 +396,77 @@
 
           <!-- Photo Livraison -->
 
+          <!-- Image Gallery -->
+
           <div class="col-md-6">
             <div class="card border-0">
-              <div class="card-body">
-                <h5 class="card-title">Photo Livraison</h5>
-                {% for photo in livraison.livraison_photos.all %}
-                <img src="{{ photo.image.url }}" alt="{{ photo.caption }}" class="img-fluid rounded mb-2">
-                {% endfor %}
-              </div>
+                <div class="card-body">
+                    <h5 class="card-title">Photo Récupération</h5>
+                    <div class="row">
+                        {% for photo in livraison.livraison_photos_recups.all %}
+                            <div class="col-md-3">
+                                <!-- Small Thumbnail -->
+                                <img src="{{ photo.image.url }}" 
+                                     class="img-fluid rounded shadow-sm" 
+                                     alt="Photo"
+                                     data-bs-toggle="modal" 
+                                     data-bs-target="#photoModal{{ forloop.counter }}">
+                            </div>
+          
+                            <!-- Bootstrap Modal for Large Image -->
+                            <div class="modal fade" id="photoModal{{ forloop.counter }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-body text-center">
+                                            <img src="{{ photo.image.url }}" class="img-fluid rounded" alt="Photo">
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
           </div>
+
+<div class="col-md-6">
+  <div class="card border-0">
+      <div class="card-body">
+          <h5 class="card-title">Photo Livraison</h5>
+          <div class="row">
+              {% for photo in livraison.livraison_photos.all %}
+                  <div class="col-md-3">
+                      <!-- Small Thumbnail -->
+                      <img src="{{ photo.image.url }}" 
+                           class="img-fluid rounded shadow-sm" 
+                           alt="Photo"
+                           data-bs-toggle="modal" 
+                           data-bs-target="#photoModal{{ forloop.counter }}">
+                  </div>
+
+                  <!-- Bootstrap Modal for Large Image -->
+                  <div class="modal fade" id="photoModal{{ forloop.counter }}" tabindex="-1" aria-hidden="true">
+                      <div class="modal-dialog modal-dialog-centered">
+                          <div class="modal-content">
+                              <div class="modal-body text-center">
+                                  <img src="{{ photo.image.url }}" class="img-fluid rounded" alt="Photo">
+                              </div>
+                              <div class="modal-footer">
+                                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              {% endfor %}
+          </div>
+      </div>
+  </div>
+</div>
+
+
         </div>
       </li>
     </ul>
@@ -612,6 +692,8 @@
 
     <!-- Hidden Input for Signature -->
     <input type="hidden" id="signatureInput" name="signature">
+    <br>
+    <br>
     <div class="swipe-container">
         <div id="swipeButton" class="swipe-button">
             <span class="swipe-text"><i class="fa-solid fa-circle-arrow-right" style="color: #63E6BE;"></i></i></span>
@@ -628,20 +710,20 @@
 <!-- Photo Upload Form -->
 <div class="offcanvas offcanvas-start" tabindex="-1" id="uploadOffcanvas" aria-labelledby="uploadOffcanvasLabel">
   <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="uploadOffcanvasLabel">Télécharger Photo</h5>
+    <h5 class="offcanvas-title" id="uploadOffcanvasLabel">Déposer photos</h5>
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
   <div class="offcanvas-body">
-    <form method="POST" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
-      {{ formbis.management_form }}
-      {% for form in formbis %}
-        <div>
-          {{ form.as_p }}
-        </div>
-      {% endfor %}
-      <button type="submit" class="btn btn-primary">Déposer les photos</button>
-    </form>
+  
+      <div class="mb-3">
+          <label for="photo-upload" class="form-label">Ajouter des photos</label>
+          <input type="file" name="image" id="photo-upload" class="form-control" multiple>
+      </div>
+  
+      <button type="submit" name="photo_form" class="btn btn-primary">Déposer</button>
+  </form>
 
   </div>
 </div>

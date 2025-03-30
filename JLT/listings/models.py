@@ -110,10 +110,25 @@ class Journee(models.Model):
         return f'{self.nom}'
      date = models.DateField()
 
+from django.db import models
+from django.utils import timezone
+
+# Assuming 'Livreur' is defined elsewhere
+class Vehicle(models.Model):
+    choicename = (
+        ('KingKong', 'KingKong'),
+        ('Yeti', 'Yeti')
+    )
+    name = models.CharField(max_length=100, choices= choicename)
+    photos = models.ImageField(upload_to='listings/media/commandesdetail', blank=True, null=True)
+    routes = models.ManyToManyField('Route', related_name='vehicles_list', blank=True)
+
+    def __str__(self):
+        return self.name
 
 class Route(models.Model):
 
-     choiceheures = (
+    choiceheures = (
          ('.', '.'),
          ('06h00', '06h00'),
          ('06h15', '06h15'),
@@ -173,13 +188,19 @@ class Route(models.Model):
          ('19h45', '19h45'),
          ('20h00', '20h00'),
      )
-     nom = models.fields.CharField(max_length=100)
-     livreur = models.ManyToManyField('Livreur', blank=True, related_name='routes')
-     heure_depart = models.fields.CharField(null=True, blank=True, max_length=100, choices= choiceheures, default=" ")
-     date = models.DateField(default=date.today)
-     commentaire = models.fields.CharField(max_length=100, blank=True)
-     def __str__(self):
+    nom = models.fields.CharField(max_length=100)
+    livreur = models.ManyToManyField('Livreur', blank=True, related_name='routes')
+    heure_depart = models.fields.CharField(null=True, blank=True, max_length=100, choices= choiceheures, default=" ")
+    date = models.DateField(default=date.today)
+    vehicles = models.ManyToManyField(Vehicle, related_name='routes_vehicules', blank=True)
+    commentaire = models.fields.CharField(max_length=100, blank=True)
+
+    def __str__(self):
         return f'{self.nom}'
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
 class Shift(models.Model):
     livreur = models.ForeignKey(Livreur, on_delete=models.CASCADE)
@@ -191,6 +212,12 @@ class Shift(models.Model):
 
     def __str__(self):
         return f"{self.livreur.nom} Shift from {self.start_time} to {self.end_time}"
+
+
+
+
+
+
 
 
 class Livraison(models.Model):
@@ -310,6 +337,7 @@ class Livraison(models.Model):
     date_signature = models.DateField(null=True, blank=True)
     signature = models.TextField(blank=True, null=True)  # Stores Base64 string
     photo = models.ImageField(upload_to='listings/media/commandesdetail', blank=True, null=True)
+    photo_recup = models.ImageField(upload_to='listings/media/commandesdetail', blank=True, null=True)
     def __str__(self):
         return f'{self.nom}'
 
@@ -318,6 +346,14 @@ class Livraison(models.Model):
 
 class Photo(models.Model):
     livraison = models.ForeignKey('Livraison', on_delete=models.CASCADE, related_name='livraison_photos')
+    image = models.ImageField(upload_to='listings/media/commandesdetail')
+    caption = models.CharField(max_length=200, null=True, blank=True)
+
+    def __str__(self):
+        return f'Photo for {self.livraison.nom} - {self.caption or "No Caption"}'
+
+class PhotoRecup(models.Model):
+    livraison = models.ForeignKey('Livraison', on_delete=models.CASCADE, related_name='livraison_photos_recups')
     image = models.ImageField(upload_to='listings/media/commandesdetail')
     caption = models.CharField(max_length=200, null=True, blank=True)
 
