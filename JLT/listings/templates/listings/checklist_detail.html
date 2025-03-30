@@ -375,6 +375,26 @@
 .alert {
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
+.modal-body {
+    padding: 20px; /* Adjust padding inside the modal */
+}
+
+.product-item {
+    margin-bottom: 10px; /* Space between product items */
+}
+
+.product-info {
+    flex-grow: 1; /* Allow product-info to take up available space */
+}
+
+.form-group {
+    flex: 0 0 auto; /* Prevents form groups from shrinking */
+}
+
+textarea.comment-textarea {
+    min-height: 60px; /* Set a minimum height for text areas */
+    resize: vertical; /* Allow vertical resizing for spaciousness */
+}
 
 </style>
 
@@ -1186,7 +1206,7 @@
 
                             <tbody>
                                 {% for product in products %}
-                                {% if product.category == montage %}
+                                {% if product.is_canape %}
                                 <tr>
                                     <td class="small-cell" {% if product.id in checklist_products %}
                                         style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
