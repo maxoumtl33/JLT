@@ -354,7 +354,7 @@
     }
 
     h1 {
-        color: #009879;
+        color: #116EFD;
     }
 
     .form-control {
@@ -379,16 +379,16 @@
     }
 
     .page-link {
-  color: #009879; /* Change text color */
+  color: #116EFD; /* Change text color */
 }
 
 .page-link:hover {
   background-color: rgba(0, 152, 123, 0.2); /* Lighten the background on hover */
-  color: #00795e; /* Darker text color on hover */
+  color: #116EFD; /* Darker text color on hover */
 }
 
 .page-link.active {
-  background-color: #009879; /* Active page color */
+  background-color: #116EFD; /* Active page color */
   color: white; /* Active text color */
 }
 </style>
@@ -430,7 +430,7 @@
     <!-- Date Filter Form -->
     <form method="get" class="d-flex justify-content-center mb-4">
         {{ form.date|add_class:"form-control" }} <!-- Use the add_class filter -->
-        <button type="submit" class="btn btn-success mx-2">Filtrer</button>
+        <button type="submit" class="btn btn-primary mx-2">Filtrer</button>
         <a href="{% url 'journees-list' %}" class="btn btn-secondary">Voir toute la liste</a>
     </form>
 

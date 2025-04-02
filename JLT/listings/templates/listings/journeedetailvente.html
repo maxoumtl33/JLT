@@ -1,150 +1,306 @@
 {% extends 'listings/base.html' %}
 {% load static %}
 {% block content %}
+
 <style>
-  /* General Styling */
-body {
-    font-family: Arial, sans-serif;
-    color: #333;
-}
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-h1 {
-    color: #009879;
-}
+    body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background-color: #f9f9f9;
+    }
 
-/* Table Styling */
-table.table {
-    width: 100%;
-    margin: 0 auto;
-    border-collapse: collapse;
-    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
-}
+    .container {
+        max-width: 1200px;
+        margin: auto;
+    }
 
-table thead {
-    background-color: #303FBA;
-    color: white;
-}
+    .card {
+        border-radius: 15px;
+        background-color: #fff;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
 
-table th, table td {
-    padding: 15px;
-    text-align: center;
-    border-bottom: 1px solid #ddd;
-}
+    .toggle-btn {
+        background-color: #1176F5;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        display: block;
+        width: 100%;
+        margin-top: 10px;
+        text-align: center;
+    }
 
-table th {
-    font-weight: bold;
-}
+    .toggle-btn:hover {
+        background-color: #0d63cc;
+    }
 
-table tbody tr:hover {
+    /* General styling for the shift section */
+.shift-section {
+    margin: 20px;
+    padding: 20px;
     background-color: #f9f9f9;
-    cursor: pointer;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Button Styling */
-.btn {
-    padding: 10px 20px;
-    font-size: 1rem;
-    border: none;
-    border-radius: 5px;
-    background-color: #009879;
+/* Table styling */
+.shift-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+/* Table headers */
+.shift-table thead {
+    background-color: #4CAF50;
     color: white;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+    text-align: left;
 }
 
-.btn:hover {
-    background-color: #007a63;
-}
-
-/* General Styles for Navigation */
-nav.nav {
-    position: sticky;
-    top: 0;
-    width: 100%;
-    background-color: #fff;
-    padding: 10px 20px;
-    display: flex;
-    align-items: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-}
-
-/* Logo */
-.nav__img {
-    width: 120px; /* Adjust the size to your preference */
-    height: auto; /* Maintain aspect ratio */
-    border-radius: 5px; /* Optional: rounded corners */
-    margin-right: 20px; /* Space between image and logo */
-}
-
-/* Logo Text */
-.nav__logo {
-    font-size: 2rem;
+.shift-table th {
+    padding: 10px;
     font-weight: bold;
-    color: #009879;
-    margin-left: 20px;
+    text-transform: uppercase;
 }
 
-/* Navigation Menu */
-.nav__menu {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    flex-grow: 1; /* Allow menu to take available space */
+
+
+.shift-table tbody tr:hover {
+    background-color: #e0f7fa;
+    cursor: pointer;
 }
 
-.nav__list {
-    list-style: none;
-    display: flex;
-    gap: 20px; /* Spacing between nav items */
+.shift-table td {
+    padding: 12px;
+    border: 1px solid #ddd;
 }
 
-.nav__item {
-    display: flex;
-    align-items: center;
+/* Message for no shifts available */
+.shift-section p {
+    text-align: center;
+    font-size: 16px;
+    color: #666;
+    margin-top: 20px;
 }
 
-.nav__link {
-    text-decoration: none;
-    font-size: 1rem;
-    color: #333;
-    transition: color 0.3s ease;
-}
-
-.nav__link:hover {
-    color: #009879;
-}
-
-/* Adjustments for Mobile Responsiveness */
-@media screen and (max-width: 768px) {
-    .nav__menu {
-        flex-direction: column;
-        gap: 10px; /* Spacing between items in mobile view */
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .shift-table th, .shift-table td {
+        padding: 8px;
     }
-
-    .nav__img {
-        width: 80px; /* Smaller size on mobile */
-        margin-bottom: 10px; /* Space below the image */
+    .shift-table thead {
+        font-size: 14px;
     }
 }
+.repos-row {
+    background-color: #FFEB3B;  /* Yellow background */
+}
 
-/* Offcanvas Styling */
-.offcanvas-body p a {
-    width: 100%;
-    display: inline-block;
+    .delivery-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .delivery-table th, .delivery-table td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .delivery-cards {
+        display: none;
+    }
+
+    .delivery-card {
+    position: relative;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background-color: white;
+    cursor: pointer;
+}
+
+    .delivery-card h3 {
+        color: #127BFF;
+    }
+
+    .delivery-card p {
+        margin: 5px 0;
+    }
+
+    .delivery-card:hover {
+        background-color: #f1f1f1;
+    }
+    .user-tag {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background-color: #28a745; /* Green for visibility */
+    color: white;
+    padding: 6px 10px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 50%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+    @media (max-width: 768px) {
+        .delivery-table {
+            display: none;
+        }
+
+        .delivery-cards {
+            display: block;
+        }
+    }
+    .statistiques-card {
+    border-radius: 12px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.statistiques-card .card-body {
+    padding: 20px;
+}
+
+.card-title {
+    font-size: 1.5rem;
+    color: #1176F5;
+}
+
+.stats-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-item h2 {
+    font-size: 2.5rem;
     margin-bottom: 10px;
 }
 
-/* Responsive Design for Tables */
-@media screen and (max-width: 1200px) {
-    table th, table td {
-        font-size: 0.9rem; /* Smaller font size for smaller screens */
+.stat-item p {
+    font-size: 1rem;
+    color: #666;
+}
+
+
+.filter-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 15px 0;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    background: #007BFF;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.filter-btn i {
+    font-size: 18px;
+}
+
+.filter-btn:hover {
+    background: #0056b3;
+    transform: scale(1.05);
+}
+
+/* Active button */
+.filter-btn.active {
+    background: #28a745;
+    font-weight: bold;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 600px) {
+    .filter-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .filter-btn {
+        width: 80%;
+        text-align: center;
     }
 }
 
-</style>
 
-<!-- Navigation -->
+
+/* Media query for mobile devices */
+@media (max-width: 768px) {
+    .stats-row {
+        flex-direction: column;
+        align-items: center;
+    }
+    .stat-item {
+        margin-bottom: 20px;
+    }
+}
+   /* Bottom Navbar */
+   .bottom-navbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #333;
+    padding: 10px 0;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+
+.bottom-navbar ul {
+    list-style: none;
+    display: flex;
+    justify-content: space-around;
+    margin: 0;
+    padding: 0;
+}
+
+.bottom-navbar ul li {
+    flex: 1;
+    text-align: center;
+}
+
+.bottom-navbar ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.bottom-navbar ul li a:hover {
+    text-decoration: underline;
+}
+
+</style>
 <nav class="nav container">
   <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg' %}" alt="Julien Leblanc" class="nav__img">
   <a href="#" class="nav__logo">Julien Leblanc Traiteur</a>
@@ -169,76 +325,261 @@ nav.nav {
       {% endif %}
       <li class="nav__item">
         <a href="{% url 'journees-list' %}" class="nav__link">
-          <i class="fa-solid fa-calendar-days"></i> Retour
+          <i class="fa-solid fa-calendar-days"></i> Journées
         </a>
       </li>
+      <li class="nav__item">
+            <a href="{% url 'creerchecklist' %}" class="nav__link">
+              <i class="fa-solid fa-cart-flatbed"></i> Checklists
+            </a>
+        </li>
     </ul>
   </div>
 </nav>
 
+<header>
+    <h1 class="text-center">Feuille de route</h1>
+    <h1 class="text-center">{{ journees }}</h1>
+</header>
 
-
-<!-- Main Content -->
-<div class="container mt-5">
-  <h1 class="text-center">{{ journees }}</h1>
-  <p class="text-center">{{ livraisonsok|length }} livraisons et {{ recuperationes|length }} récupérations aujourd'hui</p>
-
-  <!-- Table -->
-  <table class="table table-hover">
-    <thead class="thead-dark">
-      <tr>
-        <th>Heure départ</th>
-        <th>Nom du contrat</th>
-        <th>Infos</th>
-        <th>Heure livraison</th>
-        <th>Livreur</th>
-        <th>Status</th>
-        <th>Modifier</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for livraison in livraisons %}
-        {% if livraison.date == journees.date and livraison.recuperation == True %}
-        <tr>
-          <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.heure_depart }}</strong></td>
-          <td style="background-color: #F1B3DA;"><strong>{{ livraison.nom }}</strong></td>
-          <td style="background-color: #F1B3DA;"><strong>{{ livraison.infodetail }}</strong></td>
-          <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
-          <td style="background-color: #F1B3DA;"><strong>{% for livreur in livraison.statut.livreur.all %}
-            {{ livreur.nom }}{% if not forloop.last %}, {% endif %}
-        {% endfor %}</strong></td>
-          <td style="background-color: #F1B3DA;">
-            {% if livraison.status == True %}
-              <strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong>
-            {% else %}
-              <strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong>
-            {% endif %}
-          </td>
-          <td style="background-color: #F1B3DA;"><a href="{% url 'livraisonventesdetail' livraison.id %}" class="btn"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
-        </tr>
-        {% elif livraison.date == journees.date %}
-        <tr>
-          <td><strong>{{ livraison.statut.heure_depart }}</strong></td>
-          <td><strong>{{ livraison.nom }}</strong></td>
-          <td><strong>{{ livraison.infodetail }}</strong></td>
-          <td><strong>{{ livraison.heure_livraison }}</strong></td>
-          <td><strong>{% for livreur in livraison.statut.livreur.all %}
-            {{ livreur.nom }}{% if not forloop.last %}, {% endif %}
-        {% endfor %}</strong></td>
-          <td>
-            {% if livraison.status == True %}
-              <strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong>
-            {% else %}
-              <strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong>
-            {% endif %}
-          </td>
-          <td><a href="{% url 'livraisonventesdetail' livraison.id %}" class="btn"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
-        </tr>
+<div class="container mt-4">
+    <button class="toggle-btn" id="toggle-btn" >Afficher le Planning Livraison</button>
+    
+    <div class="shift-section" id="shift-section" style="display: none;">
+        {% if shifts %}
+            <table class="shift-table">
+                <thead>
+                    <tr>
+                        <th>Livreur</th>
+                        <th>Heure de Début</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for shift in shifts %}
+                        <tr class="{% if shift.notes and 'Repos' in shift.notes %}repos-row{% endif %}">
+                            <td>{{ shift.livreur.nom }}</td>
+                            <td>{% if shift.start_time %}{{ shift.start_time }}{% else %}{{ "" }}{% endif %}</td>
+                            <td>{{ shift.notes }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Aucun planning disponible.</p>
         {% endif %}
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
+    </div>
+    
 
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow-sm border-0 statistiques-card">
+                    <div class="card-body text-center">
+                        <div class="stats-row d-flex justify-content-around align-items-center">
+                            <!-- Livraisons Stat -->
+                            <div class="stat-item">
+                                <h2 class="text-primary">{{ livraisonsok|length }}</h2>
+                                <p>Livraisons</p>
+                            </div>
+                            <!-- Récupérations Stat -->
+                            <div class="stat-item">
+                                <h2 style="color: #F1B3DA;">{{ recuperationes|length }}</h2>
+                                <p>Récupérations</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="filter-buttons">
+        <button class="filter-btn active" onclick="filterDeliveries('matin', this)">
+            <i class="fa-solid fa-sun"></i> Matin
+        </button>
+        <button class="filter-btn" onclick="filterDeliveries('midi', this)">
+            <i class="fa-solid fa-utensils"></i> Midi
+        </button>
+        <button class="filter-btn" onclick="filterDeliveries('aprem', this)">
+            <i class="fa-solid fa-moon"></i> Après-midi
+        </button>
+        <button class="filter-btn" onclick="filterDeliveries('', this)">
+            <i class="fa-solid fa-globe"></i> Tous
+        </button>
+    </div>
+    
+    
+      
+
+
+    <table class="delivery-table">
+        <thead>
+            <tr>
+                <th>Heure Départ</th>
+                <th>Nom Client</th>
+                <th>Informations</th>
+                <th>Heure livraison</th>
+                <th>Livreur</th>
+                <th>Détails</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="delivery-data"></tbody>
+    </table>
+    <div id="delivery-cards" class="delivery-cards"></div>
+</div>
+<br>
+<br>
+<br>
+<br>
+
+
+
+<script>
+   // Ensure the section is initially hidden on page load
+window.onload = function() {
+    var shiftSection = document.getElementById('shift-section');
+    var toggleBtn = document.getElementById('toggle-btn');
+    
+    // Initially hide the shift section and set the button text accordingly
+    shiftSection.style.display = 'none';
+    toggleBtn.textContent = "Afficher le Planning";
+};
+
+// Toggle visibility of the shift section
+document.getElementById('toggle-btn').addEventListener('click', function() {
+    var shiftSection = document.getElementById('shift-section');
+    var toggleBtn = document.getElementById('toggle-btn');
+    
+    // Toggle the visibility
+    if (shiftSection.style.display === 'none') {
+        shiftSection.style.display = 'block';
+        toggleBtn.textContent = "Cacher le Planning"; // Change the button text
+    } else {
+        shiftSection.style.display = 'none';
+        toggleBtn.textContent = "Afficher le Planning Livraison"; // Change the button text
+    }
+});
+
+
+    const livraisons = JSON.parse('{{ livraisonss|escapejs }}');
+    const matin = ['05h00', '05h15', '05h30', '05h45', '06h00', '06h15', '06h30', '06h45', 
+              '07h00', '07h15', '07h30', '07h45', '08h00', '08h15', '08h30', '08h45', 
+              '09h00', '09h15', '09h30', '09h45'];
+
+const midi = ['10h00', '10h15', '10h30', '10h45', '11h00', '11h15', '11h30', '11h45', 
+              '12h00', '12h15', '12h30',];
+
+const aprem = ['12h45','13h00', '13h15', '13h30', '13h45', '14h00', '14h15', '14h30', '14h45', 
+               '15h00', '15h15', '15h30', '15h45', '16h00', '16h15', '16h30', '16h45', 
+               '17h00', '17h15', '17h30', '17h45', '18h00', '18h15', '18h30', '18h45', 
+               '19h00'];
+
+function renderDeliveries(filter = null) {
+    const tableBody = document.getElementById('delivery-data');
+    const deliveryCards = document.getElementById('delivery-cards');
+    tableBody.innerHTML = '';
+    deliveryCards.innerHTML = '';
+    if (!livraisons.length) return;
+
+    const currentUser = "{{ user.username }}"; // Get the logged-in user's name
+
+    livraisons.forEach(livraison => {
+        // Apply filter if provided
+        if (filter && !filter.includes(livraison.heure_depart)) return;
+
+        const statusIcon = livraison.status 
+            ? '<i class="fa-solid fa-circle-check" style="color: #63E6BE;"></i>' 
+            : '<i class="fa-solid fa-spinner fa-spin" style="color: #FFD43B;"></i>';
+
+        // Create Table Row
+        const row = document.createElement('tr');
+
+// Check if `livraison.recuperation` is true and apply background color
+const rowBackground = livraison.recuperation ? 'background-color: #F1B3DA;' : '';
+
+row.innerHTML = `
+    <td style="${rowBackground}">${livraison.heure_depart || 'N/A'}</td>
+    <td style="${rowBackground}">${livraison.nom || 'N/A'}</td>
+    <td style="${rowBackground}">${livraison.infodetail || 'N/A'}</td>
+    <td style="${rowBackground}">${livraison.heure_livraison || 'N/A'}</td>
+    <td style="${rowBackground}">${livraison.livreurs.join(', ') || 'Aucun'}</td>
+    <td style="${rowBackground}"><a href="#" class="view-details" data-id="${livraison.id}">Voir</a></td>
+    <td style="${rowBackground}">${statusIcon}</td>`;
+
+// Append row to table
+tableBody.appendChild(row);
+
+
+        // Create Card
+        const card = document.createElement('div');
+        card.classList.add('delivery-card');
+
+        // Tag for the user's deliveries
+        const isUserLivreur = livraison.livreurs.includes(currentUser);
+        let userTag = isUserLivreur 
+            ? `<span class="user-tag"><i class="fa-solid fa-user-check"></i></span>` 
+            : '';
+
+        // Set background color for recuperation
+        // Ensure recuperation is treated as a boolean
+if (livraison.recuperation === true || livraison.recuperation === "True") {
+    card.style.backgroundColor = '#F1B3DA'; // Pink for recuperation
+}
+
+        card.innerHTML = `
+            ${userTag} <!-- Font Awesome Icon on the top-right -->
+            <h3>${livraison.nom || 'N/A'}</h3>
+            <p><strong><i class="fa-solid fa-clock"></i> Départ:</strong> ${livraison.heure_depart || 'N/A'}</p>
+            <p><strong><i class="fa-solid fa-truck"></i> Livraison:</strong> ${livraison.heure_livraison || 'N/A'}</p>
+            <p style="color: orange"><strong><i class="fa-solid fa-info-circle"></i> Infos:</strong> ${livraison.infodetail || 'N/A'}</p>
+            <p><strong><i class="fa-solid fa-user"></i> Livreur(s):</strong> ${livraison.livreurs.join(', ') || 'Aucun'}</p>
+            <p><strong><i class="fa-solid fa-circle-check"></i> Status:</strong> ${statusIcon}</p>`;
+
+        card.addEventListener('click', () => {
+            window.location.href = `{% url 'livraisonventesdetail' 0 %}`.replace('0', livraison.id);
+        });
+
+        deliveryCards.appendChild(card);
+    });
+}
+
+// Function to filter by time period and highlight the selected button
+function filterDeliveries(period, btn = null) {
+    if (period === 'matin') {
+        renderDeliveries(matin);
+    } else if (period === 'midi') {
+        renderDeliveries(midi);
+    } else if (period === 'aprem') {
+        renderDeliveries(aprem);
+    } else {
+        renderDeliveries(); // Show all deliveries
+    }
+
+    // Update active button styling
+    if (btn) {
+        document.querySelectorAll('.filter-btn').forEach(button => {
+            button.classList.remove('active'); // Remove active class from all buttons
+        });
+        btn.classList.add('active'); // Add active class to the clicked button
+    }
+}
+
+
+// Run the function on page load
+window.onload = renderDeliveries;
+
+document.addEventListener('click', function(event) {
+    if (event.target.classList.contains('view-details')) {
+        event.preventDefault(); // Prevent default action
+        const livraisonId = event.target.getAttribute('data-id');
+        const url = "{% url 'livraisonventesdetail' 0 %}".replace('0', livraisonId);
+        window.location.href = url; // Redirect to the correct URL
+    }
+});
+
+</script>
 
 {% endblock %}

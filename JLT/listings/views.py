@@ -2436,29 +2436,68 @@ def journeerecupdetail(request, id):
 
 @login_required
 def journeedetailvente(request, id):
-    journees = get_object_or_404(Journee, id=id)  # Use get_object_or_404 for better error handling
+    journees = get_object_or_404(Journee, id=id)
     livreurs = Livreur.objects.all()
-    livraisonsroute = Livraison.objects.order_by('statut__position')
+    shifts = Shift.objects.filter(date=journees.date)
+    livraisonsroute = Livraison.objects.order_by('statut', 'position')
     today = now().date()
 
-    livraisons = Livraison.objects.order_by('statut', 'position').filter(date=journees.date)
-    livraisonsok = livraisons.filter(recuperation=False)
-    recuperations = livraisons.filter(recuperation=True)
+    livraisonss = Livraison.objects.prefetch_related('statut__livreur') \
+    .filter(date=journees.date) \
+    .order_by('statut', 'position')
 
-    context = {
-        'livraisons': livraisons,
-        'livreurs': livreurs,
-        'journees': journees,
-        'today': today,
-        'livraisonsok': livraisonsok,
-        'livraisonsroute': livraisonsroute,
-        'recuperations': recuperations,
-        'recuperation': "oui",
-        'recuperationo': "non",
-        'rien': ".",
-    }
+    # Convert to JSON-like structure with error handling for 'livreur'
+    livraisons_data = [
+        {
+            'id': livraison.id,
+            'nom': livraison.nom,
+            'infodetail': livraison.infodetail if livraison.infodetail else "N/A",
+            'heure_livraison': livraison.heure_livraison,
+            'heure_livraison_classement': livraison.heure_livraison_classement,
+            'livreurs': [livreur.nom for livreur in livraison.statut.livreur.all()] if livraison.statut else ["Aucun livreur"],  # Handle ManyToManyField
+            'heure_depart': livraison.statut.heure_depart if livraison.statut else "Non défini",
+            'recuperation': livraison.recuperation,
+            'status': livraison.status,
+            'statut.heure_depart': livraison.statut.heure_depart,
+        }
+        for livraison in livraisonss
+    ]
 
-    return render(request, 'listings/journeedetailvente.html', context)
+    livraisons_json = json.dumps(livraisons_data)
+    livraisonsok = Livraison.objects.filter(recuperation=False, date=journees.date)
+    recuperations = Livraison.objects.filter(recuperation=True, date=journees.date)
+    recuperationes = Livraison.objects.filter(recuperation=True, date=journees.date)
+
+    retourtraiteur = "oui"
+    retourtraiteurno = "non"
+    recuperation = "oui"
+    recuperationo = "non"
+    loic = "Loic"
+    maxime = "Maxime"
+    rien = "."
+
+    return render(request,
+                  'listings/journeedetailvente.html',
+                  context={
+                      'journees': journees,
+                      'livraisonsroute': livraisonsroute,
+                      'livreurs': livreurs,
+                      'recuperations': recuperations,
+                      'retourtraiteur': retourtraiteur,
+                      'recuperation': recuperation,
+                      'retourtraiteurno': retourtraiteurno,
+                      'livraisonss': livraisons_json,
+                      'recuperationo': recuperationo,
+                      'loic': loic,
+                      'maxime': maxime,
+                      'rien': rien,
+                      'recuperations': recuperation,
+                      'livraisons_data': livraisons_data,
+                      'livraisonsok': livraisonsok,
+                      'recuperationes': recuperationes,
+                      'today': today,
+                      'shifts': shifts,
+                  })  # nous passons l'id au modèle
 
 @login_required
 def journees_list(request):
@@ -4827,7 +4866,7 @@ def livraisonsresp(request):
 def recuptoday(request):
     today = datetime.now().date()
     tomorrow = today + timedelta(1)
-    recups = ["Porcelaine", "Chaud et porcelaine", "Porcelaine et bois", "Plateau de bois", "Froid et bois", "Chaud et jetable", "Froid et porcelaine", "Porcelaine / chaud en vrac"]
+    recups = ["Porcelaine", "Chaud et porcelaine", "Porcelaine et bois", "Plateau de bois", "Froid et bois", "Chaud et jetable", "Froid et porcelaine", "Porcelaine / chaud en vrac", "Plateau JLT"]
 
     # Querysets
     recuperations = Livraison.objects.filter(recuperation=False, date=today, mode_envoi__in=recups)

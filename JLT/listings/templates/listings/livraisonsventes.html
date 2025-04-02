@@ -1,232 +1,630 @@
 {% extends 'listings/base.html' %}
-{% load static %}
+{%  load static%}
 {% block content %}
-
 <style>
-  /* General Styling */
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Updated font for a modern look */
-    background-color: #f4f4f4; /* Light background for contrast */
-    color: #333;
+
+.swipe-container {
+  position: relative;
+  width: 100%;
+  height: 60px;
+  background-color: #f8f8f8;
+  border-radius: 30px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.swipe-button {
+  position: absolute;
+  left: 0;
+  height: 50px;
+  width: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: left 0.3s ease, background-color 0.2s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.swipe-text {
+  font-size: 16px;
+  color: white;
+  user-select: none;
+  pointer-events: none;
+  text-transform: uppercase;
+}
+
+.swipe-button.dragging {
+  transition: none;
+}
+
+
+.swipe-container:hover .swipe-button {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.swipe-button.done {
+  background-color: #2196f3; /* Blue color once swipe is complete */
+  left: 100%;
+  transform: translateX(-100%);
+  box-shadow: none;
 }
 
 
 
-.image-gallery {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px; /* Space between images */
-}
 
-.image-container {
-    flex: 1 1 45%; /* Allow images to take up to 45% width with flexibility */
-    max-width: 200px; /* Set a max width for each image */
-}
-
-.custom-image {
-    width: 100%; /* Full width of the container */
-    height: auto; /* Maintain aspect ratio */
-    border-radius: 8px; /* Rounded corners */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
-}
-
-
-
-/* Card and Modal Styling */
 .card {
-    border: none; /* No border for cards */
-    border-radius: 8px; /* Rounded corners */
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow */
-    transition: transform 0.2s ease; /* Transition for hover effect */
+    margin-bottom: 20px;
+    border-radius: 15px;
+}
+
+.card-title {
+    font-weight: bold;
 }
 
 
-
-.modal-content {
-    padding: 20px; /* Padding for modal content */
-    border-radius: 8px; /* Rounded corners */
+.card-body {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 15px;
 }
 
-.modal-header {
-    border-bottom: 1px solid #e3e3e3; /* Bottom border for header */
+.offcanvas-title {
+    font-size: 1.5rem;
+    color: #4a90e2;
+}
+#signaturePad {
+    touch-action: none; /* Prevent scrolling while signing */
+    background-color: white; /* Ensure contrast */
 }
 
-/* Button Styling */
-.btn-outline-primary {
-    color: #009879; /* Outline button color */
-    border-color: #009879; /* Outline border color */
+.card-body img {
+    transition: transform 0.3s ease;
 }
 
-.btn-outline-primary:hover {
-    background-color: #009879; /* Background color on hover */
-    color: white; /* Text color on hover */
+.card-body img:hover {
+    cursor: pointer; /* Change cursor to pointer */
 }
 
-/* Responsive Design */
-@media screen and (max-width: 768px) {
-    .card {
-        margin-bottom: 20px; /* Margin below cards for small screens */
-    }
-
-    h1 {
-        font-size: 2rem; /* Responsive heading size */
-    }
-
-    .card-title {
-        font-size: 1.2rem; /* Responsive title size */
-    }
+.btn-primary {
+    background-color: #4a90e2;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    transition: background-color 0.3s ease;
 }
 
-</style>
+.btn-primary:hover {
+    background-color: #3a78c2;
+}
 
-<!-- Main Heading -->
-{% if livraison.recuperation == True %}
-<h1 style="text-align: center; color: #F1B3DA;">RECUPERATION {{ livraison.nom|upper }}</h1>
-{% else %}
-<h1 style="text-align: center;color: #009879;">LIVRAISON {{ livraison.nom|upper }}</h1>
-{% endif %}
-<br>
+  * {
+     margin: 0;
+     padding: 0;
+     box-sizing: border-box;
+ }
 
-<a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
-    <i class="fa-solid fa-pen-to-square"></i><span>Editer</span></a>
-<br>
+ body {
+     font-family: Arial, sans-serif;
+     padding: 20px;
+     background-color: #f9f9f9;
+ }
 
-<!-- Informations Livraison Card -->
-<div class="card card-body mb-4">
-    <ul class="list-group">
-        <li class="list-group-item" style="background-color: #009879; color: white;" aria-current="true">
-            <h2>Informations Livraison</h2>
+ /* Heading */
+ h1 {
+     text-align: center;
+     color: #333;
+     margin-bottom: 20px;
+ }
+
+
+
+
+ /* Footer Navigation Bar (Fixed to bottom) */
+ .bottom-navbar {
+     position: fixed;
+     bottom: 0;
+     left: 0;
+     width: 100%;
+     background-color: #333;
+     padding: 10px 0;
+     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+     z-index: 1000; /* Ensures it's above other content */
+ }
+
+ .bottom-navbar ul {
+     list-style: none;
+     display: flex;
+     justify-content: space-around;
+     margin: 0;
+     padding: 0;
+ }
+
+ .bottom-navbar ul li {
+     flex: 1;
+     text-align: center;
+ }
+
+ .bottom-navbar ul li a {
+     color: white;
+     text-decoration: none;
+     font-size: 16px;
+ }
+
+ .bottom-navbar ul li a:hover {
+     text-decoration: underline;
+ }
+
+ /* Responsive Design */
+ @media (max-width: 768px) {
+     .header-container {
+         flex-direction: column;
+         text-align: center;
+     }
+
+     .navbar ul {
+         flex-direction: column;
+     }
+
+     .navbar ul li {
+         margin: 10px 0;
+     }
+
+     .stats-section {
+         flex-direction: column;
+         align-items: center;
+     }
+
+     .map-section {
+         padding: 10px;
+     }
+
+     .order {
+         font-size: 14px;
+     }
+     .dashboard-header {
+     text-align: center;
+     padding: 20px;
+     background-color: #f5f5f5;
+     border-radius: 10px;
+     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+     margin: 20px;
+ }
+
+
+ }
+
+
+ </style>
+<nav class="nav container">
+    <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg' %}" alt="Julien Leblanc" class="nav__img">
+    <a href="#" class="nav__logo">Julien Leblanc Traiteur</a>
+  
+    <div class="nav__menu" id="nav-menu">
+      <ul class="nav__list">
+        {% if user.is_authenticated %}
+          <li class="nav__item">
+            <form action="{% url 'logout' %}" method="post">
+              {% csrf_token %}
+              <button type="submit" class="nav__link" style="color: red;">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Déconnexion
+              </button>
+            </form>
+          </li>
+        {% else %}
+          <li class="nav__item">
+            <a href="{% url 'login' %}" class="nav__link" style="color: green;">
+              <i class="fa-regular fa-user"></i> Connexion
+            </a>
+          </li>
+        {% endif %}
+        <li class="nav__item">
+            <a href="javascript:history.back()" class="nav__link">
+                <i class="fa-solid fa-calendar-days"></i> Feuille de route
+            </a>
         </li>
+        <li class="nav__item">
+            <a href="{% url 'creerchecklist' %}" class="nav__link">
+                <i class="fa-solid fa-cart-flatbed"></i> Checklists
+            </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+
+<header>
+  <div class="header-container text-center py-3">
+    {% if livraison.recuperation == True %}
+    <h1 class="text-uppercase" style="color: #F1B3DA;">Récupération {{ livraison.nom }}</h1>
+    <p class="card-text"><a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
+        <i class="fa-solid fa-pen-to-square"></i><span>Editer</span></a></p>
+    {% else %}
+    <h1 class="text-uppercase" style="color: #116EFD;">Livraison {{ livraison.nom }}</h1>
+            <p class="card-text"><a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                <i class="fa-solid fa-pen-to-square"></i><span>Editer</span></a></p>
+    {% endif %}
+  </div>
+</header>
+
+<div class="container">
+  <!-- Main Informations Section -->
+  <div class="card shadow mb-4">
+    <ul class="list-group list-group-flush">
+      <!-- Toggle Header -->
+      <li class="list-group-item active" data-bs-toggle="collapse" href="#informationContent" aria-expanded="false" aria-controls="informationContent" style="cursor: pointer;">
+        Informations Livraison
+      </li>
+    </ul>
+    <!-- Collapsible Content -->
+    <div id="informationContent" class="collapse">
+      <ul class="list-group list-group-flush">
         <li class="list-group-item">
-            <div class="row g-4">
-                <div class="col-md-6">
-                    <h5 class="card-title"><strong>Nom</strong></h5>
-                    <p class="card-text">{{ livraison.nom }}</p>
-                </div>
-                <div class="col-md-6">
-                    <h5 class="card-title"><strong>Adresse</strong></h5>
-                    <p class="card-text">
-                        <a href="https://maps.google.com/?q={{ livraison.adress }}, {{ livraison.zipcode }}, {{ livraison.city }}" target="_blank">{{ livraison.adress }}, {{ livraison.zipcode }}, {{ livraison.city }}</a>
-                    </p>
-                    <p class="card-text"><a href="{{ livraison.client.adresse_dock }}">Aller au Dock</a></p>
-                </div>
-                <div class="col-md-6">
-                    <h5 class="card-title"><strong>Heure de livraison</strong></h5>
-                    <p class="card-text">{{ livraison.heure_livraison }}</p>
-                </div>
-                <div class="col-md-6">
-                    <h5 class="card-title" ><strong>Infos supplementaires</strong></h5>
-                    <p class="card-text">{{ livraison.infodetail }}</p>
-                </div>
-                <div class="col-md-6">
-                    <h5 class="card-title"><strong>Commentaire du dispatch</strong></h5>
-                    <p class="card-text">{{ livraison.commentairedispatch }}</p>
-                </div>
-                <div class="col-md-6">
-                    <h5 class="card-title"><strong>Commentaire du livreur</strong></h5>
-                    <p class="card-text">{{ livraison.commentaire }}</p>
-                </div>
-                <div class="col-md-6">
-                    <h5 class="card-title"><strong>N° de commande</strong></h5>
-                    <p class="card-text">{{ livraison.num_commande }}</p>
-                </div>
-                <div class="col-md-6">
-                    <h5 class="card-title"><strong>Nombre convives</strong></h5>
-                    <p class="card-text">{{ livraison.convives }}</p>
-                </div>
-                <div class="col-md-6">
-                    <h5 class="card-title"><strong>Mode d'envoi</strong></h5>
-                    <p class="card-text">{{ livraison.mode_envoi }}</p>
-                </div>
-                <div class="col-md-6">
-                  <h5 class="card-title"><strong>Photo Livraison</strong></h5>
-                  <div class="image-gallery">
-                      {% for photo in livraison.livraison_photos.all %}
-                          <div class="image-container">
-                              <a href="#" data-bs-toggle="modal" data-bs-target="#photoModal" data-image="{{ photo.image.url }}" data-caption="{{ photo.caption }}">
-                                  <img src="{{ photo.image.url }}" alt="{{ photo.caption }}" class="img-fluid rounded mb-3 custom-image">
-                              </a>
-                          </div>
-                      {% endfor %}
-                  </div>
+          <div class="row g-4">
+            <!-- Nom -->
+            <div class="col-md-6">
+              <div class="card border-0">
+                <div class="card-body">
+                  <h5 class="card-title">Nom</h5>
+                  <p class="card-text">{{ livraison.nom }}</p>
                 </div>
               </div>
-              <br>
-              <div class="col-md-6">
-                        <h5 class="card-title"><strong>Photo Récupération</strong></h5>
-                        <div class="image-gallery">
-                            {% for photo in livraison.livraison_photos_recups.all %}
-                                <div class="col-md-3">
-                                    <!-- Small Thumbnail -->
-                                    <img src="{{ photo.image.url }}" 
-                                         class="img-fluid rounded shadow-sm" 
-                                         alt="Photo"
-                                         data-bs-toggle="modal" 
-                                         data-bs-target="#photoModal{{ forloop.counter }}">
-                                </div>
-              
-                                <!-- Bootstrap Modal for Large Image -->
-                                <div class="modal fade" id="photoModal{{ forloop.counter }}" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered">
-                                        <div class="modal-content">
-                                            <div class="modal-body text-center">
-                                                <img src="{{ photo.image.url }}" class="img-fluid rounded" alt="Photo">
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                                            </div>
+            </div>
+            <!-- Adresse -->
+            <div class="col-md-6">
+              <div class="card border-0">
+                <div class="card-body">
+                  <h5 class="card-title">Adresse</h5>
+                  <p class="card-text">
+                    <a href="https://maps.google.com/?q={{ livraison.adress }}, {{ livraison.zipcode }}, {{ livraison.city }}" target="_blank">
+                      {{ livraison.adress }}, {{ livraison.zipcode }}, {{ livraison.city }} {{ livraison.app }}, {{ livraison.ligne2 }}
+                    </a>
+                  </p>
+                  <hr>
+                  <p class="card-text">
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#dockModal">Aller au Dock</a>
+                  </p>
+                </div>
+              </div>
+            </div>
+          <!-- Heure de Livraison -->
+          <div class="col-md-6">
+            <div class="card border-0">
+              <div class="card-body">
+                <h5 class="card-title">Heure de Livraison</h5>
+                <p class="card-text">{{ livraison.heure_livraison }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Infos supplementaires -->
+          {% if livraison.infodetail %}
+          <div class="col-md-6">
+            <div class="card border-0">
+              <div class="card-body" style="background-color: orange;">
+                <h5 class="card-title">Infos Supplementaires</h5>
+                <p class="card-text">{{ livraison.infodetail }}</p>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+          <!-- Commentaire du Dispatch -->
+          {% if livraison.commentairedispatch %}
+          <div class="col-md-6">
+            <div class="card border-0">
+              <div class="card-body" style="background-color: orange;">
+                <h5 class="card-title">Commentaire du Dispatch</h5>
+                <p class="card-text">{{ livraison.commentairedispatch }}</p>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+          <!-- Commentaire du Livreur -->
+          <div class="col-md-6">
+            <div class="card border-0">
+              <div class="card-body">
+                <h5 class="card-title">Commentaire du Livreur</h5>
+                <p class="card-text">{{ livraison.commentaire }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- N° de Commande -->
+          <div class="col-md-6">
+            <div class="card border-0">
+              <div class="card-body">
+                <h5 class="card-title">N° de Commande</h5>
+                <p class="card-text">{{ livraison.num_commande }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Nombre Convives -->
+          <div class="col-md-6">
+            <div class="card border-0">
+              <div class="card-body">
+                <h5 class="card-title">Nombre de Convives</h5>
+                <p class="card-text">{{ livraison.convives }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mode d'envoi -->
+          <div class="col-md-6">
+            <div class="card border-0">
+              <div class="card-body">
+                <h5 class="card-title">Mode d'Envoi</h5>
+                <p class="card-text">{{ livraison.mode_envoi }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vendeur -->
+          <div class="col-md-6">
+            <div class="card border-0">
+              <div class="card-body">
+                <h5 class="card-title">Vendeur</h5>
+                <p class="card-text">{{ livraison.vendeur }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Photo Livraison -->
+
+          <!-- Image Gallery -->
+
+          <div class="col-md-6">
+            <div class="card border-0">
+                <div class="card-body">
+                    <h5 class="card-title">Photo Récupération</h5>
+                    <div class="row">
+                        {% for photo in livraison.livraison_photos_recups.all %}
+                            <div class="col-md-3">
+                                <!-- Small Thumbnail -->
+                                <img src="{{ photo.image.url }}" 
+                                     class="img-fluid rounded shadow-sm" 
+                                     alt="Photo"
+                                     data-bs-toggle="modal" 
+                                     data-bs-target="#photoModalrecup{{ forloop.counter }}">
+                            </div>
+                            
+                            <!-- Bootstrap Modal for Large Image -->
+                            <div class="modal fade" id="photoModalrecup{{ forloop.counter }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-fullscreen">
+                                    <div class="modal-content">
+                                        <div class="modal-body text-center">
+                                            <img src="{{ photo.image.url }}" class="img-fluid rounded" alt="Photo" style="max-width: 100%; height: auto;">
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
                                         </div>
                                     </div>
                                 </div>
-                            {% endfor %}
-                        </div>
+                            </div>
+                        {% endfor %}
                     </div>
                 </div>
-              </div>
-              
-              <!-- Modal -->
-              <div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
-                  <div class="modal-dialog modal-lg">
-                      <div class="modal-content">
-                          <div class="modal-header">
-                              <h5 class="modal-title" id="photoModalLabel">Photo</h5>
-                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                          </div>
-                          <div class="modal-body">
-                              <img id="modalImage" src="" alt="Large Photo" class="img-fluid">
-                              <p id="modalCaption" class="mt-2"></p>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-              
             </div>
-        </li>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card border-0">
+                <div class="card-body">
+                    <h5 class="card-title">Photo Livraison</h5>
+                    <div class="row">
+                        {% for photo in livraison.livraison_photos.all %}
+                            <div class="col-md-3">
+                                <!-- Small Thumbnail -->
+                                <img src="{{ photo.image.url }}" 
+                                     class="img-fluid rounded shadow-sm" 
+                                     alt="Photo"
+                                     data-bs-toggle="modal" 
+                                     data-bs-target="#photoModal{{ forloop.counter }}">
+                            </div>
+        
+                            <!-- Bootstrap Modal for Large Image -->
+                            <div class="modal fade" id="photoModal{{ forloop.counter }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered fullscreen">
+                                    <div class="modal-content">
+                                        <div class="modal-body text-center">
+                                            <img src="{{ photo.image.url }}" class="img-fluid rounded" alt="Photo" style="max-width: 100%; height: auto;">
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        </div>
+      </li>
     </ul>
+  </div>
 </div>
 
-<!-- Informations Client sur place Card -->
-<div class="card card-body mb-4">
-    <ul class="list-group">
-        <li class="list-group-item" style="background-color: #009879; color: white;" aria-current="true">
-            <h2>Informations Client sur place</h2>
-        </li>
+ <!-- Client Information Section -->
+ <div class="card shadow mb-4">
+  <ul class="list-group list-group-flush">
+    <!-- Toggle Header -->
+    <li class="list-group-item active" data-bs-toggle="collapse" href="#clientInfoContent" aria-expanded="false" aria-controls="clientInfoContent" style="cursor: pointer;">
+      Informations Client sur place
+    </li>
+  </ul>
+  <!-- Collapsible Content -->
+  <div id="clientInfoContent" class="collapse">
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item">
+        <div class="row g-4">
+          <!-- Contact Client -->
+          <div class="col-md-6">
+            <div class="card border-0">
+              <div class="card-body">
+                <h5 class="card-title">Contact Client</h5>
+                <p class="card-text">{{ livraison.contact_site }}</p>
+              </div>
+            </div>
+          </div>
+          <!-- Commandé par -->
+          <div class="col-md-6">
+            <div class="card border-0">
+              <div class="card-body">
+                <h5 class="card-title">Commandé par</h5>
+                <p class="card-text">{{ livraison.nom_client }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card border-0">
+              <div class="card-body">
+                <h5 class="card-title">Signature</h5>
+                <p class="card-text">{{ livraison.nom_client_signature }}</p>
+                {% if livraison.signature %}
+                <img src="{{ livraison.signature }}" alt="Signature" width="150">
+                {% endif %}</p>
+              </div>
+            </div>
+          </div>
+          
+          
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- Checklist Section -->
+<div class="card shadow mb-4">
+  <ul class="list-group list-group-flush">
+    <!-- Toggle Header -->
+    <li class="list-group-item active" data-bs-toggle="collapse" href="#checklistContent" aria-expanded="false" aria-controls="checklistContent" style="cursor: pointer;">
+      Informations Checklist
+    </li>
+  </ul>
+  <!-- Collapsible Content -->
+  <div id="checklistContent" class="collapse">
+    <ul class="list-group list-group-flush">
+      {% for item in checklist %}
         <li class="list-group-item">
             <div class="row g-4">
-                <div class="col-md-6">
-                    <h5 class="card-title"><strong>Contact client</strong></h5>
-                    <p class="card-text">{{ livraison.contact_site }}</p>
-                </div>
-                <div class="col-md-6">
-                    <h5 class="card-title"><strong>Commandé par</strong></h5>
-                    <p class="card-text">{{ livraison.nom_client }}</p>
+                            {% if item.notechecklist %}
+                            <div class="col-md-6">
+                              <div class="card border-0">
+                                <div class="card-body" style="background-color: orange;">
+                                  <h5 class="card-title">Note</h5>
+                                  <p class="card-text">{{ item.notechecklist }}</p>
+                                </div>
+                              </div>
+                            </div>
+                            {% endif %}
+                            {% if item.md %}
+                            <div class="col-md-6">
+                              <div class="card border-0">
+                                <div class="card-body">
+                                  <h5 class="card-title">MD</h5>
+                                  <p class="card-text">{{ item.md.name }} (<a href="tel:{{ item.md.phone }}">{{ item.md.phone }}</a>)</p>
+                                </div>
+                              </div>
+                            </div>
+                            {% endif %}
+                            {% if item.commentairevente %}
+                            <div class="col-md-6">
+                              <div class="card border-0">
+                                <div class="card-body">
+                                  <h5 class="card-title">Commentaire ventes</h5>
+                                  <p class="card-text">{{ item.commentairevente }}</p>
+                                </div>
+                              </div>
+                            </div>
+                            {% endif %}
+                            <div class="col-md-6">
+                              <div class="card border-0">
+                                <div class="card-body">
+                                  <h5 class="card-title">Produits</h5>
+                                  <p class="card-text">
+                                    <ul>
+                                      {% if item.filtered_checklist_items %}
+                                          {% for checklist_item in item.filtered_checklist_items %}
+                                              <li><strong>{{ checklist_item.quantity }}</strong> <strong style="margin-left: 10px;">{{ checklist_item.product.name }}</strong>
+                                              </li>
+                                          {% endfor %}
+                                      {% else %}
+                                          <li>Aucun produit associé.</li>
+                                      {% endif %}
+                                  </ul>
+
+                              </p>
+                                </div>
+                              </div>
+                            </div>
+                            {% if livraison.recuperation %}
+                            <div class="col-md-6">
+                              <div class="card border-0">
+                                  <div class="card-body">
+                                      <h5 class="card-title">Photos Récup</h5>
+                                      <div class="row">
+                                          {% for photo in item.checklistrecupphoto_set.all %}
+                                              <div class="col-6 mb-2">
+                                                  <img src="{{ photo.image.url }}" alt="Photo" class="img-fluid rounded thumbnail"
+                                                       data-bs-toggle="modal"
+                                                       data-bs-target="#photoModal"
+                                                       data-photo-url="{{ photo.image.url }}"
+                                                       style="cursor: pointer;" />
+                                              </div>
+                                          {% empty %}
+                                              <div class="col-12">
+                                                  <p>Aucune photo disponible.</p>
+                                              </div>
+                                          {% endfor %}
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+
+                          <!-- Modal for displaying full-sized images -->
+                          <div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-fullscreen">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="photoModalLabel">Photo</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body d-flex justify-content-center align-items-center">
+                                        <img id="modalImage" class="img-fluid" src="" alt="Full Size Photo" style="max-height: 100%; max-width: 100%;" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+
+
+                            <div class="col-md-6">
+                              <div class="card border-0">
+                                <div class="card-body">
+                                  <h5 class="card-title">Rapport Récup</h5>
+                                  <p class="card-text">{{ item.rapportrecup }}</p>
+                                </div>
+                              </div>
+                            </div>
+                            {% endif %}
                 </div>
             </div>
         </li>
+    {% empty %}
+        <li class="list-group-item">Pas de checklist disponible.</li>
+    {% endfor %}
     </ul>
+  </div>
 </div>
-
 <!-- Modal for Editing Information -->
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -239,29 +637,200 @@ body {
                 <form action="" method="POST">
                     {% csrf_token %}
                     {{ formbis.as_p }}
-                    <input type="submit" value="valider" class="btn btn-success">
+                    <input type="submit" value="valider" class="btn btn-primary">
                 </form>
             </div>
         </div>
     </div>
 </div>
+<!-- Optional JavaScript if Bootstrap isn't toggling correctly -->
+<script>
+  document.querySelectorAll('.list-group-item.active').forEach(item => {
+    item.addEventListener('click', function() {
+      const content = document.getElementById(this.getAttribute('href').substring(1));
+      content.classList.toggle('show');
+    });
+  });
+</script>
+
+</div>
+
+<br>
+<br>
+<br>
+
+
+
+
+
+
+
+
+
+
 
 <script>
-  document.addEventListener("DOMContentLoaded", function() {
-    const photoLinks = document.querySelectorAll('.image-container a');
-    const modalImage = document.getElementById('modalImage');
-    const modalCaption = document.getElementById('modalCaption');
 
-    photoLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const imageSrc = this.getAttribute('data-image');
-            const imageCaption = this.getAttribute('data-caption');
-            modalImage.src = imageSrc;
-            modalCaption.innerText = imageCaption;
-        });
+const swipeButton = document.getElementById('swipeButton');
+const commentaire = document.getElementById('commentaire');
+const form = document.getElementById('validateForm');
+let isDragging = false;
+let startX = 0;
+
+const startDrag = (e) => {
+    e.preventDefault();
+    isDragging = true;
+    // for mobile and desktop
+    startX = e.touches ? e.touches[0].clientX : e.clientX; // Use touches for touchscreen devices
+    swipeButton.classList.add('dragging');
+};
+
+const dragMove = (e) => {
+    if (!isDragging) return;
+
+    // Calculate the offset from the initial position
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX; // Use touches for touchscreen devices
+    const offset = Math.max(0, Math.min(clientX - startX, form.offsetWidth - swipeButton.offsetWidth));
+    swipeButton.style.left = `${offset}px`; // Move the swipe button
+
+    // Check if the button is swiped all the way to the right
+    if (offset >= form.offsetWidth - swipeButton.offsetWidth) {
+        swipeButton.style.backgroundColor = '#45a049'; // Change color on proper swipe
+    } else {
+        swipeButton.style.backgroundColor = '#4caf50'; // Reset color
+    }
+};
+
+const endDrag = () => {
+    if (isDragging) {
+        const offset = parseFloat(swipeButton.style.left); // Get the current position
+
+        // Check if the swipe button reached the end
+        if (offset >= form.offsetWidth - swipeButton.offsetWidth) {
+            validateLivraison(); // If reached, validate
+        } else {
+            resetButton(); // Reset to start position if not
+        }
+    }
+};
+
+document.addEventListener('mouseup', endDrag);
+document.addEventListener('mouseleave', resetButton);
+
+swipeButton.addEventListener('mousedown', startDrag);
+swipeButton.addEventListener('touchstart', startDrag); // Touch start event for mobile
+
+document.addEventListener('mousemove', dragMove);
+document.addEventListener('touchmove', dragMove); // Touch move event for mobile
+
+document.addEventListener('mouseup', endDrag);
+document.addEventListener('touchend', endDrag); // Touch end event for mobile
+
+function validateLivraison() {
+    form.submit(); // Directly submit the form
+}
+
+function resetButton() {
+    isDragging = false;
+    swipeButton.style.left = '0'; // Reset button position
+    swipeButton.classList.remove('dragging');
+}
+
+  document.querySelectorAll('.list-group-item.active').forEach(item => {
+    item.addEventListener('click', function() {
+      const content = document.getElementById(this.getAttribute('href').substring(1));
+      content.classList.toggle('show');
     });
+  });
+
+  
+
+    document.addEventListener('DOMContentLoaded', function() {
+    const signaturePad = document.getElementById('signaturePad');
+    const signatureInput = document.getElementById('signatureInput');
+    const clearButton = document.getElementById('clearButton');
+
+    if (!signaturePad || !signatureInput || !clearButton) {
+        console.error("One or more required elements are missing.");
+        return;
+    }
+
+    const ctx = signaturePad.getContext('2d');
+    if (!ctx) {
+        console.error("Canvas context could not be initialized.");
+        return;
+    }
+
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#000';
+
+    let drawing = false;
+
+    const getPosition = (e) => {
+        const rect = signaturePad.getBoundingClientRect();
+        const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+        const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+        return {
+            x: clientX - rect.left,
+            y: clientY - rect.top
+        };
+    };
+
+    const startDrawing = (e) => {
+        e.preventDefault();
+        drawing = true;
+        const pos = getPosition(e);
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+        console.log("Start Drawing:", pos);
+    };
+
+    const draw = (e) => {
+        if (!drawing) return;
+        e.preventDefault();
+        const pos = getPosition(e);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+        console.log("Drawing:", pos);
+    };
+
+    const stopDrawing = () => {
+        drawing = false;
+        saveSignature();
+        console.log("Stopped Drawing");
+    };
+
+    const clearSignature = () => {
+        ctx.clearRect(0, 0, signaturePad.width, signaturePad.height);
+        signatureInput.value = '';
+        console.log("Signature Cleared");
+    };
+
+    const saveSignature = () => {
+        const dataURL = signaturePad.toDataURL();
+        signatureInput.value = dataURL;
+        console.log("Signature Saved:", dataURL);
+    };
+
+    signaturePad.addEventListener('mousedown', startDrawing);
+    signaturePad.addEventListener('mousemove', draw);
+    signaturePad.addEventListener('mouseup', stopDrawing);
+    signaturePad.addEventListener('mouseleave', stopDrawing);
+
+    signaturePad.addEventListener('touchstart', startDrawing);
+    signaturePad.addEventListener('touchmove', draw);
+    signaturePad.addEventListener('touchend', stopDrawing);
+
+    clearButton.addEventListener('click', clearSignature);
 });
 
+
+
+
 </script>
+
+
 {% endblock %}
+
