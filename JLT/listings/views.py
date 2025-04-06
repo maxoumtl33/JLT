@@ -3182,7 +3182,7 @@ def responsables(request, id):
     today = datetime.now().date()
     journee = Journee.objects.get(id=id)
     tomorrow = today + timedelta(1)
-    livraisons  = Livraison.objects.order_by('statut', 'position')
+    livraisons = Livraison.objects.order_by('statut', 'position').select_related('statut').prefetch_related('statut__vehicles')
     livraisonstatusok = Livraison.objects.filter(status=True,recuperation=False, date=journee.date)
     livraisonstatusko = Livraison.objects.filter(status=False,recuperation=False, date=journee.date)
     recuperation = Livraison.objects.filter(recuperation=True, date=journee.date)
@@ -3190,11 +3190,11 @@ def responsables(request, id):
     recuperationko = Livraison.objects.filter(status=False,recuperation=True, date=journee.date)
     livraison = Livraison.objects.filter(recuperation=False, date=journee.date)
     livreurs = Livreur.objects.all()
-
     recuperations = "oui"
     if not request.user.is_superuser:
         return redirect('unauthorized')
-    return render(request, 'listings/responsables.html', context={'livraisons': livraisons,
+    return render(request, 'listings/responsables.html', context={
+                                                              'livraisons': livraisons,
                                                               'livreurs': livreurs,
                                                               'journee' : journee,
                                                               'recuperations' : recuperations,
@@ -3205,6 +3205,7 @@ def responsables(request, id):
                                                               'recuperationko':recuperationko,
                                                               'recuperation' : recuperation,
                                                               })
+
 @login_required
 def unauthorized_view(request):
     return render(request, 'listings/pasauthorise.html', status=403)
@@ -4866,7 +4867,7 @@ def livraisonsresp(request):
 def recuptoday(request):
     today = datetime.now().date()
     tomorrow = today + timedelta(1)
-    recups = ["Porcelaine", "Chaud et porcelaine", "Porcelaine et bois", "Plateau de bois", "Froid et bois", "Chaud et jetable", "Froid et porcelaine", "Porcelaine / chaud en vrac", "Plateau JLT"]
+    recups = ["Porcelaine", "Chaud et porcelaine", "Porcelaine et bois", "Plateau de bois", "Froid et bois", "Chaud et jetable", "Froid et porcelaine", "Porcelaine / chaud en vrac", "Plateau JLT", "Plateaux à partager"]
 
     # Querysets
     recuperations = Livraison.objects.filter(recuperation=False, date=today, mode_envoi__in=recups)

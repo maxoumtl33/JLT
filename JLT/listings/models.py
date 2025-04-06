@@ -128,6 +128,7 @@ class Vehicle(models.Model):
     name = models.CharField(max_length=100, choices= choicename)
     photos = models.ImageField(upload_to='listings/media/commandesdetail', blank=True, null=True)
     routes = models.ManyToManyField('Route', related_name='vehicles_list', blank=True)
+    commentaire = models.fields.CharField(null=True, blank=True, max_length=500)
 
     def __str__(self):
         return self.name
@@ -346,8 +347,7 @@ class Livraison(models.Model):
     photo_recup = models.ImageField(upload_to='listings/media/commandesdetail', blank=True, null=True)
     def __str__(self):
         return f'{self.nom}'
-    class Meta:
-        ordering = ['status', 'position']  # Default ordering
+
 
 
 
