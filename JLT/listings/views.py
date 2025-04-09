@@ -2845,7 +2845,8 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
         key = settings.GOOGLE_API_KEY
         userid = livreur.id
         today = now().date()
-        livraisonss  = Livraison.objects.filter( statut__livreur = userid, date = journee.date)
+        livraisonss = Livraison.objects.filter( statut__livreur = userid, date = journee.date) \
+        .order_by('statut', 'position')
         livraisons  = Livraison.objects.order_by('statut', 'position').filter( statut__livreur = userid, date = journee.date)
         livraisonstatusok = Livraison.objects.filter(status=True, recuperation=False, statut__livreur = userid, date = journee.date)
         livraisonstatusko = Livraison.objects.filter(status=False, recuperation=False, statut__livreur = userid, date = journee.date)
@@ -2862,6 +2863,12 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
         routes = Livraison.objects.order_by('statut', 'position')
         routess = Route.objects.filter(date = journee.date, livreur = livreur)
         routes_with_livraisons = routess.prefetch_related('livreur', 'livraisons').order_by('heure_depart')
+        for route in routes_with_livraisons:
+            # This will give you the livraisons associated with the current route
+            ordered_livraisons = route.livraisons.all().order_by('statut', 'position')
+            
+            # Store these ordered livraisons in a convenient way, e.g., in the route object itself
+            route.ordered_livraisons = ordered_livraisons
 
         if request.method == 'POST':
             form = VehicleForm(request.POST, request.FILES)
@@ -2923,6 +2930,7 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
                                                                 'tacheok':tacheok,
                                                                 'tacheko':tacheko,
                                                                 'form': form,
+                                                                'ordered_livraisons': ordered_livraisons,
                                                                 
 
 
