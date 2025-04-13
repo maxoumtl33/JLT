@@ -363,9 +363,12 @@ text-decoration: underline;
                   {% else %}
                   <td></td>
                   {% endif %}
-                  <td ><a href="#" class="btn" data-bs-toggle="modal" data-bs-target="#vehicleModal{{ livraison.id }}">
-                    <i class="fa-solid fa-truck"></i>
-                  </a></td>
+                  <td>
+                    {% for vehicle in livraison.statut.vehicles.all %}
+                      {{ vehicle.name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                  </td>
+                  
 
                 </tr>
                 {% elif livraison.date == journee.date and livraison.status == False %}
@@ -383,9 +386,12 @@ text-decoration: underline;
                   {% else %}
                   <td></td>
                   {% endif %}
-                  <td ><a href="#" class="btn" data-bs-toggle="modal" data-bs-target="#vehicleModal{{ livraison.id }}">
-                    <i class="fa-solid fa-truck"></i>
-                  </a></td>
+                  <td>
+                    {% for vehicle in livraison.statut.vehicles.all %}
+                      {{ vehicle.name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                  </td>
+                  
 
                 </tr>
                   {% endif %}
@@ -433,9 +439,12 @@ text-decoration: underline;
                   {% else %}
                   <td></td>
                   {% endif %}
-    <td ><a href="#" class="btn" data-bs-toggle="modal" data-bs-target="#vehicleModal{{ livraison.id }}">
-      <i class="fa-solid fa-truck"></i>
-    </a></td>
+                  <td>
+                    {% for vehicle in livraison.statut.vehicles.all %}
+                      {{ vehicle.name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                  </td>
+                  
 
   </tr>
   {% elif livraison.date == journee.date and livraison.status == True %}
@@ -453,9 +462,12 @@ text-decoration: underline;
                   {% else %}
                   <td></td>
                   {% endif %}
-    <td ><a href="#" class="btn" data-bs-toggle="modal" data-bs-target="#vehicleModal{{ livraison.id }}">
-      <i class="fa-solid fa-truck"></i>
-    </a></td>
+                  <td>
+                    {% for vehicle in livraison.statut.vehicles.all %}
+                      {{ vehicle.name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                  </td>
+                  
 
   </tr>
     {% endif %}
@@ -471,33 +483,7 @@ text-decoration: underline;
 <br>
     
 
-<!-- Modal for Displaying Vehicle Photos -->
-{% for livraison in livraisons %}
-  <div class="modal fade" id="vehicleModal{{ livraison.id }}" tabindex="-1" aria-labelledby="vehicleModalLabel{{ livraison.id }}" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="vehicleModalLabel{{ livraison.id }}">Photos du véhicule</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          {% if livraison.statut.vehicles.all %}
-              <div>
-                <h6>{{ livraison.statut.vehicle.name }}</h6> <!-- Display Vehicle Name -->
-                {% if vehicle.photos %}
-                  <img src="{{ vehicle.photos.url }}" alt="Photo de véhicule : {{ vehicle.name }}" class="img-fluid mb-3">
-                {% else %}
-                  <p>Aucune photo disponible pour {{ vehicle.name }}.</p>
-                {% endif %}
-              </div>
-          {% else %}
-            <p>Aucun véhicule assigné à cette livraison.</p>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-  </div>
-{% endfor %}
+
 
 
 

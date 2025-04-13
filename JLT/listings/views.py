@@ -2873,19 +2873,26 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
         if request.method == 'POST':
             form = VehicleForm(request.POST, request.FILES)
             if form.is_valid():
-                vehicle = form.save(commit=False)
-                route_id = request.POST.get('route_vehicule')
+                vehicle = form.save(commit=False)  # Create vehicle object but not yet saved to DB
+                route_id = request.POST.get('route_vehicule')  # Get route ID
 
-                # ✅ Correct ManyToManyField assignment
-                vehicle.save()
-                vehicle.routes.add(get_object_or_404(Route, id=route_id))  
-
+                # Fetch the route instance
+                route_instance = Route.objects.filter(id=route_id).first()  # Use first() to prevent errors if not found
+                
+                if route_instance:
+                    vehicle.save()  # Now save the vehicle
+                    route_instance.vehicles_list.add(vehicle)  # Associate vehicle with the route
+                    print('Vehicle:', vehicle)
+                    print('Linked to Route ID:', route_instance.id)  # Confirming the ID
+                else:
+                    print('No matching route found for ID:', route_id)  # Handle the case where the route is not found
+                    
                 return redirect('dashboard', pk=pk, id=id)
             else:
                 print(form.errors)
-
         else:
             form = VehicleForm()
+
 
 
 
@@ -2930,7 +2937,7 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
                                                                 'tacheok':tacheok,
                                                                 'tacheko':tacheko,
                                                                 'form': form,
-                                                                'ordered_livraisons': ordered_livraisons,
+                                                                
                                                                 
 
 
@@ -3190,7 +3197,7 @@ def responsables(request, id):
     today = datetime.now().date()
     journee = Journee.objects.get(id=id)
     tomorrow = today + timedelta(1)
-    livraisons = Livraison.objects.order_by('statut', 'position').select_related('statut').prefetch_related('statut__vehicles')
+    livraisons = Livraison.objects.order_by('statut', 'position').select_related('statut')
     livraisonstatusok = Livraison.objects.filter(status=True,recuperation=False, date=journee.date)
     livraisonstatusko = Livraison.objects.filter(status=False,recuperation=False, date=journee.date)
     recuperation = Livraison.objects.filter(recuperation=True, date=journee.date)
@@ -3201,6 +3208,12 @@ def responsables(request, id):
     recuperations = "oui"
     if not request.user.is_superuser:
         return redirect('unauthorized')
+
+    for livraison in livraisons:
+        if livraison.statut:
+            print(f'Route: {livraison.statut.nom}')
+            print(f'Vehicles: {[v.name for v in livraison.statut.vehicles.all()]}')
+
     return render(request, 'listings/responsables.html', context={
                                                               'livraisons': livraisons,
                                                               'livreurs': livreurs,
@@ -5106,7 +5119,8 @@ def ChecklistmdDetailView(request, pk):
     formset1 = ChecklistRecupPhotoFormSet(request.POST or None, request.FILES or None, prefix='formset1', queryset=ChecklistRecupPhoto.objects.filter(checklist=checklist))
     form = RapportForm(request.POST or None, prefix='form', instance=checklist)
     form1 = RapportRecupForm(request.POST or None, prefix='form1', instance=checklist)
-    checklist_itemsbreuvage = ChecklistItem.objects.filter(checklist_id=checklist, product__category__in=["ALCOOL FORT", "SANS ALCOOL", "VINS",  "BIERES"], quantity__gt=0)
+    checklist_itemsbreuvage = ChecklistItem.objects.filter(checklist_id=checklist, product__category__name__in=["ALCOOL FORT", "SANS ALCOOL", "VINS",  "BIERES"], quantity__gt=0)
+   
 
     for item in checklist_itemsbreuvage:
         item.remaining_quantity = item.quantity - (item.consumed_quantity or 0)

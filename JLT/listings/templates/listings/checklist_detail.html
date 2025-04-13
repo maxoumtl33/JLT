@@ -717,14 +717,16 @@ textarea.comment-textarea {
                                     </div>
 
                                     <!-- Comment Button -->
-                                    <div class="form-group">
-                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-target="#comment-{{ product.id }}">
-                                            <i class="fa fa-comment-dots"></i>  <!-- Icon for writing a comment -->
-                                        </button>
-                                        <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
-                                                name="commentaires[]" placeholder="nt pour nouvelle tablée"
-                                                style="display: none;">{{ checklist_item_comments|get_item:product.id }}</textarea>
-                                    </div>
+                                    <!-- Comment Button -->
+                                <div class="form-group">
+                                    <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                        <i class="fa fa-comment-dots"></i>
+                                    </button>
+                                    <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
+                                              name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                              style="display: none;" data-product-id="{{ product.id }}"></textarea>
+                                </div>
+
 
                                 </div>
                             {% endif %}

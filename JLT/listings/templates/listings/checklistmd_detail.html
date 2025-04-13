@@ -90,7 +90,12 @@
                     <p><strong>Conseillère:</strong> {{ checklist.conseillere }}</p>
                     <p><strong>Nombre de convives:</strong> {{ checklist.nb_convive }}</p>
                     <p><strong>MD:</strong> {{ checklist.md }}</p>
-                    <p><strong>Livreur:</strong> {{ checklist.livraison.statut.livreur.nom }} / <a href="tel:{{ checklist.livraison.statut.livreur.phone }}">{{ checklist.livraison.statut.livreur.phone }}</a></p>
+                    
+                    
+                    <p><strong>Livreur:</strong> {% for livreur in checklist.livraison.statut.livreur.all %}
+                        {{ livreur.nom }}    <i class="fa-solid fa-phone"></i> <a href="tel:{{ livreur.phone }}">{{ livreur.phone }}</a>{% if not forloop.last %}, {% endif %}
+                        {% empty %}
+                            Aucun livreur assigné {% endfor %}</p>
                     
                     <!-- Button to Show Checklist Items -->
                     <button class="btn btn-primary mt-3" onclick="toggleChecklistItems()">Voir le contenu de la checklist</button>
