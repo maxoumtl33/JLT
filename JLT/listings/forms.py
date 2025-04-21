@@ -197,7 +197,7 @@ class LivraisonsVentesForm(forms.ModelForm):
         model = Livraison
         fields = ('nom_client', 'contact_site', 'app')
         labels = {
-            'nom_client': 'Nom du client',  # Change 'Vehicle Name' to whatever custom label you want
+            'nom_client': 'Nom du client',  
             'contact_site': 'Contact Client',
               'app': 'Etage'  # You can also change the label for photos if needed
         }
@@ -232,10 +232,9 @@ class PhotoUploadForm(forms.ModelForm):
 class VehicleForm(forms.ModelForm):
     class Meta:
         model = Vehicle
-        fields = ['name', 'photos']
+        fields = ['name']
         labels = {
-            'name': 'Véhicule',  # Change 'Vehicle Name' to whatever custom label you want
-            'photos': 'Photos',  # You can also change the label for photos if needed
+            'name': 'Véhicule',  # Change 'Vehicle Name' to whatever custom label you wan
         }
 
 

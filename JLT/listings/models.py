@@ -223,6 +223,13 @@ class Shift(models.Model):
 
 
 
+class PhotoVehicle(models.Model):
+    vehicle = models.ForeignKey('Vehicle', on_delete=models.CASCADE, related_name='vehicle_photos')
+    image = models.ImageField(upload_to='listings/media/commandesdetail')
+    caption = models.CharField(max_length=200, null=True, blank=True)
+
+    def __str__(self):
+        return f'Photo for {self.vehicle.name} - {self.caption or "No Caption"}'
 
 
 

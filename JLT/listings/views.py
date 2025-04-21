@@ -2560,6 +2560,7 @@ def journees_list(request):
                                                               'is_checklist': request.user.groups.filter(name='checklist').exists(),
                                                               'is_ventes': request.user.groups.filter(name='ventes').exists(),
                                                               'is_livreur': request.user.groups.filter(name='livreurs').exists(),
+                                                              'is_cuisine': request.user.groups.filter(name='cuisine').exists(),
                                                               'is_chaud': request.user.groups.filter(name='chaud').exists(),
                                                               'is_chefcuisine': request.user.groups.filter(name='chefcuisine').exists(),
                                                               'jef':jef,
@@ -2862,6 +2863,7 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
         taches = Tacheafaire.objects.filter(livreur = userid)
         routes = Livraison.objects.order_by('statut', 'position')
         routess = Route.objects.filter(date = journee.date, livreur = livreur)
+        vehicles = Vehicle.objects.filter(routes__in=routess).distinct()  # Use distinct() to prevent duplicates
         routes_with_livraisons = routess.prefetch_related('livreur', 'livraisons').order_by('heure_depart')
         for route in routes_with_livraisons:
             # This will give you the livraisons associated with the current route
@@ -2871,29 +2873,27 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
             route.ordered_livraisons = ordered_livraisons
 
         if request.method == 'POST':
-            form = VehicleForm(request.POST, request.FILES)
-            if form.is_valid():
-                vehicle = form.save(commit=False)  # Create vehicle object but not yet saved to DB
-                route_id = request.POST.get('route_vehicule')  # Get route ID
-
-                # Fetch the route instance
-                route_instance = Route.objects.filter(id=route_id).first()  # Use first() to prevent errors if not found
-                
-                if route_instance:
-                    vehicle.save()  # Now save the vehicle
-                    route_instance.vehicles_list.add(vehicle)  # Associate vehicle with the route
-                    print('Vehicle:', vehicle)
-                    print('Linked to Route ID:', route_instance.id)  # Confirming the ID
-                else:
-                    print('No matching route found for ID:', route_id)  # Handle the case where the route is not found
+            if 'route_vehicule' in request.POST:
+                vehicle_form = VehicleForm(request.POST)
+                if vehicle_form.is_valid():
+                    # Save the vehicle object
+                    vehicle = vehicle_form.save(commit=False)
+                    route_id = request.POST.get('route_vehicule')
+                    route_instance = Route.objects.filter(id=route_id).first()
                     
+                    if route_instance:
+                        vehicle.save()  # Vehicle saved to the database
+                        route_instance.vehicles.add(vehicle)  # Link vehicle to the route
+
+                        # Handle image uploads for this vehicle
+                        images = request.FILES.getlist("images")
+                        for img in images:
+                            PhotoVehicle.objects.create(vehicle=vehicle, image=img)
+
                 return redirect('dashboard', pk=pk, id=id)
-            else:
-                print(form.errors)
+
         else:
             form = VehicleForm()
-
-
 
 
         livraisons_data = [
@@ -2937,6 +2937,7 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
                                                                 'tacheok':tacheok,
                                                                 'tacheko':tacheko,
                                                                 'form': form,
+                                                                'vehicles': vehicles,
                                                                 
                                                                 
 
@@ -3205,14 +3206,12 @@ def responsables(request, id):
     recuperationko = Livraison.objects.filter(status=False,recuperation=True, date=journee.date)
     livraison = Livraison.objects.filter(recuperation=False, date=journee.date)
     livreurs = Livreur.objects.all()
+    routess = Route.objects.filter(date = journee.date)
+    vehicles = Vehicle.objects.filter(routes__in=routess).distinct()  # Use distinct() to prevent duplicates
     recuperations = "oui"
     if not request.user.is_superuser:
         return redirect('unauthorized')
 
-    for livraison in livraisons:
-        if livraison.statut:
-            print(f'Route: {livraison.statut.nom}')
-            print(f'Vehicles: {[v.name for v in livraison.statut.vehicles.all()]}')
 
     return render(request, 'listings/responsables.html', context={
                                                               'livraisons': livraisons,
@@ -3225,6 +3224,7 @@ def responsables(request, id):
                                                               'recuperationok':recuperationok,
                                                               'recuperationko':recuperationko,
                                                               'recuperation' : recuperation,
+                                                              'vehicles' : vehicles,
                                                               })
 
 @login_required
@@ -4659,6 +4659,8 @@ class GeocodingTodayView(View):
 
         }
         return render(request, 'listings/geocodingtoday.html', context)
+
+
 
 from difflib import get_close_matches
 @login_required

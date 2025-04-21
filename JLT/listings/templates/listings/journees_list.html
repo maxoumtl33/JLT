@@ -166,29 +166,50 @@
 
 
 
-{% if user.username == cuisine %}
+{% if is_cuisine %}
+<style>
+  .hidden {
+      display: none;
+  }
+  .btn-toggle {
+            margin: 10px;
+            padding: 10px 15px;
+            font-size: 16px;
+            color: white;
+            background-color: #007BFF; /* Bootstrap Primary Color */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .btn-toggle:hover {
+            background-color: #0056b3; /* Darken the button on hover */
+            transform: scale(1.05); /* Slightly enlarge on hover */
+        }
+</style>
+
+<div style="text-align: center; margin-bottom: 20px;">
+  <button class="btn-toggle" onclick="toggleSection('livraisons-cuisine')">Afficher Livraisons du Jour</button>
+  <button class="btn-toggle" onclick="toggleSection('chaud')">Afficher Livraisons Part Chaud</button>
+</div>
+
+<section id="livraisons-cuisine">
 <div style="text-align: center;">
   <div class="body">
-    <h1 style="text-align: center;">LIVRAISONS DU JOUR</h1>
-    <br>
-    <br>
-    <p style="text-align: center;">{{ livraisonsok|length }} livraisons et {{ livraisonsrecup|length }} récupérations aujourd'hui</p>
-    <br>
-    <br>
+    <h1 style="text-align: center;">LIVRAISONS DU JOUR   <button onclick="printSection('livraisons-cuisine')"><i class="fa-solid fa-print" style="color: #74C0FC;"></i></button>
+    </h1>
+    <h2 class="text-center mb-4">{{ today }}</h2>
+    <p style="text-align: center;">{{ livraisonsok|length }} livraisons aujourd'hui</p>
     <table class="table table-hover">
         <thead class="thead-dark">
           <tr>
             
             <th scope="col" style="color: #303FBA;">Heure départ</th>
             <th scope="col" style="color: #303FBA;">Nom du contrat</th>
-            <th scope="col" style="color: #303FBA;">Infos</th>
             <th scope="col" style="color: #303FBA;">Heure livraison</th>
             <th scope="col" style="color: #303FBA;">Livreur</th>
-            <th scope="col" style="color: #303FBA;">Route</th>
-            <th scope="col" style="color: #303FBA;">Status</th>
-            {% if user.username == ventes %}
-            <th scope="col" style="color: #303FBA;">Modifier</th>
-            {% endif %}
+
 
 
   
@@ -197,56 +218,84 @@
         </thead>
         <tbody>
             {% for livraison in livraisons %}
-            {% if livraison.recuperation == True %}
-          <tr>
-            
-            <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.heure_depart }}</strong></td>
-            <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
-            <td style="background-color: #F1B3DA;"><strong>{{livraison.infodetail}}</strong></td>
-            <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
-            <td style="background-color: #F1B3DA;"><strong>{% for livreur in livraison.statut.livreur.all %}
-              {{ livreur.nom }}{% if not forloop.last %}, {% endif %}
-          {% endfor %}</strong></td>
-            <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.nom }}</strong></td>
-            {% if livraison.status == True %}
-            <td><strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong></td>
-              {% else %}
-            <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
-            {% endif %}
-            {% if user.username == ventes %}
-          <td><a href="{% url 'livraisonventesdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
-          {% endif %}
-            </tr>
-            {% else %}
             <tr>
             
             <td><strong>{{ livraison.statut.heure_depart }}</strong></td>
             <td><strong>{{livraison.nom}}</strong></td>
-            <td><strong>{{livraison.infodetail}}</strong></td>
             <td><strong>{{ livraison.heure_livraison }}</strong></td>
             <td><strong>{% for livreur in livraison.statut.livreur.all %}
               {{ livreur.nom }}{% if not forloop.last %}, {% endif %}
           {% endfor %}</strong></td>
-            <td><strong>{{ livraison.statut.nom }}</strong></td>
-            {% if livraison.status == True %}
-            <td><strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong></td>
-              {% else %}
-            <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
-            {% endif %}
-            {% if user.username == ventes %}
-          <td><a href="{% url 'livraisonventesdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
-          {% endif %}
           </tr>
-          {% endif %}
           {% endfor %}
           
         </tbody>
       </table>
     </div>
 </div>
+</section>
 
 
-{% elif is_livreur %}
+<section id="chaud" class="hidden">
+<div class="container my-4">
+  <h1 class="text-center mb-4">LIVRAISONS PART CHAUD   <button onclick="printSection('chaud')"><i class="fa-solid fa-print" style="color: #74C0FC;"></i></button>
+  </h1>
+  <h2 class="text-center mb-4">{{ today }}</h2>
+  <div class="row mb-3">
+  </div>
+  <div class="row">
+      {% if livraisonschaud %}
+          {% for livraison in livraisonschaud %}
+              <div class="col-12 col-md-6 mb-3">
+                  <div class="card shadow-sm">
+                      <div class="card-body">
+                          <h5 class="card-title">{{ livraison.nom }}</h5>
+                          <p class="card-text">
+                            <strong>Chauffeur(s):</strong>
+                            {% for livreur in livraison.statut.livreur.all %}
+                                {{ livreur.nom }} 
+                                (<a href="tel:{{ livreur.phone }}">{{ livreur.phone }}</a>)
+                                {% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                            <br>
+                            <strong>Heure de départ:</strong> {{ livraison.statut.heure_depart }}<br>
+                        </p>
+                      </div>
+                  </div>
+              </div>
+          {% endfor %}
+      {% else %}
+          <div class="col-12">
+              <div class="alert alert-warning text-center">
+                  Aucun livraison "part chaud" disponible pour aujourd'hui.
+              </div>
+          </div>
+      {% endif %}
+  </div>
+</div>
+</section>
+
+<script>
+  function toggleSection(sectionId) {
+      const sections = document.querySelectorAll('section');
+      sections.forEach(section => {
+          section.classList.add('hidden');
+      });
+      document.getElementById(sectionId).classList.remove('hidden');
+  }
+
+  function printSection(sectionId) {
+      const originalContent = document.body.innerHTML;
+      const sectionContent = document.getElementById(sectionId).innerHTML;
+      document.body.innerHTML = sectionContent;
+      window.print();
+      document.body.innerHTML = originalContent;
+      window.location.reload();  // Refresh to reset the page state
+  }
+</script>
+{% endif %}
+
+{% if is_livreur %}
 <div class="container mt-5">
   <h1 class="text-center mb-4">Liste des Journées</h1>
 <br>
@@ -309,40 +358,7 @@
     <span class="nav__name">Aller à mon dashboard</span>
   </a>
   {% endif %}
-  {% if is_chaud %}
-  <div class="container my-4">
-    <h1 class="text-center mb-4">Livraisons - Part Chaud</h1>
-<div class="row">
-    {% if livraisonschaud %}
-        {% for livraison in livraisonschaud %}
-            <div class="col-12 col-md-6 mb-3">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ livraison.nom }}</h5>
-                        <p class="card-text">
-                          <strong>Chauffeur(s):</strong>
-                          {% for livreur in livraison.statut.livreur.all %}
-                              {{ livreur.nom }} 
-                              (<a href="tel:{{ livreur.phone }}">{{ livreur.phone }}</a>) 
-                              {% if not forloop.last %}, {% endif %}
-                          {% endfor %}
-                          <br>
-                          <strong>Heure de départ:</strong> {{ livraison.statut.heure_depart }}<br>
-                      </p>
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
-    {% else %}
-        <div class="col-12">
-            <div class="alert alert-warning text-center">
-                Aucun livraison "part chaud" disponible pour aujourd'hui.
-            </div>
-        </div>
-    {% endif %}
-</div>
-</div>
-  {% endif %}
+
   {% if is_ventes %}
   
 
@@ -512,4 +528,10 @@
     </ul>
 </nav>
 {% endif %}
+
+<script>
+  function printPage() {
+        window.print();
+    }
+</script>
 {% endblock %}

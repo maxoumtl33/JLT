@@ -619,20 +619,16 @@
                 <h5 class="modal-title" id="vehicleModalLabel">Choisir véhicule</h5>
             </div>
             <div class="modal-body">
-                <form id="vehicleForm{{ route.id }}" method="post" enctype="multipart/form-data" action="{% url 'dashboard' id=journee.id pk=user.id %}">
+                <form id="vehicleForm{{ route.id }}" method="post" enctype="multipart/form-data" action="{% url 'dashboard' id=journee.id pk=livreur.user.id %}">
                     {% csrf_token %}
-                    
                     <div class="form-group">
-                        <label for="id_name">Choisir véhicule</label> <!-- Use the field's id for label 'for' attribution -->
-                        {{ form.name|add_class:"form-control" }} <!-- Adds Bootstrap's form-control class -->
+                        <label for="id_name">{{ form.name.label }}</label>  <!-- Accessing the label correctly -->
+                        {{ form.name|add_class:"form-control" }}  <!-- Ensure form.name is a proper field from the VehicleForm -->
                     </div>
-                    <br>
-                    <div class="form-group">
-                        
-                        {{ form.photos|add_class:"form-control-file mb-2" }} <!-- File input with proper class -->
-                        
+                    <div class="mb-3">
+                        <label for="photo-upload" class="form-label">Ajouter des photos</label>
+                        <input type="file" name="images" id="photo-upload" class="form-control" multiple>
                     </div>
-                    
                     <input type="hidden" name="route_vehicule" value="{{ route.id }}">
                 </form>
             </div>
@@ -647,6 +643,9 @@
 
 
 
+
+
+
             <!-- Route Details -->
             <div class="route-info">
                 <p class="route-title">Route n°{{ route.nom }}</p>
@@ -657,8 +656,7 @@
                         Aucun livreur assigné
                     {% endfor %}
                 </p>
-                
-                    {% for vehicle in route.vehicles_list.all %}
+                    {% for vehicle in route.vehicles.all %}
                         <span style="display: inline-flex; align-items: center;">  <!-- Flex container -->
                              <!-- Wrap vehicle name in a separate span -->
                             <form method="POST" action="{% url 'delete_vehicle' vehicle.id %}" style="margin-left: 5px;">

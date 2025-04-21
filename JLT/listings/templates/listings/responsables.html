@@ -20,6 +20,35 @@ color: #333;
 
 /* styles.css */
 
+
+    .no-data {
+        color: #888;
+        font-style: italic;
+    }
+
+    .vehicle-container {
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 15px;
+        background-color: #f9f9f9;
+    }
+    .vehicle-header {
+        font-size: 1.5em;
+        color: #333;
+    }
+    .hidden {
+        display: none;
+    }
+    .show-btn {
+        margin-bottom: 10px;
+        cursor: pointer;
+    }
+    .no-data {
+        color: #888;
+        font-style: italic;
+    }
+
 header {
 background: #127BFF; /* A cool blue background color */
 color: #fff;
@@ -338,7 +367,7 @@ text-decoration: underline;
                   <th scope="col" style="color: #303FBA;">Route</th>
                   <th scope="col" style="color: #303FBA;">Status</th>
                   <th scope="col" style="color: #303FBA;">Commentaire</th>
-                  <th scope="col" style="color: #303FBA;">Véhicule</th>
+                  <th scope="col" style="color: #303FBA;">Vehicule</th>
 
         
                 </tr>
@@ -358,16 +387,46 @@ text-decoration: underline;
                   <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
                   <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.nom }}</strong></td>
                   <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
-                  {% if livraison.commentaire|length > 0  %}
-                  <td><i class="fa-solid fa-message"></i></td>
-                  {% else %}
-                  <td></td>
-                  {% endif %}
+                  <td>
+                    {% if livraison.commentaire|length > 0 %}
+                        <i class="fa-solid fa-message" onclick="toggleComment('{{ livraison.id }}')"></i>
+                        <div id="comment-{{ livraison.id }}" style="display: none; padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;">
+                            {{ livraison.commentaire }}
+                        </div>
+                    {% else %}
+                        <span>Aucun commentaire</span>
+                    {% endif %}
+                </td>
                   <td>
                     {% for vehicle in livraison.statut.vehicles.all %}
-                      {{ vehicle.name }}{% if not forloop.last %}, {% endif %}
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#vehiclePhotosModal{{ vehicle.id }}">
+                            {{ vehicle.name }}
+                        </a>
+                        {% if not forloop.last %}, {% endif %}
+                        
+                        <!-- Modal for Vehicle Photos -->
+                        <div class="modal fade" id="vehiclePhotosModal{{ vehicle.id }}" tabindex="-1" role="dialog" aria-labelledby="vehiclePhotosModalLabel{{ vehicle.id }}" aria-hidden="true">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="vehiclePhotosModalLabel{{ vehicle.id }}">Photos pour {{ vehicle.name }}</h5>
+                                    </div>
+                                    <div class="modal-body">
+                                        {% for photo in vehicle.vehicle_photos.all %}
+                                            <div class="photo-container">
+                                                <img src="{{ photo.image.url }}" alt="{{ photo.caption }}" class="img-fluid" style="max-height: 300px; margin-bottom: 10px;">
+                                                
+                                            </div>
+                                        {% empty %}
+                                            <p>Pas de photos pour ce véhicule.</p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                
                     {% endfor %}
-                  </td>
+                </td>
                   
 
                 </tr>
@@ -381,16 +440,47 @@ text-decoration: underline;
                   <td ><strong>{{ livraison.heure_livraison }}</strong></td>
                   <td ><strong>{{ livraison.statut.nom }}</strong></td>
                   <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
-                  {% if livraison.commentaire|length > 0  %}
-                  <td><i class="fa-solid fa-message"></i></td>
-                  {% else %}
-                  <td></td>
-                  {% endif %}
+                  <td>
+                    {% if livraison.commentaire|length > 0 %}
+                        <i class="fa-solid fa-message" onclick="toggleComment('{{ livraison.id }}')"></i>
+                        <div id="comment-{{ livraison.id }}" style="display: none; padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;">
+                            {{ livraison.commentaire }}
+                        </div>
+                    {% else %}
+                        <span>Aucun commentaire</span>
+                    {% endif %}
+                </td>
                   <td>
                     {% for vehicle in livraison.statut.vehicles.all %}
-                      {{ vehicle.name }}{% if not forloop.last %}, {% endif %}
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#vehiclePhotosModal{{ vehicle.id }}">
+                            {{ vehicle.name }}
+                        </a>
+                        {% if not forloop.last %}, {% endif %}
+                        
+                        <!-- Modal for Vehicle Photos -->
+                        <div class="modal fade" id="vehiclePhotosModal{{ vehicle.id }}" tabindex="-1" role="dialog" aria-labelledby="vehiclePhotosModalLabel{{ vehicle.id }}" aria-hidden="true">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="vehiclePhotosModalLabel{{ vehicle.id }}">Photos pour {{ vehicle.name }}</h5>
+                                    </div>
+                                    <div class="modal-body">
+                                        {% for photo in vehicle.vehicle_photos.all %}
+                                            <div class="photo-container">
+                                                <img src="{{ photo.image.url }}" alt="{{ photo.caption }}" class="img-fluid" style="max-height: 300px; margin-bottom: 10px;">
+                                                
+                                            </div>
+                                        {% empty %}
+                                            <p>Pas de photos pour ce véhicule.</p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                
                     {% endfor %}
-                  </td>
+                </td>
+                  
                   
 
                 </tr>
@@ -414,8 +504,9 @@ text-decoration: underline;
         <th scope="col" style="color: #303FBA;">Route</th>
         <th scope="col" style="color: #303FBA;">Status</th>
         <th scope="col" style="color: #303FBA;">Commentaire</th>
+        <th scope="col" style="color: #303FBA;">Vehicule</th>
 
-        <th scope="col" style="color: #303FBA;">Véhicule</th>
+
 
 
       </tr>
@@ -434,16 +525,47 @@ text-decoration: underline;
     <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
     <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.nom }}</strong></td>
     <td><strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong></td>
-    {% if livraison.commentaire|length > 0  %}
-                  <td><i class="fa-solid fa-message"></i></td>
-                  {% else %}
-                  <td></td>
-                  {% endif %}
+    <td>
+      {% if livraison.commentaire|length > 0 %}
+          <i class="fa-solid fa-message" onclick="toggleComment('{{ livraison.id }}')"></i>
+          <div id="comment-{{ livraison.id }}" style="display: none; padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;">
+              {{ livraison.commentaire }}
+          </div>
+      {% else %}
+          <span>Aucun commentaire</span>
+      {% endif %}
+  </td>
                   <td>
                     {% for vehicle in livraison.statut.vehicles.all %}
-                      {{ vehicle.name }}{% if not forloop.last %}, {% endif %}
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#vehiclePhotosModal{{ vehicle.id }}">
+                            {{ vehicle.name }}
+                        </a>
+                        {% if not forloop.last %}, {% endif %}
+                        
+                        <!-- Modal for Vehicle Photos -->
+                        <div class="modal fade" id="vehiclePhotosModal{{ vehicle.id }}" tabindex="-1" role="dialog" aria-labelledby="vehiclePhotosModalLabel{{ vehicle.id }}" aria-hidden="true">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="vehiclePhotosModalLabel{{ vehicle.id }}">Photos pour {{ vehicle.name }}</h5>
+                                    </div>
+                                    <div class="modal-body">
+                                        {% for photo in vehicle.vehicle_photos.all %}
+                                            <div class="photo-container">
+                                                <img src="{{ photo.image.url }}" alt="{{ photo.caption }}" class="img-fluid" style="max-height: 300px; margin-bottom: 10px;">
+                                                
+                                            </div>
+                                        {% empty %}
+                                            <p>Pas de photos pour ce véhicule.</p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                
                     {% endfor %}
-                  </td>
+                </td>
+                  
                   
 
   </tr>
@@ -457,16 +579,48 @@ text-decoration: underline;
     <td ><strong>{{ livraison.heure_livraison }}</strong></td>
     <td ><strong>{{ livraison.statut.nom }}</strong></td>
     <td><strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong></td>
-    {% if livraison.commentaire|length > 0  %}
-                  <td><i class="fa-solid fa-message"></i></td>
-                  {% else %}
-                  <td></td>
-                  {% endif %}
+    <td>
+      {% if livraison.commentaire|length > 0 %}
+          <i class="fa-solid fa-message" onclick="toggleComment('{{ livraison.id }}')"></i>
+          <div id="comment-{{ livraison.id }}" style="display: none; padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;">
+              {{ livraison.commentaire }}
+          </div>
+      {% else %}
+          <span>Aucun commentaire</span>
+      {% endif %}
+  </td>
                   <td>
                     {% for vehicle in livraison.statut.vehicles.all %}
-                      {{ vehicle.name }}{% if not forloop.last %}, {% endif %}
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#vehiclePhotosModal{{ vehicle.id }}">
+                            {{ vehicle.name }}
+                        </a>
+                        {% if not forloop.last %}, {% endif %}
+                        
+                        <!-- Modal for Vehicle Photos -->
+                        <div class="modal fade" id="vehiclePhotosModal{{ vehicle.id }}" tabindex="-1" role="dialog" aria-labelledby="vehiclePhotosModalLabel{{ vehicle.id }}" aria-hidden="true">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="vehiclePhotosModalLabel{{ vehicle.id }}">Photos pour {{ vehicle.name }}</h5>
+                                    </div>
+                                    <div class="modal-body">
+                                        {% for photo in vehicle.vehicle_photos.all %}
+                                            <div class="photo-container">
+                                                <img src="{{ photo.image.url }}" alt="{{ photo.caption }}" class="img-fluid" style="max-height: 300px; margin-bottom: 10px;">
+                                                
+                                            </div>
+                                        {% empty %}
+                                            <p>Pas de photos pour ce véhicule.</p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                
                     {% endfor %}
-                  </td>
+                </td>
+                
+                  
                   
 
   </tr>
@@ -476,6 +630,8 @@ text-decoration: underline;
                 {% endfor %}
               </tbody>
             </table>
+
+        
 <br>
 <br>
 <br>
@@ -483,7 +639,7 @@ text-decoration: underline;
 <br>
     
 
-
+  
 
 
 
@@ -498,6 +654,16 @@ text-decoration: underline;
     </a></li>
 </nav>
 
+<script>
+  function toggleComment(livraisonId) {
+    const commentDiv = document.getElementById('comment-' + livraisonId);
+    if (commentDiv.style.display === 'none' || commentDiv.style.display === '') {
+        commentDiv.style.display = 'block';  // Show comment
+    } else {
+        commentDiv.style.display = 'none';   // Hide comment
+    }
+}
+</script>
 
     {% endblock %}
     
