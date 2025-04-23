@@ -2876,21 +2876,24 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
             if 'route_vehicule' in request.POST:
                 vehicle_form = VehicleForm(request.POST)
                 if vehicle_form.is_valid():
-                    # Save the vehicle object
                     vehicle = vehicle_form.save(commit=False)
                     route_id = request.POST.get('route_vehicule')
                     route_instance = Route.objects.filter(id=route_id).first()
                     
                     if route_instance:
-                        vehicle.save()  # Vehicle saved to the database
-                        route_instance.vehicles.add(vehicle)  # Link vehicle to the route
+                        vehicle.save()
+                        route_instance.vehicles.add(vehicle)
 
-                        # Handle image uploads for this vehicle
-                        images = request.FILES.getlist("images")
-                        for img in images:
-                            PhotoVehicle.objects.create(vehicle=vehicle, image=img)
+                        # Handle media uploads for this vehicle
+                        media_files = request.FILES.getlist("media")
+                        for file in media_files:
+                            if file.content_type.startswith('image/'):
+                                PhotoVehicle.objects.create(vehicle=vehicle, image=file)
+                            elif file.content_type.startswith('video/'):
+                                PhotoVehicle.objects.create(vehicle=vehicle, video=file)
 
                 return redirect('dashboard', pk=pk, id=id)
+
 
         else:
             form = VehicleForm()
@@ -4662,8 +4665,37 @@ class GeocodingTodayView(View):
 
 
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt  # Only use if necessary for non-POST actions
+from .models import LoadingDock, Livraison
+
+def associate_livraisons_with_docks(request):
+    if request.method == 'POST':
+        # Get all loading docks
+        loading_docks = LoadingDock.objects.all()
+
+        associations_made = 0
+        
+        # Loop through each loading dock to find matching livraisons
+        for dock in loading_docks:
+            # Find livraisons where place_id matches the dock's place_id
+            livraisons = Livraison.objects.filter(place_id=dock.place_id)
+
+            # For each matching livraison, perform the association
+            for livraison in livraisons:
+                livraison.loading_dock = dock  # Assuming there's a ForeignKey named 'loading_dock'
+                livraison.save()
+                associations_made += 1
+        
+        return JsonResponse({'status': 'success', 'message': f'{associations_made} livraisons associées avec succès.'})
+
+    return JsonResponse({'status': 'error', 'message': 'Méthode non supportée.'}, status=400)
+
+
+
 from difflib import get_close_matches
 @login_required
+
 def livraison_detail(request, ip):
     livraison = get_object_or_404(Livraison, id=ip)
     adresse = livraison.adress
@@ -4680,7 +4712,11 @@ def livraison_detail(request, ip):
 
     if livraison.place_id:
         matching_dock = LoadingDock.objects.filter(place_id=livraison.place_id).first()
-        dock_photos = matching_dock.photo if matching_dock else None
+        # Check if the matching dock exists and has an associated photo
+        if matching_dock and matching_dock.photo:
+            dock_photos = matching_dock.photo
+        else:
+            dock_photos = None
 
     # Google Maps geocode to fetch place_id and coordinate information
     gmaps = googlemaps.Client(key=settings.GOOGLE_API_KEY)
@@ -4750,6 +4786,35 @@ def livraison_detail(request, ip):
         'dock_photos': dock_photos,
         'matching_dock': matching_dock,
     })
+
+
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from .models import LoadingDock
+
+def modify_dock_view(request):
+    if request.method == 'POST':
+        dock_id = request.POST.get('dockId')  # This should be an integer
+        address = request.POST.get('address')
+        description = request.POST.get('description')
+        place_id = request.POST.get('place_id')
+        photo = request.POST.get('photo')
+
+        # Ensure dock_id is converted to an integer
+        loading_dock = get_object_or_404(LoadingDock, id=int(dock_id))  # Cast dock_id to integer
+        loading_dock.address = address
+        loading_dock.description = description
+        loading_dock.place_id = place_id
+        loading_dock.photo = photo if photo else loading_dock.photo  # Update only if a new photo is provided
+        loading_dock.save()
+
+        return JsonResponse({'status': 'success'})
+
+    return JsonResponse({'status': 'error'}, status=400)
+
+
+
+
 from django.contrib.auth.decorators import user_passes_test
 
 
@@ -4779,17 +4844,51 @@ def update_photo(request, pk):
     })
 
 
+from django.shortcuts import render
+from .models import LoadingDock, Livraison
+from django.http import JsonResponse
+from datetime import datetime
+
+def loading_docks_view(request):
+    if request.method == 'POST':
+        selected_date = request.POST.get('selected_date')
+        deliveries = Livraison.objects.filter(date=datetime.strptime(selected_date, '%Y-%m-%d'))
+
+        # Use the field name correctly based on your model definition
+        docks = {dock.place_id: dock for dock in LoadingDock.objects.filter(
+            id__in=deliveries.values_list('loading_dock_id', flat=True)  # Use _id if it's a foreign key.
+        )}
+        
+        # Prepare data for AJAX response
+        docks_data = {dock.place_id: {
+            'address': dock.address,
+            'description': dock.description,
+            'photo': dock.photo.url if dock.photo else None,
+            'deliveries': list(deliveries.filter(loading_dock=dock.id).values('id', 'nom'))  # Modify as necessary
+        } for dock in docks.values()}
+        
+        return JsonResponse(docks_data)
+    
+    loading_docks = LoadingDock.objects.all()
+    return render(request, 'listings/loading_docks.html', {'loading_docks': loading_docks})
+
+
 @login_required
 def create_loading_dock(request):
+
+    key = settings.GOOGLE_API_KEY
     if request.method == 'POST':
         form = LoadingDockForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
-            return redirect('create_loading_dock')  # Redirect to a page after saving, adjust as necessary
+            loading_dock = form.save(commit=False)
+            loading_dock.place_id = request.POST.get('place_id')  # Retrieve place_id from POST data
+            loading_dock.save()
+            return redirect('create_loading_dock')
     else:
         form = LoadingDockForm()
 
-    return render(request, 'listings/create_loading_dock.html', {'form': form})
+    return render(request, 'listings/create_loading_dock.html', {'form': form, 'key': key,})
+
 
 from datetime import datetime, timedelta
 from django.shortcuts import render, redirect

@@ -226,6 +226,7 @@ class Shift(models.Model):
 class PhotoVehicle(models.Model):
     vehicle = models.ForeignKey('Vehicle', on_delete=models.CASCADE, related_name='vehicle_photos')
     image = models.ImageField(upload_to='listings/media/commandesdetail')
+    video = models.FileField(upload_to='listings/media/videos', blank=True, null=True)
     caption = models.CharField(max_length=200, null=True, blank=True)
 
     def __str__(self):
@@ -321,6 +322,7 @@ class Livraison(models.Model):
     client = models.ForeignKey(Client, null=True, blank=True, on_delete=models.SET_NULL)
     date = models.fields.DateField(null=True, blank=True)
     period = models.CharField(max_length=20, choices=[("matin", "Matin"), ("midi", "Midi"), ("apres_midi", "Après-midi")], null=True, blank=True)
+    loading_dock = models.ForeignKey(LoadingDock, on_delete=models.SET_NULL, null=True,blank=True, related_name='livraisons')
     date_livraison = models.fields.DateField(null=True, blank=True)
     commentaire = models.fields.CharField(null=True, blank=True, max_length=500)
     commentairedispatch = models.fields.CharField(null=True, blank=True, max_length=350)

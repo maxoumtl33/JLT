@@ -622,15 +622,17 @@
                 <form id="vehicleForm{{ route.id }}" method="post" enctype="multipart/form-data" action="{% url 'dashboard' id=journee.id pk=livreur.user.id %}">
                     {% csrf_token %}
                     <div class="form-group">
-                        <label for="id_name">{{ form.name.label }}</label>  <!-- Accessing the label correctly -->
-                        {{ form.name|add_class:"form-control" }}  <!-- Ensure form.name is a proper field from the VehicleForm -->
+                        <label for="id_name">{{ form.name.label }}</label>
+                        {{ form.name|add_class:"form-control" }}
                     </div>
                     <div class="mb-3">
-                        <label for="photo-upload" class="form-label">Ajouter des photos</label>
-                        <input type="file" name="images" id="photo-upload" class="form-control" multiple>
+                        <label for="media-upload" class="form-label">Ajouter des photos & vidéos</label>
+                        <input type="file" name="media" id="media-upload" class="form-control" multiple>
                     </div>
                     <input type="hidden" name="route_vehicule" value="{{ route.id }}">
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
                 </form>
+                
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>

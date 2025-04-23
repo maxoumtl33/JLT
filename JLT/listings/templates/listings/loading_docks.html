@@ -1,0 +1,147 @@
+{% extends 'listings/base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center">Chargement des Docks</h2>
+    <input type="hidden" id="csrfToken" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+    
+    <div class="form-group mt-4">
+        <label for="datePicker">Sélectionnez une date :</label>
+        <input type="date" id="datePicker" class="form-control">
+        <button id="fetchDocks" class="btn btn-primary mt-2">Affichez les Docks</button>
+    </div>
+
+    <div id="docksDisplay" class="row mt-4"></div> <!-- Use Bootstrap row -->
+</div>
+
+<!-- Modal for Modifying Dock -->
+<!-- Modal for Modifying Dock -->
+<div class="modal fade" id="modifyDockModal" tabindex="-1" aria-labelledby="modifyDockModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modifyDockModalLabel">Modifier Dock</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="modifyDockContent">
+          <!-- Form will be injected here dynamically -->
+        </div>
+      </div>
+    </div>
+</div>
+
+  
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    $('#fetchDocks').click(function() {
+        const selectedDate = $('#datePicker').val();
+        const csrfToken = $('#csrfToken').val();
+
+        $.ajax({
+            type: "POST",
+            url: "{% url 'loading_docks_view' %}",
+            data: {
+                selected_date: selectedDate,
+                csrfmiddlewaretoken: csrfToken
+            },
+            success: function(data) {
+                $('#docksDisplay').empty(); // Clear previous results
+                $.each(data, function(place_id, dock) {
+                    $('#docksDisplay').append(
+                        `<div class="col-md-4 mb-4">
+                            <div class="card text-center">
+                                <img src="${dock.photo}" class="card-img-top" alt="Dock Photo" style="max-height: 150px; object-fit: cover;">
+                                <div class="card-body">
+                                    <h5 class="card-title">${dock.address}</h5>
+                                    <p class="card-text">${dock.description}</p>
+                                    <h6>Livraisons associés:</h6>
+                                    <ul>${dock.deliveries.map(del => `<li>${del.id}: ${del.name}</li>`).join('')}</ul>
+                                    <button class="btn btn-secondary modifyDock" data-placeid="${place_id}">Modifier Dock</button>
+                                </div>
+                            </div>
+                        </div>`
+                    );
+                });
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+            }
+        });
+    });
+
+    $('#docksDisplay').on('click', '.modifyDock', function() {
+        const placeId = $(this).data('placeid');
+
+        // AJAX request to get dock details for modification
+        $.ajax({
+            type: "GET",
+            url: `/get-dock-details/${placeId}/`, // URL to fetch dock details. Update according to your routes
+            success: function(dockDetails) {
+                // Create form dynamically
+                const formHtml = `
+                    <form id="modifyDockForm">
+                        <input type="hidden" id="dockId" name="dockId" value="${dockDetails.id}">
+                        <div class="mb-3">
+                            <label for="dockAddress" class="form-label">Adresse</label>
+                            <input type="text" class="form-control" id="dockAddress" name="address" value="${dockDetails.address}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="dockDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="dockDescription" name="description" required>${dockDetails.description}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="placeId" class="form-label">Place_id</label>
+                            <input type="text" class="form-control" id="placeId" name="place_id" value="${dockDetails.place_id}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="dockPhoto" class="form-label">Photo URL</label>
+                            <input type="text" class="form-control" id="dockPhoto" name="photo" value="${dockDetails.photo}">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Sauvegarder</button>
+                    </form>
+                `;
+
+                // Inject the form HTML into the modal body
+                $('#modifyDockContent').html(formHtml);
+
+                // Show the modal
+                $('#modifyDockModal').modal('show');
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching dock details:', error);
+                alert('An error occurred while fetching dock details. Please try again.');
+            }
+        });
+    });
+
+    // Handle the form submission for modifying the dock
+    $(document).on('submit', '#modifyDockForm', function(event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        const formData = $(this).serialize(); // Serialize the form data
+
+        $.ajax({
+            type: "POST",
+            url: "{% url 'modify_dock_view' %}", // Ensure this matches your URLs
+            data: formData,
+            success: function(response) {
+                alert('Dock updated successfully!');
+                $('#modifyDockModal').modal('hide'); // Hide the modal
+                // Optionally refresh docks display
+                $('#fetchDocks').click(); // Re-fetch the docks if needed
+            },
+            error: function(xhr, status, error) {
+                console.error('Error updating dock:', error);
+                alert('An error occurred while updating the dock. Please try again.');
+            }
+        });
+    });
+
+});
+</script>
+
+
+
+{% endblock %}
+

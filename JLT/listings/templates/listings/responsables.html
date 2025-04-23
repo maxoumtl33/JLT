@@ -413,10 +413,18 @@ text-decoration: underline;
                                     </div>
                                     <div class="modal-body">
                                         {% for photo in vehicle.vehicle_photos.all %}
+                                        {% if photo.image %}
                                             <div class="photo-container">
                                                 <img src="{{ photo.image.url }}" alt="{{ photo.caption }}" class="img-fluid" style="max-height: 300px; margin-bottom: 10px;">
                                                 
                                             </div>
+                                            {% endif %}
+                                            {% if photo.video %}
+                                                <video width="320" height="240" controls>
+                                                    <source src="{{ photo.video.url }}" type="video/mp4">
+                                                    Your browser does not support the video tag.
+                                                </video>
+                                            {% endif %}
                                         {% empty %}
                                             <p>Pas de photos pour ce véhicule.</p>
                                         {% endfor %}
@@ -466,10 +474,18 @@ text-decoration: underline;
                                     </div>
                                     <div class="modal-body">
                                         {% for photo in vehicle.vehicle_photos.all %}
+                                        {% if photo.image %}
                                             <div class="photo-container">
                                                 <img src="{{ photo.image.url }}" alt="{{ photo.caption }}" class="img-fluid" style="max-height: 300px; margin-bottom: 10px;">
                                                 
                                             </div>
+                                            {% endif %}
+                                            {% if photo.video %}
+                                                <video width="320" height="240" controls>
+                                                    <source src="{{ photo.video.url }}" type="video/mp4">
+                                                    Your browser does not support the video tag.
+                                                </video>
+                                            {% endif %}
                                         {% empty %}
                                             <p>Pas de photos pour ce véhicule.</p>
                                         {% endfor %}
@@ -551,10 +567,18 @@ text-decoration: underline;
                                     </div>
                                     <div class="modal-body">
                                         {% for photo in vehicle.vehicle_photos.all %}
+                                        {% if photo.image %}
                                             <div class="photo-container">
                                                 <img src="{{ photo.image.url }}" alt="{{ photo.caption }}" class="img-fluid" style="max-height: 300px; margin-bottom: 10px;">
                                                 
                                             </div>
+                                            {% endif %}
+                                            {% if photo.video %}
+                                                <video width="320" height="240" controls>
+                                                    <source src="{{ photo.video.url }}" type="video/mp4">
+                                                    Your browser does not support the video tag.
+                                                </video>
+                                            {% endif %}
                                         {% empty %}
                                             <p>Pas de photos pour ce véhicule.</p>
                                         {% endfor %}
@@ -605,10 +629,18 @@ text-decoration: underline;
                                     </div>
                                     <div class="modal-body">
                                         {% for photo in vehicle.vehicle_photos.all %}
+                                        {% if photo.image %}
                                             <div class="photo-container">
                                                 <img src="{{ photo.image.url }}" alt="{{ photo.caption }}" class="img-fluid" style="max-height: 300px; margin-bottom: 10px;">
                                                 
                                             </div>
+                                            {% endif %}
+                                            {% if photo.video %}
+                                                <video width="320" height="240" controls>
+                                                    <source src="{{ photo.video.url }}" type="video/mp4">
+                                                    Your browser does not support the video tag.
+                                                </video>
+                                            {% endif %}
                                         {% empty %}
                                             <p>Pas de photos pour ce véhicule.</p>
                                         {% endfor %}
