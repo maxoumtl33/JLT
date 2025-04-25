@@ -749,9 +749,15 @@
             </div>
           {% endif %}
           <div class="text-center">
+            {% if matching_dock.link %}
+            <a href="{{ matching_dock.link }}" target="_blank" class="btn btn-primary">
+              <i class="bi bi-map" aria-hidden="true"></i> Ouvrir dans Google Maps
+            </a>
+            {% elif matching_dock.place_id %}
             <a href="https://www.google.com/maps/place/?q=place_id:{{ matching_dock.place_id }}" target="_blank" class="btn btn-primary">
               <i class="bi bi-map" aria-hidden="true"></i> Ouvrir dans Google Maps
             </a>
+            {% endif %}
           </div>
         {% else %}
           <div class="text-center">

@@ -981,8 +981,6 @@ def add_to_checklist(request, checklist_id):
                 product = Product.objects.get(pk=product_id)
                 quantity = int(quantity)  # Ensure quantity is an integer
 
-                # Debugging - Print values
-                print(f"Product ID: {product_id}, Quantity: {quantity}, Comment: '{commentaire}'")
 
                 # Check the condition for quantity 0 with a comment
                 if quantity >= 0:
