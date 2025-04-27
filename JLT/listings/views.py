@@ -1017,6 +1017,7 @@ def add_to_checklist(request, checklist_id):
 
 from collections import defaultdict
 
+
 @login_required
 def checklist_detail(request, checklist_id):
     checklist = get_object_or_404(Checklist, pk=checklist_id)
@@ -1194,6 +1195,7 @@ def checklist_detail(request, checklist_id):
         'is_cfcdn': is_cfcdn,
     }
     return render(request, 'listings/checklist_detail.html', context)
+
 
 
 @login_required

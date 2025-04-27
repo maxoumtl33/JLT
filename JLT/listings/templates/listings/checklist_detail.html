@@ -1,979 +1,868 @@
 {% extends 'listings/base.html' %}
 {% load static %}
 {% load custom_filters %}
+
 {% block content %}
 <link rel="stylesheet" href="{% static 'listings/checklist_detail.css' %}">
+<!-- Remove duplicate Bootstrap links, keep the latest version -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-
-
-
-
-
-
-
 
 {% if is_ventes or is_admin %}
-
-{% if messages %}
+  {% if messages %}
     <div class="alert-container">
-        {% for message in messages %}
-            <div class="alert alert-info alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endfor %}
-    </div>
-{% endif %}
-
-
-<nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
-    <div class="container">
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto">
-                <!-- "Vérifier" button on the left -->
-
-                <li class="nav-item">
-                    <a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#verifierModal">
-                        <i class="fa-solid fa-square-check" style="color: #63E6BE;"></i><span>Vérifier Checklist</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#verifierbModal" style="margin-left: 20px;">
-                        <i class="fa-solid fa-square-check" style="color: #63E6BE;"></i><span>Vérifier Breuvages</span>
-                    </a>
-                </li>
-
-                {% if is_admin %}
-                <li>
-                    <a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#associer" style="margin-left: 20px;">
-                        <i class="fa-solid fa-square-check" style="color: #63E6BE;"></i><span>Associer</span>
-                    </a>
-                </li>
-                {% endif %}
-            </ul>
-
-            <ul class="navbar-nav ms-auto">
-                <!-- Other navigation items on the right -->
-                <li class="nav-item">
-                    <button type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#productModal">
-                        <i class="fa-solid fa-circle-plus"></i><span>Créer produit</span>
-                    </button>
-                </li>
-                <li>
-                    <a href="{% url 'conseiller_dashboard' %}" class="nav__link" style="margin-left: 20px;">
-                        <i class="fa-solid fa-dashboard"></i>
-                        <span>Dashboard</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a type="button" class="nav__link" style="margin-left: 20px;" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                        <i class="fa-solid fa-basket-shopping"></i><span>Mes produits</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{% url 'creerchecklist' %}" class="nav__link" style="margin-left: 20px;">
-                        <i class="fa-solid fa-clipboard-list"></i><span>Checklists</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <form action="{% url 'duplicate-checklist' checklist_id=checklist.id %}" method="POST">
-                        {% csrf_token %}
-                        <button type="submit" class="nav__link" style="margin-left: 20px;"><i class="fa-solid fa-copy"></i><span>Dupliquer</span></button>
-                    </form>
-                </li>
-
-            </ul>
+      {% for message in messages %}
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
+      {% endfor %}
     </div>
+  {% endif %}
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+    <div class="container">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav__link" data-bs-toggle="modal" data-bs-target="#verifierModal">
+              <i class="fa-solid fa-square-check" style="color: #63E6BE;"></i><span>Vérifier Checklist</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav__link" data-bs-toggle="modal" data-bs-target="#verifierbModal" style="margin-left: 20px;">
+              <i class="fa-solid fa-square-check" style="color: #63E6BE;"></i><span>Vérifier Breuvages</span>
+            </a>
+          </li>
+
+          {% if is_admin %}
+            <li>
+              <a class="nav__link" data-bs-toggle="modal" data-bs-target="#associer" style="margin-left: 20px;">
+                <i class="fa-solid fa-square-check" style="color: #63E6BE;"></i><span>Associer</span>
+              </a>
+            </li>
+          {% endif %}
+        </ul>
+
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <button class="nav__link" data-bs-toggle="modal" data-bs-target="#productModal">
+              <i class="fa-solid fa-circle-plus"></i><span>Créer produit</span>
+            </button>
+          </li>
+          <li>
+            <a href="{% url 'conseiller_dashboard' %}" class="nav__link" style="margin-left: 20px;">
+              <i class="fa-solid fa-dashboard"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal" style="margin-left: 20px;">
+              <i class="fa-solid fa-basket-shopping"></i><span>Mes produits</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{% url 'creerchecklist' %}" class="nav__link" style="margin-left: 20px;">
+              <i class="fa-solid fa-clipboard-list"></i><span>Checklists</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <form action="{% url 'duplicate-checklist' checklist_id=checklist.id %}" method="POST">
+              {% csrf_token %}
+              <button type="submit" class="nav__link" style="margin-left: 20px;">
+                <i class="fa-solid fa-copy"></i><span>Dupliquer</span>
+            </button>
+          </form>
+        </li>
+      </ul>
+    </div>
+  </div>
 </nav>
 
-<!-- Modal -->
+<!-- Product Modal -->
 <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="productModalLabel">Créer nouveau produit</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <!-- Product creation form inside modal -->
-                <form method="POST">
-                    {% csrf_token %}
-                    {{ product_form.as_p }}
-                    <button type="submit" name="product-form" class="btn btn-primary">Créer produit</button>
-                </form>
-            </div>
-        </div>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="productModalLabel">Créer nouveau produit</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form method="POST">
+          {% csrf_token %}
+          {{ product_form.as_p }}
+          <button type="submit" class="btn btn-primary">Créer produit</button>
+        </form>
+      </div>
     </div>
+  </div>
 </div>
-<!-- Modal -->
-<div class="modal fade" id="associer" tabindex="-1" aria-labelledby="associer" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="productModalLabel">Associer checklist et livraison</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <h3>Checklist Details</h3>
-    <p>Checklist: {{ checklist.name }}</p>
-    <p>Num Commande: {{ checklist.num_contrat }}</p>
 
-    <!-- Button to associate Livraison -->
-    <form method="POST" action="{% url 'associate_livraison' checklist.id %}">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-primary">Associer</button>
-    </form>
-
-            </div>
-        </div>
+<!-- Associer Modal -->
+<div class="modal fade" id="associer" tabindex="-1" aria-labelledby="associerLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Associer checklist et livraison</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <h3>Checklist Details</h3>
+        <p>Checklist: {{ checklist.name }}</p>
+        <p>Num Commande: {{ checklist.num_contrat }}</p>
+        <form method="POST" action="{% url 'associate_livraison' checklist.id %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary">Associer</button>
+        </form>
+      </div>
     </div>
+  </div>
 </div>
+
 <div class="container mt-5">
-    <hr>
-    <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="font-size: 2em; color: #0056b3; font-weight: 600;" id="checklistName">Checklist: {{ checklist.name }}</h1>
+  <hr>
+  <div class="text-center mb-4">
+    <h1 id="checklistName" style="font-size: 2em; color: #0056b3; font-weight: 600;">Checklist: {{ checklist.name }}</h1>
+  </div>
+
+  <div class="d-flex justify-content-between flex-wrap gap-3 p-3 bg-light rounded shadow">
+    <div class="info-card">
+      <p id="date"><strong><i class="bi bi-calendar-event"></i> Date événement:</strong> {{ checklist.date|date:"d/m/Y" }}</p>
+      <p><strong><i class="bi bi-geo-alt"></i> Lieu événement:</strong> {{ checklist.lieu }}</p>
+      <p><strong><i class="bi bi-people"></i> Nombre convives:</strong> {{ checklist.nb_convive }}</p>
     </div>
 
-    <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 20px; padding: 20px; background-color: #f8f9fa; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
-
-        <div class="info-card">
-            <p id="date"><strong><i class="bi bi-calendar-event"></i> Date événement:</strong> {{ checklist.date|date:"d/m/Y" }}</p>
-            <p><strong><i class="bi bi-geo-alt"></i> Lieu événement:</strong> {{ checklist.lieu }}</p>
-            <p><strong><i class="bi bi-people"></i> Nombre convives:</strong> {{ checklist.nb_convive }}</p>
-        </div>
-
-        <div class="info-card">
-            <p><strong><i class="bi bi-clock"></i> Heure de livraison:</strong> {{ checklist.heure_livraison }}</p>
-            <p id="numContrat"><strong><i class="bi bi-file-earmark-text"></i> Numéro de contrat:</strong> {{ checklist.num_contrat }}</p>
-        </div>
-
-        <div class="info-card">
-            <p id="conseiller"><strong><i class="bi bi-person-circle"></i> Conseiller(e):</strong> {{ checklist.conseillere }}</p>
-            <p><strong><i class="bi bi-person-badge"></i> Nom du MD:</strong> {{ checklist.md }}</p>
-        </div>
-        <a  type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModals" style="margin-left: 20px;"><i class="fa-solid fa-pen-to-square"></i><span>Modifier</span></a>
+    <div class="info-card">
+      <p><strong><i class="bi bi-clock"></i> Heure de livraison:</strong> {{ checklist.heure_livraison }}</p>
+      <p id="numContrat"><strong><i class="bi bi-file-earmark-text"></i> Numéro de contrat:</strong> {{ checklist.num_contrat }}</p>
     </div>
 
-    <div style="text-align: center; margin-top: 20px; display: flex;">
-        <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#documentModal" style="display: flex; margin-right: 20px; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);">
-            <i class="bi bi-folder"></i>  Ajouter documents
-        </button>
-        <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModalcommentaire" style="display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);">
-            <i class="fa-regular fa-comment"></i>Ajouter commentaire
-        </button>
+    <div class="info-card">
+      <p id="conseiller"><strong><i class="bi bi-person-circle"></i> Conseiller(e):</strong> {{ checklist.conseillere }}</p>
+      <p><strong><i class="bi bi-person-badge"></i> Nom du MD:</strong> {{ checklist.md }}</p>
     </div>
+    <a class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModals" style="margin-left: 20px;"><i class="fa-solid fa-pen-to-square"></i><span>Modifier</span></a>
+  </div>
 
+  <div class="text-center mt-4 d-flex justify-content-center">
+    <button type="button" class="btn btn-primary btn-lg me-3" data-bs-toggle="modal" data-bs-target="#documentModal">
+      <i class="bi bi-folder"></i>  Ajouter documents
+    </button>
+    <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModalcommentaire">
+      <i class="fa-regular fa-comment"></i>Ajouter commentaire
+    </button>
+  </div>
 
-    <hr>
+  <hr>
 
-    {% if is_cfcdn %}
-    <h2 style="text-align: center; font-size: 1.8em; margin-bottom: 20px;">CFCDN</h2>
-    <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; padding: 20px;">
-        <!-- Example Card Layout -->
+  {% if is_cfcdn %}
+    <h2 class="text-center" style="font-size: 1.8em; margin-bottom: 20px;">CFCDN</h2>
+    <div class="d-flex justify-content-center flex-wrap gap-3 p-3">
         <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalcfcdn">
-            <i class="fa-solid fa-skull"></i>
-            <span>CFCDN</span>
+          <i class="fa-solid fa-skull"></i>
+          <span>CFCDN</span>
         </div>
-    </div>
-{% else %}
-<h2 style="text-align: center; font-size: 1.8em; margin-bottom: 20px;">
-    Liste des produits disponibles par catégories 
-    <i class="fas fa-info-circle" style="cursor: pointer; margin-left: 10px;" data-bs-toggle="modal" data-bs-target="#infoModal"></i>
-</h2>
-<hr>
-<!-- Information Modal -->
-<div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
+      </div>
+    {% else %}
+      <h2 class="text-center" style="font-size: 1.8em; margin-bottom: 20px;">
+        Liste des produits disponibles par catégories
+        <i class="fas fa-info-circle" style="cursor: pointer; margin-left: 10px;" data-bs-toggle="modal" data-bs-target="#infoModal"></i>
+      </h2>
+      <hr>
+
+      <!-- Information Modal -->
+      <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="infoModalLabel">Informations sur les produits</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              <h5 class="modal-title" id="infoModalLabel">Informations sur les produits</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p>Voici quelques informations importantes concernant les produits disponibles :</p>
-                <ul>
-                    <li>-> Les produits sont divisés en différentes catégories pour une meilleure organisation.</li>
-                    <br>
-                    <li>-> Cliquez sur chaque catégorie pour explorer les produits disponibles.</li>
-                    <br>
-                    <li>-> Assurez-vous de vérifier les quantités et les commentaires associés à chaque produit. Ajouter nt ou NT dans les commentaires si c'est un produit commandé par Nouvelle tablée.</li>
-                </ul>
+              <p>Voici quelques informations importantes concernant les produits disponibles :</p>
+              <ul>
+                <li>Les produits sont divisés en différentes catégories pour une meilleure organisation.</li>
+                <li>Cliquez sur chaque catégorie pour explorer les produits disponibles.</li>
+                <li>Assurez-vous de vérifier les quantités et les commentaires associés à chaque produit. Ajouter "nt" ou "NT" dans les commentaires si c'est un produit commandé par Nouvelle tablée.</li>
+              </ul>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-center flex-wrap gap-3 p-3">
+        <!-- Example Card Layout -->
+        <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModal3">
+          <i class="fas fa-toolbox"></i>
+          <span>ÉQUIPEMENT DE BASE</span>
+        </div>
+        <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModaljetable">
+          <i class="fas fa-box-open"></i>
+          <span>JETABLE</span>
+        </div>
+        <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalaccessoirededecor">
+          <i class="fas fa-couch"></i>
+          <span>ACCESSOIRES DE DÉCOR</span>
+        </div>
+        <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalequipementdebar">
+          <i class="fa-solid fa-champagne-glasses"></i>
+          <span>ÉQUIPEMENT DE BAR</span>
+        </div>
+        <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalequipementpourservicecafe">
+          <i class="fas fa-coffee"></i>
+          <span>ÉQUIPEMENT POUR SERVICE A CAFÉ</span>
+        </div>
+        <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModaltableetlinge">
+          <i class="fas fa-utensils"></i>
+          <span>TABLE ET LINGE DE TABLE</span>
+        </div>
+
+        <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalverrerie">
+          <i class="fa-solid fa-wine-glass-empty"></i>
+          <span>VERRERIE</span>
+        </div>
+        <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalporcelaine">
+          <i class="fas fa-utensils"></i>
+          <span>PORCELAINE ET COUTELLERIE</span>
+        </div>
+        <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalmontage">
+          <i class="fas fa-concierge-bell"></i>
+          <span>ÉQUIPEMENT POUR MONTAGE CANAPÉS</span>
+        </div>
+        <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalcuisson">
+          <i class="fas fa-fire"></i>
+          <span>ÉQUIPEMENT DE CUISSON</span>
+        </div>
+        <div class="category-card"           data-bs-toggle="modal" data-bs-target="#exampleModalservice">
+            <i class="fas fa-spoon"></i>
+            <span>USTENSILES DE SERVICE</span>
+          </div>
+          <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalitemsdivers">
+            <i class="fas fa-puzzle-piece"></i>
+            <span>ITEMS DIVERS</span>
+          </div>
+        </div>
+  
+      {% endif %}
+  
+      <!-- Include all the listings/partials/ for each category -->
+      {% block product_modal %}
+        {% for product in products %}
+          {% if product.is_base %}
+            {% include 'listings/partials/product_modal.html' with modal_id='exampleModal3' search_id='productSearch' modal_category='base' %}
+          {% elif product.is_jetable %}
+            {% include 'listings/partials/product_modal.html' with modal_id='exampleModaljetable' search_id='productSearch1' modal_category='jetable' %}
+          {% elif product.is_decor %}
+            {% include 'listings/partials/product_modal.html' with modal_id='exampleModalaccessoirededecor' search_id='productSearch2' modal_category='decor' %}
+          {% elif product.is_bar %}
+            {% include 'listings/partials/product_modal.html' with modal_id='exampleModalequipementdebar' search_id='productSearch3' modal_category='bar' %}
+          {% elif product.is_cafe %}
+            {% include 'listings/partials/product_modal.html' with modal_id='exampleModalequipementpourservicecafe' search_id='productSearch4' modal_category='cafe' %}
+          {% elif product.is_table %}
+            {% include 'listings/partials/product_modal.html' with modal_id='exampleModaltableetlinge' search_id='productSearch6' modal_category='table' %}
+          {% elif product.is_verre %}
+            {% include 'listings/partials/product_modal.html' with modal_id='exampleModalverrerie' search_id='productSearch7' modal_category='verre' %}
+          {% elif product.is_porcelaine %}
+            {% include 'listings/partials/product_modal.html' with modal_id='exampleModalporcelaine' search_id='productSearch8' modal_category='porcelaine' %}
+          {% elif product.is_canape %}
+            {% include 'listings/partials/product_modal.html' with modal_id='exampleModalmontage' search_id='productSearch9' modal_category='canape' %}
+          {% elif product.is_cuisson %}
+            {% include 'listings/partials/product_modal.html' with modal_id='exampleModalcuisson' search_id='productSearch10' modal_category='cuisson' %}
+          {% elif product.is_service %}
+            {% include 'listings/partials/product_modal.html' with modal_id='exampleModalservice' search_id='productSearch11' modal_category='service' %}
+          {% elif product.is_alcool %}
+            {% include 'listings/partials/product_modal.html' with modal_id='exampleModalalcoolfort' search_id='productSearch12' modal_category='alcool' %}
+          {% elif product.is_bieres %}
+            {% include 'listings/partials/product_modal.html' with modal_id='exampleModalbieres' search_id='productSearch13' modal_category='bieres' %}
+          {% elif product.is_vins %}
+            {% include 'listings/partials/product_modal.html' with modal_id='exampleModalvins' search_id='productSearch14' modal_category='vins' %}
+          {% elif product.is_sansalcool %}
+            {% include 'listings/partials/product_modal.html' with modal_id='exampleModalsansalcool' search_id='productSearch15' modal_category='sansalcool' %}
+            {% endif %}
+          {% endfor %}
+        {% endblock %}
+        <br>
+    
+        <h2 class="text-center" style="font-size: 1.8em; margin-bottom: 20px;">Liste des breuvages disponibles par catégories</h2>
+        <hr>
+        <div class="d-flex justify-content-center flex-wrap gap-3 p-3">
+            <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalalcoolfort">
+              <i class="fa-solid fa-martini-glass"></i>
+              <span>ALCOOL FORT</span>
+            </div>
+            <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalbieres">
+              <i class="fa-solid fa-beer-mug-empty"></i>
+              <span>BIERES</span>
+            </div>
+            <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalvins">
+              <i class="fa-solid fa-wine-bottle"></i>
+              <span>VINS</span>
+            </div>
+            <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalsansalcool">
+              <i class="fa-solid fa-glass-water"></i>
+              <span>SANS ALCOOL</span>
             </div>
         </div>
-    </div>
-</div>
-
-<div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; padding: 20px;">
-    <!-- Example Card Layout -->
-    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModal3">
-        <i class="fas fa-toolbox"></i>
-        <span>ÉQUIPEMENT DE BASE</span>
-    </div>
-    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModaljetable">
-        <i class="fas fa-box-open"></i>
-        <span>JETABLE</span>
-    </div>
-    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalaccessoirededecor">
-        <i class="fas fa-couch"></i>
-        <span>ACCESSOIRES DE DÉCOR</span>
-    </div>
-    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalequipementdebar">
-        <i class="fa-solid fa-champagne-glasses"></i>
-        <span>ÉQUIPEMENT DE BAR</span>
-    </div>
-    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalequipementpourservicecafe">
-        <i class="fas fa-coffee"></i>
-        <span>ÉQUIPEMENT POUR SERVICE A CAFÉ</span>
-    </div>
-    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModaltableetlinge">
-        <div class="icon-wrapper">
-            <svg xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 -960 960 960" width="52px" fill="currentColor" stroke="#e8eaed" stroke-width="5">
-                <path d="M173-600h614l-34-120H208l-35 120Zm307-60Zm192 140H289l-11 80h404l-10-80ZM160-160l49-360h-89q-20 0-31.5-16T82-571l57-200q4-13 14-21t24-8h606q14 0 24 8t14 21l57 200q5 19-6.5 35T840-520h-88l48 360h-80l-27-200H267l-27 200h-80Z"/>
-            </svg>
+        <br><br>
+    
+        <hr>
+        <h2>Rapports MD</h2>
+        <hr>
+    
+        <!-- Display RapportMD and RapportRecup Buttons -->
+        <button type="button" onclick="toggleSection('rapportmd-section')" class="toggle-btn">
+          <i class="bi bi-file-earmark-text"></i> Voir rapport événement
+        </button>
+        <button type="button" onclick="toggleSection('rapportbreuvage-section')" class="toggle-btn">
+          <i class="fa-solid fa-champagne-glasses"></i> Voir rapport breuvage
+        </button>
+        <button type="button" onclick="toggleSection('rapportrecup-section')" class="toggle-btn">
+          <i class="bi bi-file-earmark-text"></i> Voir rapport récupération
+        </button>
+    
+        <!-- RapportMD Section -->
+        <div id="rapportmd-section" class="rapport-section hidden">
+          <h3>Rapport événement</h3>
+          <p>{{ checklist.rapportmd }}</p>
         </div>
-        <span class="icon-label">TABLE ET LINGE DE TABLE</span>
-    </div>
-
-    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalverrerie">
-        <i class="fa-solid fa-wine-glass-empty"></i>
-        <span>VERRERIE</span>
-    </div>
-    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalporcelaine">
-        <i class="fas fa-utensils"></i>
-        <span>PORCELAINE ET COUTELLERIE</span>
-    </div>
-    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalmontage">
-        <i class="fas fa-concierge-bell"></i>
-        <span>ÉQUIPEMENT POUR MONTAGE CANAPÉS</span>
-    </div>
-    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalcuisson">
-        <i class="fas fa-fire"></i>
-        <span>ÉQUIPEMENT DE CUISSON</span>
-    </div>
-    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalservice">
-        <i class="fas fa-spoon"></i>
-        <span>USTENSILES DE SERVICE</span>
-    </div>
-    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalitemsdivers">
-        <i class="fas fa-puzzle-piece"></i>
-        <span>ITEMS DIVERS</span>
-    </div>
-</div>
-
-{% endif %}
-
-<!-- Include all the listings/partials/ for each category -->
-{% block product_modal %}
-    {% for product in products %}
-        {% if product.is_base %}
-            {% include 'listings/partials//product_modal.html' with modal_id='exampleModal3' search_id='productSearch' modal_category='base' %}
-        {% elif product.is_jetable %}
-            {% include 'listings/partials//product_modal.html' with modal_id='exampleModaljetable' search_id='productSearch1' modal_category='jetable' %}
-        {% elif product.is_decor %}
-            {% include 'listings/partials//product_modal.html' with modal_id='exampleModalaccessoirededecor' search_id='productSearch2' modal_category='decor' %}
-        {% elif product.is_bar %}
-            {% include 'listings/partials//product_modal.html' with modal_id='exampleModalequipementdebar' search_id='productSearch3' modal_category='bar' %}
-        {% elif product.is_cafe %}
-            {% include 'listings/partials//product_modal.html' with modal_id='exampleModalequipementpourservicecafe' search_id='productSearch4' modal_category='cafe' %}
-        {% elif product.is_table %}
-            {% include 'listings/partials//product_modal.html' with modal_id='exampleModaltableetlinge' search_id='productSearch6' modal_category='table' %}
-        {% elif product.is_verre %}
-            {% include 'listings/partials//product_modal.html' with modal_id='exampleModalverrerie' search_id='productSearch7' modal_category='verre' %}
-        {% elif product.is_porcelaine %}
-            {% include 'listings/partials//product_modal.html' with modal_id='exampleModalporcelaine' search_id='productSearch8' modal_category='porcelaine' %}
-        {% elif product.is_canape %}
-            {% include 'listings/partials//product_modal.html' with modal_id='exampleModalmontage' search_id='productSearch9' modal_category='canape' %}
-        {% elif product.is_cuisson %}
-            {% include 'listings/partials//product_modal.html' with modal_id='exampleModalcuisson' search_id='productSearch10' modal_category='cuisson' %}
-        {% elif product.is_service %}
-            {% include 'listings/partials//product_modal.html' with modal_id='exampleModalservice' search_id='productSearch11' modal_category='service' %}
-        {% elif product.is_alcool %}
-            {% include 'listings/partials//product_modal.html' with modal_id='exampleModalalcoolfort' search_id='productSearch12' modal_category='alcool' %}
-        {% elif product.is_bieres %}
-            {% include 'listings/partials//product_modal.html' with modal_id='exampleModalbieres' search_id='productSearch13' modal_category='bieres' %}
-        {% elif product.is_vins %}
-            {% include 'listings/partials//product_modal.html' with modal_id='exampleModalvins' search_id='productSearch14' modal_category='vins' %}
-        {% elif product.is_sansalcool %}
-            {% include 'listings/partials//product_modal.html' with modal_id='exampleModalsansalcool' search_id='productSearch15' modal_category='sansalcool' %}
-        {% endif %}
-    {% endfor %}
-{% endblock %}
-<br>
-
-<h2 style="text-align: center; font-size: 1.8em; margin-bottom: 20px;">Liste des breuvages disponibles par catégories</h2>
-<hr>
-<div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; padding: 20px;">
-    <!-- Example Card Layout -->
-    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalalcoolfort">
-        <i class="fa-solid fa-martini-glass"></i>
-        <span>ALCOOL FORT</span>
-    </div>
-    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalbieres">
-        <i class="fa-solid fa-beer-mug-empty"></i>
-        <span>BIERES</span>
-    </div>
-    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalvins">
-        <i class="fa-solid fa-wine-bottle"></i>
-        <span>VINS</span>
-    </div>
-    <div class="category-card" data-bs-toggle="modal" data-bs-target="#exampleModalsansalcool">
-        <i class="fa-solid fa-glass-water"></i>
-        <span>SANS ALCOOL</span>
-    </div>
-</div>
-<br>
-<br>
-
-
-<hr>
-<h2>Rapports MD</h2>
-<hr>
-
-<!-- Display RapportMD and RapportRecup Buttons -->
-<button type="button" onclick="toggleSection('rapportmd-section')" class="toggle-btn">
-    <i class="bi bi-file-earmark-text"></i> Voir rapport événement
-</button>
-<button type="button" onclick="toggleSection('rapportbreuvage-section')" class="toggle-btn">
-    <i class="fa-solid fa-champagne-glasses"></i> Voir rapport breuvage
-</button>
-<button type="button" onclick="toggleSection('rapportrecup-section')" class="toggle-btn">
-    <i class="bi bi-file-earmark-text"></i> Voir rapport récupération
-</button>
-
-
-<!-- RapportMD Section -->
-<div id="rapportmd-section" class="rapport-section hidden">
-    <h3>Rapport événement</h3>
-    <p>{{ checklist.rapportmd }}</p>
-</div>
-
-<!-- RapportBreuvage Section -->
-<div id="rapportbreuvage-section" class="rapport-section hidden">
-    <h3>Rapport Breuvage</h3>
-    <table class="table table-striped">
-        <thead>
-            <tr>
+    
+        <!-- RapportBreuvage Section -->
+        <div id="rapportbreuvage-section" class="rapport-section hidden">
+          <h3>Rapport Breuvage</h3>
+          <table class="table table-striped">
+            <thead>
+              <tr>
                 <th scope="col">Produit</th>
                 <th scope="col">Total</th>
                 <th scope="col">Restant</th>
                 <th scope="col">Consommé</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for breuvage in breuvages %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for breuvage in breuvages %}
                 <tr>
-                    <td>{{ breuvage.product.name }}</td>
-                    <td>{{ breuvage.quantity }}</td>
-                    <td>{{ breuvage.consumed_quantity }}</td>
-                    <td>{{ breuvage.quantity|subtract:breuvage.consumed_quantity }}</td>
+                  <td>{{ breuvage.product.name }}</td>
+                  <td>{{ breuvage.quantity }}</td>
+                  <td>{{ breuvage.consumed_quantity }}</td>
+                  <td>{{ breuvage.quantity|subtract:breuvage.consumed_quantity }}</td>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-
-
-
-<!-- RapportRecup Section -->
-<div id="rapportrecup-section" class="rapport-section hidden">
-    <h3>Rapport Récupération</h3>
-    <p>{{ checklist.rapportrecup }}</p>
-</div>
-
-<hr>
-<h2>Photos Evenement</h2>
-<hr>
-
-<!-- Display Photo Buttons -->
-<button type="button" onclick="toggleSection('photo-gallery-evenement')" class="toggle-btn">
-    <i class="bi bi-image"></i> Voir photos événement
-</button>
-<button type="button" onclick="toggleSection('photo-gallery-recup')" class="toggle-btn">
-    <i class="bi bi-image"></i> Voir photos récupération
-</button>
-
-<!-- ChecklistMDPhoto Section -->
-<div id="photo-gallery-evenement" class="rapport-section hidden">
-    <h3>Photos événement</h3>
-    <div class="photo-gallery">
-        {% for photo in md_photos %}
-            <div class="photo-item">
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+    
+        <!-- RapportRecup Section -->
+        <div id="rapportrecup-section" class="rapport-section hidden">
+          <h3>Rapport Récupération</h3>
+          <p>{{ checklist.rapportrecup }}</p>
+        </div>
+    
+        <hr>
+        <h2>Photos Événement</h2>
+        <hr>
+    
+        <!-- Display Photo Buttons -->
+        <button type="button" onclick="toggleSection('photo-gallery-evenement')" class="toggle-btn">
+          <i class="bi bi-image"></i> Voir photos événement
+        </button>
+        <button type="button" onclick="toggleSection('photo-gallery-recup')" class="toggle-btn">
+          <i class="bi bi-image"></i> Voir photos récupération
+        </button>
+    
+        <!-- ChecklistMDPhoto Section -->
+        <div id="photo-gallery-evenement" class="rapport-section hidden">
+          <h3>Photos événement</h3>
+          <div class="photo-gallery">
+            {% for photo in md_photos %}
+              <div class="photo-item">
                 <img src="{{ photo.image.url }}" alt="MD Photo" class="checklist-photo" onclick="openModal('{{ photo.image.url }}')" />
-            </div>
-        {% empty %}
-            <p>Pas de photos.</p>
-        {% endfor %}
-    </div>
-</div>
-
-<!-- ChecklistRecupPhoto Section -->
-<div id="photo-gallery-recup" class="rapport-section hidden">
-    <h3>Photos récupération</h3>
-    <div class="photo-gallery">
-        {% for photo in recup_photos %}
+              </div>
+            {% empty %}
+              <p>Pas de photos.</p>
+            {% endfor %}
+          </div>
+        </div>
+    
+            <!-- ChecklistRecupPhoto Section -->
+    <div id="photo-gallery-recup" class="rapport-section hidden">
+        <h3>Photos récupération</h3>
+        <div class="photo-gallery">
+          {% for photo in recup_photos %}
             <div class="photo-item">
-                <img src="{{ photo.image.url }}" alt="Recup Photo" class="checklist-photo" onclick="openModal('{{ photo.image.url }}')" />
+              <img src="{{ photo.image.url }}" alt="Recup Photo" class="checklist-photo" onclick="openModal('{{ photo.image.url }}')" />
             </div>
-        {% empty %}
+          {% empty %}
             <p>Pas de photos.</p>
-        {% endfor %}
-    </div>
-</div>
-
-<!-- Modal Structure -->
-<div id="photoModal" class="modal" onclick="closeModal()">
-    <span class="close" onclick="closeModal()">&times;</span>
-    <div class="modal-content-wrapper">
-        <img class="modal-content" id="modalImg">
-        <a id="downloadBtn" class="download-btn" href="#" download>
-            <i class="fa fa-download"></i> Télécharger
-        </a>
-    </div>
-</div>
-
-
-
-
-<!-- Modal -->
-<!-- Modal -->
-<div class="modal fade" id="verifierModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl-custom"> <!-- Extra-large modal -->
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="productModalLabel">Vérification Checklist</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body-verif">
-                <div class="container d-flex flex-wrap g-0"> <!-- Flexbox container with no gutter -->
-                    <!-- ÉQUIPEMENT DE BASE -->
-                    <div class="col-md-6 p-0">
-                        <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
-                            <h5 class="m-0">ÉQUIPEMENT DE BASE</h5>
-                        </div>
-                        <table class="table table-bordered table-hover m-0">
-                            <tbody>
-                                {% for product in products %}
-                                {% if product.is_base %}
-                                <tr>
-                                    <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
-                                        {{ product.name }}
-                                    </td>
-                                    <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
-                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                        {% if checklist_item %}
-                                            {{ checklist_item.quantity }}
-                                        {% else %}
-                                            0
-                                        {% endif %}
-                                        {% endwith %}
-                                    </td>
-                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                    {% if checklist_item and checklist_item.commentaire %}
-                                    <td class="small-cell"
-                                        {% if product.id in checklist_products %}
-                                            style="background-color: rgb(8, 39, 67); color: white;"
-                                        {% endif %}>
-                                        <i
-                                            class="fa-solid fa-comment-dots"
-                                            tabindex="0"
-                                            data-bs-toggle="popover"
-                                            data-bs-trigger="hover focus"
-                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
-                                            >
-                                        </i>
-                                    </td>
-                                    {% endif %}
-                                    {% endwith %}
-                                </tr>
-                                {% endif %}
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- TABLE ET LINGE DE TABLE -->
-                    <div class="col-md-6 p-0">
-                        <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
-                            <h5 class="m-0">TABLE ET LINGE DE TABLE</h5>
-                        </div>
-                        <table class="table table-bordered table-hover m-0">
-                            <tbody>
-                                {% for product in products %}
-                                {% if product.is_table %}
-                                <tr>
-                                    <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
-                                        {{ product.name }}
-                                    </td>
-                                    <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
-                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                        {% if checklist_item %}
-                                            {{ checklist_item.quantity }}
-                                        {% else %}
-                                            0
-                                        {% endif %}
-                                        {% endwith %}
-                                    </td>
-                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                    {% if checklist_item and checklist_item.commentaire %}
-                                    <td class="small-cell"
-                                        {% if product.id in checklist_products %}
-                                            style="background-color: rgb(8, 39, 67); color: white;"
-                                        {% endif %}>
-                                        <i
-                                            class="fa-solid fa-comment-dots"
-                                            tabindex="0"
-                                            data-bs-toggle="popover"
-                                            data-bs-trigger="hover focus"
-                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
-                                            >
-                                        </i>
-                                    </td>
-                                    {% endif %}
-                                    {% endwith %}
-                                </tr>
-                                {% endif %}
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- JETABLE -->
-                    <div class="col-md-6 p-0">
-                        <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
-                            <h5 class="m-0">JETABLE</h5>
-                        </div>
-                        <table class="table table-bordered table-hover m-0">
-                            <tbody>
-                                {% for product in products %}
-                                {% if product.is_jetable %}
-                                <tr>
-                                    <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
-                                        {{ product.name }}
-                                    </td>
-                                    <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
-                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                        {% if checklist_item %}
-                                            {{ checklist_item.quantity }}
-                                        {% else %}
-                                            0
-                                        {% endif %}
-                                        {% endwith %}
-                                    </td>
-                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                    {% if checklist_item and checklist_item.commentaire %}
-                                    <td class="small-cell"
-                                        {% if product.id in checklist_products %}
-                                            style="background-color: rgb(8, 39, 67); color: white;"
-                                        {% endif %}>
-                                        <i
-                                            class="fa-solid fa-comment-dots"
-                                            tabindex="0"
-                                            data-bs-toggle="popover"
-                                            data-bs-trigger="hover focus"
-                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
-                                            >
-                                        </i>
-                                    </td>
-                                    {% endif %}
-                                    {% endwith %}
-                                </tr>
-                                {% endif %}
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- VERRERIE -->
-                    <div class="col-md-6 p-0">
-                        <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
-                            <h5 class="m-0">VERRERIE</h5>
-                        </div>
-                        <table class="table table-bordered table-hover m-0">
-                            <tbody>
-                                {% for product in products %}
-                                {% if product.is_verre %}
-                                <tr>
-                                    <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
-                                        {{ product.name }}
-                                    </td>
-                                    <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
-                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                        {% if checklist_item %}
-                                            {{ checklist_item.quantity }}
-                                        {% else %}
-                                            0
-                                        {% endif %}
-                                        {% endwith %}
-                                    </td>
-                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                    {% if checklist_item and checklist_item.commentaire %}
-                                    <td class="small-cell"
-                                        {% if product.id in checklist_products %}
-                                            style="background-color: rgb(8, 39, 67); color: white;"
-                                        {% endif %}>
-                                        <i
-                                            class="fa-solid fa-comment-dots"
-                                            tabindex="0"
-                                            data-bs-toggle="popover"
-                                            data-bs-trigger="hover focus"
-                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
-                                            >
-                                        </i>
-                                    </td>
-                                    {% endif %}
-                                    {% endwith %}
-                                </tr>
-                                {% endif %}
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="col-md-6 p-0">
-                        <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
-                        <h5 class="m-0">ACCESSOIRES DE DÉCOR</h5>
-                    </div>
-                        <table class="table table-bordered table-hover m-0">
-
-                            <tbody>
-                                {% for product in products %}
-                                {% if product.is_decor %}
-                                <tr>
-                                    <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
-                                        {{ product.name }}
-                                    </td>
-                                    <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
-                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                        {% if checklist_item %}
-                                            {{ checklist_item.quantity }}
-                                        {% else %}
-                                            0
-                                        {% endif %}
-                                        {% endwith %}
-                                    </td>
-                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                    {% if checklist_item and checklist_item.commentaire %}
-                                    <td class="small-cell"
-                                        {% if product.id in checklist_products %}
-                                            style="background-color: rgb(8, 39, 67); color: white;"
-                                        {% endif %}>
-                                        <i
-                                            class="fa-solid fa-comment-dots"
-                                            tabindex="0"
-                                            data-bs-toggle="popover"
-                                            data-bs-trigger="hover focus"
-                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
-                                            >
-                                        </i>
-                                    </td>
-                                    {% endif %}
-                                    {% endwith %}
-                                </tr>
-                                    {% endif %}
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="col-md-6 p-0">
-                        <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
-                        <h5 class="m-0">PORCELAINE ET COUTELLERIE</h5>
-                    </div>
-                        <table class="table table-bordered table-hover m-0">
-
-                            <tbody>
-                                {% for product in products %}
-                                {% if product.is_porcelaine %}
-                                <tr>
-                                    <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
-                                        {{ product.name }}
-                                    </td>
-                                    <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
-                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                        {% if checklist_item %}
-                                            {{ checklist_item.quantity }}
-                                        {% else %}
-                                            0
-                                        {% endif %}
-                                        {% endwith %}
-                                    </td>
-                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                    {% if checklist_item and checklist_item.commentaire %}
-                                    <td class="small-cell"
-                                        {% if product.id in checklist_products %}
-                                            style="background-color: rgb(8, 39, 67); color: white;"
-                                        {% endif %}>
-                                        <i
-                                            class="fa-solid fa-comment-dots"
-                                            tabindex="0"
-                                            data-bs-toggle="popover"
-                                            data-bs-trigger="hover focus"
-                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
-                                            >
-                                        </i>
-                                    </td>
-                                    {% endif %}
-                                    {% endwith %}
-                                </tr>
-                                    {% endif %}
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <!-- ÉQUIPEMENT DE BAR -->
-                    <div class="col-md-6 p-0">
-                        <div style="background-color: #B3A1C7; text-align: center;margin: 0; padding: 0;">
-                        <h5 class="m-0">ÉQUIPEMENT DE BAR</h5>
-                    </div>
-                        <table class="table table-bordered table-hover">
-
-                            <tbody>
-                                {% for product in products %}
-                                {% if product.is_bar %}
-                                <tr>
-                                    <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
-                                        {{ product.name }}
-                                    </td>
-                                    <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
-                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                        {% if checklist_item %}
-                                            {{ checklist_item.quantity }}
-                                        {% else %}
-                                            0
-                                        {% endif %}
-                                        {% endwith %}
-                                    </td>
-                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                    {% if checklist_item and checklist_item.commentaire %}
-                                    <td class="small-cell"
-                                        {% if product.id in checklist_products %}
-                                            style="background-color: rgb(8, 39, 67); color: white;"
-                                        {% endif %}>
-                                        <i
-                                            class="fa-solid fa-comment-dots"
-                                            tabindex="0"
-                                            data-bs-toggle="popover"
-                                            data-bs-trigger="hover focus"
-                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
-                                            >
-                                        </i>
-                                    </td>
-                                    {% endif %}
-                                    {% endwith %}
-                                </tr>
-                                {% endif %}
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- ÉQUIPEMENT POUR MONTAGE CANAPÉS -->
-                    <div class="col-md-6 p-0">
-                        <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
-                        <h5 class="m-0">ÉQUIPEMENT POUR MONTAGE CANAPÉS</h5>
-                    </div>
-                        <table class="table table-bordered table-hover">
-
-                            <tbody>
-                                {% for product in products %}
-                                {% if product.is_canape %}
-                                <tr>
-                                    <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
-                                        {{ product.name }}
-                                    </td>
-                                    <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
-                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                        {% if checklist_item %}
-                                            {{ checklist_item.quantity }}
-                                        {% else %}
-                                            0
-                                        {% endif %}
-                                        {% endwith %}
-                                    </td>
-                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                    {% if checklist_item and checklist_item.commentaire %}
-                                    <td class="small-cell"
-                                        {% if product.id in checklist_products %}
-                                            style="background-color: rgb(8, 39, 67); color: white;"
-                                        {% endif %}>
-                                        <i
-                                            class="fa-solid fa-comment-dots"
-                                            tabindex="0"
-                                            data-bs-toggle="popover"
-                                            data-bs-trigger="hover focus"
-                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
-                                            >
-                                        </i>
-                                    </td>
-                                    {% endif %}
-                                    {% endwith %}
-                                </tr>
-                                {% endif %}
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="col-md-6 p-0">
-                        <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
-                        <h5 class="m-0">USTENSILES DE SERVICE</h5>
-                        </div>
-                        <table class="table table-bordered table-hover">
-
-                            <tbody>
-                                {% for product in products %}
-                                {% if product.is_service %}
-                                <tr>
-                                    <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
-                                        {{ product.name }}
-                                    </td>
-                                    <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
-                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                        {% if checklist_item %}
-                                            {{ checklist_item.quantity }}
-                                        {% else %}
-                                            0
-                                        {% endif %}
-                                        {% endwith %}
-                                    </td>
-                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                    {% if checklist_item and checklist_item.commentaire %}
-                                    <td class="small-cell"
-                                        {% if product.id in checklist_products %}
-                                            style="background-color: rgb(8, 39, 67); color: white;"
-                                        {% endif %}>
-                                        <i
-                                            class="fa-solid fa-comment-dots"
-                                            tabindex="0"
-                                            data-bs-toggle="popover"
-                                            data-bs-trigger="hover focus"
-                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
-                                            >
-                                        </i>
-                                    </td>
-                                    {% endif %}
-                                    {% endwith %}
-                                </tr>
-                                    {% endif %}
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="col-md-6 p-0">
-                        <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
-                        <h5 class="m-0">ÉQUIPEMENT DE CUISSON</h5>
-                    </div>
-                        <table class="table table-bordered table-hover">
-
-                            <tbody>
-                                {% for product in products %}
-                                {% if product.is_cuisson %}
-                                <tr>
-                                    <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
-                                        {{ product.name }}
-                                    </td>
-                                    <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
-                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                        {% if checklist_item %}
-                                            {{ checklist_item.quantity }}
-                                        {% else %}
-                                            0
-                                        {% endif %}
-                                        {% endwith %}
-                                    </td>
-                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                    {% if checklist_item and checklist_item.commentaire %}
-                                    <td class="small-cell"
-                                        {% if product.id in checklist_products %}
-                                            style="background-color: rgb(8, 39, 67); color: white;"
-                                        {% endif %}>
-                                        <i
-                                            class="fa-solid fa-comment-dots"
-                                            tabindex="0"
-                                            data-bs-toggle="popover"
-                                            data-bs-trigger="hover focus"
-                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
-                                            >
-                                        </i>
-                                    </td>
-                                    {% endif %}
-                                    {% endwith %}
-                                </tr>
-                                    {% endif %}
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="col-md-6 p-0">
-                        <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
-                            <h5 class="m-0">ÉQUIPEMENT POUR SERVICE A CAFE</h5>
-                        </div>
-                            <table class="table table-bordered table-hover">
-
+          {% endfor %}
+        </div>
+      </div>
+  
+      <!-- Modal Structure for Photo Viewing -->
+      <div id="photoModal" class="modal" onclick="closeModal()">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <div class="modal-content-wrapper">
+          <img class="modal-content" id="modalImg">
+          <a id="downloadBtn" class="download-btn" href="#" download>
+              <i class="fa fa-download"></i> Télécharger
+          </a>
+        </div>
+      </div>
+  
+      <div class="modal fade" id="verifierbModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl-custom"> <!-- Extra-large modal -->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="productModalLabel">Vérification Breuvages</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body-verif">
+                    <div class="container d-flex flex-wrap g-0"> <!-- Flexbox container with no gutter -->
+    
+                        <div class="col-md-6 p-0">
+                            <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
+                                <h5 class="m-0">ALCOOL FORT</h5>
+                            </div>
+                            <table class="table table-bordered table-hover m-0">
                                 <tbody>
                                     {% for product in products %}
-                                    {% if product.is_cafe %}
+                                    {% if product.is_alcool %}
                                     <tr>
                                         <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
-                                        {{ product.name }}
-                                    </td>
-                                    <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {{ product.name }}
+                                        </td>
+                                        <td class="small-cell" {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                            {% if checklist_item %}
+                                                {{ checklist_item.quantity }}
+                                            {% else %}
+                                                0
+                                            {% endif %}
+                                            {% endwith %}
+                                        </td>
                                         {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                        {% if checklist_item %}
-                                            {{ checklist_item.quantity }}
-                                        {% else %}
-                                            0
+                                        {% if checklist_item and checklist_item.commentaire %}
+                                        <td class="small-cell"
+                                            {% if product.id in checklist_products %}
+                                                style="background-color: rgb(8, 39, 67); color: white;"
+                                            {% endif %}>
+                                            <i
+                                                class="fa-solid fa-comment-dots"
+                                                tabindex="0"
+                                                data-bs-toggle="popover"
+                                                data-bs-trigger="hover focus"
+                                                data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                                >
+                                            </i>
+                                        </td>
                                         {% endif %}
                                         {% endwith %}
-                                    </td>
-                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                    {% if checklist_item and checklist_item.commentaire %}
-                                    <td class="small-cell"
-                                        {% if product.id in checklist_products %}
-                                            style="background-color: rgb(8, 39, 67); color: white;"
-                                        {% endif %}>
-                                        <i
-                                            class="fa-solid fa-comment-dots"
-                                            tabindex="0"
-                                            data-bs-toggle="popover"
-                                            data-bs-trigger="hover focus"
-                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
-                                            >
-                                        </i>
-                                    </td>
+                                    </tr>
                                     {% endif %}
-                                    {% endwith %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-6 p-0">
+                            <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
+                                <h5 class="m-0">BIERES</h5>
+                            </div>
+                            <table class="table table-bordered table-hover m-0">
+                                <tbody>
+                                    {% for product in products %}
+                                    {% if product.is_bieres %}
+                                    <tr>
+                                        <td class="small-cell" {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {{ product.name }}
+                                        </td>
+                                        <td class="small-cell" {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                            {% if checklist_item %}
+                                                {{ checklist_item.quantity }}
+                                            {% else %}
+                                                0
+                                            {% endif %}
+                                            {% endwith %}
+                                        </td>
+                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                        {% if checklist_item and checklist_item.commentaire %}
+                                        <td class="small-cell"
+                                            {% if product.id in checklist_products %}
+                                                style="background-color: rgb(8, 39, 67); color: white;"
+                                            {% endif %}>
+                                            <i
+                                                class="fa-solid fa-comment-dots"
+                                                tabindex="0"
+                                                data-bs-toggle="popover"
+                                                data-bs-trigger="hover focus"
+                                                data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                                >
+                                            </i>
+                                        </td>
+                                        {% endif %}
+                                        {% endwith %}
+    
+                                    </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-6 p-0">
+                            <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
+                                <h5 class="m-0">SANS ALCOOL</h5>
+                            </div>
+                            <table class="table table-bordered table-hover m-0">
+                                <tbody>
+                                    {% for product in products %}
+                                    {% if product.is_sansalcool %}
+                                    <tr>
+                                        <td class="small-cell" {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {{ product.name }}
+                                        </td>
+                                        <td class="small-cell" {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                            {% if checklist_item %}
+                                                {{ checklist_item.quantity }}
+                                            {% else %}
+                                                0
+                                            {% endif %}
+                                            {% endwith %}
+                                        </td>
+                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                        {% if checklist_item and checklist_item.commentaire %}
+                                        <td class="small-cell"
+                                            {% if product.id in checklist_products %}
+                                                style="background-color: rgb(8, 39, 67); color: white;"
+                                            {% endif %}>
+                                            <i
+                                                class="fa-solid fa-comment-dots"
+                                                tabindex="0"
+                                                data-bs-toggle="popover"
+                                                data-bs-trigger="hover focus"
+                                                data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                                >
+                                            </i>
+                                        </td>
+                                        {% endif %}
+                                        {% endwith %}
+                                    </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-6 p-0">
+                            <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
+                                <h5 class="m-0">VINS</h5>
+                            </div>
+                            <table class="table table-bordered table-hover m-0">
+                                <tbody>
+                                    {% for product in products %}
+                                    {% if product.is_vins %}
+                                    <tr>
+                                        <td class="small-cell" {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {{ product.name }}
+                                        </td>
+                                        <td class="small-cell" {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                            {% if checklist_item %}
+                                                {{ checklist_item.quantity }}
+                                            {% else %}
+                                                0
+                                            {% endif %}
+                                            {% endwith %}
+                                        </td>
+                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                        {% if checklist_item and checklist_item.commentaire %}
+                                        <td class="small-cell"
+                                            {% if product.id in checklist_products %}
+                                                style="background-color: rgb(8, 39, 67); color: white;"
+                                            {% endif %}>
+                                            <i
+                                                class="fa-solid fa-comment-dots"
+                                                tabindex="0"
+                                                data-bs-toggle="popover"
+                                                data-bs-trigger="hover focus"
+                                                data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                                >
+                                            </i>
+                                        </td>
+                                        {% endif %}
+                                        {% endwith %}
+                                    </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                </div>
+                </div>
+    
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="button" class="btn btn-primary" onclick="generatePDFb()">
+                        <i class="fa-solid fa-file-pdf"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="verifierModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl-custom"> <!-- Extra-large modal -->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="productModalLabel">Vérification Checklist</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body-verif">
+                    <div class="container d-flex flex-wrap g-0"> <!-- Flexbox container with no gutter -->
+                        <!-- ÉQUIPEMENT DE BASE -->
+                        <div class="col-md-6 p-0">
+                            <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
+                                <h5 class="m-0">ÉQUIPEMENT DE BASE</h5>
+                            </div>
+                            <table class="table table-bordered table-hover m-0">
+                                <tbody>
+                                    {% for product in products %}
+                                    {% if product.is_base %}
+                                    <tr>
+                                        <td class="small-cell" {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {{ product.name }}
+                                        </td>
+                                        <td class="small-cell" {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                            {% if checklist_item %}
+                                                {{ checklist_item.quantity }}
+                                            {% else %}
+                                                0
+                                            {% endif %}
+                                            {% endwith %}
+                                        </td>
+                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                        {% if checklist_item and checklist_item.commentaire %}
+                                        <td class="small-cell"
+                                            {% if product.id in checklist_products %}
+                                                style="background-color: rgb(8, 39, 67); color: white;"
+                                            {% endif %}>
+                                            <i
+                                                class="fa-solid fa-comment-dots"
+                                                tabindex="0"
+                                                data-bs-toggle="popover"
+                                                data-bs-trigger="hover focus"
+                                                data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                                >
+                                            </i>
+                                        </td>
+                                        {% endif %}
+                                        {% endwith %}
+                                    </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+    
+                        <!-- TABLE ET LINGE DE TABLE -->
+                        <div class="col-md-6 p-0">
+                            <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
+                                <h5 class="m-0">TABLE ET LINGE DE TABLE</h5>
+                            </div>
+                            <table class="table table-bordered table-hover m-0">
+                                <tbody>
+                                    {% for product in products %}
+                                    {% if product.is_table %}
+                                    <tr>
+                                        <td class="small-cell" {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {{ product.name }}
+                                        </td>
+                                        <td class="small-cell" {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                            {% if checklist_item %}
+                                                {{ checklist_item.quantity }}
+                                            {% else %}
+                                                0
+                                            {% endif %}
+                                            {% endwith %}
+                                        </td>
+                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                        {% if checklist_item and checklist_item.commentaire %}
+                                        <td class="small-cell"
+                                            {% if product.id in checklist_products %}
+                                                style="background-color: rgb(8, 39, 67); color: white;"
+                                            {% endif %}>
+                                            <i
+                                                class="fa-solid fa-comment-dots"
+                                                tabindex="0"
+                                                data-bs-toggle="popover"
+                                                data-bs-trigger="hover focus"
+                                                data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                                >
+                                            </i>
+                                        </td>
+                                        {% endif %}
+                                        {% endwith %}
+                                    </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+    
+                        <!-- JETABLE -->
+                        <div class="col-md-6 p-0">
+                            <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
+                                <h5 class="m-0">JETABLE</h5>
+                            </div>
+                            <table class="table table-bordered table-hover m-0">
+                                <tbody>
+                                    {% for product in products %}
+                                    {% if product.is_jetable %}
+                                    <tr>
+                                        <td class="small-cell" {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {{ product.name }}
+                                        </td>
+                                        <td class="small-cell" {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                            {% if checklist_item %}
+                                                {{ checklist_item.quantity }}
+                                            {% else %}
+                                                0
+                                            {% endif %}
+                                            {% endwith %}
+                                        </td>
+                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                        {% if checklist_item and checklist_item.commentaire %}
+                                        <td class="small-cell"
+                                            {% if product.id in checklist_products %}
+                                                style="background-color: rgb(8, 39, 67); color: white;"
+                                            {% endif %}>
+                                            <i
+                                                class="fa-solid fa-comment-dots"
+                                                tabindex="0"
+                                                data-bs-toggle="popover"
+                                                data-bs-trigger="hover focus"
+                                                data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                                >
+                                            </i>
+                                        </td>
+                                        {% endif %}
+                                        {% endwith %}
+                                    </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+    
+                        <!-- VERRERIE -->
+                        <div class="col-md-6 p-0">
+                            <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
+                                <h5 class="m-0">VERRERIE</h5>
+                            </div>
+                            <table class="table table-bordered table-hover m-0">
+                                <tbody>
+                                    {% for product in products %}
+                                    {% if product.is_verre %}
+                                    <tr>
+                                        <td class="small-cell" {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {{ product.name }}
+                                        </td>
+                                        <td class="small-cell" {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                            {% if checklist_item %}
+                                                {{ checklist_item.quantity }}
+                                            {% else %}
+                                                0
+                                            {% endif %}
+                                            {% endwith %}
+                                        </td>
+                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                        {% if checklist_item and checklist_item.commentaire %}
+                                        <td class="small-cell"
+                                            {% if product.id in checklist_products %}
+                                                style="background-color: rgb(8, 39, 67); color: white;"
+                                            {% endif %}>
+                                            <i
+                                                class="fa-solid fa-comment-dots"
+                                                tabindex="0"
+                                                data-bs-toggle="popover"
+                                                data-bs-trigger="hover focus"
+                                                data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                                >
+                                            </i>
+                                        </td>
+                                        {% endif %}
+                                        {% endwith %}
+                                    </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-6 p-0">
+                            <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
+                            <h5 class="m-0">ACCESSOIRES DE DÉCOR</h5>
+                        </div>
+                            <table class="table table-bordered table-hover m-0">
+    
+                                <tbody>
+                                    {% for product in products %}
+                                    {% if product.is_decor %}
+                                    <tr>
+                                        <td class="small-cell" {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {{ product.name }}
+                                        </td>
+                                        <td class="small-cell" {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                            {% if checklist_item %}
+                                                {{ checklist_item.quantity }}
+                                            {% else %}
+                                                0
+                                            {% endif %}
+                                            {% endwith %}
+                                        </td>
+                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                        {% if checklist_item and checklist_item.commentaire %}
+                                        <td class="small-cell"
+                                            {% if product.id in checklist_products %}
+                                                style="background-color: rgb(8, 39, 67); color: white;"
+                                            {% endif %}>
+                                            <i
+                                                class="fa-solid fa-comment-dots"
+                                                tabindex="0"
+                                                data-bs-toggle="popover"
+                                                data-bs-trigger="hover focus"
+                                                data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                                >
+                                            </i>
+                                        </td>
+                                        {% endif %}
+                                        {% endwith %}
                                     </tr>
                                         {% endif %}
                                     {% endfor %}
@@ -982,277 +871,466 @@
                         </div>
                         <div class="col-md-6 p-0">
                             <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
-                            <h5 class="m-0">ITEMS DIVERS</h5>
+                            <h5 class="m-0">PORCELAINE ET COUTELLERIE</h5>
                         </div>
-                            <table class="table table-bordered table-hover">
-
+                            <table class="table table-bordered table-hover m-0">
+    
                                 <tbody>
                                     {% for product in products %}
-                                    {% if product.is_divers %}
+                                    {% if product.is_porcelaine %}
                                     <tr>
                                         <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
-                                        {{ product.name }}
-                                    </td>
-                                    <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {{ product.name }}
+                                        </td>
+                                        <td class="small-cell" {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                            {% if checklist_item %}
+                                                {{ checklist_item.quantity }}
+                                            {% else %}
+                                                0
+                                            {% endif %}
+                                            {% endwith %}
+                                        </td>
                                         {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                        {% if checklist_item %}
-                                            {{ checklist_item.quantity }}
-                                        {% else %}
-                                            0
+                                        {% if checklist_item and checklist_item.commentaire %}
+                                        <td class="small-cell"
+                                            {% if product.id in checklist_products %}
+                                                style="background-color: rgb(8, 39, 67); color: white;"
+                                            {% endif %}>
+                                            <i
+                                                class="fa-solid fa-comment-dots"
+                                                tabindex="0"
+                                                data-bs-toggle="popover"
+                                                data-bs-trigger="hover focus"
+                                                data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                                >
+                                            </i>
+                                        </td>
                                         {% endif %}
                                         {% endwith %}
-                                    </td>
-                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                    {% if checklist_item and checklist_item.commentaire %}
-                                    <td class="small-cell"
-                                        {% if product.id in checklist_products %}
-                                            style="background-color: rgb(8, 39, 67); color: white;"
-                                        {% endif %}>
-                                        <i
-                                            class="fa-solid fa-comment-dots"
-                                            tabindex="0"
-                                            data-bs-toggle="popover"
-                                            data-bs-trigger="hover focus"
-                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
-                                            >
-                                        </i>
-                                    </td>
-                                    {% endif %}
-                                    {% endwith %}
+                                    </tr>
+                                        {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- ÉQUIPEMENT DE BAR -->
+                        <div class="col-md-6 p-0">
+                            <div style="background-color: #B3A1C7; text-align: center;margin: 0; padding: 0;">
+                            <h5 class="m-0">ÉQUIPEMENT DE BAR</h5>
+                        </div>
+                            <table class="table table-bordered table-hover">
+    
+                                <tbody>
+                                    {% for product in products %}
+                                    {% if product.is_bar %}
+                                    <tr>
+                                        <td class="small-cell" {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {{ product.name }}
+                                        </td>
+                                        <td class="small-cell" {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                            {% if checklist_item %}
+                                                {{ checklist_item.quantity }}
+                                            {% else %}
+                                                0
+                                            {% endif %}
+                                            {% endwith %}
+                                        </td>
+                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                        {% if checklist_item and checklist_item.commentaire %}
+                                        <td class="small-cell"
+                                            {% if product.id in checklist_products %}
+                                                style="background-color: rgb(8, 39, 67); color: white;"
+                                            {% endif %}>
+                                            <i
+                                                class="fa-solid fa-comment-dots"
+                                                tabindex="0"
+                                                data-bs-toggle="popover"
+                                                data-bs-trigger="hover focus"
+                                                data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                                >
+                                            </i>
+                                        </td>
+                                        {% endif %}
+                                        {% endwith %}
                                     </tr>
                                     {% endif %}
                                     {% endfor %}
                                 </tbody>
                             </table>
                         </div>
+    
+                        <!-- ÉQUIPEMENT POUR MONTAGE CANAPÉS -->
+                        <div class="col-md-6 p-0">
+                            <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
+                            <h5 class="m-0">ÉQUIPEMENT POUR MONTAGE CANAPÉS</h5>
+                        </div>
+                            <table class="table table-bordered table-hover">
+    
+                                <tbody>
+                                    {% for product in products %}
+                                    {% if product.is_canape %}
+                                    <tr>
+                                        <td class="small-cell" {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {{ product.name }}
+                                        </td>
+                                        <td class="small-cell" {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                            {% if checklist_item %}
+                                                {{ checklist_item.quantity }}
+                                            {% else %}
+                                                0
+                                            {% endif %}
+                                            {% endwith %}
+                                        </td>
+                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                        {% if checklist_item and checklist_item.commentaire %}
+                                        <td class="small-cell"
+                                            {% if product.id in checklist_products %}
+                                                style="background-color: rgb(8, 39, 67); color: white;"
+                                            {% endif %}>
+                                            <i
+                                                class="fa-solid fa-comment-dots"
+                                                tabindex="0"
+                                                data-bs-toggle="popover"
+                                                data-bs-trigger="hover focus"
+                                                data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                                >
+                                            </i>
+                                        </td>
+                                        {% endif %}
+                                        {% endwith %}
+                                    </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-6 p-0">
+                            <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
+                            <h5 class="m-0">USTENSILES DE SERVICE</h5>
+                            </div>
+                            <table class="table table-bordered table-hover">
+    
+                                <tbody>
+                                    {% for product in products %}
+                                    {% if product.is_service %}
+                                    <tr>
+                                        <td class="small-cell" {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {{ product.name }}
+                                        </td>
+                                        <td class="small-cell" {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                            {% if checklist_item %}
+                                                {{ checklist_item.quantity }}
+                                            {% else %}
+                                                0
+                                            {% endif %}
+                                            {% endwith %}
+                                        </td>
+                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                        {% if checklist_item and checklist_item.commentaire %}
+                                        <td class="small-cell"
+                                            {% if product.id in checklist_products %}
+                                                style="background-color: rgb(8, 39, 67); color: white;"
+                                            {% endif %}>
+                                            <i
+                                                class="fa-solid fa-comment-dots"
+                                                tabindex="0"
+                                                data-bs-toggle="popover"
+                                                data-bs-trigger="hover focus"
+                                                data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                                >
+                                            </i>
+                                        </td>
+                                        {% endif %}
+                                        {% endwith %}
+                                    </tr>
+                                        {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+    
+                        <div class="col-md-6 p-0">
+                            <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
+                            <h5 class="m-0">ÉQUIPEMENT DE CUISSON</h5>
+                        </div>
+                            <table class="table table-bordered table-hover">
+    
+                                <tbody>
+                                    {% for product in products %}
+                                    {% if product.is_cuisson %}
+                                    <tr>
+                                        <td class="small-cell" {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {{ product.name }}
+                                        </td>
+                                        <td class="small-cell" {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                            {% if checklist_item %}
+                                                {{ checklist_item.quantity }}
+                                            {% else %}
+                                                0
+                                            {% endif %}
+                                            {% endwith %}
+                                        </td>
+                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                        {% if checklist_item and checklist_item.commentaire %}
+                                        <td class="small-cell"
+                                            {% if product.id in checklist_products %}
+                                                style="background-color: rgb(8, 39, 67); color: white;"
+                                            {% endif %}>
+                                            <i
+                                                class="fa-solid fa-comment-dots"
+                                                tabindex="0"
+                                                data-bs-toggle="popover"
+                                                data-bs-trigger="hover focus"
+                                                data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                                >
+                                            </i>
+                                        </td>
+                                        {% endif %}
+                                        {% endwith %}
+                                    </tr>
+                                        {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-6 p-0">
+                            <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
+                                <h5 class="m-0">ÉQUIPEMENT POUR SERVICE A CAFE</h5>
+                            </div>
+                                <table class="table table-bordered table-hover">
+    
+                                    <tbody>
+                                        {% for product in products %}
+                                        {% if product.is_cafe %}
+                                        <tr>
+                                            <td class="small-cell" {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {{ product.name }}
+                                        </td>
+                                        <td class="small-cell" {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                            {% if checklist_item %}
+                                                {{ checklist_item.quantity }}
+                                            {% else %}
+                                                0
+                                            {% endif %}
+                                            {% endwith %}
+                                        </td>
+                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                        {% if checklist_item and checklist_item.commentaire %}
+                                        <td class="small-cell"
+                                            {% if product.id in checklist_products %}
+                                                style="background-color: rgb(8, 39, 67); color: white;"
+                                            {% endif %}>
+                                            <i
+                                                class="fa-solid fa-comment-dots"
+                                                tabindex="0"
+                                                data-bs-toggle="popover"
+                                                data-bs-trigger="hover focus"
+                                                data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                                >
+                                            </i>
+                                        </td>
+                                        {% endif %}
+                                        {% endwith %}
+                                        </tr>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-md-6 p-0">
+                                <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
+                                <h5 class="m-0">ITEMS DIVERS</h5>
+                            </div>
+                                <table class="table table-bordered table-hover">
+    
+                                    <tbody>
+                                        {% for product in products %}
+                                        {% if product.is_divers %}
+                                        <tr>
+                                            <td class="small-cell" {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {{ product.name }}
+                                        </td>
+                                        <td class="small-cell" {% if product.id in checklist_products %}
+                                            style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
+                                            {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                            {% if checklist_item %}
+                                                {{ checklist_item.quantity }}
+                                            {% else %}
+                                                0
+                                            {% endif %}
+                                            {% endwith %}
+                                        </td>
+                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
+                                        {% if checklist_item and checklist_item.commentaire %}
+                                        <td class="small-cell"
+                                            {% if product.id in checklist_products %}
+                                                style="background-color: rgb(8, 39, 67); color: white;"
+                                            {% endif %}>
+                                            <i
+                                                class="fa-solid fa-comment-dots"
+                                                tabindex="0"
+                                                data-bs-toggle="popover"
+                                                data-bs-trigger="hover focus"
+                                                data-bs-content="{{ checklist_item.commentaire |upper}}"
+                                                >
+                                            </i>
+                                        </td>
+                                        {% endif %}
+                                        {% endwith %}
+                                        </tr>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+    
                     </div>
-
+    
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+    
+                    <button type="button" class="btn btn-primary" onclick="generatePDF()">
+                        <i class="fa-solid fa-file-pdf"></i>
+                    </button>
                 </div>
-
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-
-                <button type="button" class="btn btn-primary" onclick="generatePDF()">
-                    <i class="fa-solid fa-file-pdf"></i>
-                </button>
             </div>
         </div>
     </div>
-</div>
+    
+  
 
-<div class="modal fade" id="verifierbModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl-custom"> <!-- Extra-large modal -->
+    
+      {% endif %}
+      
+      {% if is_chefcuisine %}
+      <div class="container mt-4">
+        <a href="{% url 'creerchecklist' %}" class="btn btn-primary mt-3">Retour liste checklists</a>
+        <br><br>
+        <h2 class="text-center">Produits de la Checklist - {{ checklist.name }}</h2>
+        <h3 class="text-center">{{ checklist.date }}</h3>
+        <table class="table table-striped mt-3">
+          <thead class="thead-dark">
+            <tr>
+              <th>Produit</th>
+              <th>Quantité</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in checklist_items %}
+            <tr>
+              <td>{{ item.product.name }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>
+                <span class="badge
+                  {% if item.status in 'valide,complete' %}badge-success
+                  {% elif item.status in 'refuse,denied,deniedprevious' %}badge-danger
+                  {% elif item.status in 'en_cours,pending' %}badge-warning
+                  {% else %}badge-secondary{% endif %}">
+                  {% if item.status in 'valide,complete' %}
+                    Validé
+                  {% elif item.status in 'refuse,denied,deniedprevious' %}
+                    Refusé
+                  {% elif item.status in 'en_cours,pending' %}
+                    En cours
+                  {% elif item.status in 'remettrestock, remettrestockchange' %}
+                    Annulé
+                  {% else %}
+                    {{ item.status }}
+                  {% endif %}
+                </span>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="3" class="text-center">Aucun item trouvé</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+
+      <!-- Document Modal -->
+<div class="modal fade" id="documentModal" tabindex="-1" aria-labelledby="documentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="productModalLabel">Vérification Breuvages</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title" id="documentModalLabel">Ajouter des documents</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-            <div class="modal-body-verif">
-                <div class="container d-flex flex-wrap g-0"> <!-- Flexbox container with no gutter -->
-
-                    <div class="col-md-6 p-0">
-                        <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
-                            <h5 class="m-0">ALCOOL FORT</h5>
-                        </div>
-                        <table class="table table-bordered table-hover m-0">
-                            <tbody>
-                                {% for product in products %}
-                                {% if product.is_alcool %}
-                                <tr>
-                                    <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
-                                        {{ product.name }}
-                                    </td>
-                                    <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
-                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                        {% if checklist_item %}
-                                            {{ checklist_item.quantity }}
-                                        {% else %}
-                                            0
-                                        {% endif %}
-                                        {% endwith %}
-                                    </td>
-                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                    {% if checklist_item and checklist_item.commentaire %}
-                                    <td class="small-cell"
-                                        {% if product.id in checklist_products %}
-                                            style="background-color: rgb(8, 39, 67); color: white;"
-                                        {% endif %}>
-                                        <i
-                                            class="fa-solid fa-comment-dots"
-                                            tabindex="0"
-                                            data-bs-toggle="popover"
-                                            data-bs-trigger="hover focus"
-                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
-                                            >
-                                        </i>
-                                    </td>
-                                    {% endif %}
-                                    {% endwith %}
-                                </tr>
-                                {% endif %}
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="col-md-6 p-0">
-                        <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
-                            <h5 class="m-0">BIERES</h5>
-                        </div>
-                        <table class="table table-bordered table-hover m-0">
-                            <tbody>
-                                {% for product in products %}
-                                {% if product.is_bieres %}
-                                <tr>
-                                    <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
-                                        {{ product.name }}
-                                    </td>
-                                    <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
-                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                        {% if checklist_item %}
-                                            {{ checklist_item.quantity }}
-                                        {% else %}
-                                            0
-                                        {% endif %}
-                                        {% endwith %}
-                                    </td>
-                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                    {% if checklist_item and checklist_item.commentaire %}
-                                    <td class="small-cell"
-                                        {% if product.id in checklist_products %}
-                                            style="background-color: rgb(8, 39, 67); color: white;"
-                                        {% endif %}>
-                                        <i
-                                            class="fa-solid fa-comment-dots"
-                                            tabindex="0"
-                                            data-bs-toggle="popover"
-                                            data-bs-trigger="hover focus"
-                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
-                                            >
-                                        </i>
-                                    </td>
-                                    {% endif %}
-                                    {% endwith %}
-
-                                </tr>
-                                {% endif %}
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="col-md-6 p-0">
-                        <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
-                            <h5 class="m-0">SANS ALCOOL</h5>
-                        </div>
-                        <table class="table table-bordered table-hover m-0">
-                            <tbody>
-                                {% for product in products %}
-                                {% if product.is_sansalcool %}
-                                <tr>
-                                    <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
-                                        {{ product.name }}
-                                    </td>
-                                    <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
-                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                        {% if checklist_item %}
-                                            {{ checklist_item.quantity }}
-                                        {% else %}
-                                            0
-                                        {% endif %}
-                                        {% endwith %}
-                                    </td>
-                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                    {% if checklist_item and checklist_item.commentaire %}
-                                    <td class="small-cell"
-                                        {% if product.id in checklist_products %}
-                                            style="background-color: rgb(8, 39, 67); color: white;"
-                                        {% endif %}>
-                                        <i
-                                            class="fa-solid fa-comment-dots"
-                                            tabindex="0"
-                                            data-bs-toggle="popover"
-                                            data-bs-trigger="hover focus"
-                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
-                                            >
-                                        </i>
-                                    </td>
-                                    {% endif %}
-                                    {% endwith %}
-                                </tr>
-                                {% endif %}
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="col-md-6 p-0">
-                        <div style="background-color: #B3A1C7; text-align: center; margin: 0; padding: 0;">
-                            <h5 class="m-0">VINS</h5>
-                        </div>
-                        <table class="table table-bordered table-hover m-0">
-                            <tbody>
-                                {% for product in products %}
-                                {% if product.is_vins %}
-                                <tr>
-                                    <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
-                                        {{ product.name }}
-                                    </td>
-                                    <td class="small-cell" {% if product.id in checklist_products %}
-                                        style="background-color: rgb(8, 39, 67); color: white;" {% endif %}>
-                                        {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                        {% if checklist_item %}
-                                            {{ checklist_item.quantity }}
-                                        {% else %}
-                                            0
-                                        {% endif %}
-                                        {% endwith %}
-                                    </td>
-                                    {% with checklist_item=checklist_items|get_itemss:product.id %}
-                                    {% if checklist_item and checklist_item.commentaire %}
-                                    <td class="small-cell"
-                                        {% if product.id in checklist_products %}
-                                            style="background-color: rgb(8, 39, 67); color: white;"
-                                        {% endif %}>
-                                        <i
-                                            class="fa-solid fa-comment-dots"
-                                            tabindex="0"
-                                            data-bs-toggle="popover"
-                                            data-bs-trigger="hover focus"
-                                            data-bs-content="{{ checklist_item.commentaire |upper}}"
-                                            >
-                                        </i>
-                                    </td>
-                                    {% endif %}
-                                    {% endwith %}
-                                </tr>
-                                {% endif %}
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+            <div class="modal-body">
+                <form id="documentForm" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="file" name="document" class="form-control mb-2">
+                    <button type="submit" class="btn btn-success">Ajouter Document</button>
+                </form>
+                <hr>
+                <ul id="documentList">
+                    {% for document in checklist_documents %}
+                    <li>
+                        <a href="{{ document.document.url }}" target="_blank"><i class="fa-solid fa-eye fa-2xl" style="color: #74C0FC;"></i></a>
+                        <button class="delete-doc" data-id="{{ document.id }}" style="margin-left: 20px; margin-bottom: 30px;">
+                            <i class="fa-solid fa-trash fa-2xl" style="color: #f51919;"></i>
+                        </button>
+                    </li>
+                   
+                    {% endfor %}
+                </ul>
             </div>
-            </div>
-
+            
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                <button type="button" class="btn btn-primary" onclick="generatePDFb()">
-                    <i class="fa-solid fa-file-pdf"></i>
-                </button>
             </div>
         </div>
     </div>
 </div>
 
+  <!-- Modal for modifying checklist -->
+  <div class="modal fade modal-xlg" id="exampleModals" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Modifier Checklist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="" method="POST">
+                    {% csrf_token %}
+                    {{ formbis.as_p }}
+                    <input type="submit" value="Valider" class="btn btn-primary" name="submit_checklist">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-
-  <!-- Modal -->
+  <!-- Modal for mes produits-->
   <div class="modal fade modal-xlg" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -1295,95 +1373,6 @@
     </div>
 </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  <!-- Modal for modifying checklist -->
-<div class="modal fade modal-xlg" id="exampleModals" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Modifier Checklist</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form action="" method="POST">
-                    {% csrf_token %}
-                    {{ formbis.as_p }}
-                    <input type="submit" value="Valider" class="btn btn-primary" name="submit_checklist">
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Document Modal -->
-<div class="modal fade" id="documentModal" tabindex="-1" aria-labelledby="documentModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="documentModalLabel">Ajouter des documents</h5>
-                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="documentForm" method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <input type="file" name="document" class="form-control mb-2">
-                    <button type="submit" class="btn btn-success">Ajouter Document</button>
-                </form>
-                <hr>
-                <ul id="documentList">
-                    {% for document in checklist_documents %}
-                    <li>
-                        <a href="{{ document.document.url }}" target="_blank"><i class="fa-solid fa-eye fa-2xl" style="color: #74C0FC;"></i></a>
-                        <button class="delete-doc" data-id="{{ document.id }}" style="margin-left: 20px; margin-bottom: 30px;">
-                            <i class="fa-solid fa-trash fa-2xl" style="color: #f51919;"></i>
-                        </button>
-                    </li>
-                   
-                    {% endfor %}
-                </ul>
-            </div>
-            
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <!-- Modal for commentaire ventes -->
 <div class="modal fade" id="exampleModalcommentaire" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -1405,90 +1394,38 @@
 </div>
 
 
-
-
-  </div>
-
-{% endif %}
-{% if is_chefcuisine %}
-<div class="container mt-4">
-    <a href="{% url 'creerchecklist'%}" class="btn btn-primary mt-3">Retour liste checklists</a>
-    <br>
-    <br>
-    <h2 class="text-center">Produits de la Checklist - {{ checklist.name }}</h2>
-    <h3 class="text-center">{{ checklist.date }}</h3>
-    <table class="table table-striped mt-3">
-        <thead class="thead-dark">
-            <tr>
-                <th>Produit</th>
-                <th>Quantité</th>
-                <th>Statut</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in checklist_items %}
-            <tr>
-                <td>{{ item.product.name }}</td>
-                <td>{{ item.quantity }}</td>
-                <td>
-                    <span class="badge
-    {% if item.status in 'valide,complete' %}badge-success
-    {% elif item.status in 'refuse,denied,deniedprevious' %}badge-danger
-    {% elif item.status in 'en_cours,pending' %}badge-warning
-    {% else %}badge-secondary{% endif %}">
-    {% if item.status in 'valide,complete' %}
-        Validé
-    {% elif item.status in 'refuse,denied,deniedprevious' %}
-        Refusé
-    {% elif item.status in 'en_cours,pending' %}
-        En cours
-    {% elif item.status in 'remettrestock, remettrestockchange' %}
-        Annulé
-    {% else %}
-        {{ item.status }}
-    {% endif %}
-</span>
-
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="3" class="text-center">Aucun item trouvé</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-</div>
-
-{% endif %}
-<script src="{% static 'listings/js/checklist_detail.js' %}"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<script type="text/javascript">
-    var uploadDocumentUrl = "{% url 'upload_document' checklist.id %}";
-    var searchProductsBaseUrl = "{% url 'search_productsbase' checklist.id %}";
-    var searchProductsJetableUrl = "{% url 'search_productsjetable' checklist.id %}";
-    var searchProductsDecorUrl = "{% url 'search_productsdecor' checklist.id %}";
-    var searchProductsBarUrl = "{% url 'search_productsbar' checklist.id %}";
-    var searchProductsCafeUrl = "{% url 'search_productscafe' checklist.id %}";
-    var searchProductsDiversUrl = "{% url 'search_productsdivers' checklist.id %}";
-    var searchProductsTableUrl = "{% url 'search_productstable' checklist.id %}";
-    var searchProductsVerreUrl = "{% url 'search_productsverre' checklist.id %}";
-    var searchProductsPorcelaineUrl = "{% url 'search_productsporcelaine' checklist.id %}";
-    var searchProductsCanapeUrl = "{% url 'search_productscanape' checklist.id %}";
-    var searchProductsCuissonUrl = "{% url 'search_productscuisson' checklist.id %}";
-    var searchProductsServiceUrl = "{% url 'search_productsservice' checklist.id %}";
-    var searchProductsAlcoolFortUrl = "{% url 'search_productsalcoolfort' checklist.id %}";
-    var searchProductsBieresUrl = "{% url 'search_productsbieres' checklist.id %}";
-    var searchProductsVinsUrl = "{% url 'search_productsvins' checklist.id %}";
-    var searchProductsSansAlcoolUrl = "{% url 'search_productssansalcool' checklist.id %}";
-    var searchProductsCFCDNUrl = "{% url 'search_productscfcdn' checklist.id %}";
+    
+    <script src="{% static 'listings/js/checklist_detail.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <script type="text/javascript">
+      var uploadDocumentUrl = "{% url 'upload_document' checklist.id %}";
+      var searchProductsBaseUrl = "{% url 'search_productsbase' checklist.id %}";
+      var searchProductsJetableUrl = "{% url 'search_productsjetable' checklist.id %}";
+      var searchProductsDecorUrl = "{% url 'search_productsdecor' checklist.id %  }";
+  var searchProductsBarUrl = "{% url 'search_productsbar' checklist.id %}";
+  var searchProductsCafeUrl = "{% url 'search_productscafe' checklist.id %}";
+  var searchProductsDiversUrl = "{% url 'search_productsdivers' checklist.id %}";
+  var searchProductsTableUrl = "{% url 'search_productstable' checklist.id %}";
+  var searchProductsVerreUrl = "{% url 'search_productsverre' checklist.id %}";
+  var searchProductsPorcelaineUrl = "{% url 'search_productsporcelaine' checklist.id %}";
+  var searchProductsCanapeUrl = "{% url 'search_productscanape' checklist.id %}";
+  var searchProductsCuissonUrl = "{% url 'search_productscuisson' checklist.id %}";
+  var searchProductsServiceUrl = "{% url 'search_productsservice' checklist.id %}";
+  var searchProductsAlcoolFortUrl = "{% url 'search_productsalcoolfort' checklist.id %}";
+  var searchProductsBieresUrl = "{% url 'search_productsbieres' checklist.id %}";
+  var searchProductsVinsUrl = "{% url 'search_productsvins' checklist.id %}";
+  var searchProductsSansAlcoolUrl = "{% url 'search_productssansalcool' checklist.id %}";
+  var searchProductsCFCDNUrl = "{% url 'search_productscfcdn' checklist.id %}";
 </script>
 
 {% endblock %}
+
+    
+    
+  
 
