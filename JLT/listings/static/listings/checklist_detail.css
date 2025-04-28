@@ -380,3 +380,17 @@ textarea.comment-textarea {
     resize: vertical; /* Allow vertical resizing for spaciousness */
 }
 
+@media print {
+    body * {
+      display: none !important;
+    }
+    #rapportbreuvage-section,
+    #rapportbreuvage-section * {
+      display: block !important;
+    }
+    #rapportbreuvage-section {
+      margin: 0 auto;
+      width: 100%;
+      max-width: 800px;
+    }
+  }

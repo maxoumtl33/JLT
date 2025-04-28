@@ -273,6 +273,23 @@ class ChecklistForm(forms.ModelForm):
     heure_livraison = forms.TimeField(label='Heure de livraison', widget=forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}))
     conseillere = forms.ModelChoiceField(queryset=Conseiller.objects.all())   
 
+class ChecklistInfosForm(forms.ModelForm):
+    class Meta:
+        model = Checklist
+        fields = ['type_service', 'occasion', 'depart_traiteur', 'heure_arrive', 'heure_convives', 'debut_cocktail', 'debut_repas', 'fin_evenement', 'commodite', 'fourni_client', 'fourni_salle']
+
+    type_service = forms.CharField(label='Type de service', max_length=100, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'Coktail, Banquet, bbq, ...'}),required=False)
+    occasion = forms.CharField(label='Occasion', max_length=100, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'Mariage, anniversaire, ...'}),required=False)
+    depart_traiteur = forms.TimeField(label='Départ du traiteur', widget=forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),required=False)
+    heure_arrive = forms.TimeField(label='Arrivée sur place', widget=forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),required=False)
+    heure_convives = forms.TimeField(label='Arrivée des convives', widget=forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),required=False)
+    debut_cocktail = forms.TimeField(label='Début du coktail', widget=forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),required=False)
+    debut_repas = forms.TimeField(label='Début du repas', widget=forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),required=False)
+    fin_evenement = forms.TimeField(label="Fin de l'événement", widget=forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),required=False)
+    commodite = forms.CharField(label='Commodités',  max_length=100, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'Four, frigo,...'}),required=False)
+    fourni_client = forms.CharField(label='Matériel fourni par client', max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}),required=False)
+    fourni_salle = forms.CharField(label='Matériel dans la salle', max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}),required=False)
+
 
 class SearchFormInv(forms.Form):
     query = forms.CharField(label='Objet à chercher', max_length=100)
@@ -420,6 +437,14 @@ class CommentaireForm(forms.ModelForm):
         fields = ['commentairevente']
         widgets = {
             'commentairevente': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Écrire un commentaire...'}),
+        }
+
+class CommentairemdForm(forms.ModelForm):
+    class Meta:
+        model = Checklist
+        fields = ['commentairemd']
+        widgets = {
+            'Commentaire': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Écrire un commentaire...'}),
         }
 
 

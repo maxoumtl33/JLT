@@ -1128,36 +1128,46 @@ def checklist_detail(request, checklist_id):
 
     # Checklist form instance
     formbis = ChecklistForm(request.POST or None, instance=checklist, prefix='checklist_form')
-    commentaire_form = CommentaireForm(request.POST or None, instance=checklist, prefix='commentaire_form')
+    commentairemd_form = CommentairemdForm(request.POST or None, instance=checklist, prefix='commentaire_form')
     product_form = ProductsForm
+    forminfo = ChecklistInfosForm(request.POST or None, instance=checklist, prefix='checklistinfos_form')
 
     if request.method == 'POST':
-        if 'product-form' in request.POST:
+        # Handle checklistinfos_form submission
+        if 'submit_checklistinfos' in request.POST:
+            forminfo = ChecklistInfosForm(request.POST, instance=checklist, prefix='checklistinfos_form')
+            if forminfo.is_valid():
+                forminfo.save()
+                messages.success(request, 'Les informations ont été ajoutées avec succès.')
+                return redirect('checklist-detail', checklist_id=checklist_id)
+        
+        # Handle commentaire_form submission separately
+        elif 'commentaire_form' in request.POST:
+            commentaire_form = CommentaireForm(request.POST, instance=checklist)
+            if commentaire_form.is_valid():
+                commentaire_form.save()
+                messages.success(request, 'Commentaire ajouté avec succès.')
+                return redirect('checklist-detail', checklist_id=checklist_id)
+
+        # Handle product_form submission separately
+        elif 'product-form' in request.POST:
             product_form = ProductsForm(request.POST, user=request.user)
             if product_form.is_valid():
                 product = product_form.save()
-
-                # Log the product creation
-                ProductLog.objects.create(product=product, created_by=request.user)
-
+                # Log the product creation logic, etc.
                 messages.success(request, 'Nouveau produit créé avec succès.')
-                return HttpResponseRedirect(reverse('checklist-detail', args=[checklist_id]))
+                return redirect('checklist-detail', checklist_id=checklist_id)
 
 
+        # Handle checklist form submission
+        elif 'checklist_form-name' in request.POST and formbis.is_valid():
+            if checklist.statusro == 'verifié':
+                    checklist.statusro = 'modifié'  # Update the status to 'modifié'
+            formbis.save()
+            checklist.save()
+            return HttpResponseRedirect(reverse('checklist-detail', args=[checklist_id]))
 
-
-    # Handle checklist form submission
-    if 'checklist_form-name' in request.POST and formbis.is_valid():
-        if checklist.statusro == 'verifié':
-                checklist.statusro = 'modifié'  # Update the status to 'modifié'
-        formbis.save()
-        checklist.save()
-        return HttpResponseRedirect(reverse('checklist-detail', args=[checklist_id]))
-
-    # Handle commentaire form submission
-    elif 'commentaire_form-commentairevente' in request.POST and commentaire_form.is_valid():
-        commentaire_form.save()
-        return HttpResponseRedirect(reverse('checklist-detail', args=[checklist_id]))
+  
 
     # Filter products based on the search query
     if query:
@@ -1179,12 +1189,13 @@ def checklist_detail(request, checklist_id):
         'checklist_items': checklist_items,
         'products': products,
         'formbis': formbis,
-        'commentaire_form': commentaire_form,
+        'commentairemd_form': commentairemd_form,
         'document_formset': document_formset,
         'checklist_documents': checklist_documents,
         'recup_photos': recup_photos,
         'md_photos': md_photos,
         'product_form': product_form,
+        'forminfo': forminfo,
         'checklist_item_quantities': checklist_item_quantities,
         'checklist_item_comments': checklist_item_comments,
         'checklist_items_by_category': checklist_items_by_category,
@@ -5213,7 +5224,8 @@ def ChecklistmdDetailView(request, pk):
     checklist = get_object_or_404(Checklist, pk=pk)
     md_photos = ChecklistMDPhoto.objects.filter(checklist=checklist)
     recup_photos = ChecklistRecupPhoto.objects.filter(checklist=checklist)
-    checklist_items = ChecklistItem.objects.filter(checklist=checklist, quantity__gt=0)
+    checklist_items = ChecklistItem.objects.filter(checklist=checklist, quantity__gt=0).select_related('product')
+    checklist_products = checklist_items.values_list('product__id', flat=True)
     checklist_documents = ChecklistDocument.objects.filter(checklist=checklist)
     # Initialize the formsets and forms with unique prefixes
     formset = ChecklistMDPhotoFormSet(request.POST or None, request.FILES or None, prefix='formset', queryset=ChecklistMDPhoto.objects.filter(checklist=checklist))
@@ -5222,6 +5234,17 @@ def ChecklistmdDetailView(request, pk):
     form1 = RapportRecupForm(request.POST or None, prefix='form1', instance=checklist)
     checklist_itemsbreuvage = ChecklistItem.objects.filter(checklist_id=checklist, product__category__name__in=["ALCOOL FORT", "SANS ALCOOL", "VINS",  "BIERES"], quantity__gt=0)
    
+    products = Product.objects.filter(quantity__gt=0).prefetch_related('category').all()
+    products_by_category = {}
+
+    for product in products:
+        for category in product.category.all():
+            if category.name not in products_by_category:
+                products_by_category[category.name] = []
+            products_by_category[category.name].append(product)
+
+    # Check if checklist name contains 'CFCDN'
+    show_cfcdn_category = "CFCDN" in checklist.name
 
     for item in checklist_itemsbreuvage:
         item.remaining_quantity = item.quantity - (item.consumed_quantity or 0)
@@ -5235,6 +5258,17 @@ def ChecklistmdDetailView(request, pk):
                     checklist_photo.checklist = checklist  # Associate with the checklist
                     checklist_photo.save()
             return redirect('checklistmd_detail', pk=checklist.pk)
+        
+        elif 'photo' in request.POST:
+            imagesrecup = request.FILES.getlist("imagerecup") 
+            images = request.FILES.getlist("image") # Fetching multiple uploaded files
+            if imagesrecup:  # Ensure at least one file is uploaded
+                for img in imagesrecup:
+                    ChecklistRecupPhoto.objects.create(checklist=checklist, image=img)
+            elif images:
+                for img in images:
+                    ChecklistMDPhoto.objects.create(checklist=checklist, image=img)
+                return redirect('checklistmd_detail', pk=checklist.pk)
 
         elif 'formset1-TOTAL_FORMS' in request.POST and formset1.is_valid():
             for form in formset1:
@@ -5252,6 +5286,10 @@ def ChecklistmdDetailView(request, pk):
             form1.save()
         return redirect('checklistmd_detail', pk=checklist.pk)
 
+        
+
+        
+
 
     context = {
         'checklist': checklist,
@@ -5259,8 +5297,10 @@ def ChecklistmdDetailView(request, pk):
         'formset': formset,
         'formset1': formset1,
         'form': form,
+        'products_by_category': products_by_category,
         'checklist_itemsbreuvage': checklist_itemsbreuvage,
         'form1': form1,
+        'show_cfcdn_category': show_cfcdn_category,
         'checklist_items' : checklist_items,
         'md_photos' : md_photos,
         'recup_photos' : recup_photos,

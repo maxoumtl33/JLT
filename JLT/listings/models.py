@@ -486,6 +486,18 @@ class Checklist(models.Model):
     rapportmd = models.TextField(blank=True, null=True)
     rapportrecup = models.TextField(blank=True, null=True)
     commentairevente = models.TextField(blank=True, null=True)
+    commentairemd = models.TextField(blank=True, null=True)
+    type_service = models.TextField(blank=True, null=True)
+    occasion = models.TextField(blank=True, null=True)
+    depart_traiteur = models.TextField(blank=True, null=True)
+    heure_arrive = models.TextField(blank=True, null=True)
+    heure_convives = models.TextField(blank=True, null=True)
+    debut_cocktail = models.TextField(blank=True, null=True)
+    debut_repas = models.TextField(blank=True, null=True)
+    fin_evenement = models.TextField(blank=True, null=True)
+    commodite = models.TextField(blank=True, null=True)
+    fourni_client = models.TextField(blank=True, null=True)
+    fourni_salle = models.TextField(blank=True, null=True)
     notechecklist = models.TextField(blank=True, null=True)
     conseillere = models.ForeignKey(Conseiller, on_delete=models.CASCADE, related_name='checklists', null=True, blank=True)
     is_active = models.BooleanField(default=True)  # New field
@@ -551,13 +563,20 @@ class QuantityProductChangeLog(models.Model):
 
     
 
+
+
 class ChecklistMDPhoto(models.Model):
     checklist = models.ForeignKey(Checklist, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='listings/media/commandesdetail')
+    caption = models.CharField(max_length=200, null=True, blank=True)
 
 class ChecklistRecupPhoto(models.Model):
     checklist = models.ForeignKey(Checklist, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='listings/media/commandesdetail')
+    caption = models.CharField(max_length=200, null=True, blank=True)
+
+    
+    
 
 class ChecklistDocument(models.Model):
     checklist = models.ForeignKey(Checklist, on_delete=models.CASCADE, related_name='documents')

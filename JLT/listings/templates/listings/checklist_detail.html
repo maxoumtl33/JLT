@@ -146,15 +146,16 @@
       <p><strong><i class="bi bi-person-badge"></i> Nom du MD:</strong> {{ checklist.md }}</p>
     </div>
     <a class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModals" style="margin-left: 20px;"><i class="fa-solid fa-pen-to-square"></i><span>Modifier</span></a>
+    <a class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModalsinfos" style="margin-left: 20px;"><i class="fa-solid fa-asterisk"></i><span>Infos</span></a>
   </div>
 
   <div class="text-center mt-4 d-flex justify-content-center">
     <button type="button" class="btn btn-primary btn-lg me-3" data-bs-toggle="modal" data-bs-target="#documentModal">
       <i class="bi bi-folder"></i>  Ajouter documents
     </button>
-    <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModalcommentaire">
-      <i class="fa-regular fa-comment"></i>Ajouter commentaire
-    </button>
+    <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModalcommentairemd">
+        Commentaire MD
+      </button>
   </div>
 
   <hr>
@@ -252,42 +253,1170 @@
   
       {% endif %}
   
-      <!-- Include all the listings/partials/ for each category -->
-      {% block product_modal %}
-        {% for product in products %}
-          {% if product.is_base %}
-            {% include 'listings/partials/product_modal.html' with modal_id='exampleModal3' search_id='productSearch' modal_category='base' %}
-          {% elif product.is_jetable %}
-            {% include 'listings/partials/product_modal.html' with modal_id='exampleModaljetable' search_id='productSearch1' modal_category='jetable' %}
-          {% elif product.is_decor %}
-            {% include 'listings/partials/product_modal.html' with modal_id='exampleModalaccessoirededecor' search_id='productSearch2' modal_category='decor' %}
-          {% elif product.is_bar %}
-            {% include 'listings/partials/product_modal.html' with modal_id='exampleModalequipementdebar' search_id='productSearch3' modal_category='bar' %}
-          {% elif product.is_cafe %}
-            {% include 'listings/partials/product_modal.html' with modal_id='exampleModalequipementpourservicecafe' search_id='productSearch4' modal_category='cafe' %}
-          {% elif product.is_table %}
-            {% include 'listings/partials/product_modal.html' with modal_id='exampleModaltableetlinge' search_id='productSearch6' modal_category='table' %}
-          {% elif product.is_verre %}
-            {% include 'listings/partials/product_modal.html' with modal_id='exampleModalverrerie' search_id='productSearch7' modal_category='verre' %}
-          {% elif product.is_porcelaine %}
-            {% include 'listings/partials/product_modal.html' with modal_id='exampleModalporcelaine' search_id='productSearch8' modal_category='porcelaine' %}
-          {% elif product.is_canape %}
-            {% include 'listings/partials/product_modal.html' with modal_id='exampleModalmontage' search_id='productSearch9' modal_category='canape' %}
-          {% elif product.is_cuisson %}
-            {% include 'listings/partials/product_modal.html' with modal_id='exampleModalcuisson' search_id='productSearch10' modal_category='cuisson' %}
-          {% elif product.is_service %}
-            {% include 'listings/partials/product_modal.html' with modal_id='exampleModalservice' search_id='productSearch11' modal_category='service' %}
-          {% elif product.is_alcool %}
-            {% include 'listings/partials/product_modal.html' with modal_id='exampleModalalcoolfort' search_id='productSearch12' modal_category='alcool' %}
-          {% elif product.is_bieres %}
-            {% include 'listings/partials/product_modal.html' with modal_id='exampleModalbieres' search_id='productSearch13' modal_category='bieres' %}
-          {% elif product.is_vins %}
-            {% include 'listings/partials/product_modal.html' with modal_id='exampleModalvins' search_id='productSearch14' modal_category='vins' %}
-          {% elif product.is_sansalcool %}
-            {% include 'listings/partials/product_modal.html' with modal_id='exampleModalsansalcool' search_id='productSearch15' modal_category='sansalcool' %}
-            {% endif %}
-          {% endfor %}
-        {% endblock %}
+      <div class="modal fade modal-xlg" id="exampleModalcfcdn" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-custom">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <!-- Search Bar -->
+                        <div class="input-group mb-3">
+                            <input type="text" id="productSearch16" class="form-control" placeholder="Rechercher un produit par nom">
+                        </div>
+                        <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                            {% csrf_token %}
+                            <div class="row gy-3 rtttttttttttttttt">
+                                {% for product in products %}
+                                {% if product.is_cfcdn %}
+                                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                        <div class="product-info d-flex align-items-center">
+                                            <h6 class="product-name mb-0 me-3">
+                                                {{ product.name }}
+                                                <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                    ({{ product.quantity|floatformat:0 }})                                            </strong>
+                                            </h6>
+                                        </div>
+    
+                                        <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+    
+                                        <div class="form-group d-flex align-items-center me-2">
+                                            <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                            <input type="number" class="form-control text-center"
+                                                   id="quantity-{{ product.id }}" name="quantities[]"
+                                                   min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                        </div>
+    
+                                        <!-- Comment Button -->
+                                        <!-- Comment Button -->
+                                    <div class="form-group">
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
+                                        </button>
+                                        <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}"></textarea>
+                                    </div>
+    
+    
+                                    </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+    
+                            <!-- Single Submit Button -->
+                            <div class="d-flex justify-content-end mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="exampleModal3" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-custom">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <!-- Search Bar -->
+                        <div class="input-group mb-3">
+                            <input type="text" id="productSearch" class="form-control" placeholder="Rechercher un produit par nom">
+                        </div>
+    
+                        <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                            {% csrf_token %}
+                            <div class="row gy-3 rgh">
+                                {% for product in products %}
+                                {% if product.is_base %}
+                                    <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                        <div class="product-info d-flex align-items-center">
+                                            <h6 class="product-name mb-0 me-3">
+                                                <i class="fa-solid fa-info-circle" 
+                                                    tabindex="0"
+                                                    data-bs-toggle="popover" 
+                                                    data-bs-trigger="focus"
+                                                    data-bs-content="{{ product.id }}"></i>
+                                                {{ product.name }}
+                                                <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                    ({{ product.quantity|strip_zero_decimal }})                                            </strong>
+                                            </h6>
+                                        </div>
+    
+                                        <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+    
+                                        <div class="form-group d-flex align-items-center me-2">
+                                            <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                            <input type="number" class="form-control text-center"
+                                                   id="quantity-{{ product.id }}" name="quantities[]"
+                                                   min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                        </div>
+    
+                                        <!-- Comment Button -->
+                                        <div class="form-group">
+                                            <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                                <i class="fa fa-comment-dots"></i>
+                                            </button>
+                                            <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
+                                                      name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                      style="display: none;" data-product-id="{{ product.id }}"></textarea>
+                                        </div>
+    
+                                    </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+    
+                            <!-- Single Submit Button -->
+                            <div class="d-flex justify-content-end mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+    <div class="modal fade modal-xlg" id="exampleModaljetable" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-custom">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <!-- Search Bar -->
+                        <div class="input-group mb-3">
+                            <input type="text" id="productSearch1" class="form-control" placeholder="Rechercher un produit par nom">
+                        </div>
+                        <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                            {% csrf_token %}
+                            <div class="row gy-3 rt">
+                                {% for product in products %}
+                                {% if product.is_jetable %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            <i class="fa-solid fa-info-circle" 
+                                                tabindex="0"
+                                                data-bs-toggle="popover" 
+                                                data-bs-trigger="focus"
+                                                data-bs-content="{{ product.id }}"></i>
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity|strip_zero_decimal }})                                            </strong>
+                                        </h6>
+                                    </div>
+    
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+    
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center"
+                                               id="quantity-{{ product.id }}" name="quantities[]"
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+    
+                                    <!-- Comment Button -->
+                                    <div class="form-group">
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
+                                        </button>
+                                        <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}"></textarea>
+                                    </div>
+    
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+    
+                            <!-- Single Submit Button -->
+                            <div class="d-flex justify-content-end mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade modal-xlg" id="exampleModalaccessoirededecor" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-custom">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <!-- Search Bar -->
+                        <div class="input-group mb-3">
+                            <input type="text" id="productSearch2" class="form-control" placeholder="Rechercher un produit par nom">
+                        </div>
+                        <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                            {% csrf_token %}
+                            <div class="row gy-3 rtt">
+                                {% for product in products %}
+                                {% if product.is_decor %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            <i class="fa-solid fa-info-circle" 
+                                                tabindex="0"
+                                                data-bs-toggle="popover" 
+                                                data-bs-trigger="focus"
+                                                data-bs-content="{{ product.id }}"></i>
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity|strip_zero_decimal }})                                            </strong>
+                                        </h6>
+                                    </div>
+    
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+    
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center"
+                                               id="quantity-{{ product.id }}" name="quantities[]"
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+    
+                                    <!-- Comment Button -->
+                                    <div class="form-group">
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
+                                        </button>
+                                        <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}"></textarea>
+                                    </div>
+    
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+    
+                            <!-- Single Submit Button -->
+                            <div class="d-flex justify-content-end mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade modal-xlg" id="exampleModalequipementdebar" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-custom">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <!-- Search Bar -->
+                        <div class="input-group mb-3">
+                            <input type="text" id="productSearch3" class="form-control" placeholder="Rechercher un produit par nom">
+                        </div>
+                        <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                            {% csrf_token %}
+                            <div class="row gy-3 rttt">
+                                {% for product in products %}
+                                {% if product.is_bar %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            <i class="fa-solid fa-info-circle" 
+                                                tabindex="0"
+                                                data-bs-toggle="popover" 
+                                                data-bs-trigger="focus"
+                                                data-bs-content="{{ product.id }}"></i>
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity|strip_zero_decimal }})                                            </strong>
+                                        </h6>
+                                    </div>
+    
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+    
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center"
+                                               id="quantity-{{ product.id }}" name="quantities[]"
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+    
+                                    <!-- Comment Button -->
+                                    <div class="form-group">
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
+                                        </button>
+                                        <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}"></textarea>
+                                    </div>
+    
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+    
+                            <!-- Single Submit Button -->
+                            <div class="d-flex justify-content-end mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade modal-xlg" id="exampleModalequipementpourservicecafe" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-custom">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <!-- Search Bar -->
+                        <div class="input-group mb-3">
+                            <input type="text" id="productSearch4" class="form-control" placeholder="Rechercher un produit par nom">
+                        </div>
+                        <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                            {% csrf_token %}
+                            <div class="row gy-3 rtttt">
+                                {% for product in products %}
+                                {% if product.is_cafe %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            <i class="fa-solid fa-info-circle" 
+                                                tabindex="0"
+                                                data-bs-toggle="popover" 
+                                                data-bs-trigger="focus"
+                                                data-bs-content="{{ product.id }}"></i>
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity|strip_zero_decimal }})                                            </strong>
+                                        </h6>
+                                    </div>
+    
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+    
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center"
+                                               id="quantity-{{ product.id }}" name="quantities[]"
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+    
+                                    <!-- Comment Button -->
+                                    <div class="form-group">
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
+                                        </button>
+                                        <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}"></textarea>
+                                    </div>
+    
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+    
+                            <!-- Single Submit Button -->
+                            <div class="d-flex justify-content-end mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade modal-xlg" id="exampleModalitemsdivers" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-custom">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <!-- Search Bar -->
+                        <div class="input-group mb-3">
+                            <input type="text" id="productSearch5" class="form-control" placeholder="Rechercher un produit par nom">
+                        </div>
+                        <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                            {% csrf_token %}
+                            <div class="row gy-3 rttttt">
+                                {% for product in products %}
+                                {% if product.is_divers %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            <i class="fa-solid fa-info-circle" 
+                                                tabindex="0"
+                                                data-bs-toggle="popover" 
+                                                data-bs-trigger="focus"
+                                                data-bs-content="{{ product.id }}"></i>
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity|strip_zero_decimal }})                                            </strong>
+                                        </h6>
+                                    </div>
+    
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+    
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center"
+                                               id="quantity-{{ product.id }}" name="quantities[]"
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+    
+                                    <!-- Comment Button -->
+                                    <div class="form-group">
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
+                                        </button>
+                                        <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}"></textarea>
+                                    </div>
+    
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+    
+                            <!-- Single Submit Button -->
+                            <div class="d-flex justify-content-end mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade modal-xlg" id="exampleModaltableetlinge" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-custom">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <!-- Search Bar -->
+                        <div class="input-group mb-3">
+                            <input type="text" id="productSearch6" class="form-control" placeholder="Rechercher un produit par nom">
+                        </div>
+                        <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                            {% csrf_token %}
+                            <div class="row gy-3 rtttttt">
+                                {% for product in products %}
+                                {% if product.is_table %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            <i class="fa-solid fa-info-circle" 
+                                                tabindex="0"
+                                                data-bs-toggle="popover" 
+                                                data-bs-trigger="focus"
+                                                data-bs-content="{{ product.id }}"></i>
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity|strip_zero_decimal }})                                            </strong>
+                                        </h6>
+                                    </div>
+    
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+    
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center"
+                                               id="quantity-{{ product.id }}" name="quantities[]"
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+    
+                                    <!-- Comment Button -->
+                                    <div class="form-group">
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
+                                        </button>
+                                        <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}"></textarea>
+                                    </div>
+    
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+    
+                            <!-- Single Submit Button -->
+                            <div class="d-flex justify-content-end mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade modal-xlg" id="exampleModalverrerie" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-custom">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <!-- Search Bar -->
+                        <div class="input-group mb-3">
+                            <input type="text" id="productSearch7" class="form-control" placeholder="Rechercher un produit par nom">
+                        </div>
+                        <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                            {% csrf_token %}
+                            <div class="row gy-3 rttttttt">
+                                {% for product in products %}
+                                {% if product.is_verre %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            <i class="fa-solid fa-info-circle" 
+                                                tabindex="0"
+                                                data-bs-toggle="popover" 
+                                                data-bs-trigger="focus"
+                                                data-bs-content="{{ product.id }}"></i>
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity|strip_zero_decimal }})                                            </strong>
+                                        </h6>
+                                    </div>
+    
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+    
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center"
+                                               id="quantity-{{ product.id }}" name="quantities[]"
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+    
+                                    <!-- Comment Button -->
+                                    <div class="form-group">
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
+                                        </button>
+                                        <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}"></textarea>
+                                    </div>
+    
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+    
+                            <!-- Single Submit Button -->
+                            <div class="d-flex justify-content-end mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade modal-xlg" id="exampleModalporcelaine" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-custom">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <!-- Search Bar -->
+                        <div class="input-group mb-3">
+                            <input type="text" id="productSearch8" class="form-control" placeholder="Rechercher un produit par nom">
+                        </div>
+                        <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                            {% csrf_token %}
+                            <div class="row gy-3 rtttttttt">
+                                {% for product in products %}
+                                {% if product.is_porcelaine %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            <i class="fa-solid fa-info-circle" 
+                                                tabindex="0"
+                                                data-bs-toggle="popover" 
+                                                data-bs-trigger="focus"
+                                                data-bs-content="{{ product.id }}"></i>
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity|strip_zero_decimal }})                                            </strong>
+                                        </h6>
+                                    </div>
+    
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+    
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center"
+                                               id="quantity-{{ product.id }}" name="quantities[]"
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+    
+                                    <!-- Comment Button -->
+                                    <div class="form-group">
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
+                                        </button>
+                                        <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}"></textarea>
+                                    </div>
+    
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+    
+                            <!-- Single Submit Button -->
+                            <div class="d-flex justify-content-end mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade modal-xlg" id="exampleModalmontage" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-custom">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <!-- Search Bar -->
+                        <div class="input-group mb-3">
+                            <input type="text" id="productSearch9" class="form-control" placeholder="Rechercher un produit par nom">
+                        </div>
+                        <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                            {% csrf_token %}
+                            <div class="row gy-3 rttttttttt">
+                                {% for product in products %}
+                                {% if product.is_canape %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            <i class="fa-solid fa-info-circle" 
+                                                tabindex="0"
+                                                data-bs-toggle="popover" 
+                                                data-bs-trigger="focus"
+                                                data-bs-content="{{ product.id }}"></i>
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity|strip_zero_decimal }})                                            </strong>
+                                        </h6>
+                                    </div>
+    
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+    
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center"
+                                               id="quantity-{{ product.id }}" name="quantities[]"
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+    
+                                    <!-- Comment Button -->
+                                    <div class="form-group">
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
+                                        </button>
+                                        <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}"></textarea>
+                                    </div>
+    
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+    
+                            <!-- Single Submit Button -->
+                            <div class="d-flex justify-content-end mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade modal-xlg" id="exampleModalcuisson" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-custom">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <!-- Search Bar -->
+                        <div class="input-group mb-3">
+                            <input type="text" id="productSearch10" class="form-control" placeholder="Rechercher un produit par nom">
+                        </div>
+                        <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                            {% csrf_token %}
+                            <div class="row gy-3 rtttttttttt">
+                                {% for product in products %}
+                                {% if product.is_cuisson %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            <i class="fa-solid fa-info-circle" 
+                                                tabindex="0"
+                                                data-bs-toggle="popover" 
+                                                data-bs-trigger="focus"
+                                                data-bs-content="{{ product.id }}"></i>
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity|strip_zero_decimal }})                                            </strong>
+                                        </h6>
+                                    </div>
+    
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+    
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center"
+                                               id="quantity-{{ product.id }}" name="quantities[]"
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+    
+                                    <!-- Comment Button -->
+                                    <div class="form-group">
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
+                                        </button>
+                                        <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}"></textarea>
+                                    </div>
+    
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+    
+                            <!-- Single Submit Button -->
+                            <div class="d-flex justify-content-end mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade modal-xlg" id="exampleModalservice" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-custom">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <!-- Search Bar -->
+                        <div class="input-group mb-3">
+                            <input type="text" id="productSearch11" class="form-control" placeholder="Rechercher un produit par nom">
+                        </div>
+                        <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                            {% csrf_token %}
+                            <div class="row gy-3 rttttttttttt">
+                                {% for product in products %}
+                                {% if product.is_service %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            <i class="fa-solid fa-info-circle" 
+                                                tabindex="0"
+                                                data-bs-toggle="popover" 
+                                                data-bs-trigger="focus"
+                                                data-bs-content="{{ product.id }}"></i>
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity|strip_zero_decimal }})                                            </strong>
+                                        </h6>
+                                    </div>
+    
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+    
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center"
+                                               id="quantity-{{ product.id }}" name="quantities[]"
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+    
+                                    <!-- Comment Button -->
+                                    <div class="form-group">
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
+                                        </button>
+                                        <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}"></textarea>
+                                    </div>
+    
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+    
+                            <!-- Single Submit Button -->
+                            <div class="d-flex justify-content-end mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade modal-xlg" id="exampleModalalcoolfort" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-custom">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <!-- Search Bar -->
+                        <div class="input-group mb-3">
+                            <input type="text" id="productSearch12" class="form-control" placeholder="Rechercher un produit par nom">
+                        </div>
+                        <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                            {% csrf_token %}
+                            <div class="row gy-3 rtttttttttttt">
+                                {% for product in products %}
+                                {% if product.is_alcool %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            <i class="fa-solid fa-info-circle" 
+                                                tabindex="0"
+                                                data-bs-toggle="popover" 
+                                                data-bs-trigger="focus"
+                                                data-bs-content="{{ product.id }}"></i>
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity|strip_zero_decimal }})                                            </strong>
+                                        </h6>
+                                    </div>
+    
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+    
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center"
+                                               id="quantity-{{ product.id }}" name="quantities[]"
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+    
+                                    <!-- Comment Button -->
+                                    <div class="form-group">
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
+                                        </button>
+                                        <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}"></textarea>
+                                    </div>
+    
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+    
+                            <!-- Single Submit Button -->
+                            <div class="d-flex justify-content-end mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade modal-xlg" id="exampleModalbieres" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-custom">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <!-- Search Bar -->
+                        <div class="input-group mb-3">
+                            <input type="text" id="productSearch13" class="form-control" placeholder="Rechercher un produit par nom">
+                        </div>
+                        <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                            {% csrf_token %}
+                            <div class="row gy-3 rttttttttttttt">
+                                {% for product in products %}
+                                {% if product.is_bieres %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            <i class="fa-solid fa-info-circle" 
+                                                tabindex="0"
+                                                data-bs-toggle="popover" 
+                                                data-bs-trigger="focus"
+                                                data-bs-content="{{ product.id }}"></i>
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity|strip_zero_decimal }})                                            </strong>
+                                        </h6>
+                                    </div>
+    
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+    
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center"
+                                               id="quantity-{{ product.id }}" name="quantities[]"
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+    
+                                    <!-- Comment Button -->
+                                    <div class="form-group">
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
+                                        </button>
+                                        <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}"></textarea>
+                                    </div>
+    
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+    
+                            <!-- Single Submit Button -->
+                            <div class="d-flex justify-content-end mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade modal-xlg" id="exampleModalvins" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-custom">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <!-- Search Bar -->
+                        <div class="input-group mb-3">
+                            <input type="text" id="productSearch14" class="form-control" placeholder="Rechercher un produit par nom">
+                        </div>
+                        <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                            {% csrf_token %}
+                            <div class="row gy-3 rtttttttttttttt">
+                                {% for product in products %}
+                                {% if product.is_vins %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            <i class="fa-solid fa-info-circle" 
+                                                tabindex="0"
+                                                data-bs-toggle="popover" 
+                                                data-bs-trigger="focus"
+                                                data-bs-content="{{ product.id }}"></i>
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity|strip_zero_decimal }})                                            </strong>
+                                        </h6>
+                                    </div>
+    
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+    
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center"
+                                               id="quantity-{{ product.id }}" name="quantities[]"
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+    
+                                    <!-- Comment Button -->
+                                    <div class="form-group">
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
+                                        </button>
+                                        <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}"></textarea>
+                                    </div>
+    
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+    
+                            <!-- Single Submit Button -->
+                            <div class="d-flex justify-content-end mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade modal-xlg" id="exampleModalsansalcool" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-custom">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ajouter des produits à la checklist</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <!-- Search Bar -->
+                        <div class="input-group mb-3">
+                            <input type="text" id="productSearch15" class="form-control" placeholder="Rechercher un produit par nom">
+                        </div>
+                        <form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post">
+                            {% csrf_token %}
+                            <div class="row gy-3 rttttttttttttttt">
+                                {% for product in products %}
+                                {% if product.is_sansalcool %}
+                                <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                                    <div class="product-info d-flex align-items-center">
+                                        <h6 class="product-name mb-0 me-3">
+                                            <i class="fa-solid fa-info-circle" 
+                                                tabindex="0"
+                                                data-bs-toggle="popover" 
+                                                data-bs-trigger="focus"
+                                                data-bs-content="{{ product.id }}"></i>
+                                            {{ product.name }}
+                                            <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">
+                                                ({{ product.quantity|strip_zero_decimal }})                                            </strong>
+                                        </h6>
+                                    </div>
+    
+                                    <input type="hidden" name="product_ids[]" value="{{ product.id }}">
+    
+                                    <div class="form-group d-flex align-items-center me-2">
+                                        <label for="quantity-{{ product.id }}" class="form-label me-2">Quantité:</label>
+                                        <input type="number" class="form-control text-center"
+                                               id="quantity-{{ product.id }}" name="quantities[]"
+                                               min="0" value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required>
+                                    </div>
+    
+                                    <!-- Comment Button -->
+                                    <div class="form-group">
+                                        <button type="button" class="btn btn-secondary btn-sm toggle-comment" data-product-id="{{ product.id }}">
+                                            <i class="fa fa-comment-dots"></i>
+                                        </button>
+                                        <textarea id="comment-{{ product.id }}" class="form-control mt-2 comment-textarea"
+                                                  name="commentaires[]" placeholder="nt pour nouvelle tablée"
+                                                  style="display: none;" data-product-id="{{ product.id }}"></textarea>
+                                    </div>
+    
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+    
+                            <!-- Single Submit Button -->
+                            <div class="d-flex justify-content-end mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-cart-plus me-2"></i> Valider
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
         <br>
     
         <h2 class="text-center" style="font-size: 1.8em; margin-bottom: 20px;">Liste des breuvages disponibles par catégories</h2>
@@ -323,9 +1452,7 @@
         <button type="button" onclick="toggleSection('rapportbreuvage-section')" class="toggle-btn">
           <i class="fa-solid fa-champagne-glasses"></i> Voir rapport breuvage
         </button>
-        <button type="button" onclick="toggleSection('rapportrecup-section')" class="toggle-btn">
-          <i class="bi bi-file-earmark-text"></i> Voir rapport récupération
-        </button>
+ 
     
         <!-- RapportMD Section -->
         <div id="rapportmd-section" class="rapport-section hidden">
@@ -333,36 +1460,33 @@
           <p>{{ checklist.rapportmd }}</p>
         </div>
     
-        <!-- RapportBreuvage Section -->
         <div id="rapportbreuvage-section" class="rapport-section hidden">
-          <h3>Rapport Breuvage</h3>
-          <table class="table table-striped">
-            <thead>
-              <tr>
-                <th scope="col">Produit</th>
-                <th scope="col">Total</th>
-                <th scope="col">Restant</th>
-                <th scope="col">Consommé</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for breuvage in breuvages %}
-                <tr>
-                  <td>{{ breuvage.product.name }}</td>
-                  <td>{{ breuvage.quantity }}</td>
-                  <td>{{ breuvage.consumed_quantity }}</td>
-                  <td>{{ breuvage.quantity|subtract:breuvage.consumed_quantity }}</td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+            <h3>Rapport Breuvage</h3>
+            <button onclick="generatePDFbreuvage()" class="btn btn-secondary mb-3">Télécharger en PDF <i class="fa-solid fa-file-pdf"></i></button>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">Produit</th>
+                        <th scope="col">Total</th>
+                        <th scope="col">Restant</th>
+                        <th scope="col">Consommé</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for breuvage in breuvages %}
+                        <tr>
+                            <td>{{ breuvage.product.name }}</td>
+                            <td>{{ breuvage.quantity }}</td>
+                            <td>{{ breuvage.consumed_quantity }}</td>
+                            <td>{{ breuvage.quantity|subtract:breuvage.consumed_quantity }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-    
-        <!-- RapportRecup Section -->
-        <div id="rapportrecup-section" class="rapport-section hidden">
-          <h3>Rapport Récupération</h3>
-          <p>{{ checklist.rapportrecup }}</p>
-        </div>
+        
+          
+
     
         <hr>
         <h2>Photos Événement</h2>
@@ -1330,6 +2454,27 @@
     </div>
 </div>
 
+<div class="modal fade modal-xlg" id="exampleModalsinfos" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Ajouter informations</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="" id='checklistinfos_form' method="POST">
+                    {% csrf_token %}
+                    {{ forminfo.as_p }}
+                    <input type="submit" value="Valider" class="btn btn-primary" name="submit_checklistinfos">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
   <!-- Modal for mes produits-->
   <div class="modal fade modal-xlg" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -1374,17 +2519,18 @@
 </div>
 
 <!-- Modal for commentaire ventes -->
-<div class="modal fade" id="exampleModalcommentaire" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+
+<div class="modal fade" id="exampleModalcommentairemd" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Ajouter un commentaire livreurs</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Ajouter un commentaire MD</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form method="post" action="{% url 'checklist-detail' checklist.id %}" id="commentaireForm">
+                <form method="post" action="{% url 'checklist-detail' checklist.id %}" id="commentairemdForm">
                     {% csrf_token %}
-                    {{ commentaire_form.as_p }}
+                    {{ commentairemd_form.as_p }}
                     <button type="submit" class="btn btn-primary" name="submit_commentaire">Envoyer</button>
                 </form>
 
@@ -1393,16 +2539,16 @@
     </div>
 </div>
 
-
     
-    <script src="{% static 'listings/js/checklist_detail.js' %}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'listings/js/checklist_detail.js' %}"></script>
     
-    <script type="text/javascript">
+    
+    <script type="text/javascript" defer>
       var uploadDocumentUrl = "{% url 'upload_document' checklist.id %}";
       var searchProductsBaseUrl = "{% url 'search_productsbase' checklist.id %}";
       var searchProductsJetableUrl = "{% url 'search_productsjetable' checklist.id %}";
@@ -1421,6 +2567,44 @@
   var searchProductsVinsUrl = "{% url 'search_productsvins' checklist.id %}";
   var searchProductsSansAlcoolUrl = "{% url 'search_productssansalcool' checklist.id %}";
   var searchProductsCFCDNUrl = "{% url 'search_productscfcdn' checklist.id %}";
+
+  $(document).ready(function() {
+    window.generatePDFbreuvage = function() {
+        // Getting the necessary data from Django
+        const checklistName = "{{ checklist.name }}"; // Get checklist name
+        const checklistDate = "{{ checklist.date|date:'d F Y' }}"; // Get date
+        const conseiller = "{{ checklist.conseillere }}"; // Get conseiller
+
+        // Create a new jsPDF instance
+        const { jsPDF } = window.jspdf; // Ensure you access jsPDF correctly
+        const pdf = new jsPDF();
+
+        // Adding checklist info at the top of the PDF
+        pdf.setFontSize(12);
+        pdf.text(20, 20, `RAPPORT BREUVAGE - ${checklistName}`);
+        pdf.text(20, 30, `${checklistDate}`);
+        pdf.text(20, 40, `Conseillère: ${conseiller}`);
+
+        // Use autoTable to create a table dynamically
+        const breuvagesData = [
+            {% for breuvage in breuvages %}
+                ['{{ breuvage.product.name }}', {{ breuvage.quantity }}, {{ breuvage.quantity|subtract:breuvage.consumed_quantity }}, {{ breuvage.consumed_quantity }}],
+            {% endfor %}
+        ];
+
+        pdf.autoTable({
+            head: [['Produit', 'Total', 'Restant', 'Consommé']],
+            body: breuvagesData,
+            startY: 50, // Start position for the table
+            theme: 'striped', // Giving it a striped theme
+        });
+
+        // Save the PDF
+        pdf.save(`rapport_breuvage_${checklistName.replace(/\s+/g, '_')}_${checklistDate}.pdf`);
+    };
+});
+
+
 </script>
 
 {% endblock %}
