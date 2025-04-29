@@ -1,6 +1,7 @@
 {% extends 'listings/base.html' %}
-
+{% load custom_filters %}
 {% block content %}
+
 <div class="container">
     <h2 class="mt-5 text-center">Gestion des Soumissions</h2>
 
@@ -18,7 +19,7 @@
                     {% endfor %}
                 </select>
             </div>
-
+<br>
             <div class="form-group me-2">
                 <label for="submission_type" class="form-label">Type de Soumission:</label>
                 <select name="submission_type" id="submission_type" class="form-select me-2">
@@ -27,7 +28,7 @@
                     <option value="contrat">Contrat</option>
                 </select>
             </div>
-
+<br>
             <div class="form-group me-2">
                 <label for="status" class="form-label">Status:</label>
                 <select name="status" id="status" class="form-select me-2">
@@ -37,11 +38,21 @@
                     <option value="en_cours">En cours</option>
                 </select>
             </div>
-
-            <div class="form-group me-2">
-                <label for="date" class="form-label">Date:</label>
-                <input type="date" id="date" name="date" class="form-control me-2">
+<br>
+            <div class="mb-4">
+                <div class="row">
+                    <div class="col-auto me-2">
+                        <label for="start_date" class="form-label">Date de début:</label>
+                        <input type="date" id="start_date" name="start_date" class="form-control">
+                    </div>
+                    
+                    <div class="col-auto me-2">
+                        <label for="end_date" class="form-label">Date de fin:</label>
+                        <input type="date" id="end_date" name="end_date" class="form-control">
+                    </div>
+                </div>
             </div>
+            
             <br>
         
             <button type="submit" class="btn btn-primary">Filtrer</button>
@@ -54,10 +65,14 @@
     <div class="mb-4">
         <p class="text-center">Total des soumissions filtrées: <strong>{{ submission_count }}</strong></p>
     </div>
-
+    <div class="mb-4 text-center">
+        <button onclick="generatePDF()" class="btn btn-secondary">Télécharger Soumissions en PDF <i class="fa-solid fa-file-pdf"></i></button>
+<br>
+<br>
     <table class="table">
         <thead>
             <tr>
+                <th>Client</th>
                 <th>Type</th>
                 <th>Utilisateur</th>
                 <th>Créé à</th>
@@ -69,6 +84,7 @@
         <tbody>
             {% for submission in submissions %}
                 <tr>
+                    <td>{{ submission.company_name }}</td>
                     <td>{{ submission.get_submission_type_display }}</td>
                     <td>{{ submission.user.username }}</td>
                     <td>{{ submission.created_at|date:"d F Y, H:i" }}</td>
@@ -82,7 +98,7 @@
                         </span>
                     </td>
                     <td>
-                        <a href="{% url 'submission_detail' submission.id %}" class="btn btn-info">Voir Détails</a>
+                        <a href="{% url 'submission_detail' submission.id %}"><i class="fa-solid fa-eye"></i></a>
                     </td>
                 </tr>
             {% empty %}
@@ -92,8 +108,38 @@
             {% endfor %}
         </tbody>
     </table>
-    <div class="mb-4 text-center">
-    <button onclick="generatePDF()" class="btn btn-secondary">Télécharger Soumissions en PDF <i class="fa-solid fa-file-pdf"></i></button>
+    <div class="pagination justify-content-center my-4">
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                {% if submissions.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ submissions.previous_page_number }}" aria-label="Précédente">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+        
+                <li class="page-item disabled">
+                    <span class="page-link">Page {{ submissions.number }} sur {{ submissions.paginator.num_pages }}</span>
+                </li>
+        
+                {% if submissions.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ submissions.next_page_number }}" aria-label="Suivant">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ submissions.paginator.num_pages }}" aria-label="Dernière">
+                            Dernière
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    
+    
 </div>
 </div>
 
@@ -104,66 +150,65 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     function generatePDF() {
-    const { jsPDF } = window.jspdf; // Correctly accessing jsPDF
-    const pdf = new jsPDF();
+        const { jsPDF } = window.jspdf; // Correctly accessing jsPDF
+        const pdf = new jsPDF();
 
-    // Adding checklist information at the top of the PDF
-    pdf.setFontSize(12);
+        // Adding checklist information at the top of the PDF
+        pdf.setFontSize(12);
 
-    // Fetch dynamic data from the Django context for counts and types
-    const countValidated = {{ count_validated|default:0 }};
-    const countRejected = {{ count_rejected|default:0 }};
-    const countInProgress = {{ count_in_progress|default:0 }};
-    const countValidatedContrat = {{ count_validatedcontrat|default:0 }};  // Ensure these are calculated and passed in context
-    const countRejectedContrat = {{ count_rejectedontrat|default:0 }};
-    const countInProgressContrat = {{ count_in_progressontrat|default:0 }};
-    const submissionType = "{{ submission_type }}";  // Get the selected submission type
-    const userName = "{{ user.username|default:'' }}"; // Get the username
+        // Fetch dynamic data from the Django context for counts and types
+        const countValidated = {{ count_validated|default:0 }};
+        const countRejected = {{ count_rejected|default:0 }};
+        const countInProgress = {{ count_in_progress|default:0 }};
+        const countValidatedContrat = {{ count_validatedcontrat|default:0 }};  
+        const countRejectedContrat = {{ count_rejectedontrat|default:0 }};
+        const countInProgressContrat = {{ count_in_progressontrat|default:0 }};
+        const submissionType = "{{ submission_type }}";  
+        const userName = "{{ user.username|default:'' }}"; 
+        const submissionCount = "{{ submission_count }}"; 
+        const startDate = "{{ start_date }}"; // Getting original string without date format
+        const endDate = "{{ end_date }}"; // Getting original string without date format
 
-    let summarySentence = "";
+        // Add the total submissions text to the PDF
+        pdf.text(`Total: ${submissionCount}`, 10, 20);
 
-    if (submissionType === "soumission") {
-        summarySentence = `
-            ${countValidated} Soumissions Validées pour ${userName}
-            ${countRejected} Soumissions Refusées pour ${userName}
-            ${countInProgress} Soumissions En Cours pour ${userName}
-        `;
-    } else if (submissionType === "contrat") {
-        summarySentence = `
-            ${countValidatedContrat} Contrats Validés pour ${userName}
-            ${countRejectedContrat} Contrats Refusés pour ${userName}
-            ${countInProgressContrat} Contrats En Cours pour ${userName}
-        `;
-    } else {
-        summarySentence = `Aucun type de soumission sélectionné pour ${userName}.`;
+        // Check if start and end dates exist and add to PDF
+        if (startDate) {
+            pdf.text(`Date de début: ${startDate}`, 10, 30);
+        }
+        if (endDate) {
+            pdf.text(`Date de fin: ${endDate}`, 10, 40);
+        }
+
+        // Use autoTable to create a table dynamically
+        const submissionsData = [];
+
+
+        {% for submission in submissions %}
+            
+
+            submissionsData.push([
+                '{{ submission.get_submission_type_display }}',
+                '{{ submission.user.username }}',
+                '{{ submission.created_at|date:"Y-m-d H:i" }}',
+                '{{ submission.get_status_display }}'
+            ]);
+        {% endfor %}
+
+        pdf.autoTable({
+            head: [['Type', 'Utilisateur', 'Créé à', 'Statut']],
+            body: submissionsData,
+            startY: 50, // Start position for the table, after the date range
+            theme: 'striped', // Giving it a striped theme
+        });
+
+        // Save the generated PDF
+        pdf.save(`soumissions_${submissionType.replace(/\s+/g, '_')}_${userName.replace(/\s+/g, '_')}.pdf`);
     }
-
-    pdf.text(20, 20, summarySentence);
-
-    // Use autoTable to create a table dynamically
-    const submissionsData = [];
-
-    {% for submission in submissions %}
-        submissionsData.push([
-            '{{ submission.get_submission_type_display }}',
-            '{{ submission.user.username }}',
-            '{{ submission.created_at|date:"Y-m-d H:i" }}',
-            '{{ submission.get_status_display }}'
-        ]);
-    {% endfor %}
-
-    pdf.autoTable({
-        head: [['Type', 'Utilisateur', 'Créé à', 'Status']],
-        body: submissionsData,
-        startY: 50, // Start position for the table
-        theme: 'striped', // Giving it a striped theme
-    });
-
-    // Save the generated PDF
-    pdf.save(`soumissions_${submissionType.replace(/\s+/g, '_')}_${userName.replace(/\s+/g, '_')}.pdf`);
-}
-
 </script>
+
+
+
     
     
 

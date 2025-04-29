@@ -5363,7 +5363,7 @@ def manage_submissions(request):
     count_in_progressontrat = submissions.filter(status='en_cours', submission_type="contrat").count()
 
     selected_conseiller = request.GET.get('conseiller')
-    
+
     if selected_conseiller:
         # Filter submissions where the user (creator) is associated with the selected conseiller
         submissions = submissions.filter(user__conseiller__id=selected_conseiller)
@@ -5378,13 +5378,30 @@ def manage_submissions(request):
     if status_filter:
         submissions = submissions.filter(status=status_filter)
 
-    # Filter by Date
-    selected_date = request.GET.get('date')
-    if selected_date:
-        submissions = submissions.filter(created_at__date=selected_date)
+
+    # Handle date range filtering
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    if start_date and end_date:
+        # Filter submissions within the selected date range
+        submissions = submissions.filter(created_at__range=[start_date, end_date])
+
+    # Pagination logic
+    paginator = Paginator(submissions, 15)  # Show 10 submissions per page
+    page_number = request.GET.get('page')  # Get the page number from the request
+    try:
+        submissions = paginator.page(page_number)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        submissions = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 999), deliver last page of results.
+        submissions = paginator.page(paginator.num_pages)
+   
 
     # Count the number of filtered submissions
-    submission_count = submissions.count()
+    submission_count = submissions.paginator.count
 
     return render(request, 'listings/manage_submissions.html', {
         'submissions': submissions,
@@ -5397,8 +5414,26 @@ def manage_submissions(request):
         'count_rejectedontrat': count_rejectedontrat,
          'conseillers': conseillers,
         'count_in_progressontrat': count_in_progressontrat,
+        'start_date': start_date,  # Add start_date to context
+        'end_date': end_date,
         
                 })
+
+
+def get_conseiller_username(request):
+    # Retrieve the conseiller id from the GET request
+    conseiller_id = request.GET.get('id')
+    
+    # Check if the id is provided and not empty
+    if not conseiller_id:
+        return JsonResponse({'username': ''}, status=400)  # Return an empty username with a bad request status
+
+    try:
+        # Try to get the conseiller with the provided id
+        conseiller = Conseiller.objects.get(id=conseiller_id)
+        return JsonResponse({'username': conseiller.user.username})  # Return the username in the response
+    except Conseiller.DoesNotExist:
+        return JsonResponse({'username': ''}, status=404)  # Handle cases where conseiller does not exist
 
 
 from django.http import JsonResponse

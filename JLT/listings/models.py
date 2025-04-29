@@ -620,7 +620,7 @@ class Submission(models.Model):
         ('coffret', 'Coffret'),
     ], null=True, blank=True)  # Mode d'envoi
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(null=True, blank=True)
 
     STATUS_CHOICES = [
         ('en_cours', 'En cours'),
@@ -636,8 +636,15 @@ class Submission(models.Model):
 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='en_cours')
 
+    def save(self, *args, **kwargs):
+        # Set created_at to now minus 4 hours
+        if not self.created_at:  # If created_at is not already set
+            self.created_at = timezone.now() - timedelta(hours=4)
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.submission_type} by {self.user} at {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}. Company: {self.company_name if self.company_name else 'N/A'}"
+    
 
 from django.shortcuts import render, get_object_or_404
 from .models import Submission

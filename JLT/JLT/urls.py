@@ -84,6 +84,7 @@ path('update_status/', views.update_status, name='update_status'),
 path('submit/', submit_request, name='submit_request'),  # For submitting a new Soumission or Contrat
 path('manage/', manage_submissions, name='manage_submissions'),  # For managing submissions
 path('submission/<int:submission_id>/', submission_detail, name='submission_detail'),
+path('get-conseiller-username/', get_conseiller_username, name='get_conseiller_username'),
 path('update_submission/<int:submission_id>/', update_submission_status, name='update_submission_status'),  # For updating submission status
 path('modify-dock/', modify_dock_view, name='modify_dock_view'),  # URL pattern for modify dock
 path('save_credit_card/', save_credit_card_info, name='save_credit_card_info'),

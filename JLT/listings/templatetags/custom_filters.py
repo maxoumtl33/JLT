@@ -33,6 +33,16 @@ def subtract(value, arg):
         return value
     
 
+from datetime import timedelta
+from datetime import datetime as dt  # Import datetime and alias it to avoid confusion
+
+@register.filter
+def subtract_hours(value, hours):
+    """Subtract specified number of hours from a datetime."""
+    if isinstance(value, dt):  # Use the alias here
+        return value - timedelta(hours=hours)
+    return value  # Return unchanged if not a datetime
+
 @register.simple_tag
 def year_range(start_year, end_year):
     return range(start_year, end_year + 1)
