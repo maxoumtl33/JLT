@@ -1,0 +1,40 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mt-5">Détails de la Soumission</h2>
+    
+    <div class="card shadow-sm mt-4">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0">Soumission Type: {{ submission.get_submission_type_display }}</h5>
+        </div>
+        <div class="card-body">
+            <p><strong>Commandé par:</strong> {{ submission.ordered_by }}</p>
+            <p><strong>Nom de la compagnie:</strong> {{ submission.company_name }}</p>
+            <p><strong>Lieu de l'événement:</strong> {{ submission.event_location }}</p>
+            <p><strong>Contact sur place:</strong> {{ submission.contact_person }}</p>
+            <p><strong>Téléphone:</strong> {{ submission.phone }}</p>
+            <p><strong>Email:</strong> {{ submission.email }}</p>
+            <p><strong>Adresse de facturation:</strong> {{ submission.billing_address }}</p>
+            <p><strong>Mode de paiement:</strong> {{ submission.get_payment_mode_display }}</p>
+            <p><strong>Date:</strong> {{ submission.date|date:"d F Y" }}</p>
+            <p><strong>Heure de l'événement:</strong> {{ submission.event_time }}</p>
+            <p><strong>Nombre de personnes:</strong> {{ submission.guest_count }}</p>
+            <p><strong>Heure de livraison:</strong> {{ submission.delivery_time }}</p>
+            <p><strong>Budget:</strong> {{ submission.budget }}</p>
+            <p><strong>Nombre de services:</strong> {{ submission.service_count }}</p>
+            <p><strong>Mode d'envoi:</strong> {{ submission.get_delivery_mode_display }}</p>
+            <p><strong>Status:</strong> {{ submission.get_status_display }}</p>
+            <p><strong>Créé à:</strong> {{ submission.created_at|date:"d F Y, H:i" }}</p>
+        </div>
+
+        <div class="modal-footer">
+            <a href="{% url 'manage_submissions' %}" class="btn btn-secondary">Retour à la gestion des soumissions</a>
+            <a href="{% url 'update_submission_status' submission.id %}" class="btn btn-warning">Modifier le statut</a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+

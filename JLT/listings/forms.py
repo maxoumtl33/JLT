@@ -290,6 +290,49 @@ class ChecklistInfosForm(forms.ModelForm):
     fourni_client = forms.CharField(label='Matériel fourni par client', max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}),required=False)
     fourni_salle = forms.CharField(label='Matériel dans la salle', max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}),required=False)
 
+from django import forms
+
+from django import forms
+
+class SubmissionForm(forms.ModelForm):
+    class Meta:
+        model = Submission
+        fields = [
+            'submission_type', 'company_name', 'event_location', 'contact_person', 
+            'ordered_by', 'phone', 'email', 'billing_address', 
+            'payment_mode', 'date', 'event_time', 'guest_count', 
+            'delivery_time', 'budget', 'service_count', 'delivery_mode'
+        ]
+        
+    submission_type = forms.ChoiceField(choices=Submission.SUBMISSION_TYPE_CHOICES)
+    company_name = forms.CharField(label='Nom de la compagnie', max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    event_location = forms.CharField(label='Lieu de l\'événement', max_length=200, required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    contact_person = forms.CharField(label='Contact sur place', max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    ordered_by = forms.CharField(label='Commandé par', max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    phone = forms.CharField(label='Téléphone', max_length=15, required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    email = forms.EmailField(label='Email', max_length=100, required=True, widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    billing_address = forms.CharField(label='Adresse de facturation', max_length=200, required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    payment_mode = forms.ChoiceField(label='Mode de paiement', choices=Submission.STATUS_CHOICESS, required=True, widget=forms.Select(attrs={'class': 'form-control'}))
+    date = forms.DateField(label='Date', widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}), required=True)
+    event_time = forms.TimeField(label='Heure de l\'événement', widget=forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}), required=True)
+    guest_count = forms.IntegerField(label='Nombre de personnes', required=True, widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    delivery_time = forms.TimeField(label='Heure de livraison', widget=forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}), required=True)
+    budget = forms.DecimalField(label='Budget', max_digits=10, decimal_places=2, required=True, widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    service_count = forms.CharField(label='Nombre de services', max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    delivery_mode = forms.ChoiceField(
+        label='Mode d\'envoi',
+        choices=[
+            ('assiette', 'Assiette'),
+            ('buffet_porcelaine', 'Buffet porcelaine'),
+            ('buffet_jetable', 'Buffet jetable'),
+            ('coffret', 'Coffret'),
+        ],
+        required=True,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+
+
 
 class SearchFormInv(forms.Form):
     query = forms.CharField(label='Objet à chercher', max_length=100)

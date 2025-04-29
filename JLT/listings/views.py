@@ -5309,6 +5309,128 @@ def ChecklistmdDetailView(request, pk):
     }
     return render(request, 'listings/checklistmd_detail.html', context)
 
+from django.http import HttpResponse
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from .models import Submission
+from .forms import SubmissionForm
+@login_required
+def submit_request(request):
+    if request.method == 'POST':
+        form = SubmissionForm(request.POST)
+        if form.is_valid():
+            submission = form.save(commit=False)
+            submission.user = request.user  # Link to the logged-in user
+            submission.save()
+            messages.success(request, 'Votre soumission a été enregistrée avec succès.')
+            return redirect('submit_request')  # Replace with your success URL
+    else:
+        form = SubmissionForm()
+    
+    return render(request, 'listings/submit_request.html', {'form': form})
+
+
+from django.utils import timezone
+from datetime import timedelta
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import Submission
+
+from django.shortcuts import redirect, render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from .models import Submission
+from django.http import JsonResponse
+from datetime import timedelta
+
+@login_required
+def manage_submissions(request):
+    if not request.user.groups.filter(name='admin').exists():
+        return redirect('home')
+
+    conseillers = Conseiller.objects.select_related('user').all()  # Fetch all Conseillers with related Users
+    submissions = Submission.objects.all().order_by('-created_at')
+    submission_type = request.GET.get('submission_type', '')
+    count_validated = submissions.filter(status='valide', submission_type="soumission").count()
+    count_rejected = submissions.filter(status='refuse', submission_type="soumission").count()
+    count_in_progress = submissions.filter(status='en_cours', submission_type="soumission").count()
+
+    count_validatedcontrat = submissions.filter(status='valide', submission_type="contrat").count()
+    count_rejectedontrat = submissions.filter(status='refuse', submission_type="contrat").count()
+    count_in_progressontrat = submissions.filter(status='en_cours', submission_type="contrat").count()
+
+    selected_conseiller = request.GET.get('conseiller')
+    
+    if selected_conseiller:
+        # Filter submissions where the user (creator) is associated with the selected conseiller
+        submissions = submissions.filter(user__conseiller__id=selected_conseiller)
+
+    # Filter by Submission Type
+    submission_type = request.GET.get('submission_type')
+    if submission_type:
+        submissions = submissions.filter(submission_type=submission_type)
+
+    # Filter by Status
+    status_filter = request.GET.get('status')
+    if status_filter:
+        submissions = submissions.filter(status=status_filter)
+
+    # Filter by Date
+    selected_date = request.GET.get('date')
+    if selected_date:
+        submissions = submissions.filter(created_at__date=selected_date)
+
+    # Count the number of filtered submissions
+    submission_count = submissions.count()
+
+    return render(request, 'listings/manage_submissions.html', {
+        'submissions': submissions,
+        'submission_type': submission_type,
+        'submission_count': submission_count,
+        'count_validated': count_validated,
+        'count_rejected': count_rejected,
+        'count_in_progress': count_in_progress,
+        'count_validatedcontrat' : count_validatedcontrat,
+        'count_rejectedontrat': count_rejectedontrat,
+         'conseillers': conseillers,
+        'count_in_progressontrat': count_in_progressontrat,
+        
+                })
+
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+
+@require_POST
+def save_credit_card_info(request):
+    card_number = request.POST.get('card_number')
+    card_holder = request.POST.get('card_holder')
+    expiry_date = request.POST.get('expiry_date')
+    cvv = request.POST.get('cvv')
+
+    # Here you can implement your business logic to store the details
+    # e.g., saving to the database or processing the payment
+
+    return JsonResponse({'success': True, 'message': 'Détails de la carte enregistrés avec succès!'})
+
+
+@login_required
+def update_submission_status(request, submission_id):
+    submission = get_object_or_404(Submission, id=submission_id)
+
+    if request.method == 'POST':
+        new_status = request.POST.get('status')  # Expecting status from a form or AJAX
+        if new_status in dict(Submission.STATUS_CHOICES):  # Ensure the new status is valid
+            submission.status = new_status
+            submission.save()
+            messages.success(request, 'Statut de la soumission mis à jour avec succès.')
+            return redirect('manage_submissions')
+    
+    return render(request, 'listings/update_submission_status.html', {'submission': submission})
+
 
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods

@@ -1,0 +1,20 @@
+{% extends 'listings/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mt-5">Modifier le Statut de la Soumission</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="status" class="form-label">Choisissez un statut</label>
+            <select name="status" class="form-select">
+                <option value="en_cours" {% if submission.status == 'en_cours' %}selected{% endif %}>En cours</option>
+                <option value="valide" {% if submission.status == 'valide' %}selected{% endif %}>Validé</option>
+                <option value="refuse" {% if submission.status == 'refuse' %}selected{% endif %}>Refusé</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Mettre à jour</button>
+    </form>
+    <a href="{% url 'manage_submissions' %}" class="btn btn-secondary mt-3">Retour à la gestion des soumissions</a>
+</div>
+{% endblock %}

@@ -87,4 +87,4 @@ admin.site.register(Conseiller)
 admin.site.register(Category)
 admin.site.register(Vehicle)
 admin.site.register(PhotoVehicle)
-
+admin.site.register(Submission)

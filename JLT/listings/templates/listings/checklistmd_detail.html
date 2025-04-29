@@ -273,6 +273,9 @@
                     <div class="tab-content">
                         <!-- Photos Rapport -->
                         <div id="photos-rapport" class="tab-pane fade show active photo-gallery mt-3">
+                            <br>
+                            <br>
+                            <br>
                             {% for photo in md_photos %}
                                 <div class="photo position-relative">
                                     <img src="{{ photo.image.url }}" alt="MD Photo" 
@@ -285,15 +288,16 @@
                                         <i class="fa-solid fa-trash"></i>
                                     </button>
                                 </div>
-                            {% empty %}
-                                <p class="no-photos-message">Pas de photos.</p>
-                                 <!-- Videos Section -->
+                            
                             {% endfor %}
                         </div>
                         
                     
                         <!-- Photos Récupération -->
                         <div id="photos-recuperation" class="tab-pane fade photo-gallery mt-3">
+                            <br>
+                            <br>
+                            <br>
                             {% for photo in recup_photos %}
                                 <div class="photo position-relative">
                                     <img src="{{ photo.image.url }}" alt="Recup Photo" 
@@ -306,8 +310,7 @@
                                         <i class="fa-solid fa-trash"></i>
                                     </button>
                                 </div>
-                            {% empty %}
-                                <p class="no-photos-message">Pas de photos.</p>
+                            
                             {% endfor %}
                     
                            
