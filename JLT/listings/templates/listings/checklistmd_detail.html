@@ -144,7 +144,7 @@
                     <div id="checklist-items" style="display: none; margin-top: 20px;">
                         <div class="container mt-5">
                             <h2 class="text-center">Produits par catégorie</h2>
-                            {% for category, products in products_by_category.items %}
+                            {% for category, checklist_items in checklist_items_by_category.items %}
                                 {% if category == "CFCDN" and not show_cfcdn_category %}
                                     {% comment %} Skip rendering this category if it doesn't belong to the checklist {% endcomment %}
                                 {% else %}
@@ -156,9 +156,9 @@
                                     </div>
                                     <div id="category-{{ forloop.counter }}" class="card-body" style="display: none;">
                                         <ul class="list-group">
-                                            {% for product in products %}
+                                            {% for product in checklist_items %}
                                                 <li class="list-group-item">
-                                                    {{ product.name }} - Quantité: {{ product.quantity }}
+                                                    <strong>{{ product.product.name }}</strong> - Quantité: {{ product.quantity }}
                                                 </li>
                                             {% empty %}
                                                 <li class="list-group-item">Aucun produit dans cette catégorie.</li>
@@ -274,25 +274,46 @@
                         <!-- Photos Rapport -->
                         <div id="photos-rapport" class="tab-pane fade show active photo-gallery mt-3">
                             {% for photo in md_photos %}
-                                <div class="photo">
-                                    <img src="{{ photo.image.url }}" alt="MD Photo" data-bs-toggle="modal" data-bs-target="#imageModal" onclick="openModal('{{ photo.image.url }}')">
+                                <div class="photo position-relative">
+                                    <img src="{{ photo.image.url }}" alt="MD Photo" 
+                                         data-bs-toggle="modal" data-bs-target="#imageModal" 
+                                         onclick="openModal('{{ photo.image.url }}')">
+                                    <!-- Delete Button -->
+                                    <button class="btn btn-danger btn-sm position-absolute" 
+                                            style="top: 0; right: 0;" 
+                                            onclick="deletePhoto('{{ photo.id }}')">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
                                 </div>
                             {% empty %}
                                 <p class="no-photos-message">Pas de photos.</p>
+                                 <!-- Videos Section -->
                             {% endfor %}
                         </div>
-        
+                        
+                    
                         <!-- Photos Récupération -->
                         <div id="photos-recuperation" class="tab-pane fade photo-gallery mt-3">
                             {% for photo in recup_photos %}
-                                <div class="photo">
-                                    <img src="{{ photo.image.url }}" alt="Recup Photo" data-bs-toggle="modal" data-bs-target="#imageModal" onclick="openModal('{{ photo.image.url }}')">
+                                <div class="photo position-relative">
+                                    <img src="{{ photo.image.url }}" alt="Recup Photo" 
+                                         data-bs-toggle="modal" data-bs-target="#imageModal" 
+                                         onclick="openModal('{{ photo.image.url }}')">
+                                    <!-- Delete Button -->
+                                    <button class="btn btn-danger btn-sm position-absolute" 
+                                            style="top: 0; right: 0;" 
+                                            onclick="deletePhoto('{{ photo.id }}')">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
                                 </div>
                             {% empty %}
                                 <p class="no-photos-message">Pas de photos.</p>
                             {% endfor %}
+                    
+                           
                         </div>
                     </div>
+                    
                 </div>
             </div>
 
@@ -515,6 +536,26 @@ document.getElementById("breuvagesReportForm").addEventListener("submit", functi
     function hideToast() {
         document.getElementById("toast").style.display = "none";
     }
+
+    function deletePhoto(photoId) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cette photo?')) {
+        $.ajax({
+            url: `/delete_photo/${photoId}/`, // Modify URL to your deletion route
+            type: 'DELETE',
+            headers: {
+                'X-CSRFToken': "{{ csrf_token }}",
+            },
+            success: function() {
+                // Optionally, reload the page or remove the photo from the DOM
+                location.reload(); // Reloads the page to reflect deletion
+            },
+            error: function() {
+                alert('Erreur lors de la suppression de la photo.');
+            }
+        });
+    }
+}
+
 </script>
 
 {% endblock %}

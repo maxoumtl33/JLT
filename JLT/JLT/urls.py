@@ -76,6 +76,7 @@ path('livraisonsventes/<int:pk>/', views.livraisonsventesdetail, name='livraison
 path("livraisonsdrag/", views.Livraisonsdrag.as_view(), name='livraisonsdrag'),
 path('livraison/edit/<int:livraison_id>/', livraison_edit_form, name='livraison-edit-form'),
 path('livraisonsdrag/<int:pk>/', views.livraisonsdrag_detail, name='livraisonsdrag-detail'),
+path('delete_photo/<int:photo_id>/', delete_photo_md, name='delete_photo'),
 path('livraisonsdragtoday/<int:pk>/', views.livraisonsdrag_detailtoday, name='livraisonsdrag-detailtoday'),
 path('livraisonsdragtoday/<int:pk>/edit', views.livraison_edit_formtoday, name='livraison-edit-formtoday'),
 path("livraisonsdragtoday/", views.Livraisonsdragtoday.as_view(), name='livraisonsdragtoday'),

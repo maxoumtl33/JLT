@@ -5234,14 +5234,15 @@ def ChecklistmdDetailView(request, pk):
     form1 = RapportRecupForm(request.POST or None, prefix='form1', instance=checklist)
     checklist_itemsbreuvage = ChecklistItem.objects.filter(checklist_id=checklist, product__category__name__in=["ALCOOL FORT", "SANS ALCOOL", "VINS",  "BIERES"], quantity__gt=0)
    
-    products = Product.objects.filter(quantity__gt=0).prefetch_related('category').all()
-    products_by_category = {}
-
-    for product in products:
-        for category in product.category.all():
-            if category.name not in products_by_category:
-                products_by_category[category.name] = []
-            products_by_category[category.name].append(product)
+    products = Product.objects.filter(checklistitem__checklist=checklist, quantity__gt=0).prefetch_related('category')
+    checklist_items_by_category = {}
+    for item in checklist_items:
+        product = item.product
+        if product:
+            for category in product.category.all():  # Iterate over each category of the product
+                if category.name not in checklist_items_by_category:
+                    checklist_items_by_category[category.name] = []
+                checklist_items_by_category[category.name].append(item)
 
     # Check if checklist name contains 'CFCDN'
     show_cfcdn_category = "CFCDN" in checklist.name
@@ -5297,7 +5298,7 @@ def ChecklistmdDetailView(request, pk):
         'formset': formset,
         'formset1': formset1,
         'form': form,
-        'products_by_category': products_by_category,
+        'checklist_items_by_category': checklist_items_by_category,
         'checklist_itemsbreuvage': checklist_itemsbreuvage,
         'form1': form1,
         'show_cfcdn_category': show_cfcdn_category,
@@ -5308,6 +5309,28 @@ def ChecklistmdDetailView(request, pk):
     }
     return render(request, 'listings/checklistmd_detail.html', context)
 
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+@login_required
+@require_http_methods(["DELETE"])
+def delete_photo_md(request, photo_id):
+    # Try to delete from ChecklistMDPhoto first
+    try:
+        photo = ChecklistMDPhoto.objects.get(id=photo_id)
+        photo.delete()
+        return JsonResponse({'success': True, 'message': 'Photo MD deleted successfully.'})
+    except ChecklistMDPhoto.DoesNotExist:
+        pass  # If it doesn’t exist, we’ll try the recup photo
+
+    # If the first attempt fails, try to delete from ChecklistRecupPhoto
+    try:
+        photo_recup = ChecklistRecupPhoto.objects.get(id=photo_id)
+        photo_recup.delete()
+        return JsonResponse({'success': True, 'message': 'Photo Récupération deleted successfully.'})
+    except ChecklistRecupPhoto.DoesNotExist:
+        # If both don't exist, return an error response
+        return JsonResponse({'success': False, 'error': 'Photo not found in any category.'}, status=404)
 
 
 from django.shortcuts import redirect

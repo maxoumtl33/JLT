@@ -568,11 +568,14 @@ class QuantityProductChangeLog(models.Model):
 class ChecklistMDPhoto(models.Model):
     checklist = models.ForeignKey(Checklist, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='listings/media/commandesdetail')
+    video = models.FileField(upload_to='listings/media/commandesdetail', blank=True, null=True)
     caption = models.CharField(max_length=200, null=True, blank=True)
 
 class ChecklistRecupPhoto(models.Model):
     checklist = models.ForeignKey(Checklist, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='listings/media/commandesdetail')
+    video = models.FileField(upload_to='listings/media/commandesdetail', blank=True, null=True)
+
     caption = models.CharField(max_length=200, null=True, blank=True)
 
     
