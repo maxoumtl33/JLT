@@ -1,0 +1,535 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% load custom_filters %}
+{% block content %}
+<link href='https://unpkg.com/@fullcalendar/core@5/main.min.css' rel='stylesheet' />
+<script src='https://unpkg.com/@fullcalendar/core@5/main.min.js'></script>
+<script src='https://unpkg.com/@fullcalendar/daygrid@5/main.min.js'></script>
+
+<style>
+    /* General styling */
+    body {
+        background-color: #f0f2f5;
+    }
+
+    .clickable-row {
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .clickable-row:hover {
+        filter: brightness(95%);
+    }
+    
+    h1, h2 {
+        color: #343a40;
+    }
+
+    /* General page styles */
+    .agenda-title {
+        font-size: 2rem;
+        margin-bottom: 20px;
+        text-align: center;
+        color: #333;
+    }
+
+    /* Month selection styles */
+    .month-selection {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 30px;
+    }
+    .month-label {
+        font-size: 1rem;
+        margin-right: 10px;
+        align-self: center;
+    }
+    .month-dropdown {
+        padding: 10px;
+        font-size: 1rem;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        outline: none;
+        transition: border-color 0.3s ease;
+    }
+    .month-dropdown:hover {
+        border-color: #007bff;
+    }
+
+    /* General layout styling */
+    .agenda-container {
+        display: flex;
+        align-items: flex-start;
+        gap: 20px;
+        padding: 20px;
+    }
+
+    /* Calendar section */
+    .calendar-section {
+        width: 45%;
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .calendar {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr); /* 7 equal columns */
+        grid-gap: 10px;
+    }
+    .day {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .day-btn {
+        position: relative;
+        padding: 10px;
+        font-size: 0.9rem;
+        background-color: #ffffff;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        cursor: pointer;
+        width: 100%;
+        height: 60px;
+        text-align: center;
+        transition: background-color 0.3s ease;
+    }
+    .day-btn:hover {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .daycreate-btn {
+        position: relative;
+        padding: 10px;
+        font-size: 0.9rem;
+        background-color: #ffffff;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        cursor: pointer;
+        width: 100%;
+        height: 60px;
+        text-align: center;
+        transition: background-color 0.3s ease;
+    }
+    .daycreate-btn:hover {
+        background-color: #007bff;
+        color: white;
+    }
+    
+    /* Submission section */
+    .submission-section {
+        width: 55%;
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .submission-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .submission-table th, .submission-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+    .submission-table th {
+        background-color: #007bff;
+        color: white;
+    }
+    .submission-table td a {
+        text-decoration: none;
+        color: #007bff;
+    }
+    .submission-table td a:hover {
+        text-decoration: underline;
+    }
+
+    .submissioncreate-section {
+        width: 55%;
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .submissioncreate-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .submissioncreate-table th, .submissioncreate-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+    .submissioncreate-table th {
+        background-color: #007bff;
+        color: white;
+    }
+    .submissioncreate-table td a {
+        text-decoration: none;
+        color: #007bff;
+    }
+    .submissioncreate-table td a:hover {
+        text-decoration: underline;
+    }
+     /* Responsiveness */
+     @media (max-width: 768px) {
+        .calendar {
+            grid-template-columns: repeat(7, 1fr);
+        }
+    }
+
+    @media (max-width: 480px) {
+        .calendar {
+            grid-template-columns: repeat(5, 1fr); /* Adjust for small screens */
+        }
+    }
+
+
+    /* Selected day button style */
+    .day-btn.selected {
+        background-color: #007bff;
+        color: white;
+        font-weight: bold;
+        border-color: #0056b3;
+    }
+        /* Selected day button style */
+        .daycreate-btn.selected {
+        background-color: #007bff;
+        color: white;
+        font-weight: bold;
+        border-color: #0056b3;
+    }
+    .notif-top-right {
+    position: absolute;       /* Positioning relative to the button */
+    right: 5px;              /* Adjust horizontal position */
+    top: 5px;                /* Adjust vertical position */
+    font-size: 0.7rem;       /* Slightly smaller font size */
+    background-color: orange; /* Set background color to orange */
+    color: white;            /* White text for contrast */
+    padding: 3px;           /* Reduced padding */
+    border-radius: 50%;      /* Make it circular */
+    min-width: 20px;         /* Smaller minimum width */
+    height: 20px;            /* Smaller fixed height */
+    display: flex;           /* Use flexbox for centering */
+    justify-content: center;  /* Center content horizontally */
+    align-items: center;     /* Center content vertically */
+    z-index: 10;             /* Ensure it appears above other elements */
+}
+
+
+.filter-section {
+    margin-bottom: 20px; /* Space below the checkbox */
+}
+
+.custom-checkbox {
+    display: flex;
+    align-items: center;
+    cursor: pointer; /* Pointer cursor on hover */
+    font-size: 1rem; /* Font size for the label */
+}
+
+.custom-checkbox input {
+    /* Hide the default checkbox */
+    display: none;
+}
+
+.custom-checkbox .checkmark {
+    display: inline-block;
+    width: 20px; /* Width of the custom checkbox */
+    height: 20px; /* Height of the custom checkbox */
+    border: 2px solid #007bff; /* Border color */
+    border-radius: 4px; /* Rounded corners */
+    margin-right: 10px; /* Space between checkbox and label */
+    position: relative; /* Positioning context for the checkmark */
+}
+
+/* Style for when the checkbox is checked */
+.custom-checkbox input:checked + .checkmark {
+    background-color: #007bff; /* Change background color when checked */
+}
+
+/* Create the checkmark symbol */
+.custom-checkbox input:checked + .checkmark:after {
+    content: ''; /* Empty content */
+    position: absolute; /* Position relative to the checkmark */
+    top: 4px; /* Adjust top position */
+    left: 6px; /* Adjust left position */
+    width: 5px; /* Checkmark width */
+    height: 10px; /* Checkmark height */
+    border: solid white; /* Checkmark color */
+    border-width: 0 2px 2px 0; /* Create a checkmark shape */
+    transform: rotate(45deg); /* Rotate to form a checkmark */
+}
+
+
+</style>
+<br>
+<h1 style="text-align: center;">CALENDRIER SOUMISSIONS / COMMANDES <strong><u>DATE DE CRÉATION</u></strong>
+</h1>
+<br>
+
+<div class="agenda-container">
+    <!-- Calendar to get submissions by creation date -->
+    <div id="calendar-create-section" class="calendar-section">
+        <div class="month-selection">
+            <label for="month-create" class="month-label">Sélectionnez le mois :</label>
+            <select id="month-create" name="month-create" onchange="updateCreateAgenda()" class="month-dropdown">
+                {% for month_name in french_months %}
+                    <option value="{{ forloop.counter0|add:1 }}" {% if forloop.counter0|add:1 == selected_month %}selected{% endif %}>
+                        {{ month_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div id="calendar-create" class="calendar">
+            <div class="day"><strong>Dimanche</strong></div>
+            <div class="day"><strong>Lundi</strong></div>
+            <div class="day"><strong>Mardi</strong></div>
+            <div class="day"><strong>Mercredi</strong></div>
+            <div class="day"><strong>Jeudi</strong></div>
+            <div class="day"><strong>Vendredi</strong></div>
+            <div class="day"><strong>Samedi</strong></div>
+
+            {% for day in days %}
+                <div class="day">
+                    <button class="daycreate-btn" data-day="{{ day }}" onclick="getSubmissionsCreate({{ day }})" {% if day == '' %}disabled{% endif %}>
+                        {{ day }}
+                        {% with daily_counts|get_item:day as counts %}
+                            {% if counts and counts.en_cours > 0 %}
+                                <span class="notif-top-right">{{ counts.en_cours }}</span>
+                            {% endif %}
+                        {% endwith %}
+                    </button>
+                </div>
+            {% endfor %}
+
+
+
+
+        </div>
+    </div>
+
+        <!-- Submission Section for Creation Date Submissions -->
+        <div id="submissioncreate-section" class="submission-section">
+            <div class="submission-section" style="display: flex;">
+                <div class="filter-section">
+                    <span style="margin-right: 10px;">Afficher :</span>
+                    <label>
+                        <input type="radio" name="status-filter" value="all" checked onchange="filterSubmissions()" />
+                        Tous
+                    </label>
+                    <label>
+                        <input type="radio" name="status-filter" value="en_cours" onchange="filterSubmissions()" />
+                        En cours
+                    </label>
+                    <label>
+                        <input type="radio" name="status-filter" value="valide" onchange="filterSubmissions()" />
+                        Validé
+                    </label>
+                    <label>
+                        <input type="radio" name="status-filter" value="refuse" onchange="filterSubmissions()" />
+                        Refusé
+                    </label>
+                    <label>
+                        <input type="radio" name="status-filter" value="envoye" onchange="filterSubmissions()" />
+                        Envoyé
+                    </label>
+                </div>
+            
+                <div class="type-filter-section">
+                    <span style="margin-right: 10px;">Type de soumission :</span>
+                    <label>
+                        <input type="checkbox" name="type-filter" value="Soumission événement" onchange="filterSubmissions()" />
+                        Soumission événement
+                    </label>
+                    <label>
+                        <input type="checkbox" name="type-filter" value="Commande événement" onchange="filterSubmissions()" />
+                        Commande événement
+                    </label>
+                    <label>
+                        <input type="checkbox" name="type-filter" value="Soumission BAL/Buffet" onchange="filterSubmissions()" />
+                        Soumission BAL/Buffet
+                    </label>
+                    <label>
+                        <input type="checkbox" name="type-filter" value="Commande BAL/Buffet" onchange="filterSubmissions()" />
+                        Commande BAL/Buffet
+                    </label>
+                </div>
+            
+                
+            </div>
+            
+            
+            <br>
+            <table class="submissioncreate-table">
+                <thead>
+                    <tr>
+                        <th data-sort="client" style="cursor: pointer;">Client</th>
+                        <th data-sort="type" style="cursor: pointer;">Type</th>
+                        <th data-sort="ajoute_par" style="cursor: pointer;">Ajouté par</th>
+                        <th data-sort="ajoute_le" style="cursor: pointer;">Ajouté le</th>
+                        <th data-sort="date" style="cursor: pointer;">Date</th>
+                        <th data-sort="status" style="cursor: pointer;">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="submissioncreate-list" data-detail-url="{% url 'submission_detail' submission_id=0 %}">
+                    <!-- Submissions will appear dynamically here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script>
+
+document.addEventListener('DOMContentLoaded', function() {
+    const table = document.querySelector('.submissioncreate-table');
+    const tbody = table.querySelector('tbody');
+
+    // Function to sort the table rows
+    function sortTable(columnIndex, asc = true) {
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const sortedRows = rows.sort((a, b) => {
+            const aText = a.children[columnIndex].innerText;
+            const bText = b.children[columnIndex].innerText;
+
+            // Handle sorting as numbers if the content is numeric
+            const aValue = isNaN(aText) ? aText : parseFloat(aText);
+            const bValue = isNaN(bText) ? bText : parseFloat(bText);
+
+            return asc ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
+        });
+
+        // Remove existing rows and append sorted rows
+        tbody.innerHTML = '';
+        sortedRows.forEach(row => tbody.appendChild(row));
+    }
+
+    // Add click event listeners to each header to sort
+    table.querySelectorAll('th').forEach((header, index) => {
+        let asc = true; // Default to ascending sort
+        header.addEventListener('click', function() {
+            sortTable(index, asc);
+            asc = !asc; // Toggle direction after each click
+        });
+    });
+});
+
+
+        // Update function for creating submission month
+        function updateCreateAgenda() {
+            const selectedMonth = document.getElementById('month-create').value;
+            const url = `/calendarsubcreate_view/?month=${selectedMonth}`; // Adjust the URL for your view
+            window.location.href = url; // Reload the page with the new month selection
+        }
+
+        function getStatusIcon(status) {
+            switch (status) {
+                case 'valide':
+                    return '<i class="fas fa-check-circle" style="color: green;"></i>';
+                case 'en_cours':
+                    return '<i class="fas fa-clock" style="color: orange;"></i>';
+                case 'refuse':
+                    return '<i class="fas fa-times-circle" style="color: red;"></i>';
+                case 'envoyé':
+                    return '<i class="fas fa-paper-plane" style="color: blue;"></i>';
+                default:
+                    return '';  // Return an empty string if no icon is matched.
+            }
+        }
+
+        
+        function filterSubmissions() {
+            const selectedStatus = document.querySelector('input[name="status-filter"]:checked').value; // Get selected status
+            const selectedTypes = Array.from(document.querySelectorAll('input[name="type-filter"]:checked')).map(input => input.value); // Get checked types
+            const rows = document.querySelectorAll('#submissioncreate-list tr'); // Get all table rows
+
+            rows.forEach(row => {
+                const statusCell = row.querySelector('td:last-child'); // Assuming the last cell holds the status
+                const typeCell = row.children[1]; // Assuming the second cell (index 1) holds the type
+
+                // Default to visible
+                let shouldDisplay = true;
+
+                // Check status condition
+                if (selectedStatus !== 'all' && statusCell) {
+                    shouldDisplay = statusCell.innerText.includes(selectedStatus);
+                }
+
+                // Check type condition
+                if (shouldDisplay && selectedTypes.length > 0 && typeCell) {
+                    shouldDisplay = selectedTypes.includes(typeCell.innerText);
+                }
+
+                // Show or hide the row based on the filter conditions
+                row.style.display = shouldDisplay ? '' : 'none';
+            });
+        }
+
+
+
+
+    
+        // Fetch submissions based on creation date
+        function getSubmissionsCreate(day) {
+            const month = document.getElementById('month-create').value;
+            fetch(`/get_submissions_for_created_at/${day}/?month=${month}`)
+                .then(response => {
+                    
+                    return response.json();
+                })
+                .then(data => {
+                    const submissionList = document.getElementById('submissioncreate-list');
+                    const baseUrl = submissionList.dataset.detailUrl.replace(/0\/$/, '');
+                    submissionList.innerHTML = '';
+    
+                    // Clear previously selected date
+                    const allDayButtons = document.querySelectorAll('.daycreate-btn');
+                    allDayButtons.forEach(button => button.classList.remove('selected'));
+    
+                    // Highlight the selected date button
+                    const selectedButton = document.querySelector(`.daycreate-btn[data-day='${day}']`);
+                    if (selectedButton) {
+                        selectedButton.classList.add('selected');
+                    }
+    
+                    if (data.submission && data.submission.length > 0) {
+                        
+                        data.submission.forEach(submission => {
+                            const row = document.createElement('tr');
+                            row.classList.add('clickable-row');
+                            row.classList.add(`status-${submission.status}`); // Add status class
+                            row.dataset.href = `${baseUrl}${submission.id}/`;
+    
+                            row.innerHTML = `
+                            <td>${submission.company_name}</td>
+                            <td>${submission.submission_type}</td>
+                            <td>${submission.user__username || 'N/A'}</td>
+                            <td>${submission.created_at}</td>
+                            <td>${submission.date}</td>
+                            <td>${getStatusIcon(submission.status)} ${submission.status}</td>
+                        `;
+                        row.addEventListener('click', function() {
+                            window.location.href = this.dataset.href;
+                        });
+                        submissionList.appendChild(row);
+                    });
+                } else {
+                    
+                    submissionList.innerHTML = `
+                        <tr>
+                            <td colspan="5">Aucune soumission créee à ce jour.</td>
+                        </tr>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching creation submissions:', error);
+            });
+    }
+</script>
+{% endblock %}
+
+    

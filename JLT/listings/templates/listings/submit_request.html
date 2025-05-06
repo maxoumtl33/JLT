@@ -11,12 +11,12 @@
         {% csrf_token %}
 
         <!-- Submission Type -->
-        <div class="mb-3">
+        <div class="mb-4">
             <label for="submission_type" class="form-label">Type de Soumission</label>
             {{ form.submission_type }}
         </div>
 
-        <div class="row mb-3">
+        <div class="row mb-4">
             <div class="col-md-6">
                 <label for="company_name" class="form-label">Nom de la compagnie <i class="fas fa-building" aria-hidden="true"></i></label>
                 {{ form.company_name }}
@@ -34,7 +34,8 @@
             </div>
         </div>
 
-        <div class="row mb-3">
+        <h5 class="mb-3">Coordonnées</h5>
+        <div class="row mb-4">
             <div class="col-md-6">
                 <label for="contact_person" class="form-label">Contact sur place <i class="fas fa-user" aria-hidden="true"></i></label>
                 {{ form.contact_person }}
@@ -52,7 +53,7 @@
             </div>
         </div>
 
-        <div class="row mb-3">
+        <div class="row mb-4">
             <div class="col-md-6">
                 <label for="phone" class="form-label">Téléphone <i class="fas fa-phone" aria-hidden="true"></i></label>
                 {{ form.phone }}
@@ -70,7 +71,8 @@
             </div>
         </div>
 
-        <div class="row mb-3">
+        <h5 class="mb-3">Informations de Facturation</h5>
+        <div class="row mb-4">
             <div class="col-md-6">
                 <label for="billing_address" class="form-label">Adresse de facturation <i class="fas fa-address-card" aria-hidden="true"></i></label>
                 {{ form.billing_address }}
@@ -79,23 +81,22 @@
                 </div>
             </div>
 
-            
-                <div class="col-md-6">
-                    <label for="payment_mode" class="form-label">Mode de paiement <i class="fas fa-credit-card" aria-hidden="true"></i></label>
-                    {{ form.payment_mode }}
-                    <div class="invalid-feedback">
-                        Veuillez choisir un mode de paiement.
-                    </div>
+            <div class="col-md-6">
+                <label for="payment_mode" class="form-label">Mode de paiement <i class="fas fa-credit-card" aria-hidden="true"></i></label>
+                {{ form.payment_mode }}
+                <div class="invalid-feedback">
+                    Veuillez choisir un mode de paiement.
                 </div>
             </div>
-        
+        </div>
 
-        <div class="row mb-3">
+        <h5 class="mb-3">Détails de l'Événement</h5>
+        <div class="row mb-4">
             <div class="col-md-6">
                 <label for="date" class="form-label">Date <i class="fas fa-calendar-day" aria-hidden="true"></i></label>
                 {{ form.date }}
                 <div class="invalid-feedback">
-                    Veuillez sélectionner une date.
+                    Veuillez sélectionner une date
                 </div>
             </div>
 
@@ -108,7 +109,7 @@
             </div>
         </div>
 
-        <div class="row mb-3">
+        <div class="row mb-4">
             <div class="col-md-6">
                 <label for="guest_count" class="form-label">Nombre de personnes <i class="fas fa-users" aria-hidden="true"></i></label>
                 {{ form.guest_count }}
@@ -126,7 +127,8 @@
             </div>
         </div>
 
-        <div class="row mb-3">
+        <h5 class="mb-3">Autres Détails</h5>
+        <div class="row mb-4">
             <div class="col-md-6">
                 <label for="budget" class="form-label">Budget <i class="fas fa-dollar-sign" aria-hidden="true"></i></label>
                 {{ form.budget }}
@@ -144,13 +146,44 @@
             </div>
         </div>
 
-        <div class="row mb-3">
+        <h5 class="mb-3">Mode d'Envoi</h5>
+        <div class="row mb-4">
             <div class="col-md-6">
                 <label for="delivery_mode" class="form-label">Mode d'envoi <i class="fas fa-truck" aria-hidden="true"></i></label>
                 {{ form.delivery_mode }}
                 <div class="invalid-feedback">
                     Veuillez choisir un mode d'envoi.
                 </div>
+                <!-- Modal for Menu Selection -->
+                <div class="modal fade" id="menuModal" tabindex="-1" aria-labelledby="menuModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="menuModalLabel">Sélectionner un Menu</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="menuSelectForm">
+                                    {% for menu in menus %}
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="menu_{{ menu.id }}" value="{{ menu.id }}">
+                                        <label class="form-check-label" for="menu_{{ menu.id }}">{{ menu.name }}</label>
+                                    </div>
+                                    {% endfor %}
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                <button type="button" class="btn btn-primary" id="addMenus">Ajouter</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Button to open menu modal -->
+                <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#menuModal">
+                    Sélectionner un Menu
+                </button>
             </div>
         </div>
 
@@ -158,7 +191,7 @@
     </form>
 </div>
 
-<!-- Modal for Credit Card Info -->
+<!-- Credit Card Info Modal -->
 <div class="modal fade" id="creditCardModal" tabindex="-1" aria-labelledby="creditCardModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -193,7 +226,8 @@
         </div>
     </div>
 </div>
-<!-- Modal for Interac Info -->
+
+<!-- Interac Info Modal -->
 <div class="modal fade" id="interacModal" tabindex="-1" aria-labelledby="interacModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -221,8 +255,6 @@
     </div>
 </div>
 
-
-
 <script>
 // JavaScript for form validation
 (function () {
@@ -241,14 +273,11 @@
         });
 })();
 
-
 document.getElementById('id_payment_mode').addEventListener('change', function() {
     const paymentMode = this.value;
     if (paymentMode === 'cc') {
-        // Show Credit Card Modal
         $('#creditCardModal').modal('show');
     } else if (paymentMode === 'interac') {
-        // Show Interac Modal
         $('#interacModal').modal('show');
     }
 });
@@ -257,15 +286,12 @@ document.getElementById('id_payment_mode').addEventListener('change', function()
 document.getElementById('creditCardForm').addEventListener('submit', function(event) {
     event.preventDefault(); // Prevent the default form submission
 
-    // Get the values from the input fields
     const cardNumber = document.getElementById('card_number').value;
     const cardHolder = document.getElementById('card_holder').value;
     const expiryDate = document.getElementById('expiry_date').value;
     const cvv = document.getElementById('cvv').value;
     
-    // You can add an AJAX request here or handle the submission logic as required
     console.log("Credit Card Info Submitted:", cardNumber, cardHolder, expiryDate, cvv);
-    // Close the modal
     $('#creditCardModal').modal('hide');
 });
 
@@ -273,20 +299,34 @@ document.getElementById('creditCardForm').addEventListener('submit', function(ev
 document.getElementById('interacForm').addEventListener('submit', function(event) {
     event.preventDefault(); // Prevent the default form submission
 
-    // Get the values from the input fields
     const interacEmail = document.getElementById('interac_email').value;
     const interacMessage = document.getElementById('interac_message').value;
 
-    // You can add an AJAX request here or handle the submission logic as required
-    console.log("Interac Info Submitted:", interacEmail, interacMessage);
-    // You can replace this with an AJAX request to save Interac payment details or process accordingly.
+console.log("Interac Info Submitted:", interacEmail, interacMessage);
 
-    // Close the modal after submission
-    $('#interacModal').modal('hide');
+// Optionally, handle the submission via AJAX here
+
+$('#interacModal').modal('hide'); // Close the modal after submission
 });
 
+// Handle Menu Selection Submission
+document.getElementById('addMenus').addEventListener('click', function() {
+const selectedMenus = [];
+const checkboxes = document.querySelectorAll('#menuSelectForm .form-check-input:checked');
 
+checkboxes.forEach(function(checkbox) {
+    selectedMenus.push(checkbox.value);
+});
+
+console.log('Selected Menus:', selectedMenus);
+
+// Update a hidden input or display the selected menus
+document.getElementById('delivery_mode').value = selectedMenus.join(',');
+$('#menuModal').modal('hide');  // Hide the modal after selection
+});
 </script>
 
 {% endblock %}
+
+
 

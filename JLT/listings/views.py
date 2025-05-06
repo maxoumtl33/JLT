@@ -1252,34 +1252,52 @@ def edit_item(request, pk):
     return render(request, 'listings/edit_item.html', {'form': form, 'item':item})
 
 
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.shortcuts import render, get_object_or_404
+from django.contrib import messages
+from django.utils import timezone
+
 @login_required
 def conseiller_dashboard(request):
     encours = "en_cours"
     valide = "valide"
     refuse = "refuse"
     conseiller_instance = get_object_or_404(Conseiller, user=request.user)
+
+    # Fetch checklists
     checklists = Checklist.objects.filter(conseillere=conseiller_instance).order_by("-date")
     active_checklists = checklists.filter(is_active=True)
     inactive_checklists = checklists.filter(is_active=False)
-    paginator = Paginator(checklists, 10)  # Show 10 checklists per page
-    page_number = request.GET.get('page')
 
-    # Retrieve the page object
+    # Paginate checklists
+    checklist_paginator = Paginator(checklists, 10)  # Show 10 checklists per page
+    checklist_page_number = request.GET.get('checklist_page')  # Different page number for checklists
     try:
-        page_obj = paginator.page(page_number)
+        checklist_page_obj = checklist_paginator.page(checklist_page_number)
     except PageNotAnInteger:
-        page_obj = paginator.page(1)  # If page is not an integer, deliver first page
+        checklist_page_obj = checklist_paginator.page(1)
     except EmptyPage:
-        page_obj = paginator.page(paginator.num_pages)  # If page is out of range, deliver last page
+        checklist_page_obj = checklist_paginator.page(checklist_paginator.num_pages)
 
+    # Pagination for user's submissions
+    submissions = Submission.objects.filter(user=request.user).order_by("-created_at")
+    
+    # Paginate submissions
+    submission_paginator = Paginator(submissions, 10)  # Show 10 submissions per page
+    submission_page_number = request.GET.get('submission_page')  # Different page number for submissions
+    try:
+        submission_page_obj = submission_paginator.page(submission_page_number)
+    except PageNotAnInteger:
+        submission_page_obj = submission_paginator.page(1)
+    except EmptyPage:
+        submission_page_obj = submission_paginator.page(submission_paginator.num_pages)
 
-    # Initialize both forms
+    # Initialize forms
     checklist_form = ChecklistForm(initial={'conseillere': conseiller_instance})
     product_form = ProductsForm()
 
     if request.method == 'POST':
         if 'create_checklist' in request.POST:
-            # Handle the checklist creation form
             checklist_form = ChecklistForm(request.POST)
             if checklist_form.is_valid():
                 checklist = checklist_form.save(commit=False)
@@ -1291,21 +1309,16 @@ def conseiller_dashboard(request):
                 messages.error(request, 'Veuillez corriger les erreurs dans le formulaire de création.')
 
         elif 'toggle_checklist' in request.POST:
-            # Handle the toggle checklist action
             checklist_id = request.POST.get('checklist_id')
             try:
                 checklist = Checklist.objects.get(id=checklist_id, conseillere=conseiller_instance)
                 checklist.is_active = not checklist.is_active
                 checklist.save()
-                if checklist.is_active:
-                    messages.success(request, 'Checklist activée.')
-                else:
-                    messages.success(request, 'Checklist désactivée.')
+                messages.success(request, 'Checklist activée.' if checklist.is_active else 'Checklist désactivée.')
             except Checklist.DoesNotExist:
                 messages.error(request, 'Checklist non trouvée.')
 
         elif 'product-form' in request.POST:
-            # Handle product creation form
             product_form = ProductsForm(request.POST)
             if product_form.is_valid():
                 product = product_form.save(commit=False)
@@ -1313,23 +1326,65 @@ def conseiller_dashboard(request):
                 product.save()
                 messages.success(request, 'Nouveau produit créé avec succès.')
                 return redirect('creerchecklist')
+     # Calculate counts for each status
+    total_submissions = submissions.count()
+    count_encours = submissions.filter(status='en_cours').count()
+    count_valide = submissions.filter(status='valide').count()
+    count_refuse = submissions.filter(status='refuse').count()
+    count_envoye = submissions.filter(status='envoye').count()
 
     context = {
         'checklist_form': checklist_form,
         'conseiller_instance': conseiller_instance,
         'active_checklists': active_checklists,
-        'inactive_checklists': inactive_checklists,  # Update context to use checklist_form
+        'inactive_checklists': inactive_checklists,
         'encours': encours,
         'valide': valide,
+        'total_submissions': total_submissions,
+        'count_encours': count_encours,
+        'count_valide': count_valide,
+        'count_refuse': count_refuse,
+        'count_envoye': count_envoye,
         'product_form': product_form,
         'refuse': refuse,
-        'page_obj': page_obj,
         'checklists': checklists,
-        'today': timezone.now().date(),  # Pass the current date
-
+        'checklist_page_obj': checklist_page_obj,  # Passing checklist pagination
+        'submission_page_obj': submission_page_obj,  # Passing submission pagination
+        'today': timezone.now().date(),
     }
 
     return render(request, 'listings/conseiller_dashboard.html', context)
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+@csrf_exempt  # Use only for testing; implement CSRF protection in production
+def update_submission_status_dashboard(request, submission_id):
+    if request.method == 'POST':
+        try:
+            submission = Submission.objects.get(id=submission_id)
+            data = json.loads(request.body)  # Parse the JSON payload
+
+            # Get the new status from the request
+            status = data.get('status')
+            submission.status = status
+
+            # If status is 'refuse', save the comment as well
+            if status == 'refuse':
+                comment = data.get('comment', '')
+                submission.refusal_comment = comment  # Assign the comment to the model
+
+            submission.save()
+
+            return JsonResponse({'success': True})
+
+        except Submission.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Submission not found.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})  # General error handling
+
+    return JsonResponse({'success': False, 'error': 'Invalid request.'})
 
 
 from django.http import JsonResponse
@@ -1561,6 +1616,84 @@ def get_checklists_for_day(request, day):
     }
 
     return JsonResponse(response_data)
+
+from django.core.paginator import Paginator
+from django.http import JsonResponse
+from django.utils import formats
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
+import calendar
+from datetime import date
+from .models import Submission
+
+@login_required
+def get_submissions_created_at(request, day):
+    # Get the selected month and year
+    selected_month = int(request.GET.get('month', date.today().month))
+    selected_year = int(request.GET.get('year', date.today().year))
+
+    # Ensure day is within the range of the selected month
+    _, num_days_in_month = calendar.monthrange(selected_year, selected_month)
+    day = min(int(day), num_days_in_month)  # Prevent out-of-range days
+
+    # Construct the date object for filtering
+    selected_date = date(selected_year, selected_month, day)
+
+    # Retrieve submissions created on that date
+    submissions_created = Submission.objects.filter(created_at__date=selected_date).values(
+        'id', 'company_name', 'submission_type', 'user__username', 'status', 'created_at', 'date'
+    )
+
+    submission_list = list(submissions_created)  # Convert the QuerySet to a list directly
+
+    # Format date for JSON serialization
+    for submission in submission_list:
+        submission['created_at'] = submission['created_at'].strftime('%Y-%m-%d')
+
+    response_data = {
+        'submission': submission_list,
+        'selected_date': formats.date_format(selected_date, "j F Y", use_l10n=True),
+    }
+
+    return JsonResponse(response_data)
+
+
+@login_required
+def get_submission_for_day(request, day):
+    # Get the selected month and year
+    selected_month = int(request.GET.get('month', date.today().month))
+    selected_year = int(request.GET.get('year', date.today().year))
+
+    # Ensure day is within the range of the selected month
+    _, num_days_in_month = calendar.monthrange(selected_year, selected_month)
+    day = min(int(day), num_days_in_month)  # Prevent out-of-range days
+
+    # Construct the date object for filtering checklists
+    selected_date = date(selected_year, selected_month, day)
+
+    selected_date_formatted = formats.date_format(selected_date, "j F Y", use_l10n=True)
+
+    # Retrieve only active checklists for the selected date
+    submissions = Submission.objects.filter(date=selected_date).values(
+        'id', 'company_name', 'date', 'submission_type', 'user__username', 'status', 'created_at'
+    )
+
+    
+
+    submission_list = list(submissions)
+
+    # Format the date objects for JSON serialization
+    for submission in submission_list:
+        submission['date'] = submission['date'].strftime('%Y-%m-%d')
+
+    response_data = {
+        'submission': submission_list,
+        'selected_date': selected_date_formatted,
+        
+    }
+
+    return JsonResponse(response_data)
+
 @login_required
 def import_items(request):
     if request.method == 'POST' and request.FILES['myfile']:
@@ -5318,6 +5451,11 @@ from .models import Submission
 from .forms import SubmissionForm
 @login_required
 def submit_request(request):
+
+    menus = Menu.objects.all()
+    key = settings.GOOGLE_API_KEY
+
+
     if request.method == 'POST':
         form = SubmissionForm(request.POST)
         if form.is_valid():
@@ -5329,15 +5467,128 @@ def submit_request(request):
     else:
         form = SubmissionForm()
     
-    return render(request, 'listings/submit_request.html', {'form': form})
+    return render(request, 'listings/submit_request.html', {'form': form,
+                                                            'menus': menus,
+                                                            'key': key,}
+                  )
+
+from django.db.models import Count, Q
+from collections import defaultdict
 
 
-from django.utils import timezone
-from datetime import timedelta
+def calendarsub_view(request):
+    submissions = Submission.objects.all()
+    current_year = date.today().year
+    years = [year for year in range(current_year - 5, current_year + 1)]
+    today = date.today()
+    selected_day = int(request.GET.get('day', 1))  # Default to the first day of the month if none selected
+    current_year = date.today().year
+    months = [(month, calendar.month_name[month]) for month in range(1, 13)]
+    selected_month = int(request.GET.get('month', today.month))
+    # Get the number of days in the selected month
+    _, num_days_in_month = calendar.monthrange(current_year, selected_month)
+    days_in_month = [day for day in range(1, num_days_in_month + 1)]  # Adjust days in month
 
+    # Get the starting day of the month (0 = Monday, 1 = Tuesday, ..., 6 = Sunday)
+    first_day_of_month = date(current_year, selected_month, 1).weekday()  # Returns 0-6, Monday-Sunday
+    first_day_of_month = (first_day_of_month + 1) % 7  # Adjust to make Sunday = 0
+
+    # Pad the beginning of the month with empty days
+    padded_days = [''] * first_day_of_month + days_in_month
+
+        # Limit to a maximum of 7 rows (7 days x 6 rows if overflow, note that normally only one row will be needed to display)
+    # Calculate how many rows we need (84 slots for a month max, but we are only showing 7 rows)
+    num_rows = (len(padded_days) + 6) // 7  # To fill the calendar
+
+    french_months = [
+        "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+        "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+    ]
+
+    # Fetch checklists for the selected month
+    submissions = Submission.objects.filter(date__month=int(selected_month))
+
+ 
+
+    context = {
+        'submissions': submissions,
+        'today': today,
+        'months': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],  # Months as numbers
+        'selected_month': selected_month,
+        'days': padded_days,
+        'months': months,
+        'french_months': french_months,
+        'selected_day': selected_day,
+        'selected_date': date(current_year, selected_month, selected_day).strftime('%d %B %Y'),
+        'years': years,
+        'selected_year': current_year,
+        'is_chefcuisine': request.user.groups.filter(name='chefcuisine').exists(),
+        'is_ventes': request.user.groups.filter(name='ventes').exists(),
+        'is_admin': request.user.groups.filter(name='admin').exists(),
+    }
+    return render(request, 'listings/calendar_submission.html', context)
+
+
+from collections import defaultdict
 from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from .models import Submission
+from django.utils import timezone
+import calendar
+from datetime import date
+
+def calendarsubcreate_view(request):
+    current_year = date.today().year
+    years = [year for year in range(current_year - 5, current_year + 1)]
+    today = date.today()
+    selected_day = int(request.GET.get('day', 1))  # Default to the first day of the month if none selected
+    selected_month = int(request.GET.get('month', today.month))
+
+    # Get the number of days in the selected month
+    _, num_days_in_month = calendar.monthrange(current_year, selected_month)
+    days_in_month = list(range(1, num_days_in_month + 1))  # Adjust days in month
+
+    # Get the starting day of the month (0 = Monday, ..., 6 = Sunday)
+    first_day_of_month = (date(current_year, selected_month, 1).weekday() + 1) % 7
+
+    # Pad the beginning of the month with empty days
+    padded_days = [''] * first_day_of_month + days_in_month
+
+    french_months = [
+        "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+        "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+    ]
+
+    # Fetch all submissions for the selected month
+    submissions = Submission.objects.filter(created_at__month=selected_month, created_at__year=current_year)
+
+
+    # Initialize a dictionary to hold counts of statuses per day
+    daily_counts = defaultdict(lambda: {'en_cours': 0})
+
+    # Count statuses for each creation day for submissions that are "en cours"
+    for submission in submissions:
+        day = submission.created_at.day
+        if submission.status == 'en_cours':
+            daily_counts[day]['en_cours'] += 1
+
+
+    context = {
+        'submissions': submissions,
+        'today': today,
+        'months': list(enumerate(calendar.month_name[1:], start=1)),  # Months as (number, name)
+        'selected_month': selected_month,
+        'days': padded_days,
+        'french_months': french_months,
+        'selected_day': selected_day,
+        'selected_date': date(current_year, selected_month, selected_day).strftime('%d %B %Y'),
+        'years': years,
+        'daily_counts': daily_counts,
+        'selected_year': current_year,
+        'is_chefcuisine': request.user.groups.filter(name='chefcuisine').exists(),
+        'is_ventes': request.user.groups.filter(name='ventes').exists(),
+        'is_admin': request.user.groups.filter(name='admin').exists(),
+    }
+    
+    return render(request, 'listings/calendarcreate_submission.html', context)
 
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -5345,7 +5596,7 @@ from django.utils import timezone
 from .models import Submission
 from django.http import JsonResponse
 from datetime import timedelta
-
+from datetime import datetime
 @login_required
 def manage_submissions(request):
     if not request.user.groups.filter(name='admin').exists():
@@ -5358,9 +5609,9 @@ def manage_submissions(request):
     count_rejected = submissions.filter(status='refuse', submission_type="soumission").count()
     count_in_progress = submissions.filter(status='en_cours', submission_type="soumission").count()
 
-    count_validatedcontrat = submissions.filter(status='valide', submission_type="contrat").count()
-    count_rejectedontrat = submissions.filter(status='refuse', submission_type="contrat").count()
-    count_in_progressontrat = submissions.filter(status='en_cours', submission_type="contrat").count()
+    count_validatedcontrat = submissions.filter(status='valide', submission_type="commande").count()
+    count_rejectedontrat = submissions.filter(status='refuse', submission_type="commande").count()
+    count_in_progressontrat = submissions.filter(status='en_cours', submission_type="commande").count()
 
     selected_conseiller = request.GET.get('conseiller')
 
@@ -5384,8 +5635,11 @@ def manage_submissions(request):
     end_date = request.GET.get('end_date')
 
     if start_date and end_date:
-        # Filter submissions within the selected date range
-        submissions = submissions.filter(created_at__range=[start_date, end_date])
+        # Adjust the date range to include the whole day
+        start_datetime = datetime.strptime(start_date, "%Y-%m-%d")
+        end_datetime = datetime.strptime(end_date, "%Y-%m-%d") + timedelta(days=1)  # Add one day to include the full final day
+    
+        submissions = submissions.filter(created_at__range=[start_datetime, end_datetime])
 
     # Pagination logic
     paginator = Paginator(submissions, 15)  # Show 10 submissions per page
@@ -5450,6 +5704,24 @@ def save_credit_card_info(request):
     # e.g., saving to the database or processing the payment
 
     return JsonResponse({'success': True, 'message': 'Détails de la carte enregistrés avec succès!'})
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Submission
+from .forms import SubmissionForm  # If you are using a form class
+
+def update_submission(request, id):
+    submission = get_object_or_404(Submission, id=id)
+    
+    if request.method == 'POST':
+        form = SubmissionForm(request.POST, instance=submission)
+        if form.is_valid():
+            form.save()
+            return redirect('manage_submissions')  # Redirect after successful update
+    else:
+        form = SubmissionForm(instance=submission)
+    
+    return redirect('conseiller_dashboard')
 
 
 @login_required

@@ -1,40 +1,209 @@
 {% extends 'listings/base.html' %}
 {% load static %}
 
+{% block head %}
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+    body {
+        background-color: #f8f9fa; /* Light background color */
+    }
+    .card {
+        border-radius: 10px;
+    }
+    .card-header {
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+    }
+    .info-icon {
+        margin-right: 10px;
+        color: #007bff; /* Primary color */
+    }
+    .card-body p {
+        font-size: 1.1rem;
+        line-height: 1.4;
+        margin-bottom: 1rem; /* Space between paragraphs */
+    }
+    .card-body p strong {
+        color: #333; /* Darker color for labels */
+    }
+    .modal-footer {
+        border-top: 1px solid #e9ecef; /* Separate footer from body */
+    }
+    .btn {
+        border-radius: 20px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container">
-    <h2 class="mt-5">Détails de la Soumission</h2>
-    
+    <h2 class="mt-5 text-center">Détails de la Soumission</h2>
+
     <div class="card shadow-sm mt-4">
         <div class="card-header bg-secondary text-white">
-            <h5 class="mb-0">Soumission Type: {{ submission.get_submission_type_display }}</h5>
+            <h5 class="mb-0 text-center">Soumission Type: {{ submission.get_submission_type_display }}</h5>
         </div>
         <div class="card-body">
-            <p><strong>Commandé par:</strong> {{ submission.ordered_by }}</p>
-            <p><strong>Nom de la compagnie:</strong> {{ submission.company_name }}</p>
-            <p><strong>Lieu de l'événement:</strong> {{ submission.event_location }}</p>
-            <p><strong>Contact sur place:</strong> {{ submission.contact_person }}</p>
-            <p><strong>Téléphone:</strong> {{ submission.phone }}</p>
-            <p><strong>Email:</strong> {{ submission.email }}</p>
-            <p><strong>Adresse de facturation:</strong> {{ submission.billing_address }}</p>
-            <p><strong>Mode de paiement:</strong> {{ submission.get_payment_mode_display }}</p>
-            <p><strong>Date:</strong> {{ submission.date|date:"d F Y" }}</p>
-            <p><strong>Heure de l'événement:</strong> {{ submission.event_time }}</p>
-            <p><strong>Nombre de personnes:</strong> {{ submission.guest_count }}</p>
-            <p><strong>Heure de livraison:</strong> {{ submission.delivery_time }}</p>
-            <p><strong>Budget:</strong> {{ submission.budget }}</p>
-            <p><strong>Nombre de services:</strong> {{ submission.service_count }}</p>
-            <p><strong>Mode d'envoi:</strong> {{ submission.get_delivery_mode_display }}</p>
-            <p><strong>Status:</strong> {{ submission.get_status_display }}</p>
-            <p><strong>Créé à:</strong> {{ submission.created_at|date:"d F Y, H:i" }}</p>
+            <h5 class="mt-3">Informations Générales</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><i class="fas fa-user info-icon"></i><strong>Commandé par:</strong> {{ submission.ordered_by }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><i class="fas fa-building info-icon"></i><strong>Nom de la compagnie:</strong> {{ submission.company_name }}</p>
+                </div>
+            </div>
+
+            <h5 class="mt-3">Coordonnées de Contact</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><i class="fas fa-user-circle info-icon"></i><strong>Contact sur place:</strong> {{ submission.contact_person }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><i class="fas fa-phone info-icon"></i><strong>Téléphone:</strong> {{ submission.phone }}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><i class="fas fa-envelope info-icon"></i><strong>Email:</strong> {{ submission.email }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><i class="fas fa-address-card info-icon"></i><strong>Adresse de facturation:</strong> {{ submission.billing_address }}</p>
+                </div>
+            </div>
+
+            <h5 class="mt-3">Détails de l'Événement</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><i class="fas fa-calendar-alt info-icon"></i><strong>Date:</strong> {{ submission.date|date:"d F Y" }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><i class="fas fa-clock info-icon"></i><strong>Heure de l'événement:</strong> {{ submission.event_time }}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><i class="fas fa-users info-icon"></i><strong>Nombre de personnes:</strong> {{ submission.guest_count }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><i class="fas fa-clock info-icon"></i><strong>Heure de livraison:</strong> {{ submission.delivery_time }}</p>
+                </div>
+            </div>
+
+            <h5 class="mt-3">Informations Financières</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><i class="fas fa-dollar-sign info-icon"></i><strong>Budget:</strong> {{ submission.budget }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><i class="fas fa-clipboard-list info-icon"></i><strong>Nombre de services:</strong> {{ submission.service_count }}</p>
+                </div>
+            </div>
+
+            <h5 class="mt-3">Mode d'Envoi</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><i class="fas fa-truck info-icon"></i><strong>Mode d'envoi:</strong> {{ submission.get_delivery_mode_display }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><i class="fas fa-info-circle info-icon"></i><strong>Status:</strong> {{ submission.get_status_display }}</p>
+                </div>
+            </div>
+
+            <h5 class="mt-3">Détails de Création</h5>
+            <div class="row">
+                <div class="col-md-12">
+                    <p><i class="fas fa-calendar-check info-icon"></i><strong>Créé à:</strong> {{ submission.created_at|date:"d F Y, H:i" }}</p>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editSubmissionModal">
+                    Modifier la Soumission
+                </button>
+            </div>
         </div>
 
         <div class="modal-footer">
             <a href="{% url 'manage_submissions' %}" class="btn btn-secondary">Retour à la gestion des soumissions</a>
-            <a href="{% url 'update_submission_status' submission.id %}" class="btn btn-warning">Modifier le statut</a>
         </div>
     </div>
 </div>
 
+<!-- Modal for Modifying Submission -->
+<div class="modal fade" id="editSubmissionModal" tabindex="-1" aria-labelledby="editSubmissionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editSubmissionModalLabel">Modifier la Soumission</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editSubmissionForm" method="POST" action="{% url 'update_submission' submission.id %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="ordered_by" class="form-label">Commandé par</label>
+                        <input type="text" class="form-control" id="ordered_by" name="ordered_by" value="{{ submission.ordered_by }}" >
+                    </div>
+                    <div class="mb-3">
+                        <label for="company_name" class="form-label">Nom de la compagnie</label>
+                        <input type="text" class="form-control" id="company_name" name="company_name" value="{{ submission.company_name }}" >
+                    </div>
+                    <div class="mb-3">
+                        <label for="event_location" class="form-label">Lieu de l'événement</label>
+                        <input type="text" class="form-control" id="event_location" name="event_location" value="{{ submission.event_location }}" >
+                    </div>
+                    <div class="mb-3">
+                        <label for="contact_person" class="form-label">Contact sur place</label>
+                        <input type="text" class="form-control" id="contact_person" name="contact_person" value="{{ submission.contact_person }}" >
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Téléphone</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" value="{{ submission.phone }}" >
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ submission.email }}" >
+                    </div>
+                    <div class="mb-3">
+                        <label for="billing_address" class="form-label">Adresse de facturation</label>
+                        <input type="text" class="form-control" id="billing_address" name="billing_address" value="{{ submission.billing_address                        }}" >
+                    </div>
+                    <div class="mb-3">
+                        <label for="budget" class="form-label">Budget</label>
+                        <input type="number" step="0.01" class="form-control" id="budget" name="budget" value="{{ submission.budget }}" >
+                    </div>
+                    <div class="mb-3">
+                        <label for="guest_count" class="form-label">Nombre de personnes</label>
+                        <input type="number" class="form-control" id="guest_count" name="guest_count" value="{{ submission.guest_count }}" >
+                    </div>
+                    <div class="mb-3">
+                        <label for="event_time" class="form-label">Heure de l'événement</label>
+                        <input type="time" class="form-control" id="event_time" name="event_time" value="{{ submission.event_time|time:"H:i" }}" >
+                    </div>
+                    <div class="mb-3">
+                        <label for="delivery_time" class="form-label">Heure de livraison</label>
+                        <input type="time" class="form-control" id="delivery_time" name="delivery_time" value="{{ submission.delivery_time|time:"H:i" }}" >
+                    </div>
+                    <div class="mb-3">
+                        <label for="payment_mode" class="form-label">Mode de paiement</label>
+                        <select class="form-select" id="payment_mode" name="payment_mode" >
+                            <option value="cc" {% if submission.payment_mode == 'cc' %}selected{% endif %}>Carte de Crédit</option>
+                            <option value="cheque" {% if submission.payment_mode == 'cheque' %}selected{% endif %}>Chèque</option>
+                            <option value="interac" {% if submission.payment_mode == 'interac' %}selected{% endif %}>Interact</option>
+                        </select>
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                <button type="submit" class="btn btn-primary" form="editSubmissionForm">Enregistrer les modifications</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
+
 

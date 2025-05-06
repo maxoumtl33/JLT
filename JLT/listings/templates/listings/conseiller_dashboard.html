@@ -26,6 +26,47 @@
     .nav-item{
         margin-left: 20px;
     }
+
+    .mb-4 {
+    margin-bottom: 1.5rem;
+}
+
+.d-flex {
+    display: flex;
+}
+
+.justify-content-between {
+    justify-content: space-between;
+}
+
+.align-items-center {
+    align-items: center;
+}
+
+.form-control {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+}
+
+.submission-section {
+    display: flex;
+    gap: 20px;
+}
+
+.filter-section, .type-filter-section {
+    display: flex;
+    align-items: center;
+}
+
+.filter-section label, .type-filter-section label {
+    margin-right: 20px;
+}
+
+input[type="radio"], 
+input[type="checkbox"] {
+    margin-right: 5px;
+}
+
 </style>
 
 {% if messages %}
@@ -62,6 +103,11 @@
                     <button type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#createChecklistModal">
                         <i class="fa-solid fa-circle-plus me-2" style="color: #63E6BE;"></i>Créer Checklist
                     </button>
+                </li>
+                <li class="nav-item">
+                    <a type="button" class="nav__link" href="{% url 'submit_request' %}" target="_blank" >
+                        <i class="fa-solid fa-circle-plus me-2" style="color: #63E6BE;"></i>Créer Soumission
+                    </a>
                 </li>
                 <li class="nav-item">
                     <form action="{% url 'logout' %}" method="post" class="d-inline">
@@ -136,7 +182,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for checklist in page_obj %}
+                {% for checklist in checklist_page_obj %}
                 <tr class="text-center checklist-row{% if checklist.date < today %} completed{% endif %}">
                     <td>{{ checklist.name }}</td>
                     <td>{{ checklist.nb_convive }}</td>
@@ -185,39 +231,245 @@
     
 
     <!-- Pagination Controls -->
-    <nav aria-label="Page navigation">
-        <ul class="pagination justify-content-center">
-            {% if page_obj.has_previous %}
-                <li class="page-item">
-                    <a class="page-link" href="?page=1" aria-label="Première">
-                        <span aria-hidden="true">&laquo;&laquo;</span>
-                    </a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Précédent">
-                        <span aria-hidden="true">&laquo;</span>
-                    </a>
-                </li>
-            {% endif %}
-            {% for num in page_obj.paginator.page_range %}
-                {% if page_obj.number == num %}
+    <!-- Checklist Pagination Controls -->
+<nav aria-label="Checklist Navigation">
+    <ul class="pagination justify-content-center">
+        {% if checklist_page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?checklist_page=1" aria-label="Première">
+                    <span aria-hidden="true">&laquo;&laquo;</span>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?checklist_page={{ checklist_page_obj.previous_page_number }}" aria-label="Précédent">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+        {% endif %}
+        {% for num in checklist_page_obj.paginator.page_range %}
+            {% if checklist_page_obj.number == num %}
                 <li class="page-item active" aria-current="page">
                     <span class="page-link">{{ num }}</span>
                 </li>
-            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            {% elif num > checklist_page_obj.number|add:'-3' and num < checklist_page_obj.number|add:'3' %}
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    <a class="page-link" href="?checklist_page={{ num }}">{{ num }}</a>
                 </li>
             {% endif %}
         {% endfor %}
-        {% if page_obj.has_next %}
+        {% if checklist_page_obj.has_next %}
             <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Suivant">
+                <a class="page-link" href="?checklist_page={{ checklist_page_obj.next_page_number }}" aria-label="Suivant">
                     <span aria-hidden="true">&raquo;</span>
                 </a>
             </li>
             <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Dernière">
+                <a class="page-link" href="?checklist_page={{ checklist_page_obj.paginator.num_pages }}" aria-label="Dernière">
+                    <span aria-hidden="true">&raquo;&raquo;</span>
+                </a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+
+<hr>
+<hr>
+<!-- Submission Summary Stats -->
+<div class="row mb-4">
+    <div class="col-lg-3">
+        <div class="card shadow-sm border-0 text-center">
+            <div class="card-body">
+                <h5 class="card-title">Total Soumissions/Commandes</h5>
+                <p class="card-text display-4 text-primary">{{ total_submissions }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="card shadow-sm border-0 text-center">
+            <div class="card-body">
+                <h5 class="card-title">En cours</h5>
+                <p class="card-text display-4 text-warning">{{ count_encours }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="card shadow-sm border-0 text-center">
+            <div class="card-body">
+                <h5 class="card-title">Validé</h5>
+                <p class="card-text display-4 text-success">{{ count_valide }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="card shadow-sm border-0 text-center">
+            <div class="card-body">
+                <h5 class="card-title">Refusé</h5>
+                <p class="card-text display-4 text-danger">{{ count_refuse }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <input type="text" id="searchInputi" class="form-control" placeholder="Rechercher une soumission..." onkeyup="filterSoumissionss()" style="width: 300px;">
+
+    <div id="submissioncreate-section" class="submission-section" style="display: none;">
+        <div class="submission-section" style="display: flex;">
+            <div class="filter-section">
+                <span style="margin-right: 10px;">Afficher :</span>
+                <label>
+                    <input type="radio" name="status-filter" value="all" checked onchange="filterBelongings()" />
+                    Tous
+                </label>
+                <label>
+                    <input type="radio" name="status-filter" value="en_cours" onchange="filterBelongings()" />
+                    En cours
+                </label>
+                <label>
+                    <input type="radio" name="status-filter" value="valide" onchange="filterBelongings()" />
+                    Validé
+                </label>
+                <label>
+                    <input type="radio" name="status-filter" value="refuse" onchange="filterBelongings()" />
+                    Refusé
+                </label>
+                <label>
+                    <input type="radio" name="status-filter" value="envoye" onchange="filterBelongings()" />
+                    Envoyé
+                </label>
+            </div>
+        
+            <div class="type-filter-section">
+                <span style="margin-right: 10px;">Type de soumission :</span>
+                <label>
+                    <input type="checkbox" name="type-filter" value="Soumission événement" onchange="filterBelongings()" />
+                    Soumission événement
+                </label>
+                <label>
+                    <input type="checkbox" name="type-filter" value="Commande événement" onchange="filterBelongings()" />
+                    Commande événement
+                </label>
+                <label>
+                    <input type="checkbox" name="type-filter" value="Soumission BAL/Buffet" onchange="filterBelongings()" />
+                    Soumission BAL/Buffet
+                </label>
+                <label>
+                    <input type="checkbox" name="type-filter" value="Commande BAL/Buffet" onchange="filterBelongings()" />
+                    Commande BAL/Buffet
+                </label>
+            </div>
+        
+            
+        </div>
+        
+        
+    
+    </div>
+</div>
+
+
+<div id="submissionContainer" class="table-responsive shadow-sm">
+    <table class="table table-bordered table-hover align-middle submissioncreate-table">
+        <thead class="table-primary">
+            <tr class="text-center">
+                <th data-sort="client" onclick="sortTable(0)" style="cursor: pointer;">Client</th>
+        <th data-sort="type" onclick="sortTable(1)" style="cursor: pointer;">Type</th>
+        <th data-sort="date" onclick="sortTable(2)" style="cursor: pointer;">Date</th>
+        <th data-sort="ajoute_le" onclick="sortTable(3)" style="cursor: pointer;">Ajouté le</th>
+        <th data-sort="status" onclick="sortTable(4)" style="cursor: pointer;">Statut</th>
+                
+                <th>Actions</th>
+                <th>Détail</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for submission in submission_page_obj %}
+            <tr class="text-center">
+                <td>{{ submission.company_name }}</td>
+                <td>{{ submission.submission_type }}</td>
+                <td>{{ submission.date|date:"l d F Y" }}</td>
+                <td>{{ submission.created_at|date:"l d F Y" }}</td>
+                
+                <td>{% if submission.status == valide %}
+                    <span class="badge bg-success"><i class="fa-solid fa-check-circle me-1"></i>Validée</span>
+                {% elif submission.status == refuse %}
+                    <span class="badge bg-danger"><i class="fa-solid fa-times-circle me-1"></i>Refusée</span>
+                {% elif submission.status == encours %}
+                    <span class="badge bg-warning"><i class="fa-solid fa-spinner me-1"></i>En cours</span>
+                {% endif %}</td>
+                <td>
+                    <div class="status-selection">
+                       
+                        <select id="submissionStatus{{ submission.id }}" onchange="showCommentBox({{ submission.id }})">
+                            <option value="en_cours" {% if submission.status == 'en_cours' %}selected{% endif %}>En cours</option>
+                            <option value="valide" {% if submission.status == 'valide' %}selected{% endif %}>Validé</option>
+                            <option value="refuse" {% if submission.status == 'refuse' %}selected{% endif %}>Refusé</option>
+                            <option value="envoye" {% if submission.status == 'envoye' %}selected{% endif %}>Envoyé</option>
+                        </select>
+                    </div>
+                    
+                    <div id="commentBox{{ submission.id }}" class="comment-box" style="display: none;">
+                        <label for="refusalComment{{ submission.id }}">Pourquoi a-t-il été refusé ?</label>
+                        <textarea id="refusalComment{{ submission.id }}" rows="4" class="form-control"></textarea>
+                    </div>
+                    
+                    
+                    
+                    <button id="statusSubmitButton" class="btn btn-primary" onclick="submitStatus({{ submission.id }})">changer le statut</button>
+
+                    
+                </td>
+                <td>
+                    <form method="post" action="{% url 'submission_detail' submission.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" style="color: #116EFD;"><i class="fa-solid fa-eye me-1"></i></button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center text-muted">Aucune soumission trouvée.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Submission Pagination Controls -->
+    <nav aria-label="Submission Navigation">
+        <ul class="pagination justify-content-center">
+            {% if submission_page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?submission_page=1" aria-label="Première">
+                        <span aria-hidden="true">&laquo;&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?submission_page={{ submission_page_obj.previous_page_number }}" aria-label="Précédent">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+            {% for num in submission_page_obj.paginator.page_range %}
+                {% if submission_page_obj.number == num %}
+                    <li class="page-item active" aria-current="page">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                {% elif num > submission_page_obj.number|add:'-3' and num < submission_page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?submission_page={{ num }}">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+            {% if submission_page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?submission_page={{ submission_page_obj.next_page_number }}" aria-label="Suivant">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?submission_page={{ submission_page_obj.paginator.num_pages }}" aria-label="Dernière">
                     <span aria-hidden="true">&raquo;&raquo;</span>
                 </a>
             </li>
@@ -225,6 +477,8 @@
     </ul>
 </nav>
 </div>
+
+
 
 <!-- Product Modal -->
 <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
@@ -287,6 +541,38 @@ rows.forEach(row => {
 });
 }
 
+function sortTable(columnIndex) {
+    const table = document.querySelector('.submissioncreate-table');
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr')); // Convert NodeList to Array
+
+    // Determine the sorting order (ascending or descending)
+    const currentIsAscending = table.querySelector(`th:nth-child(${columnIndex + 1})`).getAttribute('data-order') === 'asc';
+    
+    // Sort rows based on the specified column index and current order
+    const sortedRows = rows.sort((a, b) => {
+        const aText = a.children[columnIndex].innerText.toLowerCase();
+        const bText = b.children[columnIndex].innerText.toLowerCase();
+
+        if (columnIndex === 2) { // Assuming column 2 is the date column
+            // Parse date and compare
+            return currentIsAscending ? new Date(aText) - new Date(bText) : new Date(bText) - new Date(aText);
+        } else {
+            // Compare text
+            return currentIsAscending ? (aText > bText ? 1 : -1) : (aText < bText ? 1 : -1);
+        }
+    });
+    
+    // Re-append sorted rows to the table body
+    tbody.innerHTML = ''; // Clear existing rows
+    sortedRows.forEach(row => tbody.appendChild(row)); // Append sorted rows
+    
+    // Toggle the sorting order
+    const newOrder = currentIsAscending ? 'desc' : 'asc';
+    table.querySelector(`th:nth-child(${columnIndex + 1})`).setAttribute('data-order', newOrder);
+}
+
+
 // Execute the function on page load to set the initial state
 document.addEventListener('DOMContentLoaded', filterChecklistshide);
 
@@ -298,6 +584,116 @@ rows.forEach(row => {
     row.style.display = name.includes(input) ? '' : 'none';
 });
 }
+
+
+function filterSoumissionss() {
+const input = document.getElementById('searchInputi').value.toLowerCase();
+const rows = document.querySelectorAll('table tbody tr');
+rows.forEach(row => {
+    const name = row.querySelector('td:first-child').textContent.toLowerCase();
+    row.style.display = name.includes(input) ? '' : 'none';
+});
+}
+
+
+function filterSoumissions() {
+    const statusSelect = document.getElementById(`submissionStatus${submissionId}`);
+    
+    // Check if the statusSelect is not found
+    if (!statusSelect) {
+        console.error('Status select element not found for submission:', submissionId);
+        return; // Exit if the element is not found
+    }
+
+    const status = statusSelect.value; // Get the selected status value
+    const comment = document.getElementById(`refusalComment${submissionId}`).value; // Capture the comment if it exists
+
+    const payload = {
+        status: status,
+        ...(status === 'refuse' && { comment: comment }) // Include the comment only if the status is 'refuse'
+    };
+    fetch(`/submission_dashboard/status/update/${submissionId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}', // Include CSRF token for security
+            'Content-Type': 'application/json', // Specify content type
+        },
+        body: JSON.stringify(payload) // Send the payload as JSON
+    })
+    .then(response => {
+        if (!response.ok) {
+            // If the response is not OK, throw an error
+            throw new Error('Network response was not ok');
+        }
+        return response.json(); // Parse JSON from the response
+    })
+    .then(data => {
+        if (data.success) {
+            alert('Statut mis à jour avec succès!');
+            location.reload(); // Refresh the page to reflect changes
+        } else {
+            alert(data.error || 'Erreur lors de la mise à jour du statut.'); // Handle errors
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error); // Log any errors
+        alert('Une erreur est survenue lors de la mise à jour du statut.'); // User-friendly message
+    });
+}
+
+
+// JavaScript Functions
+function showCommentBox(submissionId) {
+    const statusSelect = document.getElementById(`submissionStatus${submissionId}`);
+    const commentBox = document.getElementById(`commentBox${submissionId}`);
+
+    // Show comment box if "Refusé" is selected
+    if (statusSelect.value === 'refuse') {
+        commentBox.style.display = 'block'; // Show the comment box
+    } else {
+        commentBox.style.display = 'none'; // Hide the comment box
+    }
+}
+
+function submitStatus(submissionId) {
+    const statusSelect = document.getElementById(`submissionStatus${submissionId}`);
+    
+    // Check if the statusSelect is not found
+    if (!statusSelect) {
+        console.error('Status select element not found for submission:', submissionId);
+        return; // Exit if the element is not found
+    }
+
+    const status = statusSelect.value; // Get the status value
+    const comment = document.getElementById(`refusalComment${submissionId}`).value; // Capture the comment
+
+    const payload = {
+        status: status,
+        ...(status === 'refuse' && { comment: comment }) // Include comment only if status is 'refuse'
+    };
+
+    fetch(`/submission_dashboard/status/update/${submissionId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}', // Include CSRF token for security
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload) // Send the payload
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Statut mis à jour avec succès!');
+            location.reload(); // Optionally refresh the page to reflect changes
+        } else {
+            alert(data.error || 'Erreur lors de la mise à jour du statut.');
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+
+
 </script>
 {% endblock %}
 

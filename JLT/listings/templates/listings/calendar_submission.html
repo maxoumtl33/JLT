@@ -1,0 +1,341 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% block content %}
+<link href='https://unpkg.com/@fullcalendar/core@5/main.min.css' rel='stylesheet' />
+<script src='https://unpkg.com/@fullcalendar/core@5/main.min.js'></script>
+<script src='https://unpkg.com/@fullcalendar/daygrid@5/main.min.js'></script>
+
+<style>
+    /* General styling */
+    body {
+        background-color: #f0f2f5;
+    }
+
+    .clickable-row {
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .clickable-row:hover {
+        filter: brightness(95%);
+    }
+    .status-valide {
+        background-color: #d4edda; /* Light green */
+    }
+
+    .status-en_cours {
+        background-color: #fff3cd; /* Light orange */
+    }
+
+    .status-refuse {
+        background-color: #f8d7da; /* Light red */
+    }
+    h1, h2 {
+        color: #343a40;
+    }
+
+    /* General page styles */
+    .agenda-title {
+        font-size: 2rem;
+        margin-bottom: 20px;
+        text-align: center;
+        color: #333;
+    }
+
+    /* Month selection styles */
+    .month-selection {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 30px;
+    }
+    .month-label {
+        font-size: 1rem;
+        margin-right: 10px;
+        align-self: center;
+    }
+    .month-dropdown {
+        padding: 10px;
+        font-size: 1rem;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        outline: none;
+        transition: border-color 0.3s ease;
+    }
+    .month-dropdown:hover {
+        border-color: #007bff;
+    }
+
+    /* General layout styling */
+    .agenda-container {
+        display: flex;
+        align-items: flex-start;
+        gap: 20px;
+        padding: 20px;
+    }
+
+    /* Calendar section */
+    .calendar-section {
+        width: 45%;
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .calendar {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr); /* 7 equal columns */
+        grid-gap: 10px;
+    }
+    .day {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .day-btn {
+        position: relative;
+        padding: 10px;
+        font-size: 0.9rem;
+        background-color: #ffffff;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        cursor: pointer;
+        width: 100%;
+        height: 60px;
+        text-align: center;
+        transition: background-color 0.3s ease;
+    }
+    .day-btn:hover {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .daycreate-btn {
+        position: relative;
+        padding: 10px;
+        font-size: 0.9rem;
+        background-color: #ffffff;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        cursor: pointer;
+        width: 100%;
+        height: 60px;
+        text-align: center;
+        transition: background-color 0.3s ease;
+    }
+    .daycreate-btn:hover {
+        background-color: #007bff;
+        color: white;
+    }
+    
+    /* Submission section */
+    .submission-section {
+        width: 55%;
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .submission-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .submission-table th, .submission-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+    .submission-table th {
+        background-color: #007bff;
+        color: white;
+    }
+    .submission-table td a {
+        text-decoration: none;
+        color: #007bff;
+    }
+    .submission-table td a:hover {
+        text-decoration: underline;
+    }
+
+    .submissioncreate-section {
+        width: 55%;
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .submissioncreate-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .submissioncreate-table th, .submissioncreate-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+    .submissioncreate-table th {
+        background-color: #007bff;
+        color: white;
+    }
+    .submissioncreate-table td a {
+        text-decoration: none;
+        color: #007bff;
+    }
+    .submissioncreate-table td a:hover {
+        text-decoration: underline;
+    }
+     /* Responsiveness */
+     @media (max-width: 768px) {
+        .calendar {
+            grid-template-columns: repeat(7, 1fr);
+        }
+    }
+
+    @media (max-width: 480px) {
+        .calendar {
+            grid-template-columns: repeat(5, 1fr); /* Adjust for small screens */
+        }
+    }
+
+
+    /* Selected day button style */
+    .day-btn.selected {
+        background-color: #007bff;
+        color: white;
+        font-weight: bold;
+        border-color: #0056b3;
+    }
+        /* Selected day button style */
+        .daycreate-btn.selected {
+        background-color: #007bff;
+        color: white;
+        font-weight: bold;
+        border-color: #0056b3;
+    }
+</style>
+
+<br>
+<h1 style="text-align: center;">CALENDRIER SOUMISSIONS / COMMANDES <strong><u>DATE D'ÉVÉNEMENT</u></strong>
+</h1>
+<br>
+
+<div class="agenda-container">
+    <!-- Calendar to get submissions by date -->
+    <div id="calendar-section" class="calendar-section">
+        <div class="month-selection">
+            <label for="month" class="month-label">Sélectionnez le mois :</label>
+            <select id="month" name="month" onchange="updateAgenda()" class="month-dropdown">
+                {% for month_name in french_months %}
+                    <option value="{{ forloop.counter0|add:1 }}" {% if forloop.counter0|add:1 == selected_month %}selected{% endif %}>
+                        {{ month_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div id="calendar-date" class="calendar">
+            <div class="day"><strong>Dimanche</strong></div>
+            <div class="day"><strong>Lundi</strong></div>
+            <div class="day"><strong>Mardi</strong></div>
+            <div class="day"><strong>Mercredi</strong></div>
+            <div class="day"><strong>Jeudi</strong></div>
+            <div class="day"><strong>Vendredi</strong></div>
+            <div class="day"><strong>Samedi</strong></div>
+
+            {% for day in days %}
+                <div class="day">
+                    <button class="day-btn" data-day="{{ day }}" onclick="getSubmissions({{ day }})" {% if day == '' %}disabled{% endif %}>
+                        {{ day }}
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Submission Section for Date Submissions -->
+    <div id="submission-section" class="submission-section">
+        <table class="submission-table">
+            <thead>
+                <tr>
+                    <th>Client</th>
+                    <th>Type</th>
+                    <th>Ajouté par</th>
+                    <th>Date événement</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="submission-list" data-detail-url="{% url 'submission_detail' submission_id=0 %}">
+                <!-- Submissions will appear dynamically here -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+    <script>
+        // Fetch submissions based on submission date
+        function getSubmissions(day) {
+            const month = document.getElementById('month').value;
+            fetch(`/get_submissions_for_day/${day}/?month=${month}`)
+                .then(response => {
+                    
+                    return response.json();
+                })
+                .then(data => {
+                    const submissionList = document.getElementById('submission-list');
+                    const baseUrl = submissionList.dataset.detailUrl.replace(/0\/$/, '');
+                    submissionList.innerHTML = '';
+    
+                    // Clear previously selected date
+                    const allDayButtons = document.querySelectorAll('.day-btn');
+                    allDayButtons.forEach(button => button.classList.remove('selected'));
+    
+                    // Highlight the selected date button
+                    const selectedButton = document.querySelector(`.day-btn[data-day='${day}']`);
+                    if (selectedButton) {
+                        selectedButton.classList.add('selected');
+                    }
+    
+                    if (data.submission && data.submission.length > 0) {
+                       
+                        data.submission.forEach(submission => {
+                            const row = document.createElement('tr');
+                            row.classList.add('clickable-row');
+                            row.classList.add(`status-${submission.status}`); // Add status class
+                            row.dataset.href = `${baseUrl}${submission.id}/`;
+    
+                            row.innerHTML = `
+                                <td>${submission.company_name}</td>
+                                <td>${submission.submission_type}</td>
+                                <td>${submission.user__username || 'N/A'}</td>
+                                <td>${submission.date}</td>
+                                <td>${submission.status}</td>
+                            `;
+                            row.addEventListener('click', function() {
+                                window.location.href = this.dataset.href;
+                            });
+                            submissionList.appendChild(row);
+                        });
+                    } else {
+                        
+                        submissionList.innerHTML = `
+                            <tr>
+                                <td colspan="5">Aucune soumission prévue pour ce jour.</td>
+                            </tr>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching submissions:', error);
+                });
+        }
+    
+
+        function updateAgenda() {
+            const selectedMonth = document.getElementById('month').value;
+            const url = `/calendarsub_view/?month=${selectedMonth}`; // Adjust the URL for your view
+            window.location.href = url; // Reload the page with the new month selection
+        }
+    
+</script>
+{% endblock %}
+
+    

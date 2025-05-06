@@ -350,6 +350,16 @@ class DateFilterForm(forms.Form):
 
 
 
+from django import forms
+from .models import Menu
+
+class OrderForm(forms.Form):
+    # Existing fields...
+    delivery_mode = forms.ModelMultipleChoiceField(
+        queryset=Menu.objects.all(),
+        widget=forms.CheckboxSelectMultiple,  # This can be changed to a different widget if needed
+        required=False,
+    )
 
 
 

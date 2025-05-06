@@ -563,6 +563,13 @@ class QuantityProductChangeLog(models.Model):
 
     
 
+class Menu(models.Model):
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
 
 
 class ChecklistMDPhoto(models.Model):
@@ -587,14 +594,17 @@ from django.contrib.auth.models import User
 
 class Submission(models.Model):
     SUBMISSION_TYPE_CHOICES = [
-        ('soumission', 'Soumission'),
-        ('contrat', 'Contrat'),
+        ('Soumission événement', 'Soumission_événement'),
+        ('Commande événement', 'Commande_événement'),
+        ('Soumission BAL/Buffet', 'Soumission_BAL_Buffet'),
+        ('Commande BAL/Buffet', 'Commande_BAL_Buffet'),
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    submission_type = models.CharField(max_length=10, choices=SUBMISSION_TYPE_CHOICES)
+    submission_type = models.CharField(max_length=24, choices=SUBMISSION_TYPE_CHOICES)
     
     # New fields
+    refusal_comment = models.TextField(null=True, blank=True)
     company_name = models.CharField(max_length=100, null=True, blank=True)  # Company name
     event_location = models.CharField(max_length=200, null=True, blank=True)  # Lieu événement
     contact_person = models.CharField(max_length=100, null=True, blank=True)  # Contact sur place
@@ -626,6 +636,7 @@ class Submission(models.Model):
         ('en_cours', 'En cours'),
         ('valide', 'Validé'),
         ('refuse', 'Refusé'),
+        ('envoyé', 'Envoyé'),
     ]
 
     STATUS_CHOICESS = [

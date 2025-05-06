@@ -35,6 +35,9 @@ path('create-routeaujour/', views.CreateRouteAujourView.as_view(), name='create_
 path('create-routetoday/', views.CreateRouteTodayView.as_view(), name='create_routetoday'),
 path('create-routedim/', views.CreateRouteDimView.as_view(), name='create_routedim'),
 path('', views.home, name='home'),
+
+path('get_submissions_for_created_at/<int:day>/', views.get_submissions_created_at, name='get_submissions_created_at'),
+path('get_submissions_for_day/<int:day>/', views.get_submission_for_day, name='get_submissions_for_day'),
 path('get_checklists_for_day/<int:day>/', views.get_checklists_for_day, name='get_checklists_for_day'),
 path('members/', include('members.urls')),
 path('members/', include('django.contrib.auth.urls')),
@@ -85,7 +88,11 @@ path('submit/', submit_request, name='submit_request'),  # For submitting a new 
 path('manage/', manage_submissions, name='manage_submissions'),  # For managing submissions
 path('submission/<int:submission_id>/', submission_detail, name='submission_detail'),
 path('get-conseiller-username/', get_conseiller_username, name='get_conseiller_username'),
+path('submission_dashboard/status/update/<int:submission_id>/', update_submission_status_dashboard, name='update_dashboard_submission_status'),
 path('update_submission/<int:submission_id>/', update_submission_status, name='update_submission_status'),  # For updating submission status
+path('submission/<int:id>/update/', views.update_submission, name='update_submission'),
+path('calendarsubcreate_view/', calendarsubcreate_view, name='calendarsubcreate_view'),
+path('calendarsub_view/', calendarsub_view, name='calendarsub_view'),
 path('modify-dock/', modify_dock_view, name='modify_dock_view'),  # URL pattern for modify dock
 path('save_credit_card/', save_credit_card_info, name='save_credit_card_info'),
 path('commentcamarche/', views.commentcamarche, name='commentcamarche'),
