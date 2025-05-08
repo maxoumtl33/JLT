@@ -1,197 +1,205 @@
 {% extends 'listings/base.html' %}
 {% load static %}
 {% block content %}
-
+<style>
+    #menuSelect {
+    height: 800px; /* Adjust height as needed */
+    font-size: 1.1rem; /* Increase font size for better visibility */
+}
+</style>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
+<nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+    <div class="container">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li>
+                    <a href="{% url 'conseiller_dashboard' %}" class="nav__link" style="margin-left: 20px;">
+                        <i class="fa-solid fa-display"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
 <div class="container mt-5">
-    <h2 class="text-center">Soumission ou Contrat</h2>
+    <h2 class="text-center">Soumission ou Commande</h2>
     <form method="POST" class="needs-validation" novalidate>
         {% csrf_token %}
 
         <!-- Submission Type -->
-        <div class="mb-4">
+        <div class="mb-3">
             <label for="submission_type" class="form-label">Type de Soumission</label>
             {{ form.submission_type }}
         </div>
 
-        <div class="row mb-4">
+        <!-- Company and Event Location -->
+        <div class="row mb-3">
             <div class="col-md-6">
                 <label for="company_name" class="form-label">Nom de la compagnie <i class="fas fa-building" aria-hidden="true"></i></label>
                 {{ form.company_name }}
-                <div class="invalid-feedback">
-                    Veuillez entrer le nom de la compagnie.
-                </div>
+                <div class="invalid-feedback">Veuillez entrer le nom de la compagnie.</div>
             </div>
-
             <div class="col-md-6">
-                <label for="event_location" class="form-label">Lieu de l'événement <i class="fas fa-map-marker-alt" aria-hidden="true"></i></label>
-                {{ form.event_location }}
-                <div class="invalid-feedback">
-                    Veuillez entrer le lieu de l'événement.
+                
+                    <label for="event_location" class="form-label">Lieu de l'événement <i class="fas fa-map-marker-alt" aria-hidden="true"></i></label>
+                    {{ form.event_location }}
+                    <button type="button" class="btn btn-secondary btn-sm" id="copyLocation">Copier vers Adresse de facturation</button>
+                    <div class="invalid-feedback">Veuillez entrer le lieu de l'événement.</div>
                 </div>
-            </div>
+            
         </div>
 
-        <h5 class="mb-3">Coordonnées</h5>
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <label for="contact_person" class="form-label">Contact sur place <i class="fas fa-user" aria-hidden="true"></i></label>
-                {{ form.contact_person }}
-                <div class="invalid-feedback">
-                    Veuillez entrer le nom de la personne de contact.
+        <!-- Contact Information -->
+        <div class="row mb-3">
+            
+                <div class="col-md-6">
+                    <label for="contact_person" class="form-label">Contact sur place <i class="fas fa-user" aria-hidden="true"></i></label>
+                    {{ form.contact_person }}
+                    <button type="button" class="btn btn-secondary btn-sm" id="copyContact">Copier vers Commandé par</button>
+                    <div class="invalid-feedback">Veuillez entrer le nom de la personne de contact.</div>
                 </div>
-            </div>
-
+   
             <div class="col-md-6">
                 <label for="ordered_by" class="form-label">Commandé par <i class="fas fa-user-check" aria-hidden="true"></i></label>
                 {{ form.ordered_by }}
-                <div class="invalid-feedback">
-                    Veuillez entrer le nom de la personne qui a commandé.
-                </div>
+                <div class="invalid-feedback">Veuillez entrer le nom de la personne qui a commandé.</div>
             </div>
         </div>
 
-        <div class="row mb-4">
+        <!-- Contact Details -->
+        <div class="row mb-3">
             <div class="col-md-6">
                 <label for="phone" class="form-label">Téléphone <i class="fas fa-phone" aria-hidden="true"></i></label>
                 {{ form.phone }}
-                <div class="invalid-feedback">
-                    Veuillez entrer un numéro de téléphone valide.
-                </div>
+                <div class="invalid-feedback">Veuillez entrer un numéro de téléphone valide.</div>
             </div>
-
             <div class="col-md-6">
                 <label for="email" class="form-label">Email <i class="fas fa-envelope" aria-hidden="true"></i></label>
                 {{ form.email }}
-                <div class="invalid-feedback">
-                    Veuillez entrer une adresse e-mail valide.
-                </div>
+                <div class="invalid-feedback">Veuillez entrer une adresse e-mail valide.</div>
             </div>
         </div>
 
-        <h5 class="mb-3">Informations de Facturation</h5>
-        <div class="row mb-4">
+        <!-- Billing Address and Payment Mode -->
+        <div class="row mb-3">
             <div class="col-md-6">
                 <label for="billing_address" class="form-label">Adresse de facturation <i class="fas fa-address-card" aria-hidden="true"></i></label>
                 {{ form.billing_address }}
-                <div class="invalid-feedback">
-                    Veuillez entrer une adresse de facturation.
-                </div>
+                <div class="invalid-feedback">Veuillez entrer une adresse de facturation.</div>
             </div>
-
             <div class="col-md-6">
                 <label for="payment_mode" class="form-label">Mode de paiement <i class="fas fa-credit-card" aria-hidden="true"></i></label>
                 {{ form.payment_mode }}
-                <div class="invalid-feedback">
-                    Veuillez choisir un mode de paiement.
-                </div>
+                <div class="invalid-feedback">Veuillez choisir un mode de paiement.</div>
             </div>
         </div>
 
-        <h5 class="mb-3">Détails de l'Événement</h5>
-        <div class="row mb-4">
+        <!-- Date and Event Time -->
+        <div class="row mb-3">
             <div class="col-md-6">
                 <label for="date" class="form-label">Date <i class="fas fa-calendar-day" aria-hidden="true"></i></label>
                 {{ form.date }}
-                <div class="invalid-feedback">
-                    Veuillez sélectionner une date
-                </div>
+                <div class="invalid-feedback">Veuillez sélectionner une date.</div>
             </div>
-
             <div class="col-md-6">
                 <label for="event_time" class="form-label">Heure de l'événement <i class="fas fa-clock" aria-hidden="true"></i></label>
                 {{ form.event_time }}
-                <div class="invalid-feedback">
-                    Veuillez sélectionner une heure.
-                </div>
+                <div class="invalid-feedback">Veuillez sélectionner une heure.</div>
             </div>
         </div>
 
-        <div class="row mb-4">
+        <!-- Guest Count and Delivery Time -->
+        <div class="row mb-3">
             <div class="col-md-6">
                 <label for="guest_count" class="form-label">Nombre de personnes <i class="fas fa-users" aria-hidden="true"></i></label>
                 {{ form.guest_count }}
-                <div class="invalid-feedback">
-                    Veuillez entrer le nombre de personnes.
-                </div>
+                <div class="invalid-feedback">Veuillez entrer le nombre de personnes.</div>
             </div>
-
             <div class="col-md-6">
                 <label for="delivery_time" class="form-label">Heure de livraison <i class="fas fa-clock" aria-hidden="true"></i></label>
                 {{ form.delivery_time }}
-                <div class="invalid-feedback">
-                    Veuillez entrer une heure de livraison.
-                </div>
+                <div class="invalid-feedback">Veuillez entrer une heure de livraison.</div>
             </div>
         </div>
 
-        <h5 class="mb-3">Autres Détails</h5>
-        <div class="row mb-4">
+        <!-- Budget and Service Count -->
+        <div class="row mb-3">
             <div class="col-md-6">
                 <label for="budget" class="form-label">Budget <i class="fas fa-dollar-sign" aria-hidden="true"></i></label>
                 {{ form.budget }}
-                <div class="invalid-feedback">
-                    Veuillez entrer un budget valide.
-                </div>
+                <div class="invalid-feedback">Veuillez entrer un budget valide.</div>
             </div>
-
             <div class="col-md-6">
                 <label for="service_count" class="form-label">Nombre de services <i class="fas fa-clipboard-list" aria-hidden="true"></i></label>
                 {{ form.service_count }}
-                <div class="invalid-feedback">
-                    Veuillez entrer le nombre de services.
-                </div>
+                <div class="invalid-feedback">Veuillez entrer le nombre de services.</div>
             </div>
         </div>
-
-        <h5 class="mb-3">Mode d'Envoi</h5>
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <label for="delivery_mode" class="form-label">Mode d'envoi <i class="fas fa-truck" aria-hidden="true"></i></label>
-                {{ form.delivery_mode }}
-                <div class="invalid-feedback">
-                    Veuillez choisir un mode d'envoi.
-                </div>
-                <!-- Modal for Menu Selection -->
-                <div class="modal fade" id="menuModal" tabindex="-1" aria-labelledby="menuModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="menuModalLabel">Sélectionner un Menu</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <form id="menuSelectForm">
-                                    {% for menu in menus %}
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="menu_{{ menu.id }}" value="{{ menu.id }}">
-                                        <label class="form-check-label" for="menu_{{ menu.id }}">{{ menu.name }}</label>
-                                    </div>
-                                    {% endfor %}
-                                </form>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                                <button type="button" class="btn btn-primary" id="addMenus">Ajouter</button>
-                            </div>
-                        </div>
+        <div class="row mb-3">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <label for="commentaire" class="form-label">Commentaire <i class="fa-solid fa-comment info-icon"></i></label>
+                        {{ form.commentaire }}  <!-- Ensure this outputs a textarea -->
+                        <div class="invalid-feedback">Veuillez entrer un commentaire.</div>
+            
+                        
                     </div>
                 </div>
-
-                <!-- Button to open menu modal -->
-                <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#menuModal">
-                    Sélectionner un Menu
-                </button>
             </div>
         </div>
+       <!-- Delivery Modes -->
+<div class="row mb-3">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <label class="form-label">Menus <i class="fa-solid fa-utensils" aria-hidden="true"></i></label>
+    
+                <select id="menuSelect" class="form-select" name="sub_menus" multiple>
+                    <option value="">Choisissez un ou plusieurs menus</option>
+                    {% for menu in menus %}
+                        <option value="{{ menu.id }}" data-allergies="{{ menu.allergie }}">{{ menu.name }}</option>
+                    {% endfor %}
+                </select>
+    
+                <div id="menuDetails" class="mt-3 row"> <!-- Use Bootstrap's row to hold dynamic menu details -->
+                    <!-- Dynamic content will be inserted here -->
+                </div>
+                
+                <div class="invalid-feedback">Veuillez choisir un menu.</div>
+            </div>
+        </div>
+    </div>
+    
+    
+    
 
-        <button type="submit" class="btn btn-primary">Envoyer</button>
+</div>
+        
+   
+        <div class="d-flex justify-content-center my-4">  <!-- Adds margin for spacing -->
+            <button type="submit" class="btn btn-primary">Envoyer</button>
+        </div>
+        
+
+        </div>
+
+
+        
     </form>
 </div>
 
-<!-- Credit Card Info Modal -->
+<br>
+<br>
+
+
+<!-- Modal for Credit Card Info -->
 <div class="modal fade" id="creditCardModal" tabindex="-1" aria-labelledby="creditCardModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -227,7 +235,7 @@
     </div>
 </div>
 
-<!-- Interac Info Modal -->
+<!-- Modal for Interac Info -->
 <div class="modal fade" id="interacModal" tabindex="-1" aria-labelledby="interacModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -255,14 +263,19 @@
     </div>
 </div>
 
-<script>
-// JavaScript for form validation
-(function () {
-    'use strict';
-    const forms = document.querySelectorAll('.needs-validation');
+<!-- jQuery (required for Select2) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    Array.prototype.slice.call(forms)
-        .forEach(function (form) {
+<!-- Select2 JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+<script>
+    // JavaScript for form validation
+    (function () {
+        'use strict';
+        const forms = document.querySelectorAll('.needs-validation');
+    
+        Array.prototype.slice.call(forms).forEach(function (form) {
             form.addEventListener('submit', function (event) {
                 if (!form.checkValidity()) {
                     event.preventDefault();
@@ -271,62 +284,144 @@
                 form.classList.add('was-validated');
             }, false);
         });
-})();
-
-document.getElementById('id_payment_mode').addEventListener('change', function() {
-    const paymentMode = this.value;
-    if (paymentMode === 'cc') {
-        $('#creditCardModal').modal('show');
-    } else if (paymentMode === 'interac') {
-        $('#interacModal').modal('show');
-    }
-});
-
-// Handle Credit Card Form Submission
-document.getElementById('creditCardForm').addEventListener('submit', function(event) {
-    event.preventDefault(); // Prevent the default form submission
-
-    const cardNumber = document.getElementById('card_number').value;
-    const cardHolder = document.getElementById('card_holder').value;
-    const expiryDate = document.getElementById('expiry_date').value;
-    const cvv = document.getElementById('cvv').value;
+    })();
     
-    console.log("Credit Card Info Submitted:", cardNumber, cardHolder, expiryDate, cvv);
-    $('#creditCardModal').modal('hide');
+    document.getElementById('id_payment_mode').addEventListener('change', function() {
+        const paymentMode = this.value;
+        if (paymentMode === 'cc') {
+            $('#creditCardModal').modal('show');
+        } else if (paymentMode === 'interac') {
+            $('#interacModal').modal('show');
+        }
+    });
+    
+    // Handle Credit Card Form Submission
+    document.getElementById('creditCardForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent the default form submission
+    
+        const cardNumber = document.getElementById('card_number').value;
+        const cardHolder = document.getElementById('card_holder').value;
+        const expiryDate = document.getElementById('expiry_date').value;
+        const cvv = document.getElementById('cvv').value;
+    
+        console.log("Credit Card Info Submitted:", cardNumber, cardHolder, expiryDate, cvv);
+        $('#creditCardModal').modal('hide');
+    });
+    
+    // Handle Interac Form Submission
+    document.getElementById('interacForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent the default form submission
+    
+        const interacEmail = document.getElementById('interac_email').value;
+        const interacMessage = document.getElementById('interac_message').value;
+    
+        console.log("Interac Info Submitted:", interacEmail, interacMessage);
+        $('#interacModal').modal('hide');
+    });
+    
+    // Handle menu selection
+    document.addEventListener('DOMContentLoaded', function() {
+    // Copy event listeners for contact and location
+    document.getElementById('copyLocation').addEventListener('click', function() {
+        const eventLocation = document.getElementById('id_event_location').value;
+        document.getElementById('id_billing_address').value = eventLocation;
+    });
+
+    document.getElementById('copyContact').addEventListener('click', function() {
+        const contactPerson = document.getElementById('id_contact_person').value;
+        document.getElementById('id_ordered_by').value = contactPerson;
+    });
+
 });
 
-// Handle Interac Form Submission
-document.getElementById('interacForm').addEventListener('submit', function(event) {
-    event.preventDefault(); // Prevent the default form submission
-
-    const interacEmail = document.getElementById('interac_email').value;
-    const interacMessage = document.getElementById('interac_message').value;
-
-console.log("Interac Info Submitted:", interacEmail, interacMessage);
-
-// Optionally, handle the submission via AJAX here
-
-$('#interacModal').modal('hide'); // Close the modal after submission
+$(document).ready(function() {
+    // Initialize Select2 for the menu selection
+    $('#menuSelect').select2({
+        placeholder: "Rechercher un menu...",
+        allowClear: true
+    }).on('change', function() {
+        updateMenuDetails(); // Call function to handle menu selection change
+    });
 });
 
-// Handle Menu Selection Submission
-document.getElementById('addMenus').addEventListener('click', function() {
-const selectedMenus = [];
-const checkboxes = document.querySelectorAll('#menuSelectForm .form-check-input:checked');
+// Object to store selected allergies and delivery modes for each menu
+const menuSelections = {};
 
-checkboxes.forEach(function(checkbox) {
-    selectedMenus.push(checkbox.value);
-});
+// Function to update the details based on selected menus
+function updateMenuDetails() {
+    const selectedMenus = $('#menuSelect').val(); // Get selected menu IDs
+    const menuDetailsContainer = $('#menuDetails');
+    menuDetailsContainer.empty(); // Clear any existing details
 
-console.log('Selected Menus:', selectedMenus);
+    selectedMenus.forEach(menuId => {
+        const selectedOption = $('#menuSelect option[value="' + menuId + '"]');
+        const allergies = selectedOption.data('allergies');
 
-// Update a hidden input or display the selected menus
-document.getElementById('delivery_mode').value = selectedMenus.join(',');
-$('#menuModal').modal('hide');  // Hide the modal after selection
-});
-</script>
+        // Creating options for the delivery modes
+        const deliveryModeOptions = `
+            <option value="">Sélectionnez un mode</option>
+            {% for mode in delivery_modes %}
+                <option value="{{ mode.id }}">{{ mode.name }}</option>
+            {% endfor %}
+        `;
+
+        // If there are custom delivery modes for the selected menu, ensure they are set properly
+        const selectedDeliveryMode = menuSelections[menuId]?.deliveryMode || '';
+
+        // Create new section for each selected menu
+        const menuDetailHtml = `
+            <div class="col-md-4 card mb-2 menu-detail" data-menu-id="${menuId}">
+                <div class="card-body">
+                    <h5 class="card-title">${selectedOption.text()}</h5>
+                    <label>Allergies:</label>
+                    <input type="text" class="form-control mb-2" name="menu_allergies_${menuId}" value="${allergies}" 
+                           onchange="updateMenuSelections(${menuId}, this.value, '${selectedDeliveryMode}')">
+                    <label for="delivery_modes_${menuId}">Modes d'envoie:</label>
+                    <select id="delivery_modes_${menuId}" name="delivery_modes_${menuId}" class="form-select mb-2" 
+                            onchange="updateMenuSelections(${menuId}, '${allergies}', this.value)">
+                        <option value="">Sélectionnez un mode</option>
+                        ${deliveryModeOptions}
+                        <option value="${selectedDeliveryMode}" selected>${selectedDeliveryMode}</option>
+                    </select>
+                    <button type="button" class="btn btn-danger remove-menu" onclick="removeMenuDetail(this)">Supprimer</button>
+                </div>
+            </div>
+        `;
+
+        menuDetailsContainer.append(menuDetailHtml);
+    });
+}
+
+// Function to update the selection object
+function updateMenuSelections(menuId, allergies, deliveryMode) {
+    // Check the input values and update them in the menuSelections object
+    if (!menuSelections[menuId]) {
+        menuSelections[menuId] = {}; // Initialize if it doesn't exist
+    }
+
+    // Store the current input values correctly
+    menuSelections[menuId].allergies = allergies || ''; // Default to empty string if undefined
+    menuSelections[menuId].deliveryMode = deliveryMode || ''; // Default to empty string if undefined
+}
+
+
+// Function to remove menu details
+function removeMenuDetail(button) {
+    const parentDiv = $(button).closest('.menu-detail');
+    const menuId = parentDiv.data('menu-id');
+    
+    // Remove menu from selections when the menu detail is removed
+    delete menuSelections[menuId];
+
+    // Safely remove the surrounding div
+    parentDiv.remove();
+}
+
+
+   
+   </script>
+    
 
 {% endblock %}
-
 
 

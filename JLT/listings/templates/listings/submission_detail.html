@@ -1,7 +1,7 @@
 {% extends 'listings/base.html' %}
 {% load static %}
 
-{% block head %}
+{% block content %}
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
@@ -11,12 +11,8 @@
     .card {
         border-radius: 10px;
     }
-    .card-header {
-        border-top-left-radius: 10px;
-        border-top-right-radius: 10px;
-    }
     .info-icon {
-        margin-right: 10px;
+        margin-right: 20px !important;
         color: #007bff; /* Primary color */
     }
     .card-body p {
@@ -27,183 +23,287 @@
     .card-body p strong {
         color: #333; /* Darker color for labels */
     }
-    .modal-footer {
-        border-top: 1px solid #e9ecef; /* Separate footer from body */
-    }
     .btn {
         border-radius: 20px;
     }
 </style>
-{% endblock %}
-
-{% block content %}
-<div class="container">
-    <h2 class="mt-5 text-center">Détails de la Soumission</h2>
-
-    <div class="card shadow-sm mt-4">
-        <div class="card-header bg-secondary text-white">
-            <h5 class="mb-0 text-center">Soumission Type: {{ submission.get_submission_type_display }}</h5>
-        </div>
-        <div class="card-body">
-            <h5 class="mt-3">Informations Générales</h5>
-            <div class="row">
-                <div class="col-md-6">
-                    <p><i class="fas fa-user info-icon"></i><strong>Commandé par:</strong> {{ submission.ordered_by }}</p>
-                </div>
-                <div class="col-md-6">
-                    <p><i class="fas fa-building info-icon"></i><strong>Nom de la compagnie:</strong> {{ submission.company_name }}</p>
-                </div>
-            </div>
-
-            <h5 class="mt-3">Coordonnées de Contact</h5>
-            <div class="row">
-                <div class="col-md-6">
-                    <p><i class="fas fa-user-circle info-icon"></i><strong>Contact sur place:</strong> {{ submission.contact_person }}</p>
-                </div>
-                <div class="col-md-6">
-                    <p><i class="fas fa-phone info-icon"></i><strong>Téléphone:</strong> {{ submission.phone }}</p>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <p><i class="fas fa-envelope info-icon"></i><strong>Email:</strong> {{ submission.email }}</p>
-                </div>
-                <div class="col-md-6">
-                    <p><i class="fas fa-address-card info-icon"></i><strong>Adresse de facturation:</strong> {{ submission.billing_address }}</p>
-                </div>
-            </div>
-
-            <h5 class="mt-3">Détails de l'Événement</h5>
-            <div class="row">
-                <div class="col-md-6">
-                    <p><i class="fas fa-calendar-alt info-icon"></i><strong>Date:</strong> {{ submission.date|date:"d F Y" }}</p>
-                </div>
-                <div class="col-md-6">
-                    <p><i class="fas fa-clock info-icon"></i><strong>Heure de l'événement:</strong> {{ submission.event_time }}</p>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <p><i class="fas fa-users info-icon"></i><strong>Nombre de personnes:</strong> {{ submission.guest_count }}</p>
-                </div>
-                <div class="col-md-6">
-                    <p><i class="fas fa-clock info-icon"></i><strong>Heure de livraison:</strong> {{ submission.delivery_time }}</p>
-                </div>
-            </div>
-
-            <h5 class="mt-3">Informations Financières</h5>
-            <div class="row">
-                <div class="col-md-6">
-                    <p><i class="fas fa-dollar-sign info-icon"></i><strong>Budget:</strong> {{ submission.budget }}</p>
-                </div>
-                <div class="col-md-6">
-                    <p><i class="fas fa-clipboard-list info-icon"></i><strong>Nombre de services:</strong> {{ submission.service_count }}</p>
-                </div>
-            </div>
-
-            <h5 class="mt-3">Mode d'Envoi</h5>
-            <div class="row">
-                <div class="col-md-6">
-                    <p><i class="fas fa-truck info-icon"></i><strong>Mode d'envoi:</strong> {{ submission.get_delivery_mode_display }}</p>
-                </div>
-                <div class="col-md-6">
-                    <p><i class="fas fa-info-circle info-icon"></i><strong>Status:</strong> {{ submission.get_status_display }}</p>
-                </div>
-            </div>
-
-            <h5 class="mt-3">Détails de Création</h5>
-            <div class="row">
-                <div class="col-md-12">
-                    <p><i class="fas fa-calendar-check info-icon"></i><strong>Créé à:</strong> {{ submission.created_at|date:"d F Y, H:i" }}</p>
-                </div>
-            </div>
-
-            <div class="mt-4">
-                <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editSubmissionModal">
-                    Modifier la Soumission
-                </button>
-            </div>
-        </div>
-
-        <div class="modal-footer">
-            <a href="{% url 'manage_submissions' %}" class="btn btn-secondary">Retour à la gestion des soumissions</a>
+<nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+    <div class="container">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                {% if user.username == "Audrey" %}
+                <li class="nav-item dropdown">
+                    <a class="nav__link dropdown-toggle" href="#" id="menuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Suivi
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="menuDropdown">
+                        <li>
+                            <a class="dropdown-item" href="{% url 'manage_submissions' %}">
+                                <i class="fa-solid fa-file-pdf me-2"></i>PDF
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{% url 'calendarsub_view' %}">
+                                <i class="fa-solid fa-calendar-days me-2"></i>Calendrier date événement
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{% url 'calendarsubcreate_view' %}">
+                                <i class="fa-solid fa-calendar-plus me-2"></i>Calendrier date création
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                {% endif %}
+                <li class="nav-item">
+                    <a href="{% url 'conseiller_dashboard' %}" class="nav__link" style="margin-left: 20px;">
+                        <i class="fa-solid fa-display"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <div style="margin-left: 20px;">
+                        <button type="button" id="modifyButton" class="nav__link">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                            <span>Modifier</span>
+                        </button>
+                        <button type="button" class="btn btn-success d-none" id="saveButton">
+                            Enregistrer les modifications
+                        </button>
+                    </div>
+                </li>
+            </ul>
         </div>
     </div>
-</div>
+</nav>
+<div class="container">
+    <h3 class="mt-5 text-center">Détails de la Soumission</h3>
 
-<!-- Modal for Modifying Submission -->
-<div class="modal fade" id="editSubmissionModal" tabindex="-1" aria-labelledby="editSubmissionModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editSubmissionModalLabel">Modifier la Soumission</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="card shadow-sm mt-4">
+        <div class="d-flex justify-content-between align-items-center card-header bg-secondary text-white">
+            <div>
+                <h3 class="mb-0">{{ submission.get_submission_type_display }}</h3>
             </div>
-            <div class="modal-body">
-                <form id="editSubmissionForm" method="POST" action="{% url 'update_submission' submission.id %}">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label for="ordered_by" class="form-label">Commandé par</label>
-                        <input type="text" class="form-control" id="ordered_by" name="ordered_by" value="{{ submission.ordered_by }}" >
+        </div>
+        <div class="card-body">
+            <h3 class="mt-3">Détails de l'Événement</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><i class="fas fa-building info-icon"></i><strong>Nom de la compagnie:</strong>
+                        <span class="info-field">{{ submission.company_name }}</span>
+                        <input type="text" class="form-control d-none" name="company_name" value="{{ submission.company_name }}" />
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <p><i class="fas fa-calendar-alt info-icon"></i><strong>Date:</strong>
+                        <span class="info-field">{{ submission.date|date:"d F Y" }}</span>
+                        <input type="date" class="form-control d-none" name="date" value="{{ submission.date|date:"Y-m-d" }}" />
+                    </p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><i class="fas fa-clock info-icon"></i><strong>Heure de l'événement:</strong>
+                        <span class="info-field">{{ submission.event_time }}</span>
+                        <input type="time" class="form-control d-none" name="event_time" value="{{ submission.event_time|time:"H:i" }}" />
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <p><i class="fas fa-clock info-icon"></i><strong>Heure de livraison:</strong>
+                        <span class="info-field">{{ submission.delivery_time }}</span>
+                        <input type="time" class="form-control d-none" name="delivery_time" value="{{ submission.delivery_time|time:"H:i" }}" />
+                    </p>
+                </div>
+                
+                    
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><i class="fas fa-users info-icon"></i><strong>Nombre de personnes:</strong>
+                            <span class="info-field">{{ submission.guest_count }}</span>
+                            <input type="number" class="form-control d-none" name="guest_count" value="{{ submission.guest_count }}" />
+                        </p>
                     </div>
-                    <div class="mb-3">
-                        <label for="company_name" class="form-label">Nom de la compagnie</label>
-                        <input type="text" class="form-control" id="company_name" name="company_name" value="{{ submission.company_name }}" >
+                    
+                    <div class="col-md-6">
+                        <p><i class="fas fa-clipboard-list info-icon"></i><strong>Nombre de services:</strong>
+                            <span class="info-field">{{ submission.service_count }}</span>
+                            <input type="text" class="form-control d-none" name="service_count" value="{{ submission.service_count }}" />
+                        </p>
                     </div>
-                    <div class="mb-3">
-                        <label for="event_location" class="form-label">Lieu de l'événement</label>
-                        <input type="text" class="form-control" id="event_location" name="event_location" value="{{ submission.event_location }}" >
-                    </div>
-                    <div class="mb-3">
-                        <label for="contact_person" class="form-label">Contact sur place</label>
-                        <input type="text" class="form-control" id="contact_person" name="contact_person" value="{{ submission.contact_person }}" >
-                    </div>
-                    <div class="mb-3">
-                        <label for="phone" class="form-label">Téléphone</label>
-                        <input type="tel" class="form-control" id="phone" name="phone" value="{{ submission.phone }}" >
-                    </div>
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email" name="email" value="{{ submission.email }}" >
-                    </div>
-                    <div class="mb-3">
-                        <label for="billing_address" class="form-label">Adresse de facturation</label>
-                        <input type="text" class="form-control" id="billing_address" name="billing_address" value="{{ submission.billing_address                        }}" >
-                    </div>
-                    <div class="mb-3">
-                        <label for="budget" class="form-label">Budget</label>
-                        <input type="number" step="0.01" class="form-control" id="budget" name="budget" value="{{ submission.budget }}" >
-                    </div>
-                    <div class="mb-3">
-                        <label for="guest_count" class="form-label">Nombre de personnes</label>
-                        <input type="number" class="form-control" id="guest_count" name="guest_count" value="{{ submission.guest_count }}" >
-                    </div>
-                    <div class="mb-3">
-                        <label for="event_time" class="form-label">Heure de l'événement</label>
-                        <input type="time" class="form-control" id="event_time" name="event_time" value="{{ submission.event_time|time:"H:i" }}" >
-                    </div>
-                    <div class="mb-3">
-                        <label for="delivery_time" class="form-label">Heure de livraison</label>
-                        <input type="time" class="form-control" id="delivery_time" name="delivery_time" value="{{ submission.delivery_time|time:"H:i" }}" >
-                    </div>
-                    <div class="mb-3">
-                        <label for="payment_mode" class="form-label">Mode de paiement</label>
-                        <select class="form-select" id="payment_mode" name="payment_mode" >
+                </div>
+            
+
+            <h3 class="mt-3">Coordonnées de Contact</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><i class="fas fa-user-circle info-icon"></i><strong>Contact sur place:</strong>
+                        <span class="info-field">{{ submission.contact_person }}</span>
+                        <input type="text" class="form-control d-none" name="contact_person" value="{{ submission.contact_person }}" />
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <p><i class="fas fa-user info-icon"></i><strong>Commandé par:</strong>
+                        <span class="info-field">{{ submission.ordered_by }}</span>
+                        <input type="text" class="form-control d-none" name="ordered_by" value="{{ submission.ordered_by }}" />
+                    </p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><i class="fas fa-envelope info-icon"></i><strong>Email:</strong>
+                        <span class="info-field">{{ submission.email }}</span>
+                        <input type="email" class="form-control d-none" name="email" value="{{ submission.email }}" />
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <p><i class="fas fa-phone info-icon"></i><strong>Téléphone:</strong>
+                        <span class="info-field">{{ submission.phone }}</span>
+                        <input type="tel" class="form-control d-none" name="phone" value="{{ submission.phone }}" />
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <p><i class="fas fa-address-card info-icon"></i><strong>Adresse de facturation:</strong>
+                        <span class="info-field">{{ submission.billing_address }}</span>
+                        <input type="text" class="form-control d-none" name="billing_address" value="{{ submission.billing_address }}" />
+                    </p>
+                </div>
+            </div>
+            
+
+            <h3 class="mt-3">Informations Financières</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><i class="fas fa-dollar-sign info-icon"></i><strong>Budget:</strong>
+                        <span class="info-field">{{ submission.budget }} $</span>
+                        <input type="number" step="0.01" class="form-control d-none" name="budget" value="{{ submission.budget }}" />
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <p><i class="fa-solid fa-credit-card info-icon"></i><strong>Mode de paiement:</strong>
+                        <span class="info-field">{{ submission.payment_mode }}</span>
+                        <select class="form-select d-none" name="payment_mode">
                             <option value="cc" {% if submission.payment_mode == 'cc' %}selected{% endif %}>Carte de Crédit</option>
                             <option value="cheque" {% if submission.payment_mode == 'cheque' %}selected{% endif %}>Chèque</option>
                             <option value="interac" {% if submission.payment_mode == 'interac' %}selected{% endif %}>Interact</option>
                         </select>
-                    </div>
-
-                </form>
+                    </p>
+                </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                <button type="submit" class="btn btn-primary" form="editSubmissionForm">Enregistrer les modifications</button>
+
+            <h3 class="mt-3">Menus et Commentaires</h3>
+            <div class="row">
+                <div class="col-md-12">
+                    
+                    {% if submission.menu_submissions.count > 0 %}
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Menu</th>
+                                    <th>Allergies</th>
+                                    <th>Modes d'envoi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for menu_submission in submission.menu_submissions.all %}
+                                    <tr>
+                                        <td><strong>{{ menu_submission.menu.name }}</strong>
+                                            <input type="hidden" class="form-control d-none" name="sub_menus[]" value="{{ menu_submission.menu.id }}" />
+                                        </td>
+                                        <td>{{ menu_submission.allergies|default:"Aucune allergies" }}</td>
+                                        <td>
+                                            {{ menu_submission.delivery_mode.name|default:"Aucun mode sélectionné" }}
+                                            <input type="hidden" class="form-control d-none" name="delivery_modes[]" value="{{ menu_submission.delivery_mode.id }}" />
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p>Aucun menu sélectionné.</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <p><i class="fa-solid fa-comment info-icon"></i><strong>Commentaire:</strong>
+                        <span class="info-field">{{ submission.commentaire }}</span>
+                        <input type="text" class="form-control d-none" name="commentaire" value="{{ submission.commentaire }}" />
+                    </p>
+                </div>
+            </div>
+
+        <h3 class="mt-3">Détails de Création</h3>
+        <div class="row">
+            <div class="col-md-6">
+                <p><i class="fas fa-calendar-check info-icon"></i><strong>Créé à:</strong> {{ submission.created_at|date:"d F Y, H:i" }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><i class="fa-solid fa-user info-icon"></i><strong>Par:</strong> {{ submission.user.username }}</p>
             </div>
         </div>
+        <br>
+       
     </div>
 </div>
-{% endblock %}
+    
+</div>
+</div>
 
+<script>
+document.getElementById('modifyButton').addEventListener('click', function() {
+    // Show input fields and hide spans
+    const infoFields = document.querySelectorAll('.info-field');
+    const inputs = document.querySelectorAll('.form-control');
+
+    infoFields.forEach(field => {
+        field.classList.toggle('d-none'); // toggle visibility
+    });
+
+    inputs.forEach(input => {
+        input.classList.toggle('d-none'); // toggle visibility
+    });
+
+    // Toggle buttons
+    this.classList.toggle('d-none'); // Hide the modify button
+    document.getElementById('saveButton').classList.toggle('d-none'); // Show the save button
+});
+
+document.getElementById('saveButton').addEventListener('click', function() {
+    const formData = new FormData();
+    
+    // Collect data from all input fields
+    const inputs = document.querySelectorAll('.form-control:not(.d-none)'); // Only collect visible input fields
+
+    inputs.forEach(input => {
+        formData.append(input.name, input.value); // Append each value to FormData
+    });
+
+    // Send data using Fetch API to the server
+    fetch("{% url 'update_submission' submission.id %}", {
+        method: "POST",
+        body: formData,
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}', // Include CSRF token for security
+        }
+    })
+    .then(response => response.json())  // Expecting a JSON response
+    .then(data => {
+        if (data.success) {
+            location.reload();  // Reload to fetch updated details
+        } else {
+            alert("Une erreur s'est produite lors de la sauvegarde des modifications: " + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert("Une erreur s'est produite lors de la sauvegarde des modifications.");
+    });
+});
+</script>
+
+{% endblock %}
 

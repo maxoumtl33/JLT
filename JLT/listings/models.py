@@ -563,12 +563,7 @@ class QuantityProductChangeLog(models.Model):
 
     
 
-class Menu(models.Model):
-    name = models.CharField(max_length=255)
-    description = models.TextField(blank=True, null=True)
 
-    def __str__(self):
-        return self.name
 
 
 
@@ -585,6 +580,27 @@ class ChecklistRecupPhoto(models.Model):
 
     caption = models.CharField(max_length=200, null=True, blank=True)
 
+class DeliveryMode(models.Model):
+
+    choicesmode = [('assiette', 'Assiette'),
+        ('buffet_porcelaine', 'Buffet porcelaine'),
+        ('buffet_jetable', 'Buffet jetable'),
+        ('coffret', 'Coffret'),
+        ('menu', 'Menu')]
+    
+    name = models.CharField(max_length=30, choices=choicesmode, null=True, blank=True)  # Mode d'envoi
+
+    def __str__(self):
+        return self.name
+    
+class Menu(models.Model):
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    allergie = models.TextField(blank=True, null=True)
+    delivery_modes = models.ManyToManyField(DeliveryMode, blank=True)
+
+    def __str__(self):
+        return self.name
     
 from django.db import models
 from django.contrib.auth.models import User
@@ -612,6 +628,7 @@ class Submission(models.Model):
     phone = models.CharField(max_length=15, null=True, blank=True)  # Telephone
     email = models.EmailField(max_length=100, null=True, blank=True)  # Email
     billing_address = models.CharField(max_length=200, null=True, blank=True)  # Adresse facturation
+    commentaire = models.CharField(max_length=200, null=True, blank=True) 
     payment_mode = models.CharField(max_length=20, choices=[
         ('cc', 'Carte de Crédit'),
         ('cheque', 'Chèque'),
@@ -621,15 +638,9 @@ class Submission(models.Model):
     event_time = models.TimeField(null=True, blank=True)  # Heure événement
     guest_count = models.IntegerField(null=True, blank=True)  # Nombre personne
     delivery_time = models.TimeField(null=True, blank=True)  # Heure livraison
-    budget = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # Budget
+    budget = models.IntegerField(null=True, blank=True)  # Budget
     service_count = models.CharField(max_length=100, null=True, blank=True)  # Nombre de service (as string)
-    delivery_mode = models.CharField(max_length=30, choices=[
-        ('assiette', 'Assiette'),
-        ('buffet_porcelaine', 'Buffet porcelaine'),
-        ('buffet_jetable', 'Buffet jetable'),
-        ('coffret', 'Coffret'),
-    ], null=True, blank=True)  # Mode d'envoi
-
+    sub_menus = models.ManyToManyField(Menu, blank=True)
     created_at = models.DateTimeField(null=True, blank=True)
 
     STATUS_CHOICES = [
@@ -656,6 +667,18 @@ class Submission(models.Model):
     def __str__(self):
         return f"{self.submission_type} by {self.user} at {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}. Company: {self.company_name if self.company_name else 'N/A'}"
     
+
+from django.db import models
+
+class MenuSubmission(models.Model):
+    submission = models.ForeignKey(Submission, on_delete=models.CASCADE, related_name='menu_submissions')
+    menu = models.ForeignKey(Menu, on_delete=models.CASCADE)
+    allergies = models.TextField(null=True, blank=True)  # Field to save allergies
+    delivery_mode = models.ForeignKey(DeliveryMode, on_delete=models.SET_NULL, null=True, blank=True)  # Link to DeliveryMode
+
+    def __str__(self):
+        return f"{self.menu.name} for {self.submission.company_name}"
+
 
 from django.shortcuts import render, get_object_or_404
 from .models import Submission

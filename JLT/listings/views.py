@@ -5451,26 +5451,50 @@ from .models import Submission
 from .forms import SubmissionForm
 @login_required
 def submit_request(request):
-
+    delivery_modes = DeliveryMode.objects.all()
     menus = Menu.objects.all()
     key = settings.GOOGLE_API_KEY
-
 
     if request.method == 'POST':
         form = SubmissionForm(request.POST)
         if form.is_valid():
-            submission = form.save(commit=False)
+            submission = form.save(commit=False)  # Create the submission object but don't save immediately
             submission.user = request.user  # Link to the logged-in user
-            submission.save()
+            submission.save()  # Save the submission to the database
+
+            # Save the ManyToMany relationships 
+            form.save_m2m()  
+
             messages.success(request, 'Votre soumission a été enregistrée avec succès.')
-            return redirect('submit_request')  # Replace with your success URL
+
+            # Process each selected menu
+            selected_menus = request.POST.getlist('sub_menus')
+            for menu_id in selected_menus:
+                menu = Menu.objects.get(id=menu_id)
+                allergies = request.POST.get(f'menu_allergies_{menu_id}', '')  # Get allergies
+                delivery_mode_id = request.POST.get(f'delivery_modes_{menu_id}', '')  # Get selected delivery mode
+
+                # If delivery_mode_id is not empty, get the DeliveryMode object
+                delivery_mode = DeliveryMode.objects.get(id=delivery_mode_id) if delivery_mode_id else None
+
+                # Create a MenuSubmission instance to save the relationship to allergies and delivery mode
+                MenuSubmission.objects.create(
+                    submission=submission,
+                    menu=menu,
+                    allergies=allergies,
+                    delivery_mode=delivery_mode
+                )
+
+            return redirect('submit_request')  # Redirect after saving
     else:
         form = SubmissionForm()
-    
-    return render(request, 'listings/submit_request.html', {'form': form,
-                                                            'menus': menus,
-                                                            'key': key,}
-                  )
+
+    return render(request, 'listings/submit_request.html', {
+        'form': form,
+        'menus': menus,
+        'key': key,
+        'delivery_modes': delivery_modes,
+    })
 
 from django.db.models import Count, Q
 from collections import defaultdict
@@ -5599,11 +5623,11 @@ from datetime import timedelta
 from datetime import datetime
 @login_required
 def manage_submissions(request):
-    if not request.user.groups.filter(name='admin').exists():
-        return redirect('home')
+    
 
     conseillers = Conseiller.objects.select_related('user').all()  # Fetch all Conseillers with related Users
     submissions = Submission.objects.all().order_by('-created_at')
+    submissionss = Submission.objects.all().order_by('-created_at')
     submission_type = request.GET.get('submission_type', '')
     count_validated = submissions.filter(status='valide', submission_type="soumission").count()
     count_rejected = submissions.filter(status='refuse', submission_type="soumission").count()
@@ -5657,6 +5681,20 @@ def manage_submissions(request):
     # Count the number of filtered submissions
     submission_count = submissions.paginator.count
 
+    search_query = request.GET.get('search', '')
+
+    if search_query:
+        # Filter submissions based on a search query
+        submissions = submissionss.filter(
+            Q(company_name__icontains=search_query) |
+            Q(user__username__icontains=search_query) |
+            Q(created_at__icontains=search_query) |
+            Q(ordered_by__icontains=search_query) |  
+            Q(contact_person__icontains=search_query) |
+            Q(phone__icontains=search_query) |  # Add phone to query
+            Q(email__icontains=search_query)  # Add email to query
+        )
+
     return render(request, 'listings/manage_submissions.html', {
         'submissions': submissions,
         'submission_type': submission_type,
@@ -5670,6 +5708,8 @@ def manage_submissions(request):
         'count_in_progressontrat': count_in_progressontrat,
         'start_date': start_date,  # Add start_date to context
         'end_date': end_date,
+        'search_query': search_query,
+        'submissionss': submissionss,
         
                 })
 
@@ -5707,21 +5747,84 @@ def save_credit_card_info(request):
 
 
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Submission
-from .forms import SubmissionForm  # If you are using a form class
 
-def update_submission(request, id):
-    submission = get_object_or_404(Submission, id=id)
-    
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import Submission
+
+@csrf_exempt
+def update_submission(request, submission_id):
     if request.method == 'POST':
-        form = SubmissionForm(request.POST, instance=submission)
-        if form.is_valid():
-            form.save()
-            return redirect('manage_submissions')  # Redirect after successful update
+        try:
+            submission = Submission.objects.get(id=submission_id)
+
+            # Safely get and sanitize fields
+            submission.date = request.POST.get('date', '').strip()
+            submission.ordered_by = request.POST.get('ordered_by', '').strip()
+            submission.company_name = request.POST.get('company_name', '').strip()
+            submission.event_location = request.POST.get('event_location', '').strip()
+            submission.contact_person = request.POST.get('contact_person', '').strip()
+            submission.phone = request.POST.get('phone', '').strip()
+            submission.commentaire = request.POST.get('commentaire', '').strip()
+            submission.email = request.POST.get('email', '').strip()
+            submission.billing_address = request.POST.get('billing_address', '').strip()
+            submission.service_count = request.POST.get('service_count', '').strip()
+
+            # Handling Budget - sanitizing to remove non-breaking spaces
+            budget_value = request.POST.get('budget', '').strip().replace("\xa0", "")  # Remove non-breaking space
+            submission.budget = int(budget_value) if budget_value.isdigit() else None  # Convert to float or set to None
+
+            # Handling Guest Count
+            guest_count_value = request.POST.get('guest_count', '').strip().replace("\xa0", "")
+            submission.guest_count = int(guest_count_value) if guest_count_value.isdigit() else None
+            
+            submission.event_time = request.POST.get('event_time', '').strip() or None
+            submission.delivery_time = request.POST.get('delivery_time', '').strip() or None
+
+            # Validate time formats if applicable
+            if submission.event_time and not validate_time_format(submission.event_time):
+                return JsonResponse({'success': False, 'error': "Le format de l'heure de l'événement est invalide."}, status=400)
+
+            if submission.delivery_time and not validate_time_format(submission.delivery_time):
+                return JsonResponse({'success': False, 'error': "Le format de l'heure de livraison est invalide."}, status=400)
+
+
+            submission.save()  # Save changes to the database
+            
+            return JsonResponse({'success': True}, status=200)
+        except Submission.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Soumission non trouvée.'}, status=404)
+        except ValueError as ve:
+            return JsonResponse({'success': False, 'error': str(ve)}, status=400)
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
     else:
-        form = SubmissionForm(instance=submission)
-    
-    return redirect('conseiller_dashboard')
+        return JsonResponse({'success': False, 'error': 'Méthode de requête invalide.'}, status=405)
+
+def validate_time_format(time_str):
+    """ Helper function to validate HH:MM format for time strings. """
+    import re
+    time_pattern = re.compile(r'^\d{1,2}:\d{2}$')  # Simple regex for HH:MM format
+    return bool(time_pattern.match(time_str))
+
+def validate_time_format(time_str):
+    """ Helper function to validate HH:MM format for time strings. """
+    import re
+    time_pattern = re.compile(r'^\d{1,2}:\d{2}$')  # Simple regex for HH:MM format
+    return bool(time_pattern.match(time_str))
+
+def validate_time_format(time_str):
+    """ Helper function to validate HH:MM format for time strings. """
+    import re
+    time_pattern = re.compile(r'^\d{1,2}:\d{2}$')  # Simple regex for HH:MM format
+    return bool(time_pattern.match(time_str))
+
+def validate_time_format(time_str):
+    """ Helper function to validate HH:MM format for time strings. """
+    import re
+    time_pattern = re.compile(r'^\d{1,2}:\d{2}$')  # Simple regex for HH:MM format
+    return bool(time_pattern.match(time_str))
+
 
 
 @login_required

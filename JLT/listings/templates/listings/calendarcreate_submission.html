@@ -265,6 +265,24 @@
 
 
 </style>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+    <div class="container">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li>
+                    <a href="{% url 'conseiller_dashboard' %}" class="nav__link" style="margin-left: 20px;">
+                        <i class="fa-solid fa-display"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
 <br>
 <h1 style="text-align: center;">CALENDRIER SOUMISSIONS / COMMANDES <strong><u>DATE DE CRÉATION</u></strong>
 </h1>
@@ -364,7 +382,7 @@
             
             
             <br>
-            <table class="submissioncreate-table">
+            <table class="table table-hover submissioncreate-table">
                 <thead>
                     <tr>
                         <th data-sort="client" style="cursor: pointer;">Client</th>
@@ -433,7 +451,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     return '<i class="fas fa-clock" style="color: orange;"></i>';
                 case 'refuse':
                     return '<i class="fas fa-times-circle" style="color: red;"></i>';
-                case 'envoyé':
+                case 'envoye':
                     return '<i class="fas fa-paper-plane" style="color: blue;"></i>';
                 default:
                     return '';  // Return an empty string if no icon is matched.

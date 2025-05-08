@@ -1,7 +1,23 @@
 {% extends 'listings/base.html' %}
 {% load custom_filters %}
 {% block content %}
-
+<nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+    <div class="container">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li>
+                    <a href="{% url 'conseiller_dashboard' %}" class="nav__link" style="margin-left: 20px;">
+                        <i class="fa-solid fa-display"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
 <div class="container">
     <h2 class="mt-5 text-center">Statistique des Soumissions et Commandes</h2>
 
@@ -72,10 +88,21 @@
         <button onclick="generatePDF()" class="btn btn-secondary">Télécharger Soumissions en PDF <i class="fa-solid fa-file-pdf"></i></button>
 <br>
 <br>
-    <table class="table">
+
+<form method="GET" action="{% url 'manage_submissions' %}" class="d-inline-block">
+    <div class="input-group mb-3" style="max-width: 400px; margin: 0 auto;">
+        <input type="text" name="search" class="form-control" placeholder="Rechercher une soumission" aria-label="Rechercher une soumission" value="{{ request.GET.search }}">
+        <button class="btn btn-outline-secondary" type="submit">Rechercher</button>
+    </div>
+</form>
+    <table class="table" id="submissionsTable">
         <thead>
             <tr>
                 <th>Client</th>
+                <th style="display: none;">Contact Person</th>
+                <th style="display: none;">Ordered By</th>
+                <th style="display: none;">Phone</th>
+                <th style="display: none;">Email</th>
                 <th>Type</th>
                 <th>Utilisateur</th>
                 <th>Créé à</th>
@@ -88,6 +115,10 @@
             {% for submission in submissions %}
                 <tr>
                     <td>{{ submission.company_name }}</td>
+                    <td style="display: none;">{{ submission.contact_person }}</td>
+                    <td style="display: none;">{{ submission.ordered_by }}</td>
+                    <td style="display: none;">{{ submission.phone }}</td>
+                    <td style="display: none;">{{ submission.email }}</td>
                     <td>{{ submission.get_submission_type_display }}</td>
                     <td>{{ submission.user.username }}</td>
                     <td>{{ submission.created_at|date:"d F Y, H:i" }}</td>
@@ -208,6 +239,10 @@
         // Save the generated PDF
         pdf.save(`soumissions_${submissionType.replace(/\s+/g, '_')}_${userName.replace(/\s+/g, '_')}.pdf`);
     }
+
+</script>
+
+
 </script>
 
 

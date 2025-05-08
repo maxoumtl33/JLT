@@ -294,42 +294,45 @@ from django import forms
 
 from django import forms
 
+from django import forms
+from .models import Submission  # Ensure you import your Submission model
+
+from django import forms
+from .models import Submission, DeliveryMode, Menu
+
 class SubmissionForm(forms.ModelForm):
     class Meta:
         model = Submission
         fields = [
-            'submission_type', 'company_name', 'event_location', 'contact_person', 
-            'ordered_by', 'phone', 'email', 'billing_address', 
-            'payment_mode', 'date', 'event_time', 'guest_count', 
-            'delivery_time', 'budget', 'service_count', 'delivery_mode'
+            'submission_type', 'company_name', 'event_location', 'contact_person',
+            'ordered_by', 'phone', 'email', 'billing_address',
+            'payment_mode', 'date', 'event_time', 'guest_count',
+            'delivery_time', 'budget', 'service_count', 'sub_menus', 'commentaire'  # sub_menus included
         ]
-        
-    submission_type = forms.ChoiceField(choices=Submission.SUBMISSION_TYPE_CHOICES)
-    company_name = forms.CharField(label='Nom de la compagnie', max_length=100, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
-    event_location = forms.CharField(label='Lieu de l\'événement', max_length=200, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
-    contact_person = forms.CharField(label='Contact sur place', max_length=100, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
-    ordered_by = forms.CharField(label='Commandé par', max_length=100, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
-    phone = forms.CharField(label='Téléphone', max_length=15, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
-    email = forms.EmailField(label='Email', max_length=100, required=False, widget=forms.EmailInput(attrs={'class': 'form-control'}))
-    billing_address = forms.CharField(label='Adresse de facturation', max_length=200, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
-    payment_mode = forms.ChoiceField(label='Mode de paiement', choices=Submission.STATUS_CHOICESS, required=False, widget=forms.Select(attrs={'class': 'form-control'}))
-    date = forms.DateField(label='Date', widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}), required=False)
-    event_time = forms.TimeField(label='Heure de l\'événement', widget=forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}), required=False)
-    guest_count = forms.IntegerField(label='Nombre de personnes', required=False, widget=forms.NumberInput(attrs={'class': 'form-control'}))
-    delivery_time = forms.TimeField(label='Heure de livraison', widget=forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}), required=False)
-    budget = forms.DecimalField(label='Budget', max_digits=10, decimal_places=2, required=False, widget=forms.NumberInput(attrs={'class': 'form-control'}))
-    service_count = forms.CharField(label='Nombre de services', max_length=100, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
-    delivery_mode = forms.ChoiceField(
-        label='Mode d\'envoi',
-        choices=[
-            ('assiette', 'Assiette'),
-            ('buffet_porcelaine', 'Buffet porcelaine'),
-            ('buffet_jetable', 'Buffet jetable'),
-            ('coffret', 'Coffret'),
-        ],
-        required=True,
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
+        widgets = {
+            'submission_type': forms.Select(attrs={'class': 'form-control'}),
+            'company_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'event_location': forms.TextInput(attrs={'class': 'form-control'}),
+            'contact_person': forms.TextInput(attrs={'class': 'form-control'}),
+            'ordered_by': forms.TextInput(attrs={'class': 'form-control'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'billing_address': forms.TextInput(attrs={'class': 'form-control'}),
+            'payment_mode': forms.Select(attrs={'class': 'form-control'}),
+            'date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'event_time': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'guest_count': forms.NumberInput(attrs={'class': 'form-control'}),
+            'delivery_time': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'budget': forms.NumberInput(attrs={'class': 'form-control'}),
+            'service_count': forms.TextInput(attrs={'class': 'form-control'}),
+            'commentaire': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),  # Use Textarea with height configured
+            # Note: delivery_modes handled dynamically via JS
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(SubmissionForm, self).__init__(*args, **kwargs)
+        # Add menu choices for the sub_menus field dynamically
+        self.fields['sub_menus'].queryset = Menu.objects.all()  # Adjust based on your conditions
 
 
 
