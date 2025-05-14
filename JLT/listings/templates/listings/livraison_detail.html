@@ -2,6 +2,21 @@
 {%  load static%}
 {% block content %}
 <style>
+.attention-link {
+  color: #fff; /* Couleur du texte, par exemple blanc */
+  background-color: #e74c3c; /* Couleur qui attire, rouge vif */
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-weight: bold;
+  text-decoration: none;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.attention-link:hover {
+  background-color: #c0392b; /* Couleur encore plus foncée au survol */
+  transform: scale(1.05); /* Effet de zoom léger au survol */
+}
 
 .swipe-container {
   position: relative;
@@ -306,9 +321,12 @@
                     </a>
                   </p>
                   <hr>
-                  <p class="card-text">
-                    <a href="#" data-bs-toggle="modal" data-bs-target="#dockModal">Aller au Dock</a>
-                  </p>
+                  {% if livraison.loading_docks.all %}
+                    <p class="card-text">
+                      <a href="#" data-bs-toggle="modal" data-bs-target="#dockModal" class="attention-link">Aller au Dock</a>
+                    </p>
+                  {% endif %}
+
                 </div>
               </div>
             </div>
@@ -737,39 +755,47 @@
         <h5 class="modal-title" id="dockModalLabel">Détails du Dock</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
       </div>
+      
       {% for dock in docks %}
       <div class="modal-body">
-          <div class="text-center mb-3">
-            <h1>Nom: {{ dock.name }}</h1>
-            <h6><strong>Adresse :</strong> {{ dock.address }}</h6>
-            <p>{{ dock.description }}</p>
-          </div>
-          {% if dock_photos %}
-            <div class="mb-3">
-              <img src="{{ dock_photos.url }}" alt="Loading Dock" class="img-fluid rounded" style="max-height: 300px; width: auto;">
-            </div>
+        <div class="text-center mb-3">
+          <h1>Nom: {{ dock.name }}</h1>
+          <h6><strong>Adresse du dock :</strong> {{ dock.address }}</h6>
+          
+          {% if dock.adresse_compagny %}
+            <h6><strong>Adresse de la compagnie :</strong> {{ dock.adresse_compagny }}</h6>
           {% endif %}
-          <div class="text-center">
-            {% if dock.link %}
+          
+          {% if dock.photo %}
+            <img src="{{ dock.photo.url }}" alt="Loading Dock" class="img-fluid rounded" style="max-height: 300px; width: auto;">
+          {% else %}
+            <p>Pas d'image</p>
+          {% endif %}
+
+        </div>
+        
+        <div class="text-center mb-3">
+          {% if dock.link %}
             <a href="{{ dock.link }}" target="_blank" class="btn btn-primary">
               <i class="bi bi-map" aria-hidden="true"></i> Ouvrir dans Google Maps
             </a>
-            {% elif dock.place_id %}
-            <a href="https://www.google.com/maps/place/?q=place_id:{{ matching_dock.place_id }}" target="_blank" class="btn btn-primary">
+          {% elif dock.place_id %}
+            <a href="https://www.google.com/maps/place/?q=place_id:{{ dock.place_id }}" target="_blank" class="btn btn-primary">
               <i class="bi bi-map" aria-hidden="true"></i> Ouvrir dans Google Maps
             </a>
-            {% endif %}
-          </div>
+          {% endif %}
+        </div>
       </div>
       <hr>
       {% endfor %}
-  
+      
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
       </div>
     </div>
   </div>
 </div>
+
 
 
 
