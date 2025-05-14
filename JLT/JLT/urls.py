@@ -13,7 +13,7 @@ from django.contrib.auth import views as auth_views
 
 
 urlpatterns = [
-    
+
 path(
         'members/password_change/',
         CustomPasswordChangeView.as_view(),
@@ -90,6 +90,9 @@ path('submission/<int:submission_id>/', submission_detail, name='submission_deta
 path('get-conseiller-username/', get_conseiller_username, name='get_conseiller_username'),
 path('submission_dashboard/status/update/<int:submission_id>/', update_submission_status_dashboard, name='update_dashboard_submission_status'),
 path('update_submission/<int:submission_id>/', update_submission_status, name='update_submission_status'),  # For updating submission status
+path('associer-toutes_dock/', views.associer_toutes_livraisons_docks, name='associer_toutes_dock'),
+path('get_livraisons/<int:journee_id>/', views.get_livraisons, name='get_livraisons'),
+path('get_livraisons_chaud/<int:journee_id>/', views.get_livraisons_chaud, name='get_livraisons_chaud'),
 path('submission/<int:submission_id>/update/', update_submission, name='update_submission'),
 path('calendarsubcreate_view/', calendarsubcreate_view, name='calendarsubcreate_view'),
 path('calendarsub_view/', calendarsub_view, name='calendarsub_view'),

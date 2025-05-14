@@ -216,12 +216,15 @@ class RoutedetailForm(forms.ModelForm):
 class LoadingDockForm(forms.ModelForm):
     class Meta:
         model = LoadingDock
-        fields = ['address', 'photo', 'description']
+        fields = ['name','address','adresse_compagny', 'photo', 'description']
         widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Nom de l'entreprise"}),
             'address': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Adresse du Dock'}),
+            'adresse_compagny': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Adresse de l'entreprise"}),
             'photo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Description du Dock', 'rows': 4}),
         }
+
 class PhotoUploadForm(forms.ModelForm):
     image = forms.FileField(required=True)
 

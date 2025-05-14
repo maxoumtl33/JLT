@@ -144,13 +144,17 @@
             
             
         </div>
+        <div class="associerloading">
+            <form action="{% url 'associer_toutes_dock' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary" style="margin-left: 10px;" onclick="return confirm('Confirmez-vous l\'association de toutes les livraisons à tous les docks ?')">
+                    Associer docks
+                </button>
+            </form>
+        </div>
         
     </div>
-    <div class="associerloading">
-        <button type="button" class="btn btn-primary" id="automaticAssociationBtn">
-            Associer Loadingdock
-        </button>
-    </div>
+
     
 
     <div id="message" style="display: none; color: green;"></div>

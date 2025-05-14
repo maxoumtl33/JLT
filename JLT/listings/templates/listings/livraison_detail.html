@@ -737,11 +737,12 @@
         <h5 class="modal-title" id="dockModalLabel">Détails du Dock</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
       </div>
+      {% for dock in docks %}
       <div class="modal-body">
-        {% if matching_dock %}
           <div class="text-center mb-3">
-            <h6><strong>Adresse :</strong> {{ matching_dock.address }}</h6>
-            <p>{{ matching_dock.description }}</p>
+            <h1>Nom: {{ dock.name }}</h1>
+            <h6><strong>Adresse :</strong> {{ dock.address }}</h6>
+            <p>{{ dock.description }}</p>
           </div>
           {% if dock_photos %}
             <div class="mb-3">
@@ -749,22 +750,20 @@
             </div>
           {% endif %}
           <div class="text-center">
-            {% if matching_dock.link %}
-            <a href="{{ matching_dock.link }}" target="_blank" class="btn btn-primary">
+            {% if dock.link %}
+            <a href="{{ dock.link }}" target="_blank" class="btn btn-primary">
               <i class="bi bi-map" aria-hidden="true"></i> Ouvrir dans Google Maps
             </a>
-            {% elif matching_dock.place_id %}
+            {% elif dock.place_id %}
             <a href="https://www.google.com/maps/place/?q=place_id:{{ matching_dock.place_id }}" target="_blank" class="btn btn-primary">
               <i class="bi bi-map" aria-hidden="true"></i> Ouvrir dans Google Maps
             </a>
             {% endif %}
           </div>
-        {% else %}
-          <div class="text-center">
-            <p>Pas de dock trouvé pour cette adresse.</p>
-          </div>
-        {% endif %}
       </div>
+      <hr>
+      {% endfor %}
+  
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
       </div>

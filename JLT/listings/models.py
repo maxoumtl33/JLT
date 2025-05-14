@@ -97,12 +97,15 @@ class Message(models.Model):
      livreur = models.ForeignKey(Livreur, null=True, on_delete=models.SET_NULL)
 
 class LoadingDock(models.Model):
+    name = models.CharField(max_length=200, null=True, blank=True)
     address = models.CharField(max_length=255)
+    adresse_compagny = models.CharField(max_length=255, null=True, blank=True)
     photo = models.ImageField(upload_to='listings/media/commandesdetail', blank=True, null=True)
     description = models.TextField(blank=True)
     link = models.URLField(max_length=350, blank=True, null=True)
     place_id = models.CharField(max_length=200, null=True, blank=True)
-
+    def __str__(self):
+        return f'{self.name}'
 
 class Journee(models.Model):
      nom = models.fields.CharField(max_length=100)
@@ -322,7 +325,7 @@ class Livraison(models.Model):
     client = models.ForeignKey(Client, null=True, blank=True, on_delete=models.SET_NULL)
     date = models.fields.DateField(null=True, blank=True)
     period = models.CharField(max_length=20, choices=[("matin", "Matin"), ("midi", "Midi"), ("apres_midi", "Après-midi")], null=True, blank=True)
-    loading_dock = models.ForeignKey(LoadingDock, on_delete=models.SET_NULL, null=True,blank=True, related_name='livraisons')
+    loading_docks = models.ManyToManyField(LoadingDock, blank=True, related_name='livraisons_dock')
     date_livraison = models.fields.DateField(null=True, blank=True)
     commentaire = models.fields.CharField(null=True, blank=True, max_length=500)
     commentairedispatch = models.fields.CharField(null=True, blank=True, max_length=350)
@@ -354,8 +357,20 @@ class Livraison(models.Model):
     signature = models.TextField(blank=True, null=True)  # Stores Base64 string
     photo = models.ImageField(upload_to='listings/media/commandesdetail', blank=True, null=True)
     photo_recup = models.ImageField(upload_to='listings/media/commandesdetail', blank=True, null=True)
+    
+    def save(self, *args, **kwargs):
+        # Avant de sauver, faire l’association si c’est une nouvelle instance ou si besoin
+        super().save(*args, **kwargs)  # Sauvegarde la livraison pour avoir un ID
+
+        # Si l’association n’est pas encore faite, ou si tu veux la mettre à jour à chaque sauvegarde :
+        if self.nom:
+            docks = LoadingDock.objects.filter(name__icontains=self.nom)
+            if docks.exists():
+                self.loading_docks.set(docks)
+
     def __str__(self):
         return f'{self.nom}'
+    
 
 
 

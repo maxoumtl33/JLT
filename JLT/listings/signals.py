@@ -65,3 +65,25 @@ def log_product_creation(sender, instance, created, **kwargs):
         if hasattr(instance, '_current_user'):
             user = instance._current_user
         ProductLog.objects.create(product=instance, created_by=user)
+
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from .models import Livraison, LoadingDock
+
+@receiver(post_save, sender=Livraison)
+def associer_loading_docks_par_nom(sender, instance, created, **kwargs):
+    print("Signal déclenché pour livraison id", instance.id)
+    if created:
+        nom_livraison = instance.nom
+        print("Nom de livraison :", nom_livraison)
+        docks = LoadingDock.objects.filter(name__icontains=nom_livraison)
+        print("Docks trouvés :", docks.count())
+        if docks.exists():
+            print("Association en cours")
+            instance.loading_docks.set(docks)
+        else:
+            print("Aucun dock trouvé à associer")
+
+
+            

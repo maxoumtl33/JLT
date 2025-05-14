@@ -69,7 +69,7 @@
     <br>
     <br>
     <p style="text-align: center;">{{ livraisonsok|length }} livraisons et {{ livraisonsrecup|length }} récupérations aujourd'hui</p>
-   
+
     <a href="{% url 'creerchecklist' %}" class="btn btn-primary mt-3">Voir Checklists</a>
     <br>
     <br>
@@ -85,7 +85,7 @@
     <table class="table table-hover">
         <thead class="thead-dark">
           <tr>
-            
+
             <th scope="col" style="color: #303FBA;">Heure départ</th>
             <th scope="col" style="color: #303FBA;">Nom du contrat</th>
             <th scope="col" style="color: #303FBA;">Infos</th>
@@ -98,15 +98,15 @@
             {% endif %}
 
 
-  
-  
+
+
           </tr>
         </thead>
         <tbody>
             {% for livraison in livraisons %}
             {% if livraison.recuperation == True %}
           <tr>
-            
+
             <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.heure_depart }}</strong></td>
             <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
             <td style="background-color: #F1B3DA;"><strong>{{livraison.infodetail}}</strong></td>
@@ -126,7 +126,7 @@
             </tr>
             {% else %}
             <tr>
-            
+
             <td><strong>{{ livraison.statut.heure_depart }}</strong></td>
             <td><strong>{{livraison.nom}}</strong></td>
             <td><strong>{{livraison.infodetail}}</strong></td>
@@ -146,7 +146,7 @@
           </tr>
           {% endif %}
           {% endfor %}
-          
+
         </tbody>
       </table>
     </div>
@@ -189,6 +189,10 @@
         }
 </style>
 
+
+
+
+
 <div style="text-align: center; margin-bottom: 20px;">
   <button class="btn-toggle" onclick="toggleSection('livraisons-cuisine')">Afficher Livraisons du Jour</button>
   <button class="btn-toggle" onclick="toggleSection('chaud')">Afficher Livraisons Part Chaud</button>
@@ -197,14 +201,24 @@
 <section id="livraisons-cuisine">
 <div style="text-align: center;">
   <div class="body">
-    <h1 style="text-align: center;">LIVRAISONS DU JOUR   <button onclick="printSection('livraisons-cuisine')"><i class="fa-solid fa-print" style="color: #74C0FC;"></i></button>
+    <div style="text-align: center; margin-bottom: 20px;">
+      <select id="journeeSelect" onchange="filterLivraisonsByJournee()">
+        <option value="">Séléctionner une journée</option>
+        {% for journee in journees %}
+        <option value="{{ journee.id }}">{{ journee.nom }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <h1 style="text-align: center;">LIVRAISONS   <button onclick="printSection('livraisons-cuisine')"><i class="fa-solid fa-print" style="color: #74C0FC;"></i></button>
     </h1>
-    <h2 class="text-center mb-4">{{ today }}</h2>
-    <p style="text-align: center;">{{ livraisonsok|length }} livraisons aujourd'hui</p>
+    <div id="journeeInfo" style="text-align: center; margin-top: 20px;">
+      <h2><span id="selectedJourneeDate"></span></h2>
+      <p>Total Livraisons: <span id="totalLivraisons"></span></p>
+    </div>
     <table class="table table-hover">
         <thead class="thead-dark">
           <tr>
-            
+
             <th scope="col" style="color: #303FBA;">Heure départ</th>
             <th scope="col" style="color: #303FBA;">Nom du contrat</th>
             <th scope="col" style="color: #303FBA;">Heure livraison</th>
@@ -212,14 +226,14 @@
 
 
 
-  
-  
+
+
           </tr>
         </thead>
         <tbody>
             {% for livraison in livraisons %}
             <tr>
-            
+
             <td><strong>{{ livraison.statut.heure_depart }}</strong></td>
             <td><strong>{{livraison.nom}}</strong></td>
             <td><strong>{{ livraison.heure_livraison }}</strong></td>
@@ -228,7 +242,7 @@
           {% endfor %}</strong></td>
           </tr>
           {% endfor %}
-          
+
         </tbody>
       </table>
     </div>
@@ -237,15 +251,26 @@
 
 
 <section id="chaud" class="hidden">
+  <div style="text-align: center; margin-bottom: 20px;">
+  <select id="journeeSelectChaud" onchange="filterLivraisonsChaudByJournee()">
+    <option value="">Séléctionner une journée</option>
+    {% for journee in journees %}
+    <option value="{{ journee.id }}">{{ journee.nom }}</option>
+    {% endfor %}
+  </select>
+  </div>
 <div class="container my-4">
   <h1 class="text-center mb-4">LIVRAISONS PART CHAUD   <button onclick="printSection('chaud')"><i class="fa-solid fa-print" style="color: #74C0FC;"></i></button>
   </h1>
-  <h2 class="text-center mb-4">{{ today }}</h2>
+  <div id="journeeInfo" style="text-align: center; margin-top: 20px;">
+    <h2><span id="selectedJourneeDateChaud"></span></h2>
+    <p>Total Part chaud: <span id="totalLivraisonschaud"></span></p>
+  </div>
   <div class="row mb-3">
   </div>
   <div class="row">
       {% if livraisonschaud %}
-          {% for livraison in livraisonschaud %}
+          {% for livraison in livraisons%}
               <div class="col-12 col-md-6 mb-3">
                   <div class="card shadow-sm">
                       <div class="card-body">
@@ -253,7 +278,7 @@
                           <p class="card-text">
                             <strong>Chauffeur(s):</strong>
                             {% for livreur in livraison.statut.livreur.all %}
-                                {{ livreur.nom }} 
+                                {{ livreur.nom }}
                                 (<a href="tel:{{ livreur.phone }}">{{ livreur.phone }}</a>)
                                 {% if not forloop.last %}, {% endif %}
                             {% endfor %}
@@ -264,12 +289,6 @@
                   </div>
               </div>
           {% endfor %}
-      {% else %}
-          <div class="col-12">
-              <div class="alert alert-warning text-center">
-                  Aucun livraison "part chaud" disponible pour aujourd'hui.
-              </div>
-          </div>
       {% endif %}
   </div>
 </div>
@@ -292,6 +311,89 @@
       document.body.innerHTML = originalContent;
       window.location.reload();  // Refresh to reset the page state
   }
+
+function filterLivraisonsByJournee() {
+    const journeeSelect = document.getElementById('journeeSelect');
+    const journeeId = journeeSelect.value;
+    const selectedOption = journeeSelect.options[journeeSelect.selectedIndex];
+    const journeeDate = selectedOption.getAttribute('data-date');
+    const journeeNom = selectedOption.textContent;
+
+    // Display the selected Journee name and date
+    document.getElementById('selectedJourneeDate').textContent = `${journeeNom}`;
+
+    if (journeeId) {
+        fetch(`/get_livraisons/${journeeId}/`)
+            .then(response => response.json())
+            .then(data => {
+                // Update the total number of livraisons
+                document.getElementById('totalLivraisons').textContent = data.livraisons.length;
+
+                const livraisonTable = document.querySelector('table tbody');
+                livraisonTable.innerHTML = ''; // Clear existing table rows
+
+                data.livraisons.forEach(livraison => {
+                    const row = `<tr>
+                        <td><strong>${livraison.heure_depart}</strong></td>
+                        <td><strong>${livraison.nom}</strong></td>
+                        <td><strong>${livraison.heure_livraison}</strong></td>
+                        <td><strong>${livraison.livreurs.join(', ')}</strong></td>
+                    </tr>`;
+                    livraisonTable.innerHTML += row;
+                });
+            });
+    } else {
+        // Clear date and count if no journee is selected
+        document.getElementById('selectedJourneeDate').textContent = "";
+        document.getElementById('totalLivraisons').textContent = "";
+        document.querySelector('table tbody').innerHTML = '';
+    }
+}
+
+function filterLivraisonsChaudByJournee() {
+    const journeeSelect = document.getElementById('journeeSelectChaud');
+    const journeeId = journeeSelect.value;
+    const selectedOption = journeeSelect.options[journeeSelect.selectedIndex];
+    const journeeNom = selectedOption.textContent;
+
+    // Display the selected Journee name
+    document.getElementById('selectedJourneeDateChaud').textContent = `${journeeNom}`;
+
+    if (journeeId) {
+        fetch(`/get_livraisons_chaud/${journeeId}/`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('totalLivraisonschaud').textContent = data.livraisons.length;
+                // Clear existing content
+                const chaudContainer = document.querySelector('#chaud .row');
+                chaudContainer.innerHTML = '';
+
+                if (data.livraisons.length > 0) {
+                    data.livraisons.forEach(livraison => {
+                        const livraisonCard = `
+                            <div class="col-12 col-md-6 mb-3">
+                                <div class="card shadow-sm">
+                                    <div class="card-body">
+                                        <h5 class="card-title">${livraison.nom}</h5>
+                                        <p class="card-text">
+                                            <strong>Chauffeur(s):</strong> ${livraison.livreurs.map(livreur => `${livreur.nom} (<a href="tel:${livreur.phone}">${livreur.phone}</a>)`).join(', ')}
+                                            <br>
+                                            <strong>Heure de départ:</strong> ${livraison.heure_depart}<br>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>`;
+                        chaudContainer.innerHTML += livraisonCard;
+                    });
+                } 
+            });
+    } else {
+        // Clear the container if no journee is selected
+        document.getElementById('selectedJourneeDateChaud').textContent = "";
+        document.querySelector('#chaud .row').innerHTML = '<div class="col-12"><div class="alert alert-warning text-center">Aucun livraison "part chaud" disponible pour aujourd\'hui.</div></div>';
+    }
+}
+
 </script>
 {% endif %}
 
@@ -351,7 +453,7 @@
 
 
 
-    
+
   {% endif %}
   {% if is_checklist %}
   <a href="{% url 'voir_checklist' %}" class="btn btn-primary">
@@ -360,7 +462,7 @@
   {% endif %}
 
   {% if is_ventes %}
-  
+
 
 <style>
     /* Styling for the page */
@@ -437,7 +539,7 @@
             </li>
         </ul>
     </div>
-    
+
   </div>
 </nav>
 <div class="container mt-5">
@@ -451,7 +553,7 @@
     </form>
 
     <br>
-    
+
     <!-- Display Events -->
     <div class="row text-center">
         {% for journee in journees %}
@@ -486,11 +588,11 @@
                     <a class="page-link" href="?page={{ journees.previous_page_number }}">Précédent</a>
                 </li>
                 {% endif %}
-                
+
                 <li class="page-item active">
                     <a class="page-link" href="?page={{ journees.number }}">{{ journees.number }}</a>
                 </li>
-                
+
                 {% if journees.has_next %}
                 <li class="page-item">
                     <a class="page-link" href="?page={{ journees.next_page_number }}">Suivant</a>
@@ -524,7 +626,7 @@
       </a></li>
       <li><a href="{% url 'acceuilresponsables'%}" class="nav__link" ><i class="fa-solid fa-user-ninja"></i>
         <span class="nav__name">Admin</span>
-    </a></li> 
+    </a></li>
     </ul>
 </nav>
 {% endif %}

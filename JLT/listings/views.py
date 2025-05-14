@@ -1140,7 +1140,7 @@ def checklist_detail(request, checklist_id):
                 forminfo.save()
                 messages.success(request, 'Les informations ont été ajoutées avec succès.')
                 return redirect('checklist-detail', checklist_id=checklist_id)
-        
+
         # Handle commentaire_form submission separately
         elif 'commentaire_form' in request.POST:
             commentaire_form = CommentaireForm(request.POST, instance=checklist)
@@ -1167,7 +1167,7 @@ def checklist_detail(request, checklist_id):
             checklist.save()
             return HttpResponseRedirect(reverse('checklist-detail', args=[checklist_id]))
 
-  
+
 
     # Filter products based on the search query
     if query:
@@ -1281,7 +1281,7 @@ def conseiller_dashboard(request):
 
     # Pagination for user's submissions
     submissions = Submission.objects.filter(user=request.user).order_by("-created_at")
-    
+
     # Paginate submissions
     submission_paginator = Paginator(submissions, 10)  # Show 10 submissions per page
     submission_page_number = request.GET.get('submission_page')  # Different page number for submissions
@@ -1678,7 +1678,7 @@ def get_submission_for_day(request, day):
         'id', 'company_name', 'date', 'submission_type', 'user__username', 'status', 'created_at'
     )
 
-    
+
 
     submission_list = list(submissions)
 
@@ -1689,7 +1689,7 @@ def get_submission_for_day(request, day):
     response_data = {
         'submission': submission_list,
         'selected_date': selected_date_formatted,
-        
+
     }
 
     return JsonResponse(response_data)
@@ -2650,6 +2650,7 @@ def journees_list(request):
     livraisonsok  = Livraison.objects.filter(date = today, recuperation=False)
     livraisonsrecup  = Livraison.objects.filter(date = today, recuperation=True)
     journees = Journee.objects.all().order_by('-date')
+    selected_date = request.GET.get('journeeSelect')
     max = "Maxime"
     loic = "Loic"
     jef = "Jef"
@@ -2659,7 +2660,7 @@ def journees_list(request):
     statut__livreur__isnull=False,  # Ensure a livreur is linked
     statut__heure_depart__isnull=False,
     recuperation=False,
-    date=today
+    date=selected_date
     ).prefetch_related('statut__livreur').distinct()  # Ensure distinct results
 
 
@@ -3012,7 +3013,7 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
         for route in routes_with_livraisons:
             # This will give you the livraisons associated with the current route
             ordered_livraisons = route.livraisons.all().order_by('statut', 'position')
-            
+
             # Store these ordered livraisons in a convenient way, e.g., in the route object itself
             route.ordered_livraisons = ordered_livraisons
 
@@ -3023,7 +3024,7 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
                     vehicle = vehicle_form.save(commit=False)
                     route_id = request.POST.get('route_vehicule')
                     route_instance = Route.objects.filter(id=route_id).first()
-                    
+
                     if route_instance:
                         vehicle.save()
                         route_instance.vehicles.add(vehicle)
@@ -3056,7 +3057,7 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
         for livraison in livraisonss
 
     ]
-        
+
 
 
 
@@ -3085,8 +3086,8 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
                                                                 'tacheko':tacheko,
                                                                 'form': form,
                                                                 'vehicles': vehicles,
-                                                                
-                                                                
+
+
 
 
                                                                 })
@@ -3100,7 +3101,7 @@ def delete_vehicle(request, vehicle_id):
     vehicle = get_object_or_404(Vehicle, id=vehicle_id)  # Retrieve vehicle
     vehicle.delete()  # Delete the vehicle instance
     messages.success(request, "Vehicle deleted successfully.")  # Set success message
-    
+
     # Redirect back to the page that made the request
     referer = request.META.get('HTTP_REFERER', '/')  # Get the Referer header or fallback to home
     return HttpResponseRedirect(referer)  # Redirect to the referer
@@ -4819,7 +4820,7 @@ def associate_livraisons_with_docks(request):
         loading_docks = LoadingDock.objects.all()
 
         associations_made = 0
-        
+
         # Loop through each loading dock to find matching livraisons
         for dock in loading_docks:
             # Find livraisons where place_id matches the dock's place_id
@@ -4830,14 +4831,44 @@ def associate_livraisons_with_docks(request):
                 livraison.loading_dock = dock  # Assuming there's a ForeignKey named 'loading_dock'
                 livraison.save()
                 associations_made += 1
-        
+
         return JsonResponse({'status': 'success', 'message': f'{associations_made} livraisons associées avec succès.'})
 
     return JsonResponse({'status': 'error', 'message': 'Méthode non supportée.'}, status=400)
 
+from django.shortcuts import redirect
+from django.contrib import messages
+from .models import Livraison, LoadingDock
+
+def associer_toutes_livraisons_docks(request):
+    docks = list(LoadingDock.objects.all())
+    if not docks:
+        messages.warning(request, "Aucun dock disponible pour l'association.")
+        return redirect('livraisonstomorrow')
+
+    for livraison in Livraison.objects.all():
+        if livraison.nom:
+            mots_livraison = livraison.nom.lower().split()
+            docks_correspondants = []
+
+            for dock in docks:
+                dock_name = dock.name
+                if dock_name:  # Vérification que dock.name n'est pas None
+                    dock_name_lower = dock_name.lower()
+
+                    # Vérifier si au moins un mot est dans le nom du dock
+                    if any(mot in dock_name_lower for mot in mots_livraison):
+                        docks_correspondants.append(dock)
+
+            if docks_correspondants:
+                livraison.loading_docks.set(docks_correspondants)
+
+    messages.success(request, "Les livraisons ont été associées aux docks correspondants.")
+    return redirect('livraisonstomorrow')  # Modifier si nécessaire
 
 
-from difflib import get_close_matches
+
+
 @login_required
 
 def livraison_detail(request, ip):
@@ -4849,30 +4880,12 @@ def livraison_detail(request, ip):
     loic = "Loic"
     maxime = "Maxime"
     # If already having place_id, try matching it.
-    matching_dock = None
-    dock_photos = None
-
-
-
-    if livraison.place_id:
-        matching_dock = LoadingDock.objects.filter(place_id=livraison.place_id).first()
-        # Check if the matching dock exists and has an associated photo
-        if matching_dock and matching_dock.photo:
-            dock_photos = matching_dock.photo
-        else:
-            dock_photos = None
+    docks = livraison.loading_docks.all()
 
     # Google Maps geocode to fetch place_id and coordinate information
-    gmaps = googlemaps.Client(key=settings.GOOGLE_API_KEY)
-    result = gmaps.geocode(adresse)
 
-    if result:
-        place_id = result[0].get('place_id')
-        if place_id:
-            livraison.place_id = place_id
-            livraison.save()
 
-    
+
     # Initialize forms
     form = LivraisonForm(instance=livraison)
     photo_form = PhotoUploadForm()
@@ -4888,12 +4901,12 @@ def livraison_detail(request, ip):
                 livraison.status = True  # Mark as validated
                 livraison.signature = current_signature  # Preserve signature
                 livraison.save()
-                
+
                 return redirect("livraison-detail", ip=livraison.id)
 
         # Handling the PhotoUploadForm submission for 'imagerecup'
         elif 'photo_form' in request.POST:
-            imagesrecup = request.FILES.getlist("imagerecup") 
+            imagesrecup = request.FILES.getlist("imagerecup")
             images = request.FILES.getlist("image") # Fetching multiple uploaded files
             if imagesrecup:  # Ensure at least one file is uploaded
                 for img in imagesrecup:
@@ -4902,17 +4915,15 @@ def livraison_detail(request, ip):
                 for img in images:
                     Photo.objects.create(livraison=livraison, image=img)
 
-            return redirect("livraison-detail", ip=livraison.id) 
+            return redirect("livraison-detail", ip=livraison.id)
 
 
 
 
     # Use Google Maps API to geocode address
-    gmaps = googlemaps.Client(key=settings.GOOGLE_API_KEY)
     checklist = Checklist.objects.filter(livraison=livraison)
     for item in checklist:
         item.filtered_checklist_items = item.checklistitem_set.filter(quantity__gt=0)
-        print(f"Checklist: {item.name}, Filtered Items: {item.filtered_checklist_items.count()}")
 
 
     return render(request, 'listings/livraison_detail.html', {
@@ -4921,14 +4932,12 @@ def livraison_detail(request, ip):
         'recuperation': recuperation,
         'form': form,
         'journee': journee,
-        'result': result,
         'adresse': adresse,
         'loic': loic,
         'maxime': maxime,
         'photo_form': photo_form,
         'checklist': checklist,
-        'dock_photos': dock_photos,
-        'matching_dock': matching_dock,
+        'docks': docks,
     })
 
 
@@ -5002,7 +5011,7 @@ def loading_docks_view(request):
         docks = {dock.place_id: dock for dock in LoadingDock.objects.filter(
             id__in=deliveries.values_list('loading_dock_id', flat=True)  # Use _id if it's a foreign key.
         )}
-        
+
         # Prepare data for AJAX response
         docks_data = {dock.place_id: {
             'address': dock.address,
@@ -5010,9 +5019,9 @@ def loading_docks_view(request):
             'photo': dock.photo.url if dock.photo else None,
             'deliveries': list(deliveries.filter(loading_dock=dock.id).values('id', 'nom'))  # Modify as necessary
         } for dock in docks.values()}
-        
+
         return JsonResponse(docks_data)
-    
+
     loading_docks = LoadingDock.objects.all()
     return render(request, 'listings/loading_docks.html', {'loading_docks': loading_docks})
 
@@ -5366,7 +5375,7 @@ def ChecklistmdDetailView(request, pk):
     form = RapportForm(request.POST or None, prefix='form', instance=checklist)
     form1 = RapportRecupForm(request.POST or None, prefix='form1', instance=checklist)
     checklist_itemsbreuvage = ChecklistItem.objects.filter(checklist_id=checklist, product__category__name__in=["ALCOOL FORT", "SANS ALCOOL", "VINS",  "BIERES"], quantity__gt=0)
-   
+
     products = Product.objects.filter(checklistitem__checklist=checklist, quantity__gt=0).prefetch_related('category')
     checklist_items_by_category = {}
     for item in checklist_items:
@@ -5392,9 +5401,9 @@ def ChecklistmdDetailView(request, pk):
                     checklist_photo.checklist = checklist  # Associate with the checklist
                     checklist_photo.save()
             return redirect('checklistmd_detail', pk=checklist.pk)
-        
+
         elif 'photo' in request.POST:
-            imagesrecup = request.FILES.getlist("imagerecup") 
+            imagesrecup = request.FILES.getlist("imagerecup")
             images = request.FILES.getlist("image") # Fetching multiple uploaded files
             if imagesrecup:  # Ensure at least one file is uploaded
                 for img in imagesrecup:
@@ -5420,9 +5429,9 @@ def ChecklistmdDetailView(request, pk):
             form1.save()
         return redirect('checklistmd_detail', pk=checklist.pk)
 
-        
 
-        
+
+
 
 
     context = {
@@ -5462,8 +5471,8 @@ def submit_request(request):
             submission.user = request.user  # Link to the logged-in user
             submission.save()  # Save the submission to the database
 
-            # Save the ManyToMany relationships 
-            form.save_m2m()  
+            # Save the ManyToMany relationships
+            form.save_m2m()
 
             messages.success(request, 'Votre soumission a été enregistrée avec succès.')
 
@@ -5532,7 +5541,7 @@ def calendarsub_view(request):
     # Fetch checklists for the selected month
     submissions = Submission.objects.filter(date__month=int(selected_month))
 
- 
+
 
     context = {
         'submissions': submissions,
@@ -5611,7 +5620,7 @@ def calendarsubcreate_view(request):
         'is_ventes': request.user.groups.filter(name='ventes').exists(),
         'is_admin': request.user.groups.filter(name='admin').exists(),
     }
-    
+
     return render(request, 'listings/calendarcreate_submission.html', context)
 
 from django.shortcuts import redirect, render, get_object_or_404
@@ -5623,7 +5632,7 @@ from datetime import timedelta
 from datetime import datetime
 @login_required
 def manage_submissions(request):
-    
+
 
     conseillers = Conseiller.objects.select_related('user').all()  # Fetch all Conseillers with related Users
     submissions = Submission.objects.all().order_by('-created_at')
@@ -5662,7 +5671,7 @@ def manage_submissions(request):
         # Adjust the date range to include the whole day
         start_datetime = datetime.strptime(start_date, "%Y-%m-%d")
         end_datetime = datetime.strptime(end_date, "%Y-%m-%d") + timedelta(days=1)  # Add one day to include the full final day
-    
+
         submissions = submissions.filter(created_at__range=[start_datetime, end_datetime])
 
     # Pagination logic
@@ -5676,7 +5685,7 @@ def manage_submissions(request):
     except EmptyPage:
         # If page is out of range (e.g. 999), deliver last page of results.
         submissions = paginator.page(paginator.num_pages)
-   
+
 
     # Count the number of filtered submissions
     submission_count = submissions.paginator.count
@@ -5689,7 +5698,7 @@ def manage_submissions(request):
             Q(company_name__icontains=search_query) |
             Q(user__username__icontains=search_query) |
             Q(created_at__icontains=search_query) |
-            Q(ordered_by__icontains=search_query) |  
+            Q(ordered_by__icontains=search_query) |
             Q(contact_person__icontains=search_query) |
             Q(phone__icontains=search_query) |  # Add phone to query
             Q(email__icontains=search_query)  # Add email to query
@@ -5710,14 +5719,14 @@ def manage_submissions(request):
         'end_date': end_date,
         'search_query': search_query,
         'submissionss': submissionss,
-        
+
                 })
 
 
 def get_conseiller_username(request):
     # Retrieve the conseiller id from the GET request
     conseiller_id = request.GET.get('id')
-    
+
     # Check if the id is provided and not empty
     if not conseiller_id:
         return JsonResponse({'username': ''}, status=400)  # Return an empty username with a bad request status
@@ -5777,7 +5786,7 @@ def update_submission(request, submission_id):
             # Handling Guest Count
             guest_count_value = request.POST.get('guest_count', '').strip().replace("\xa0", "")
             submission.guest_count = int(guest_count_value) if guest_count_value.isdigit() else None
-            
+
             submission.event_time = request.POST.get('event_time', '').strip() or None
             submission.delivery_time = request.POST.get('delivery_time', '').strip() or None
 
@@ -5790,7 +5799,7 @@ def update_submission(request, submission_id):
 
 
             submission.save()  # Save changes to the database
-            
+
             return JsonResponse({'success': True}, status=200)
         except Submission.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Soumission non trouvée.'}, status=404)
@@ -5800,6 +5809,38 @@ def update_submission(request, submission_id):
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
     else:
         return JsonResponse({'success': False, 'error': 'Méthode de requête invalide.'}, status=405)
+
+
+def get_livraisons(request, journee_id):
+    livraisons = Livraison.objects.filter(journee_id=journee_id, recuperation=False)
+    livraison_list = [{
+        'heure_depart': livraison.statut.heure_depart,
+        'nom': livraison.nom,
+        'heure_livraison': livraison.heure_livraison,
+        'livreurs': [str(livreur) for livreur in livraison.statut.livreur.all()]
+    } for livraison in livraisons]
+
+    return JsonResponse({'livraisons': livraison_list})
+
+def get_livraisons_chaud(request, journee_id):
+    livraisons = Livraison.objects.filter(
+        journee_id=journee_id,
+        recuperation=False,
+        nom__icontains="part chaud"
+    ).prefetch_related('statut__livreur')
+
+    livraison_list = []
+    for livraison in livraisons:
+        livreurs = [{'nom': livreur.nom, 'phone': livreur.phone} for livreur in livraison.statut.livreur.all()]
+        livraison_list.append({
+            'heure_depart': livraison.statut.heure_depart,
+            'nom': livraison.nom,
+            'heure_livraison': livraison.heure_livraison,
+            'livreurs': livreurs
+        })
+
+    return JsonResponse({'livraisons': livraison_list})
+
 
 def validate_time_format(time_str):
     """ Helper function to validate HH:MM format for time strings. """
@@ -5838,7 +5879,7 @@ def update_submission_status(request, submission_id):
             submission.save()
             messages.success(request, 'Statut de la soumission mis à jour avec succès.')
             return redirect('manage_submissions')
-    
+
     return render(request, 'listings/update_submission_status.html', {'submission': submission})
 
 
