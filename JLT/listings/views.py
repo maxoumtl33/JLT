@@ -4912,21 +4912,21 @@ def generate_etiquette_pdf(request, plats):
 
     def draw_centered_multiline(x, y, lines, font_name, font_size):
         total_height = len(lines) * font_size * 1.2
-        
+
         # Définir la marge en haut en fonction du nombre de lignes
         if len(lines) == 1:
-            top_margin = 42.525  # 1.5 cm en points
+            top_margin = 18  # 1 cm en points
             start_y = y + (label_height - total_height) / 2 - top_margin
         else:
             start_y = y + (label_height - total_height) / 2
-        
+
         # Définir la marge en bas pour 4 lignes
         bottom_margin = 0
         if len(lines) == 4:
             bottom_margin = 28.35  # 1 cm en points
             # Ajuster start_y pour inclure cette marge en bas
             start_y += bottom_margin
-        
+
         for i, line in enumerate(lines):
             line_y = start_y - i * font_size * 1.2
             c.setFont(font_name, font_size)
