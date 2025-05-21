@@ -4870,6 +4870,7 @@ def associer_toutes_livraisons_docks(request):
 from django.http import HttpResponse
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
+import math
 
 def generate_etiquette_pdf(request, plats):
     response = HttpResponse(content_type='application/pdf')
@@ -4877,8 +4878,11 @@ def generate_etiquette_pdf(request, plats):
 
     c = canvas.Canvas(response, pagesize=A4)
 
-    label_width = 4.45 * 28.35  # approx 126.7 pts
-    label_height = 10.8 * 28.35 # approx 306.2 pts
+    label_width_cm = 9  # largeur en cm
+    label_width = label_width_cm * 28.35  # conversion en points (~255 pts)
+
+    label_height_cm = 10.8
+    label_height = label_height_cm * 28.35  # (~306 pts)
 
     margin_left = 20
     margin_top = 20
@@ -4892,6 +4896,44 @@ def generate_etiquette_pdf(request, plats):
     x_positions = [margin_left + i * (label_width + h_space) for i in range(cols)]
     y_positions = [A4[1] - margin_top - i * (label_height + v_space) - label_height for i in range(rows)]
 
+    def split_text_to_fit_width(text, max_width, font_name="Helvetica-Bold", font_size=14):
+        words = text.split()
+        lines = []
+        current_line = words[0]
+        for word in words[1:]:
+            test_line = current_line + ' ' + word
+            if c.stringWidth(test_line, font_name, font_size) <= max_width:
+                current_line = test_line
+            else:
+                lines.append(current_line)
+                current_line = word
+        lines.append(current_line)
+        return lines
+
+    def draw_centered_multiline(x, y, lines, font_name, font_size):
+        total_height = len(lines) * font_size * 1.2
+        
+        # Définir la marge en haut en fonction du nombre de lignes
+        if len(lines) == 1:
+            top_margin = 42.525  # 1.5 cm en points
+            start_y = y + (label_height - total_height) / 2 - top_margin
+        else:
+            start_y = y + (label_height - total_height) / 2
+        
+        # Définir la marge en bas pour 4 lignes
+        bottom_margin = 0
+        if len(lines) == 4:
+            bottom_margin = 28.35  # 1 cm en points
+            # Ajuster start_y pour inclure cette marge en bas
+            start_y += bottom_margin
+        
+        for i, line in enumerate(lines):
+            line_y = start_y - i * font_size * 1.2
+            c.setFont(font_name, font_size)
+            c.drawCentredString(x + label_width / 2, line_y, line)
+
+
+
     count = 0
     for plat in plats:
         index = count % (cols * rows)
@@ -4901,36 +4943,37 @@ def generate_etiquette_pdf(request, plats):
         x = x_positions[col_idx]
         y = y_positions[row_idx]
 
-        # Ajuster la taille de la police en fonction de la longueur du texte
-        max_width = label_width - 10  # marges internes
-        base_font_size = 14
+        # Si c'est la troisième rangée, descendre le texte de 1cm (28.35 points)
+        if row_idx == 2:
+            y -= 28.35
 
-        # La fonction ajuste la taille de police pour que le texte rentre
-        def get_font_size(text, max_width, base_size):
-            font_size = base_size
-            # Vérifier si le texte rentre dans la largeur
-            # Si pas, réduire la taille
-            while font_size > 4:
-                width = c.stringWidth(text, "Helvetica-Bold", font_size)
-                if width <= max_width:
-                    break
-                font_size -= 1
-            return font_size
+        max_width = label_width - 10  # marge à gauche/droite dans l’étiquette
+        font_size = 14
 
-        font_size = get_font_size(plat, max_width, base_font_size)
+        # Couper le texte en lignes pour tenir dans la largeur de 9cm
+        lines = split_text_to_fit_width(plat, max_width, font_name="Helvetica-Bold", font_size=font_size)
 
-        c.setFont("Helvetica-Bold", font_size)
-        c.drawCentredString(x + label_width/2, y + label_height/2 - font_size/2, plat)
+        # Si le nombre de lignes est trop grand, réduire la taille
+        while len(lines) * font_size * 1.2 > (label_height - 10) and font_size > 4:
+            font_size -= 1
+            lines = split_text_to_fit_width(plat, max_width, font_name="Helvetica-Bold", font_size=font_size)
+
+        # Dessiner le texte centré horizontalement et verticalement
+        draw_centered_multiline(x, y, lines, "Helvetica-Bold", font_size)
 
         count += 1
-        # Nouvelle page si nécessaire
         if count % (cols * rows) == 0 and count != 0:
             c.showPage()
+
 
     c.showPage()
     c.save()
     return response
 
+
+def generate_multiple_pdfs(request):
+    plats = request.GET.getlist('plats')
+    return generate_etiquette_pdf(request, plats)
 
 def etiquette_tente(request):
     plats = Plat.objects.all()

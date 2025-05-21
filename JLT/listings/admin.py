@@ -42,6 +42,9 @@ class ItemInvAdmin(ImportExportModelAdmin):
 class ProductAdmin(ImportExportModelAdmin):
     list_display = ('id', 'name', 'quantity')
 
+class PlatAdmin(ImportExportModelAdmin):
+    list_display = ('id', 'nom')
+
 class InventoryAdmin(ImportExportModelAdmin):
     list_display = ('id', 'item', 'quantity')
 
@@ -90,4 +93,4 @@ admin.site.register(PhotoVehicle)
 admin.site.register(Submission)
 admin.site.register(Menu)
 admin.site.register(DeliveryMode)
-admin.site.register(Plat)
+admin.site.register(Plat, PlatAdmin)

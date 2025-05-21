@@ -611,7 +611,7 @@ class DeliveryMode(models.Model):
         return self.name
 
 class Plat(models.Model):
-    nom = models.CharField(max_length=100)
+    nom = models.CharField(max_length=130)
     def __str__(self):
         return self.nom
     
