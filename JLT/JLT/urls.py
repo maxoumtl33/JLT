@@ -74,6 +74,8 @@ path('livraisonsresp/', views.livraisonsresp, name='livraisonsresp'),
 path('livraisonshier/', views.livraisonshier, name='livraisonshier'),
 path('geocode-all-livraisons/', GeocodeAllLivraisonsView.as_view(), name='geocode_all_livraisons'),path('geocodingtoday/<int:pk>/', GeocodingTodayView.as_view(), name='geocodingtoday'),
 path('recuptoday/', views.recuptoday, name='recuptoday'),
+path('generate-multiple-pdfs/', views.generate_multiple_pdfs, name='generate_multiple_pdfs'),
+path('etiquette-tente/', views.etiquette_tente, name='etiquette-tente'),
 path('manage/', manage_submissions, name='manage_submissions'),  # For managing submissions
 path('api/get_checklist_items_for_date/', views.get_checklist_items_for_date, name='get_checklist_items_for_date'),
 path('livraisonsventes/<int:pk>/', views.livraisonsventesdetail, name='livraisonventesdetail'),

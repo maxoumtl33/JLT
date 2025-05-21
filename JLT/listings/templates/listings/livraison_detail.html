@@ -215,6 +215,9 @@
 
 
  </style>
+ <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.0/css/bootstrap.min.css" rel="stylesheet">
+ <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.5.0/font/bootstrap-icons.css" rel="stylesheet">
+ 
 <nav class="bottom-navbar">
   <ul>
       <li><a href="{% url 'dashboard' livraison.journee.id request.user.id %}" class="nav__link" ><i class="fa-solid fa-reply"></i>
@@ -751,37 +754,43 @@
 <div class="modal fade" id="dockModal" tabindex="-1" aria-labelledby="dockModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="dockModalLabel">Détails du Dock</h5>
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="dockModalLabel">
+          <i class="bi bi-info-circle-fill"></i> Détails du Dock
+        </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
       </div>
-      
+
       {% for dock in docks %}
       <div class="modal-body">
-        <div class="text-center mb-3">
-          <h1>Nom: {{ dock.name }}</h1>
-          <h6><strong>Adresse du dock :</strong> {{ dock.address }}</h6>
+        <div class="text-center mb-3 pb-3 border-bottom">
+          <h1 class="display-6">{{ dock.name }}</h1>
+          <h6><strong><i class="bi bi-geo-alt-fill"></i> Adresse du dock :</strong> {{ dock.address }}</h6>
           
           {% if dock.adresse_compagny %}
-            <h6><strong>Adresse de la compagnie :</strong> {{ dock.adresse_compagny }}</h6>
+            <h6><strong><i class="bi bi-building"></i> Adresse de la compagnie :</strong> {{ dock.adresse_compagny }}</h6>
           {% endif %}
-          
+    
           {% if dock.photo %}
-            <img src="{{ dock.photo.url }}" alt="Loading Dock" class="img-fluid rounded" style="max-height: 300px; width: auto;">
+            <img src="{{ dock.photo.url }}" alt="Loading Dock Image" class="img-fluid rounded mt-3" style="max-height: 300px; width: auto;">
           {% else %}
-            <p>Pas d'image</p>
+            <p class="text-muted">Pas d'image disponible</p>
           {% endif %}
-
+          <br>
+          {% if dock.description %}
+            <p><strong><i class="bi bi-file-earmark-text-fill"></i> Description :</strong></p>
+            <p> {{ dock.description }}</p>
+          {% endif %}
         </div>
         
         <div class="text-center mb-3">
           {% if dock.link %}
             <a href="{{ dock.link }}" target="_blank" class="btn btn-primary">
-              <i class="bi bi-map" aria-hidden="true"></i> Ouvrir dans Google Maps
+              <i class="bi bi-map"></i> Ouvrir dans Google Maps
             </a>
           {% elif dock.place_id %}
             <a href="https://www.google.com/maps/place/?q=place_id:{{ dock.place_id }}" target="_blank" class="btn btn-primary">
-              <i class="bi bi-map" aria-hidden="true"></i> Ouvrir dans Google Maps
+              <i class="bi bi-map"></i> Ouvrir dans Google Maps
             </a>
           {% endif %}
         </div>
@@ -795,6 +804,7 @@
     </div>
   </div>
 </div>
+
 
 
 

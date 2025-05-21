@@ -113,6 +113,8 @@ class Journee(models.Model):
         return f'{self.nom}'
      date = models.DateField()
 
+
+
 from django.db import models
 from django.utils import timezone
 
@@ -357,7 +359,7 @@ class Livraison(models.Model):
     signature = models.TextField(blank=True, null=True)  # Stores Base64 string
     photo = models.ImageField(upload_to='listings/media/commandesdetail', blank=True, null=True)
     photo_recup = models.ImageField(upload_to='listings/media/commandesdetail', blank=True, null=True)
-    
+
     def save(self, *args, **kwargs):
         # Avant de sauver, faire l’association si c’est une nouvelle instance ou si besoin
         super().save(*args, **kwargs)  # Sauvegarde la livraison pour avoir un ID
@@ -607,6 +609,12 @@ class DeliveryMode(models.Model):
 
     def __str__(self):
         return self.name
+
+class Plat(models.Model):
+    nom = models.CharField(max_length=100)
+    def __str__(self):
+        return self.nom
+    
     
 class Menu(models.Model):
     name = models.CharField(max_length=255)

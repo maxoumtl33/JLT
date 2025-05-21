@@ -1,0 +1,109 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+<div class="container mt-5">
+    <h1>Gestion des Plats</h1>
+
+    <!-- Bouton pour ouvrir le modal d'ajout de plat -->
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addPlatModal">
+        Ajouter un Plat
+    </button>
+
+    <!-- Bouton pour ouvrir le modal de sélection des plats pour le PDF -->
+    <button type="button" class="btn btn-secondary ml-2" data-toggle="modal" data-target="#selectPlatsModal">
+        Sélectionner des Plats pour PDF
+    </button>
+
+    <!-- Modal d'ajout de plat -->
+    <div class="modal fade" id="addPlatModal" tabindex="-1" role="dialog" aria-labelledby="addPlatModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addPlatModalLabel">Ajouter un Nouveau Plat</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form method="post" action="{% url 'etiquette-tente' %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="nom">Nom du Plat :</label>
+                            <input type="text" class="form-control" id="nom" name="nom" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                        <button type="submit" class="btn btn-primary">Ajouter</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de sélection des plats pour le PDF -->
+    <div class="modal fade" id="selectPlatsModal" tabindex="-1" role="dialog" aria-labelledby="selectPlatsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="selectPlatsModalLabel">Sélectionner des Plats pour PDF</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form method="get" action="{% url 'generate_multiple_pdfs' %}">
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="searchBar" onkeyup="searchFunction()" placeholder="Rechercher un plat...">
+                    </div>
+            
+                    <div style="max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                        <ul class="list-group" id="platList">
+                            {% for plat in plats %}
+                            <li class="list-group-item form-check">
+                                <input class="form-check-input" type="checkbox" id="plat_{{ plat.id }}" name="plats" value="{{ plat.nom }}">
+                                <label class="form-check-label" for="plat_{{ plat.id }}">{{ plat.nom }}</label>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+            
+                    <button type="submit" class="btn btn-primary mt-3">Générer PDF</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    function searchFunction() {
+    // Déclare les variables
+    var input, filter, ul, li, label, i, txtValue;
+    input = document.getElementById('searchBar');
+    filter = input.value.toUpperCase();
+    ul = document.getElementById("platList");
+    li = ul.getElementsByTagName('li');
+
+    // Boucle sur chaque élément
+    for (i = 0; i < li.length; i++) {
+        label = li[i].getElementsByTagName("label")[0];
+        txtValue = label.textContent || label.innerText;
+        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            li[i].style.display = "";
+        } else {
+            li[i].style.display = "none";
+        }
+    }
+}
+</script>
+
+</script>
+
+{% endblock %}

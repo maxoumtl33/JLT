@@ -4867,6 +4867,80 @@ def associer_toutes_livraisons_docks(request):
     return redirect('livraisonstomorrow')  # Modifier si nécessaire
 
 
+from django.http import HttpResponse
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+
+def generate_etiquette_pdf(request, plats):
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="etiquettes.pdf"'
+
+    c = canvas.Canvas(response, pagesize=A4)
+
+    label_width = 4.45 * 28.35  # approx 126.7 pts
+    label_height = 10.8 * 28.35 # approx 306.2 pts
+
+    margin_left = 20
+    margin_top = 20
+
+    cols = 2
+    rows = 3
+
+    h_space = (A4[0] - 2 * margin_left - cols * label_width) / (cols - 1) if cols > 1 else 0
+    v_space = (A4[1] - 2 * margin_top - rows * label_height) / (rows - 1) if rows > 1 else 0
+
+    x_positions = [margin_left + i * (label_width + h_space) for i in range(cols)]
+    y_positions = [A4[1] - margin_top - i * (label_height + v_space) - label_height for i in range(rows)]
+
+    count = 0
+    for plat in plats:
+        index = count % (cols * rows)
+        col_idx = index % cols
+        row_idx = index // cols
+
+        x = x_positions[col_idx]
+        y = y_positions[row_idx]
+
+        # Ajuster la taille de la police en fonction de la longueur du texte
+        max_width = label_width - 10  # marges internes
+        base_font_size = 14
+
+        # La fonction ajuste la taille de police pour que le texte rentre
+        def get_font_size(text, max_width, base_size):
+            font_size = base_size
+            # Vérifier si le texte rentre dans la largeur
+            # Si pas, réduire la taille
+            while font_size > 4:
+                width = c.stringWidth(text, "Helvetica-Bold", font_size)
+                if width <= max_width:
+                    break
+                font_size -= 1
+            return font_size
+
+        font_size = get_font_size(plat, max_width, base_font_size)
+
+        c.setFont("Helvetica-Bold", font_size)
+        c.drawCentredString(x + label_width/2, y + label_height/2 - font_size/2, plat)
+
+        count += 1
+        # Nouvelle page si nécessaire
+        if count % (cols * rows) == 0 and count != 0:
+            c.showPage()
+
+    c.showPage()
+    c.save()
+    return response
+
+
+def etiquette_tente(request):
+    plats = Plat.objects.all()
+
+    if request.method == 'POST':
+        Plat.objects.create(nom=request.POST['nom'])
+        return redirect('etiquette-tente')
+    return render(request, 'listings/etiquettes-tentes.html', {
+        'plats': plats,
+    })
 
 
 @login_required
