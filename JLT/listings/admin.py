@@ -33,6 +33,7 @@ class ChecklistItemAdmin(admin.ModelAdmin):
 class LivraisonAdmin(ImportExportModelAdmin):
     list_display = ('id', 'nom', 'date', 'client', 'heure_livraison')
 
+
 class LivreursAdmin(ImportExportModelAdmin):
     list_display = ('nom')
 
@@ -94,3 +95,4 @@ admin.site.register(Submission)
 admin.site.register(Menu)
 admin.site.register(DeliveryMode)
 admin.site.register(Plat, PlatAdmin)
+admin.site.register(MenuSubmission)

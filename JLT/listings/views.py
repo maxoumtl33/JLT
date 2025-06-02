@@ -191,8 +191,25 @@ def import_xlsx(request):
 
     return render(request, 'listings/import_xlsx.html', {'form': form})
 
+def submission_detail(request, submission_id):
+    submission = get_object_or_404(Submission, id=submission_id)
+    all_menus = Menu.objects.all()
+    all_delivery_modes = DeliveryMode.objects.all()
+    menus = Menu.objects.all()
+    # Build a dict: menu.id -> list of delivery mode ids
+    menus_with_modes_ids = {}
+    for menu in menus:
+        modes_ids = list(menu.delivery_modes.values_list('id', flat=True))
+        menus_with_modes_ids[menu.id] = modes_ids
 
-
+    context = {
+        'submission': submission,
+        'menus': menus,
+        'menus_with_modes_ids': menus_with_modes_ids,
+        'all_menus' : all_menus,
+        'all_delivery_modes' : all_delivery_modes,
+    }
+    return render(request, 'listings/submission_detail.html', context)
 
 from django.http import JsonResponse
 import json
@@ -4975,6 +4992,11 @@ def generate_multiple_pdfs(request):
     plats = request.GET.getlist('plats')
     return generate_etiquette_pdf(request, plats)
 
+
+def generate_multiple_pdfs_en(request):
+    plats = request.GET.getlist('plats_en')
+    return generate_etiquette_pdf(request, plats)
+
 def etiquette_tente(request):
     plats = Plat.objects.all()
 
@@ -5611,7 +5633,7 @@ def submit_request(request):
                     delivery_mode=delivery_mode
                 )
 
-            return redirect('submit_request')  # Redirect after saving
+            return redirect('submission_detail', submission_id=submission.id)  # Redirect after saving
     else:
         form = SubmissionForm()
 
@@ -5882,50 +5904,135 @@ from .models import Submission
 def update_submission(request, submission_id):
     if request.method == 'POST':
         try:
-            submission = Submission.objects.get(id=submission_id)
+            submission = get_object_or_404(Submission, id=submission_id)
 
-            # Safely get and sanitize fields
-            submission.date = request.POST.get('date', '').strip()
-            submission.ordered_by = request.POST.get('ordered_by', '').strip()
+            # Parse and validate main fields
+            # (Similar to your current approach)
+            # Example: date parsing
+            date_str = request.POST.get('date', '').strip()
+            if date_str:
+                from datetime import datetime
+                submission.date = datetime.strptime(date_str, "%Y-%m-%d").date()
+
+            # Update simple text fields
             submission.company_name = request.POST.get('company_name', '').strip()
+            submission.ordered_by = request.POST.get('ordered_by', '').strip()
             submission.event_location = request.POST.get('event_location', '').strip()
             submission.contact_person = request.POST.get('contact_person', '').strip()
             submission.phone = request.POST.get('phone', '').strip()
             submission.commentaire = request.POST.get('commentaire', '').strip()
             submission.email = request.POST.get('email', '').strip()
             submission.billing_address = request.POST.get('billing_address', '').strip()
-            submission.service_count = request.POST.get('service_count', '').strip()
 
-            # Handling Budget - sanitizing to remove non-breaking spaces
-            budget_value = request.POST.get('budget', '').strip().replace("\xa0", "")  # Remove non-breaking space
-            submission.budget = int(budget_value) if budget_value.isdigit() else None  # Convert to float or set to None
+            # Numeric fields with validation and sanitization
+            budget_str = request.POST.get('budget', '').replace("\xa0", "").strip()
+            try:
+                submission.budget = float(budget_str)
+            except ValueError:
+                submission.budget = None
 
-            # Handling Guest Count
-            guest_count_value = request.POST.get('guest_count', '').strip().replace("\xa0", "")
-            submission.guest_count = int(guest_count_value) if guest_count_value.isdigit() else None
+            guest_str = request.POST.get('guest_count', '').replace("\xa0", "").strip()
+            try:
+                submission.guest_count = int(guest_str)
+            except ValueError:
+                submission.guest_count = None
 
-            submission.event_time = request.POST.get('event_time', '').strip() or None
-            submission.delivery_time = request.POST.get('delivery_time', '').strip() or None
-
-            # Validate time formats if applicable
-            if submission.event_time and not validate_time_format(submission.event_time):
+            # Time fields with validation
+            event_time_str = request.POST.get('event_time', '').strip()
+            if event_time_str and not validate_time_format(event_time_str):
                 return JsonResponse({'success': False, 'error': "Le format de l'heure de l'événement est invalide."}, status=400)
+            submission.event_time = event_time_str or None
 
-            if submission.delivery_time and not validate_time_format(submission.delivery_time):
+            delivery_time_str = request.POST.get('delivery_time', '').strip()
+            if delivery_time_str and not validate_time_format(delivery_time_str):
                 return JsonResponse({'success': False, 'error': "Le format de l'heure de livraison est invalide."}, status=400)
+            submission.delivery_time = delivery_time_str or None
+
+            # Save main submission data
+            submission.save()
+
+            existing_ids = set(submission.menu_submissions.values_list('id', flat=True))
+            processed_ids = set()
+
+            # 2. Parcourir tous `request.POST` pour traiter
+            for key in request.POST:
+                if key.startswith('sub_menus_'):
+                    menu_sub_id = key.split('sub_menus_')[1]
+                    menu_id = request.POST.get(key)
+                    allergies = request.POST.get(f'allergies_{menu_sub_id}', '').strip()
+                    delivery_mode_id = request.POST.get(f'delivery_modes_{menu_sub_id}', '')
+
+                    # Validation
+                    if not menu_id or not menu_id.isdigit():
+                        continue
+                    if not delivery_mode_id or not delivery_mode_id.isdigit():
+                        continue
+
+                    menu = get_object_or_404(Menu, id=int(menu_id))
+                    delivery_mode = get_object_or_404(DeliveryMode, id=int(delivery_mode_id))
+
+                    # Si c'est une modification existante
+                    if menu_sub_id.isdigit():
+                        try:
+                            ms = MenuSubmission.objects.get(id=int(menu_sub_id))
+                            ms.menu = menu
+                            ms.allergies = allergies
+                            ms.delivery_mode = delivery_mode
+                            ms.save()
+                            processed_ids.add(ms.id)
+                        except MenuSubmission.DoesNotExist:
+                            # Créer si n'existe pas
+                            ms = MenuSubmission.objects.create(
+                                submission=submission,
+                                menu=menu,
+                                allergies=allergies,
+                                delivery_mode=delivery_mode
+                            )
+                            processed_ids.add(ms.id)
+                    else:
+                        # Nouvelle entrée
+                        ms = MenuSubmission.objects.create(
+                            submission=submission,
+                            menu=menu,
+                            allergies=allergies,
+                            delivery_mode=delivery_mode
+                        )
+                        processed_ids.add(ms.id)
+
+            # 3. Supprimer ceux qui ne sont plus présents
+            to_delete_ids = existing_ids - processed_ids
+            MenuSubmission.objects.filter(id__in=to_delete_ids).delete()
 
 
-            submission.save()  # Save changes to the database
+            for key in request.POST:
+                if key.startswith('new_sub_menus_'):
+                    index = key.split('new_sub_menus_')[1]
+                    menu_id = request.POST.get(key)
+                    allergies = request.POST.get(f'allergies_new_{index}', '').strip()
+                    delivery_mode_id = request.POST.get(f'delivery_modes_new_{index}', '')
 
-            return JsonResponse({'success': True}, status=200)
+                    if not menu_id or not menu_id.isdigit():
+                        continue
+                    if not delivery_mode_id or not delivery_mode_id.isdigit():
+                        continue
+
+                    menu = get_object_or_404(Menu, id=int(menu_id))
+                    delivery_mode = get_object_or_404(DeliveryMode, id=int(delivery_mode_id))
+                    MenuSubmission.objects.create(
+                        submission=submission,
+                        menu=menu,
+                        allergies=allergies,
+                        delivery_mode=delivery_mode
+                    )
+
+            return JsonResponse({'success': True})
+
         except Submission.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Soumission non trouvée.'}, status=404)
-        except ValueError as ve:
-            return JsonResponse({'success': False, 'error': str(ve)}, status=400)
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
     else:
-        return JsonResponse({'success': False, 'error': 'Méthode de requête invalide.'}, status=405)
+        return JsonResponse({'success': False, 'error': 'Méthode non autorisée.'}, status=405)
 
 
 def get_livraisons(request, journee_id):
@@ -6303,3 +6410,20 @@ def duplicate_checklist(request, checklist_id):
 
     # Redirect to the detail view of the new checklist
     return HttpResponseRedirect(reverse('checklist-detail', args=[new_checklist.id]))
+
+    # view ejemplo
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def delete_menu_submission(request, submission_id, submenu_id):
+    if request.method == 'POST':
+        try:
+            submission = get_object_or_404(Submission, id=submission_id)
+            submenu = get_object_or_404(MenuSubmission, id=submenu_id, submission=submission)
+            submenu.delete()
+            return JsonResponse({'success': True, 'message': 'Sous-menu supprimé.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    else:
+        return JsonResponse({'success': False, 'error': 'Méthode non autorisée'})

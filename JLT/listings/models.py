@@ -561,6 +561,9 @@ class Checklist(models.Model):
 
         super(Checklist, self).save(*args, **kwargs)
 
+    def __str__(self):
+        return self.name
+
 
 
 
@@ -612,6 +615,7 @@ class DeliveryMode(models.Model):
 
 class Plat(models.Model):
     nom = models.CharField(max_length=130)
+    nom_english = models.CharField(max_length=130, null=True, blank=True)
     def __str__(self):
         return self.nom
     
@@ -700,7 +704,7 @@ class MenuSubmission(models.Model):
     delivery_mode = models.ForeignKey(DeliveryMode, on_delete=models.SET_NULL, null=True, blank=True)  # Link to DeliveryMode
 
     def __str__(self):
-        return f"{self.menu.name} for {self.submission.company_name}"
+        return f"Menu '{self.menu.name}' for {self.submission.company_name} (ID {self.id})"
 
 
 from django.shortcuts import render, get_object_or_404
@@ -798,6 +802,9 @@ class ChecklistItem(models.Model):
                     )
 
         super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.product.name} - {self.checklist.name}"
 
 
 
@@ -996,3 +1003,4 @@ class OrderCuisine(models.Model):
 
     def __str__(self):
        return f"{self.item.name} ordered by {self.user.username}"
+

@@ -1,30 +1,104 @@
+
+
+
+
 {% extends 'listings/base.html' %}
 {% load static %}
 
 {% block content %}
+<!-- Lien Bootstrap déjà dans base si inclus, sinon décommentez -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
 
-<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+<div class="container my-4">
 
-<div class="container mt-5">
-    <h1>Gestion des Plats</h1>
+    <!-- Navbar est inchangée, pas touche ici -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'conseiller_dashboard' %}">Etiquettes tente</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if user.username == "Maxime" %}
+                    <li class="nav-item dropdown">
+                        <a class="nav__link dropdown-toggle" href="#" id="menuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Suivi
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="menuDropdown">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'manage_submissions' %}">
+                                    <i class="fa-solid fa-file-pdf me-2"></i>PDF
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'calendarsub_view' %}">
+                                    <i class="fa-solid fa-calendar-days me-2"></i>Calendrier date événement
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'calendarsubcreate_view' %}">
+                                    <i class="fa-solid fa-calendar-plus me-2"></i>Calendrier date création
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item dropdown">
+                        
+                        <a class="nav__link dropdown-toggle" href="#" id="menuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Liens
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="menuDropdown">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'journees-list' %}">
+                                    <i class="fa-solid fa-truck me-2"></i>Livraisons
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'creerchecklist' %}">
+                                    <i class="fa-solid fa-cart-flatbed me-2"></i>Checklist
+                                </a>
+                            </li>
+                        </ul>
+                        <li>
+                            <a href="{% url 'conseiller_dashboard' %}" class="nav__link" style="margin-left: 30px;">
+                                <i class="fa-solid fa-display"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                    </li>
+           
+                    
+                    
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-    <!-- Bouton pour ouvrir le modal d'ajout de plat -->
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addPlatModal">
-        Ajouter un Plat
-    </button>
+    <!-- Titre principal -->
+    <h1 class="text-center mb-4">Impression étiquettes</h1>
 
-    <!-- Bouton pour ouvrir le modal de sélection des plats pour le PDF -->
-    <button type="button" class="btn btn-secondary ml-2" data-toggle="modal" data-target="#selectPlatsModal">
-        Sélectionner des Plats pour PDF
-    </button>
+    <!-- Boutons d'action -->
+    <div class="mb-4 text-center">
+        <button type="button" class="btn btn-primary mx-2" data-toggle="modal" data-target="#addPlatModal">
+            Ajouter un Plat
+        </button>
+        <button type="button" class="btn btn-secondary mx-2" data-toggle="modal" data-target="#selectPlatsModal">
+            PDF 🇫🇷
+        </button>
+        <button type="button" class="btn btn-secondary mx-2" data-toggle="modal" data-target="#selectPlatsModalEn">
+            PDF 🇬🇧
+        </button>
+    </div>
 
-    <!-- Modal d'ajout de plat -->
+    <!-- Modal Ajout Plat -->
     <div class="modal fade" id="addPlatModal" tabindex="-1" role="dialog" aria-labelledby="addPlatModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="addPlatModalLabel">Ajouter un Nouveau Plat</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -32,8 +106,10 @@
                     {% csrf_token %}
                     <div class="modal-body">
                         <div class="form-group">
-                            <label for="nom">Nom du Plat :</label>
+                            <label for="nom">NOM 🇫🇷</label>
                             <input type="text" class="form-control" id="nom" name="nom" required>
+                            <label for="nom">NOM 🇬🇧</label>
+                            <input type="text" class="form-control" id="nom_english" name="nom_english" required>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -45,21 +121,20 @@
         </div>
     </div>
 
-    <!-- Modal de sélection des plats pour le PDF -->
+    <!-- Modal sélection Plats -->
     <div class="modal fade" id="selectPlatsModal" tabindex="-1" role="dialog" aria-labelledby="selectPlatsModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="selectPlatsModalLabel">Sélectionner des Plats pour PDF</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <h5 class="modal-title" id="selectPlatsModalLabel">PDF 🇫🇷</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <form method="get" action="{% url 'generate_multiple_pdfs' %}">
-                    <div class="mb-3">
+                    <div class="mb-3 px-3">
                         <input type="text" class="form-control" id="searchBar" onkeyup="searchFunction()" placeholder="Rechercher un plat...">
                     </div>
-            
                     <div style="max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
                         <ul class="list-group" id="platList">
                             {% for plat in plats %}
@@ -70,31 +145,79 @@
                             {% endfor %}
                         </ul>
                     </div>
-            
-                    <button type="submit" class="btn btn-primary mt-3">Générer PDF</button>
+                    <div class="text-center my-3">
+                        <button type="submit" class="btn btn-primary">Générer PDF</button>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
-</div>
 
+        <!-- Modal sélection Plats -->
+        <div class="modal fade" id="selectPlatsModalEn" tabindex="-1" role="dialog" aria-labelledby="selectPlatsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="selectPlatsModalLabel">PDF 🇬🇧</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form method="get" action="{% url 'generate_multiple_pdfs_en' %}">
+                        <div class="mb-3 px-3">
+                            <input type="text" class="form-control" id="searchBarEn" onkeyup="searchFunctionEn()" placeholder="Rechercher un plat...">
+                        </div>
+                        <div style="max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                            <ul class="list-group" id="platListEn">
+                                {% for plat in plats %}
+                                <li class="list-group-item form-check">
+                                    <input class="form-check-input" type="checkbox" id="plat_{{ plat.id }}" name="plats_en" value="{{ plat.nom_english }}">
+                                    <label class="form-check-label" for="plat_{{ plat.id }}">{{ plat.nom_english }}</label>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="text-center my-3">
+                            <button type="submit" class="btn btn-primary">Générer PDF</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+</div> <!-- Fin container -->
+
+<!-- Inclusion des scripts Bootstrap -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.4/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
+<!-- Script de recherche -->
 <script>
-    function searchFunction() {
-    // Déclare les variables
-    var input, filter, ul, li, label, i, txtValue;
-    input = document.getElementById('searchBar');
-    filter = input.value.toUpperCase();
-    ul = document.getElementById("platList");
-    li = ul.getElementsByTagName('li');
+function searchFunction() {
+    var input = document.getElementById("searchBar");
+    var filter = input.value.toUpperCase();
+    var ul = document.getElementById("platList");
+    var li = ul.getElementsByTagName("li");
+    for (var i = 0; i < li.length; i++) {
+        var label = li[i].getElementsByTagName("label")[0];
+        var txtValue = label.textContent || label.innerText;
+        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            li[i].style.display = "";
+        } else {
+            li[i].style.display = "none";
+        }
+    }
+}
 
-    // Boucle sur chaque élément
-    for (i = 0; i < li.length; i++) {
-        label = li[i].getElementsByTagName("label")[0];
-        txtValue = label.textContent || label.innerText;
+function searchFunctionEn() {
+    var input = document.getElementById("searchBarEn");
+    var filter = input.value.toUpperCase();
+    var ul = document.getElementById("platListEn");
+    var li = ul.getElementsByTagName("li");
+    for (var i = 0; i < li.length; i++) {
+        var label = li[i].getElementsByTagName("label")[0];
+        var txtValue = label.textContent || label.innerText;
         if (txtValue.toUpperCase().indexOf(filter) > -1) {
             li[i].style.display = "";
         } else {
@@ -103,7 +226,6 @@
     }
 }
 </script>
-
-</script>
-
 {% endblock %}
+                           
+

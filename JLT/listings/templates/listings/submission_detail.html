@@ -1,6 +1,8 @@
 {% extends 'listings/base.html' %}
 {% load static %}
 
+
+
 {% block content %}
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -89,32 +91,32 @@
             </div>
         </div>
         <div class="card-body">
-            <h3 class="mt-3">Détails de l'Événement</h3>
+            <h3 class="mt-3" style="margin-bottom: 10px;">Détails de l'Événement</h3>
             <div class="row">
                 <div class="col-md-6">
                     <p><i class="fas fa-building info-icon"></i><strong>Nom de la compagnie:</strong>
-                        <span class="info-field">{{ submission.company_name }}</span>
-                        <input type="text" class="form-control d-none" name="company_name" value="{{ submission.company_name }}" />
+                        <span class="view-section">{{ submission.company_name }}</span>
+                        <input type="text" class="form-control edit-section d-none" name="company_name" value="{{ submission.company_name }}" />
                     </p>
                 </div>
                 <div class="col-md-6">
                     <p><i class="fas fa-calendar-alt info-icon"></i><strong>Date:</strong>
-                        <span class="info-field">{{ submission.date|date:"d F Y" }}</span>
-                        <input type="date" class="form-control d-none" name="date" value="{{ submission.date|date:"Y-m-d" }}" />
+                        <span class="view-section">{{ submission.date|date:"d F Y" }}</span>
+                        <input type="date" class="form-control edit-section d-none" name="date" value="{{ submission.date|date:"Y-m-d" }}" />
                     </p>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-6">
                     <p><i class="fas fa-clock info-icon"></i><strong>Heure de l'événement:</strong>
-                        <span class="info-field">{{ submission.event_time }}</span>
-                        <input type="time" class="form-control d-none" name="event_time" value="{{ submission.event_time|time:"H:i" }}" />
+                        <span class="view-section">{{ submission.event_time }}</span>
+                        <input type="time" class="form-control edit-section d-none" name="event_time" value="{{ submission.event_time|time:"H:i" }}" />
                     </p>
                 </div>
                 <div class="col-md-6">
                     <p><i class="fas fa-clock info-icon"></i><strong>Heure de livraison:</strong>
-                        <span class="info-field">{{ submission.delivery_time }}</span>
-                        <input type="time" class="form-control d-none" name="delivery_time" value="{{ submission.delivery_time|time:"H:i" }}" />
+                        <span class="view-section">{{ submission.delivery_time }}</span>
+                        <input type="time" class="form-control edit-section d-none" name="delivery_time" value="{{ submission.delivery_time|time:"H:i" }}" />
                     </p>
                 </div>
                 
@@ -123,69 +125,69 @@
                 <div class="row">
                     <div class="col-md-6">
                         <p><i class="fas fa-users info-icon"></i><strong>Nombre de personnes:</strong>
-                            <span class="info-field">{{ submission.guest_count }}</span>
-                            <input type="number" class="form-control d-none" name="guest_count" value="{{ submission.guest_count }}" />
+                            <span class="view-section">{{ submission.guest_count }}</span>
+                            <input type="number" class="form-control edit-section d-none" name="guest_count" value="{{ submission.guest_count }}" />
                         </p>
                     </div>
                     
                     <div class="col-md-6">
                         <p><i class="fas fa-clipboard-list info-icon"></i><strong>Nombre de services:</strong>
-                            <span class="info-field">{{ submission.service_count }}</span>
-                            <input type="text" class="form-control d-none" name="service_count" value="{{ submission.service_count }}" />
+                            <span class="view-section">{{ submission.service_count }}</span>
+                            <input type="text" class="form-control edit-section d-none" name="service_count" value="{{ submission.service_count }}" />
                         </p>
                     </div>
                 </div>
             
 
-            <h3 class="mt-3">Coordonnées de Contact</h3>
+            <h3 class="mt-3" style="margin-bottom: 10px;">Coordonnées de Contact</h3>
             <div class="row">
                 <div class="col-md-6">
                     <p><i class="fas fa-user-circle info-icon"></i><strong>Contact sur place:</strong>
-                        <span class="info-field">{{ submission.contact_person }}</span>
-                        <input type="text" class="form-control d-none" name="contact_person" value="{{ submission.contact_person }}" />
+                        <span class="view-section">{{ submission.contact_person }}</span>
+                        <input type="text" class="form-control edit-section d-none" name="contact_person" value="{{ submission.contact_person }}" />
                     </p>
                 </div>
                 <div class="col-md-6">
                     <p><i class="fas fa-user info-icon"></i><strong>Commandé par:</strong>
-                        <span class="info-field">{{ submission.ordered_by }}</span>
-                        <input type="text" class="form-control d-none" name="ordered_by" value="{{ submission.ordered_by }}" />
+                        <span class="view-section">{{ submission.ordered_by }}</span>
+                        <input type="text" class="form-control edit-section d-none" name="ordered_by" value="{{ submission.ordered_by }}" />
                     </p>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-6">
                     <p><i class="fas fa-envelope info-icon"></i><strong>Email:</strong>
-                        <span class="info-field">{{ submission.email }}</span>
-                        <input type="email" class="form-control d-none" name="email" value="{{ submission.email }}" />
+                        <span class="view-section">{{ submission.email }}</span>
+                        <input type="email" class="form-control edit-section d-none" name="email" value="{{ submission.email }}" />
                     </p>
                 </div>
                 <div class="col-md-6">
                     <p><i class="fas fa-phone info-icon"></i><strong>Téléphone:</strong>
-                        <span class="info-field">{{ submission.phone }}</span>
-                        <input type="tel" class="form-control d-none" name="phone" value="{{ submission.phone }}" />
+                        <span class="view-section">{{ submission.phone }}</span>
+                        <input type="tel" class="form-control edit-section d-none" name="phone" value="{{ submission.phone }}" />
                     </p>
                 </div>
                 <div class="col-md-6">
                     <p><i class="fas fa-address-card info-icon"></i><strong>Adresse de facturation:</strong>
-                        <span class="info-field">{{ submission.billing_address }}</span>
-                        <input type="text" class="form-control d-none" name="billing_address" value="{{ submission.billing_address }}" />
+                        <span class="view-section">{{ submission.billing_address }}</span>
+                        <input type="text" class="form-control edit-section d-none" name="billing_address" value="{{ submission.billing_address }}" />
                     </p>
                 </div>
             </div>
             
 
-            <h3 class="mt-3">Informations Financières</h3>
+            <h3 class="mt-3" style="margin-bottom: 10px;">Informations Financières</h3>
             <div class="row">
                 <div class="col-md-6">
                     <p><i class="fas fa-dollar-sign info-icon"></i><strong>Budget:</strong>
-                        <span class="info-field">{{ submission.budget }} $</span>
-                        <input type="number" step="0.01" class="form-control d-none" name="budget" value="{{ submission.budget }}" />
+                        <span class="view-section">{{ submission.budget }} $</span>
+                        <input type="number" step="0.01" class="form-control edit-section d-none" name="budget" value="{{ submission.budget }}" />
                     </p>
                 </div>
                 <div class="col-md-6">
                     <p><i class="fa-solid fa-credit-card info-icon"></i><strong>Mode de paiement:</strong>
-                        <span class="info-field">{{ submission.payment_mode }}</span>
-                        <select class="form-select d-none" name="payment_mode">
+                        <span class="view-section">{{ submission.payment_mode }}</span>
+                        <select class="form-select edit-section d-none" name="payment_mode">
                             <option value="cc" {% if submission.payment_mode == 'cc' %}selected{% endif %}>Carte de Crédit</option>
                             <option value="cheque" {% if submission.payment_mode == 'cheque' %}selected{% endif %}>Chèque</option>
                             <option value="interac" {% if submission.payment_mode == 'interac' %}selected{% endif %}>Interact</option>
@@ -194,49 +196,92 @@
                 </div>
             </div>
 
-            <h3 class="mt-3">Menus et Commentaires</h3>
-            <div class="row">
-                <div class="col-md-12">
-                    
-                    {% if submission.menu_submissions.count > 0 %}
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>Menu</th>
-                                    <th>Allergies</th>
-                                    <th>Modes d'envoi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for menu_submission in submission.menu_submissions.all %}
+            <h3 class="mt-3" style="margin-bottom: 10px;">Menus et Commentaires</h3>
+            <button type="button" class="btn btn-primary d-none" id="btnAddMenu" style="margin-bottom: 10px;">Ajouter un menu</button>
+            <form id="menuEditForm" method="POST" action="{% url 'update_submission' submission.id %}">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-12">
+                        
+                            <table class="table table-bordered" id="menuTable">
+                                <thead>
                                     <tr>
-                                        <td><strong>{{ menu_submission.menu.name }}</strong>
-                                            <input type="hidden" class="form-control d-none" name="sub_menus[]" value="{{ menu_submission.menu.id }}" />
-                                        </td>
-                                        <td>{{ menu_submission.allergies|default:"Aucune allergies" }}</td>
-                                        <td>
-                                            {{ menu_submission.delivery_mode.name|default:"Aucun mode sélectionné" }}
-                                            <input type="hidden" class="form-control d-none" name="delivery_modes[]" value="{{ menu_submission.delivery_mode.id }}" />
-                                        </td>
+                                        <th>Menu</th>
+                                        <th>Allergies</th>
+                                        <th>Modes d'envoi</th>
                                     </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    {% else %}
-                        <p>Aucun menu sélectionné.</p>
-                    {% endif %}
+                                </thead>
+                                <tbody>
+                                    {% if submission.menu_submissions.count > 0 %}
+                                    {% for menu_submission in submission.menu_submissions.all %}
+                                        <tr>
+                                            <!-- Section visible en mode édition -->
+                                            <td>
+                                                <div class="view-section" id="view-menu-{{ menu_submission.id }}">
+                                                    <strong>{{ menu_submission.menu.name }}</strong>
+                                                </div>
+                                                <!-- Champ modifiable, affiché en mode édition -->
+                                                <div class="edit-section d-none" id="edit-menu-{{ menu_submission.id }}">
+                                                    <select name="sub_menus_{{ menu_submission.id }}" class="form-control">
+                                                        {% for menu in all_menus %}
+                                                            <option value="{{ menu.id }}" {% if menu.id == menu_submission.menu.id %}selected{% endif %}>{{ menu.name }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </td>
+                                            <!-- Allergies -->
+                                            <td>
+                                                <div class="view-section" id="view-allergies-{{ menu_submission.id }}">
+                                                    {{ menu_submission.allergies|default:"Aucune allergies" }}
+                                                </div>
+                                                <div class="edit-section d-none" id="edit-allergies-{{ menu_submission.id }}">
+                                                    <input type="text" name="allergies_{{ menu_submission.id }}" class="form-control" value="{{ menu_submission.allergies }}">
+                                                </div>
+                                            </td>
+                                            <!-- Mode d'envoi -->
+                                            <td>
+                                                <div class="view-section" id="view-delivery-{{ menu_submission.id }}">
+                                                    {{ menu_submission.delivery_mode.name|default:"Aucun mode sélectionné" }}
+                                                </div>
+                                                <div class="edit-section d-none" id="edit-delivery-{{ menu_submission.id }}">
+                                                    <select name="delivery_modes_{{ menu_submission.id }}" class="form-control">
+                                                        {% for mode in all_delivery_modes %}
+                                                            <option value="{{ mode.id }}" {% if mode.id == menu_submission.delivery_mode.id %}selected{% endif %}>{{ mode.name }}</option>
+                                                        {% endfor %}
+                                                        
+                                                    </select>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-danger btn-sm delete-menu-btn" data-menu-id="{{ menu_submission.id }}" data-submission-id="{{ submission.id }}">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                                
+                                            </td>
+                                            
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <p></p>
+                        {% endif %}
+                    </div>
                 </div>
-            </div>
+            </form>
+            
+    
+            
             <div class="row">
                 <div class="col-md-12">
                     <p><i class="fa-solid fa-comment info-icon"></i><strong>Commentaire:</strong>
-                        <span class="info-field">{{ submission.commentaire }}</span>
-                        <input type="text" class="form-control d-none" name="commentaire" value="{{ submission.commentaire }}" />
+                        <span class="view-section">{{ submission.commentaire }}</span>
+                        <input type="text" class="form-control edit-section d-none" name="commentaire" value="{{ submission.commentaire }}" />
                     </p>
                 </div>
             </div>
 
-        <h3 class="mt-3">Détails de Création</h3>
+        <h3 class="mt-3" style="margin-bottom: 10px;">Détails de Création</h3>
         <div class="row">
             <div class="col-md-6">
                 <p><i class="fas fa-calendar-check info-icon"></i><strong>Créé à:</strong> {{ submission.created_at|date:"d F Y, H:i" }}</p>
@@ -254,23 +299,17 @@
 </div>
 
 <script>
+
 document.getElementById('modifyButton').addEventListener('click', function() {
-    // Show input fields and hide spans
-    const infoFields = document.querySelectorAll('.info-field');
-    const inputs = document.querySelectorAll('.form-control');
+    document.querySelectorAll('.view-section').forEach(el => el.classList.toggle('d-none'));
+    document.querySelectorAll('.edit-section').forEach(el => el.classList.toggle('d-none'));
 
-    infoFields.forEach(field => {
-        field.classList.toggle('d-none'); // toggle visibility
-    });
-
-    inputs.forEach(input => {
-        input.classList.toggle('d-none'); // toggle visibility
-    });
-
-    // Toggle buttons
-    this.classList.toggle('d-none'); // Hide the modify button
-    document.getElementById('saveButton').classList.toggle('d-none'); // Show the save button
+    this.classList.toggle('d-none');
+    document.getElementById('saveButton').classList.toggle('d-none');
+    document.getElementById('btnAddMenu').classList.toggle('d-none');
 });
+
+
 
 document.getElementById('saveButton').addEventListener('click', function() {
     const formData = new FormData();
@@ -303,6 +342,106 @@ document.getElementById('saveButton').addEventListener('click', function() {
         alert("Une erreur s'est produite lors de la sauvegarde des modifications.");
     });
 });
+
+document.querySelectorAll('.delete-menu-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const submenuId = this.dataset.menuId;
+        const submissionId = this.dataset.submissionId;
+        
+        console.log(`Deleting Submenu: Submenu ID - ${submenuId}, Submission ID - ${submissionId}`);
+
+        if (!confirm('Voulez-vous vraiment supprimer ce menu ?')) return;
+
+        const row = this.closest('tr');
+
+        fetch(`/api/submission/${submissionId}/delete-submenu/${submenuId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+        })
+        .then(res => {
+            if (!res.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return res.json();
+        })
+        .then(data => {
+            if (data.success) {
+                row.remove();
+            } else {
+                alert('Erreur : ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Network Error:', error);
+            alert('Erreur réseau.');
+        });
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+let newMenuCounter = 0;  // To generate unique IDs if needed
+
+document.getElementById('btnAddMenu').addEventListener('click', function() {
+    // Create row HTML
+    const tbody = document.querySelector('#menuTable tbody');
+
+    // Increment counter for unique id
+    newMenuCounter++;
+
+    const newRow = document.createElement('tr');
+
+    newRow.innerHTML = `
+        <!-- Menu select -->
+        <td>
+            <div class="view-section d-none"></div>
+            <div class="edit-section" id="edit-new-menu-${newMenuCounter}">
+                <select name="new_sub_menus_${newMenuCounter}" class="form-control">
+                    {% for menu in all_menus %}
+                    <option value="{{ menu.id }}">{{ menu.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </td>
+        <!-- Allergies -->
+        <td>
+            <div class="view-section d-none"></div>
+            <div class="edit-section" id="edit-new-allergies-${newMenuCounter}">
+                <input type="text" name="allergies_new_${newMenuCounter}" class="form-control" placeholder="Allergies">
+            </div>
+        </td>
+        <!-- Delivery Mode -->
+        <td>
+            <div class="view-section d-none"></div>
+            <div class="edit-section" id="edit-new-delivery-${newMenuCounter}">
+                <select name="delivery_modes_new_${newMenuCounter}" class="form-control">
+                    {% for mode in all_delivery_modes %}
+                    <option value="{{ mode.id }}">{{ mode.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </td>
+        <!-- Delete Button -->
+        <td>
+            <button type="button" class="btn btn-danger btn-sm delete-new-menu">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+        </td>
+    `;
+
+    tbody.appendChild(newRow);
+});
+
+// Handle delete of newly added rows
+document.querySelector('#menuTable').addEventListener('click', function(e) {
+    if (e.target.closest('.delete-new-menu')) {
+        e.target.closest('tr').remove();
+    }
+});
+
+});
+
 </script>
 
 {% endblock %}
