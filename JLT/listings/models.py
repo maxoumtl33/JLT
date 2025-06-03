@@ -614,8 +614,8 @@ class DeliveryMode(models.Model):
         return self.name
 
 class Plat(models.Model):
-    nom = models.CharField(max_length=130)
-    nom_english = models.CharField(max_length=130, null=True, blank=True)
+    nom = models.CharField(max_length=160)
+    nom_english = models.CharField(max_length=160, null=True, blank=True)
     def __str__(self):
         return self.nom
     

@@ -4943,6 +4943,11 @@ def generate_etiquette_pdf(request, plats):
             bottom_margin = 28.35  # 1 cm en points
             # Ajuster start_y pour inclure cette marge en bas
             start_y += bottom_margin
+        
+        if len(lines) == 5:
+            bottom_margin = 37  # 1 cm en points
+            # Ajuster start_y pour inclure cette marge en bas
+            start_y += bottom_margin
 
         for i, line in enumerate(lines):
             line_y = start_y - i * font_size * 1.2
