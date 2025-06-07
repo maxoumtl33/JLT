@@ -2746,17 +2746,17 @@ def top_scores(request):
     }
     return JsonResponse(data)
 
-@csrf_exempt  # pour désactiver CSRF si tu veux faire uniquement en test (penser à faire la bonne gestion en prod)
+@login_required
 def save_score(request):
     if request.method == 'POST':
-        if request.user.is_authenticated:
+        try:
             data = json.loads(request.body)
-            score_value = data.get('score', 0)
+            score_value = int(data.get('score', 0))
             Score.objects.create(user=request.user, score=score_value)
             return JsonResponse({'status': 'ok'})
-        else:
-            return JsonResponse({'status': 'error', 'message': 'Not authenticated'}, status=403)
-    return JsonResponse({'status': 'error', 'message': 'Invalid method'}, status=405)
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
 
 # RecupFrigo detail view
 @login_required

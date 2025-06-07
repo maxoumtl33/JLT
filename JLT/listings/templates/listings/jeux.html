@@ -23,20 +23,20 @@ body {
 }
 #character {
     position: absolute;
-    width: 60px;
-    height: 60px;
+    width: 110px;
+    height: 110px;
     background: url('{% static "listings/gen.png" %}') no-repeat center/contain;
-    bottom: 100px;
+    bottom: 22%;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-180%);
     z-index: 2;
 }
 
 /* Zone d'apparition limitée pour PNJ */
 .pnj {
     position: absolute;
-    width: 50px;
-    height: 50px;
+    width: 130px;
+    height: 130px;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
@@ -135,6 +135,9 @@ body {
 </style>
 </head>
 <body>
+    
+    <audio id="shotSound" src="{% static 'listings/son_tir.mp3' %}" preload="auto" hidden></audio>
+
 
     <!-- Bouton en haut à droite -->
     <div style="position: fixed; top: 10px; right: 10px; z-index:20;">
@@ -158,7 +161,11 @@ body {
   </div>
 </div>
 
-<audio id="gameOverSound" src="{% static 'listings/son_game_over.mp3' %}" preload="auto" hidden></audio>
+<audio id="sound1" src="{% static 'listings/sound1.mp3' %}" preload="auto"></audio>
+<audio id="sound2" src="{% static 'listings/sound2.mp3' %}" preload="auto"></audio>
+<audio id="sound3" src="{% static 'listings/sound3.mp3' %}" preload="auto"></audio>
+<audio id="sound4" src="{% static 'listings/sound4.mp3' %}" preload="auto"></audio>
+<audio id="sound5" src="{% static 'listings/sound5.mp3' %}" preload="auto"></audio>
 
 <div id="score">Score: 0</div>
 
@@ -186,32 +193,60 @@ const scoreDisplay = document.getElementById('score');
 const gameOverScreen = document.getElementById('gameOverScreen');
 
 let gameRunning = true;
-let startTime = Date.now();
 let spawnDelay = 2000; // délai initial en ms
 let spawnTimeout;
 
 // Listes d'images PNJs
 const pnjImages = [
-    "{% static 'listings/ennemie.jpeg' %}",
-    "{% static 'listings/ennemie2.jpeg' %}",
-    "{% static 'listings/ennemie3.jpeg' %}"
+    "{% static 'listings/ennemie1.png' %}",
+    "{% static 'listings/ennemie2.png' %}",
+    "{% static 'listings/ennemie3.png' %}",
+    "{% static 'listings/ennemie4.png' %}",
+    "{% static 'listings/ennemie5.png' %}",
+    "{% static 'listings/ennemie6.png' %}"
 ];
 
 // Gestion bouton
+// Pas besoin de faire de verrouillage si tu veux tout laisser faire
 document.getElementById('btnJump').addEventListener('click', jump);
 document.getElementById('btnShoot').addEventListener('click', shoot);
+
+// Si sur mobile, ajoute aussi touchstart
+document.getElementById('btnJump').addEventListener('touchstart', jump);
+document.getElementById('btnShoot').addEventListener('touchstart', shoot);
+
+
 document.getElementById('restartBtn').addEventListener('click', () => {
     location.reload();
 });
 
-// Saut
+let scoreStarted = false;
+let startTime; // ne pas l'initialiser ici
+
+function startScore() {
+    function update() {
+        if (!gameRunning) return;
+        const seconds = Math.floor((Date.now() - startTime) / 1000);
+        document.getElementById('score').innerHTML = 'Score: ' + seconds;
+        requestAnimationFrame(update);
+    }
+    update();
+}
+
 let isJumping = false;
 function jump() {
     if (isJumping) return;
     isJumping = true;
+
+    if (!scoreStarted) {
+        scoreStarted = true;
+        startTime = Date.now(); // démarre le temps ici
+        startScore(); // lance le compteur
+    }
+
     const maxHeight = 150;
     let start = null;
-    const duration = 500; // ms
+    const duration = 500;
 
     function step(timestamp) {
         if (!start) start = timestamp;
@@ -230,32 +265,40 @@ function jump() {
     requestAnimationFrame(step);
 }
 
+
+
+
 // Tir
 function shoot() {
-    if (!gameRunning) return;
-    const projectile = document.createElement('div');
-    projectile.className = 'projectile';
-    container.appendChild(projectile);
-    // Position initial
-    projectile.style.left = (container.clientWidth / 2 + 25) + 'px'; 
-    const bottomVal = parseFloat(window.getComputedStyle(character).bottom);
-    projectile.style.top = (container.clientHeight - bottomVal - 25) + 'px';
+  if (!gameRunning) return;
 
-    const interval = setInterval(() => {
-        projectile.style.left = (projectile.offsetLeft + 10) + 'px';
 
-        document.querySelectorAll('.pnj').forEach(pnj => {
-            if (checkCollision(projectile, pnj)) {
-                pnj.remove();
-                projectile.remove();
-                clearInterval(interval);
-            }
-        });
-        if (projectile.offsetLeft > window.innerWidth) {
-            clearInterval(interval);
-            projectile.remove();
-        }
-    }, 20);
+
+  // Créer le projectile
+  const projectile = document.createElement('div');
+  projectile.className = 'projectile';
+  container.appendChild(projectile);
+  // Position initiale
+  projectile.style.left = (container.clientWidth / 2 + 25) + 'px'; 
+  const bottomVal = parseFloat(window.getComputedStyle(character).bottom);
+  projectile.style.top = (container.clientHeight - bottomVal - 25) + 'px';
+
+  const interval = setInterval(() => {
+      projectile.style.left = (projectile.offsetLeft + 10) + 'px';
+
+      // Vérification collision avec PNJ
+      document.querySelectorAll('.pnj').forEach(pnj => {
+          if (checkCollision(projectile, pnj)) {
+              pnj.remove();
+              projectile.remove();
+              clearInterval(interval);
+          }
+      });
+      if (projectile.offsetLeft > window.innerWidth) {
+          clearInterval(interval);
+          projectile.remove();
+      }
+  }, 20);
 }
 
 // Collision detection
@@ -283,10 +326,12 @@ function createPnj() {
     pnj.style.left = container.clientWidth + 'px';
 
     // Placement très proche du sol, entre 10 et 30 px du sol
-    const minHeightFromBottom = 10;
-    const maxHeightFromBottom = 100;
-    const randHeight = minHeightFromBottom + Math.random() * (maxHeightFromBottom - minHeightFromBottom);
-    pnj.style.bottom = randHeight + 'px';
+    // Placer le PNJ très proche du sol, un peu au-dessus
+    const minBottom = 10; // 10px du sol
+    const maxBottom = 80; // 30px du sol
+    const randBottom = minBottom + Math.random() * (maxBottom - minBottom);
+    pnj.style.bottom = randBottom + 'px'; // position en 'bottom'
+
 
     container.appendChild(pnj);
 
@@ -324,39 +369,65 @@ function updateScore() {
 }
 requestAnimationFrame(updateScore);
 
-// Fonction gameOver
+
+
+
+
+
+// Ajoute cette variable globale au début
+let scoreSauvegardeEnvoyee = false;
+
 function gameOver() {
     gameRunning = false;
+
+   // Stop all sounds first
+for (let i = 1; i <= 5; i++) {
+    const sound = document.getElementById('sound' + i);
+    if (sound) {
+        sound.pause(); // Stop current sound
+        sound.currentTime = 0; // Reset to start
+    }
+}
+
+// Play a randomly selected sound
+const n = Math.floor(Math.random() * 5) + 1;
+const sound = document.getElementById('sound' + n);
+if (sound) {
+    sound.currentTime = 0; // Rewind in case it was paused
+    sound.play(); // Play the sound
+}
+
+
+
+    // Vérifier si le score a déjà été sauvegardé
+    if (!scoreSauvegardeEnvoyee) {
+        fetch('/save_score/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ score: Math.floor((Date.now() - startTime) / 1000) })
+        }).then(response => {
+            // éventuellement gérer la réponse
+        });
+        scoreSauvegardeEnvoyee = true; // marque comme sauvegardé
+    }
+
+    // Arrêter le spawn
     clearTimeout(spawnTimeout);
+    // Désactiver les boutons
     document.getElementById('btnJump').disabled = true;
     document.getElementById('btnShoot').disabled = true;
-    document.getElementById('gameOverScreen').style.display = 'flex';
+    // Afficher le modal Game Over
+    document.getElementById('gameOverScreen').style.display='flex';
 }
 
-// Après chaque fin de partie (gameOver), enregistrer le score
-function saveCurrentScore() {
-  fetch('/save_score/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': '{{ csrf_token }}'
-    },
-    body: JSON.stringify({ score: Math.floor((Date.now() - startTime)/1000) }) // par exemple
-  });
-}
 
-// Sur la fin du jeu
-function gameOver() {
-    gameRunning = false;
-    clearTimeout(spawnTimeout);
-    document.getElementById('btnJump').disabled = true;
-    document.getElementById('btnShoot').disabled = true;
-    document.getElementById('gameOverScreen').style.display = 'flex';
 
-    // Jouer le son
-    const sound = document.getElementById('gameOverSound');
-    sound.play();
-}
+
+
+
 
 
 document.getElementById('topScoresBtn').onclick = function() {
