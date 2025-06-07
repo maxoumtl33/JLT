@@ -208,6 +208,7 @@
                                     <tr>
                                         <th>Menu</th>
                                         <th>Allergies</th>
+                                        <th>Nombre de personne</th>
                                         <th>Modes d'envoi</th>
                                     </tr>
                                 </thead>
@@ -236,6 +237,14 @@
                                                 </div>
                                                 <div class="edit-section d-none" id="edit-allergies-{{ menu_submission.id }}">
                                                     <input type="text" name="allergies_{{ menu_submission.id }}" class="form-control" value="{{ menu_submission.allergies }}">
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="view-section" id="view-service_count-{{ menu_submission.id }}">
+                                                    {{ menu_submission.service_count|default:"0 personnes" }}
+                                                </div>
+                                                <div class="edit-section d-none" id="edit-service_count-{{ menu_submission.id }}">
+                                                    <input type="text" name="service_count_{{ menu_submission.id }}" class="form-control" value="{{ menu_submission.service_count }}">
                                                 </div>
                                             </td>
                                             <!-- Mode d'envoi -->
@@ -409,6 +418,12 @@ document.getElementById('btnAddMenu').addEventListener('click', function() {
             <div class="view-section d-none"></div>
             <div class="edit-section" id="edit-new-allergies-${newMenuCounter}">
                 <input type="text" name="allergies_new_${newMenuCounter}" class="form-control" placeholder="Allergies">
+            </div>
+        </td>
+        <td>
+            <div class="view-section d-none"></div>
+            <div class="edit-section" id="edit-new-service_count-${newMenuCounter}">
+                <input type="text" name="service_count_new_${newMenuCounter}" class="form-control" placeholder="Nombre de personne">
             </div>
         </td>
         <!-- Delivery Mode -->

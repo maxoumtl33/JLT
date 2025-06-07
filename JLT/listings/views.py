@@ -2729,6 +2729,35 @@ def journees_list(request):
                                                               'md':md,
                                                               'loic':loic})
 
+@login_required
+def jeux(request):
+    top_scores = Score.objects.order_by('-score')[:5]
+    return render(request, 'listings/jeux.html', {
+        'top_scores': top_scores,
+    })
+
+def top_scores(request):
+    scores = Score.objects.order_by('-score')[:5]
+    data = {
+        'scores': [
+            {'user': s.user.username, 'score': s.score}
+            for s in scores
+        ]
+    }
+    return JsonResponse(data)
+
+@csrf_exempt  # pour désactiver CSRF si tu veux faire uniquement en test (penser à faire la bonne gestion en prod)
+def save_score(request):
+    if request.method == 'POST':
+        if request.user.is_authenticated:
+            data = json.loads(request.body)
+            score_value = data.get('score', 0)
+            Score.objects.create(user=request.user, score=score_value)
+            return JsonResponse({'status': 'ok'})
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Not authenticated'}, status=403)
+    return JsonResponse({'status': 'error', 'message': 'Invalid method'}, status=405)
+
 # RecupFrigo detail view
 @login_required
 def recupfrigo_detail(request, id):
@@ -5624,19 +5653,20 @@ def submit_request(request):
             selected_menus = request.POST.getlist('sub_menus')
             for menu_id in selected_menus:
                 menu = Menu.objects.get(id=menu_id)
-                allergies = request.POST.get(f'menu_allergies_{menu_id}', '')  # Get allergies
-                delivery_mode_id = request.POST.get(f'delivery_modes_{menu_id}', '')  # Get selected delivery mode
+                allergies = request.POST.get(f'menu_allergies_{menu_id}', '')
+                delivery_mode_id = request.POST.get(f'delivery_modes_{menu_id}', '')
+                service_count_value = request.POST.get(f'service_count_{menu_id}', '')  # Retrieve the service count
 
-                # If delivery_mode_id is not empty, get the DeliveryMode object
                 delivery_mode = DeliveryMode.objects.get(id=delivery_mode_id) if delivery_mode_id else None
 
-                # Create a MenuSubmission instance to save the relationship to allergies and delivery mode
                 MenuSubmission.objects.create(
                     submission=submission,
                     menu=menu,
                     allergies=allergies,
-                    delivery_mode=delivery_mode
+                    delivery_mode=delivery_mode,
+                    service_count=service_count_value,  # Save the service count
                 )
+
 
             return redirect('submission_detail', submission_id=submission.id)  # Redirect after saving
     else:
@@ -5966,6 +5996,8 @@ def update_submission(request, submission_id):
                     menu_id = request.POST.get(key)
                     allergies = request.POST.get(f'allergies_{menu_sub_id}', '').strip()
                     delivery_mode_id = request.POST.get(f'delivery_modes_{menu_sub_id}', '')
+                    service_count_str = request.POST.get(f'service_count_{menu_sub_id}', '').strip()
+
 
                     # Validation
                     if not menu_id or not menu_id.isdigit():
@@ -5983,6 +6015,7 @@ def update_submission(request, submission_id):
                             ms.menu = menu
                             ms.allergies = allergies
                             ms.delivery_mode = delivery_mode
+                            ms.service_count = service_count_str
                             ms.save()
                             processed_ids.add(ms.id)
                         except MenuSubmission.DoesNotExist:
@@ -6015,6 +6048,8 @@ def update_submission(request, submission_id):
                     menu_id = request.POST.get(key)
                     allergies = request.POST.get(f'allergies_new_{index}', '').strip()
                     delivery_mode_id = request.POST.get(f'delivery_modes_new_{index}', '')
+                    service_count_str = request.POST.get(f'service_count_new_{index}', '').strip()
+
 
                     if not menu_id or not menu_id.isdigit():
                         continue
@@ -6027,7 +6062,8 @@ def update_submission(request, submission_id):
                         submission=submission,
                         menu=menu,
                         allergies=allergies,
-                        delivery_mode=delivery_mode
+                        delivery_mode=delivery_mode,
+                        service_count=service_count_str,
                     )
 
             return JsonResponse({'success': True})

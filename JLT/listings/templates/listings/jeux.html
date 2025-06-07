@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mini Jeu</title>
+{% load static %}
+<style>
+body {
+    margin: 0;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+#gameContainer {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background: #a0d2eb;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+}
+#character {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background: url('{% static "listings/gen.png" %}') no-repeat center/contain;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+}
+
+/* Zone d'apparition limitée pour PNJ */
+.pnj {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+}
+
+/* Projectile */
+.projectile {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: red;
+}
+
+/* Boutons rond à gauche/droite */
+#controls {
+    position: fixed;
+    bottom: 10px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 10;
+}
+/* Boutons rondes, plus gros et éloignés du bord */
+#btnJump {
+  position: fixed;
+  bottom: 40%;
+  left: 30px; /* plus loin du bord gauche */
+  width: 90px; /* plus gros */
+  height: 90px;
+  border-radius: 50%;
+  font-size: 1.8em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  cursor: pointer;
+  touch-action: manipulation; /* empêche le zoom par double tap */
+  -webkit-touch-callout: none;  /* pour Safari / iOS */
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent; /* supprime la highlight sur tap */
+}
+#btnShoot {
+  position: fixed;
+  bottom: 40%;
+  right: 30px; /* plus loin du bord droit */
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  font-size: 1.8em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  cursor: pointer;
+  touch-action: manipulation; /* empêche le zoom par double tap */
+  -webkit-touch-callout: none;  /* pour Safari / iOS */
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent; /* supprime la highlight sur tap */
+}
+
+
+#score {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    font-size: 20px;
+    background: rgba(255,255,255,0.8);
+    padding: 5px 10px;
+    border-radius: 8px;
+    z-index: 10;
+}
+/* Écran GAME OVER */
+#gameOverScreen {
+    position: fixed;
+    top:0; left:0; right:0; bottom:0;
+    background: rgba(0,0,0,0.8);
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-size: 2em;
+    z-index: 100;
+}
+#restartBtn {
+    margin-top: 20px;
+    padding: 12px 24px;
+    font-size: 1.2em;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+    <!-- Bouton en haut à droite -->
+    <div style="position: fixed; top: 10px; right: 10px; z-index:20;">
+        <button id="topScoresBtn" style="padding:10px; border-radius:20px;">Meilleurs Scores</button>
+    </div>
+    
+
+<!-- Modal -->
+<div id="scoresModal" style="
+  display:none; position:fixed; top:0; left:0; right:0; bottom:0;
+  background:rgba(0,0,0,0.5);
+  justify-content:center; align-items:center; z-index:1000;">
+  <div style="background:#fff; padding:20px; border-radius:10px; max-height:80%; overflow:auto; width:300px; display:flex; flex-direction:column;">
+    <h3>Top 5 Scores</h3>
+    <ul id="scoresList" style="list-style:none; padding:0;">
+      {% for s in top_scores %}
+        <li style="padding:5px 0;">{{ s.user.username }} : {{ s.score }} pts</li>
+      {% endfor %}
+    </ul>
+    <button id="closeScores" style="margin-top:10px; padding:5px 10px;">Fermer</button>
+  </div>
+</div>
+
+<audio id="gameOverSound" src="{% static 'listings/son_game_over.mp3' %}" preload="auto" hidden></audio>
+
+<div id="score">Score: 0</div>
+
+<div id="gameContainer">
+    <div id="character"></div>
+</div>
+
+<!-- Boutons -->
+<div id="controls">
+    <button id="btnJump" title="Sauter">⛹️</button>
+    <button id="btnShoot" title="Tirer">🎯</button>
+</div>
+
+<!-- Écran GAME OVER -->
+<div id="gameOverScreen">
+    <div>GAME OVER</div>
+    <button id="restartBtn">Rejouer</button>
+</div>
+
+<script>
+// Variables
+const character = document.getElementById('character');
+const container = document.getElementById('gameContainer');
+const scoreDisplay = document.getElementById('score');
+const gameOverScreen = document.getElementById('gameOverScreen');
+
+let gameRunning = true;
+let startTime = Date.now();
+let spawnDelay = 2000; // délai initial en ms
+let spawnTimeout;
+
+// Listes d'images PNJs
+const pnjImages = [
+    "{% static 'listings/ennemie.jpeg' %}",
+    "{% static 'listings/ennemie2.jpeg' %}",
+    "{% static 'listings/ennemie3.jpeg' %}"
+];
+
+// Gestion bouton
+document.getElementById('btnJump').addEventListener('click', jump);
+document.getElementById('btnShoot').addEventListener('click', shoot);
+document.getElementById('restartBtn').addEventListener('click', () => {
+    location.reload();
+});
+
+// Saut
+let isJumping = false;
+function jump() {
+    if (isJumping) return;
+    isJumping = true;
+    const maxHeight = 150;
+    let start = null;
+    const duration = 500; // ms
+
+    function step(timestamp) {
+        if (!start) start = timestamp;
+        const progress = timestamp - start;
+        const progressNorm = Math.min(progress / duration, 1);
+        const height = Math.sin(progressNorm * Math.PI) * maxHeight;
+        character.style.bottom = height + 'px';
+
+        if (progress < duration) {
+            requestAnimationFrame(step);
+        } else {
+            character.style.bottom = '0px';
+            isJumping = false;
+        }
+    }
+    requestAnimationFrame(step);
+}
+
+// Tir
+function shoot() {
+    if (!gameRunning) return;
+    const projectile = document.createElement('div');
+    projectile.className = 'projectile';
+    container.appendChild(projectile);
+    // Position initial
+    projectile.style.left = (container.clientWidth / 2 + 25) + 'px'; 
+    const bottomVal = parseFloat(window.getComputedStyle(character).bottom);
+    projectile.style.top = (container.clientHeight - bottomVal - 25) + 'px';
+
+    const interval = setInterval(() => {
+        projectile.style.left = (projectile.offsetLeft + 10) + 'px';
+
+        document.querySelectorAll('.pnj').forEach(pnj => {
+            if (checkCollision(projectile, pnj)) {
+                pnj.remove();
+                projectile.remove();
+                clearInterval(interval);
+            }
+        });
+        if (projectile.offsetLeft > window.innerWidth) {
+            clearInterval(interval);
+            projectile.remove();
+        }
+    }, 20);
+}
+
+// Collision detection
+function checkCollision(a, b) {
+    const rectA = a.getBoundingClientRect();
+    const rectB = b.getBoundingClientRect();
+    return (
+        rectA.right > rectB.left &&
+        rectA.left < rectB.right &&
+        rectA.bottom > rectB.top &&
+        rectA.top < rectB.bottom
+    );
+}
+
+// Création PNJ
+function createPnj() {
+    if (!gameRunning) return;
+    const pnj = document.createElement('div');
+    pnj.className = 'pnj';
+
+    const imgUrl = pnjImages[Math.floor(Math.random() * pnjImages.length)];
+    pnj.style.backgroundImage = `url('${imgUrl}')`;
+
+    // Position initiale à droite
+    pnj.style.left = container.clientWidth + 'px';
+
+    // Placement très proche du sol, entre 10 et 30 px du sol
+    const minHeightFromBottom = 10;
+    const maxHeightFromBottom = 100;
+    const randHeight = minHeightFromBottom + Math.random() * (maxHeightFromBottom - minHeightFromBottom);
+    pnj.style.bottom = randHeight + 'px';
+
+    container.appendChild(pnj);
+
+    const move = setInterval(() => {
+        pnj.style.left = (pnj.offsetLeft - 5) + 'px';
+
+        if (pnj.offsetLeft < -pnj.offsetWidth) {
+            clearInterval(move);
+            pnj.remove();
+        }
+
+        if (checkCollision(character, pnj)) {
+            gameOver();
+        }
+    }, 20);
+}
+
+// Fonction récursive de spawn
+function spawnPnj() {
+    if (!gameRunning) return;
+    createPnj();
+    // Réduction progressive du délai
+    spawnDelay = Math.max(500, spawnDelay * 0.98);
+    spawnTimeout = setTimeout(spawnPnj, spawnDelay);
+}
+// Démarre la boucle
+spawnPnj();
+
+// Score (temps)
+function updateScore() {
+    if (!gameRunning) return;
+    const seconds = Math.floor((Date.now() - startTime) / 1000);
+    document.getElementById('score').innerHTML = 'Score: ' + seconds;
+    requestAnimationFrame(updateScore);
+}
+requestAnimationFrame(updateScore);
+
+// Fonction gameOver
+function gameOver() {
+    gameRunning = false;
+    clearTimeout(spawnTimeout);
+    document.getElementById('btnJump').disabled = true;
+    document.getElementById('btnShoot').disabled = true;
+    document.getElementById('gameOverScreen').style.display = 'flex';
+}
+
+// Après chaque fin de partie (gameOver), enregistrer le score
+function saveCurrentScore() {
+  fetch('/save_score/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': '{{ csrf_token }}'
+    },
+    body: JSON.stringify({ score: Math.floor((Date.now() - startTime)/1000) }) // par exemple
+  });
+}
+
+// Sur la fin du jeu
+function gameOver() {
+    gameRunning = false;
+    clearTimeout(spawnTimeout);
+    document.getElementById('btnJump').disabled = true;
+    document.getElementById('btnShoot').disabled = true;
+    document.getElementById('gameOverScreen').style.display = 'flex';
+
+    // Jouer le son
+    const sound = document.getElementById('gameOverSound');
+    sound.play();
+}
+
+
+document.getElementById('topScoresBtn').onclick = function() {
+    document.getElementById('scoresModal').style.display='flex';
+};
+document.getElementById('closeScores').onclick = function() {
+    document.getElementById('scoresModal').style.display='none';
+};
+
+
+</script>
+

@@ -356,6 +356,7 @@ function updateMenuDetails() {
     selectedMenus.forEach(menuId => {
         const selectedOption = $('#menuSelect option[value="' + menuId + '"]');
         const allergies = selectedOption.data('allergies');
+        const service_count = selectedOption.data('service_count');
 
         // Creating options for the delivery modes
         const deliveryModeOptions = `
@@ -375,7 +376,7 @@ function updateMenuDetails() {
                     <h5 class="card-title">${selectedOption.text()}</h5>
                     <label>Allergies:</label>
                     <input type="text" class="form-control mb-2" name="menu_allergies_${menuId}" value="${allergies}" 
-                           onchange="updateMenuSelections(${menuId}, this.value, '${selectedDeliveryMode}')">
+                        onchange="updateMenuSelections(${menuId}, this.value, '${selectedDeliveryMode}')">
                     <label for="delivery_modes_${menuId}">Modes d'envoie:</label>
                     <select id="delivery_modes_${menuId}" name="delivery_modes_${menuId}" class="form-select mb-2" 
                             onchange="updateMenuSelections(${menuId}, '${allergies}', this.value)">
@@ -383,10 +384,14 @@ function updateMenuDetails() {
                         ${deliveryModeOptions}
                         <option value="${selectedDeliveryMode}" selected>${selectedDeliveryMode}</option>
                     </select>
+                    <label>Nombre de services:</label>
+                    <input type="text" class="form-control mb-2" name="service_count_${menuId}" value="${service_count || ''}" 
+                        onchange="updateMenuSelections(${menuId}, '${allergies}', '${selectedDeliveryMode}', this.value)">
                     <button type="button" class="btn btn-danger remove-menu" onclick="removeMenuDetail(this)">Supprimer</button>
                 </div>
             </div>
         `;
+
 
         menuDetailsContainer.append(menuDetailHtml);
     });
@@ -402,6 +407,7 @@ function updateMenuSelections(menuId, allergies, deliveryMode) {
     // Store the current input values correctly
     menuSelections[menuId].allergies = allergies || ''; // Default to empty string if undefined
     menuSelections[menuId].deliveryMode = deliveryMode || ''; // Default to empty string if undefined
+    menuSelections[menuId].serviceCount = serviceCount || '';
 }
 
 

@@ -655,6 +655,12 @@ class Submission(models.Model):
     phone = models.CharField(max_length=15, null=True, blank=True)  # Telephone
     email = models.EmailField(max_length=100, null=True, blank=True)  # Email
     billing_address = models.CharField(max_length=200, null=True, blank=True)  # Adresse facturation
+    etage = models.CharField(max_length=200, null=True, blank=True)
+    dock_livraison = models.CharField(max_length=200, null=True, blank=True)
+    escalier = models.BooleanField(default=False)
+    ascenseur = models.BooleanField(default=False)
+    carte_dock = models.BooleanField(default=False)
+    avec_service = models.BooleanField(default=False)
     commentaire = models.CharField(max_length=200, null=True, blank=True) 
     payment_mode = models.CharField(max_length=20, choices=[
         ('cc', 'Carte de Crédit'),
@@ -701,26 +707,13 @@ class MenuSubmission(models.Model):
     submission = models.ForeignKey(Submission, on_delete=models.CASCADE, related_name='menu_submissions')
     menu = models.ForeignKey(Menu, on_delete=models.CASCADE)
     allergies = models.TextField(null=True, blank=True)  # Field to save allergies
+    service_count = models.CharField(max_length=100, null=True, blank=True)  # Nombre de service (as string)
     delivery_mode = models.ForeignKey(DeliveryMode, on_delete=models.SET_NULL, null=True, blank=True)  # Link to DeliveryMode
 
     def __str__(self):
         return f"Menu '{self.menu.name}' for {self.submission.company_name} (ID {self.id})"
 
-
-from django.shortcuts import render, get_object_or_404
-from .models import Submission
-
-def submission_detail(request, submission_id):
-    # Get the specific submission instance
-    submission = get_object_or_404(Submission, id=submission_id)
-
-    context = {
-        'submission': submission,
-    }
-
-    return render(request, 'listings/submission_detail.html', context)
     
-
 class ChecklistDocument(models.Model):
     checklist = models.ForeignKey(Checklist, on_delete=models.CASCADE, related_name='documents')
     document = models.FileField(upload_to='listings/media/commandesdetail')
@@ -731,6 +724,14 @@ class ChecklistDocument(models.Model):
         return f"Document for {self.checklist.name}"
 
 
+
+class Score(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    score = models.IntegerField()
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username}: {self.score}"
 
 from django.core.exceptions import ValidationError
 from django.db import models
