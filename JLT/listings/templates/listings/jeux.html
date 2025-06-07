@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <title>Mini Jeu</title>
 {% load static %}
 <style>
@@ -14,28 +14,30 @@ body {
 #gameContainer {
     position: relative;
     width: 100vw;
-    height: 100vh;
+    height: 85vh;
     background: #a0d2eb;
     overflow: hidden;
     display: flex;
-    justify-content: center;
-    align-items: flex-end;
+
+    align-items: flex-end;   /* aligne en bas verticalement */
 }
+
+/* Personnage */
 #character {
-    position: absolute;
-    width: 110px;
+    position: relative; /* change from absolute à relatif pour mieux gérer sur flex */
+    width: 80px;
     height: 110px;
     background: url('{% static "listings/gen.png" %}') no-repeat center/contain;
-    bottom: 22%;
-    left: 50%;
-    transform: translateX(-180%);
-    z-index: 2;
+    margin-left: 30px; /* ou un peu de marge si tu veux */
+    /* Si tu veux jouer avec un fixe bottom, tu peux aussi */
 }
+
+
 
 /* Zone d'apparition limitée pour PNJ */
 .pnj {
     position: absolute;
-    width: 130px;
+    width: 80px;
     height: 130px;
     background-repeat: no-repeat;
     background-position: center;
@@ -44,11 +46,18 @@ body {
 
 /* Projectile */
 .projectile {
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    background: red;
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  font-size: 20px; /* ou la taille désirée */
+  color: green; /* couleure pour le billet */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
 
 /* Boutons rond à gauche/droite */
 #controls {
@@ -133,17 +142,19 @@ body {
     cursor: pointer;
 }
 </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
 </head>
 <body>
-    
-    <audio id="shotSound" src="{% static 'listings/son_tir.mp3' %}" preload="auto" hidden></audio>
+    <!-- Bouton "Meilleurs Scores" en haut à droite -->
+<div style="position: fixed; top:10px; right:10px; z-index:20;">
+    <button id="topScoresBtn" style="padding:10px; border-radius:20px;">Meilleurs Scores</button>
+</div>
 
-
-    <!-- Bouton en haut à droite -->
-    <div style="position: fixed; top: 10px; right: 10px; z-index:20;">
-        <button id="topScoresBtn" style="padding:10px; border-radius:20px;">Meilleurs Scores</button>
-    </div>
-    
+<!-- Bouton "Démarrer" en dessous -->
+<div style="position: fixed; top:50px; right:10px; z-index:20;">
+    <button id="startBtn" style="padding:10px; border-radius:20px;">Démarrer</button>
+</div>
 
 <!-- Modal -->
 <div id="scoresModal" style="
@@ -161,42 +172,54 @@ body {
   </div>
 </div>
 
-<audio id="sound1" src="{% static 'listings/sound1.mp3' %}" preload="auto"></audio>
-<audio id="sound2" src="{% static 'listings/sound2.mp3' %}" preload="auto"></audio>
-<audio id="sound3" src="{% static 'listings/sound3.mp3' %}" preload="auto"></audio>
-<audio id="sound4" src="{% static 'listings/sound4.mp3' %}" preload="auto"></audio>
-<audio id="sound5" src="{% static 'listings/sound5.mp3' %}" preload="auto"></audio>
+<!-- Son général -->
+<audio id="sound1" src="{% static 'listings/sound1.mp3' %}" preload="auto" style="display:none;"></audio>
+<audio id="sound2" src="{% static 'listings/sound2.mp3' %}" preload="auto" style="display:none;"></audio>
+<audio id="sound3" src="{% static 'listings/sound3.mp3' %}" preload="auto" style="display:none;"></audio>
+<audio id="sound4" src="{% static 'listings/sound4.mp3' %}" preload="auto" style="display:none;"></audio>
+<audio id="sound5" src="{% static 'listings/sound5.mp3' %}" preload="auto" style="display:none;"></audio>
 
+
+<!-- Son pour les tirs -->
+<audio id="shotSound" src="{% static 'listings/son_tir.mp3' %}" preload="auto" style="display:none;"></audio>
+
+<!-- Score -->
 <div id="score">Score: 0</div>
 
+<!-- Zone de jeu -->
 <div id="gameContainer">
     <div id="character"></div>
 </div>
 
-<!-- Boutons -->
+<!-- Controls -->
 <div id="controls">
-    <button id="btnJump" title="Sauter">⛹️</button>
-    <button id="btnShoot" title="Tirer">🎯</button>
+    <button id="btnJump" title="Sauter" style="width:90px; height:90px; border-radius:50%; font-size:1.8em;">⛹️</button>
+    <button id="btnShoot" title="Tirer" style="width:90px; height:90px; border-radius:50%; font-size:1.8em;">🎯</button>
 </div>
 
-<!-- Écran GAME OVER -->
-<div id="gameOverScreen">
+<div id="countdown" style="position: fixed; top: 50%; left:50%; transform: translate(-50%, -50%); font-size: 4em; color:#fff; z-index:200; display:none;">3</div>
+
+<!-- Modal Game Over -->
+<div id="gameOverScreen" style="
+  display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8);
+  justify-content:center; align-items:center; flex-direction:column; color:#fff; font-size:2em; z-index:1000;">
     <div>GAME OVER</div>
-    <button id="restartBtn">Rejouer</button>
+    <button id="restartBtn" style="margin-top:20px; padding:12px 24px; font-size:1.2em; border:none; border-radius:10px;">Rejouer</button>
 </div>
 
 <script>
-// Variables
-const character = document.getElementById('character');
-const container = document.getElementById('gameContainer');
-const scoreDisplay = document.getElementById('score');
-const gameOverScreen = document.getElementById('gameOverScreen');
-
-let gameRunning = true;
-let spawnDelay = 2000; // délai initial en ms
+let gameStart = false;
+let gameRunning = false;
+let spawnDelay = 5000;
 let spawnTimeout;
+let startTime;
+let score = 0;
+let scoreSauvegardeEnvoyee = false;
+let isJumping = false;
+let scoreStarted = false;
+let hasPlayedSound = false;
+let lastShotTime = 0;
 
-// Listes d'images PNJs
 const pnjImages = [
     "{% static 'listings/ennemie1.png' %}",
     "{% static 'listings/ennemie2.png' %}",
@@ -206,135 +229,177 @@ const pnjImages = [
     "{% static 'listings/ennemie6.png' %}"
 ];
 
-// Gestion bouton
-// Pas besoin de faire de verrouillage si tu veux tout laisser faire
-document.getElementById('btnJump').addEventListener('click', jump);
-document.getElementById('btnShoot').addEventListener('click', shoot);
 
-// Si sur mobile, ajoute aussi touchstart
-document.getElementById('btnJump').addEventListener('touchstart', jump);
-document.getElementById('btnShoot').addEventListener('touchstart', shoot);
+let scoreAllowed = false; // commence à compter après démarrage
 
+const startBtn = document.getElementById('startBtn');
+const topScoresBtn = document.getElementById('topScoresBtn');
+const closeScores = document.getElementById('closeScores');
+const restartBtn = document.getElementById('restartBtn');
+const container = document.getElementById('gameContainer');
 
-document.getElementById('restartBtn').addEventListener('click', () => {
-    location.reload();
-});
+// Initialement, vous pouvez charger tous les sons pour éviter les problèmes de chargement
+for (let i=1; i<=5; i++) {
+    const sound = document.getElementById('sound' + i);
+    if (sound) {
+        sound.load(); // charge les sons
+    }
+}
 
-let scoreStarted = false;
-let startTime; // ne pas l'initialiser ici
+// Lancement du jeu
 
+document.getElementById('startBtn').onclick = () => {
+  if (gameStart) return;
+  gameStart = true;
+
+  // Affiche le décompte 3-2-1-GO
+  const countdown = document.getElementById('countdown');
+  countdown.style.display='block';
+
+  let count = 3;
+  const countdownInterval = setInterval(() => {
+    if (count > 1) {
+      countdown.innerHTML = count;
+      count--;
+    } else if (count === 1) {
+      countdown.innerHTML = 'GO !';
+      count--;
+    } else {
+      clearInterval(countdownInterval);
+      countdown.style.display='none';
+
+      // Après 1 sec d'attente
+      setTimeout(() => {
+        // Lance le score, spawn PNJ
+        startTime = Date.now();
+        gameRunning = true;
+        scoreSauvegardeEnvoyee = false;
+        startScore();
+        spawnPnj();
+      }, 1000);
+    }
+  }, 1000);
+};
+// Fonction pour le score
+let bossSpawned = false;     // indique si le boss est lancé
+let bossHits = 0;            // compteur hits au boss
+
+// Modify la fonction startScore() pour arrêter à 100
 function startScore() {
     function update() {
-        if (!gameRunning) return;
-        const seconds = Math.floor((Date.now() - startTime) / 1000);
-        document.getElementById('score').innerHTML = 'Score: ' + seconds;
+        if (!gameStart || !gameRunning) return;
+        score = Math.floor((Date.now() - startTime) / 1000);
+        document.getElementById('score').innerHTML = 'Score: ' + score;
+
+        // Si score >= 100, créer le boss si pas encore fait
+        if (score >= 100 && !bossSpawned) {
+            bossSpawned = true;
+            spawnBoss();
+        }
+
+        // La spawnrate des PNJs continue jusqu'à 100
+        spawnDelay = Math.max(500, 5000 - score * 100);
         requestAnimationFrame(update);
     }
     update();
 }
 
-let isJumping = false;
-function jump() {
-    if (isJumping) return;
-    isJumping = true;
+// Fonction pour spawn le boss
+function spawnBoss() {
+    // Création du PNJ spécial boss
+    const boss = document.createElement('div');
+    boss.id='boss';
+    boss.className='pnj';
+    boss.style.backgroundImage = `url('{% static "listings/boss.png" %}')`; // Assurez-vous d'avoir cette image
+    boss.style.left='100%';
+    boss.style.bottom='50px'; // dans la moitié du sol
+    boss.style.width='130px'; // plus gros
+    boss.style.height='130px';
 
-    if (!scoreStarted) {
-        scoreStarted = true;
-        startTime = Date.now(); // démarre le temps ici
-        startScore(); // lance le compteur
-    }
+    container.appendChild(boss);
+    
+    // Déplacement lent
+    const move = setInterval(() => {
+        boss.style.left = (boss.offsetLeft - 2) + 'px'; // lente
 
-    const maxHeight = 150;
-    let start = null;
-    const duration = 500;
-
-    function step(timestamp) {
-        if (!start) start = timestamp;
-        const progress = timestamp - start;
-        const progressNorm = Math.min(progress / duration, 1);
-        const height = Math.sin(progressNorm * Math.PI) * maxHeight;
-        character.style.bottom = height + 'px';
-
-        if (progress < duration) {
-            requestAnimationFrame(step);
-        } else {
-            character.style.bottom = '0px';
-            isJumping = false;
+        // Si Mort
+        if (boss.offsetLeft < -boss.offsetWidth || bossHits >= 5) {
+            clearInterval(move); boss.remove();
         }
+
+        // Si collision projectile
+        document.querySelectorAll('.projectile').forEach(p => {
+            if (checkCollision(p,boss)) {
+                p.remove();
+                bossHits++;
+            }
+        });
+
+        // La faire sautiller aléatoirement
+        if (!boss.isJumping) {
+            bossJump(boss);
+        }
+
+    }, 20);
+}
+
+// Fonction boss qui sautille aléatoirement
+function bossJump(boss) {
+    boss.isJumping=true;
+    const jumpHeight= 50 + Math.random()*30; // saut aléatoire
+    const duration= 400 + Math.random()*300; // durée aléatoire
+
+    let start= null;
+    function step(timestamp) {
+        if (!start) start= timestamp;
+        const progress= timestamp - start;
+        if (progress < duration/2) {
+            // Montée
+            boss.style.bottom= (50 + (jumpHeight*(progress/ (duration/2))))+ 'px';
+        } else if (progress<duration) {
+            // Descente
+            boss.style.bottom= (50 + jumpHeight - (jumpHeight*(progress - duration/2)/ (duration/2))) + 'px';
+        } else {
+            boss.style.bottom='50px';
+            boss.isJumping=false;
+            return;
+        }
+        requestAnimationFrame(step);
     }
     requestAnimationFrame(step);
 }
 
 
 
-
-// Tir
-function shoot() {
-  if (!gameRunning) return;
-
-
-
-  // Créer le projectile
-  const projectile = document.createElement('div');
-  projectile.className = 'projectile';
-  container.appendChild(projectile);
-  // Position initiale
-  projectile.style.left = (container.clientWidth / 2 + 25) + 'px'; 
-  const bottomVal = parseFloat(window.getComputedStyle(character).bottom);
-  projectile.style.top = (container.clientHeight - bottomVal - 25) + 'px';
-
-  const interval = setInterval(() => {
-      projectile.style.left = (projectile.offsetLeft + 10) + 'px';
-
-      // Vérification collision avec PNJ
-      document.querySelectorAll('.pnj').forEach(pnj => {
-          if (checkCollision(projectile, pnj)) {
-              pnj.remove();
-              projectile.remove();
-              clearInterval(interval);
-          }
-      });
-      if (projectile.offsetLeft > window.innerWidth) {
-          clearInterval(interval);
-          projectile.remove();
-      }
-  }, 20);
+// Fonction spawnPNJ, appelée une fois que le jeu est lancé
+function spawnPnj() {
+    if (!gameStart || !gameRunning) return;
+    createPnj();
+    // La vitesse du spawn s’accélère avec le score
+    spawnTimeout = setTimeout(spawnPnj, spawnDelay);
 }
 
-// Collision detection
-function checkCollision(a, b) {
-    const rectA = a.getBoundingClientRect();
-    const rectB = b.getBoundingClientRect();
-    return (
-        rectA.right > rectB.left &&
-        rectA.left < rectB.right &&
-        rectA.bottom > rectB.top &&
-        rectA.top < rectB.bottom
-    );
-}
-
-// Création PNJ
+// Fonction pour créer un PNJ
 function createPnj() {
-    if (!gameRunning) return;
+    if (!gameStart || !gameRunning) return;
     const pnj = document.createElement('div');
     pnj.className = 'pnj';
 
     const imgUrl = pnjImages[Math.floor(Math.random() * pnjImages.length)];
     pnj.style.backgroundImage = `url('${imgUrl}')`;
 
-    // Position initiale à droite
-    pnj.style.left = container.clientWidth + 'px';
+    // Imprime la position devant le personnage, à gauche
+    pnj.style.left = '100%';
 
-    // Placement très proche du sol, entre 10 et 30 px du sol
-    // Placer le PNJ très proche du sol, un peu au-dessus
-    const minBottom = 10; // 10px du sol
-    const maxBottom = 80; // 30px du sol
+    // Placement proche du sol, entre 10 et 30 px
+    const minBottom = 10;
+    const maxBottom = 60;
     const randBottom = minBottom + Math.random() * (maxBottom - minBottom);
-    pnj.style.bottom = randBottom + 'px'; // position en 'bottom'
-
+    pnj.style.bottom = randBottom + 'px';
 
     container.appendChild(pnj);
 
+    // Déplacement
     const move = setInterval(() => {
         pnj.style.left = (pnj.offsetLeft - 5) + 'px';
 
@@ -349,57 +414,31 @@ function createPnj() {
     }, 20);
 }
 
-// Fonction récursive de spawn
-function spawnPnj() {
-    if (!gameRunning) return;
-    createPnj();
-    // Réduction progressive du délai
-    spawnDelay = Math.max(500, spawnDelay * 0.98);
-    spawnTimeout = setTimeout(spawnPnj, spawnDelay);
-}
-// Démarre la boucle
-spawnPnj();
-
-// Score (temps)
-function updateScore() {
-    if (!gameRunning) return;
-    const seconds = Math.floor((Date.now() - startTime) / 1000);
-    document.getElementById('score').innerHTML = 'Score: ' + seconds;
-    requestAnimationFrame(updateScore);
-}
-requestAnimationFrame(updateScore);
-
-
-
-
-
-
-// Ajoute cette variable globale au début
-let scoreSauvegardeEnvoyee = false;
-
+// Fonction gameOver
 function gameOver() {
+    if (!gameStart || !gameRunning) return;
     gameRunning = false;
 
-   // Stop all sounds first
-for (let i = 1; i <= 5; i++) {
-    const sound = document.getElementById('sound' + i);
+    
+
+    if (hasPlayedSound) return; // évite de jouer plusieurs fois
+    hasPlayedSound = true;
+
+    // Jouer un son aléatoire
+    const n = Math.floor(Math.random() * 5) + 1;
+    const sound = document.getElementById('sound' + n);
     if (sound) {
-        sound.pause(); // Stop current sound
-        sound.currentTime = 0; // Reset to start
-    }
-}
-
-// Play a randomly selected sound
-const n = Math.floor(Math.random() * 5) + 1;
-const sound = document.getElementById('sound' + n);
-if (sound) {
-    sound.currentTime = 0; // Rewind in case it was paused
-    sound.play(); // Play the sound
-}
+        try {
+            sound.currentTime = 0;
+            sound.play();
+        } catch(e) {
+            console.warn('Lecture du son impossible en mobile.');
+        }}
+    // (le reste de votre code)
+  
 
 
-
-    // Vérifier si le score a déjà été sauvegardé
+    // Sauvegarder le score une fois
     if (!scoreSauvegardeEnvoyee) {
         fetch('/save_score/', {
             method: 'POST',
@@ -408,35 +447,135 @@ if (sound) {
                 'X-CSRFToken': '{{ csrf_token }}'
             },
             body: JSON.stringify({ score: Math.floor((Date.now() - startTime) / 1000) })
-        }).then(response => {
-            // éventuellement gérer la réponse
         });
-        scoreSauvegardeEnvoyee = true; // marque comme sauvegardé
+        scoreSauvegardeEnvoyee = true;
     }
 
-    // Arrêter le spawn
+    // Arrête spawn et désactive boutons
     clearTimeout(spawnTimeout);
-    // Désactiver les boutons
     document.getElementById('btnJump').disabled = true;
     document.getElementById('btnShoot').disabled = true;
-    // Afficher le modal Game Over
+
+    // Affiche l'écran Game Over
     document.getElementById('gameOverScreen').style.display='flex';
+}
+
+// Voir si le collision détecte bien
+function checkCollision(a, b) {
+    const rectA = a.getBoundingClientRect();
+    const rectB = b.getBoundingClientRect();
+    return (
+        rectA.right > rectB.left &&
+        rectA.left < rectB.right &&
+        rectA.bottom > rectB.top &&
+        rectA.top < rectB.bottom
+    );
+}
+
+// La gestion du clic sur "Rejouer"
+restartBtn.onclick = () => {
+    location.reload();
+};
+
+// La gestion du clic sur “Top Scores”
+document.getElementById('topScoresBtn').onclick = () => {
+    document.getElementById('scoresModal').style.display='flex';
+};
+document.getElementById('closeScores').onclick = () => {
+    document.getElementById('scoresModal').style.display='none';
+};
+
+// Fonction pour faire sauter le personnage
+function jump() {
+    if (isJumping) return;  // Empêche le double saut
+    isJumping = true;
+
+
+
+    const maxHeight = 150; // La hauteur du saut
+    let start = null;
+    const duration = 500; // Durée du saut en ms
+
+    function step(timestamp) {
+        if (!start) start = timestamp;
+        const progress = timestamp - start;
+        const progressNorm = Math.min(progress / duration, 1);
+        const height = Math.sin(progressNorm * Math.PI) * maxHeight; // Animation de saut
+        character.style.bottom = height + 'px';
+
+        if (progress < duration) {
+            requestAnimationFrame(step);
+        } else {
+            character.style.bottom = '0px'; // Retour au sol
+            isJumping = false; // Fin du saut
+        }
+    }
+    requestAnimationFrame(step);
+}
+
+// Fonction pour tirer un projectile
+
+function shoot() {
+    if (!gameRunning) return;
+
+    const now = Date.now();
+    if (now - lastShotTime < 200) {
+        // Si moins d'une seconde s’est écoulée depuis le dernier tir, on ne tire pas
+        return;
+    }
+    lastShotTime = now;
+
+
+    const projectile = document.createElement('div');
+    projectile.className = 'projectile';
+    projectile.innerHTML = '<i class="fas fa-dollar-sign"></i>';
+    container.appendChild(projectile);
+
+
+    // Obtenir la position du character
+    const rectChar = character.getBoundingClientRect();
+
+    // Position du projectile : à la sortie de 'gen.png' (au centre du character)
+    const containerRect = container.getBoundingClientRect();
+    const projectileLeft = rectChar.left + rectChar.width / 2 - containerRect.left;
+    const projectileTop = rectChar.top + rectChar.height / 2 - containerRect.top;
+
+    // Appliquer la position
+    projectile.style.left = projectileLeft + 'px';
+    projectile.style.top = projectileTop + 'px';
+
+    container.appendChild(projectile);
+
+    const moveInterval = setInterval(() => {
+        projectile.style.left = (projectile.offsetLeft + 10) + 'px';
+
+        // Vérification collision with PNJ
+        document.querySelectorAll('.pnj').forEach(pnj => {
+            if (checkCollision(projectile, pnj)) {
+                pnj.remove();
+                projectile.remove();
+                clearInterval(moveInterval);
+            }
+        });
+
+        if (projectile.offsetLeft > container.clientWidth) {
+            clearInterval(moveInterval);
+            projectile.remove();
+        }
+    }, 20);
 }
 
 
 
+document.getElementById('btnJump').addEventListener('click', () => {
+  if (gameStart && gameRunning) jump();
+});
+document.getElementById('btnShoot').addEventListener('click', () => {
+  if (gameStart && gameRunning) shoot();
+});
 
-
-
-
-
-document.getElementById('topScoresBtn').onclick = function() {
-    document.getElementById('scoresModal').style.display='flex';
-};
-document.getElementById('closeScores').onclick = function() {
-    document.getElementById('scoresModal').style.display='none';
-};
 
 
 </script>
+
 
