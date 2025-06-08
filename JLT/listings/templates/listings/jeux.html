@@ -159,6 +159,29 @@ body {
     <button id="topScoresBtn" style="padding:10px; border-radius:20px;">Meilleurs Scores</button>
 </div>
 
+<!-- Modal d'instructions -->
+<div id="instructionModal" style="
+  position: fixed; top:0; left:0; right:0; bottom:0;
+  background: rgba(0,0,0,0.8);
+  display:flex; justify-content:center; align-items:center;
+  z-index: 2000; flex-direction:column; text-align:center; padding:20px; color:#fff;">
+  <h2>Comment jouer</h2>
+  <p style="font-size:1.2em;">  
+    Bienvenue dans ce jeu !  
+    Ton objectif est de refuser les augmentations de tes employés.
+    Pour se faire, évite les ennemis en sautant, et utilise le bouton "Tirer" pour infliger des dégâts.  
+    Combine le saut + le tire au bon moment.
+    Plus le score est haut, plus les employés arrivent vite.
+    Au score 100 apparait l'employé ultime qui te demandera une énorme augmentation, extermine le !
+    Si tu arrives à lui refuser son augmentation, tu recevras 50 points bonus
+  </p>
+  <button id="closeInstructionBtn" style="
+    padding: 10px 20px; font-size: 1.2em; border:none; border-radius:10px; cursor:pointer; margin-top:20px;">
+    Démarrer le jeu
+  </button>
+</div>
+
+
 <!-- Bouton "Démarrer" en dessous -->
 <div style="position: fixed; top:50px; right:10px; z-index:20;">
     <button id="startBtn" style="padding:10px; border-radius:20px;">Démarrer</button>
@@ -231,8 +254,8 @@ body {
   background:rgba(0,0,0,0.5);
   justify-content:center; align-items:center; z-index:2000;">
   <div style="background:#fff; padding:20px; border-radius:10px; min-width:200px; text-align:center;">
-    <h2>Succès !</h2>
-    <p>Vous avez tué le boss avec succès</p>
+    <h2>Augmentation refusée pour Sam, bien joué !</h2>
+    <p>TYPE SHIIIT, j'ai pas eu mon augmentation ! heureusement que jai un autre job a 30$ l'heure esti</p>
   </div>
 </div>
 
@@ -255,7 +278,11 @@ const pnjImages = [
     "{% static 'listings/ennemie3.png' %}",
     "{% static 'listings/ennemie4.png' %}",
     "{% static 'listings/ennemie5.png' %}",
-    "{% static 'listings/ennemie6.png' %}"
+    "{% static 'listings/ennemie6.png' %}",
+    "{% static 'listings/ennemie7.png' %}",
+    "{% static 'listings/ennemie8.png' %}",
+    "{% static 'listings/ennemie9.png' %}",
+    "{% static 'listings/ennemie10.png' %}"
 ];
 
 
@@ -273,6 +300,60 @@ for (let i=1; i<=5; i++) {
     if (sound) {
         sound.load(); // charge les sons
     }
+}
+
+// Quand la page est prête
+window.onload = () => {
+  const instructionModal = document.getElementById('instructionModal');
+  const startGameBtn = document.getElementById('closeInstructionBtn');
+
+  startGameBtn.onclick = () => {
+    // Cache le modal
+    instructionModal.style.display = 'none';
+
+    // Lance le début du jeu
+    startGame();  // Appelez votre fonction pour démarrer le jeu
+  };
+};
+
+function startGame() {
+  // Code de démarrage du jeu, repris de votre logique
+  if (gameStart) return;  // Si le jeu a déjà commencé
+  gameStart = true;
+
+  const bgMusic = document.getElementById('bgMusic');
+  if (bgMusic) {
+      bgMusic.currentTime = 0;
+      bgMusic.play().catch(e => {
+          console.log("Lecture de la musique de fond bloquée");
+      });
+  }
+
+  // Démarre le décompte
+  const countdown = document.getElementById('countdown');
+  countdown.style.display='block';
+  let count = 3;
+  const countdownInterval = setInterval(() => {
+    if (count > 1) {
+      countdown.innerHTML = count;
+      count--;
+    } else if (count === 1) {
+      countdown.innerHTML = 'GO !';
+      count--;
+    } else {
+      clearInterval(countdownInterval);
+      countdown.style.display='none';
+
+      // Après 1 sec, lance le jeu
+      setTimeout(() => {
+        startTime = Date.now();
+        gameRunning = true;
+        scoreSauvegardeEnvoyee = false;
+        startScore();
+        spawnPnj();
+      }, 1000);
+    }
+  }, 1000);
 }
 
 // Lancement du jeu
@@ -425,6 +506,7 @@ function spawnBoss() {
                     // Arrêter le jeu
                     gameRunning = false;
 
+                    score += 50;
                     // Sauvegarder le score
                     if (!scoreSauvegardeEnvoyee) {
                         fetch('/save_score/', {
@@ -433,7 +515,7 @@ function spawnBoss() {
                                 'Content-Type': 'application/json',
                                 'X-CSRFToken': '{{ csrf_token }}'
                             },
-                            body: JSON.stringify({ score: Math.floor((Date.now() - startTime) / 1000) })
+                            body: JSON.stringify({ score: score })
                         });
                         scoreSauvegardeEnvoyee = true;
                     }
@@ -501,6 +583,11 @@ function gameOver() {
     if (!gameStart || !gameRunning) return;
     gameRunning = false;
 
+    const bgMusic = document.getElementById('bgMusic');
+    if (bgMusic) {
+        bgMusic.pause();
+        bgMusic.currentTime = 0;
+    }
 
 
     if (hasPlayedSound) return; // évite de jouer plusieurs fois
@@ -663,7 +750,7 @@ function startScore() {
         document.getElementById('score').innerHTML = 'Score: ' + score;
 
         // Si score >= 100, créer le boss si pas encore fait
-        if (score >= 20 && !bossSpawned) {
+        if (score >= 100 && !bossSpawned) {
             // faire disparaitre PNJs
             document.querySelectorAll('.pnj').forEach(p => p.style.display='none');
             spawnBoss();
