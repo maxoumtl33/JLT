@@ -44,6 +44,14 @@ body {
     background-size: contain;
 }
 
+.boss-pnj {
+    position: absolute;
+    width: 80px;
+    height: 130px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+}
 /* Projectile */
 .projectile {
   position: absolute;
@@ -179,6 +187,17 @@ body {
 <audio id="sound4" src="{% static 'listings/sound4.mp3' %}" preload="auto" style="display:none;"></audio>
 <audio id="sound5" src="{% static 'listings/sound5.mp3' %}" preload="auto" style="display:none;"></audio>
 
+<!-- Son d'ambiance de début -->
+<audio id="bgMusic" src="{% static 'listings/background.mp3' %}" loop preload="auto" style="display:none;"></audio>
+
+<!-- Son du boss spawn -->
+<audio id="bossSpawnSound" src="{% static 'listings/boss_spawn.mp3' %}" preload="auto" style="display:none;"></audio>
+
+<!-- Son du boss tué -->
+<audio id="bossKilledSound" src="{% static 'listings/boss_killed.mp3' %}" preload="auto" style="display:none;"></audio>
+
+<audio id="successSound" src="{% static 'listings/success_sound.mp3' %}" preload="auto"></audio>
+
 
 <!-- Son pour les tirs -->
 <audio id="shotSound" src="{% static 'listings/son_tir.mp3' %}" preload="auto" style="display:none;"></audio>
@@ -205,6 +224,16 @@ body {
   justify-content:center; align-items:center; flex-direction:column; color:#fff; font-size:2em; z-index:1000;">
     <div>GAME OVER</div>
     <button id="restartBtn" style="margin-top:20px; padding:12px 24px; font-size:1.2em; border:none; border-radius:10px;">Rejouer</button>
+</div>
+
+<div id="successModal" style="
+  display:none; position:fixed; top:0; left:0; right:0; bottom:0;
+  background:rgba(0,0,0,0.5);
+  justify-content:center; align-items:center; z-index:2000;">
+  <div style="background:#fff; padding:20px; border-radius:10px; min-width:200px; text-align:center;">
+    <h2>Succès !</h2>
+    <p>Vous avez tué le boss avec succès</p>
+  </div>
 </div>
 
 <script>
@@ -252,6 +281,14 @@ document.getElementById('startBtn').onclick = () => {
   if (gameStart) return;
   gameStart = true;
 
+  const bgMusic = document.getElementById('bgMusic');
+    if (bgMusic) {
+        bgMusic.currentTime = 0;
+        bgMusic.play().catch(e => {
+            console.log("Lecture de la musique de fond bloquée par le navigateur");
+        });
+    }
+
   // Affiche le décompte 3-2-1-GO
   const countdown = document.getElementById('countdown');
   countdown.style.display='block';
@@ -284,90 +321,135 @@ document.getElementById('startBtn').onclick = () => {
 let bossSpawned = false;     // indique si le boss est lancé
 let bossHits = 0;            // compteur hits au boss
 
-// Modify la fonction startScore() pour arrêter à 100
-function startScore() {
-    function update() {
-        if (!gameStart || !gameRunning) return;
-        score = Math.floor((Date.now() - startTime) / 1000);
-        document.getElementById('score').innerHTML = 'Score: ' + score;
 
-        // Si score >= 100, créer le boss si pas encore fait
-        if (score >= 100 && !bossSpawned) {
-            bossSpawned = true;
-            spawnBoss();
-        }
-
-        // La spawnrate des PNJs continue jusqu'à 100
-        spawnDelay = Math.max(500, 5000 - score * 100);
-        requestAnimationFrame(update);
-    }
-    update();
-}
 
 // Fonction pour spawn le boss
+// Lors du spawn du boss
 function spawnBoss() {
-    // Création du PNJ spécial boss
     const boss = document.createElement('div');
     boss.id='boss';
-    boss.className='pnj';
-    boss.style.backgroundImage = `url('{% static "listings/boss.png" %}')`; // Assurez-vous d'avoir cette image
+    boss.className='boss-pnj';
+    boss.style.backgroundImage = `url('{% static "listings/boss.png" %}')`;
     boss.style.left='100%';
-    boss.style.bottom='50px'; // dans la moitié du sol
-    boss.style.width='130px'; // plus gros
+    boss.style.bottom='50px'; // dans la moitié basse
+    boss.style.width='130px';
     boss.style.height='130px';
 
     container.appendChild(boss);
-    
-    // Déplacement lent
-    const move = setInterval(() => {
-        boss.style.left = (boss.offsetLeft - 2) + 'px'; // lente
 
-        // Si Mort
-        if (boss.offsetLeft < -boss.offsetWidth || bossHits >= 5) {
-            clearInterval(move); boss.remove();
+    // Jouer le son du spawn du boss
+    const bossSound = document.getElementById('bossSpawnSound');
+    if (bossSound) {
+        const bgMusic = document.getElementById('bgMusic');
+        if (bgMusic && !bgMusic.paused) {
+            bgMusic.pause();
         }
+        bossSound.currentTime=0;
+        bossSound.play();
+    }
 
-        // Si collision projectile
+    let bossHits = 0;
+    let gameRunning = true;
+    let scoreSauvegardeEnvoyee = false;
+
+    // Fonction pour faire sauter le boss
+    function jumpBoss() {
+        if (!boss || !gameRunning) return;
+        const jumpHeight = 50; // La hauteur du saut en pixels
+        const jumpDuration = 300; // La durée du saut en ms
+
+        // Animation du saut (monter)
+        boss.animate([
+            { transform: 'translateY(0)' },
+            { transform: `translateY(-${jumpHeight}px)` }
+        ], { duration: jumpDuration, easing: 'ease-out' }).onfinish = () => {
+            // Animation de la descente
+            boss.animate([
+                { transform: `translateY(-${jumpHeight}px)` },
+                { transform: 'translateY(0)' }
+            ], { duration: jumpDuration, easing: 'ease-in' });
+        };
+    }
+
+    // Appel initial de la fonction pour le jump
+    function scheduleJump() {
+        if (!gameRunning || !boss) return;
+        const interval = Math.random() * 1000 + 1000; // entre 2 et 5 secondes
+        setTimeout(() => {
+            jumpBoss();
+            scheduleJump();
+        }, interval);
+    }
+    scheduleJump();
+
+    // Mouvement lent et gestion collision
+    const move = setInterval(() => {
+        if (!boss || !gameRunning) return;
+        boss.style.left = (boss.offsetLeft - 0.7) + 'px';
+         // Vérification collision entre boss et personnage
+    if (checkCollision(boss, character)) {
+        gameOver();
+        clearInterval(move);
+        return;
+    }
+
         document.querySelectorAll('.projectile').forEach(p => {
-            if (checkCollision(p,boss)) {
+            if (checkCollision(p, boss)) {
                 p.remove();
                 bossHits++;
+                const bossKilledSound = document.getElementById('bossKilledSound');
+                if (bossKilledSound) {
+                    bossKilledSound.currentTime=0;
+                    bossKilledSound.play();
+                }
+                if (bossHits >= 15) {
+                    clearInterval(move);
+                    boss.remove();
+
+                    // Arrêter le son du spawn
+                    if (bossSound) {
+                        bossSound.pause();
+                        bossSound.currentTime = 0;
+                    }
+
+                    // Jouer le son de succès
+                    const successSound = document.getElementById('successSound');
+                    if (successSound) {
+                        successSound.currentTime=0;
+                        successSound.play();
+                    }
+
+                    // Afficher modal succès
+                    document.getElementById('successModal').style.display='flex';
+
+                    // Arrêter le jeu
+                    gameRunning = false;
+
+                    // Sauvegarder le score
+                    if (!scoreSauvegardeEnvoyee) {
+                        fetch('/save_score/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token }}'
+                            },
+                            body: JSON.stringify({ score: Math.floor((Date.now() - startTime) / 1000) })
+                        });
+                        scoreSauvegardeEnvoyee = true;
+                    }
+                }
             }
         });
 
-        // La faire sautiller aléatoirement
-        if (!boss.isJumping) {
-            bossJump(boss);
+        // Fin du boss si hors écran ou tué
+        if (boss.offsetLeft < -boss.offsetWidth || bossHits >= 15) {
+            clearInterval(move);
+            boss.remove();
         }
-
     }, 20);
 }
 
-// Fonction boss qui sautille aléatoirement
-function bossJump(boss) {
-    boss.isJumping=true;
-    const jumpHeight= 50 + Math.random()*30; // saut aléatoire
-    const duration= 400 + Math.random()*300; // durée aléatoire
 
-    let start= null;
-    function step(timestamp) {
-        if (!start) start= timestamp;
-        const progress= timestamp - start;
-        if (progress < duration/2) {
-            // Montée
-            boss.style.bottom= (50 + (jumpHeight*(progress/ (duration/2))))+ 'px';
-        } else if (progress<duration) {
-            // Descente
-            boss.style.bottom= (50 + jumpHeight - (jumpHeight*(progress - duration/2)/ (duration/2))) + 'px';
-        } else {
-            boss.style.bottom='50px';
-            boss.isJumping=false;
-            return;
-        }
-        requestAnimationFrame(step);
-    }
-    requestAnimationFrame(step);
-}
 
 
 
@@ -419,7 +501,7 @@ function gameOver() {
     if (!gameStart || !gameRunning) return;
     gameRunning = false;
 
-    
+
 
     if (hasPlayedSound) return; // évite de jouer plusieurs fois
     hasPlayedSound = true;
@@ -435,7 +517,7 @@ function gameOver() {
             console.warn('Lecture du son impossible en mobile.');
         }}
     // (le reste de votre code)
-  
+
 
 
     // Sauvegarder le score une fois
@@ -574,7 +656,29 @@ document.getElementById('btnShoot').addEventListener('click', () => {
   if (gameStart && gameRunning) shoot();
 });
 
+function startScore() {
+    function update() {
+        if (!gameStart || !gameRunning) return;
+        score = Math.floor((Date.now() - startTime) / 1000);
+        document.getElementById('score').innerHTML = 'Score: ' + score;
 
+        // Si score >= 100, créer le boss si pas encore fait
+        if (score >= 20 && !bossSpawned) {
+            // faire disparaitre PNJs
+            document.querySelectorAll('.pnj').forEach(p => p.style.display='none');
+            spawnBoss();
+            bossSpawned = true;
+            clearTimeout(spawnTimeout);
+        }
+
+
+
+        // La spawnrate des PNJs continue jusqu'à 100
+        spawnDelay = Math.max(500, 5000 - score * 100);
+        requestAnimationFrame(update);
+    }
+    update();
+}
 
 </script>
 
