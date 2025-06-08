@@ -10,11 +10,15 @@ body {
     margin: 0;
     overflow: hidden;
     font-family: Arial, sans-serif;
+    touch-action: manipulation; /* Éviter le zoom dû au double tap */
+    -webkit-user-select: none; /* Pour Safari / Chrome */
+    -webkit-tap-highlight-color: transparent; /* Supprimer la surbrillance sur iOS */
+    -webkit-text-size-adjust: none; /* Éviter changement taille texte en zoom */
 }
 #gameContainer {
     position: relative;
     width: 100vw;
-    height: 85vh;
+    height: 90vh;
     background: #a0d2eb;
     overflow: hidden;
     display: flex;
@@ -25,10 +29,11 @@ body {
 /* Personnage */
 #character {
     position: relative; /* change from absolute à relatif pour mieux gérer sur flex */
-    width: 80px;
-    height: 110px;
+    width: 140px;
+    height: 150px;
+    bottom: 150px;
     background: url('{% static "listings/gen.png" %}') no-repeat center/contain;
-    margin-left: 30px; /* ou un peu de marge si tu veux */
+    /* ou un peu de marge si tu veux */
     /* Si tu veux jouer avec un fixe bottom, tu peux aussi */
 }
 
@@ -78,9 +83,9 @@ body {
     z-index: 10;
 }
 /* Boutons rondes, plus gros et éloignés du bord */
-#btnJump {
+#btnJump2 {
   position: fixed;
-  bottom: 40%;
+  bottom: 5%;
   left: 30px; /* plus loin du bord gauche */
   width: 90px; /* plus gros */
   height: 90px;
@@ -97,9 +102,9 @@ body {
   -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent; /* supprime la highlight sur tap */
 }
-#btnShoot {
+#btnShoot2 {
   position: fixed;
-  bottom: 40%;
+  bottom: 5%;
   right: 30px; /* plus loin du bord droit */
   width: 90px;
   height: 90px;
@@ -149,6 +154,10 @@ body {
     border-radius: 10px;
     cursor: pointer;
 }
+
+.pnj-image:nth-child(1) { border: 3px solid red; }
+.pnj-image:nth-child(2) { border: 3px solid blue; }
+.pnj-image:nth-child(3) { border: 3px solid green; }
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
@@ -158,6 +167,8 @@ body {
 <div style="position: fixed; top:10px; right:10px; z-index:20;">
     <button id="topScoresBtn" style="padding:10px; border-radius:20px;">Meilleurs Scores</button>
 </div>
+
+
 
 <!-- Modal d'instructions -->
 <div id="instructionModal" style="
@@ -234,10 +245,18 @@ body {
 </div>
 
 <!-- Controls -->
-<div id="controls">
-    <button id="btnJump" title="Sauter" style="width:90px; height:90px; border-radius:50%; font-size:1.8em;">⛹️</button>
-    <button id="btnShoot" title="Tirer" style="width:90px; height:90px; border-radius:50%; font-size:1.8em;">🎯</button>
+<div id="bottomControls" style="
+  position: fixed; bottom: 10px; width: 100%; display:flex; justify-content:center; gap:20px; z-index: 200;">
+  <button id="btnJump2" style="
+    width:60px; height:60px; border-radius:50%; font-size:2em; background:#fff; box-shadow:0 2px 4px rgba(0,0,0,0.3); cursor:pointer;">
+    ⛹️
+  </button>
+  <button id="btnShoot2" style="
+    width:60px; height:60px; border-radius:50%; font-size:2em; background:#fff; box-shadow:0 2px 4px rgba(0,0,0,0.3); cursor:pointer;">
+    🎯
+  </button>
 </div>
+
 
 <div id="countdown" style="position: fixed; top: 50%; left:50%; transform: translate(-50%, -50%); font-size: 4em; color:#fff; z-index:200; display:none;">3</div>
 
@@ -286,6 +305,8 @@ const pnjImages = [
 ];
 
 
+
+
 let scoreAllowed = false; // commence à compter après démarrage
 
 const startBtn = document.getElementById('startBtn');
@@ -302,18 +323,39 @@ for (let i=1; i<=5; i++) {
     }
 }
 
+function setupInitialEventListeners() {
+    document.getElementById('topScoresBtn').onclick = () => {
+        document.getElementById('scoresModal').style.display = 'flex';
+    };
+    document.getElementById('closeScores').onclick = () => {
+        document.getElementById('scoresModal').style.display = 'none';
+    };
+}
+
+
 // Quand la page est prête
 window.onload = () => {
-  const instructionModal = document.getElementById('instructionModal');
-  const startGameBtn = document.getElementById('closeInstructionBtn');
+    const instructionModal = document.getElementById('instructionModal');
+    const startGameBtn = document.getElementById('closeInstructionBtn');
 
-  startGameBtn.onclick = () => {
-    // Cache le modal
-    instructionModal.style.display = 'none';
+    startGameBtn.onclick = () => {
+        instructionModal.style.display = 'none';  // Hide the modal
+        startGame();
+    };
 
-    // Lance le début du jeu
-    startGame();  // Appelez votre fonction pour démarrer le jeu
-  };
+    // Initially hide the shoot button
+    document.getElementById('btnShoot2').style.display = 'none';
+
+    // Event listeners for buttons
+    document.getElementById('btnJump2').addEventListener('click', () => {
+        if (gameStart && gameRunning) jump();
+    });
+
+    document.getElementById('btnShoot2').addEventListener('click', () => {
+        if (gameStart && gameRunning) shoot();
+    });
+
+    setupInitialEventListeners();
 };
 
 function startGame() {
@@ -412,7 +454,7 @@ function spawnBoss() {
     boss.className='boss-pnj';
     boss.style.backgroundImage = `url('{% static "listings/boss.png" %}')`;
     boss.style.left='100%';
-    boss.style.bottom='50px'; // dans la moitié basse
+    boss.style.bottom='150px'; // dans la moitié basse
     boss.style.width='130px';
     boss.style.height='130px';
 
@@ -437,7 +479,7 @@ function spawnBoss() {
     function jumpBoss() {
         if (!boss || !gameRunning) return;
         const jumpHeight = 50; // La hauteur du saut en pixels
-        const jumpDuration = 300; // La durée du saut en ms
+        const jumpDuration = 200; // La durée du saut en ms
 
         // Animation du saut (monter)
         boss.animate([
@@ -552,18 +594,18 @@ function createPnj() {
     const imgUrl = pnjImages[Math.floor(Math.random() * pnjImages.length)];
     pnj.style.backgroundImage = `url('${imgUrl}')`;
 
-    // Imprime la position devant le personnage, à gauche
+    // Initialise the position at the right side of the container
     pnj.style.left = '100%';
 
-    // Placement proche du sol, entre 10 et 30 px
-    const minBottom = 10;
-    const maxBottom = 60;
+    // Allow random vertical placement between 10 and 40 px when the score is >= 30
+    const minBottom = 150;
+    const maxBottom = score >= 30 ? 250 : 150;  // Increase maxBottom to 40 when score is 30 or more
     const randBottom = minBottom + Math.random() * (maxBottom - minBottom);
     pnj.style.bottom = randBottom + 'px';
 
     container.appendChild(pnj);
 
-    // Déplacement
+    // Movement function
     const move = setInterval(() => {
         pnj.style.left = (pnj.offsetLeft - 5) + 'px';
 
@@ -622,8 +664,8 @@ function gameOver() {
 
     // Arrête spawn et désactive boutons
     clearTimeout(spawnTimeout);
-    document.getElementById('btnJump').disabled = true;
-    document.getElementById('btnShoot').disabled = true;
+    document.getElementById('btnJump2').disabled = true;
+    document.getElementById('btnShoot2').disabled = true;
 
     // Affiche l'écran Game Over
     document.getElementById('gameOverScreen').style.display='flex';
@@ -633,11 +675,16 @@ function gameOver() {
 function checkCollision(a, b) {
     const rectA = a.getBoundingClientRect();
     const rectB = b.getBoundingClientRect();
+
+    // Réduire la hitbox en paddant les bords
+    const paddingX = 0.2 * Math.min(rectA.width, rectB.width);  // 20% de la largeur
+    const paddingY = 0.2 * Math.min(rectA.height, rectB.height); // 20% de la hauteur
+
     return (
-        rectA.right > rectB.left &&
-        rectA.left < rectB.right &&
-        rectA.bottom > rectB.top &&
-        rectA.top < rectB.bottom
+        rectA.right - paddingX > rectB.left + paddingX &&
+        rectA.left + paddingX < rectB.right - paddingX &&
+        rectA.bottom - paddingY > rectB.top + paddingY &&
+        rectA.top + paddingY < rectB.bottom - paddingY
     );
 }
 
@@ -659,24 +706,41 @@ function jump() {
     if (isJumping) return;  // Empêche le double saut
     isJumping = true;
 
-
-
-    const maxHeight = 150; // La hauteur du saut
+    const maxHeight = 250; // hauteur du saut en pixels
+    const originalBottom = 150; // hauteur fixe où doit rester le personnage
     let start = null;
-    const duration = 500; // Durée du saut en ms
+    const duration = 1000; // durée du saut en ms
 
     function step(timestamp) {
         if (!start) start = timestamp;
         const progress = timestamp - start;
         const progressNorm = Math.min(progress / duration, 1);
-        const height = Math.sin(progressNorm * Math.PI) * maxHeight; // Animation de saut
-        character.style.bottom = height + 'px';
+
+        // Animation de saut : sinusoïde pour un saut fluide
+        const heightOffset = Math.sin(progressNorm * Math.PI) * maxHeight;
+        character.style.bottom = (originalBottom + heightOffset) + 'px';
+
+        // Vérification de collision avec PNJs pendant le saut
+        document.querySelectorAll('.pnj').forEach(pnj => {
+            if (checkCollision(character, pnj)) {
+                pnj.remove(); // Supprime le PNJ
+                // Ajoutez éventuellement du score ou d'autres effets
+            }
+        });
 
         if (progress < duration) {
             requestAnimationFrame(step);
         } else {
-            character.style.bottom = '0px'; // Retour au sol
-            isJumping = false; // Fin du saut
+            // Fin du saut : reste à la hauteur fixée
+            character.style.bottom = originalBottom + 'px';
+            isJumping = false;
+
+            // Vérification finale de collision
+            document.querySelectorAll('.pnj').forEach(pnj => {
+                if (checkCollision(character, pnj)) {
+                    pnj.remove();
+                }
+            });
         }
     }
     requestAnimationFrame(step);
@@ -697,7 +761,8 @@ function shoot() {
 
     const projectile = document.createElement('div');
     projectile.className = 'projectile';
-    projectile.innerHTML = '<i class="fas fa-dollar-sign"></i>';
+    projectile.innerHTML = "<img src=\"{% static 'listings/golf.png' %}\" style=\"width:20px; height:20px;\">";
+
     container.appendChild(projectile);
 
 
@@ -736,12 +801,7 @@ function shoot() {
 
 
 
-document.getElementById('btnJump').addEventListener('click', () => {
-  if (gameStart && gameRunning) jump();
-});
-document.getElementById('btnShoot').addEventListener('click', () => {
-  if (gameStart && gameRunning) shoot();
-});
+
 
 function startScore() {
     function update() {
@@ -749,23 +809,30 @@ function startScore() {
         score = Math.floor((Date.now() - startTime) / 1000);
         document.getElementById('score').innerHTML = 'Score: ' + score;
 
-        // Si score >= 100, créer le boss si pas encore fait
+        // Show the shoot button when score reaches 30
+        if (score >= 30) {
+            document.getElementById('btnShoot2').style.display = 'flex';
+        }
+
+        // If score >= 100, create the boss if not yet done
         if (score >= 100 && !bossSpawned) {
-            // faire disparaitre PNJs
+            // Hide existing PNJs
             document.querySelectorAll('.pnj').forEach(p => p.style.display='none');
             spawnBoss();
             bossSpawned = true;
             clearTimeout(spawnTimeout);
         }
 
-
-
-        // La spawnrate des PNJs continue jusqu'à 100
+        // Spawn rate of PNJs continues to accelerate until 100
         spawnDelay = Math.max(500, 5000 - score * 100);
         requestAnimationFrame(update);
     }
     update();
 }
+
+
+
+
 
 </script>
 
