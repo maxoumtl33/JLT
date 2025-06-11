@@ -81,13 +81,7 @@ class Item(models.Model):
     description = models.TextField()
     status = models.CharField(max_length=20, default='pending')
 
-class Client(models.Model):
-        nom = models.fields.CharField(null=True, blank=True, max_length=100)
-        def __str__(self):
-            return f'{self.nom}'
-        adresse_lieux = models.fields.CharField(null=True, blank=True, max_length=100)
-        adresse_dock = models.fields.CharField(null=True, blank=True, max_length=100)
-        contact = models.fields.CharField(null=True, blank=True, max_length=100)
+
 
 class Message(models.Model):
      nom = models.fields.CharField(max_length=100)
@@ -324,7 +318,6 @@ class Livraison(models.Model):
     heure_depart = models.fields.CharField(null=True, blank=True, max_length=100, choices= choiceheures, default=" ")
     heure_livraison = models.fields.CharField(null=True, blank=True, max_length=100, default=".")
     heure_livraison_classement = models.fields.CharField(null=True, blank=True, max_length=100, default=".")
-    client = models.ForeignKey(Client, null=True, blank=True, on_delete=models.SET_NULL)
     date = models.fields.DateField(null=True, blank=True)
     period = models.CharField(max_length=20, choices=[("matin", "Matin"), ("midi", "Midi"), ("apres_midi", "Après-midi")], null=True, blank=True)
     loading_docks = models.ManyToManyField(LoadingDock, blank=True, related_name='livraisons_dock')
@@ -629,6 +622,25 @@ class Menu(models.Model):
     def __str__(self):
         return self.name
     
+
+class Client(models.Model):
+    company_name = models.CharField(max_length=100, null=True, blank=True)  # Company name
+    event_location = models.CharField(max_length=200, null=True, blank=True)  # Lieu événement
+    contact_person = models.CharField(max_length=100, null=True, blank=True)  # Contact sur place
+    phone = models.CharField(max_length=15, null=True, blank=True)  # Telephone
+    email = models.EmailField(max_length=100, null=True, blank=True)  # Email
+    billing_address = models.CharField(max_length=200, null=True, blank=True)  # Adresse facturation
+    etage = models.CharField(max_length=200, null=True, blank=True)
+    dock_livraison = models.CharField(max_length=200, null=True, blank=True)
+    escalier = models.BooleanField(default=False)
+    ascenseur = models.BooleanField(default=False)
+    carte_dock = models.BooleanField(default=False)
+    payment_mode = models.CharField(max_length=20, choices=[
+        ('cc', 'Carte de Crédit'),
+        ('cheque', 'Chèque'),
+        ('interac', 'Interac'),  # Changed from 'Interact' to 'Interac'
+        ], null=True, blank=True)  # Mode paiement
+    
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -663,10 +675,11 @@ class Submission(models.Model):
     avec_service = models.BooleanField(default=False)
     commentaire = models.CharField(max_length=200, null=True, blank=True) 
     payment_mode = models.CharField(max_length=20, choices=[
-        ('cc', 'Carte de Crédit'),
-        ('cheque', 'Chèque'),
-        ('interac', 'Interact'),
+    ('cc', 'Carte de Crédit'),
+    ('cheque', 'Chèque'),
+    ('interac', 'Interac'),  # Changed from 'Interact' to 'Interac'
     ], null=True, blank=True)  # Mode paiement
+    client = models.ForeignKey(Client, null=True, blank=True, on_delete=models.SET_NULL, related_name='submissions_client')
     date = models.DateField(null=True, blank=True)  # Date
     event_time = models.TimeField(null=True, blank=True)  # Heure événement
     guest_count = models.IntegerField(null=True, blank=True)  # Nombre personne

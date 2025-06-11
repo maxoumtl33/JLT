@@ -5633,39 +5633,40 @@ from .models import Submission
 from .forms import SubmissionForm
 @login_required
 def submit_request(request):
-    delivery_modes = DeliveryMode.objects.all()
-    menus = Menu.objects.all()
     key = settings.GOOGLE_API_KEY
+    clients = Client.objects.all()
 
     if request.method == 'POST':
         form = SubmissionForm(request.POST)
         if form.is_valid():
             submission = form.save(commit=False)  # Create the submission object but don't save immediately
             submission.user = request.user  # Link to the logged-in user
-            submission.save()  # Save the submission to the database
+            
+            # Get the selected client
+            client_id = request.POST.get('client')
+            if client_id:
+                client = Client.objects.get(id=client_id)
+                
+                # Copy client details to submission
+                submission.company_name = client.company_name
+                submission.event_location = client.event_location
+                submission.contact_person = client.contact_person
+                submission.phone = client.phone
+                submission.email = client.email
+                submission.billing_address = client.billing_address
+                submission.etage = client.etage
+                submission.dock_livraison = client.dock_livraison
+                submission.escalier = client.escalier
+                submission.ascenseur = client.ascenseur
+                submission.carte_dock = client.carte_dock
+                submission.payment_mode = client.payment_mode
 
-            # Save the ManyToMany relationships
-            form.save_m2m()
 
             messages.success(request, 'Votre soumission a été enregistrée avec succès.')
 
-            # Process each selected menu
-            selected_menus = request.POST.getlist('sub_menus')
-            for menu_id in selected_menus:
-                menu = Menu.objects.get(id=menu_id)
-                allergies = request.POST.get(f'menu_allergies_{menu_id}', '')
-                delivery_mode_id = request.POST.get(f'delivery_modes_{menu_id}', '')
-                service_count_value = request.POST.get(f'service_count_{menu_id}', '')  # Retrieve the service count
+            submission.save()  # Save the submission to the database
 
-                delivery_mode = DeliveryMode.objects.get(id=delivery_mode_id) if delivery_mode_id else None
 
-                MenuSubmission.objects.create(
-                    submission=submission,
-                    menu=menu,
-                    allergies=allergies,
-                    delivery_mode=delivery_mode,
-                    service_count=service_count_value,  # Save the service count
-                )
 
 
             return redirect('submission_detail', submission_id=submission.id)  # Redirect after saving
@@ -5674,10 +5675,146 @@ def submit_request(request):
 
     return render(request, 'listings/submit_request.html', {
         'form': form,
-        'menus': menus,
         'key': key,
-        'delivery_modes': delivery_modes,
+        'clients': clients,
+      
     })
+# views.py
+from django.shortcuts import render
+from django.db.models import Count, Q, F, Case, When, FloatField
+from .models import Livraison
+from .forms import LivraisonFilterForm
+
+def livraison_stats_view(request):
+    form = LivraisonFilterForm(request.GET or None)
+    stats = {}
+
+    if form.is_valid():
+        livreur = form.cleaned_data['livreur']
+        start_date = form.cleaned_data['start_date']
+        end_date = form.cleaned_data['end_date']
+
+        # Build the queryset
+        livraison_qs = Livraison.objects.all()
+
+        if livreur:
+            livraison_qs = livraison_qs.filter(statut__livreur=livreur)
+        if start_date:
+            livraison_qs = livraison_qs.filter(date__gte=start_date)
+        if end_date:
+            livraison_qs = livraison_qs.filter(date__lte=end_date)
+
+        total_livraisons = livraison_qs.count()
+
+        # Livraisons avec recuperation=False
+        livraisons_no_recup = livraison_qs.filter(recuperation=False)
+        total_no_recup = livraisons_no_recup.count()
+
+        # Livraisons avec recuperation=True
+        livraisons_recup = livraison_qs.filter(recuperation=True).count()
+
+        # Livraisons avec checklist actif (dans le filtre recuperation=False)
+        livraisons_with_checklist = livraisons_no_recup.filter(checklist__isnull=False, checklist__is_active=True).count()
+
+        # Fonction pour calculer le pourcentage
+        def percentage(numerator, denominator):
+            return (numerator / denominator * 100) if denominator else 0
+
+        # Calculs des pourcentages
+        signature_pct = percentage(
+            livraisons_no_recup.filter(signature__isnull=False).exclude(signature='').count(),
+            total_no_recup
+        )
+
+        photo_pct = percentage(
+            livraisons_no_recup.filter(photo__isnull=False).exclude(photo='').count(),
+            total_no_recup
+        )
+
+        valide_pct = percentage(
+            livraisons_no_recup.filter(status=True).count(),
+            total_no_recup
+        )
+
+        nom_client_signature_pct = percentage(
+            livraisons_no_recup.filter(nom_client_signature__isnull=False).exclude(nom_client_signature='').count(),
+            total_no_recup
+        )
+
+        # Pourcentage de livraisons avec checklist par rapport à total_no_recup
+        livraisons_with_checklist_pct = percentage(
+            livraisons_with_checklist,
+            total_no_recup
+        )
+
+
+
+        # Préparer le contexte
+        stats = {
+            'total_livraisons': total_livraisons,
+            'total_no_recup': total_no_recup,
+            'livraisons_with_checklist': livraisons_with_checklist,
+            'livraisons_with_checklist_pct': livraisons_with_checklist_pct,  # Ajout ici
+            'signature_pct': signature_pct,
+            'photo_pct': photo_pct,
+            'valide_pct': valide_pct,
+            'nom_client_signature_pct': nom_client_signature_pct,
+            'livraisons_recup': livraisons_recup,
+        }
+
+                # Total de toutes les Routes
+        total_routes = Route.objects.count()
+
+        # Routes qui ont au moins un vehicule
+        routes_with_vehicles = Route.objects.annotate(
+            nb_vehicles=Count('vehicles')
+        ).filter(nb_vehicles__gt=0, livreur=livreur)
+
+        # Routes qui ont au moins un véhicule avec une photo
+        routes_with_vehicles_photo = Route.objects.annotate(
+            nb_vehicles_with_photo=Count('vehicles', filter=Q(vehicles__photos__isnull=False) & ~Q(vehicles__photos=''))
+        ).filter(nb_vehicles_with_photo__gt=0, livreur=livreur)
+
+        # Calcul du pourcentage
+        if total_routes > 0:
+            percentage_with_vehicle_photo = (routes_with_vehicles_photo.count() / total_routes) * 100
+            percentage_with_vehicle = (routes_with_vehicles.count() / total_routes) * 100
+        else:
+            percentage_with_vehicle_photo = 0
+            percentage_with_vehicle = 0
+
+    context = {
+        'form': form,
+        'stats': stats,
+        'percentage_with_vehicle':percentage_with_vehicle,
+        'percentage_with_vehicle_photo':percentage_with_vehicle_photo
+
+
+    }
+    return render(request, 'listings/statistics.html', context)
+
+
+from django.http import JsonResponse
+from .models import Client
+
+def get_client_details(request, client_id):
+    client = Client.objects.get(id=client_id)
+    data = {
+        'company_name': client.company_name,
+        'event_location': client.event_location,
+        'contact_person': client.contact_person,
+        'phone': client.phone,
+        'email': client.email,
+        'billing_address': client.billing_address,
+        'etage': client.etage,
+        'dock_livraison': client.dock_livraison,
+        'escalier': client.escalier,
+        'ascenseur': client.ascenseur,
+        'carte_dock': client.carte_dock,
+        'payment_mode': client.payment_mode,
+    }
+    return JsonResponse(data)
+
 
 from django.db.models import Count, Q
 from collections import defaultdict
@@ -5958,6 +6095,15 @@ def update_submission(request, submission_id):
             submission.commentaire = request.POST.get('commentaire', '').strip()
             submission.email = request.POST.get('email', '').strip()
             submission.billing_address = request.POST.get('billing_address', '').strip()
+            submission.etage = request.POST.get('etage', '').strip()
+            submission.dock_livraison = request.POST.get('dock_livraison', '').strip()
+            submission.escalier = request.POST.get('escalier', '').strip()
+            submission.ascenseur = request.POST.get('ascenseur', '').strip()
+            submission.carte_dock = request.POST.get('carte_dock', '').strip()
+            submission.avec_service = request.POST.get('avec_service', '').strip()
+            payment_mode = request.POST.get('payment_mode', '').strip()
+            submission.payment_mode = payment_mode if payment_mode else None
+
 
             # Numeric fields with validation and sanitization
             budget_str = request.POST.get('budget', '').replace("\xa0", "").strip()

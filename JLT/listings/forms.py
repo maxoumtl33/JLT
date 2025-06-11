@@ -310,7 +310,8 @@ class SubmissionForm(forms.ModelForm):
             'submission_type', 'company_name', 'event_location', 'contact_person',
             'ordered_by', 'phone', 'email', 'billing_address',
             'payment_mode', 'date', 'event_time', 'guest_count',
-            'delivery_time', 'budget', 'service_count', 'sub_menus', 'commentaire'  # sub_menus included
+            'delivery_time', 'budget', 'service_count', 'sub_menus', 'commentaire', 'client', 'etage', 'dock_livraison', 
+            'escalier', 'ascenseur', 'carte_dock'  # sub_menus included
         ]
         widgets = {
             'submission_type': forms.Select(attrs={'class': 'form-control'}),
@@ -388,6 +389,16 @@ PhotoTachesFormSet = inlineformset_factory(
     extra=7,  # Number of additional blank photo forms to display
     
 )
+
+# forms.py
+from django import forms
+from .models import Livreur
+
+class LivraisonFilterForm(forms.Form):
+    livreur = forms.ModelChoiceField(queryset=Livreur.objects.all(), required=False, label='Livreur')
+    start_date = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
+    end_date = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
+
 
 # Form for Recupfrigo
 class RecupfrigoForm(forms.ModelForm):

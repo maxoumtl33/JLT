@@ -478,7 +478,7 @@ function spawnBoss() {
     // Fonction pour faire sauter le boss
     function jumpBoss() {
         if (!boss || !gameRunning) return;
-        const jumpHeight = 50; // La hauteur du saut en pixels
+        const jumpHeight = 150; // La hauteur du saut en pixels
         const jumpDuration = 200; // La durée du saut en ms
 
         // Animation du saut (monter)
@@ -525,7 +525,7 @@ function spawnBoss() {
                     bossKilledSound.currentTime=0;
                     bossKilledSound.play();
                 }
-                if (bossHits >= 15) {
+                if (bossHits >= 10) {
                     clearInterval(move);
                     boss.remove();
 
@@ -599,7 +599,7 @@ function createPnj() {
 
     // Allow random vertical placement between 10 and 40 px when the score is >= 30
     const minBottom = 150;
-    const maxBottom = score >= 30 ? 250 : 150;  // Increase maxBottom to 40 when score is 30 or more
+    const maxBottom = score >= 30 ? 240 : 150;  // Increase maxBottom to 40 when score is 30 or more
     const randBottom = minBottom + Math.random() * (maxBottom - minBottom);
     pnj.style.bottom = randBottom + 'px';
 
@@ -709,7 +709,7 @@ function jump() {
     const maxHeight = 250; // hauteur du saut en pixels
     const originalBottom = 150; // hauteur fixe où doit rester le personnage
     let start = null;
-    const duration = 1000; // durée du saut en ms
+    const duration = 600; // durée du saut en ms
 
     function step(timestamp) {
         if (!start) start = timestamp;
@@ -752,12 +752,11 @@ function shoot() {
     if (!gameRunning) return;
 
     const now = Date.now();
-    if (now - lastShotTime < 200) {
-        // Si moins d'une seconde s’est écoulée depuis le dernier tir, on ne tire pas
+    if (now - lastShotTime < 100) {
+        // If less than 200ms have passed since the last shot, don't shoot
         return;
     }
     lastShotTime = now;
-
 
     const projectile = document.createElement('div');
     projectile.className = 'projectile';
@@ -765,16 +764,15 @@ function shoot() {
 
     container.appendChild(projectile);
 
-
-    // Obtenir la position du character
+    // Get the character's position
     const rectChar = character.getBoundingClientRect();
 
-    // Position du projectile : à la sortie de 'gen.png' (au centre du character)
+    // Position of the projectile: at the center of the character
     const containerRect = container.getBoundingClientRect();
     const projectileLeft = rectChar.left + rectChar.width / 2 - containerRect.left;
     const projectileTop = rectChar.top + rectChar.height / 2 - containerRect.top;
 
-    // Appliquer la position
+    // Apply the position
     projectile.style.left = projectileLeft + 'px';
     projectile.style.top = projectileTop + 'px';
 
@@ -783,7 +781,7 @@ function shoot() {
     const moveInterval = setInterval(() => {
         projectile.style.left = (projectile.offsetLeft + 10) + 'px';
 
-        // Vérification collision with PNJ
+        // Check collision with PNJ
         document.querySelectorAll('.pnj').forEach(pnj => {
             if (checkCollision(projectile, pnj)) {
                 pnj.remove();
@@ -797,6 +795,13 @@ function shoot() {
             projectile.remove();
         }
     }, 20);
+
+    // Play shot sound
+    const shotSound = document.getElementById('shotSound');
+    if (shotSound) {
+        shotSound.currentTime = 0;
+        shotSound.play().catch(e => console.log("Shot sound playback was prevented"));
+    }
 }
 
 
@@ -824,7 +829,7 @@ function startScore() {
         }
 
         // Spawn rate of PNJs continues to accelerate until 100
-        spawnDelay = Math.max(500, 5000 - score * 100);
+        spawnDelay = Math.max(500, 5000 - score * 60);
         requestAnimationFrame(update);
     }
     update();

@@ -31,7 +31,7 @@ class ChecklistItemAdmin(admin.ModelAdmin):
     search_fields = ['product__name', 'checklist__name']
 
 class LivraisonAdmin(ImportExportModelAdmin):
-    list_display = ('id', 'nom', 'date', 'client', 'heure_livraison')
+    list_display = ('id', 'nom', 'date', 'heure_livraison')
 
 
 class LivreursAdmin(ImportExportModelAdmin):
@@ -55,9 +55,6 @@ class JourneeAdmin(ImportExportModelAdmin):
 class RouteAdmin(ImportExportModelAdmin):
     list_display = ('id', 'nom', 'date')
 
-class ClientAdmin(ImportExportModelAdmin):
-    list_display = ('nom', 'adresse_lieux', 'adresse_dock', 'contact')
-
 admin.site.unregister(Group)
 admin.site.register(Livraison, LivraisonAdmin)
 admin.site.register(Journee, JourneeAdmin)
@@ -77,7 +74,7 @@ admin.site.register(Checklist)
 admin.site.register(Phototaches)
 admin.site.register(Product,ProductAdmin)
 admin.site.register(Inventory, InventoryAdmin)
-admin.site.register(Client, ClientAdmin)
+admin.site.register(Client)
 admin.site.register(ItemInv, ItemInvAdmin)
 admin.site.register(ItemCuisine)
 admin.site.register(OrderCuisine)
