@@ -283,6 +283,93 @@
         </div>
     </div>
 </nav>
+{% if submissions_48h_envoye.exists %}
+<div class="alert alert-warning d-flex align-items-center" role="alert" style="margin-top:20px;">
+    <div><i class="fas fa-bell me-2"></i>
+        <strong>Notification :</strong> {{ submissions_48h_envoye.count }} soumission(s) envoyée(s) depuis plus de 48h sans réponse. <button type="button" id="toggleSubmissionsBtn">
+            Voir
+        </button>
+        
+        <div id="submissionsList" style="display:none; margin:0; padding-left:20px;">
+            <ul style="margin:0;">
+                {% for sub in submissions_48h_envoye %}
+                    <li>
+                        <a href="{% url 'submission_detail' sub.id %}" target="_blank">
+                            {{ sub.company_name }} crée par {{ sub.user.username }}, le {{ sub.created_at|date:"l d F Y" }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+
+                    {% if submissions_48h_encours.exists %}
+                    <div class="alert alert-warning d-flex align-items-center" role="alert" style="margin-top:20px;">
+                        <div><i class="fas fa-bell me-2"></i>
+                            <strong>Notification:</strong> {{ submissions_48h_encours.count }} soumission(s) en cours depuis plus de 48h.<button type="button" id="toggleSubmissionsencoursBtn">
+                                Voir
+                            </button>
+                            
+                            <div id="submissionsencoursList" style="display:none; margin:0; padding-left:20px;">
+                                <ul style="margin:0;">
+                                    {% for sub in submissions_48h_encours %}
+                                        <li>
+                                            <a href="{% url 'submission_detail' sub.id %}" target="_blank">
+                                                {{ sub.company_name }} crée par {{ sub.user.username }}, le {{ sub.created_at|date:"l d F Y" }}
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if commande_48h_envoye.exists %}
+                    <div class="alert alert-warning d-flex align-items-center" role="alert" style="margin-top:20px;">
+                        <div><i class="fas fa-bell me-2"></i>
+                            <strong>Notification:</strong> {{ commande_48h_envoye.count }} commande(s) envoyée(s) depuis plus de 48h sans réponse.<button type="button" id="toggleCommandeBtn">
+                                Voir
+                            </button>
+                            
+                            <div id="commandeList" style="display:none; margin:0; padding-left:20px;">
+                                <ul style="margin:0;">
+                                    {% for sub in commande_48h_envoye %}
+                                        <li>
+                                            <a href="{% url 'submission_detail' sub.id %}" target="_blank">
+                                                {{ sub.company_name }} crée par {{ sub.user.username }}, le {{ sub.created_at|date:"l d F Y" }}
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if commande_48h_encours.exists %}
+                    <div class="alert alert-warning d-flex align-items-center" role="alert" style="margin-top:20px;">
+                        <div><i class="fas fa-bell me-2"></i>
+                            <strong>Notification:</strong> {{ commande_48h_encours.count }} commande(s) en cours depuis plus de 48h.<button type="button" id="toggleCommandeencoursBtn">
+                                Voir
+                            </button>
+                            
+                            <div id="commandeencoursList" style="display:none; margin:0; padding-left:20px;">
+                                <ul style="margin:0;">
+                                    {% for sub in commande_48h_encours %}
+                                        <li>
+                                            <a href="{% url 'submission_detail' sub.id %}" target="_blank">
+                                                {{ sub.company_name }} crée par {{ sub.user.username }}, le {{ sub.created_at|date:"l d F Y" }}
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
 <br>
 <h1 style="text-align: center;">CALENDRIER SOUMISSIONS / COMMANDES <strong><u>DATE DE CRÉATION</u></strong>
 </h1>
@@ -547,6 +634,39 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error fetching creation submissions:', error);
             });
     }
+    document.getElementById('toggleSubmissionsBtn').addEventListener('click', function() {
+    const listDiv = document.getElementById('submissionsList');
+    if (listDiv.style.display === 'none') {
+        listDiv.style.display = 'block';
+    } else {
+        listDiv.style.display = 'none';
+    }
+});
+document.getElementById('toggleCommandeBtn').addEventListener('click', function() {
+    const listDiv = document.getElementById('commandeList');
+    if (listDiv.style.display === 'none') {
+        listDiv.style.display = 'block';
+    } else {
+        listDiv.style.display = 'none';
+    }
+});
+document.getElementById('toggleSubmissionsencoursBtn').addEventListener('click', function() {
+    const listDiv = document.getElementById('submissionsencoursList');
+    if (listDiv.style.display === 'none') {
+        listDiv.style.display = 'block';
+    } else {
+        listDiv.style.display = 'none';
+    }
+});
+document.getElementById('toggleCommandeencoursBtn').addEventListener('click', function() {
+    const listDiv = document.getElementById('commandeencoursList');
+    if (listDiv.style.display === 'none') {
+        listDiv.style.display = 'block';
+    } else {
+        listDiv.style.display = 'none';
+    }
+});
+
 </script>
 {% endblock %}
 

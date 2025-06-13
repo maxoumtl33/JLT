@@ -152,7 +152,7 @@ input[type="checkbox"] {
                         </li>
                     </ul>
                 </li>
-                
+               
                 <li class="nav-item" style="margin-left: 40px;">
                     <form action="{% url 'logout' %}" method="post" class="d-inline">
                         {% csrf_token %}
@@ -165,7 +165,93 @@ input[type="checkbox"] {
         </div>
     </div>
 </nav>
+{% if submissions_48h_envoye.exists %}
+<div class="alert alert-warning d-flex align-items-center" role="alert" style="margin-top:20px;">
+    <div><i class="fas fa-bell me-2"></i>
+        <strong>Notification :</strong> {{ submissions_48h_envoye.count }} soumission(s) envoyée(s) depuis plus de 48h sans réponse. <button type="button" id="toggleSubmissionsBtn">
+            Voir
+        </button>
+        
+        <div id="submissionsList" style="display:none; margin:0; padding-left:20px;">
+            <ul style="margin:0;">
+                {% for sub in submissions_48h_envoye %}
+                    <li>
+                        <a href="{% url 'submission_detail' sub.id %}" target="_blank">
+                            {{ sub.company_name }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endif %}
 
+
+                    {% if submissions_48h_encours.exists %}
+                    <div class="alert alert-warning d-flex align-items-center" role="alert" style="margin-top:20px;">
+                        <div><i class="fas fa-bell me-2"></i>
+                            <strong>Notification:</strong> {{ submissions_48h_encours.count }} soumission(s) en cours depuis plus de 48h.<button type="button" id="toggleSubmissionsencoursBtn">
+                                Voir
+                            </button>
+                            
+                            <div id="submissionsencoursList" style="display:none; margin:0; padding-left:20px;">
+                                <ul style="margin:0;">
+                                    {% for sub in submissions_48h_encours %}
+                                        <li>
+                                            <a href="{% url 'submission_detail' sub.id %}" target="_blank">
+                                                {{ sub.company_name }}
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if commande_48h_envoye.exists %}
+                    <div class="alert alert-warning d-flex align-items-center" role="alert" style="margin-top:20px;">
+                        <div><i class="fas fa-bell me-2"></i>
+                            <strong>Notification:</strong> {{ commande_48h_envoye.count }} commande(s) envoyée(s) depuis plus de 48h sans réponse.<button type="button" id="toggleCommandeBtn">
+                                Voir
+                            </button>
+                            
+                            <div id="commandeList" style="display:none; margin:0; padding-left:20px;">
+                                <ul style="margin:0;">
+                                    {% for sub in commande_48h_envoye %}
+                                        <li>
+                                            <a href="{% url 'submission_detail' sub.id %}" target="_blank">
+                                                {{ sub.company_name }}
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if commande_48h_encours.exists %}
+                    <div class="alert alert-warning d-flex align-items-center" role="alert" style="margin-top:20px;">
+                        <div><i class="fas fa-bell me-2"></i>
+                            <strong>Notification:</strong> {{ commande_48h_encours.count }} commande(s) en cours depuis plus de 48h.<button type="button" id="toggleCommandeencoursBtn">
+                                Voir
+                            </button>
+                            
+                            <div id="commandeencoursList" style="display:none; margin:0; padding-left:20px;">
+                                <ul style="margin:0;">
+                                    {% for sub in commande_48h_encours %}
+                                        <li>
+                                            <a href="{% url 'submission_detail' sub.id %}" target="_blank">
+                                                {{ sub.company_name }}
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
 <div class="container-fluid py-4">
     <!-- Dashboard Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -442,17 +528,28 @@ input[type="checkbox"] {
                     <span class="badge bg-danger"><i class="fa-solid fa-times-circle me-1"></i>Refusée</span>
                 {% elif submission.status == encours %}
                     <span class="badge bg-warning"><i class="fa-solid fa-spinner me-1"></i>En cours</span>
+                {% elif submission.status == envoye %}
+                    <span class="badge bg-primary"><i class="fa-solid fa-paper-plane me-1"></i>Envoyé</span>
                 {% endif %}</td>
                 <td>
-                    <div class="status-selection">
-                       
-                        <select id="submissionStatus{{ submission.id }}" onchange="showCommentBox({{ submission.id }})">
-                            <option value="en_cours" {% if submission.status == 'en_cours' %}selected{% endif %}>En cours</option>
-                            <option value="valide" {% if submission.status == 'valide' %}selected{% endif %}>Validé</option>
-                            <option value="refuse" {% if submission.status == 'refuse' %}selected{% endif %}>Refusé</option>
-                            <option value="envoye" {% if submission.status == 'envoye' %}selected{% endif %}>Envoyé</option>
-                        </select>
-                    </div>
+                    <div class="d-flex justify-content-center gap-2">
+                        <!-- Envoyé icon -->
+                        <button class="icon-btn" data-submission-id="{{ submission.id }}" data-status="envoyé" title="Envoyé">
+                          <i class="fas fa-paper-plane {% if submission.status == 'envoyé' %}text-primary{% else %}text-muted{% endif %}"></i>
+                        </button>
+                        <!-- En cours icon -->
+                        <button class="icon-btn" data-submission-id="{{ submission.id }}" data-status="en_cours" title="En cours">
+                          <i class="fas fa-spinner {% if submission.status == 'en_cours' %}text-primary{% else %}text-muted{% endif %}"></i>
+                        </button>
+                        <!-- Validé icon -->
+                        <button class="icon-btn" data-submission-id="{{ submission.id }}" data-status="valide" title="Validé">
+                          <i class="fas fa-check-circle {% if submission.status == 'valide' %}text-success{% else %}text-muted{% endif %}"></i>
+                        </button>
+                        <!-- Refusé icon -->
+                        <button class="icon-btn" data-submission-id="{{ submission.id }}" data-status="refuse" title="Refuser">
+                          <i class="fas fa-times-circle {% if submission.status == 'refuse' %}text-danger{% else %}text-muted{% endif %}"></i>
+                        </button>
+                      </div>
                     
                     <div id="commentBox{{ submission.id }}" class="comment-box" style="display: none;">
                         <label for="refusalComment{{ submission.id }}">Pourquoi a-t-il été refusé ?</label>
@@ -460,8 +557,7 @@ input[type="checkbox"] {
                     </div>
                     
                     
-                    
-                    <button id="statusSubmitButton" class="btn btn-primary" onclick="submitStatus({{ submission.id }})">changer le statut</button>
+            
 
                     
                 </td>
@@ -699,44 +795,68 @@ function showCommentBox(submissionId) {
     }
 }
 
-function submitStatus(submissionId) {
-    const statusSelect = document.getElementById(`submissionStatus${submissionId}`);
-    
-    // Check if the statusSelect is not found
-    if (!statusSelect) {
-        console.error('Status select element not found for submission:', submissionId);
-        return; // Exit if the element is not found
-    }
+document.querySelectorAll('.icon-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const submissionId = btn.dataset.submissionId;
+    const newStatus = btn.dataset.status;
 
-    const status = statusSelect.value; // Get the status value
-    const comment = document.getElementById(`refusalComment${submissionId}`).value; // Capture the comment
-
-    const payload = {
-        status: status,
-        ...(status === 'refuse' && { comment: comment }) // Include comment only if status is 'refuse'
-    };
-
+    // Optional: Show a loading indicator or disable buttons here
     fetch(`/submission_dashboard/status/update/${submissionId}/`, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': '{{ csrf_token }}', // Include CSRF token for security
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload) // Send the payload
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ status: newStatus })
     })
     .then(response => response.json())
     .then(data => {
-        if (data.success) {
-            alert('Statut mis à jour avec succès!');
-            location.reload(); // Optionally refresh the page to reflect changes
-        } else {
-            alert(data.error || 'Erreur lors de la mise à jour du statut.');
-        }
+      if(data.success){
+        
+        // Optionally, you can update icon colors dynamically here to reflect the new status
+        location.reload(); // or update icons/classes accordingly
+      } else {
+        alert('Erreur: ' + data.error);
+      }
     })
-    .catch(error => console.error('Error:', error));
-}
-
-
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Erreur lors de la mise à jour.');
+    });
+  });
+});
+document.getElementById('toggleSubmissionsBtn').addEventListener('click', function() {
+    const listDiv = document.getElementById('submissionsList');
+    if (listDiv.style.display === 'none') {
+        listDiv.style.display = 'block';
+    } else {
+        listDiv.style.display = 'none';
+    }
+});
+document.getElementById('toggleCommandeBtn').addEventListener('click', function() {
+    const listDiv = document.getElementById('commandeList');
+    if (listDiv.style.display === 'none') {
+        listDiv.style.display = 'block';
+    } else {
+        listDiv.style.display = 'none';
+    }
+});
+document.getElementById('toggleSubmissionsencoursBtn').addEventListener('click', function() {
+    const listDiv = document.getElementById('submissionsencoursList');
+    if (listDiv.style.display === 'none') {
+        listDiv.style.display = 'block';
+    } else {
+        listDiv.style.display = 'none';
+    }
+});
+document.getElementById('toggleCommandeencoursBtn').addEventListener('click', function() {
+    const listDiv = document.getElementById('commandeencoursList');
+    if (listDiv.style.display === 'none') {
+        listDiv.style.display = 'block';
+    } else {
+        listDiv.style.display = 'none';
+    }
+});
 
 </script>
 {% endblock %}

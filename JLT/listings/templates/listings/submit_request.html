@@ -32,14 +32,19 @@
 
         <!-- Détails de l'Événement -->
         <fieldset class="mb-4">
-            <legend><h4>Détails de l'Événement</h4></legend>
+            
             <div class="mb-3">
                 <label for="submission_type" class="form-label">Type de Soumission</label>
                 {{ form.submission_type }}
             </div>
 
+            <div class="mb-3">
+                <label for="id_type_prise_de_commande" class="form-label">Type de Prise de Commande</label>
+                {{ form.type_prise_de_commande }}
+            </div>
+
             <label for="id_client">Client</label>
-            <select id="id_client" name="client" class="form-control">
+            <select id="id_client" name="client" class="form-control select2">
                 <option value="">Choisissez un client</option>
                 {% for client in clients %}
                     <option value="{{ client.id }}" {% if submission.client and submission.client.id == client.id %}selected{% endif %}>
@@ -120,7 +125,17 @@
             }
         });
     });
-    
+
+    $(document).ready(function() {
+    // Initialize Select2 on the client dropdown
+    $('#id_client').select2({
+        placeholder: 'Choisissez un client',
+        width: '100%'
+    });
+
+
+});
+
 </script>
 {% endblock %}
 

@@ -193,7 +193,10 @@ def import_xlsx(request):
 
 def submission_detail(request, submission_id):
     submission = get_object_or_404(Submission, id=submission_id)
+    key = settings.GOOGLE_API_KEY
     all_menus = Menu.objects.all()
+    all_payment_modes = PaymentMode.objects.all()
+
     all_delivery_modes = DeliveryMode.objects.all()
     menus = Menu.objects.all()
     # Build a dict: menu.id -> list of delivery mode ids
@@ -208,6 +211,8 @@ def submission_detail(request, submission_id):
         'menus_with_modes_ids': menus_with_modes_ids,
         'all_menus' : all_menus,
         'all_delivery_modes' : all_delivery_modes,
+        'key':key,
+        'all_payment_modes':all_payment_modes,
     }
     return render(request, 'listings/submission_detail.html', context)
 
@@ -1279,7 +1284,10 @@ def conseiller_dashboard(request):
     encours = "en_cours"
     valide = "valide"
     refuse = "refuse"
+    envoye = "envoyé"
     conseiller_instance = get_object_or_404(Conseiller, user=request.user)
+
+   
 
     # Fetch checklists
     checklists = Checklist.objects.filter(conseillere=conseiller_instance).order_by("-date")
@@ -1299,6 +1307,26 @@ def conseiller_dashboard(request):
     # Pagination for user's submissions
     submissions = Submission.objects.filter(user=request.user).order_by("-created_at")
 
+    submissions_48h_encours = submissions.filter(
+    status='en_cours',
+    created_at__lt=timezone.now() - timedelta(hours=48),
+    submission_type__icontains='soumission'  # Filtre pour 'soumission' dans submission_type
+)
+    commande_48h_encours = submissions.filter(
+    status='en_cours',
+    created_at__lt=timezone.now() - timedelta(hours=48),
+    submission_type__icontains='commande'  # Filtre pour 'soumission' dans submission_type
+)
+    submissions_48h_envoye = submissions.filter(
+    status='envoyé',
+    created_at__lt=timezone.now() - timedelta(hours=48),
+    submission_type__icontains='soumission'  # Filtre pour 'soumission' dans submission_type
+)
+    commande_48h_envoye = submissions.filter(
+    status='envoyé',
+    created_at__lt=timezone.now() - timedelta(hours=48),
+    submission_type__icontains='commande'  # Filtre pour 'soumission' dans submission_type
+)
     # Paginate submissions
     submission_paginator = Paginator(submissions, 10)  # Show 10 submissions per page
     submission_page_number = request.GET.get('submission_page')  # Different page number for submissions
@@ -1368,6 +1396,11 @@ def conseiller_dashboard(request):
         'checklist_page_obj': checklist_page_obj,  # Passing checklist pagination
         'submission_page_obj': submission_page_obj,  # Passing submission pagination
         'today': timezone.now().date(),
+        'submissions_48h_envoye':submissions_48h_envoye,
+        'submissions_48h_encours':submissions_48h_encours,
+        'commande_48h_encours':commande_48h_encours,
+        'commande_48h_envoye':commande_48h_envoye,
+        'envoye':envoye,
     }
 
     return render(request, 'listings/conseiller_dashboard.html', context)
@@ -5684,8 +5717,11 @@ from django.shortcuts import render
 from django.db.models import Count, Q, F, Case, When, FloatField
 from .models import Livraison
 from .forms import LivraisonFilterForm
-
 def livraison_stats_view(request):
+    # initialiser par défaut
+    percentage_with_vehicle = 0
+    percentage_with_vehicle_photo = 0
+
     form = LivraisonFilterForm(request.GET or None)
     stats = {}
 
@@ -5716,6 +5752,17 @@ def livraison_stats_view(request):
         # Livraisons avec checklist actif (dans le filtre recuperation=False)
         livraisons_with_checklist = livraisons_no_recup.filter(checklist__isnull=False, checklist__is_active=True).count()
 
+        livraisons_avec_photos = livraisons_no_recup.filter(livraison_photos__isnull=False).distinct().count()
+        livraisons_avec_photos_recups = livraisons_no_recup.filter(livraison_photos_recups__isnull=False).distinct().count()
+
+        # Calcul du pourcentage
+        if total_no_recup > 0:
+            pourcentage_photo = (livraisons_avec_photos / total_no_recup) * 100
+            pourcentage_photo_recup = (livraisons_avec_photos_recups / total_no_recup) * 100
+        else:
+            pourcentage_photo = 0
+            pourcentage_photo_recup = 0
+
         # Fonction pour calculer le pourcentage
         def percentage(numerator, denominator):
             return (numerator / denominator * 100) if denominator else 0
@@ -5726,10 +5773,7 @@ def livraison_stats_view(request):
             total_no_recup
         )
 
-        photo_pct = percentage(
-            livraisons_no_recup.filter(photo__isnull=False).exclude(photo='').count(),
-            total_no_recup
-        )
+      
 
         valide_pct = percentage(
             livraisons_no_recup.filter(status=True).count(),
@@ -5756,40 +5800,54 @@ def livraison_stats_view(request):
             'livraisons_with_checklist': livraisons_with_checklist,
             'livraisons_with_checklist_pct': livraisons_with_checklist_pct,  # Ajout ici
             'signature_pct': signature_pct,
-            'photo_pct': photo_pct,
+            'pourcentage_photo': pourcentage_photo,
+            'pourcentage_photo_recup':pourcentage_photo_recup,
             'valide_pct': valide_pct,
             'nom_client_signature_pct': nom_client_signature_pct,
             'livraisons_recup': livraisons_recup,
         }
+        # Initialisation
+        routes_queryset = Route.objects.all()
 
-                # Total de toutes les Routes
-        total_routes = Route.objects.count()
+        # Filtrage par date
+        if start_date:
+            routes_queryset = routes_queryset.filter(date__gte=start_date)
+        if end_date:
+            routes_queryset = routes_queryset.filter(date__lte=end_date)
 
-        # Routes qui ont au moins un vehicule
-        routes_with_vehicles = Route.objects.annotate(
-            nb_vehicles=Count('vehicles')
-        ).filter(nb_vehicles__gt=0, livreur=livreur)
+        total_routes = routes_queryset.count()
 
-        # Routes qui ont au moins un véhicule avec une photo
-        routes_with_vehicles_photo = Route.objects.annotate(
-            nb_vehicles_with_photo=Count('vehicles', filter=Q(vehicles__photos__isnull=False) & ~Q(vehicles__photos=''))
-        ).filter(nb_vehicles_with_photo__gt=0, livreur=livreur)
+        # Filtrer routes liées au livrerur
+        routes_for_livreur = routes_queryset.filter(livreur=livreur)
 
-        # Calcul du pourcentage
+        # Routes avec véhicules liés
+        routes_with_vehicles = routes_for_livreur.filter(vehicles__isnull=False).distinct()
+
+        # Routes avec véhicules contenant des photos
+        routes_with_vehicles_photo = routes_with_vehicles.annotate(
+            nb_vehicles_with_photo=Count(
+                'vehicles',
+                filter=Q(vehicles__photos__isnull=False) & ~Q(vehicles__photos='')
+            )
+        ).filter(nb_vehicles_with_photo__gt=0)
+
+        # Calcul du pourcentage si total > 0
         if total_routes > 0:
-            percentage_with_vehicle_photo = (routes_with_vehicles_photo.count() / total_routes) * 100
             percentage_with_vehicle = (routes_with_vehicles.count() / total_routes) * 100
+            percentage_with_vehicle_photo = (routes_with_vehicles_photo.count() / total_routes) * 100
         else:
-            percentage_with_vehicle_photo = 0
             percentage_with_vehicle = 0
+            percentage_with_vehicle_photo = 0
 
+
+
+
+            # Ajouter dans le contexte
     context = {
         'form': form,
         'stats': stats,
-        'percentage_with_vehicle':percentage_with_vehicle,
-        'percentage_with_vehicle_photo':percentage_with_vehicle_photo
-
-
+        'percentage_with_vehicle': percentage_with_vehicle,
+        'percentage_with_vehicle_photo': percentage_with_vehicle_photo,
     }
     return render(request, 'listings/statistics.html', context)
 
@@ -5904,6 +5962,26 @@ def calendarsubcreate_view(request):
     # Fetch all submissions for the selected month
     submissions = Submission.objects.filter(created_at__month=selected_month, created_at__year=current_year)
 
+    submissions_48h_encours = submissions.filter(
+    status='en_cours',
+    created_at__lt=timezone.now() - timedelta(hours=48),
+    submission_type__icontains='soumission'  # Filtre pour 'soumission' dans submission_type
+)
+    commande_48h_encours = submissions.filter(
+    status='en_cours',
+    created_at__lt=timezone.now() - timedelta(hours=48),
+    submission_type__icontains='commande'  # Filtre pour 'soumission' dans submission_type
+)
+    submissions_48h_envoye = submissions.filter(
+    status='envoyé',
+    created_at__lt=timezone.now() - timedelta(hours=48),
+    submission_type__icontains='soumission'  # Filtre pour 'soumission' dans submission_type
+)
+    commande_48h_envoye = submissions.filter(
+    status='envoyé',
+    created_at__lt=timezone.now() - timedelta(hours=48),
+    submission_type__icontains='commande'  # Filtre pour 'soumission' dans submission_type
+)
 
     # Initialize a dictionary to hold counts of statuses per day
     daily_counts = defaultdict(lambda: {'en_cours': 0})
@@ -5930,6 +6008,10 @@ def calendarsubcreate_view(request):
         'is_chefcuisine': request.user.groups.filter(name='chefcuisine').exists(),
         'is_ventes': request.user.groups.filter(name='ventes').exists(),
         'is_admin': request.user.groups.filter(name='admin').exists(),
+        'submissions_48h_encours':submissions_48h_encours,
+        'commande_48h_encours':commande_48h_encours,
+        'submissions_48h_envoye':submissions_48h_envoye,
+        'commande_48h_envoye':commande_48h_envoye,
     }
 
     return render(request, 'listings/calendarcreate_submission.html', context)
@@ -6075,6 +6157,13 @@ from .models import Submission
 @csrf_exempt
 def update_submission(request, submission_id):
     if request.method == 'POST':
+        # Nettoyer toutes les valeurs POST
+        clean_post = {}
+        for key, value in request.POST.items():
+            if value is None or value.lower() == 'none':
+                clean_post[key] = ''
+            else:
+                clean_post[key] = value.strip()
         try:
             submission = get_object_or_404(Submission, id=submission_id)
 
@@ -6087,12 +6176,29 @@ def update_submission(request, submission_id):
                 submission.date = datetime.strptime(date_str, "%Y-%m-%d").date()
 
             # Update simple text fields
+
             submission.company_name = request.POST.get('company_name', '').strip()
-            submission.ordered_by = request.POST.get('ordered_by', '').strip()
+            submission.event_postcode = request.POST.get('postal_code', '').strip()
+            ordered_by = request.POST.get('ordered_by', '').strip()
+
+            # Vérifier si la valeur est "None" (chaîne)
+            if ordered_by.lower() == 'none':
+                ordered_by = ''
+                
+            # Ensuite, enregistrer
+            submission.ordered_by = ordered_by
+
             submission.event_location = request.POST.get('event_location', '').strip()
             submission.contact_person = request.POST.get('contact_person', '').strip()
             submission.phone = request.POST.get('phone', '').strip()
-            submission.commentaire = request.POST.get('commentaire', '').strip()
+            commentaire = request.POST.get('commentaire', '').strip()
+
+            # Vérifier si la valeur est "None" (chaîne)
+            if commentaire.lower() == 'none':
+                commentaire = ''
+                
+            # Ensuite, enregistrer
+            submission.commentaire = commentaire
             submission.email = request.POST.get('email', '').strip()
             submission.billing_address = request.POST.get('billing_address', '').strip()
             submission.etage = request.POST.get('etage', '').strip()
@@ -6101,8 +6207,30 @@ def update_submission(request, submission_id):
             submission.ascenseur = request.POST.get('ascenseur', '').strip()
             submission.carte_dock = request.POST.get('carte_dock', '').strip()
             submission.avec_service = request.POST.get('avec_service', '').strip()
-            payment_mode = request.POST.get('payment_mode', '').strip()
-            submission.payment_mode = payment_mode if payment_mode else None
+
+
+            commentaire_items = request.POST.get('commentaire_items', '').strip()
+            # Vérifier si la valeur est "None" (chaîne)
+            if commentaire_items.lower() == 'none':
+                commentaire_items = ''
+                
+            # Ensuite, enregistrer
+            submission.commentaire_items = commentaire_items
+
+            commentaire_boissons = request.POST.get('commentaire_boissons', '').strip()
+            # Vérifier si la valeur est "None" (chaîne)
+            if commentaire_boissons.lower() == 'none':
+                commentaire_boissons = ''
+                
+            # Ensuite, enregistrer
+            submission.commentaire_boissons = commentaire_boissons
+
+            submission.save()
+
+
+
+
+
 
 
             # Numeric fields with validation and sanitization
@@ -6140,6 +6268,7 @@ def update_submission(request, submission_id):
                 if key.startswith('sub_menus_'):
                     menu_sub_id = key.split('sub_menus_')[1]
                     menu_id = request.POST.get(key)
+                    commentaire_menu = request.POST.get(f'commentaire_menu_{menu_sub_id}', '').strip()
                     allergies = request.POST.get(f'allergies_{menu_sub_id}', '').strip()
                     delivery_mode_id = request.POST.get(f'delivery_modes_{menu_sub_id}', '')
                     service_count_str = request.POST.get(f'service_count_{menu_sub_id}', '').strip()
@@ -6161,6 +6290,7 @@ def update_submission(request, submission_id):
                             ms.menu = menu
                             ms.allergies = allergies
                             ms.delivery_mode = delivery_mode
+                            ms.commentaire_menu = commentaire_menu
                             ms.service_count = service_count_str
                             ms.save()
                             processed_ids.add(ms.id)
@@ -6178,6 +6308,7 @@ def update_submission(request, submission_id):
                         ms = MenuSubmission.objects.create(
                             submission=submission,
                             menu=menu,
+                            commentaire_menu=commentaire_menu,
                             allergies=allergies,
                             delivery_mode=delivery_mode
                         )
@@ -6192,6 +6323,7 @@ def update_submission(request, submission_id):
                 if key.startswith('new_sub_menus_'):
                     index = key.split('new_sub_menus_')[1]
                     menu_id = request.POST.get(key)
+                    commentaire_menu = request.POST.get(f'commentaire_menu_new_{index}', '').strip()
                     allergies = request.POST.get(f'allergies_new_{index}', '').strip()
                     delivery_mode_id = request.POST.get(f'delivery_modes_new_{index}', '')
                     service_count_str = request.POST.get(f'service_count_new_{index}', '').strip()
@@ -6208,6 +6340,7 @@ def update_submission(request, submission_id):
                         submission=submission,
                         menu=menu,
                         allergies=allergies,
+                        commentaire_menu=commentaire_menu,
                         delivery_mode=delivery_mode,
                         service_count=service_count_str,
                     )
@@ -6233,6 +6366,34 @@ def get_livraisons(request, journee_id):
 
     return JsonResponse({'livraisons': livraison_list})
 
+
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+import json
+from .models import PaymentMode
+
+@csrf_exempt
+def update_payment_mode(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            payment_mode_id = data.get('payment_mode_id')
+            new_details = data.get('details')
+
+            payment_mode_obj = PaymentMode.objects.get(id=payment_mode_id)
+            payment_mode_obj.details = new_details
+            payment_mode_obj.save()
+
+            return JsonResponse({'success': True})
+
+        except PaymentMode.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Mode de paiement non trouvé'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+
+    return JsonResponse({'success': False, 'error': 'Méthode non autorisée'})
+
+
 def get_livraisons_chaud(request, journee_id):
     livraisons = Livraison.objects.filter(
         journee_id=journee_id,
@@ -6251,6 +6412,39 @@ def get_livraisons_chaud(request, journee_id):
         })
 
     return JsonResponse({'livraisons': livraison_list})
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+from django.http import JsonResponse
+
+@csrf_exempt
+def create_payment_mode(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        name = data.get('name', '').strip()
+        details = data.get('details', '').strip()
+        submission_id = data.get('submission_id', None)
+
+        if name:
+            mode, created = PaymentMode.objects.get_or_create(
+                name=name,
+                defaults={'details': details}
+            )
+            if not created:
+                mode.details = details
+                mode.save()
+
+            if submission_id:
+                submission = Submission.objects.get(id=submission_id)
+                submission.payment_mode = mode
+                submission.save()
+
+            return JsonResponse({'success': True, 'mode_id': mode.id})
+        else:
+            return JsonResponse({'success': False, 'error': 'Champs manquants'})
+    return JsonResponse({'success': False, 'error': 'Méthode non autorisée'})
 
 
 def validate_time_format(time_str):
@@ -6476,7 +6670,6 @@ def duplicate_model(request, model_id):
     new_object.mode_envoi = original_object.mode_envoi
     new_object.status = False
     new_object.recuperation = True
-    new_object.client = original_object.client
     new_object.commentaire = original_object.commentaire
     new_object.commentairedispatch = original_object.commentairedispatch
     new_object.adress = original_object.adress

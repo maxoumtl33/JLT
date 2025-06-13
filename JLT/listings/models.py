@@ -623,6 +623,24 @@ class Menu(models.Model):
         return self.name
     
 
+
+    
+
+class PaymentMode(models.Model):
+
+    SUBMISSION_TYPE_CHOICES = [
+        ('Carte de crédit', 'Carte de crédit'),
+        ('Chèque', 'Chèque'),
+        ('Transfert bancaire', 'Transfert bancaire'),
+        ('Facturation', 'Facturation'),
+    ]
+    name = models.CharField(max_length=50, choices=SUBMISSION_TYPE_CHOICES)
+    code = models.CharField(max_length=20, unique=True)  # Identifier unique, par ex. 'cc'
+    details = models.TextField(blank=True, null=True)  # Informations complémentaires
+
+    def __str__(self):
+        return self.name
+
 class Client(models.Model):
     company_name = models.CharField(max_length=100, null=True, blank=True)  # Company name
     event_location = models.CharField(max_length=200, null=True, blank=True)  # Lieu événement
@@ -635,17 +653,15 @@ class Client(models.Model):
     escalier = models.BooleanField(default=False)
     ascenseur = models.BooleanField(default=False)
     carte_dock = models.BooleanField(default=False)
-    payment_mode = models.CharField(max_length=20, choices=[
-        ('cc', 'Carte de Crédit'),
-        ('cheque', 'Chèque'),
-        ('interac', 'Interac'),  # Changed from 'Interact' to 'Interac'
-        ], null=True, blank=True)  # Mode paiement
-    
-from django.db import models
-from django.contrib.auth.models import User
+    payment_mode = models.ForeignKey(PaymentMode, on_delete=models.SET_NULL, null=True, blank=True)
 
 from django.db import models
 from django.contrib.auth.models import User
+TYPE_PRISE_DE_COMMANDE_CHOICES = [
+    ('Téléphone', 'Téléphone'),
+    ('En ligne', 'En ligne'),
+    ('Courriel', 'Courriel'),
+]
 
 class Submission(models.Model):
     SUBMISSION_TYPE_CHOICES = [
@@ -659,7 +675,16 @@ class Submission(models.Model):
     submission_type = models.CharField(max_length=24, choices=SUBMISSION_TYPE_CHOICES)
     
     # New fields
+    type_prise_de_commande = models.CharField(
+        max_length=10,
+        choices=TYPE_PRISE_DE_COMMANDE_CHOICES,
+        null=True,
+        blank=True
+    )
     refusal_comment = models.TextField(null=True, blank=True)
+    commentaire_items = models.TextField(null=True, blank=True)
+    commentaire_boissons = models.TextField(null=True, blank=True)
+    event_postcode = models.TextField(null=True, blank=True)
     company_name = models.CharField(max_length=100, null=True, blank=True)  # Company name
     event_location = models.CharField(max_length=200, null=True, blank=True)  # Lieu événement
     contact_person = models.CharField(max_length=100, null=True, blank=True)  # Contact sur place
@@ -674,11 +699,7 @@ class Submission(models.Model):
     carte_dock = models.BooleanField(default=False)
     avec_service = models.BooleanField(default=False)
     commentaire = models.CharField(max_length=200, null=True, blank=True) 
-    payment_mode = models.CharField(max_length=20, choices=[
-    ('cc', 'Carte de Crédit'),
-    ('cheque', 'Chèque'),
-    ('interac', 'Interac'),  # Changed from 'Interact' to 'Interac'
-    ], null=True, blank=True)  # Mode paiement
+    payment_mode = models.ForeignKey(PaymentMode, on_delete=models.SET_NULL, null=True, blank=True)
     client = models.ForeignKey(Client, null=True, blank=True, on_delete=models.SET_NULL, related_name='submissions_client')
     date = models.DateField(null=True, blank=True)  # Date
     event_time = models.TimeField(null=True, blank=True)  # Heure événement
@@ -696,11 +717,7 @@ class Submission(models.Model):
         ('envoyé', 'Envoyé'),
     ]
 
-    STATUS_CHOICESS = [
-        ('cc', 'Carte de Crédit'),
-        ('cheque', 'Chèque'),
-        ('interac', 'Interact'),
-    ]
+
 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='en_cours')
 
@@ -722,6 +739,7 @@ class MenuSubmission(models.Model):
     allergies = models.TextField(null=True, blank=True)  # Field to save allergies
     service_count = models.CharField(max_length=100, null=True, blank=True)  # Nombre de service (as string)
     delivery_mode = models.ForeignKey(DeliveryMode, on_delete=models.SET_NULL, null=True, blank=True)  # Link to DeliveryMode
+    commentaire_menu = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
         return f"Menu '{self.menu.name}' for {self.submission.company_name} (ID {self.id})"

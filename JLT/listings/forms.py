@@ -311,9 +311,10 @@ class SubmissionForm(forms.ModelForm):
             'ordered_by', 'phone', 'email', 'billing_address',
             'payment_mode', 'date', 'event_time', 'guest_count',
             'delivery_time', 'budget', 'service_count', 'sub_menus', 'commentaire', 'client', 'etage', 'dock_livraison', 
-            'escalier', 'ascenseur', 'carte_dock'  # sub_menus included
+            'escalier', 'ascenseur', 'carte_dock', 'type_prise_de_commande'  # sub_menus included
         ]
         widgets = {
+            'type_prise_de_commande': forms.Select(attrs={'class': 'form-control'}),
             'submission_type': forms.Select(attrs={'class': 'form-control'}),
             'company_name': forms.TextInput(attrs={'class': 'form-control'}),
             'event_location': forms.TextInput(attrs={'class': 'form-control'}),
