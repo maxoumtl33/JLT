@@ -825,37 +825,35 @@ document.querySelectorAll('.icon-btn').forEach(btn => {
     });
   });
 });
-document.getElementById('toggleSubmissionsBtn').addEventListener('click', function() {
+document.addEventListener('DOMContentLoaded', () => {
+  // Toggle functions
+  document.getElementById('toggleSubmissionsBtn')?.addEventListener('click', () => {
     const listDiv = document.getElementById('submissionsList');
-    if (listDiv.style.display === 'none') {
-        listDiv.style.display = 'block';
-    } else {
-        listDiv.style.display = 'none';
+    if (listDiv) {
+      listDiv.style.display = (listDiv.style.display === 'none' || listDiv.style.display === '') ? 'block' : 'none';
     }
-});
-document.getElementById('toggleCommandeBtn').addEventListener('click', function() {
+  });
+  
+  document.getElementById('toggleCommandeBtn')?.addEventListener('click', () => {
     const listDiv = document.getElementById('commandeList');
-    if (listDiv.style.display === 'none') {
-        listDiv.style.display = 'block';
-    } else {
-        listDiv.style.display = 'none';
+    if (listDiv) {
+      listDiv.style.display = (listDiv.style.display === 'none' || listDiv.style.display === '') ? 'block' : 'none';
     }
-});
-document.getElementById('toggleSubmissionsencoursBtn').addEventListener('click', function() {
+  });
+  
+  document.getElementById('toggleSubmissionsencoursBtn')?.addEventListener('click', () => {
     const listDiv = document.getElementById('submissionsencoursList');
-    if (listDiv.style.display === 'none') {
-        listDiv.style.display = 'block';
-    } else {
-        listDiv.style.display = 'none';
+    if (listDiv) {
+      listDiv.style.display = (listDiv.style.display === 'none' || listDiv.style.display === '') ? 'block' : 'none';
     }
-});
-document.getElementById('toggleCommandeencoursBtn').addEventListener('click', function() {
+  });
+  
+  document.getElementById('toggleCommandeencoursBtn')?.addEventListener('click', () => {
     const listDiv = document.getElementById('commandeencoursList');
-    if (listDiv.style.display === 'none') {
-        listDiv.style.display = 'block';
-    } else {
-        listDiv.style.display = 'none';
+    if (listDiv) {
+      listDiv.style.display = (listDiv.style.display === 'none' || listDiv.style.display === '') ? 'block' : 'none';
     }
+  });
 });
 
 </script>

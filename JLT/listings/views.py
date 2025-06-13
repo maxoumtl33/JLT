@@ -5682,7 +5682,6 @@ def submit_request(request):
                 
                 # Copy client details to submission
                 submission.company_name = client.company_name
-                submission.event_location = client.event_location
                 submission.contact_person = client.contact_person
                 submission.phone = client.phone
                 submission.email = client.email
@@ -5859,7 +5858,6 @@ def get_client_details(request, client_id):
     client = Client.objects.get(id=client_id)
     data = {
         'company_name': client.company_name,
-        'event_location': client.event_location,
         'contact_person': client.contact_person,
         'phone': client.phone,
         'email': client.email,

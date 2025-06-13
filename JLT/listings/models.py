@@ -643,7 +643,6 @@ class PaymentMode(models.Model):
 
 class Client(models.Model):
     company_name = models.CharField(max_length=100, null=True, blank=True)  # Company name
-    event_location = models.CharField(max_length=200, null=True, blank=True)  # Lieu événement
     contact_person = models.CharField(max_length=100, null=True, blank=True)  # Contact sur place
     phone = models.CharField(max_length=15, null=True, blank=True)  # Telephone
     email = models.EmailField(max_length=100, null=True, blank=True)  # Email

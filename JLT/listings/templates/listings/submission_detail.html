@@ -263,9 +263,7 @@
                     <p><i class="fas fa-address-card info-icon"></i><strong style="{% if submission.billing_address %}color:#8CE78B;{% endif %}">Adresse de facturation:</strong>
                         <span class="view-section">{{ submission.billing_address|default_if_none:'' }}</span>
                         <input type="text" id="addressField" class="form-control edit-section d-none" name="billing_address" value="{{ submission.billing_address }}" />
-                        <button type="button" class="btn btn-secondary btn-sm copy-to-event-location" style="display: none;">
-                            <i class="fas fa-copy"></i>
-                        </button>
+                        
                     </p>
                 </div>
             </div>
@@ -833,49 +831,46 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('DOMContentLoaded', function() {
     // Récupérer le bouton "Enregistrer"
     const saveButton = document.getElementById('saveNewPaymentMode');
-saveButton.addEventListener('click', function() {
-    const name = document.getElementById('newPaymentModeName').value.trim();
-    const details = document.getElementById('newPaymentModeDetails').value.trim();
-    const submissionId = document.getElementById('current_submission_id').value;
+    saveButton.addEventListener('click', function() {
+        const name = document.getElementById('newPaymentModeName').value.trim();
+        const details = document.getElementById('newPaymentModeDetails').value.trim();
+        const submissionId = document.getElementById('current_submission_id').value;
 
-    fetch('/api/paymentmode/create/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': '{{ csrf_token }}'
-        },
-        body: JSON.stringify({ name, details, submission_id: submissionId })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Créer une nouvelle option pour le select
-            const option = document.createElement('option');
-            option.value = data.mode_id;
-            option.text = name;
+        fetch('/api/paymentmode/create/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ name, details, submission_id: submissionId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Créer une nouvelle option pour le select
+                const option = document.createElement('option');
+                option.value = data.mode_id;
+                option.text = name;
 
-            // Ajouter l'option au select, s'il existe
-            const select = document.getElementById('newPaymentModeName');
-            if (select) {
-                select.add(option);
-                select.value = data.mode_id;
+                const select = document.getElementById('newPaymentModeName');
+                if (select) {
+                    select.add(option);
+                    select.value = data.mode_id;
+                } else {
+                    console.error("L'élément select 'paymentModeSelect' n'a pas été trouvé");
+                    alert("Erreur : Impossible de mettre à jour la liste des modes de paiement");
+                }
+                // Au lieu de fermer le modal, recharger la page
+                location.reload();
             } else {
-                console.error("L'élément select 'paymentModeSelect' n'a pas été trouvé");
-                alert("Erreur : Impossible de mettre à jour la liste des modes de paiement");
+                alert('Erreur : ' + data.error);
             }
-
-            // Fermer le modal
-            $('#createPaymentModeModal').modal('hide');
-        } else {
-            alert('Erreur : ' + data.error);
-        }
-    })
-    .catch((error) => {
-        console.error('Erreur détaillée:', error);
-        alert('Erreur lors de la création du mode: ' + error.message);
+        })
+        .catch((error) => {
+            console.error('Erreur détaillée:', error);
+            alert('Erreur lors de la création du mode: ' + error.message);
+        });
     });
-});
-
 });
 
 document.addEventListener('DOMContentLoaded', function() {

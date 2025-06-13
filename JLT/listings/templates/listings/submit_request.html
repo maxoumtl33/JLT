@@ -56,7 +56,6 @@
             <div style="display: none;">
                 <!-- Hidden fields for client details -->
                 {{ form.company_name }}
-                {{ form.event_location }}
                 {{ form.contact_person }}
                 {{ form.phone }}
                 {{ form.email }}
@@ -104,7 +103,6 @@
                     url: '/get_client_details/' + clientId + '/',  // You need to create this URL
                     type: 'GET', success: function(data) {
                         $('#id_company_name').val(data.company_name);
-                        $('#id_event_location').val(data.event_location);
                         $('#id_contact_person').val(data.contact_person);
                         $('#id_phone').val(data.phone);
                         $('#id_email').val(data.email);
