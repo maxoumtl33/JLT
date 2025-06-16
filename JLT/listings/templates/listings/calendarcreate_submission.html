@@ -579,62 +579,60 @@ document.addEventListener('DOMContentLoaded', function() {
     
         // Fetch submissions based on creation date
         function getSubmissionsCreate(day) {
-            const month = document.getElementById('month-create').value;
-            fetch(`/get_submissions_for_created_at/${day}/?month=${month}`)
-                .then(response => {
-                    
-                    return response.json();
-                })
-                .then(data => {
-                    const submissionList = document.getElementById('submissioncreate-list');
-                    const baseUrl = submissionList.dataset.detailUrl.replace(/0\/$/, '');
-                    submissionList.innerHTML = '';
-    
-                    // Clear previously selected date
-                    const allDayButtons = document.querySelectorAll('.daycreate-btn');
-                    allDayButtons.forEach(button => button.classList.remove('selected'));
-    
-                    // Highlight the selected date button
-                    const selectedButton = document.querySelector(`.daycreate-btn[data-day='${day}']`);
-                    if (selectedButton) {
-                        selectedButton.classList.add('selected');
-                    }
-    
-                    if (data.submission && data.submission.length > 0) {
-                        
-                        data.submission.forEach(submission => {
-                            const row = document.createElement('tr');
-                            row.classList.add('clickable-row');
-                            row.classList.add(`status-${submission.status}`); // Add status class
-                            row.dataset.href = `${baseUrl}${submission.id}/`;
-    
-                            row.innerHTML = `
-                            <td>${submission.company_name}</td>
-                            <td>${submission.submission_type}</td>
-                            <td>${submission.user__username || 'N/A'}</td>
-                            <td>${submission.created_at}</td>
-                            <td>${submission.date}</td>
-                            <td>${getStatusIcon(submission.status)} ${submission.status}</td>
-                        `;
-                        row.addEventListener('click', function() {
-                            window.location.href = this.dataset.href;
-                        });
-                        submissionList.appendChild(row);
-                    });
-                } else {
-                    
-                    submissionList.innerHTML = `
-                        <tr>
-                            <td colspan="5">Aucune soumission créee à ce jour.</td>
-                        </tr>
+    const month = document.getElementById('month-create').value;
+    fetch(`/get_submissions_for_created_at/${day}/?month=${month}`)
+        .then(response => response.json())
+        .then(data => {
+            const submissionList = document.getElementById('submissioncreate-list');
+            const baseUrl = submissionList.dataset.detailUrl.replace(/0\/$/, '');
+            submissionList.innerHTML = '';
+
+            // Clear previously selected date
+            const allDayButtons = document.querySelectorAll('.daycreate-btn');
+            allDayButtons.forEach(button => button.classList.remove('selected'));
+
+            // Highlight the selected date button
+            const selectedButton = document.querySelector(`.daycreate-btn[data-day='${day}']`);
+            if (selectedButton) {
+                selectedButton.classList.add('selected');
+            }
+
+            if (data.submission && data.submission.length > 0) {
+                data.submission.forEach(submission => {
+                    const row = document.createElement('tr');
+                    row.classList.add('clickable-row');
+                    row.classList.add(`status-${submission.status}`); // Add status class
+                    row.dataset.href = `${baseUrl}/${submission.id}/`; // Ensure correct URL format
+
+                    const createdAt = new Date(submission.created_at).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
+                    const date = new Date(submission.date).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
+
+                    row.innerHTML = `
+                        <td>${submission.company_name || 'N/A'}</td>
+                        <td>${submission.submission_type || 'N/A'}</td>
+                        <td>${submission.user__username || 'N/A'}</td>
+                        <td>${createdAt}</td>
+                        <td>${date}</td>
+                        <td>${getStatusIcon(submission.status)} ${submission.status}</td>
                     `;
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching creation submissions:', error);
-            });
-    }
-    
+                    row.addEventListener('click', function() {
+                        window.location.href = this.dataset.href;
+                    });
+                    submissionList.appendChild(row);
+                });
+            } else {
+                submissionList.innerHTML = `
+                    <tr>
+                        <td colspan="6">Aucune soumission créee à ce jour.</td>
+                    </tr>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching creation submissions:', error);
+        });
+}
+
     document.addEventListener('DOMContentLoaded', () => {
   // Toggle functions
   document.getElementById('toggleSubmissionsBtn')?.addEventListener('click', () => {

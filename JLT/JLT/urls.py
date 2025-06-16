@@ -97,6 +97,7 @@ path('submission/<int:submission_id>/', submission_detail, name='submission_deta
 path('get-conseiller-username/', get_conseiller_username, name='get_conseiller_username'),
 path('submission_dashboard/status/update/<int:submission_id>/', update_submission_status_dashboard, name='update_dashboard_submission_status'),
 path('update_submission/<int:submission_id>/', update_submission_status, name='update_submission_status'),  # For updating submission status
+path('api/submission/<int:submission_id>/update-status/', views.update_submission_status_detail, name='update_submission_status'),
 path('associer-toutes_dock/', views.associer_toutes_livraisons_docks, name='associer_toutes_dock'),
 path('update-payment-mode/', views.update_payment_mode, name='update_payment_mode'),
 path('api/paymentmode/create/', views.create_payment_mode, name='create_payment_mode'),

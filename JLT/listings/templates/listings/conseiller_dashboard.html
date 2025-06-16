@@ -177,7 +177,7 @@ input[type="checkbox"] {
                 {% for sub in submissions_48h_envoye %}
                     <li>
                         <a href="{% url 'submission_detail' sub.id %}" target="_blank">
-                            {{ sub.company_name }}
+                            {{ sub.company_name }}, crée le {{ sub.created_at|date:"d F Y" }}, pour le {{ sub.date|date:"d F Y" }}
                         </a>
                     </li>
                 {% endfor %}
@@ -200,7 +200,7 @@ input[type="checkbox"] {
                                     {% for sub in submissions_48h_encours %}
                                         <li>
                                             <a href="{% url 'submission_detail' sub.id %}" target="_blank">
-                                                {{ sub.company_name }}
+                                                {{ sub.company_name }}, crée le {{ sub.created_at|date:"d F Y" }}, pour le {{ sub.date|date:"d F Y" }}
                                             </a>
                                         </li>
                                     {% endfor %}
@@ -222,7 +222,7 @@ input[type="checkbox"] {
                                     {% for sub in commande_48h_envoye %}
                                         <li>
                                             <a href="{% url 'submission_detail' sub.id %}" target="_blank">
-                                                {{ sub.company_name }}
+                                                {{ sub.company_name }}, crée le {{ sub.created_at|date:"d F Y" }}, pour le {{ sub.date|date:"d F Y" }}
                                             </a>
                                         </li>
                                     {% endfor %}
@@ -243,7 +243,7 @@ input[type="checkbox"] {
                                     {% for sub in commande_48h_encours %}
                                         <li>
                                             <a href="{% url 'submission_detail' sub.id %}" target="_blank">
-                                                {{ sub.company_name }}
+                                                {{ sub.company_name }}, crée le {{ sub.created_at|date:"d F Y" }}, pour le {{ sub.date|date:"d F Y" }}
                                             </a>
                                         </li>
                                     {% endfor %}
@@ -406,7 +406,7 @@ input[type="checkbox"] {
 <hr>
 <!-- Submission Summary Stats -->
 <div class="row mb-4">
-    <div class="col-lg-3">
+    <div class="col-lg-4">
         <div class="card shadow-sm border-0 text-center">
             <div class="card-body">
                 <h5 class="card-title">Total Soumissions/Commandes</h5>
@@ -414,25 +414,21 @@ input[type="checkbox"] {
             </div>
         </div>
     </div>
-    <div class="col-lg-3">
+    <div class="col-lg-4">
         <div class="card shadow-sm border-0 text-center">
             <div class="card-body">
                 <h5 class="card-title">En cours</h5>
                 <p class="card-text display-4 text-warning">{{ count_encours }}</p>
+                <h5 class="card-title">Envoyé</h5>
+                <p class="card-text display-4 text-primary">{{ count_envoye }}</p>
             </div>
         </div>
     </div>
-    <div class="col-lg-3">
+    <div class="col-lg-4">
         <div class="card shadow-sm border-0 text-center">
             <div class="card-body">
                 <h5 class="card-title">Validé</h5>
                 <p class="card-text display-4 text-success">{{ count_valide }}</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-3">
-        <div class="card shadow-sm border-0 text-center">
-            <div class="card-body">
                 <h5 class="card-title">Refusé</h5>
                 <p class="card-text display-4 text-danger">{{ count_refuse }}</p>
             </div>
@@ -825,6 +821,9 @@ document.querySelectorAll('.icon-btn').forEach(btn => {
     });
   });
 });
+
+
+
 document.addEventListener('DOMContentLoaded', () => {
   // Toggle functions
   document.getElementById('toggleSubmissionsBtn')?.addEventListener('click', () => {

@@ -5497,6 +5497,23 @@ class Livraisonsdrag(ListView):
 
         return context
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+@csrf_exempt  # Si vous n'avez pas mis la protection CSRF au bon endroit, sinon utilisez standard CSRF
+def update_submission_status_detail(request, submission_id):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        status = data.get('status')
+        try:
+            submission = Submission.objects.get(id=submission_id)
+            submission.status = status
+            submission.save()
+            return JsonResponse({'success': True})
+        except Submission.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Soumission non trouvée'})
+    return JsonResponse({'success': False, 'error': 'Méthode non autorisée'}, status=405)
 
 @login_required
 def delete_livraison(request, pk):

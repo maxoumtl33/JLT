@@ -721,9 +721,22 @@ class Submission(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='en_cours')
 
     def save(self, *args, **kwargs):
-        # Set created_at to now minus 4 hours
-        if not self.created_at:  # If created_at is not already set
+        # Convertir les None en chaîne vide pour les champs de texte
+        text_fields = [
+            'company_name', 'refusal_comment', 'commentaire_items', 'commentaire_boissons',
+            'event_postcode', 'event_location', 'contact_person', 'ordered_by', 'phone',
+            'email', 'billing_address', 'etage', 'dock_livraison', 'commentaire', 'service_count'
+        ]
+
+        for field in text_fields:
+            value = getattr(self, field)
+            if value is None:
+                setattr(self, field, '')
+
+        # Pour created_at
+        if not self.created_at:
             self.created_at = timezone.now() - timedelta(hours=4)
+            
         super().save(*args, **kwargs)
 
     def __str__(self):
