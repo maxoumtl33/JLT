@@ -5716,6 +5716,7 @@ def submit_request(request):
                 submission.carte_dock = client.carte_dock
                 submission.payment_mode = client.payment_mode
                 submission.ordered_by = client.ordered_by
+                submission.event_location = client.event_location
 
 
             messages.success(request, 'Votre soumission a été enregistrée avec succès.')

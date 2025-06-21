@@ -642,6 +642,7 @@ class Client(models.Model):
     email = models.EmailField(max_length=100, null=True, blank=True)  # Email
     billing_address = models.CharField(max_length=200, null=True, blank=True)  # Adresse facturation
     etage = models.CharField(max_length=200, null=True, blank=True)
+    event_location = models.CharField(max_length=200, null=True, blank=True)
     dock_livraison = models.CharField(max_length=200, null=True, blank=True)
     escalier = models.BooleanField(default=False)
     ascenseur = models.BooleanField(default=False)
