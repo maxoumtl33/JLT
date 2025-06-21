@@ -593,15 +593,8 @@ class ChecklistRecupPhoto(models.Model):
 
     caption = models.CharField(max_length=200, null=True, blank=True)
 
-class DeliveryMode(models.Model):
-
-    choicesmode = [('assiette', 'Assiette'),
-        ('buffet_porcelaine', 'Buffet porcelaine'),
-        ('buffet_jetable', 'Buffet jetable'),
-        ('coffret', 'Coffret'),
-        ('menu', 'Menu')]
-    
-    name = models.CharField(max_length=30, choices=choicesmode, null=True, blank=True)  # Mode d'envoi
+class DeliveryMode(models.Model):    
+    name = models.CharField(max_length=30, null=True, blank=True)  # Mode d'envoi
 
     def __str__(self):
         return self.name
@@ -644,6 +637,7 @@ class PaymentMode(models.Model):
 class Client(models.Model):
     company_name = models.CharField(max_length=100, null=True, blank=True)  # Company name
     contact_person = models.CharField(max_length=100, null=True, blank=True)  # Contact sur place
+    ordered_by = models.CharField(max_length=100, null=True, blank=True)
     phone = models.CharField(max_length=15, null=True, blank=True)  # Telephone
     email = models.EmailField(max_length=100, null=True, blank=True)  # Email
     billing_address = models.CharField(max_length=200, null=True, blank=True)  # Adresse facturation
@@ -683,6 +677,7 @@ class Submission(models.Model):
     refusal_comment = models.TextField(null=True, blank=True)
     commentaire_items = models.TextField(null=True, blank=True)
     commentaire_boissons = models.TextField(null=True, blank=True)
+    document = models.FileField(upload_to='listings/media/commandesdetail', null=True, blank=True)
     event_postcode = models.TextField(null=True, blank=True)
     company_name = models.CharField(max_length=100, null=True, blank=True)  # Company name
     event_location = models.CharField(max_length=200, null=True, blank=True)  # Lieu événement
@@ -736,7 +731,7 @@ class Submission(models.Model):
         # Pour created_at
         if not self.created_at:
             self.created_at = timezone.now() - timedelta(hours=4)
-            
+
         super().save(*args, **kwargs)
 
     def __str__(self):

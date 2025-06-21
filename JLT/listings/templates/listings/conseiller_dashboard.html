@@ -252,15 +252,15 @@ input[type="checkbox"] {
                         </div>
                     </div>
                     {% endif %}
-<div class="container-fluid py-4">
-    <!-- Dashboard Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="text-primary">Bonjour, {{ user.username }}</h1>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createChecklistModal">
-            <i class="fa-solid fa-plus me-2"></i>Ajouter Checklist
-        </button>
-    </div>
 
+                    
+<div class="container-fluid py-4">
+    <div class="btn-group mb-4" role="group" aria-label="Choix Affichage">
+        
+        <button type="button" class="btn btn-outline-secondary" id="showSubmissionBtn" onclick="showSection('submissions')">Soumissions</button>
+        <button type="button" class="btn btn-outline-primary" id="showChecklistBtn" onclick="showSection('checklists')">Checklists</button>
+      </div>
+<div id="checklistsSection">
     <!-- Quick Stats -->
     <div class="row mb-4">
         <div class="col-lg-4">
@@ -401,9 +401,10 @@ input[type="checkbox"] {
         {% endif %}
     </ul>
 </nav>
-
+</div>
 <hr>
 <hr>
+<div id="submissionsSection" style="display: none;">
 <!-- Submission Summary Stats -->
 <div class="row mb-4">
     <div class="col-lg-4">
@@ -614,7 +615,7 @@ input[type="checkbox"] {
 </nav>
 </div>
 
-
+</div>
 
 <!-- Product Modal -->
 <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
@@ -854,6 +855,42 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+function showSection(section) {
+  const checklistSection = document.getElementById('checklistsSection');
+  const submissionSection = document.getElementById('submissionsSection');
+
+  const showChecklistBtn = document.getElementById('showChecklistBtn');
+  const showSubmissionBtn = document.getElementById('showSubmissionBtn');
+
+  if (section === 'checklists') {
+    checklistSection.style.display = 'block';
+    submissionSection.style.display = 'none';
+
+    showChecklistBtn.classList.remove('btn-outline-primary');
+    showChecklistBtn.classList.add('btn-primary');
+
+    showSubmissionBtn.classList.remove('btn-primary');
+    showSubmissionBtn.classList.add('btn-outline-secondary');
+  } else if (section === 'submissions') {
+    checklistSection.style.display = 'none';
+    submissionSection.style.display = 'block';
+
+    showSubmissionBtn.classList.remove('btn-outline-secondary');
+    showSubmissionBtn.classList.add('btn-primary');
+
+    showChecklistBtn.classList.remove('btn-primary');
+    showChecklistBtn.classList.add('btn-outline-primary');
+  }
+}
+
+// Pour l'initialisation (par exemple, afficher Soumissions par défaut)
+window.onload = () => {
+  showSection('submissions');
+};
+
+
+
 
 </script>
 {% endblock %}

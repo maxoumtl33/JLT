@@ -363,3 +363,44 @@ function toggleMenuSection() {
     menuSection.style.display = menusChecked ? 'block' : 'none';
 }
 
+<!-- Barre latérale -->
+
+<div id="sidebar" class="" style="display: none;">
+    <nav class="nav flex-column" style="height: 80vh; overflow-y: auto; background-color: #343a40; color: #fff;">
+      <a class="nav-link text-white" href="{% url 'journees-list' %}">
+        <i class="fa-solid fa-truck me-2"></i>Livraisons
+      </a>
+      <a class="nav-link text-white" href="{% url 'creerchecklist' %}">
+        <i class="fa-solid fa-cart-flatbed me-2"></i>Checklist
+      </a>
+      <a class="nav-link text-white" href="{% url 'etiquette-tente' %}">
+        <i class="fa-solid fa-print me-2"></i>Etiquette tente
+      </a>
+      <a class="nav-link text-white" href="{% url 'submit_request' %}" target="_blank" >
+        <i class="fa-solid fa-circle-plus me-2" style="color: #63E6BE;"></i>Créer Soumission
+      </a>
+      <button type="button" class="nav-link text-white" data-bs-toggle="modal" data-bs-target="#createChecklistModal">
+        <i class="fa-solid fa-circle-plus me-2" style="color: #63E6BE;"></i>Créer Checklist
+    </button>
+
+      {% if user.username == "Audrey" or "Maxime" %}
+          <a class="nav-link text-white" href="{% url 'manage_submissions' %}">
+            <i class="fa fa-file-pdf me-2"></i>PDF
+        </a>
+          <a class="nav-link text-white" href="{% url 'calendarsub_view' %}">
+            <i class="fa fa-calendar-days me-2"></i>Calendrier date événem
+        </a>
+          <a class="nav-link text-white" href="{% url 'calendarsubcreate_view' %}">
+            <i class="fa fa-calendar-plus me-2"></i>Calendrier date création
+        </a>
+      {% endif %}
+  
+    </nav>
+  </div>
+  <!-- Bouton menu pour ouvrir/fermer la sidebar -->
+<button id="menu-toggle" class="btn btn-primary position-fixed" style="top: 20px; left: 20px; z-index: 1100; display: none;">
+    <i class="fas fa-bars"></i>
+  </button>
+  
+  <!-- Overlay pour fermer la sidebar en cliquant -->
+  <div id="overlay"></div>

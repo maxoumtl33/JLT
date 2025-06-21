@@ -43,8 +43,17 @@ class ItemInvAdmin(ImportExportModelAdmin):
 class ProductAdmin(ImportExportModelAdmin):
     list_display = ('id', 'name', 'quantity')
 
+class MenuAdmin(ImportExportModelAdmin):
+    list_display = ('id', 'name')
+
+class DeliverymodeAdmin(ImportExportModelAdmin):
+    list_display = ('id', 'name')
+
 class PlatAdmin(ImportExportModelAdmin):
     list_display = ('id', 'nom')
+
+class ClientAdmin(ImportExportModelAdmin):
+    list_display = ('id', 'company_name', 'billing_address', 'contact_person', 'phone', 'email', 'etage', 'ordered_by' )
 
 class InventoryAdmin(ImportExportModelAdmin):
     list_display = ('id', 'item', 'quantity')
@@ -74,7 +83,7 @@ admin.site.register(Checklist)
 admin.site.register(Phototaches)
 admin.site.register(Product,ProductAdmin)
 admin.site.register(Inventory, InventoryAdmin)
-admin.site.register(Client)
+admin.site.register(Client, ClientAdmin)
 admin.site.register(ItemInv, ItemInvAdmin)
 admin.site.register(ItemCuisine)
 admin.site.register(OrderCuisine)
@@ -89,8 +98,8 @@ admin.site.register(Category)
 admin.site.register(Vehicle)
 admin.site.register(PhotoVehicle)
 admin.site.register(Submission)
-admin.site.register(Menu)
-admin.site.register(DeliveryMode)
+admin.site.register(Menu, MenuAdmin)
+admin.site.register(DeliveryMode, DeliverymodeAdmin)
 admin.site.register(Plat, PlatAdmin)
 admin.site.register(MenuSubmission)
 admin.site.register(Score)

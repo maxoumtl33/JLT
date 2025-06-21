@@ -1306,6 +1306,7 @@ def conseiller_dashboard(request):
 
     # Pagination for user's submissions
     submissions = Submission.objects.filter(user=request.user).order_by("-created_at")
+    
 
     submissions_48h_encours = submissions.filter(
     status='en_cours',
@@ -1327,6 +1328,9 @@ def conseiller_dashboard(request):
     created_at__lt=timezone.now() - timedelta(hours=48),
     submission_type__icontains='commande'  # Filtre pour 'soumission' dans submission_type
 )
+
+ 
+
     # Paginate submissions
     submission_paginator = Paginator(submissions, 10)  # Show 10 submissions per page
     submission_page_number = request.GET.get('submission_page')  # Different page number for submissions
@@ -1376,7 +1380,7 @@ def conseiller_dashboard(request):
     count_encours = submissions.filter(status='en_cours').count()
     count_valide = submissions.filter(status='valide').count()
     count_refuse = submissions.filter(status='refuse').count()
-    count_envoye = submissions.filter(status='envoye').count()
+    count_envoye = submissions.filter(status='envoyé').count()
 
     context = {
         'checklist_form': checklist_form,
@@ -1401,6 +1405,8 @@ def conseiller_dashboard(request):
         'commande_48h_encours':commande_48h_encours,
         'commande_48h_envoye':commande_48h_envoye,
         'envoye':envoye,
+        
+        
     }
 
     return render(request, 'listings/conseiller_dashboard.html', context)
@@ -5348,7 +5354,7 @@ def livraisonsresp(request):
 def recuptoday(request):
     today = datetime.now().date()
     tomorrow = today + timedelta(1)
-    recups = ["Porcelaine", "Chaud et porcelaine", "Porcelaine et bois", "Plateau de bois", "Froid et bois", "Chaud et jetable", "Froid et porcelaine", "Porcelaine / chaud en vrac", "Plateau JLT", "Plateaux à partager"]
+    recups = ["Porcelaine", "Chaud et porcelaine", "Porcelaine et bois", "Plateau de bois", "Froid et bois", "Chaud et jetable", "Froid et porcelaine", "Porcelaine / chaud en vrac", "Plateau JLT", "Plateaux à partager", "Chaud et Plateau JLT", "Assiette individuelle", "Assiette Salade-Repas", "En vrac", "Froid et Plateau JLT", "Plateau JLT / chaud en vrac", "Plateau JLT et bois"] 
 
     # Querysets
     recuperations = Livraison.objects.filter(recuperation=False, date=today, mode_envoi__in=recups)
@@ -5709,6 +5715,7 @@ def submit_request(request):
                 submission.ascenseur = client.ascenseur
                 submission.carte_dock = client.carte_dock
                 submission.payment_mode = client.payment_mode
+                submission.ordered_by = client.ordered_by
 
 
             messages.success(request, 'Votre soumission a été enregistrée avec succès.')
@@ -6168,6 +6175,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import Submission
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 
 @csrf_exempt
 def update_submission(request, submission_id):
@@ -6181,6 +6190,18 @@ def update_submission(request, submission_id):
                 clean_post[key] = value.strip()
         try:
             submission = get_object_or_404(Submission, id=submission_id)
+
+            # Handle file upload
+            if 'document' in request.FILES:
+                file = request.FILES['document']
+                if submission.document:
+                    # Delete the old file if it exists
+                    default_storage.delete(submission.document.path)
+                
+                # Save the new file
+                path = default_storage.save(f'submission_documents/{file.name}', ContentFile(file.read()))
+                submission.document = path
+                submission.save()
 
             # Parse and validate main fields
             # (Similar to your current approach)

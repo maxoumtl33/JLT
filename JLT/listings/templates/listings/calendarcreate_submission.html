@@ -295,7 +295,7 @@
                 {% for sub in submissions_48h_envoye %}
                     <li>
                         <a href="{% url 'submission_detail' sub.id %}" target="_blank">
-                            {{ sub.company_name }} crée par {{ sub.user.username }}, le {{ sub.created_at|date:"l d F Y" }}
+                            {{ sub.company_name }} crée par {{ sub.user.username }}, le {{ sub.created_at|date:"l d F Y" }}, pour le {{ sub.date|date:"l d F Y" }}
                         </a>
                     </li>
                 {% endfor %}
@@ -318,7 +318,7 @@
                                     {% for sub in submissions_48h_encours %}
                                         <li>
                                             <a href="{% url 'submission_detail' sub.id %}" target="_blank">
-                                                {{ sub.company_name }} crée par {{ sub.user.username }}, le {{ sub.created_at|date:"l d F Y" }}
+                                                {{ sub.company_name }} crée par {{ sub.user.username }}, le {{ sub.created_at|date:"l d F Y" }}, pour le {{ sub.date|date:"l d F Y" }}
                                             </a>
                                         </li>
                                     {% endfor %}
@@ -340,7 +340,7 @@
                                     {% for sub in commande_48h_envoye %}
                                         <li>
                                             <a href="{% url 'submission_detail' sub.id %}" target="_blank">
-                                                {{ sub.company_name }} crée par {{ sub.user.username }}, le {{ sub.created_at|date:"l d F Y" }}
+                                                {{ sub.company_name }} crée par {{ sub.user.username }}, le {{ sub.created_at|date:"l d F Y" }}, pour le {{ sub.date|date:"l d F Y" }}
                                             </a>
                                         </li>
                                     {% endfor %}
@@ -361,7 +361,7 @@
                                     {% for sub in commande_48h_encours %}
                                         <li>
                                             <a href="{% url 'submission_detail' sub.id %}" target="_blank">
-                                                {{ sub.company_name }} crée par {{ sub.user.username }}, le {{ sub.created_at|date:"l d F Y" }}
+                                                {{ sub.company_name }} crée par {{ sub.user.username }}, le {{ sub.created_at|date:"l d F Y" }}, pour le {{ sub.date|date:"l d F Y" }}
                                             </a>
                                         </li>
                                     {% endfor %}

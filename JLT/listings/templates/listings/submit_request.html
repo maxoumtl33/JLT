@@ -48,7 +48,7 @@
                 <option value="">Choisissez un client</option>
                 {% for client in clients %}
                     <option value="{{ client.id }}" {% if submission.client and submission.client.id == client.id %}selected{% endif %}>
-                        {{ client.company_name }}
+                        {{ client.company_name }} ({{ client.contact_person }})
                     </option>
                 {% endfor %}
             </select>
@@ -66,6 +66,7 @@
                 {{ form.ascenseur }}
                 {{ form.carte_dock }}
                 {{ form.payment_mode }}
+                {{ form.ordered_by }}
             </div>
             
         </fieldset>
