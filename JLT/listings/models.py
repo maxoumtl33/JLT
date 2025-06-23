@@ -694,7 +694,7 @@ class Submission(models.Model):
     carte_dock = models.BooleanField(default=False)
     avec_service = models.BooleanField(default=False)
     commentaire = models.CharField(max_length=200, null=True, blank=True) 
-    payment_mode = models.ForeignKey(PaymentMode, on_delete=models.SET_NULL, null=True, blank=True)
+    payment_mode = models.CharField(max_length=200, null=True, blank=True) 
     client = models.ForeignKey(Client, null=True, blank=True, on_delete=models.SET_NULL, related_name='submissions_client')
     date = models.DateField(null=True, blank=True)  # Date
     event_time = models.TimeField(null=True, blank=True)  # Heure événement

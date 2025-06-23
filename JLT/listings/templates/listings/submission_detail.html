@@ -1,6 +1,7 @@
 {% extends 'listings/base.html' %}
 {% load static %}
 
+{% load custom_filters %}
 
 
 {% block content %}
@@ -378,87 +379,17 @@
                         <strong style="{% if submission.payment_mode %}color:#8CE78B;{% endif %}">
                             Mode de paiement:
                         </strong>
-                        
-                        {% if submission.payment_mode %}
-                        <span 
-                            class="view-section" 
-                            data-bs-toggle="tooltip" 
-                            data-bs-placement="top" 
-                            title="{{ submission.payment_mode.details }}">
-                            {{ submission.payment_mode }}
-                        </span>
-                        <button class="btn btn-link" data-bs-toggle="modal" data-bs-target="#editPaymentModeModal">
-                            Modifier
-                        </button>
-                        
-                        {% else %}
-                        <button name="payment_mode" class="form-control" id="paymentModeButton" data-bs-toggle="modal" data-bs-target="#createPaymentModeModal">
-                            Ajouter
-                        </button>
-                        {% endif %}
-                    </p>
+                        <span class="view-section">{{ submission.payment_mode|default_if_none:'' }}</span>
+                        <input type="text"  class="form-control edit-section d-none" name="payment_mode" value="{{ submission.payment_mode }}" />
+                       
                 </div>
                 
-                <!-- Edit Payment Mode Modal -->
-                <div class="modal fade" id="editPaymentModeModal" tabindex="-1" aria-labelledby="editPaymentModeModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="editPaymentModeModalLabel">Modifier Mode de paiement</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <!-- Form for editing payment mode -->
-                                <form id="editPaymentModeForm" data-payment-mode-id="{{ submission.payment_mode.id }}">
-                                    <div class="mb-3">
-                                      <label for="paymentModeDetailsInput" class="form-label">Détails</label>
-                                      <textarea class="form-control" id="paymentModeDetailsInput" rows="3" required>{{ submission.payment_mode.details }}</textarea>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
-                                  </form>
-                                  
-                            </div>
-                        </div>
-                    </div>
-                </div>
+           
                 
                 
             </div>
 
-            <div class="modal fade" id="createPaymentModeModal" tabindex="-1" role="dialog" aria-labelledby="createPaymentModeModalLabel" aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h5 class="modal-title" id="createPaymentModeModalLabel">Créer un nouveau mode de paiement</h5>
-                      <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
-                        <span aria-hidden="true">&times;</span>
-                      </button>
-                    </div>
-                    <div class="modal-body">
-                      <!-- Votre formulaire de création -->
-                      <div class="form-group">
-                        <label for="newPaymentModeName">Nom du mode</label>
-                        <select class="form-control" id="newPaymentModeName" name="new_payment_mode_name">
-                          <option value="">Sélectionnez un mode de paiement</option>
-                          <option value="Carte de crédit">Carte de crédit</option>
-                          <option value="Chèque">Chèque</option>
-                          <option value="Transfert bancaire">Transfert bancaire</option>
-                          <option value="Facturation">Facturation</option>
-                        </select>
-                      </div>
-    
-                      <div class="form-group">
-                        <label for="newPaymentModeDetails">Détails</label>
-                        <textarea class="form-control" id="newPaymentModeDetails" name="new_payment_mode_details" placeholder="Informations complémentaires"></textarea>
-                      </div>
-                    </div>
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
-                      <button type="button" class="btn btn-primary" id="saveNewPaymentMode">Enregistrer</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+          
               
               
             
@@ -477,7 +408,7 @@
                                     <tr>
                                         <th>Menu</th>
                                         <th>Allergies</th>
-                                        <th>Nb convives</th>
+                                        <th>Nb convives ({{ submission.menu_submissions.all|sum_service_count }} / {{ submission.guest_count|default:"0" }})</th>
                                         <th>Commentaire</th>
                                         <th>Modes d'envoi</th>
                                     </tr>
@@ -511,7 +442,7 @@
                                             </td>
                                             <td>
                                                 <div class="view-section" id="view-service_count-{{ menu_submission.id }}">
-                                                    {{ menu_submission.service_count|default:"0" }}
+                                                    {{ menu_submission.service_count|default:"0" }} / {{ submission.guest_count|default:"0" }}
                                                 </div>
                                                 <div class="edit-section d-none" id="edit-service_count-{{ menu_submission.id }}">
                                                     <input type="text" name="service_count_{{ menu_submission.id }}" class="form-control" value="{{ menu_submission.service_count }}">
@@ -547,9 +478,10 @@
                                                 </button>
                                                 
                                             </td>
-                                            
                                         </tr>
+                                        
                                     {% endfor %}
+                                    
                                 </tbody>
                             </table>
                         {% else %}
@@ -1102,88 +1034,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Récupérer le bouton "Enregistrer"
-    const saveButton = document.getElementById('saveNewPaymentMode');
-    saveButton.addEventListener('click', function() {
-        const name = document.getElementById('newPaymentModeName').value.trim();
-        const details = document.getElementById('newPaymentModeDetails').value.trim();
-        const submissionId = document.getElementById('current_submission_id').value;
-
-        fetch('/api/paymentmode/create/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: JSON.stringify({ name, details, submission_id: submissionId })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Créer une nouvelle option pour le select
-                const option = document.createElement('option');
-                option.value = data.mode_id;
-                option.text = name;
-
-                const select = document.getElementById('newPaymentModeName');
-                if (select) {
-                    select.add(option);
-                    select.value = data.mode_id;
-                } else {
-                    console.error("L'élément select 'paymentModeSelect' n'a pas été trouvé");
-                    alert("Erreur : Impossible de mettre à jour la liste des modes de paiement");
-                }
-                // Au lieu de fermer le modal, recharger la page
-                location.reload();
-            } else {
-                alert('Erreur : ' + data.error);
-            }
-        })
-        .catch((error) => {
-            console.error('Erreur détaillée:', error);
-            alert('Erreur lors de la création du mode: ' + error.message);
-        });
-    });
-});
-
-document.addEventListener('DOMContentLoaded', function() {
-  document.getElementById('editPaymentModeForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const paymentDetails = document.getElementById('paymentModeDetailsInput').value;
-    const paymentModeId = document.getElementById('editPaymentModeForm').dataset.paymentModeId;
-
-    fetch('/update-payment-mode/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': '{{ csrf_token }}' // Si Django
-      },
-      body: JSON.stringify({
-        payment_mode_id: paymentModeId,
-        details: paymentDetails
-      })
-    })
-    .then(response => response.json())
-    .then(data => {
-      if(data.success){
-        alert('Les détails ont été mis à jour.');
-        // Optionnel : mettre à jour l'affichage quelque part
-        document.querySelector('.view-section').textContent = paymentDetails;
-        var modal = bootstrap.Modal.getInstance(document.getElementById('editPaymentModeModal'));
-        modal.hide();
-      } else {
-        alert('Erreur lors de la sauvegarde. Veuillez réessayer.');
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('Une erreur est survenue.');
-    });
-  });
-});
 
 document.addEventListener('DOMContentLoaded', () => {
   // Vérifie Commentaire Boissons

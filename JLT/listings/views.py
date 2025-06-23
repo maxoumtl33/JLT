@@ -6227,6 +6227,7 @@ def update_submission(request, submission_id):
 
             submission.event_location = request.POST.get('event_location', '').strip()
             submission.contact_person = request.POST.get('contact_person', '').strip()
+            submission.payment_mode = request.POST.get('payment_mode', '').strip()
             submission.phone = request.POST.get('phone', '').strip()
             commentaire = request.POST.get('commentaire', '').strip()
 

@@ -155,3 +155,8 @@ def strip_zero_decimal(value):
         return value
     except (ValueError, TypeError):
         return value
+    
+
+@register.filter
+def sum_service_count(menu_submissions):
+    return sum(int(submission.service_count or 0) for submission in menu_submissions)
