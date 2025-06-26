@@ -1,5 +1,4 @@
 
-
 // Function to bind comment toggle events
 function bindCommentToggleEvents() {
     document.querySelectorAll('.toggle-comment').forEach(button => {
