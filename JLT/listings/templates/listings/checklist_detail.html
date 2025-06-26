@@ -1739,7 +1739,7 @@
     
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                    <button type="button" class="btn btn-primary" onclick="generatePDFb()">
+                    <button type="button" class="btn btn-primary" data-generate-pdf="breuvage">
                         <i class="fa-solid fa-file-pdf"></i>
                     </button>
                 </div>
@@ -2333,7 +2333,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
     
-                    <button type="button" class="btn btn-primary" onclick="generatePDF()">
+                    <button type="button" class="btn btn-primary" data-generate-pdf="checklist">
                         <i class="fa-solid fa-file-pdf"></i>
                     </button>
                 </div>
@@ -2546,10 +2546,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{% static 'listings/js/checklist_detail.js' %}"></script>
-    
-    
-    <script type="text/javascript" defer>
-      var uploadDocumentUrl = "{% url 'upload_document' checklist.id %}";
+
+
+
+  
+
+      <script>
+
+        var uploadDocumentUrl = "{% url 'upload_document' checklist.id %}";
       var searchProductsBaseUrl = "{% url 'search_productsbase' checklist.id %}";
       var searchProductsJetableUrl = "{% url 'search_productsjetable' checklist.id %}";
       var searchProductsDecorUrl = "{% url 'search_productsdecor' checklist.id %  }";
@@ -2567,45 +2571,165 @@
   var searchProductsVinsUrl = "{% url 'search_productsvins' checklist.id %}";
   var searchProductsSansAlcoolUrl = "{% url 'search_productssansalcool' checklist.id %}";
   var searchProductsCFCDNUrl = "{% url 'search_productscfcdn' checklist.id %}";
-
+ 
+  
   $(document).ready(function() {
-    window.generatePDFbreuvage = function() {
-        // Getting the necessary data from Django
-        const checklistName = "{{ checklist.name }}"; // Get checklist name
-        const checklistDate = "{{ checklist.date|date:'d F Y' }}"; // Get date
-        const conseiller = "{{ checklist.conseillere }}"; // Get conseiller
 
-        // Create a new jsPDF instance
-        const { jsPDF } = window.jspdf; // Ensure you access jsPDF correctly
-        const pdf = new jsPDF();
+window.generatePDFbreuvage = function() {
+    // Getting the necessary data from Django
+    const checklistName = "{{ checklist.name }}"; // Get checklist name
+    const checklistDate = "{{ checklist.date|date:'d F Y' }}"; // Get date
+    const conseiller = "{{ checklist.conseillere }}"; // Get conseiller
+    const md = "{{ checklist.md }}";
 
-        // Adding checklist info at the top of the PDF
-        pdf.setFontSize(12);
-        pdf.text(20, 20, `RAPPORT BREUVAGE - ${checklistName}`);
-        pdf.text(20, 30, `${checklistDate}`);
-        pdf.text(20, 40, `Conseillère: ${conseiller}`);
+    // Create a new jsPDF instance
+    const { jsPDF } = window.jspdf; // Ensure you access jsPDF correctly
+    const pdf = new jsPDF();
 
-        // Use autoTable to create a table dynamically
-        const breuvagesData = [
-            {% for breuvage in breuvages %}
-                ['{{ breuvage.product.name }}', {{ breuvage.quantity }}, {{ breuvage.quantity|subtract:breuvage.consumed_quantity }}, {{ breuvage.consumed_quantity }}],
-            {% endfor %}
-        ];
+    // Adding checklist info at the top of the PDF
+    pdf.setFontSize(12);
+    pdf.text(20, 20, `RAPPORT BREUVAGE - ${checklistName}`);
+    pdf.text(20, 30, `${checklistDate}`);
+    pdf.text(20, 40, `MD: ${md}`);
 
-        pdf.autoTable({
-            head: [['Produit', 'Total', 'Restant', 'Consommé']],
-            body: breuvagesData,
-            startY: 50, // Start position for the table
-            theme: 'striped', // Giving it a striped theme
-        });
+    // Use autoTable to create a table dynamically
+    const breuvagesData = [
+        {% for breuvage in breuvages %}
+            ['{{ breuvage.product.name }}', {{ breuvage.quantity }}, {{ breuvage.quantity|subtract:breuvage.consumed_quantity }}, {{ breuvage.consumed_quantity }}],
+        {% endfor %}
+    ];
 
-        // Save the PDF
-        pdf.save(`rapport_breuvage_${checklistName.replace(/\s+/g, '_')}_${checklistDate}.pdf`);
-    };
+    pdf.autoTable({
+        head: [['Boissons', 'Total', 'Restant', 'Consommé']],
+        body: breuvagesData,
+        startY: 50, // Start position for the table
+        theme: 'striped', // Giving it a striped theme
+    });
+
+    // Save the PDF
+    pdf.save(`rapport_breuvage_${checklistName.replace(/\s+/g, '_')}_${checklistDate}.pdf`);
+};
 });
 
-
-</script>
+ const generatePDF = async (type) => {
+        const { jsPDF } = window.jspdf;
+      
+        const checklistName = document.querySelector('#checklistName').textContent.trim();
+        const checklistDate = document.querySelector('#date').textContent.trim();
+        const numCommande = document.querySelector('#numContrat').textContent.trim();
+        const conseillerNom = document.querySelector('#conseiller').textContent.trim();
+      
+        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        const pageWidth = pdf.internal.pageSize.getWidth();
+      
+        // Titre et infos en haut
+        pdf.setFontSize(16);
+        pdf.text(`${checklistName}`, pageWidth / 2, 10, { align: 'center' });
+        pdf.setFontSize(12);
+        pdf.text(`${checklistDate} | ${numCommande} | ${conseillerNom}`, pageWidth / 2, 16, { align: 'center' });
+      
+        let cursorY = 30; // Position Y initiale
+      
+        if (type === 'breuvage') {
+          // Affiche la catégorie des breuvages
+          pdf.setFontSize(14);
+          pdf.text('Liste des Breuvages', pageWidth / 2, cursorY, { align: 'center' });
+          cursorY += 8;
+      
+          // Construire la liste breuvages
+          const breuvages = [
+            {% for breuvage in breuvages %}
+            {
+              name: "{{ breuvage.product.name }}",
+              quantity: "{{ breuvage.quantity }}",
+              commentaire: "{{ breuvage.commentaire|default:'' }}"
+            },
+            {% endfor %}
+          ];
+      
+          const tableData = breuvages.map(b => [
+            b.name,
+            b.quantity,
+            '', // consommation vide
+            '', // reste vide
+            b.commentaire
+          ]);
+      
+          // Vérification si dépassement page
+          const estimatedHeight = (tableData.length + 1) * 10;
+          if (cursorY + estimatedHeight > pdf.internal.pageSize.getHeight() - 10) {
+            pdf.addPage();
+            cursorY = 10;
+          }
+          // Ajouter le tableau
+          pdf.autoTable({
+            head: [['Produit', 'Total', 'Consommé', 'Restant', 'Commentaire']],
+            body: tableData,
+            startY: cursorY,
+            theme: 'grid',
+            styles: { halign: 'center', valign: 'middle' },
+            headStyles: { fillColor: [200, 200, 200], textColor: 0, fontStyle: 'bold' },
+          });
+        } else {
+          // Mode "checklist" : afficher toutes les catégories sauf "Breuvages"
+          const categories = [
+            {% for cat_name, items in checklist_items_by_category.items %}
+              {% if cat_name != "ALCOOL FORT" and cat_name != "SANS ALCOOL" and cat_name != "VINS" and cat_name != "BIERES" %}
+              {
+                name: "{{ cat_name }}",
+                items: [
+                  {% for item in items %}
+                  {
+                    name: "{{ item.product.name }}",
+                    quantity: "{{ item.quantity }}",
+                    commentaire: "{{ item.commentaire|default:'' }}"
+                  },
+                  {% endfor %}
+                ]
+              },
+              {% endif %}
+            {% endfor %}
+          ];
+      
+          for (const category of categories) {
+            // Nom de la catégorie
+            if (category.items.length === 0) continue; // Si aucune donnée, ne pas faire de tableau
+            pdf.setFontSize(14);
+            pdf.text(category.name, pageWidth / 2, cursorY, { align: 'center' });
+            cursorY += 8;
+      
+            // Table data
+            const tableData = category.items.map(i => [
+              i.name,
+              i.quantity,
+              i.commentaire
+            ]);
+      
+            // Vérification dépassement
+            const estimatedHeight = (tableData.length + 1) * 10; 
+            if (cursorY + estimatedHeight > pdf.internal.pageSize.getHeight() - 10) {
+              pdf.addPage();
+              cursorY = 10;
+            }
+            
+            // Ajout du tableau pour cette catégorie
+            pdf.autoTable({
+              head: [['Produit', 'Quantité', 'Commentaire']],
+              body: tableData,
+              startY: cursorY,
+              theme: 'grid',
+              styles: { halign: 'center', valign: 'middle' },
+              headStyles: { fillColor: [200, 200, 200], textColor: 0, fontStyle: 'bold' },
+            });
+            cursorY = pdf.lastAutoTable.finalY + 10;
+          }
+        }
+      
+        // Enregistrement du PDF
+        const filename = `${type}${checklistName.replace(/\s+/g, '_')}.pdf`;
+        pdf.save(filename);
+      };
+      </script>
 
 {% endblock %}
 
