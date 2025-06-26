@@ -2583,7 +2583,7 @@
           const breuvages = [
             {% for breuvage in breuvages %}
             {
-              name: "{{ breuvage.product.name }}",
+              name: "{{ breuvage.product.name|escapejs }}",
               quantity: "{{ breuvage.quantity }}",
               commentaire: "{{ breuvage.commentaire|default:'' }}"
             },
@@ -2617,13 +2617,13 @@
           // Mode "checklist" : afficher toutes les catégories sauf "Breuvages"
           const categories = [
             {% for cat_name, items in checklist_items_by_category.items %}
-              {% if cat_name != "ALCOOL FORT" and cat_name != "SANS ALCOOL" and cat_name != "VINS" and cat_name != "BIERES" %}
+              {% if cat_name != "ALCOOL FORT" and cat_name != "SANS ALCOOL" and cat_name != "VINS" and cat_name != "BIERES" and cat_name != "CFCDN" %}
               {
                 name: "{{ cat_name }}",
                 items: [
                   {% for item in items %}
                   {
-                    name: "{{ item.product.name }}",
+                    name: "{{ item.product.name|escapejs }}",
                     quantity: "{{ item.quantity }}",
                     commentaire: "{{ item.commentaire|default:'' }}"
                   },

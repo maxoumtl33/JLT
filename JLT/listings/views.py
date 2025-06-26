@@ -5350,28 +5350,179 @@ def livraisonsresp(request):
                                                               'tomorrow': tomorrow,
 
                                                               })
+
+
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+
+@require_POST
+def duplicate_selected_recups(request):
+    selected_ids = request.POST.getlist('selected_livraisons')
+    new_date_str = request.POST.get('new_date')
+    new_journee_id = request.POST.get('new_journee')
+
+    # Validate input
+    try:
+        new_date = datetime.strptime(new_date_str, '%Y-%m-%d').date()
+    except ValueError:
+        messages.error(request, "Format de date invalide.")
+        return redirect('recuptoday')
+
+    # Validate journee
+    new_journee = get_object_or_404(Journee, id=new_journee_id)
+
+    for liv_id in selected_ids:
+        original = get_object_or_404(Livraison, pk=liv_id)
+
+        # Duplicate the main Livraison
+        new_livraison = Livraison(
+            nom=original.nom,
+            mode_envoi=original.mode_envoi,
+            status=False,
+            recuperation=True,
+            commentaire=original.commentaire,
+            commentairedispatch=original.commentairedispatch,
+            adress=original.adress,
+            infodetail=original.infodetail,
+            zipcode=original.zipcode,
+            app=original.app,
+            ligne2=original.ligne2,
+            convives=original.convives,
+            num_commande=original.num_commande,
+            nom_client=original.nom_client,
+            contact_site=original.contact_site,
+            date=new_date,
+            heure_livraison="recup",
+            heure_livraison_classement=original.heure_livraison_classement,
+            date_livraison=original.date_livraison,
+            statut=Route.objects.get(id=21),  # Confirm route correctness
+            journee=new_journee,
+            lat=original.lat,
+            lng=original.lng,
+            place_id=original.place_id
+        )
+        new_livraison.save()
+
+        # Duplicate related photos
+        for photo in original.livraison_photos.all():
+            Photo.objects.create(
+                livraison=new_livraison,
+                image=photo.image,
+                caption=photo.caption
+            )
+
+        # Duplicate checklists
+        for checklist in original.checklist_set.all():
+            new_checklist = Checklist(
+                name=checklist.name,
+                livraison=new_livraison,
+                date=new_date,
+                lieu=checklist.lieu,
+                num_contrat=checklist.num_contrat,
+                nb_convive=checklist.nb_convive,
+                heure_livraison=checklist.heure_livraison,
+                md=checklist.md,
+                status=checklist.status,
+                rapportmd=checklist.rapportmd,
+                rapportrecup=checklist.rapportrecup,
+                commentairevente=checklist.commentairevente,
+                notechecklist=checklist.notechecklist,
+                conseiller=None,
+                is_active=False
+            )
+            new_checklist.save()
+
+            # Duplicate ChecklistItems
+            for item in checklist.checklistitem_set.all():
+                ChecklistItem.objects.create(
+                    checklist=new_checklist,
+                    product=item.product,
+                    quantity=item.quantity,
+                    status=item.status,
+                    skip_inventory_update=True
+                )
+
+            # Duplicate checklist photos
+            for photo in checklist.checklistrecupphoto_set.all():
+                ChecklistRecupPhoto.objects.create(
+                    checklist=new_checklist,
+                    image=photo.image
+                )
+
+    messages.success(request, f"{len(selected_ids)} récupérations dupliquées avec succès.")
+    return redirect('recuptoday')
+
+
+
 @login_required
 def recuptoday(request):
-    today = datetime.now().date()
-    tomorrow = today + timedelta(1)
+    # Get date from request (if any), default to today
+    date_str = request.GET.get('date')
+    if date_str:
+        try:
+            selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        except ValueError:
+            selected_date = datetime.now().date()
+    else:
+        selected_date = datetime.now().date()
+
+    # All recoveries on selected date
     recups = ["Porcelaine", "Chaud et porcelaine", "Porcelaine et bois", "Plateau de bois", "Froid et bois", "Chaud et jetable", "Froid et porcelaine", "Porcelaine / chaud en vrac", "Plateau JLT", "Plateaux à partager", "Chaud et Plateau JLT", "Assiette individuelle", "Assiette Salade-Repas", "En vrac", "Froid et Plateau JLT", "Plateau JLT / chaud en vrac", "Plateau JLT et bois"] 
 
-    # Querysets
-    recuperations = Livraison.objects.filter(recuperation=False, date=today, mode_envoi__in=recups)
+    # Querysets with optional date filter
+    recuperations = Livraison.objects.filter(recuperation=False, date=selected_date, mode_envoi__in=recups)
     recupsencours = Livraison.objects.filter(recuperation=True, status=False)
-    recuperationstot_list = Livraison.objects.filter(recuperation=False, mode_envoi__in=recups)
+    recuperationstot_list = Livraison.objects.filter(recuperation=False, mode_envoi__in=recups, date=selected_date)
 
-    # Pagination
-    paginator = Paginator(recuperationstot_list, 10)  # Show 10 items per page
+    journees = Journee.objects.all().order_by('-id')
+
+    # Pagination remains the same
+    paginator = Paginator(recuperationstot_list, 10)
     page_number = request.GET.get('page')
     recuperationstot = paginator.get_page(page_number)
+
     if not request.user.is_superuser:
         return redirect('unauthorized')
+
     return render(request, 'listings/recuptoday.html', context={
         'recuperations': recuperations,
         'recupsencours': recupsencours,
         'recuperationstot': recuperationstot,
+        'journees': journees,
+        'selected_date': selected_date.strftime('%Y-%m-%d'),  # pass for form value
     })
+
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+
+from django.shortcuts import get_object_or_404, redirect
+
+@login_required
+def update_recup_date_journee(request, livraison_id):
+    if request.method == 'POST':
+        livraison = get_object_or_404(Livraison, pk=livraison_id)
+        new_date_str = request.POST.get('date')
+        new_journee_id = request.POST.get('journee')
+        # Always assign statuc with id 21
+        route = get_object_or_404(Route, pk=21)
+
+        try:
+            new_date = datetime.strptime(new_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            # handle invalid date
+            # show error or redirect
+            return redirect('recuptoday')
+
+        new_journee = get_object_or_404(Journee, pk=new_journee_id)
+
+        # Update fields
+        livraison.date = new_date
+        livraison.journee = new_journee
+        livraison.statut = route  # always set to ID 21
+        livraison.save()
+
+    return redirect('recuptoday')
+
 @login_required
 def faq(request):
     today = datetime.now().date()
