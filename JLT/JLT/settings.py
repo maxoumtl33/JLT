@@ -24,6 +24,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-jms1pass6#6pcx3)6nk1idtw*upl)n!-kkq!%uodn_txemj%ln'
 
+API_KEY_JLT = 'b4979c4ce211ce6602e7e9e4d3e7d172b35af3c3'
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -53,6 +55,8 @@ INSTALLED_APPS = [
     'bootstrap_datepicker_plus',
     'widget_tweaks',
     'django_select2',
+    'rest_framework',
+    'rest_framework.authtoken',
    
   
 ]

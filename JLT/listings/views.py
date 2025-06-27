@@ -3440,6 +3440,7 @@ def responsables(request, id):
     livraison = Livraison.objects.filter(recuperation=False, date=journee.date)
     livreurs = Livreur.objects.all()
     routess = Route.objects.filter(date = journee.date)
+    key = settings.API_KEY_JLT
     vehicles = Vehicle.objects.filter(routes__in=routess).distinct()  # Use distinct() to prevent duplicates
     recuperations = "oui"
     if not request.user.is_superuser:
@@ -3458,6 +3459,7 @@ def responsables(request, id):
                                                               'recuperationko':recuperationko,
                                                               'recuperation' : recuperation,
                                                               'vehicles' : vehicles,
+                                                              'key':key,
                                                               })
 
 @login_required
@@ -5427,7 +5429,6 @@ def duplicate_selected_recups(request):
                 rapportrecup=checklist.rapportrecup,
                 commentairevente=checklist.commentairevente,
                 notechecklist=checklist.notechecklist,
-                conseiller=None,
                 is_active=False
             )
             new_checklist.save()
@@ -5439,7 +5440,7 @@ def duplicate_selected_recups(request):
                     product=item.product,
                     quantity=item.quantity,
                     status=item.status,
-                    skip_inventory_update=True
+                    is_stock_updated=False
                 )
 
             # Duplicate checklist photos
@@ -6996,3 +6997,5 @@ def delete_menu_submission(request, submission_id, submenu_id):
             return JsonResponse({'success': False, 'error': str(e)})
     else:
         return JsonResponse({'success': False, 'error': 'Méthode non autorisée'})
+
+

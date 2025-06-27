@@ -5,15 +5,31 @@ from django.conf import settings
 from django.conf.urls.static import static
 from listings.views import save_positions
 from listings.views import *
+from listings.viewsets import *
 from django.urls import path, include
 from listings.views import CustomPasswordChangeView, home
 from django.views.generic import TemplateView
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import views as auth_views
+from rest_framework.routers import DefaultRouter
+from rest_framework.authtoken import views as drf_views
 
+router = DefaultRouter()
+router.register(r'users', UserViewSet, basename='user')
+router.register(r'livreurs', LivreurViewSet, basename='livreur')
+router.register(r'conseillers', ConseillerViewSet, basename='conseiller')
+router.register(r'mds', MdViewSet, basename='md')
+router.register(r'clients', ClientViewSet, basename='client')
+router.register(r'menus', MenuViewSet, basename='menu')
+router.register(r'modes', ModeViewSet, basename='mode')
+router.register(r'categories', CategorieViewSet, basename='categorie')
+router.register(r'produits', ProduitViewSet, basename='produit')
+router.register(r'taches', TacheafaireViewSet, basename='tache')
 
 urlpatterns = [
 
+path('api/', include(router.urls)),
+path('api-token-auth/', drf_views.obtain_auth_token, name='api_token_auth'),
 path(
         'members/password_change/',
         CustomPasswordChangeView.as_view(),
