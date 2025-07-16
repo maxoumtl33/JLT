@@ -1,7 +1,7 @@
 {% extends 'listings/base.html' %}
 {% load static %}
 {% block content %}
-
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   .card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -24,48 +24,144 @@
 .text-secondary {
   color: #6c757d !important;
 }
-
-    /* Footer Navigation Bar (Fixed to bottom) */
-    .bottom-navbar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background-color: #333;
-            padding: 10px 0;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-        }
-
-        .bottom-navbar ul {
-            list-style: none;
-            display: flex;
-            justify-content: space-around;
+body {
+            font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 0;
+            color: #333;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s linear, color 0.3s linear;
         }
 
-        .bottom-navbar ul li {
+        .sidebar {
+            width: 250px;
+            background-color: #007BFF;
+            height: 100%;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar .sidebar-header {
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .sidebar a {
+            color: #fff;
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar a.active, .sidebar a:hover {
+            background-color: #0056b3;
+        }
+
+        .journees {
             flex: 1;
-            text-align: center;
+            padding: 20px;
+            background-color: #F0F2F5;
+            overflow-y: auto;
+            transition: margin-left 0.3s ease; /* Improves smoothness of layout change */
         }
 
-        .bottom-navbar ul li a {
-    color: white;
-    text-decoration: none;
-    font-size: 16px;
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            
+        }
+
+        .header .toggle-theme {
+            cursor: pointer;
+            color: #007BFF;
+        }
+        #journees.expanded {
+    margin-left: 0;
 }
 
-.bottom-navbar ul li a:hover {
-    text-decoration: underline;
+#journees.full-width {
+    transition: margin-left 0s;
 }
+
+.collapsed {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    width: 0; /* Ensure width collapses at the end */
+}
+
+.dark-mode {
+            background-color: #121212;
+            color: #e4e4e4;
+        }
+
+        .dark-mode .header, .dark-mode .card {
+            background-color: #1e1e1e;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .dark-mode .sidebar {
+            background-color: #1e1e1e;
+        }
+
+        .dark-mode .sidebar a {
+            color: #e4e4e4;
+        }
+
+        .dark-mode .sidebar a.active, .dark-mode .sidebar a:hover {
+            background-color: #333;
+            color: #fff;
+        }
 </style>
 
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header" style="margin-top: 100px;">Menu <button class="toggle-sidebar" id="sidebar-toggle"><i class="fas fa-bars"></i></button></div>
+  <a href="{% url 'acceuilresponsables' %}"><i class="fa-solid fa-desktop"></i> Tableau de bord Admin</a>
+  <a href="{% url 'recuptoday' %}"><i class="fas fa-sync"></i> Récups</a>
+  <a href="{% url 'dashboard_stats' %}"><i class="fas fa-chart-bar"></i> Stats</a>
+  <a href="{% url 'livraisonstomorrow' %}"><i class="fas fa-shipping-fast"></i> Dispatch</a>
+  <a href="{% url 'create-shift' %}"><i class="fas fa-calendar-plus"></i> Planning</a>
+  <a href="{% url 'voir_checklist' %}"><i class="fas fa-clipboard-list"></i> Checklist</a>
+  <a href="{% url 'creerchecklist' %}"><i class="fas fa-list-check"></i> Checklist Ventes</a>
+  <a href="{% url 'product_list' %}"><i class="fas fa-box-open"></i> Liste produits (checklist)</a>
+  <a href="/admin" target="_blank"><i class="fas fa-tools"></i> Menu admin</a>
+  <button class="toggle-theme" id="theme-toggle" style="margin-top:20px;"><i class="fas fa-moon"></i> Thème</button>
+  <div style="margin-top:20px; font-size:14px; color:#ccc;">Utilisateur: {{ user.username }}</div>
+</div>
+
 {% if user.is_authenticated %}
-<div class="container mt-5">
-    <h1 class="text-center mb-4">Liste des Journées</h1>
-  <br>
-  <br>
+<div class="journees" id="journees">
+  <div class="header">
+    <h2>Suivi des journées livraison</h2>
+        <button id="show-sidebar" style="display:none; position: fixed; top: 12%; left: 10px;">
+            <i class="fas fa-bars fa-2xl"></i>
+        </button>
+    <div class="user-info">
+        <button id="logoutBtn" style="border:none; background:none; cursor:pointer;"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
+    </div>
+</div>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
     <!-- Date Filter Form -->
     <form method="get" class="d-flex justify-content-center mb-4">
       <div class="form-group me-2">
@@ -116,13 +212,40 @@
   </div>
     
   {% endif %}
+<script>
 
-<!-- Footer Navbar -->
-<nav class="bottom-navbar">
-    <ul>
-        <li><a href="{% url 'acceuilresponsables'%}" class="nav__link" ><i class="fa-solid fa-user-ninja"></i>
-          <span class="nav__name">Menu Admin</span>
-      </a></li>  
-</nav>
+const toggleBtn = document.getElementById('theme-toggle');
+        toggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+        });
 
+          document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.getElementById('sidebar');
+    const btnShowSidebar = document.getElementById('show-sidebar');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    const dashboard = document.getElementById('dashboard');
+
+    // Quand on clique sur le bouton toggle pour cacher ou réafficher
+    toggleBtn.addEventListener('click', () => {
+        if (sidebar.classList.contains('collapsed')) {
+            // La sidebar est masquée, on la remonte
+            sidebar.classList.remove('collapsed');
+            btnShowSidebar.style.display = 'none';   // cache le bouton
+            dashboard.classList.remove('full-width');
+        } else {
+            // La sidebar est visible, on la cache
+            sidebar.classList.add('collapsed');
+            btnShowSidebar.style.display = 'block';  // montre le bouton pour la réafficher
+            dashboard.classList.add('full-width');
+        }
+    });
+
+    // Quand on clique sur le bouton pour faire réapparaître la sidebar
+    btnShowSidebar.addEventListener('click', () => {
+        sidebar.classList.remove('collapsed');
+        btnShowSidebar.style.display = 'none'; // cache le bouton
+        dashboard.classList.remove('full-width');
+    });
+});
+</script>
 {% endblock %}

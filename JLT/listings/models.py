@@ -103,9 +103,10 @@ class LoadingDock(models.Model):
 
 class Journee(models.Model):
      nom = models.fields.CharField(max_length=100)
+     date = models.DateField(unique=True)
      def __str__(self):
         return f'{self.nom}'
-     date = models.DateField()
+     
 
 
 

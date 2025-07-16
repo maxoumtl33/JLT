@@ -216,42 +216,41 @@ def submission_detail(request, submission_id):
     }
     return render(request, 'listings/submission_detail.html', context)
 
-from django.http import JsonResponse
+
+from django.views.decorators.csrf import csrf_exempt
+from django.db import IntegrityError
 import json
-from .models import Journee
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+
 @login_required
+@csrf_exempt
 def create_journee(request):
     if request.method == "POST" and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         try:
             data = json.loads(request.body)
             print(f"Received data: {data}")  # Log the received data
 
-            name = data.get('name')
+            nom = data.get('name')
             date = data.get('date')
 
-            if not name or not date:
+            if not nom or not date:
                 return JsonResponse({"success": False, "error": "Missing required fields"}, status=400)
 
-            # Create the journee
-            journee = Journee.objects.create(
-                nom=name,
-                date=date
-            )
-            return JsonResponse({
-                "success": True,
-                "journee": {
-                    "id": journee.id,
-                    "name": journee.nom,
-                    "date": journee.date
-                }
-            })
+            # TODO: Add date validation here
+
+            try:
+                journee = Journee.objects.create(nom=nom, date=date)
+                return JsonResponse({'success': True, 'message': 'Journée créée avec succès.'})
+            except IntegrityError:
+                return JsonResponse({'success': False, 'error': 'Une journée existe déjà pour cette date.'}, status=400)
+            except Exception as e:
+                return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
         except json.JSONDecodeError:
             return JsonResponse({"success": False, "error": "Invalid JSON format"}, status=400)
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)}, status=500)
     else:
-        return JsonResponse({"success": False, "error": "Invalid request method"}, status=400)
+        return JsonResponse({"success": False, "error": "Invalid request method"}, status=405)
 
 
 from django.shortcuts import render, get_list_or_404
@@ -1908,16 +1907,27 @@ def associate_livraison(request, checklist_id):
         messages.error(request, "Pas de livraison trouvée")
 
     return redirect('checklist-detail', checklist_id=checklist.id)
+from django.utils.timezone import now
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.shortcuts import redirect
+from .models import Checklist, Livraison
+
 @login_required
 def associate_all_livraisons(request):
     """
-    Associates all checklists to their corresponding Livraison where num_commande matches num_contrat.
+    Associates all checklists to their corresponding Livraison where num_commande matches num_contrat
+    and the livraison date is today or in the future.
     """
+    today = now().date()
     checklists = Checklist.objects.all()
     associated_count = 0
 
     for checklist in checklists:
-        livraison = Livraison.objects.filter(num_commande=checklist.num_contrat).first()
+        livraison = Livraison.objects.filter(
+            num_commande=checklist.num_contrat,
+            date__gte=today  # Assuming 'date' is the field storing the date of the livraison
+        ).first()
         if livraison:
             checklist.livraison = livraison
             checklist.save()
@@ -1929,6 +1939,84 @@ def associate_all_livraisons(request):
         messages.warning(request, "Aucune checklist n'a pu être associée.")
 
     return redirect('livraisonstomorrow')  # Update with your actual checklist listing view
+
+
+from django.http import JsonResponse
+import json
+from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q
+
+@csrf_exempt
+def group_livraisons(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            ids = data.get('ids', [])
+            # Récupérer toutes les livraisons sélectionnées
+            livraisons = Livraison.objects.filter(id__in=ids)
+
+            if not livraisons.exists():
+                return JsonResponse({'status': 'error', 'message': 'Aucune livraison sélectionnée.'})
+
+            # Grouper par heure de livraison
+            # Ensuite, regrouper par nom similaire
+            groups = {}
+            for liv in livraisons:
+                key = (liv.heure_livraison, get_similar_name(liv.nom))
+                if key not in groups:
+                    groups[key] = []
+                groups[key].append(liv)
+
+            # Regrouper chaque groupe
+            count_regroupements = 0
+            for key, group_list in groups.items():
+                # Prioriser livraison avec checklist si possible
+                checklist_liv = None
+                if hasattr(group_list[0], 'checklist'):
+                    checklist_liv = next((l for l in group_list if hasattr(l, 'checklist') and l.checklist.exists()), None)
+                main_liv = checklist_liv or group_list[0]
+
+                # Construire le nom du groupe
+                noms = [l.nom for l in group_list]
+                nouveau_nom = '+'.join(set(noms))
+                # Additionner convives
+                total_convives = sum(int(l.convives or 0) for l in group_list if l.convives.isdigit())
+                main_liv.nom = nouveau_nom
+                main_liv.convives = str(total_convives)
+                main_liv.save()
+
+                # Supprimer ou réassigner autres livraisons
+                for l in group_list:
+                    if l.id != main_liv.id:
+                        l.delete()
+
+                count_regroupements += 1
+
+            return JsonResponse({'status': 'success', 'message': f'{count_regroupements} regroupements effectués.'})
+
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+def get_similar_name(name):
+    # Si nom vide ouNone, renvoyer une chaîne vide
+    if not name:
+        return ''
+    # Supposer que le nom peut contenir une version ou une partie commune séparée par un espace ou un point
+    # On veut regrouper par le prefix avant un point ou un espace
+    # Exemple: "SAP 1" et "SAP 1.1" => "SAP 1"
+    # On peut utiliser une expression régulière ou une logique simple
+    
+    # Importation de re si nécessaire
+    import re
+    
+    # Chercher un motif : tout jusqu'à un premier point ou espace
+    match = re.match(r'^(.+?)(?:[\.\s].*)?$', name)
+    if match:
+        return match.group(1)
+    return name  # Si rien d'autre, retourner le nom complet
+
+
+
 
 @login_required
 def tacheslist(request):
@@ -3229,108 +3317,12 @@ from django.shortcuts import render
 from django.db.models import Sum, Count
 from django.utils import timezone
 from .models import Livraison, Checklist, ChecklistItem
-@login_required
-def dashboard_stats(request):
-    today = timezone.now().date()  # Keep today as a date object
-    selected_date_str = request.GET.get('date', today.isoformat())  # This can be a string
-
-    # Parse selected_date as a date object
-    selected_date = timezone.datetime.strptime(selected_date_str, "%Y-%m-%d").date()
-
-    # Get start and end date strings
-    start_date_str = request.GET.get('start_date', today.isoformat())
-    end_date_str = request.GET.get('end_date', today.isoformat())
-
-    # Parse start and end dates
-    start_date = timezone.datetime.strptime(start_date_str, "%Y-%m-%d").date() if start_date_str else today
-    end_date = timezone.datetime.strptime(end_date_str, "%Y-%m-%d").date() if end_date_str else today
-
-    # Validate that end_date is not before start_date
-    if end_date < start_date:
-        end_date = start_date
+from django.shortcuts import render
+from django.db.models import Count, Sum, Q
+from django.utils import timezone
+from .models import Livraison, Checklist, ChecklistItem, Route
 
 
-    # Fetch statistics
-    total_livraisons = Livraison.objects.filter(date__range=[start_date, end_date], recuperation=False).count()
-    total_recuperations = Livraison.objects.filter(date__range=[start_date, end_date], recuperation=True).count()
-    total_checklists = Checklist.objects.filter(date__range=[start_date, end_date], is_active=True).count()
-    # Calculate total convives for livraisons in the selected date range
-    total_convives = Livraison.objects.filter(date__range=[start_date, end_date]).aggregate(total_convives=Sum('convives'))['total_convives'] or 0
-
-
-    # Prepare counts of checklist items by status
-    checklist_stats = ChecklistItem.objects.filter(checklist__date__range=[start_date, end_date], checklist__is_active=True).values('status').annotate(total=Count('id'))
-    status_totals = {status: 0 for status, _ in ChecklistItem.STATUS_CHOICES}
-    for stat in checklist_stats:
-        status_totals[stat['status']] = stat['total']
-
-    checklist_items = ChecklistItem.objects.all()
-
-    # Get the selected checklist item
-    selected_item_id = request.GET.get('checklist_item')
-    selected_item_total = None
-    selected_item = None
-
-    if selected_item_id:
-        # Fetch the selected checklist item
-        selected_item = ChecklistItem.objects.filter(id=selected_item_id).first()
-        if selected_item:
-            # Calculate the total quantity for this checklist item within the selected period
-            selected_item_total = ChecklistItem.objects.filter(
-                product=selected_item.product,
-                checklist__date__range=[start_date, end_date], checklist__is_active=True
-            ).aggregate(total_quantity=Sum('quantity'))['total_quantity'] or 0
-
-    checklist_items_data = ChecklistItem.objects.filter(checklist__date__range=[start_date, end_date], quantity__gt=0, checklist__is_active=True) \
-            .values('product__name') \
-            .annotate(total_quantity=Sum('quantity'))
-
-    total_checklist_items = checklist_items_data.aggregate(total=Sum('total_quantity'))['total'] or 0
-
-    livraisons = Livraison.objects.filter(date__range=[start_date, end_date])
-    top_livraison_totals = Livraison.objects.filter(date__range=[start_date, end_date]) \
-        .values('nom', 'place_id') \
-        .annotate(total=Count('id')) \
-        .order_by('-total')[:3]  # Get the top 3 entries, focusing on names
-
-    # Group livraisons by place_id and count them
-    livraison_counts = livraisons.values('place_id', 'nom').annotate(total=Count('id')).order_by('place_id')
-
-    # Group by letters in `nom`
-    grouped_livraisons = {}
-    for livraison in livraison_counts:
-        place_id = livraison['place_id']
-        nom = livraison['nom']
-        key = ''.join(sorted(nom))  # Create a key based on letters in the name
-
-        if key not in grouped_livraisons:
-            grouped_livraisons[key] = {
-                'nom': nom,
-                'place_id': place_id,
-                'total': 0,
-            }
-
-        grouped_livraisons[key]['total'] += livraison['total']
-
-    context = {
-        'checklist_items': checklist_items,
-        'grouped_livraisons': grouped_livraisons,
-        'selected_date': selected_date,
-        'selected_item_total': selected_item_total,
-        'selected_item': selected_item,
-        'total_livraisons': total_livraisons,
-        'checklist_items_data': checklist_items_data,
-        'total_recuperations': total_recuperations,
-        'total_checklists': total_checklists,
-        'total_checklist_items': total_checklist_items,
-        'total_convives': total_convives,
-        'top_livraison_totals': top_livraison_totals,
-        'status_totals': status_totals,
-        'start_date': start_date,
-        'end_date': end_date,
-    }
-
-    return render(request, 'listings/dashboard_stats.html', context)
 
 
 @login_required
@@ -3338,54 +3330,76 @@ def create_shift(request):
     liste_livreur = Livreur.objects.all()
 
     if request.method == 'POST':
-        global_shift_date = request.POST.get("global_shift_date")
+        # Si c’est une soumission pour créer un nouveau planning
+        if 'create_planning' in request.POST:
+            global_shift_date = request.POST.get("global_shift_date")
+            if not global_shift_date:
+                return render(request, 'listings/create_shift.html', {
+                    'liste_livreur': liste_livreur,
+                    'error': 'La date est requise.',
+                })
+            for livreur in liste_livreur:
+                is_repos = f"repos_{livreur.id}" in request.POST
+                selected_start_time = request.POST.get(f"shift_start_{livreur.id}")
+                custom_start_time = request.POST.get(f"custom_start_time_{livreur.id}")
+                shift_start = custom_start_time or selected_start_time or None
 
-        if not global_shift_date:
-            return render(request, 'listings/create_shift.html', {
-                'liste_livreur': liste_livreur,
-                'error': 'La date est requise.',
-            })
+                if shift_start:
+                    try:
+                        datetime.strptime(shift_start, '%H:%M')
+                    except ValueError:
+                        return render(request, 'listings/create_shift.html', {
+                            'liste_livreur': liste_livreur,
+                            'error': 'Format d\'heure invalide.',
+                        })
 
-        for livreur in liste_livreur:
-            is_repos = f"repos_{livreur.id}" in request.POST
-            selected_start_time = request.POST.get(f"shift_start_{livreur.id}")
-            custom_start_time = request.POST.get(f"custom_start_time_{livreur.id}")
+                if is_repos:
+                    Shift.objects.create(
+                        livreur=livreur,
+                        date=global_shift_date,
+                        start_time=None,
+                        notes="Repos"
+                    )
+                else:
+                    Shift.objects.create(
+                        livreur=livreur,
+                        date=global_shift_date,
+                        start_time=shift_start,
+                        notes=""
+                    )
+            return redirect('create_shift')
 
-            # Determine the start time preference
-            shift_start = custom_start_time or selected_start_time or None
+        # Si c’est une requête de modification d’un shift existant
+        elif 'edit_shift' in request.POST:
+            shift_id = request.POST.get('shift_id')
+            shift = get_object_or_404(Shift, id=shift_id)
+            start_time = request.POST.get('start_time')
+            notes = request.POST.get('notes', '')
 
-            # Validate the start time format if it's provided
-            if shift_start and shift_start != "":  # Ensure not empty
+            if start_time:
                 try:
-                    datetime.strptime(shift_start, '%H:%M')
+                    datetime.strptime(start_time, '%H:%M')
+                    shift.start_time = start_time
                 except ValueError:
-                    return render(request, 'listings/create_shift.html', {
-                        'liste_livreur': liste_livreur,
-                        'error': 'Le format de l\'heure de début est invalide. Veuillez entrer l\'heure au format HH:MM.',
-                    })
+                    pass  # ou gérer l'erreur
+            shift.notes = notes
+            shift.save()
 
-            # Create shift record
-            if is_repos:
-                Shift.objects.create(
-                    livreur=livreur,
-                    date=global_shift_date,
-                    start_time=None,
-                    notes="Repos"
-                )
-            else:
-                Shift.objects.create(
-                    livreur=livreur,
-                    date=global_shift_date,
-                    start_time=shift_start,
-                    notes=""
-                )
-
-        return redirect('acceuilresponsables')
-
+            return redirect(request.path + '?date=' + str(shift.date))
+    
+    # Si GET, on affiche la page avec la liste des shifts
+    selected_date = request.GET.get('date', str(date.today()))
+    shifts = Shift.objects.filter(date=selected_date)
     if not request.user.is_superuser:
         return redirect('unauthorized')
+    return render(request, 'listings/create_shift.html', {
+        'liste_livreur': liste_livreur,
+        'shifts': shifts,
+        'date': selected_date,
+        'error': None,
+    })
 
-    return render(request, 'listings/create_shift.html', {'liste_livreur': liste_livreur})
+
 
 @login_required
 def responsableschoixjournee(request):
@@ -3466,6 +3480,26 @@ def responsables(request, id):
 def unauthorized_view(request):
     return render(request, 'listings/pasauthorise.html', status=403)
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+from .models import Product
+
+@csrf_exempt
+def product_inline_update(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        product_id = data.get("id")
+        quantity = data.get("quantity")
+
+        try:
+            product = Product.objects.get(id=product_id)
+            product.quantity = quantity
+            product.save()
+            return JsonResponse({"success": True})
+        except Product.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Produit introuvable"})
+    return JsonResponse({"success": False, "error": "Methode non autorisée"})
 
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -3726,7 +3760,7 @@ class MapAujourView(View):
         context = {
             'key': key,
             'livraisons': livraisons,
-            'selected_date': selected_date.strftime('%Y-%m-%d'),
+            'selected_date': selected_date,
             'routes': routes,
             'todo_livraison': todo_livraison,
             'routes21': routes21,
@@ -3781,7 +3815,7 @@ class MapApremAujourView(View):
         context = {
             'key': key,
             'livraisons': livraisons,
-            'selected_date': selected_date.strftime('%Y-%m-%d'),
+            'selected_date': selected_date,
             'routes': filtered_routes,  # Pass routes to the context
             'todo_livraison':todo_livraison,
             'routes21':routes21,
@@ -3837,7 +3871,7 @@ class MapMidiAujourView(View):
         context = {
             'key': key,
             'livraisons': livraisons,
-            'selected_date': selected_date.strftime('%Y-%m-%d'),
+            'selected_date': selected_date,
             'routes': filtered_routes,  # Pass routes to the context
             'todo_livraison':todo_livraison,
             'routes21':routes21,
@@ -4923,35 +4957,35 @@ def associate_livraisons_with_docks(request):
 
     return JsonResponse({'status': 'error', 'message': 'Méthode non supportée.'}, status=400)
 
-from django.shortcuts import redirect
+
+from django.shortcuts import render
 from django.contrib import messages
+from django.http import JsonResponse
 from .models import Livraison, LoadingDock
 
 def associer_toutes_livraisons_docks(request):
     docks = list(LoadingDock.objects.all())
     if not docks:
-        messages.warning(request, "Aucun dock disponible pour l'association.")
-        return redirect('livraisonstomorrow')
+        return JsonResponse({'error': 'Aucun dock disponible pour l\'association.'}, status=400)
 
-    for livraison in Livraison.objects.all():
+    num_associations = 0
+    non_associated = []
+
+    for livraison in Livraison.objects.filter(loading_docks__isnull=True):
         if livraison.nom:
             mots_livraison = livraison.nom.lower().split()
-            docks_correspondants = []
-
-            for dock in docks:
-                dock_name = dock.name
-                if dock_name:  # Vérification que dock.name n'est pas None
-                    dock_name_lower = dock_name.lower()
-
-                    # Vérifier si au moins un mot est dans le nom du dock
-                    if any(mot in dock_name_lower for mot in mots_livraison):
-                        docks_correspondants.append(dock)
-
+            docks_correspondants = [dock for dock in docks if any(mot in dock.name.lower() for mot in mots_livraison)]
             if docks_correspondants:
                 livraison.loading_docks.set(docks_correspondants)
+                num_associations += 1
+            else:
+                non_associated.append(livraison.nom)
 
-    messages.success(request, "Les livraisons ont été associées aux docks correspondants.")
-    return redirect('livraisonstomorrow')  # Modifier si nécessaire
+    if non_associated:
+        messages.warning(request, f"Pas de dock correspondant trouvé pour les livraisons: {', '.join(non_associated)}.")
+    
+    messages.success(request, f"{num_associations} livraisons ont été associées aux docks correspondants.")
+    return JsonResponse({'message': f"{num_associations} livraisons associées", 'non_associated': non_associated})
 
 
 from django.http import HttpResponse
@@ -5280,7 +5314,8 @@ def livraisonstomorrow(request):
     livraisonsmatin = Livraison.objects.filter(heure_livraison__in=matin, date=selected_date).order_by('statut', 'position')
     livraisonsmidi = Livraison.objects.filter(heure_livraison__in=midi, date=selected_date).order_by('statut', 'position')
     livraisonsapresmidi = Livraison.objects.filter(heure_livraison__in=apresmidi, date=selected_date).order_by('statut', 'position')
-
+    if not request.user.is_superuser:
+        return redirect('unauthorized')
     context = {
         'selected_date': selected_date.strftime('%Y-%m-%d'),
         'form':form,
@@ -5478,7 +5513,7 @@ def recuptoday(request):
     journees = Journee.objects.all().order_by('-id')
 
     # Pagination remains the same
-    paginator = Paginator(recuperationstot_list, 10)
+    paginator = Paginator(recuperationstot_list, 30)
     page_number = request.GET.get('page')
     recuperationstot = paginator.get_page(page_number)
 
@@ -6015,6 +6050,9 @@ def livraison_stats_view(request):
             percentage_with_vehicle = 0
             percentage_with_vehicle_photo = 0
 
+        if not request.user.is_superuser:
+            return redirect('unauthorized')
+
 
 
 
@@ -6025,7 +6063,8 @@ def livraison_stats_view(request):
         'percentage_with_vehicle': percentage_with_vehicle,
         'percentage_with_vehicle_photo': percentage_with_vehicle_photo,
     }
-    return render(request, 'listings/statistics.html', context)
+    return render(request, 'listings/dashboard_stats.html', context)
+
 
 
 from django.http import JsonResponse

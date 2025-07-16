@@ -5,22 +5,111 @@
 
 {% block content %}
 <style>
-  /* General Reset */
-* {
-margin: 0;
-padding: 0;
-box-sizing: border-box;
-}
 
-body {
-font-family: Arial, sans-serif;
-background-color: #f4f4f4;
-color: #333;
-}
 
 /* styles.css */
 
+body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s linear, color 0.3s linear;
+        }
 
+        .sidebar {
+            width: 250px;
+            background-color: #007BFF;
+            height: 100%;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar .sidebar-header {
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .sidebar a {
+            color: #fff;
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar a.active, .sidebar a:hover {
+            background-color: #0056b3;
+        }
+
+        .journee {
+            flex: 1;
+            padding: 20px;
+            background-color: #F0F2F5;
+            overflow-y: auto;
+            transition: margin-left 0.3s ease; /* Improves smoothness of layout change */
+        }
+
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            
+        }
+
+        .header .toggle-theme {
+            cursor: pointer;
+            color: #007BFF;
+        }
+        #journee.expanded {
+    margin-left: 0;
+}
+
+#journee.full-width {
+    transition: margin-left 0s;
+}
+
+.collapsed {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    width: 0; /* Ensure width collapses at the end */
+}
+
+.dark-mode {
+            background-color: #121212;
+            color: #e4e4e4;
+        }
+
+        .dark-mode .header, .dark-mode .card {
+            background-color: #1e1e1e;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .dark-mode .sidebar {
+            background-color: #1e1e1e;
+        }
+
+        .dark-mode .sidebar a {
+            color: #e4e4e4;
+        }
+
+        .dark-mode .sidebar a.active, .dark-mode .sidebar a:hover {
+            background-color: #333;
+            color: #fff;
+        }
     .no-data {
         color: #888;
         font-style: italic;
@@ -49,113 +138,30 @@ color: #333;
         font-style: italic;
     }
 
-header {
-background: #127BFF; /* A cool blue background color */
-color: #fff;
-padding: 20px 0;
-}
 
-.header-container {
-max-width: 1200px;
-margin: 0 auto;
-padding: 0 20px;
-}
-
-.header-content {
-display: flex;
-justify-content: space-between;
-align-items: center;
-flex-wrap: wrap;
-}
-
-.header-title {
-font-size: 2em;
-margin: 0;
-font-family: 'Roboto', sans-serif;
-}
-
-.header-subtitle {
-font-size: 1.5em;
-margin: 0;
-font-family: 'Roboto', sans-serif;
-}
-
-.logout-form {
-margin: 0;
-}
-
-.logout-button {
-background: #e94e77; /* A contrasting pink color */
-border: none;
-padding: 10px 20px;
-color: #fff;
-font-size: 1em;
-font-family: 'Roboto', sans-serif;
-border-radius: 5px;
-cursor: pointer;
-display: flex;
-align-items: center;
-transition: background 0.3s ease;
-}
-
-.logout-button:hover {
-background: #d43f65; /* Darker pink on hover */
-}
-
-.logout-button i {
-margin-right: 8px; /* Space between icon and text */
-}
-
-
-
-/* Navigation Bar */
-.navbar {
-background-color: #333;
-padding: 10px 0;
-}
-
-.navbar ul {
-list-style: none;
-display: flex;
-justify-content: center;
-}
-
-.navbar ul li {
-margin: 0 15px;
-}
-
-.bottom-navbar ul li a {
-    color: white;
-    text-decoration: none;
-    font-size: 16px;
-}
-
-.bottom-navbar ul li a:hover {
-    text-decoration: underline;
-}
 /* Stats Section */
+/* Style pour la section stats, déjà dans ton code initial, sinon rajoute ici */
 .stats-section {
-display: flex;
-justify-content: space-around;
-background-color: white;
-padding: 20px;
-margin: 20px 0;
-box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-around;
+  background-color: white;
+  padding: 20px;
+  margin: 20px 0;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  flex-wrap: wrap; /* pour la responsivité sur petits écrans */
 }
-
 .stat-box {
-text-align: center;
-padding: 10px;
+  text-align: center;
+  padding: 10px;
 }
-
 .stat-box h3 {
-color: #007BFF;
+  color: #007BFF;
+}
+.stat-box p {
+  font-size: 24px;
+  font-weight: bold;
 }
 
-.stat-box p {
-font-size: 24px;
-font-weight: bold;
-}
 
 /* Map Section */
 .map-section {
@@ -242,41 +248,11 @@ background-color: #555;
 .map-link i {
 margin-right: 8px;
 }
-
-/* Footer Navigation Bar (Fixed to bottom) */
-.bottom-navbar {
-position: fixed;
-bottom: 0;
-left: 0;
-width: 100%;
-background-color: #333;
-padding: 10px 0;
-box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
-z-index: 1000; /* Ensures it's above other content */
+/* Ajoute ceci dans ton fichier CSS */
+.custom-green {
+    background-color: #28a745; /* Vert foncé Bootstrap */
 }
 
-.bottom-navbar ul {
-list-style: none;
-display: flex;
-justify-content: space-around;
-margin: 0;
-padding: 0;
-}
-
-.bottom-navbar ul li {
-flex: 1;
-text-align: center;
-}
-
-.bottom-navbar ul li a {
-color: white;
-text-decoration: none;
-font-size: 16px;
-}
-
-.bottom-navbar ul li a:hover {
-text-decoration: underline;
-}
 
 /* Responsive Design */
 
@@ -321,370 +297,174 @@ text-decoration: underline;
 }
 }
 </style>
-<header>
-  <div class="header-container">
-      <div class="header-content">
-          <h2 class="header-subtitle">{{ journee }}</h2>
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header" style="margin-top: 100px;">Menu <button class="toggle-sidebar" id="sidebar-toggle"><i class="fas fa-bars"></i></button></div>
+  <a href="{% url 'acceuilresponsables' %}"><i class="fa-solid fa-desktop"></i> Tableau de bord Admin</a>
+  <a href="{% url 'responsablelist' %}"><i class="fas fa-home"></i> Suivi journée</a>
+  <a href="{% url 'recuptoday' %}"><i class="fas fa-sync"></i> Récups</a>
+  <a href="{% url 'livraisonstomorrow' %}"><i class="fas fa-shipping-fast"></i> Dispatch</a>
+  <a href="{% url 'voir_checklist' %}"><i class="fas fa-clipboard-list"></i> Checklist</a>
+  <a href="{% url 'creerchecklist' %}"><i class="fas fa-list-check"></i> Checklist Ventes</a>
+  <a href="/admin" target="_blank"><i class="fas fa-tools"></i> Menu admin</a>
+  <button class="toggle-theme" id="theme-toggle" style="margin-top:20px;"><i class="fas fa-moon"></i> Thème</button>
+  <div style="margin-top:20px; font-size:14px; color:#ccc;">Utilisateur: {{ user.username }}</div>
+</div>
+
+<div class="journee" id="journee">
+    <div class="header">
+        <h2>Suivi du {{journee}}</h2>
+            <button id="show-sidebar" style="display:none; position: fixed; top: 12%; left: 10px;">
+                <i class="fas fa-bars fa-2xl"></i>
+            </button>
+        <div class="user-info">
+            <button id="logoutBtn" style="border:none; background:none; cursor:pointer;"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
+        </div>
+    </div>
+    <br>
+    <br>
+    <br>
+    <br>
+
+    <section class="stats-section">
+        <div class="stat-box">
+            <h3>Livraisons en cours</h3>
+            <p id="totalDeliveries">{{livraisonstatusko|length}}</p>
+        </div>
+        <div class="stat-box">
+          <h3>Livraisons validées</h3>
+          <p id="completedDeliveries">{{livraisonstatusok|length}} / {{livraison|length}}</p>
       </div>
-  </div>
-</header>
-<br>
-<br>
-<section class="stats-section">
-  <div class="stat-box">
-      <h3>Livraisons en cours</h3>
-      <p id="totalDeliveries">{{livraisonstatusko|length}}</p>
-  </div>
-  <div class="stat-box">
-    <h3>Livraisons validées</h3>
-    <p id="completedDeliveries">{{livraisonstatusok|length}} / {{livraison|length}}</p>
-</div>
-  <div class="stat-box">
-    <h3 style="color: #E5AACF;">Récupérations en cours</h3>
-    <p id="totalRecups">{{recuperationko|length}}</p>
-</div>
-  <div class="stat-box">
-      <h3 style="color: #E5AACF;">Récupérations validées</h3>
-      <p id="completedRecups">{{recuperationok|length}} / {{recuperation|length}}</p>
-  </div>
-</section>
- 
-  <br>
-  <br>
-  <br>
-  <h1 style="text-align: center;">Liste des livraisons et récupérations aujourd'hui</h1>
-  <br>
-  <br>
-  
-            
-            <table class="table table-striped">
-              <thead class="thead-dark">
-                <tr>
-                  <th scope="col" style="color: #303FBA;">Livreur</th>
-                  <th scope="col" style="color: #303FBA;">Heure départ</th>
-                  <th scope="col" style="color: #303FBA;">Nom du contrat</th>
-                  <th scope="col" style="color: #303FBA;">Heure livraison</th>
-                  <th scope="col" style="color: #303FBA;">Route</th>
-                  <th scope="col" style="color: #303FBA;">Status</th>
-                  <th scope="col" style="color: #303FBA;">Commentaire</th>
-                  <th scope="col" style="color: #303FBA;">Vehicule</th>
+        <div class="stat-box">
+          <h3 style="color: #E5AACF;">Récupérations en cours</h3>
+          <p id="totalRecups">{{recuperationko|length}}</p>
+      </div>
+        <div class="stat-box">
+            <h3 style="color: #E5AACF;">Récupérations validées</h3>
+            <p id="completedRecups">{{recuperationok|length}} / {{recuperation|length}}</p>
+        </div>
+      </section>
+      
 
-        
-                </tr>
-              </thead>
-              <tbody>
-                
-                {% for livraison in livraisons %}
-                {% if livraison.date == journee.date and livraison.status == False and livraison.recuperation == True %}
-          
-        
-                <tr>
-                  <td style="background-color: #F1B3DA;"><strong>{% for livreur in livraison.statut.livreur.all %}
-                    {{ livreur.nom }}{% if not forloop.last %}, {% endif %}
-                {% endfor %}</strong></td>
-                  <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.heure_depart }}</strong></td>
-                  <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
-                  <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
-                  <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.nom }}</strong></td>
-                  <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
+    <div class="container">
+      <div class="table-responsive">
+        <table class="table table-striped align-middle mb-4">
+          <thead>
+            <tr>
+              <th>Livreur</th>
+              <th>Heure Départ</th>
+              <th>Contrat</th>
+              <th>Heure Livraison</th>
+              <th>Route</th>
+              <th>Statut</th>
+              <th>Commentaires</th>
+              <th>Véhicules</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for livraison in livraisons %}
+              {% if livraison.date == journee.date %}
+                <!-- Définir la classe selon le status -->
+                <tr class="{% if livraison.status %}custom-green{% else %}table-warning{% endif %}">
+
+
+                  
+                  <!-- Livreur -->
                   <td>
-                    {% if livraison.commentaire|length > 0 %}
-                        <i class="fa-solid fa-message" onclick="toggleComment('{{ livraison.id }}')"></i>
-                        <div id="comment-{{ livraison.id }}" style="display: none; padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;">
-                            {{ livraison.commentaire }}
-                        </div>
+                    {% for livreur in livraison.statut.livreur.all %}
+                      {{ livreur.nom }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                  </td>
+                  
+                  <!-- Heures, contrat, route -->
+                  <td>{{ livraison.statut.heure_depart }}</td>
+                  <td>{{ livraison.nom }}</td>
+                  <td>{{ livraison.heure_livraison }}</td>
+                  <td>{{ livraison.statut.nom }}</td>
+                  
+                  <!-- Statut badge -->
+                  <td>
+                    {% if livraison.status %}
+                      <span class="badge bg-success">Validé</span>
                     {% else %}
-                        <span>Aucun commentaire</span>
+                      <span class="badge bg-warning text-dark">En cours</span>
                     {% endif %}
-                </td>
-                  <td>
-                    {% for vehicle in livraison.statut.vehicles.all %}
-                        <a href="#" data-bs-toggle="modal" data-bs-target="#vehiclePhotosModal{{ vehicle.id }}">
-                            {{ vehicle.name }}
-                        </a>
-                        {% if not forloop.last %}, {% endif %}
-                        
-                        <!-- Modal for Vehicle Photos -->
-                        <div class="modal fade" id="vehiclePhotosModal{{ vehicle.id }}" tabindex="-1" role="dialog" aria-labelledby="vehiclePhotosModalLabel{{ vehicle.id }}" aria-hidden="true">
-                            <div class="modal-dialog modal-lg" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="vehiclePhotosModalLabel{{ vehicle.id }}">Photos pour {{ vehicle.name }}</h5>
-                                    </div>
-                                    <div class="modal-body">
-                                        {% for photo in vehicle.vehicle_photos.all %}
-                                        {% if photo.image %}
-                                            <div class="photo-container">
-                                                <img src="{{ photo.image.url }}" alt="{{ photo.caption }}" class="img-fluid" style="max-height: 300px; margin-bottom: 10px;">
-                                                
-                                            </div>
-                                            {% endif %}
-                                            {% if photo.video %}
-                                                <video width="320" height="240" controls>
-                                                    <source src="{{ photo.video.url }}" type="video/mp4">
-                                                    Your browser does not support the video tag.
-                                                </video>
-                                            {% endif %}
-                                        {% empty %}
-                                            <p>Pas de photos pour ce véhicule.</p>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                
-                    {% endfor %}
-                </td>
+                  </td>
                   
-
-                </tr>
-                {% elif livraison.date == journee.date and livraison.status == False %}
-                <tr>
-                  <td ><strong>{% for livreur in livraison.statut.livreur.all %}
-                    {{ livreur.nom }}{% if not forloop.last %}, {% endif %}
-                {% endfor %}</strong></td>
-                  <td><strong>{{ livraison.statut.heure_depart }}</strong></td>
-                  <td ><strong>{{livraison.nom}}</strong></td>
-                  <td ><strong>{{ livraison.heure_livraison }}</strong></td>
-                  <td ><strong>{{ livraison.statut.nom }}</strong></td>
-                  <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
+                  
+                  <!-- Commentaires -->
                   <td>
-                    {% if livraison.commentaire|length > 0 %}
-                        <i class="fa-solid fa-message" onclick="toggleComment('{{ livraison.id }}')"></i>
-                        <div id="comment-{{ livraison.id }}" style="display: none; padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;">
-                            {{ livraison.commentaire }}
+                    {% if livraison.commentaire %}
+                      <button class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#comment-{{ livraison.id }}">
+                        Voir Commentaire
+                      </button>
+                      <div class="collapse mt-2" id="comment-{{ livraison.id }}">
+                        <div class="card card-body">
+                          {{ livraison.commentaire }}
                         </div>
+                      </div>
                     {% else %}
-                        <span>Aucun commentaire</span>
+                      <em>Aucun commentaire</em>
                     {% endif %}
-                </td>
+                  </td>
+                  
+                  <!-- Véhicules avec modal -->
                   <td>
                     {% for vehicle in livraison.statut.vehicles.all %}
-                        <a href="#" data-bs-toggle="modal" data-bs-target="#vehiclePhotosModal{{ vehicle.id }}">
-                            {{ vehicle.name }}
-                        </a>
-                        {% if not forloop.last %}, {% endif %}
-                        
-                        <!-- Modal for Vehicle Photos -->
-                        <div class="modal fade" id="vehiclePhotosModal{{ vehicle.id }}" tabindex="-1" role="dialog" aria-labelledby="vehiclePhotosModalLabel{{ vehicle.id }}" aria-hidden="true">
-                            <div class="modal-dialog modal-lg" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="vehiclePhotosModalLabel{{ vehicle.id }}">Photos pour {{ vehicle.name }}</h5>
-                                    </div>
-                                    <div class="modal-body">
-                                        {% for photo in vehicle.vehicle_photos.all %}
-                                        {% if photo.image %}
-                                            <div class="photo-container">
-                                                <img src="{{ photo.image.url }}" alt="{{ photo.caption }}" class="img-fluid" style="max-height: 300px; margin-bottom: 10px;">
-                                                
-                                            </div>
-                                            {% endif %}
-                                            {% if photo.video %}
-                                                <video width="320" height="240" controls>
-                                                    <source src="{{ photo.video.url }}" type="video/mp4">
-                                                    Your browser does not support the video tag.
-                                                </video>
-                                            {% endif %}
-                                        {% empty %}
-                                            <p>Pas de photos pour ce véhicule.</p>
-                                        {% endfor %}
-                                    </div>
-                                </div>
+                      <a href="#" data-bs-toggle="modal" data-bs-target="#vehicleModal{{ vehicle.id }}">{{ vehicle.name }}</a>
+                      {% if not forloop.last %}, {% endif %}
+                      
+                      <!-- Modal Véhicule -->
+                      <div class="modal fade" id="vehicleModal{{ vehicle.id }}" tabindex="-1" aria-labelledby="vehicleLabel{{ vehicle.id }}" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-scrollable modal-lg">
+                          <div class="modal-content">
+                            <div class="modal-header bg-primary text-white">
+                              <h5 class="modal-title" id="vehicleLabel{{ vehicle.id }}">Photos de {{ vehicle.name }}</h5>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
                             </div>
+                            <div class="modal-body">
+                              {% for photo in vehicle.vehicle_photos.all %}
+                                {% if photo.image %}
+                                  <img src="{{ photo.image.url }}" class="img-fluid mb-3" alt="{{ photo.caption }}">
+                                {% endif %}
+                                {% if photo.video %}
+                                  <video controls class="w-100 mb-3">
+                                    <source src="{{ photo.video.url }}" type="video/mp4" />
+                                    Votre navigateur ne supporte pas la vidéo.
+                                  </video>
+                                {% endif %}
+                              {% empty %}
+                                <p>Aucune photo ou vidéo pour ce véhicule.</p>
+                              {% endfor %}
+                            </div>
+                          </div>
                         </div>
-                
+                      </div>
                     {% endfor %}
-                </td>
-                  
-                  
-
+                  </td>
                 </tr>
-                  {% endif %}
-                {% endfor %}
-              </tbody>
-            </table>
-          
-                <br>
-                <br>
-                <hr>
-<br>
-  <br>
-  <table class="table table-striped">
-    <thead class="thead-dark">
-      <tr>
-        <th scope="col" style="color: #303FBA;">Livreur</th>
-        <th scope="col" style="color: #303FBA;">Heure départ</th>
-        <th scope="col" style="color: #303FBA;">Nom du contrat</th>
-        <th scope="col" style="color: #303FBA;">Heure livraison</th>
-        <th scope="col" style="color: #303FBA;">Route</th>
-        <th scope="col" style="color: #303FBA;">Status</th>
-        <th scope="col" style="color: #303FBA;">Commentaire</th>
-        <th scope="col" style="color: #303FBA;">Vehicule</th>
+                <!-- Ligne supplémentaire pour détails si nécessaire -->
+                <tr class="collapse" id="details-{{ livraison.id }}">
+                  <td colspan="8" class="bg-light">
+                    <h6>Informations complémentaires</h6>
+                    <p>Autres infos ou logs ici...</p>
+                  </td>
+                </tr>
+              {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+    </div>
+</div>
 
-
-
-
-      </tr>
-    </thead>
-    <tbody>
-  {% for livraison in livraisons %}
-  {% if livraison.date == journee.date and livraison.status == True and livraison.recuperation == True %}
-          
-        
-  <tr>
-    <td style="background-color: #F1B3DA;"><strong>{% for livreur in livraison.statut.livreur.all %}
-      {{ livreur.nom }}{% if not forloop.last %}, {% endif %}
-  {% endfor %}</strong></td>
-    <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.heure_depart }}</strong></td>
-    <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
-    <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
-    <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.nom }}</strong></td>
-    <td><strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong></td>
-    <td>
-      {% if livraison.commentaire|length > 0 %}
-          <i class="fa-solid fa-message" onclick="toggleComment('{{ livraison.id }}')"></i>
-          <div id="comment-{{ livraison.id }}" style="display: none; padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;">
-              {{ livraison.commentaire }}
-          </div>
-      {% else %}
-          <span>Aucun commentaire</span>
-      {% endif %}
-  </td>
-                  <td>
-                    {% for vehicle in livraison.statut.vehicles.all %}
-                        <a href="#" data-bs-toggle="modal" data-bs-target="#vehiclePhotosModal{{ vehicle.id }}">
-                            {{ vehicle.name }}
-                        </a>
-                        {% if not forloop.last %}, {% endif %}
-                        
-                        <!-- Modal for Vehicle Photos -->
-                        <div class="modal fade" id="vehiclePhotosModal{{ vehicle.id }}" tabindex="-1" role="dialog" aria-labelledby="vehiclePhotosModalLabel{{ vehicle.id }}" aria-hidden="true">
-                            <div class="modal-dialog modal-lg" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="vehiclePhotosModalLabel{{ vehicle.id }}">Photos pour {{ vehicle.name }}</h5>
-                                    </div>
-                                    <div class="modal-body">
-                                        {% for photo in vehicle.vehicle_photos.all %}
-                                        {% if photo.image %}
-                                            <div class="photo-container">
-                                                <img src="{{ photo.image.url }}" alt="{{ photo.caption }}" class="img-fluid" style="max-height: 300px; margin-bottom: 10px;">
-                                                
-                                            </div>
-                                            {% endif %}
-                                            {% if photo.video %}
-                                                <video width="320" height="240" controls>
-                                                    <source src="{{ photo.video.url }}" type="video/mp4">
-                                                    Your browser does not support the video tag.
-                                                </video>
-                                            {% endif %}
-                                        {% empty %}
-                                            <p>Pas de photos pour ce véhicule.</p>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                
-                    {% endfor %}
-                </td>
-                  
-                  
-
-  </tr>
-  {% elif livraison.date == journee.date and livraison.status == True %}
-  <tr>
-    <td><strong>{% for livreur in livraison.statut.livreur.all %}
-      {{ livreur.nom }}{% if not forloop.last %}, {% endif %}
-  {% endfor %}</strong></td>
-    <td><strong>{{ livraison.statut.heure_depart }}</strong></td>
-    <td ><strong>{{livraison.nom}}</strong></td>
-    <td ><strong>{{ livraison.heure_livraison }}</strong></td>
-    <td ><strong>{{ livraison.statut.nom }}</strong></td>
-    <td><strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong></td>
-    <td>
-      {% if livraison.commentaire|length > 0 %}
-          <i class="fa-solid fa-message" onclick="toggleComment('{{ livraison.id }}')"></i>
-          <div id="comment-{{ livraison.id }}" style="display: none; padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;">
-              {{ livraison.commentaire }}
-          </div>
-      {% else %}
-          <span>Aucun commentaire</span>
-      {% endif %}
-  </td>
-                  <td>
-                    {% for vehicle in livraison.statut.vehicles.all %}
-                        <a href="#" data-bs-toggle="modal" data-bs-target="#vehiclePhotosModal{{ vehicle.id }}">
-                            {{ vehicle.name }}
-                        </a>
-                        {% if not forloop.last %}, {% endif %}
-                        
-                        <!-- Modal for Vehicle Photos -->
-                        <div class="modal fade" id="vehiclePhotosModal{{ vehicle.id }}" tabindex="-1" role="dialog" aria-labelledby="vehiclePhotosModalLabel{{ vehicle.id }}" aria-hidden="true">
-                            <div class="modal-dialog modal-lg" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="vehiclePhotosModalLabel{{ vehicle.id }}">Photos pour {{ vehicle.name }}</h5>
-                                    </div>
-                                    <div class="modal-body">
-                                        {% for photo in vehicle.vehicle_photos.all %}
-                                        {% if photo.image %}
-                                            <div class="photo-container">
-                                                <img src="{{ photo.image.url }}" alt="{{ photo.caption }}" class="img-fluid" style="max-height: 300px; margin-bottom: 10px;">
-                                                
-                                            </div>
-                                            {% endif %}
-                                            {% if photo.video %}
-                                                <video width="320" height="240" controls>
-                                                    <source src="{{ photo.video.url }}" type="video/mp4">
-                                                    Your browser does not support the video tag.
-                                                </video>
-                                            {% endif %}
-                                        {% empty %}
-                                            <p>Pas de photos pour ce véhicule.</p>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                
-                    {% endfor %}
-                </td>
-                
-                  
-                  
-
-  </tr>
-    {% endif %}
     
-                
-                {% endfor %}
-              </tbody>
-            </table>
+    
+        
 
         
-<br>
-<br>
-<br>
-<br>
-<br>
-    
-
-  
-
-
-
-
-<nav class="bottom-navbar">
-  <ul>
-      <li><a href="{% url 'acceuilresponsables'%}" class="nav__link" ><i class="fa-solid fa-user-ninja"></i>
-        <span class="nav__name">Menu Admin</span>
-    </a></li>  
-    <li><a  href="{% url 'responsablelist'%}" class="nav__link"><i class="fa-solid fa-calendar-days"></i>
-      <span class="nav__name">Journées</span>
-    </a></li>
-</nav>
+        </div>
 
 <script>
   function toggleComment(livraisonId) {
@@ -695,6 +475,40 @@ text-decoration: underline;
         commentDiv.style.display = 'none';   // Hide comment
     }
 }
+
+const toggleBtn = document.getElementById('theme-toggle');
+        toggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+        });
+
+          document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.getElementById('sidebar');
+    const btnShowSidebar = document.getElementById('show-sidebar');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    const dashboard = document.getElementById('dashboard');
+
+    // Quand on clique sur le bouton toggle pour cacher ou réafficher
+    toggleBtn.addEventListener('click', () => {
+        if (sidebar.classList.contains('collapsed')) {
+            // La sidebar est masquée, on la remonte
+            sidebar.classList.remove('collapsed');
+            btnShowSidebar.style.display = 'none';   // cache le bouton
+            dashboard.classList.remove('full-width');
+        } else {
+            // La sidebar est visible, on la cache
+            sidebar.classList.add('collapsed');
+            btnShowSidebar.style.display = 'block';  // montre le bouton pour la réafficher
+            dashboard.classList.add('full-width');
+        }
+    });
+
+    // Quand on clique sur le bouton pour faire réapparaître la sidebar
+    btnShowSidebar.addEventListener('click', () => {
+        sidebar.classList.remove('collapsed');
+        btnShowSidebar.style.display = 'none'; // cache le bouton
+        dashboard.classList.remove('full-width');
+    });
+});
 </script>
 
     {% endblock %}
