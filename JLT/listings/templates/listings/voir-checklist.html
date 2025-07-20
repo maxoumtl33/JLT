@@ -12,8 +12,106 @@
 <style>
     /* General styling */
     body {
-        background-color: #f0f2f5;
-    }
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s linear, color 0.3s linear;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #007BFF;
+            height: 100%;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar .sidebar-header {
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .sidebar a {
+            color: #fff;
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar a.active, .sidebar a:hover {
+            background-color: #0056b3;
+        }
+
+        .checklist {
+            flex: 1;
+            padding: 20px;
+            background-color: #F0F2F5;
+            overflow-y: auto;
+            transition: margin-left 0.3s ease; /* Improves smoothness of layout change */
+        }
+
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            
+        }
+
+        .header .toggle-theme {
+            cursor: pointer;
+            color: #007BFF;
+        }
+        #checklist.expanded {
+    margin-left: 0;
+}
+
+#checklist.full-width {
+    transition: margin-left 0s;
+}
+
+.collapsed {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    width: 0; /* Ensure width collapses at the end */
+}
+
+.dark-mode {
+            background-color: #121212;
+            color: #e4e4e4;
+        }
+
+        .dark-mode .header, .dark-mode .card {
+            background-color: #1e1e1e;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .dark-mode .sidebar {
+            background-color: #1e1e1e;
+        }
+
+        .dark-mode .sidebar a {
+            color: #e4e4e4;
+        }
+
+        .dark-mode .sidebar a.active, .dark-mode .sidebar a:hover {
+            background-color: #333;
+            color: #fff;
+        }
 
     h1, h2 {
         color: #343a40;
@@ -60,7 +158,8 @@
 
     /* Calendar section */
     .calendar-section {
-        width: 30%;
+        width: 100%;
+        max-width: 40%;
         background-color: #f9f9f9;
         padding: 20px;
         border-radius: 8px;
@@ -263,44 +362,65 @@
 </style>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
-<nav class="navbar navbar-expand-lg navbar-custom sticky-top">
-    <div class="container">
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header" style="margin-top: 100px;">Menu <button class="toggle-sidebar" id="sidebar-toggle"><i class="fas fa-bars"></i></button></div>
+  <a href="{% url 'acceuilresponsables' %}"><i class="fa-solid fa-desktop"></i> Tableau de bord Admin</a>
+  <a href="{% url 'responsablelist' %}"><i class="fas fa-home"></i> Suivi journée</a>
+  <a href="{% url 'dashboard_stats' %}"><i class="fas fa-chart-bar"></i> Stats</a>
+  <a href="{% url 'livraisonstomorrow' %}"><i class="fas fa-shipping-fast"></i> Dispatch</a>
+  <a href="{% url 'create-shift' %}"><i class="fas fa-calendar-plus"></i> Planning</a>
+  <a href="{% url 'voir_checklist' %}"><i class="fas fa-clipboard-list"></i> Checklist</a>
+  <a href="{% url 'creerchecklist' %}"><i class="fas fa-list-check"></i> Checklist Ventes</a>
+  <a href="{% url 'product_list' %}"><i class="fas fa-box-open"></i> Liste produits (checklist)</a>
+  <a href="/admin" target="_blank"><i class="fas fa-tools"></i> Menu admin</a>
+  <button class="toggle-theme" id="theme-toggle" style="margin-top:20px;"><i class="fas fa-moon"></i> Thème</button>
+  <div style="margin-top:20px; font-size:14px; color:#ccc;">Utilisateur: {{ user.username }}</div>
+</div>
+
+
+
+
+
+<div class="checklist" id="checklist">
+
+      <div class="header">
+    <h2>Checklist et impressions</h2>
+        <button id="show-sidebar" style="display:none; position: fixed; top: 12%; left: 10px;">
+            <i class="fas fa-bars fa-2xl"></i>
         </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <li>
-                    <a href="{% url 'product_list' %}" class="nav__link">
-                        <i class="fa-brands fa-shopify"></i>
-                        <span>Voir liste des produits</span>
-                    </a>
-
-                </li>
-            </ul>
-        </div>
+    <div class="user-info">
+        <button id="logoutBtn" style="border:none; background:none; cursor:pointer;"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
     </div>
-</nav>
+</div>
+<br>
+<br>
+<br>
+<br>
+<h2 class="text-center mb-4">Imprimer Checklists et Livraisons</h2>
 
-<hr>
+<!-- Date Pickers with enhanced UI -->
+<div class="row g-3 mb-4 justify-content-center">
+  <div class="col-md-3">
+    <label for="checklist-date" class="form-label">Date des Checklists</label>
+    <input type="date" id="checklist-date" class="form-control form-control-lg" />
+  </div>
+  <div class="col-md-3">
+    <label for="livraison-date" class="form-label">Date des Livraisons</label>
+    <input type="date" id="livraison-date" class="form-control form-control-lg" />
+  </div>
+</div>
 
-
-<div class="container">
-    <h1 class="text-center mb-4">Imprimer Checklists et Livraisons</h1>
-
-    <!-- Date Picker Section -->
-    <label for="checklist-date" class="form-label">Date pour les Checklists :</label>
-    <input type="date" id="checklist-date" class="form-control mb-4" />
-
-    <label for="livraison-date" class="form-label">Date pour les Livraisons :</label>
-    <input type="date" id="livraison-date" class="form-control mb-4" />
-
-    <!-- Print Buttons -->
-    <div class="d-flex justify-content-between">
-        <button onclick="printChecklists()" class="btn btn-primary">Imprimer Checklists</button>
-        <button onclick="printLivraisons()" class="btn btn-primary">Imprimer Livraisons</button>
-    </div>
+<!-- Button Group with icons -->
+<div class="d-flex justify-content-center gap-3 mb-5">
+  <button onclick="printChecklists()" class="btn btn-info btn-lg d-flex align-items-center gap-2 shadow" title="Imprimer Checklists">
+    <i class="bi bi-printer"></i> Imprimer Checklists
+  </button>
+  <button onclick="printLivraisons()" class="btn btn-info btn-lg d-flex align-items-center gap-2 shadow" title="Imprimer Livraisons">
+    <i class="bi bi-printer"></i> Imprimer Livraisons
+  </button>
+</div>
 
     <br>
     <!-- Checklist Section -->
@@ -308,43 +428,42 @@
         {% for checklist in checklists %}
         {% if checklist.is_active %}
         <div class="page" data-checklist-date="{{ checklist.date|date:'Y-m-d' }}">
-            <h1>{{ checklist.date|date:"l d F Y" }}</h1>
-            <h1>{{ checklist.name }}</h1>
-            <p><strong>{{ checklist.heure_livraison }}</strong></p>
+        <div style="text-align:center; margin-top:10px;">
+            <img src="{{ checklist.qr_code_uri }}" alt="QR Code" width="150" />
+        </div>
+            <h2 style="text-align:center;">{{ checklist.date|date:"l d F Y" }}</h2>
+            <h1 style="text-align:center;">{{ checklist.name }}</h1>
+            <p style="text-align:center;"><strong>{{ checklist.formatted_heure_livraison }}</strong></p>
             {% if checklist.notechecklist %}
-            <p style="color: orange;">{{ checklist.notechecklist }}</p>
+            <p style="color: orange; text-align:center;">{{ checklist.notechecklist }}</p>
             {% endif %}
         </div>
+        
         {% endif %}
         {% endfor %}
     </div>
 
+        
     <!-- Livraison Section -->
     <div id="livraison-section" style="display: none;">
         {% for livraison in livraisons %}
         <div class="livraison-page" data-livraison-date="{{ livraison.date|date:'Y-m-d' }}">
             <h1 style="display: none;">{{ livraison.date|date:"d/m/Y" }}</h1>
-            <h1>{{ livraison.journee }}</h1>
-            <h1>{{ livraison.nom }}</h1>
-            <p><strong>{{ livraison.heure_livraison }}</strong></p>
+            <h1 style="text-align:center;">{{ livraison.journee }}</h1>
+            <h1 style="text-align:center;">{{ livraison.nom }}</h1>
+            <p style="text-align:center;"><strong>{{ livraison.formatted_heure_livraison }}</strong></p>
             {% if livraison.infodetail %}
-            <p style="color: orange;">{{ livraison.infodetail }}</p>
+            <p style="color: orange; text-align:center;">{{ livraison.infodetail }}</p>
             {% endif %}
         </div>
         {% endfor %}
     </div>
-</div>
 
 
 
 
 
-
-<hr>
-
-
-
-<h1 class="text-center">Liste Checklists</h1>
+<h2 class="text-center mb-4">Liste Checklists</h2>
 
 <div class="agenda-container">
     <!-- Calendar Section -->
@@ -380,7 +499,6 @@
                 <tr>
                     <th>Heure</th>
                     <th>Nom</th>
-                    <th>Convives</th>
                     <th>Ajouté par</th>
                     <th>Ajouté le</th>
                 </tr>
@@ -392,60 +510,89 @@
     </div>
 </div>
 
-<hr>
+<br>
+<h2 class="text-center mb-4">Produits total et en cours</h2>
+<br>
+<div class="container d-flex flex-row gap-3 justify-content-center mb-4">
 
-
-
-<div class="container d-flex flex-column align-items-center">
-    <h1 class="text-center">Voir les Produits par Date</h1>
-    <br>
-    <form id="dateForm" method="get" action="#">
-        <input type="date" name="selected_datee" class="form-control mb-3 text-center" 
-               value="{{ selected_datee|date:'d-m-Y' }}" style="width: 250px;" required 
-               id="selectedDateInput"/>
-    </form>
-
-    <!-- Button to open the modal. Initially hidden -->
-    <button class="btn btn-primary mt-3" id="showModalButton" data-bs-toggle="modal" data-bs-target="#checklistItemsModal" style="display: none;">
-        Afficher les produits
-    </button>
-
-    <!-- Modal -->
-    <div class="modal fade" id="checklistItemsModal" tabindex="-1" aria-labelledby="checklistItemsModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="checklistItemsModalLabel"><span id="modalDate"></span></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Nom du Produit</th>
-                                <th>Quantité Totale</th>
-                            </tr>
-                        </thead>
-                        <tbody id="checklistItemsBody">
-                            <tr>
-                                <td colspan="2" class="text-center">Sélectionnez une date pour voir les produits.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+    <!-- First Card: Date form and button to show products -->
+    <div class="card mb-4" style="width: 20rem;">
+      <div class="card-body">
+        <h5 class="card-title text-center">Produits au total</h5>
+        <form id="dateForm" method="get" action="#">
+            <label for="dateEnCoursItems" class="form-label">Voir la quantité totale de produits pour une date</label>
+          <input type="date" name="selected_datee" class="form-control mb-3 text-center" 
+                 value="{{ selected_datee|date:'d-m-Y' }}" style="width: 100%;" required 
+                 id="selectedDateInput"/>
+        </form>
+        <!-- Button to trigger the modal for products -->
+        <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#checklistItemsModal">
+          Rechercher
+        </button>
+      </div>
     </div>
+  
+    <!-- Second Card: 'produits en cours' with date picker and search button -->
+    <div class="card mb-4" style="width: 20rem;">
+      <div class="card-body">
+        <h5 class="card-title text-center">Produits en cours</h5>
+        <div class="mb-3">
+          <label for="dateEnCoursItems" class="form-label">Voir les produits en cours pour une date</label>
+          <input type="date" id="dateEnCoursItems" class="form-control"/>
+        </div>
+        <button id="searchEnCoursItemsBtn" class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#enCoursModal">Rechercher</button>
+      </div>
+    </div>
+  
+    <!-- Modal for displaying Produits en cours -->
+    <div class="modal fade" id="enCoursModal" tabindex="-1" aria-labelledby="enCoursModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="enCoursModalLabel">Produits en cours pour la date sélectionnée</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" id="enCoursModalBody">
+            <!-- Results will be injected here -->
+            <div style="text-align:center;">Sélectionnez une date et cliquez sur "Rechercher".</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Modal for 'Afficher les produits' -->
+    <div class="modal fade" id="checklistItemsModal" tabindex="-1" aria-labelledby="checklistItemsModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="checklistItemsModalLabel">Produits pour la date</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Nom du Produit</th>
+                  <th>Quantité Totale</th>
+                </tr>
+              </thead>
+              <tbody id="checklistItemsBody">
+                <tr>
+                  <td colspan="2" class="text-center">Sélectionnez une date pour voir les produits.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+  </div>
+  
+
 </div>
-
-
-
-
-
-
-<br>
-<br>
-
+    
+    
 
 
 
@@ -456,237 +603,326 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.js"></script>
+
+
 <script>
-
-$(document).ready(function() {
-    // Listen for changes in the date input
-    $('#selectedDateInput').on('change', function() {
-        const selectedDate = $(this).val();  // Get the selected date value
-
-        // Make an AJAX request to fetch checklist items for the selected date
-        $.ajax({
-            url: "{% url 'voir_checklist' %}",  // Make sure this URL points to the correct view
-            method: 'GET',
-            data: {
-                selected_datee: selectedDate,  // Send the selected date as a parameter
-            },
-            success: function(data) {
-    // Update modal content with new data
-    $('#checklistItemsBody').empty(); // Clear previous content
-    if (data.checklist_item_totals.length > 0) {
-        // Format the date as needed, here `selectedDate` is in the format YYYY-MM-DD
-        $('#modalDate').text(selectedDate); // Set the formatted date in the modal title
-        
-        // Loop through each item and append it to the modal table body
-        data.checklist_item_totals.forEach(item => {
-            $('#checklistItemsBody').append(`
-                <tr>
-                    <td>${item.product__name}</td>
-                    <td>${item.total_quantity}</td>
-                </tr>
-            `);
+const toggleBtn = document.getElementById('theme-toggle');
+        toggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
         });
-    } else {
-        // If no items are found, display a message in the modal
-        $('#checklistItemsBody').append(`
-            <tr>
-                <td colspan="2" class="text-center">Aucun item trouvé pour cette date.</td>
-            </tr>
-        `);
-    }
 
-    // Show the modal after updating its content
-    $('#showModalButton').click(); 
-},
+          document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.getElementById('sidebar');
+    const btnShowSidebar = document.getElementById('show-sidebar');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    const dashboard = document.getElementById('dashboard');
 
-            error: function(xhr, status, error) {
-                // Log any errors that occur during the AJAX request
-                console.error('An AJAX error occurred: ' + status + ': ' + error);
-            }
-        });
+    // Quand on clique sur le bouton toggle pour cacher ou réafficher
+    toggleBtn.addEventListener('click', () => {
+        if (sidebar.classList.contains('collapsed')) {
+            // La sidebar est masquée, on la remonte
+            sidebar.classList.remove('collapsed');
+            btnShowSidebar.style.display = 'none';   // cache le bouton
+            dashboard.classList.remove('full-width');
+        } else {
+            // La sidebar est visible, on la cache
+            sidebar.classList.add('collapsed');
+            btnShowSidebar.style.display = 'block';  // montre le bouton pour la réafficher
+            dashboard.classList.add('full-width');
+        }
+    });
+
+    // Quand on clique sur le bouton pour faire réapparaître la sidebar
+    btnShowSidebar.addEventListener('click', () => {
+        sidebar.classList.remove('collapsed');
+        btnShowSidebar.style.display = 'none'; // cache le bouton
+        dashboard.classList.remove('full-width');
     });
 });
 
-    setTimeout(function(){
-       window.location.reload(1);
-    }, 300000); // 300000 milliseconds = 5 minutes
+// Écouteur sur le clic du bouton "Rechercher"
+$('#searchEnCoursItemsBtn').on('click', function() {
+    const selectedDate = $('#dateEnCoursItems').val();
 
-    function updateAgenda() {
-        const month = document.getElementById('month').value;
-        window.location.href = '?month=' + month + '&day=1';  // Reload page with selected month and day set to 1
+    if (!selectedDate) {
+        alert('Veuillez sélectionner une date.');
+        return;
     }
 
-    function getChecklists(day) {
+    // Effectuer la requête AJAX (remplace l'URL par la tienne)
+    $.ajax({
+        url: "{% url 'checklist_items_encours_par_date' %}", // adapter cette URL dans Django
+        type: 'GET',
+        data: {
+            'date': selectedDate,
+        },
+        success: function(data) {
+            const container = $('#enCoursModalBody');
+            container.empty();
 
-    const month = document.getElementById('month').value;
-    fetch(`/get_checklists_for_day/${day}/?month=${month}`)
-        .then(response => response.json())
-        .then(data => {
-            const checklistList = document.getElementById('checklist-list');
-            const baseUrl = checklistList.dataset.detailUrl.replace(/0\/$/, '');
-            checklistList.innerHTML = '';
+            if (data.items && data.items.length > 0) {
+                const table = $('<table class="table table-striped"></table>');
+                table.html(`
+                    <thead>
+                        <tr>
+                            <th>Nom du Produit</th>
+                            <th>Quantité</th>
+                            <th>Nom de la Checklist</th>
+                        </tr>
+                    </thead>
+                `);
 
-            // Clear any previously selected date
-            const allDayButtons = document.querySelectorAll('.day-btn');
-            allDayButtons.forEach(button => button.classList.remove('selected'));
-
-            // Highlight the selected date button
-            const selectedButton = document.querySelector(`.day-btn[data-day='${day}']`);
-            if (selectedButton) {
-                selectedButton.classList.add('selected');
-            }
-
-            if (data.checklists && data.checklists.length > 0) {
-                data.checklists.forEach(checklist => {
-                    const row = document.createElement('tr');
-                    row.classList.add('clickable-row');
-                    row.classList.add(`status-${checklist.status}`); // Add status class
-                    row.dataset.href = `${baseUrl}${checklist.id}/`;
-                    // Parse the date and add 5 hours
-                    const originalDate = new Date(checklist.added_on);
-                    const updatedDate = new Date(originalDate.getTime() + 5 * 60 * 60 * 1000); // Add 5 hours in milliseconds
-                    row.innerHTML = `
-                        <td>${formatTimeWithoutSeconds(checklist.heure_livraison)}</td>
-                        <td>${checklist.name}</td>
-                        <td>${checklist.nb_convive}</td>
-                        <td>${checklist.conseillere || 'N/A'}</td>
-                        <td>${formatDateTime(updatedDate)}</td>
-
-
-                    `;
-                    row.addEventListener('click', function() {
-                        window.location.href = this.dataset.href;
-                    });
-                    checklistList.appendChild(row);
+                const tbody = $('<tbody></tbody>');
+                data.items.forEach(function(item) {
+                    $('<tr></tr>').html(`
+                        <td>${item.product__name}</td>
+                        <td>${item.total_quantity}</td>
+                        <td>${item.checklist__name}</td>
+                    `).appendTo(tbody);
                 });
+                table.append(tbody);
+                container.append(table);
             } else {
-                checklistList.innerHTML = `
-                    <tr>
-                        <td colspan="4">Aucune checklist disponible pour ce jour.</td>
-                    </tr>
-                `;
+                container.html('Aucun produit en cours pour cette date.');
             }
-        })
-        .catch(error => {
-            console.error('Error fetching checklists:', error);
-        });
-}
-
-function formatDateTime(isoDateString) {
-    const date = new Date(isoDateString); // Parse ISO date
-    const options = {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false, // Use 24-hour format
-    };
-    return date.toLocaleString('fr-FR', options); // Format for French locale
-}
-
-function formatTimeWithoutSeconds(timeString) {
-    if (timeString.includes(':')) {
-        const parts = timeString.split(':');
-        return `${parts[0]}:${parts[1]}`; // Include only hours and minutes
-    }
-    return timeString; // Return as is if format is unexpected
-}
-
-function filterByDate(containerSelector, attribute, selectedDate) {
-    return Array.from(document.querySelectorAll(containerSelector)).filter(item => {
-        const itemDate = item.getAttribute(attribute);
-        return itemDate === selectedDate;
+        },
+        error: function() {
+            alert('Erreur lors de la récupération des données.');
+        }
     });
-}
+});
 
-function openPrintWindow(content, title) {
+
+    $(document).ready(function() {
+        // Listen for changes in the date input
+        $('#selectedDateInput').on('change', function() {
+            const selectedDate = $(this).val();  // Get the selected date value
+    
+            // Make an AJAX request to fetch checklist items for the selected date
+            $.ajax({
+                url: "{% url 'voir_checklist' %}",  // Make sure this URL points to the correct view
+                method: 'GET',
+                data: {
+                    selected_datee: selectedDate,  // Send the selected date as a parameter
+                },
+                success: function(data) {
+        // Update modal content with new data
+        $('#checklistItemsBody').empty(); // Clear previous content
+        if (data.checklist_item_totals.length > 0) {
+            // Format the date as needed, here `selectedDate` is in the format YYYY-MM-DD
+            $('#modalDate').text(selectedDate); // Set the formatted date in the modal title
+            
+            // Loop through each item and append it to the modal table body
+            data.checklist_item_totals.forEach(item => {
+                $('#checklistItemsBody').append(`
+                    <tr>
+                        <td>${item.product__name}</td>
+                        <td>${item.total_quantity}</td>
+                    </tr>
+                `);
+            });
+        } else {
+            // If no items are found, display a message in the modal
+            $('#checklistItemsBody').append(`
+                <tr>
+                    <td colspan="2" class="text-center">Aucun item trouvé pour cette date.</td>
+                </tr>
+            `);
+        }
+    
+    },
+    
+                error: function(xhr, status, error) {
+                    // Log any errors that occur during the AJAX request
+                    console.error('An AJAX error occurred: ' + status + ': ' + error);
+                }
+            });
+        });
+    });
+    
+        setTimeout(function(){
+           window.location.reload(1);
+        }, 300000); // 300000 milliseconds = 5 minutes
+    
+        function updateAgenda() {
+            const month = document.getElementById('month').value;
+            window.location.href = '?month=' + month + '&day=1';  // Reload page with selected month and day set to 1
+        }
+    
+        function getChecklists(day) {
+    
+        const month = document.getElementById('month').value;
+        fetch(`/get_checklists_for_day/${day}/?month=${month}`)
+            .then(response => response.json())
+            .then(data => {
+                const checklistList = document.getElementById('checklist-list');
+                const baseUrl = checklistList.dataset.detailUrl.replace(/0\/$/, '');
+                checklistList.innerHTML = '';
+    
+                // Clear any previously selected date
+                const allDayButtons = document.querySelectorAll('.day-btn');
+                allDayButtons.forEach(button => button.classList.remove('selected'));
+    
+                // Highlight the selected date button
+                const selectedButton = document.querySelector(`.day-btn[data-day='${day}']`);
+                if (selectedButton) {
+                    selectedButton.classList.add('selected');
+                }
+    
+                if (data.checklists && data.checklists.length > 0) {
+                    data.checklists.forEach(checklist => {
+                        const row = document.createElement('tr');
+                        row.classList.add('clickable-row');
+                        row.classList.add(`status-${checklist.status}`); // Add status class
+                        row.dataset.href = `${baseUrl}${checklist.id}/`;
+                        // Parse the date and add 5 hours
+                        const originalDate = new Date(checklist.added_on);
+                        const updatedDate = new Date(originalDate.getTime() + 5 * 60 * 60 * 1000); // Add 5 hours in milliseconds
+                        row.innerHTML = `
+                            <td>${formatTimeWithoutSeconds(checklist.heure_livraison)}</td>
+                            <td>${checklist.name}</td>
+                            <td>${checklist.conseillere || 'N/A'}</td>
+                            <td>${formatDateTime(updatedDate)}</td>
+    
+    
+                        `;
+                        row.addEventListener('click', function() {
+                            window.location.href = this.dataset.href;
+                        });
+                        checklistList.appendChild(row);
+                    });
+                } else {
+                    checklistList.innerHTML = `
+                        <tr>
+                            <td colspan="4">Aucune checklist disponible pour ce jour.</td>
+                        </tr>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching checklists:', error);
+            });
+    }
+    
+    function formatDateTime(isoDateString) {
+        const date = new Date(isoDateString); // Parse ISO date
+        const options = {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false, // Use 24-hour format
+        };
+        return date.toLocaleString('fr-FR', options); // Format for French locale
+    }
+    
+    function formatTimeWithoutSeconds(timeString) {
+        if (timeString.includes(':')) {
+            const parts = timeString.split(':');
+            return `${parts[0]}:${parts[1]}`; // Include only hours and minutes
+        }
+        return timeString; // Return as is if format is unexpected
+    }
+    
+    function filterByDate(containerSelector, attribute, selectedDate) {
+        return Array.from(document.querySelectorAll(containerSelector)).filter(item => {
+            const itemDate = item.getAttribute(attribute);
+            return itemDate === selectedDate;
+        });
+    }
+    
+    function openPrintWindow(content, title) {
     const printWindow = window.open('', '', 'height=800,width=1200');
+
+    // Styles pour la mise en page
     printWindow.document.write('<html><head><title>' + title + '</title>');
     printWindow.document.write('<style>');
     printWindow.document.write(`
         @media print {
-            @page {
-                size: A4 landscape; /* Landscape mode */
-                margin: 20mm;
-            }
+            @page { size: A4 landscape; margin: 20mm; }
             body {
                 font-family: Arial, sans-serif;
                 font-size: 40px;
-                text-align: center;
-            }
-            .page, .livraison-page {
-                page-break-after: always;
+                margin: 0;
+                padding: 0;
                 display: flex;
                 flex-direction: column;
-                justify-content: center;
                 align-items: center;
-                height: 100%;
-                margin: 0;
             }
-            h1 {
-                font-size: 54px; /* Larger font for headings */
-                font-weight: bold;
-                margin-bottom: 30px;
-            }
-            p {
-                font-size: 40px; /* Larger font for paragraphs */
-                margin: 10px 0;
+           
+            .page {
+                page-break-after: always;
+                width: 100%;
             }
         }
     `);
-    printWindow.document.write('</style></head><body>');
+    printWindow.document.write('</style>');
+    printWindow.document.write('</head><body>');
+
+    // Contenu des checklists
     printWindow.document.write(content);
+
+    printWindow.document.write('</body></html>');
     printWindow.document.close();
     printWindow.print();
-    printWindow.close();
 }
 
-function filterByDate(containerSelector, attribute, selectedDate) {
-    const items = document.querySelectorAll(containerSelector);
-    return Array.from(items).filter(item => item.getAttribute(attribute) === selectedDate);
-}
-
-function printChecklists() {
+    function filterByDate(containerSelector, attribute, selectedDate) {
+        const items = document.querySelectorAll(containerSelector);
+        return Array.from(items).filter(item => item.getAttribute(attribute) === selectedDate);
+    }
+    
+    function printChecklists() {
     const selectedDate = document.getElementById('checklist-date').value;
     if (!selectedDate) {
-        alert('Veuillez sélectionner une date pour les checklists.');
+        alert('Veuillez sélectionner une date.');
         return;
     }
 
-    const filteredItems = filterByDate('.page', 'data-checklist-date', selectedDate);
+    // Filtrer les pages par date
+    const filteredItems = Array.from(document.querySelectorAll('.page'))
+        .filter(item => item.getAttribute('data-checklist-date') === selectedDate);
+
     if (filteredItems.length === 0) {
-        alert('Aucune checklist trouvée pour la date sélectionnée.');
+        alert('Aucune checklist trouvée pour cette date.');
         return;
     }
 
+    // Construire la liste HTML des checklists
     const content = filteredItems.map(item => item.outerHTML).join('');
+
+ 
+
+    // Appeler la fenêtre d'impression
     openPrintWindow(content, 'Imprimer les Checklists');
 }
 
-function printLivraisons() {
-    const selectedDate = document.getElementById('livraison-date').value;
-    if (!selectedDate) {
-        alert('Veuillez sélectionner une date pour les livraisons.');
-        return;
+
+    function printLivraisons() {
+        const selectedDate = document.getElementById('livraison-date').value;
+        if (!selectedDate) {
+            alert('Veuillez sélectionner une date pour les livraisons.');
+            return;
+        }
+    
+        const filteredItems = filterByDate('.livraison-page', 'data-livraison-date', selectedDate);
+        if (filteredItems.length === 0) {
+            alert('Aucune livraison trouvée pour la date sélectionnée.');
+            return;
+        }
+    
+        const content = filteredItems.map(item => item.outerHTML).join('');
+        openPrintWindow(content, 'Imprimer les Livraisons');
     }
-
-    const filteredItems = filterByDate('.livraison-page', 'data-livraison-date', selectedDate);
-    if (filteredItems.length === 0) {
-        alert('Aucune livraison trouvée pour la date sélectionnée.');
-        return;
-    }
-
-    const content = filteredItems.map(item => item.outerHTML).join('');
-    openPrintWindow(content, 'Imprimer les Livraisons');
-}
-
-
-
-
-
-
-
-</script>
+    
+    
+    
+    
+    
+    
+    
+    </script>
+    
 
 {% endblock %}

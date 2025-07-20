@@ -51,7 +51,7 @@ path('create-routeaujour/', views.CreateRouteAujourView.as_view(), name='create_
 path('create-routetoday/', views.CreateRouteTodayView.as_view(), name='create_routetoday'),
 path('create-routedim/', views.CreateRouteDimView.as_view(), name='create_routedim'),
 path('', views.home, name='home'),
-
+path('remettre-stock/', views.remettre_en_stock, name='remettre_stock'),  # Ajoutez cette ligne
 path('get_submissions_for_created_at/<int:day>/', views.get_submissions_created_at, name='get_submissions_created_at'),
 path('get_submissions_for_day/<int:day>/', views.get_submission_for_day, name='get_submissions_for_day'),
 path('get_checklists_for_day/<int:day>/', views.get_checklists_for_day, name='get_checklists_for_day'),
@@ -171,6 +171,8 @@ path('products/', views.product_list, name='product_list'),
 path('create_shift/', views.create_shift, name='create-shift'),
 path('responsablelist/', responsable_list, name='responsablelist'),
 path('success/', views.success_page, name='success_page'),
+path('checklist/<int:checklist_id>/en_cours/', views.checklist_en_cours_view, name='checklist_en_cours'),
+path('api/checklist-items-encours/', views.checklist_items_encours_par_date, name='checklist_items_encours_par_date'),
 path('geocode_all_livraisons/', views.geocode_all_livraisons, name='geocode_all_livraisons'),
 path('faq/', faq, name='faq'),
 path('livraisons/group/', group_livraisons, name='group_livraisons'),

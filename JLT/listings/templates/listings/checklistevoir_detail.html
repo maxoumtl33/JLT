@@ -3,585 +3,1063 @@
 {% load custom_filters %}
 {% block content %}
 
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<!-- Inclure Bootstrap 5 (pas Bootstrap 4) pour une design moderne -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-
 <style>
-    .content-container {
-        margin-top: 30px;
-        background: #f7f9fc;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  /* Style global simplifié et modernisé */
+  .content-container {
+    margin-top: 30px;
+    background: #f8f9fa;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+  }
+  h1, h3 {
+    color: #222;
+  }
+  /* Z-index pour select2 dropdown (si besoin) */
+  .select2-container--open {
+    z-index: 1050;
+  }
+  /* Bouton retour stylé avec icon moderne */
+  .back-link {
+    color: #0d6efd;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    font-size: 1.1rem;
+  }
+  .back-link i {
+    margin-right: 8px;
+  }
+  /* Carte checklist style amélioré */
+  .card {
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+  }
+  /* Boutons swipe améliorés */
+  .swipe-btn {
+    min-width: 40px;
+    padding: 6px 10px;
+    font-size: 1.1rem;
+    border-radius: 50%;
+  }
+  /* Responsiveness */
+  @media(max-width: 768px){
+    .table-responsive { display: none; }
+    .checklist-card {
+      padding: 15px;
+      margin-bottom: 15px;
     }
-    h1, h3 {
-        color: #333;
-    }
-    .select2-container--open {
-        z-index: 9999; /* Ensure it stacks above everything else */
-    }
-    .back-link {
-        color: #007bff;
-        font-weight: bold;
-        display: flex;
-        align-items: center;
-        font-size: 1rem;
-    }
-    .back-link i {
-        margin-right: 8px;
-    }
-    .checklist-details p {
-        font-size: 0.9rem;
-        color: #555;
-    }
-    .table {
-        font-size: 0.9rem;
-    }
-    .status-cell {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    .btn-outline-primary {
-        border-color: #007bff;
-        color: #007bff;
-        font-weight: 600;
-    }
-    .btn-outline-primary:hover {
-        background-color: #007bff;
-        color: #fff;
-    }
-    .table-status-select {
-        max-width: 120px;
-        font-size: 0.85rem;
-    }
-    .card {
-    transition: transform 0.2s; /* Smooth hover effect */
-}
-
-
-
-.swipe-btn {
-    width: 45%;
-    transition: all 0.3s ease;
-}
-
-
-/* Media Queries for mobile responsiveness */
-@media (max-width: 768px) {
-    .card {
-        margin: 10px 0;
-    }
-}
-
-     /* Responsive Styles */
-     @media (max-width: 768px) {
-        .content-container {
-            margin: 10px;
-            padding: 15px;
-        }
-        
-        h1, h3 {
-            font-size: 1.5rem;
-        }
-        
-        .back-link {
-            font-size: 1.1rem;
-        }
-        
-        .table {
-            font-size: 0.9rem;
-        }
-        
-        .table th, .table td {
-            padding: 12px;
-        }
-        
-        .btn {
-            padding: 10px 15px;
-            font-size: 1rem;
-        }
-    }
-
-    /* Card Style for mobile views */
-    @media (max-width: 768px) {
-        .table-responsive {
-            display: none; /* hide the table */
-        }
-
-        .checklist-card {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 10px;
-            background-color: #fff;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-    }
-    
-    .alert-container {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1050;  /* Ensures it stays above other elements */
-    min-width: 250px;
-    max-width: 350px;
-}
-
-.alert {
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-}
+  }
+  /* Alerts custom */
+  .alert {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 8px;
+  }
 </style>
 
 {% if messages %}
-    <div class="alert-container">
-        {% for message in messages %}
-            <div class="alert alert-info alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endfor %}
-    </div>
+  <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999; max-width: 350px;">
+    {% for message in messages %}
+      <div class="alert alert-info alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  </div>
 {% endif %}
 
 <div class="container content-container">
-    <a href="{% url 'voir_checklist' %}" class="back-link">
-        <i class="fas fa-arrow-left"></i> Retour
-    </a>
 
-    <hr>
-    <h1 class="mb-4">Checklist: {{ checklist.name }}</h1>
+  <!-- Bouton retour stylisé -->
+  <a href="{% url 'voir_checklist' %}" class="back-link mb-3">
+    <i class="fas fa-arrow-left"></i> Retour
+  </a>
 
-    <div class="checklist-details mb-4">
-        <p><strong>Date événement :</strong> {{ checklist.date|date:"d/m/Y" }}</p>
-        <p><strong>Lieu événement :</strong> {{ checklist.lieu }}</p>
-        <p><strong>Nombre convives :</strong> {{ checklist.nb_convive }}</p>
-        <p><strong>Heure de livraison :</strong> {{ checklist.heure_livraison }}</p>
-        <p><strong>Numéro de contrat :</strong> {{ checklist.num_contrat }}</p>
-        <p><strong>Conseiller(e) :</strong> {{ checklist.conseillere }}</p>
-        <p><strong>Nom du MD :</strong> {{ checklist.md }}</p>
-    </div>
-    <!-- Print Button -->
-    <button class="btn btn-info mb-4" onclick="printChecklist()">Imprimer la Checklist</button>
-
-    <!-- Hidden Section for Printing -->
-    <div id="print-section" style="display: none;">
-        {% if checklist.is_active %}
-        <div class="page" data-checklist-date="{{ checklist.date|date:"Y-m-d" }}">
-            <h1>{{ checklist.name }}</h1>
-            <p><strong>Date :</strong> {{ checklist.date|date:"d/m/Y" }}</p>
-            <p><strong>Adresse :</strong> {{ checklist.lieu }}</p>
-            <p><strong>Heure de livraison :</strong> {{ checklist.heure_livraison }}</p>
-            {% if checklist.notechecklist %}
-            <p><strong>Infos :</strong> {{ checklist.notechecklist }}</p>
-            {% endif %}
-        </div>
-        {% endif %}
-    </div>
-     <!-- Form for adding a note to the checklist -->
-     <h3 class="mt-4">Ajouter une note pour les livreurs</h3>
-     <form method="POST" action="{% url 'checklistvoir-detail' checklist.id %}">
-         {% csrf_token %}
-         <div class="form-group">
-             <textarea name="note" class="form-control" rows="4" placeholder="Ajoutez une note sur cette checklist">{{ checklist.notechecklist }}</textarea>
-         </div>
-         <button type="submit" class="btn btn-primary">Ajouter la note</button>
-     </form>
-
-    <hr>
-    <h3 class="mt-4">Produits dans la checklist</h3>
+  <h1 class="mb-4">Checklist : {{ checklist.name }}</h1>
+  <div class="mt-5">
+    <h3>Produits dans la checklist</h3>
     <br>
-<div class="row">
-    <!-- Normal items -->
-    {% for checklist_product in normal_items %}
-    <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
-        <div class="card text-center mb-3" style="width: 18rem; background-color: {% if checklist_product.status == 'en_cours' %}#ff9800{% elif checklist_product.status == 'valide' %}#4caf50{% elif checklist_product.status == 'refuse' %}#f44336{% elif checklist_product.status == 'complete' %}#4caf50{% elif checklist_product.status == 'pending' %}#ff9800{% elif checklist_product.status == 'denied' %}#f44336{% elif checklist_product.status == 'deniedprevious' %}#f44336{% endif %};">
-            <div class="card-body position-relative">
-                <button type="button" class="btn btn-outline-primary btn-sm edit-item position-absolute" data-id="{{ checklist_product.id }}" data-product="{{ checklist_product.product.id }}" data-quantity="{{ checklist_product.quantity }}" title="Edit Item" style="top: 10px; right: 10px;">
-                        <i class="fa-solid fa-edit"></i>
-                    </button>
-                 <!-- Warning icon if quantity was changed -->
-                 {% for log in checklist_product.quantitychangelog_set.all|slice:":1" %}
-                 {% if log.previous_quantity != log.new_quantity and checklist_product.status == 'pending' %}
-                 <i class="fa-solid fa-triangle-exclamation fa-beat text-warning fa-2xl position-absolute" title="La quantité a été modifiée" style="top: 20px; left: 10px;"></i>
+    <div class="row g-3 mb-4">
+      {% for checklist_product in items_encours %}
+        <div class="col-lg-4 col-md-6 col-sm-12">
+          <div class="card shadow-sm h-100" style="background-color: {% if checklist_product.status == 'en_cours' %}#ffe0b2{% elif checklist_product.status == 'valide' %}#c8e6c9{% elif checklist_product.status == 'refuse' %}#ef9a9a{% elif checklist_product.status == 'complete' %}#c8e6c9{% elif checklist_product.status == 'pending' %}#ffe0b2{% elif checklist_product.status == 'denied' %}#ef9a9a{% elif checklist_product.status == 'deniedprevious' %}#ef9a9a{% endif %}; border-radius:10px; transition: transform 0.2s;">
+            <div class="card-body position-relative d-flex flex-column justify-content-between">
+              <!-- Bouton modif -->
+              <button type="button" class="btn btn-outline-primary btn-sm position-absolute top-2 end-2 edit-item" data-id="{{ checklist_product.id }}" data-product="{{ checklist_product.product.id }}" data-quantity="{{ checklist_product.quantity }}" title="Modifier produit" style="z-index: 10;">
+                <i class="fa fa-pencil-alt"></i>
+              </button>
+              <!-- Icon Warning si modif quant -->
+              {% for log in checklist_product.quantitychangelog_set.all|slice:":1" %}
+                {% if log.previous_quantity != log.new_quantity and checklist_product.status == 'pending' %}
+                <i class="fas fa-exclamation-triangle text-warning fa-2x position-absolute" style="top:10px; right:10px;" title="Quantité modifiée"></i>
+                {% endif %}
+              {% endfor %}
+              <h5 class="card-title text-center mt-3">{{ checklist_product.product.name }}</h5>
+              <p class="text-center mb-0">Quantité : {{ checklist_product.quantity }}</p>
+              <p class="text-center text-muted" style="font-size: 0.9rem;">{{ checklist_product.commentaire }}</p>
+
+              <!-- Form avec actions -->
+              <form method="post" action="{% url 'checklistvoir-detail' checklist.id %}" class="mt-3" id="status-form-{{ checklist_product.id }}">
+                {% csrf_token %}
+                <input type="hidden" name="item_id" value="{{ checklist_product.id }}">
+                <input type="hidden" name="status" id="status_{{ checklist_product.id }}" value="">
+                <input type="hidden" name="previous_quantity" value="{{ checklist_product.previous_quantity }}">
+                <input type="hidden" name="current_quantity" value="{{ checklist_product.quantity }}">
+
+                <!-- Boutons actions (exemples, adapt à votre logique) -->
+                <div class="d-flex justify-content-center gap-2 flex-wrap">
+                  {% comment %} Exemple simple de boutons pour changer statut {% endcomment %}
+                 <!-- Buttons for normal items -->
+                    
+                   
+                 {% if checklist_product.status == 'pending' and checklist_product.previous_status == 'refuse' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+
+                 <button type="button"class="btn btn-outline-danger swipe-btn" 
+                             onclick="submitStatusForm('{{ checklist_product.id }}', 'denied')"
+                             title="Refusé">
+                             <i class="fa-solid fa-ban"></i>
+                     </button>
+
+                     
+
                  {% endif %}
-             {% endfor %}
-              <h5 class="card-title">{{ checklist_product.product.name }}</h5>
-              <p class="card-text">Quantité: {{ checklist_product.quantity }} / {{ checklist_product.commentaire }}</p>
-                <form method="post" action="{% url 'checklistvoir-detail' checklist.id %}" id="status-form-{{ checklist_product.id }}">
+                 {% if checklist_product.status == 'complete' and checklist_product.previous_status == 'refuse' %}
+                 
+                 <button type="button"class="btn btn-outline-danger swipe-btn" 
+                             onclick="submitStatusForm('{{ checklist_product.id }}', 'refuse')"
+                             title="Refusé">
+                             <i class="fa-solid fa-ban"></i>
+                     </button>
+
+                 {% endif %}
+                 {% if checklist_product.status == 'refuse' and checklist_product.previous_status == 'refuse' %}
+                 
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+
+                 {% endif %}
+                 
+                 {% if checklist_product.status == 'complete' and checklist_product.previous_status == 'pending' %}
+                 <button type="button"class="btn btn-outline-danger swipe-btn" 
+                             onclick="submitStatusForm('{{ checklist_product.id }}', 'refuse')"
+                             title="Refusé">
+                             <i class="fa-solid fa-ban"></i>
+                     </button>
+                 {% endif %}
+
+                 {% if checklist_product.status == 'pending' and checklist_product.previous_status == 'complete' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'valide')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                 {% endif %}
+                 {% if checklist_product.status == 'pending' and checklist_product.previous_status == 'valide' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'valide')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                 {% endif %}
+
+                 {% if checklist_product.status == 'pending' and checklist_product.previous_status == 'en_cours' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                 onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                 title="Validé">
+                 <i class="fa-solid fa-check"></i>
+                 </button>
+                 <button type="button"class="btn btn-outline-danger swipe-btn" 
+                             onclick="submitStatusForm('{{ checklist_product.id }}', 'denied')"
+                             title="Refusé">
+                             <i class="fa-solid fa-ban"></i>
+                     </button>
+
+                 {% endif %}
+                 {% if checklist_product.status == 'deniedprevious' and checklist_product.previous_status == 'complete' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                 onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                 title="Validé">
+                 <i class="fa-solid fa-check"></i>
+                 </button>
+                 
+
+                 {% endif %}
+                 {% if checklist_product.status == 'pending' and checklist_product.previous_status == 'pending' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                 onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                 title="Validé">
+                 <i class="fa-solid fa-check"></i>
+                 </button>
+                 {% endif %}
+                 
+
+                 {% if checklist_product.status == 'complete' and checklist_product.previous_status == 'complete' %}
+                 <button type="button"class="btn btn-outline-danger swipe-btn" 
+                             onclick="submitStatusForm('{{ checklist_product.id }}', 'refuse')"
+                             title="Refusé">
+                             <i class="fa-solid fa-ban"></i>
+                     </button>
+                 
+
+                 {% endif %}
+                 {% if checklist_product.status == 'refuse' and checklist_product.previous_status == 'complete' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                 onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                 title="Validé">
+                 <i class="fa-solid fa-check"></i>
+                 </button>
+                 
+
+                 {% endif %}
+                 {% if checklist_product.status == 'complete' and checklist_product.previous_status == 'en_cours' %}
+                 
+                 <button type="button"class="btn btn-outline-danger swipe-btn" 
+                             onclick="submitStatusForm('{{ checklist_product.id }}', 'refuse')"
+                             title="Refusé">
+                             <i class="fa-solid fa-ban"></i>
+                     </button>
+
+                 {% endif %}
+                 {% if checklist_product.status == 'refuse' and checklist_product.previous_status == 'en_cours' %}
+                 
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                 onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                 title="Validé">
+                 <i class="fa-solid fa-check"></i>
+                 </button>
+
+                 {% endif %}
+     
+         
+         
+                 {% if checklist_product.status == 'valide' and checklist_product.previous_status == 'complete' %}
+                 
+
+                 <button class="btn btn-outline-danger swipe-btn" id="refuse-button" data-id="{{ checklist_product.id }}" type="button">
+                     <i class="fa-solid fa-ban"></i>
+                 </button>
+
+                 {% endif %}
+
+                 {% if checklist_product.status == 'complete' and checklist_product.previous_status == 'N/A' %}
+                 
+
+                 <button class="btn btn-outline-danger swipe-btn" id="refuse-button-quantity" data-id="{{ checklist_product.id }}" type="button">
+                     <i class="fa-solid fa-ban"></i>
+                 </button>
+
+                 {% endif %}
+
+                 {% if checklist_product.previous_status == 'refuse' and checklist_product.status == 'denied' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                 {% endif %}
+
+                 {% if checklist_product.previous_status == 'complete' and checklist_product.status == 'denied' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                 {% endif %}
+                 {% if checklist_product.previous_status == 'denied' and checklist_product.status == 'pending' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                 {% endif %}
+                 {% if checklist_product.previous_status == 'denied' and checklist_product.status == 'complete' %}
+                 <button type="button"class="btn btn-outline-danger swipe-btn" 
+                             onclick="submitStatusForm('{{ checklist_product.id }}', 'refuse')"
+                             title="Refusé">
+                             <i class="fa-solid fa-ban"></i>
+                     </button>
+                 {% endif %}
+                 {% if checklist_product.previous_status == 'denied' and checklist_product.status == 'refuse' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                 {% endif %}
+
+                 {% if checklist_product.previous_status == 'N/A' and checklist_product.status == 'denied' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                 {% endif %}
+                 {% if checklist_product.previous_status == 'en_cours' and checklist_product.status == 'denied' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                 {% endif %}
+
+                 {% if checklist_product.previous_status == 'N/A' and checklist_product.status == 'refuse' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                 {% endif %}
+                 {% if checklist_product.previous_status == 'N/A' and checklist_product.status == 'en_cours' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                     <button class="btn btn-outline-danger swipe-btn" id="refuse-button" data-id="{{ checklist_product.id }}" type="button">
+                         <i class="fa-solid fa-ban"></i>
+                     </button>
+                 {% endif %}
+
+                 {% if checklist_product.previous_status == None and checklist_product.status == 'pending' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                     <button class="btn btn-outline-danger swipe-btn" id="refuse-button" data-id="{{ checklist_product.id }}" type="button">
+                         <i class="fa-solid fa-ban"></i>
+                     </button>
+                 {% endif %}
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+      {% for checklist_product in items_autres %}
+        <div class="col-lg-4 col-md-6 col-sm-12">
+          <div class="card shadow-sm h-100" style="background-color: {% if checklist_product.status == 'en_cours' %}#ffe0b2{% elif checklist_product.status == 'valide' %}#c8e6c9{% elif checklist_product.status == 'refuse' %}#ef9a9a{% elif checklist_product.status == 'complete' %}#c8e6c9{% elif checklist_product.status == 'pending' %}#ffe0b2{% elif checklist_product.status == 'denied' %}#ef9a9a{% elif checklist_product.status == 'deniedprevious' %}#ef9a9a{% endif %}; border-radius:10px; transition: transform 0.2s;">
+            <div class="card-body position-relative d-flex flex-column justify-content-between">
+              <!-- Bouton modif -->
+              <button type="button" class="btn btn-outline-primary btn-sm position-absolute top-2 end-2 edit-item" data-id="{{ checklist_product.id }}" data-product="{{ checklist_product.product.id }}" data-quantity="{{ checklist_product.quantity }}" title="Modifier produit" style="z-index: 10;">
+                <i class="fa fa-pencil-alt"></i>
+              </button>
+              <!-- Icon Warning si modif quant -->
+              {% for log in checklist_product.quantitychangelog_set.all|slice:":1" %}
+                {% if log.previous_quantity != log.new_quantity and checklist_product.status == 'pending' %}
+                <i class="fas fa-exclamation-triangle text-warning fa-2x position-absolute" style="top:10px; right:10px;" title="Quantité modifiée"></i>
+                {% endif %}
+              {% endfor %}
+              <h5 class="card-title text-center mt-3">{{ checklist_product.product.name }}</h5>
+              <p class="text-center mb-0">Quantité : {{ checklist_product.quantity }}</p>
+              <p class="text-center text-muted" style="font-size: 0.9rem;">{{ checklist_product.commentaire }}</p>
+
+              <!-- Form avec actions -->
+              <form method="post" action="{% url 'checklistvoir-detail' checklist.id %}" class="mt-3" id="status-form-{{ checklist_product.id }}">
+                {% csrf_token %}
+                <input type="hidden" name="item_id" value="{{ checklist_product.id }}">
+                <input type="hidden" name="status" id="status_{{ checklist_product.id }}" value="">
+                <input type="hidden" name="previous_quantity" value="{{ checklist_product.previous_quantity }}">
+                <input type="hidden" name="current_quantity" value="{{ checklist_product.quantity }}">
+
+                <!-- Boutons actions (exemples, adapt à votre logique) -->
+                <div class="d-flex justify-content-center gap-2 flex-wrap">
+                  {% comment %} Exemple simple de boutons pour changer statut {% endcomment %}
+                 <!-- Buttons for normal items -->
+                    
+                   
+                 {% if checklist_product.status == 'pending' and checklist_product.previous_status == 'refuse' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+
+                 <button type="button"class="btn btn-outline-danger swipe-btn" 
+                             onclick="submitStatusForm('{{ checklist_product.id }}', 'denied')"
+                             title="Refusé">
+                             <i class="fa-solid fa-ban"></i>
+                     </button>
+
+                     
+
+                 {% endif %}
+                 {% if checklist_product.status == 'complete' and checklist_product.previous_status == 'refuse' %}
+                 
+                 <button type="button"class="btn btn-outline-danger swipe-btn" 
+                             onclick="submitStatusForm('{{ checklist_product.id }}', 'refuse')"
+                             title="Refusé">
+                             <i class="fa-solid fa-ban"></i>
+                     </button>
+
+                 {% endif %}
+                 {% if checklist_product.status == 'refuse' and checklist_product.previous_status == 'refuse' %}
+                 
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+
+                 {% endif %}
+                 
+                 {% if checklist_product.status == 'complete' and checklist_product.previous_status == 'pending' %}
+                 <button type="button"class="btn btn-outline-danger swipe-btn" 
+                             onclick="submitStatusForm('{{ checklist_product.id }}', 'refuse')"
+                             title="Refusé">
+                             <i class="fa-solid fa-ban"></i>
+                     </button>
+                 {% endif %}
+
+                 {% if checklist_product.status == 'pending' and checklist_product.previous_status == 'complete' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'valide')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                 {% endif %}
+                 {% if checklist_product.status == 'pending' and checklist_product.previous_status == 'valide' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'valide')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                 {% endif %}
+
+                 {% if checklist_product.status == 'pending' and checklist_product.previous_status == 'en_cours' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                 onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                 title="Validé">
+                 <i class="fa-solid fa-check"></i>
+                 </button>
+                 <button type="button"class="btn btn-outline-danger swipe-btn" 
+                             onclick="submitStatusForm('{{ checklist_product.id }}', 'denied')"
+                             title="Refusé">
+                             <i class="fa-solid fa-ban"></i>
+                     </button>
+
+                 {% endif %}
+                 {% if checklist_product.status == 'deniedprevious' and checklist_product.previous_status == 'complete' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                 onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                 title="Validé">
+                 <i class="fa-solid fa-check"></i>
+                 </button>
+                 
+
+                 {% endif %}
+                 {% if checklist_product.status == 'pending' and checklist_product.previous_status == 'pending' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                 onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                 title="Validé">
+                 <i class="fa-solid fa-check"></i>
+                 </button>
+                 {% endif %}
+                 
+
+                 {% if checklist_product.status == 'complete' and checklist_product.previous_status == 'complete' %}
+                 <button type="button"class="btn btn-outline-danger swipe-btn" 
+                             onclick="submitStatusForm('{{ checklist_product.id }}', 'refuse')"
+                             title="Refusé">
+                             <i class="fa-solid fa-ban"></i>
+                     </button>
+                 
+
+                 {% endif %}
+                 {% if checklist_product.status == 'refuse' and checklist_product.previous_status == 'complete' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                 onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                 title="Validé">
+                 <i class="fa-solid fa-check"></i>
+                 </button>
+                 
+
+                 {% endif %}
+                 {% if checklist_product.status == 'complete' and checklist_product.previous_status == 'en_cours' %}
+                 
+                 <button type="button"class="btn btn-outline-danger swipe-btn" 
+                             onclick="submitStatusForm('{{ checklist_product.id }}', 'refuse')"
+                             title="Refusé">
+                             <i class="fa-solid fa-ban"></i>
+                     </button>
+
+                 {% endif %}
+                 {% if checklist_product.status == 'refuse' and checklist_product.previous_status == 'en_cours' %}
+                 
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                 onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                 title="Validé">
+                 <i class="fa-solid fa-check"></i>
+                 </button>
+
+                 {% endif %}
+     
+         
+         
+                 {% if checklist_product.status == 'valide' and checklist_product.previous_status == 'complete' %}
+                 
+
+                 <button class="btn btn-outline-danger swipe-btn" id="refuse-button" data-id="{{ checklist_product.id }}" type="button">
+                     <i class="fa-solid fa-ban"></i>
+                 </button>
+
+                 {% endif %}
+
+                 {% if checklist_product.status == 'complete' and checklist_product.previous_status == 'N/A' %}
+                 
+
+                 <button class="btn btn-outline-danger swipe-btn" id="refuse-button-quantity" data-id="{{ checklist_product.id }}" type="button">
+                     <i class="fa-solid fa-ban"></i>
+                 </button>
+
+                 {% endif %}
+
+                 {% if checklist_product.previous_status == 'refuse' and checklist_product.status == 'denied' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                 {% endif %}
+
+                 {% if checklist_product.previous_status == 'complete' and checklist_product.status == 'denied' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                 {% endif %}
+                 {% if checklist_product.previous_status == 'denied' and checklist_product.status == 'pending' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                 {% endif %}
+                 {% if checklist_product.previous_status == 'denied' and checklist_product.status == 'complete' %}
+                 <button type="button"class="btn btn-outline-danger swipe-btn" 
+                             onclick="submitStatusForm('{{ checklist_product.id }}', 'refuse')"
+                             title="Refusé">
+                             <i class="fa-solid fa-ban"></i>
+                     </button>
+                 {% endif %}
+                 {% if checklist_product.previous_status == 'denied' and checklist_product.status == 'refuse' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                 {% endif %}
+
+                 {% if checklist_product.previous_status == 'N/A' and checklist_product.status == 'denied' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                 {% endif %}
+                 {% if checklist_product.previous_status == 'en_cours' and checklist_product.status == 'denied' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                 {% endif %}
+
+                 {% if checklist_product.previous_status == 'N/A' and checklist_product.status == 'refuse' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                 {% endif %}
+                 {% if checklist_product.previous_status == 'N/A' and checklist_product.status == 'en_cours' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                     <button class="btn btn-outline-danger swipe-btn" id="refuse-button" data-id="{{ checklist_product.id }}" type="button">
+                         <i class="fa-solid fa-ban"></i>
+                     </button>
+                 {% endif %}
+
+                 {% if checklist_product.previous_status == None and checklist_product.status == 'pending' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                     <button class="btn btn-outline-danger swipe-btn" id="refuse-button" data-id="{{ checklist_product.id }}" type="button">
+                         <i class="fa-solid fa-ban"></i>
+                     </button>
+                 {% endif %}
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+      {% for checklist_product in items_valides_completes %}
+        <div class="col-lg-4 col-md-6 col-sm-12">
+          <div class="card shadow-sm h-100" style="background-color: {% if checklist_product.status == 'en_cours' %}#ffe0b2{% elif checklist_product.status == 'valide' %}#c8e6c9{% elif checklist_product.status == 'refuse' %}#ef9a9a{% elif checklist_product.status == 'complete' %}#c8e6c9{% elif checklist_product.status == 'pending' %}#ffe0b2{% elif checklist_product.status == 'denied' %}#ef9a9a{% elif checklist_product.status == 'deniedprevious' %}#ef9a9a{% endif %}; border-radius:10px; transition: transform 0.2s;">
+            <div class="card-body position-relative d-flex flex-column justify-content-between">
+              <!-- Bouton modif -->
+              <button type="button" class="btn btn-outline-primary btn-sm position-absolute top-2 end-2 edit-item" data-id="{{ checklist_product.id }}" data-product="{{ checklist_product.product.id }}" data-quantity="{{ checklist_product.quantity }}" title="Modifier produit" style="z-index: 10;">
+                <i class="fa fa-pencil-alt"></i>
+              </button>
+              <!-- Icon Warning si modif quant -->
+              {% for log in checklist_product.quantitychangelog_set.all|slice:":1" %}
+                {% if log.previous_quantity != log.new_quantity and checklist_product.status == 'pending' %}
+                <i class="fas fa-exclamation-triangle text-warning fa-2x position-absolute" style="top:10px; right:10px;" title="Quantité modifiée"></i>
+                {% endif %}
+              {% endfor %}
+              <h5 class="card-title text-center mt-3">{{ checklist_product.product.name }}</h5>
+              <p class="text-center mb-0">Quantité : {{ checklist_product.quantity }}</p>
+              <p class="text-center text-muted" style="font-size: 0.9rem;">{{ checklist_product.commentaire }}</p>
+
+              <!-- Form avec actions -->
+              <form method="post" action="{% url 'checklistvoir-detail' checklist.id %}" class="mt-3" id="status-form-{{ checklist_product.id }}">
+                {% csrf_token %}
+                <input type="hidden" name="item_id" value="{{ checklist_product.id }}">
+                <input type="hidden" name="status" id="status_{{ checklist_product.id }}" value="">
+                <input type="hidden" name="previous_quantity" value="{{ checklist_product.previous_quantity }}">
+                <input type="hidden" name="current_quantity" value="{{ checklist_product.quantity }}">
+
+                <!-- Boutons actions (exemples, adapt à votre logique) -->
+                <div class="d-flex justify-content-center gap-2 flex-wrap">
+                  {% comment %} Exemple simple de boutons pour changer statut {% endcomment %}
+                 <!-- Buttons for normal items -->
+                    
+                   
+                 {% if checklist_product.status == 'pending' and checklist_product.previous_status == 'refuse' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+
+                 <button type="button"class="btn btn-outline-danger swipe-btn" 
+                             onclick="submitStatusForm('{{ checklist_product.id }}', 'denied')"
+                             title="Refusé">
+                             <i class="fa-solid fa-ban"></i>
+                     </button>
+
+                     
+
+                 {% endif %}
+                 {% if checklist_product.status == 'complete' and checklist_product.previous_status == 'refuse' %}
+                 
+                 <button type="button"class="btn btn-outline-danger swipe-btn" 
+                             onclick="submitStatusForm('{{ checklist_product.id }}', 'refuse')"
+                             title="Refusé">
+                             <i class="fa-solid fa-ban"></i>
+                     </button>
+
+                 {% endif %}
+                 {% if checklist_product.status == 'refuse' and checklist_product.previous_status == 'refuse' %}
+                 
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+
+                 {% endif %}
+                 
+                 {% if checklist_product.status == 'complete' and checklist_product.previous_status == 'pending' %}
+                 <button type="button"class="btn btn-outline-danger swipe-btn" 
+                             onclick="submitStatusForm('{{ checklist_product.id }}', 'refuse')"
+                             title="Refusé">
+                             <i class="fa-solid fa-ban"></i>
+                     </button>
+                 {% endif %}
+
+                 {% if checklist_product.status == 'pending' and checklist_product.previous_status == 'complete' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'valide')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                 {% endif %}
+                 {% if checklist_product.status == 'pending' and checklist_product.previous_status == 'valide' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'valide')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                 {% endif %}
+
+                 {% if checklist_product.status == 'pending' and checklist_product.previous_status == 'en_cours' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                 onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                 title="Validé">
+                 <i class="fa-solid fa-check"></i>
+                 </button>
+                 <button type="button"class="btn btn-outline-danger swipe-btn" 
+                             onclick="submitStatusForm('{{ checklist_product.id }}', 'denied')"
+                             title="Refusé">
+                             <i class="fa-solid fa-ban"></i>
+                     </button>
+
+                 {% endif %}
+                 {% if checklist_product.status == 'deniedprevious' and checklist_product.previous_status == 'complete' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                 onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                 title="Validé">
+                 <i class="fa-solid fa-check"></i>
+                 </button>
+                 
+
+                 {% endif %}
+                 {% if checklist_product.status == 'pending' and checklist_product.previous_status == 'pending' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                 onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                 title="Validé">
+                 <i class="fa-solid fa-check"></i>
+                 </button>
+                 {% endif %}
+                 
+
+                 {% if checklist_product.status == 'complete' and checklist_product.previous_status == 'complete' %}
+                 <button type="button"class="btn btn-outline-danger swipe-btn" 
+                             onclick="submitStatusForm('{{ checklist_product.id }}', 'refuse')"
+                             title="Refusé">
+                             <i class="fa-solid fa-ban"></i>
+                     </button>
+                 
+
+                 {% endif %}
+                 {% if checklist_product.status == 'refuse' and checklist_product.previous_status == 'complete' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                 onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                 title="Validé">
+                 <i class="fa-solid fa-check"></i>
+                 </button>
+                 
+
+                 {% endif %}
+                 {% if checklist_product.status == 'complete' and checklist_product.previous_status == 'en_cours' %}
+                 
+                 <button type="button"class="btn btn-outline-danger swipe-btn" 
+                             onclick="submitStatusForm('{{ checklist_product.id }}', 'refuse')"
+                             title="Refusé">
+                             <i class="fa-solid fa-ban"></i>
+                     </button>
+
+                 {% endif %}
+                 {% if checklist_product.status == 'refuse' and checklist_product.previous_status == 'en_cours' %}
+                 
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                 onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                 title="Validé">
+                 <i class="fa-solid fa-check"></i>
+                 </button>
+
+                 {% endif %}
+     
+         
+         
+                 {% if checklist_product.status == 'valide' and checklist_product.previous_status == 'complete' %}
+                 
+
+                 <button class="btn btn-outline-danger swipe-btn" id="refuse-button" data-id="{{ checklist_product.id }}" type="button">
+                     <i class="fa-solid fa-ban"></i>
+                 </button>
+
+                 {% endif %}
+
+                 {% if checklist_product.status == 'complete' and checklist_product.previous_status == 'N/A' %}
+                 
+
+                 <button class="btn btn-outline-danger swipe-btn" id="refuse-button-quantity" data-id="{{ checklist_product.id }}" type="button">
+                     <i class="fa-solid fa-ban"></i>
+                 </button>
+
+                 {% endif %}
+
+                 {% if checklist_product.previous_status == 'refuse' and checklist_product.status == 'denied' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                 {% endif %}
+
+                 {% if checklist_product.previous_status == 'complete' and checklist_product.status == 'denied' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                 {% endif %}
+                 {% if checklist_product.previous_status == 'denied' and checklist_product.status == 'pending' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                 {% endif %}
+                 {% if checklist_product.previous_status == 'denied' and checklist_product.status == 'complete' %}
+                 <button type="button"class="btn btn-outline-danger swipe-btn" 
+                             onclick="submitStatusForm('{{ checklist_product.id }}', 'refuse')"
+                             title="Refusé">
+                             <i class="fa-solid fa-ban"></i>
+                     </button>
+                 {% endif %}
+                 {% if checklist_product.previous_status == 'denied' and checklist_product.status == 'refuse' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                 {% endif %}
+
+                 {% if checklist_product.previous_status == 'N/A' and checklist_product.status == 'denied' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                 {% endif %}
+                 {% if checklist_product.previous_status == 'en_cours' and checklist_product.status == 'denied' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                 {% endif %}
+
+                 {% if checklist_product.previous_status == 'N/A' and checklist_product.status == 'refuse' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                 {% endif %}
+                 {% if checklist_product.previous_status == 'N/A' and checklist_product.status == 'en_cours' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                     <button class="btn btn-outline-danger swipe-btn" id="refuse-button" data-id="{{ checklist_product.id }}" type="button">
+                         <i class="fa-solid fa-ban"></i>
+                     </button>
+                 {% endif %}
+
+                 {% if checklist_product.previous_status == None and checklist_product.status == 'pending' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                             onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                             title="Validé">
+                             <i class="fa-solid fa-check"></i>
+                     </button>
+                     <button class="btn btn-outline-danger swipe-btn" id="refuse-button" data-id="{{ checklist_product.id }}" type="button">
+                         <i class="fa-solid fa-ban"></i>
+                     </button>
+                 {% endif %}
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  <!-- Détails checklist dans une card -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-body">
+      <dl class="row mb-0">
+        <dt class="col-sm-3">Date événement :</dt>
+        <dd class="col-sm-9">{{ checklist.date|date:"d/m/Y" }}</dd>
+
+        <dt class="col-sm-3">Lieu événement :</dt>
+        <dd class="col-sm-9">{{ checklist.lieu }}</dd>
+
+        <dt class="col-sm-3">Nombre convives :</dt>
+        <dd class="col-sm-9">{{ checklist.nb_convive }}</dd>
+
+        <dt class="col-sm-3">Heure de livraison :</dt>
+        <dd class="col-sm-9">{{ checklist.heure_livraison }}</dd>
+
+        <dt class="col-sm-3">Numéro de contrat :</dt>
+        <dd class="col-sm-9">{{ checklist.num_contrat }}</dd>
+
+        <dt class="col-sm-3">Conseiller :</dt>
+        <dd class="col-sm-9">{{ checklist.conseillere }}</dd>
+
+        <dt class="col-sm-3">Nom du MD :</dt>
+        <dd class="col-sm-9">{{ checklist.md }}</dd>
+      </dl>
+    </div>
+  </div>
+
+  <!-- Bouton impression stylisé -->
+  <div class="mb-4 text-end">
+    <button class="btn btn-primary" onclick="printChecklist()">
+      <i class="fas fa-print"></i> Imprimer la checklist
+    </button>
+  </div>
+
+  <!-- Section cachée pour impression -->
+  <div id="print-section" style="display:none;">
+    {% if checklist.is_active %}
+      <div class="page" data-checklist-date="{{ checklist.date|date:'Y-m-d' }}">
+        <h2>{{ checklist.name }}</h2>
+        <p><strong>Date :</strong> {{ checklist.date|date:"d/m/Y" }}</p>
+        <p><strong>Adresse :</strong> {{ checklist.lieu }}</p>
+        <p><strong>Heure de livraison :</strong> {{ checklist.heure_livraison }}</p>
+        {% if checklist.notechecklist %}
+          <p><strong>Infos :</strong> {{ checklist.notechecklist }}</p>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Form pour ajouter une note -->
+  <div class="mt-5">
+    <h3>Ajouter une note pour les livreurs</h3>
+    <form method="POST" action="{% url 'checklistvoir-detail' checklist.id %}">
+      {% csrf_token %}
+      <div class="mb-3">
+        <textarea name="note" class="form-control" rows="4" placeholder="Ajoutez une note..." maxlength="500">{{ checklist.notechecklist }}</textarea>
+      </div>
+      <button type="submit" class="btn btn-success">
+        <i class="fas fa-plus"></i> Ajouter / Modifier la note
+      </button>
+    </form>
+  </div>
+
+
+  <!-- Modal édition produit -->
+  <div class="modal fade" id="editItemModal" tabindex="-1" aria-labelledby="editItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editItemModalLabel">Modifier Produit</h5>
+                
+            </div>
+            <div class="modal-body">
+                <form id="editItemForm">
                     {% csrf_token %}
-                    <input type="hidden" name="item_id" value="{{ checklist_product.id }}">
-                    <input type="hidden" name="status" id="status_{{ checklist_product.id }}" value="">
-                    <input type="hidden" name="previous_quantity" value="{{ checklist_product.previous_quantity }}">
-                    <input type="hidden" name="current_quantity" value="{{ checklist_product.quantity }}">
-                    <input type="hidden" id="checklist-item-quantity-{{ checklist_item.id }}" value="{{ checklist_item.quantity }}">
-                    <input type="hidden" id="product-quantity-{{ checklist_item.id }}" value="{{ checklist_item.product.quantity }}">
-
-
-                   
-                    
-                    <!-- Buttons for normal items -->
-                    
-                   
-                    {% if checklist_product.status == 'pending' and checklist_product.previous_status == 'refuse' %}
-                    <button type="button" class="btn btn-outline-success swipe-btn" 
-                                onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
-                                title="Validé">
-                                <i class="fa-solid fa-check"></i>
-                        </button>
-
-                    <button type="button"class="btn btn-outline-danger swipe-btn" 
-                                onclick="submitStatusForm('{{ checklist_product.id }}', 'denied')"
-                                title="Refusé">
-                                <i class="fa-solid fa-ban"></i>
-                        </button>
-
-                        
-
-                    {% endif %}
-                    {% if checklist_product.status == 'complete' and checklist_product.previous_status == 'refuse' %}
-                    
-                    <button type="button"class="btn btn-outline-danger swipe-btn" 
-                                onclick="submitStatusForm('{{ checklist_product.id }}', 'refuse')"
-                                title="Refusé">
-                                <i class="fa-solid fa-ban"></i>
-                        </button>
-
-                    {% endif %}
-                    {% if checklist_product.status == 'refuse' and checklist_product.previous_status == 'refuse' %}
-                    
-                    <button type="button" class="btn btn-outline-success swipe-btn" 
-                                onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
-                                title="Validé">
-                                <i class="fa-solid fa-check"></i>
-                        </button>
-
-                    {% endif %}
-                    
-                    {% if checklist_product.status == 'complete' and checklist_product.previous_status == 'pending' %}
-                    <button type="button"class="btn btn-outline-danger swipe-btn" 
-                                onclick="submitStatusForm('{{ checklist_product.id }}', 'refuse')"
-                                title="Refusé">
-                                <i class="fa-solid fa-ban"></i>
-                        </button>
-                    {% endif %}
-
-                    {% if checklist_product.status == 'pending' and checklist_product.previous_status == 'complete' %}
-                    <button type="button" class="btn btn-outline-success swipe-btn" 
-                                onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'valide')"
-                                title="Validé">
-                                <i class="fa-solid fa-check"></i>
-                        </button>
-                    {% endif %}
-                    {% if checklist_product.status == 'pending' and checklist_product.previous_status == 'valide' %}
-                    <button type="button" class="btn btn-outline-success swipe-btn" 
-                                onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'valide')"
-                                title="Validé">
-                                <i class="fa-solid fa-check"></i>
-                        </button>
-                    {% endif %}
-
-                    {% if checklist_product.status == 'pending' and checklist_product.previous_status == 'en_cours' %}
-                    <button type="button" class="btn btn-outline-success swipe-btn" 
-                    onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
-                    title="Validé">
-                    <i class="fa-solid fa-check"></i>
-                    </button>
-                    <button type="button"class="btn btn-outline-danger swipe-btn" 
-                                onclick="submitStatusForm('{{ checklist_product.id }}', 'denied')"
-                                title="Refusé">
-                                <i class="fa-solid fa-ban"></i>
-                        </button>
-
-                    {% endif %}
-                    {% if checklist_product.status == 'deniedprevious' and checklist_product.previous_status == 'complete' %}
-                    <button type="button" class="btn btn-outline-success swipe-btn" 
-                    onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
-                    title="Validé">
-                    <i class="fa-solid fa-check"></i>
-                    </button>
-                    
-
-                    {% endif %}
-                    {% if checklist_product.status == 'pending' and checklist_product.previous_status == 'pending' %}
-                    <button type="button" class="btn btn-outline-success swipe-btn" 
-                    onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
-                    title="Validé">
-                    <i class="fa-solid fa-check"></i>
-                    </button>
-                    {% endif %}
-                    
-
-                    {% if checklist_product.status == 'complete' and checklist_product.previous_status == 'complete' %}
-                    <button type="button"class="btn btn-outline-danger swipe-btn" 
-                                onclick="submitStatusForm('{{ checklist_product.id }}', 'refuse')"
-                                title="Refusé">
-                                <i class="fa-solid fa-ban"></i>
-                        </button>
-                    
-
-                    {% endif %}
-                    {% if checklist_product.status == 'refuse' and checklist_product.previous_status == 'complete' %}
-                    <button type="button" class="btn btn-outline-success swipe-btn" 
-                    onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
-                    title="Validé">
-                    <i class="fa-solid fa-check"></i>
-                    </button>
-                    
-
-                    {% endif %}
-                    {% if checklist_product.status == 'complete' and checklist_product.previous_status == 'en_cours' %}
-                    
-                    <button type="button"class="btn btn-outline-danger swipe-btn" 
-                                onclick="submitStatusForm('{{ checklist_product.id }}', 'refuse')"
-                                title="Refusé">
-                                <i class="fa-solid fa-ban"></i>
-                        </button>
-
-                    {% endif %}
-                    {% if checklist_product.status == 'refuse' and checklist_product.previous_status == 'en_cours' %}
-                    
-                    <button type="button" class="btn btn-outline-success swipe-btn" 
-                    onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
-                    title="Validé">
-                    <i class="fa-solid fa-check"></i>
-                    </button>
-
-                    {% endif %}
-        
-            
-            
-                    {% if checklist_product.status == 'valide' and checklist_product.previous_status == 'complete' %}
-                    
-
-                    <button class="btn btn-outline-danger swipe-btn" id="refuse-button" data-id="{{ checklist_product.id }}" type="button">
-                        <i class="fa-solid fa-ban"></i>
-                    </button>
-
-                    {% endif %}
-
-                    {% if checklist_product.status == 'complete' and checklist_product.previous_status == 'N/A' %}
-                    
-
-                    <button class="btn btn-outline-danger swipe-btn" id="refuse-button-quantity" data-id="{{ checklist_product.id }}" type="button">
-                        <i class="fa-solid fa-ban"></i>
-                    </button>
-
-                    {% endif %}
-
-                    {% if checklist_product.previous_status == 'refuse' and checklist_product.status == 'denied' %}
-                    <button type="button" class="btn btn-outline-success swipe-btn" 
-                                onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
-                                title="Validé">
-                                <i class="fa-solid fa-check"></i>
-                        </button>
-                    {% endif %}
-
-                    {% if checklist_product.previous_status == 'complete' and checklist_product.status == 'denied' %}
-                    <button type="button" class="btn btn-outline-success swipe-btn" 
-                                onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
-                                title="Validé">
-                                <i class="fa-solid fa-check"></i>
-                        </button>
-                    {% endif %}
-                    {% if checklist_product.previous_status == 'denied' and checklist_product.status == 'pending' %}
-                    <button type="button" class="btn btn-outline-success swipe-btn" 
-                                onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
-                                title="Validé">
-                                <i class="fa-solid fa-check"></i>
-                        </button>
-                    {% endif %}
-                    {% if checklist_product.previous_status == 'denied' and checklist_product.status == 'complete' %}
-                    <button type="button"class="btn btn-outline-danger swipe-btn" 
-                                onclick="submitStatusForm('{{ checklist_product.id }}', 'refuse')"
-                                title="Refusé">
-                                <i class="fa-solid fa-ban"></i>
-                        </button>
-                    {% endif %}
-                    {% if checklist_product.previous_status == 'denied' and checklist_product.status == 'refuse' %}
-                    <button type="button" class="btn btn-outline-success swipe-btn" 
-                                onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
-                                title="Validé">
-                                <i class="fa-solid fa-check"></i>
-                        </button>
-                    {% endif %}
-
-                    {% if checklist_product.previous_status == 'N/A' and checklist_product.status == 'denied' %}
-                    <button type="button" class="btn btn-outline-success swipe-btn" 
-                                onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
-                                title="Validé">
-                                <i class="fa-solid fa-check"></i>
-                        </button>
-                    {% endif %}
-                    {% if checklist_product.previous_status == 'en_cours' and checklist_product.status == 'denied' %}
-                    <button type="button" class="btn btn-outline-success swipe-btn" 
-                                onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
-                                title="Validé">
-                                <i class="fa-solid fa-check"></i>
-                        </button>
-                    {% endif %}
-
-                    {% if checklist_product.previous_status == 'N/A' and checklist_product.status == 'refuse' %}
-                    <button type="button" class="btn btn-outline-success swipe-btn" 
-                                onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
-                                title="Validé">
-                                <i class="fa-solid fa-check"></i>
-                        </button>
-                    {% endif %}
-                    {% if checklist_product.previous_status == 'N/A' and checklist_product.status == 'en_cours' %}
-                    <button type="button" class="btn btn-outline-success swipe-btn" 
-                                onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
-                                title="Validé">
-                                <i class="fa-solid fa-check"></i>
-                        </button>
-                        <button class="btn btn-outline-danger swipe-btn" id="refuse-button" data-id="{{ checklist_product.id }}" type="button">
-                            <i class="fa-solid fa-ban"></i>
-                        </button>
-                    {% endif %}
-
-                    {% if checklist_product.previous_status == None and checklist_product.status == 'pending' %}
-                    <button type="button" class="btn btn-outline-success swipe-btn" 
-                                onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
-                                title="Validé">
-                                <i class="fa-solid fa-check"></i>
-                        </button>
-                        <button class="btn btn-outline-danger swipe-btn" id="refuse-button" data-id="{{ checklist_product.id }}" type="button">
-                            <i class="fa-solid fa-ban"></i>
-                        </button>
-                    {% endif %}
-                    
-
-
-                   
-
+                    <input type="hidden" id="edit-item-id" name="item_id">
+                    <div class="form-group">
+                        <label for="edit-product">Sélectionner le produit:</label>
+                        <select id="edit-product" name="product" class="form-control">
+                            {% for product in products %}
+                                <option value="{{ product.id }}">{{ product.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-quantity">Quantité:</label>
+                        <input type="number" id="edit-quantity" name="quantity" class="form-control" required>
+                    </div>
                 </form>
             </div>
-          </div>      
-    </div>
-    {% endfor %}
-</div>
-    
-
-    
-                          
-            <!-- Edit Item Modal -->
-            <div class="modal fade" id="editItemModal" tabindex="-1" aria-labelledby="editItemModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="editItemModalLabel">Modifier Produit</h5>
-                            
-                        </div>
-                        <div class="modal-body">
-                            <form id="editItemForm">
-                                {% csrf_token %}
-                                <input type="hidden" id="edit-item-id" name="item_id">
-                                <div class="form-group">
-                                    <label for="edit-product">Sélectionner le produit:</label>
-                                    <select id="edit-product" name="product" class="form-control">
-                                        {% for product in products %}
-                                            <option value="{{ product.id }}">{{ product.name }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="edit-quantity">Quantité:</label>
-                                    <input type="number" id="edit-quantity" name="quantity" class="form-control" required>
-                                </div>
-                            </form>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                            <button type="button" class="btn btn-primary" id="saveChanges">Sauvegarder</button>
-                        </div>
-                    </div>
-                </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                <button type="button" class="btn btn-primary" id="saveChanges">Sauvegarder</button>
             </div>
-            
-
+        </div>
+    </div>
 </div>
 
-
+  <!-- Changement quantité : tableau -->
+  <div class="mt-5">
+    <h3 class="mt-4">Changement de quantité</h3>
+    <br>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Produit</th>
+                    <th>Quantité avant changement</th>
+                    <th>Quantité après changement</th>
+                    <th>Ajouter / Enlever</th>
+                    <th>Remettre dans l'inventaire</th> <!-- Added the "Commentaire" column -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in quantity_change_logs %}
+                <tr>
+                    {% if log.new_quantity == 0  %}
+                    <td style="background-color: orange;">{{ log.checklist_item.product.name }}</td>
+                    <td style="background-color: orange;">{{ log.previous_quantity }}</td>
+                    <td style="background-color: orange;">{{ log.new_quantity }}</td>
+                    <td style="background-color: orange;">{{ log.quantity_change }}</td>
+                    {% if log.checklist_item.commentaire == 'nt' %}
+                    <td style="text-align: center;">
+                        <span style="color: green;">Pas besoin d'ajouter au stock</span>
+                    </td>
+                    {% elif log.previous_status == 'complete' %}
+                    <td style="text-align: center;">
+                        {% if log.checklist_item.is_stock_updated %}
+                            <span style="color: green;">Ajouté au stock ✅</span>
+                        {% else %}
+                        <button class="btn btn-outline-success btn-sm rounded-circle remettrestock-btn" 
+                        data-id="{{ log.checklist_item.id }}" 
+                        data-quantity="{{ log.previous_quantity}}" 
+                        type="button"
+                        title="Complete">
+                    <i class="fa-solid fa-warehouse"></i>
+                </button>
+                {% endif %}
+                    </td>
+                    {% elif log.previous_status == 'valide' %}
+                    <td style="text-align: center;">
+                        {% if log.checklist_item.is_stock_updated %}
+                            <span style="color: green;">Ajouté au stock ✅</span>
+                        {% else %}
+                        <button class="btn btn-outline-success btn-sm rounded-circle remettrestockchange-btn" 
+                        data-id="{{ log.checklist_item.id }}" 
+                        data-quantity-change="{{ log.quantity_change }}" 
+                        type="button"
+                        title="Validé">
+                    <i class="fa-solid fa-warehouse"></i>
+                </button>
+                {% endif %}
+                    </td>
+                    {% else %}
+                    <td style="text-align: center;">
+                        <span style="color: green;">Pas besoin d'ajouter au stock</span>
+                    </td>
+                    {% endif %}
+                    {% else %}
+                    <td>{{ log.checklist_item.product.name }}</td>
+                    <td>{{ log.previous_quantity }}</td>
+                    <td>{{ log.new_quantity }}</td>
+                    <td>{{ log.quantity_change }}</td>
+                    {% endif %}
+                </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">Pas de changements de quantité enregistrés.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     
 
-    <h3 class="mt-4">Changement de quantité</h3>
-<br>
-<div class="table-responsive">
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Produit</th>
-                <th>Quantité avant changement</th>
-                <th>Quantité après changement</th>
-                <th>Ajouter / Enlever</th>
-                <th>Remettre dans l'inventaire</th> <!-- Added the "Commentaire" column -->
-            </tr>
-        </thead>
-        <tbody>
-            {% for log in quantity_change_logs %}
-            <tr>
-                {% if log.new_quantity == 0  %}
-                <td style="background-color: orange;">{{ log.checklist_item.product.name }}</td>
-                <td style="background-color: orange;">{{ log.previous_quantity }}</td>
-                <td style="background-color: orange;">{{ log.new_quantity }}</td>
-                <td style="background-color: orange;">{{ log.quantity_change }}</td>
-                {% if log.checklist_item.commentaire == 'nt' %}
-                <td style="text-align: center;">
-                    <span style="color: green;">Pas besoin d'ajouter au stock</span>
-                </td>
-                {% elif log.previous_status == 'complete' %}
-                <td style="text-align: center;">
-                    {% if log.checklist_item.is_stock_updated %}
-                        <span style="color: green;">Ajouté au stock ✅</span>
-                    {% else %}
-                    <button class="btn btn-outline-success btn-sm rounded-circle remettrestock-btn" 
-                    data-id="{{ log.checklist_item.id }}" 
-                    data-quantity="{{ log.previous_quantity}}" 
-                    type="button"
-                    title="Complete">
-                <i class="fa-solid fa-warehouse"></i>
-            </button>
-            {% endif %}
-                </td>
-                {% elif log.previous_status == 'valide' %}
-                <td style="text-align: center;">
-                    {% if log.checklist_item.is_stock_updated %}
-                        <span style="color: green;">Ajouté au stock ✅</span>
-                    {% else %}
-                    <button class="btn btn-outline-success btn-sm rounded-circle remettrestockchange-btn" 
-                    data-id="{{ log.checklist_item.id }}" 
-                    data-quantity-change="{{ log.quantity_change }}" 
-                    type="button"
-                    title="Validé">
-                <i class="fa-solid fa-warehouse"></i>
-            </button>
-            {% endif %}
-                </td>
-                {% else %}
-                <td style="text-align: center;">
-                    <span style="color: green;">Pas besoin d'ajouter au stock</span>
-                </td>
-                {% endif %}
-                {% else %}
-                <td>{{ log.checklist_item.product.name }}</td>
-                <td>{{ log.previous_quantity }}</td>
-                <td>{{ log.new_quantity }}</td>
-                <td>{{ log.quantity_change }}</td>
-                {% endif %}
-            </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="5" class="text-center text-muted">Pas de changements de quantité enregistrés.</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
 </div>
 
-
-</div>
-
+<!-- Scripts pour gestion modale et actions -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <!-- Load Bootstrap JS -->
@@ -597,6 +1075,78 @@ $(document).ready(function() {
             placeholder: 'Sélectionner un produit',
             allowClear: true
         });
+    });
+});
+
+  // Ouvrir modal pour modifier produit
+  $(document).on('click', '.edit-item', function() {
+    const itemId = $(this).data('id');
+    const productId = $(this).data('product');
+    const quantity = $(this).data('quantity');
+
+    $('#edit-item-id').val(itemId);
+    $('#edit-product').val(productId);
+    $('#edit-quantity').val(quantity);
+    $('#editItemModal').modal('show');
+  });
+
+  // Sauvegarder modifications via AJAX
+  $('#saveChanges').click(function() {
+    const data = {
+      'item_id': $('#edit-item-id').val(),
+      'product': $('#edit-product').val(),
+      'quantity': $('#edit-quantity').val(),
+      'csrfmiddlewaretoken': '{{ csrf_token }}'
+    };
+    $.post("{% url 'update_checklist_item' %}", data)
+      .done(function(resp) {
+        alert('Produit mis à jour avec succès');
+        location.reload();
+      })
+      .fail(function() {
+        alert('Erreur lors de la mise à jour');
+      });
+  });
+
+  // Fonction pour imprimer la checklist
+  function printChecklist() {
+    const content = document.getElementById('print-section').innerHTML;
+    const qrCodeData = "{{ qr_code_data_uri }}";
+
+    const printWindow = window.open('', '', 'height=600,width=900');
+    printWindow.document.write('<html><head><title>Impression Checklist</title>');
+    printWindow.document.write(`
+      <style>
+        @page { size: A4 landscape; margin: 10mm; }
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .page { display: flex; flex-direction: column; align-items: center; }
+        h2 { margin-bottom: 20px; }
+        img { max-width: 150px; margin-bottom: 20px; }
+        /* autres styles selon besoin */
+      </style>
+    `);
+    printWindow.document.write('</head><body>');
+    printWindow.document.write('<div class="page">');
+    printWindow.document.write(`<img src="${qrCodeData}" alt="QR Code">`);
+    printWindow.document.write(content);
+    printWindow.document.write('</div></body></html>');
+    printWindow.document.close();
+    printWindow.print();
+  }
+
+  document.querySelectorAll("#refuse-button").forEach(button => {
+    button.addEventListener("click", function () {
+        let checklistItemId = this.dataset.id;
+        let statusField = document.querySelector(`#status_${checklistItemId}`);
+        let form = document.querySelector(`#status-form-${checklistItemId}`);
+
+        if (statusField) {
+            statusField.value = 'denied'; 
+        }
+
+    
+
+        form.submit(); // Submit the form
     });
 });
 
@@ -630,78 +1180,7 @@ document.querySelectorAll("#en-cours-button").forEach(button => {
     });
 });
 
-document.addEventListener("DOMContentLoaded", function () {
-    function handleButtonClick(button, status) {
-        const itemId = button.getAttribute("data-id");
-        let quantity = parseInt(button.getAttribute("data-quantity") || button.getAttribute("data-quantity-change"), 10);
-        
-        if (status === "remettrestockchange") {
-            quantity = Math.abs(quantity);  // Ensure positive value
-        }
-
-        fetch(window.location.href, { 
-            method: "POST",
-            headers: {
-                "X-CSRFToken": getCSRFToken(),
-                "Content-Type": "application/x-www-form-urlencoded",
-                "X-Requested-With": "XMLHttpRequest"  // Ensure Django detects it as AJAX
-            },
-            body: new URLSearchParams({
-                item_id: itemId,
-                status: status,
-                quantity: quantity
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                console.log("✅ Succès:", data.message);
-                setTimeout(() => {
-                    window.location.href = window.location.href; // ✅ Force reload
-                }, 100);
-            } else {
-                console.error("❌ Erreur serveur:", data);
-            }
-        })
-        .catch(error => console.error("❌ Erreur réseau:", error));
-    }
-
-    document.querySelectorAll(".remettrestock-btn").forEach(button => {
-        button.addEventListener("click", function () {
-            handleButtonClick(this, "remettrestock");
-        });
-    });
-
-    document.querySelectorAll(".remettrestockchange-btn").forEach(button => {
-        button.addEventListener("click", function () {
-            handleButtonClick(this, "remettrestockchange");
-        });
-    });
-
-    function getCSRFToken() {
-        const tokenElement = document.querySelector("input[name=csrfmiddlewaretoken]");
-        return tokenElement ? tokenElement.value : null;
-    }
-});
-
-
-document.querySelectorAll("#refuse-button").forEach(button => {
-    button.addEventListener("click", function () {
-        let checklistItemId = this.dataset.id;
-        let statusField = document.querySelector(`#status_${checklistItemId}`);
-        let form = document.querySelector(`#status-form-${checklistItemId}`);
-
-        if (statusField) {
-            statusField.value = 'denied'; 
-        }
-
-    
-
-        form.submit(); // Submit the form
-    });
-});
-
-document.querySelectorAll("#refuse-button-quantity").forEach(button => {
+  document.querySelectorAll("#refuse-button-quantity").forEach(button => {
     button.addEventListener("click", function () {
         let checklistItemId = this.dataset.id;
         let statusField = document.querySelector(`#status_${checklistItemId}`);
@@ -717,7 +1196,7 @@ document.querySelectorAll("#refuse-button-quantity").forEach(button => {
     });
 });
 
-function submitStatusForm(itemId, newStatus) {
+  function submitStatusForm(itemId, newStatus) {
     const statusField = document.querySelector(`#status_${itemId}`);
     const quantityField = document.querySelector(`#quantity_${itemId}`);  // Get the quantity field (if it exists)
     const form = document.querySelector(`#status-form-${itemId}`);
@@ -734,7 +1213,7 @@ function submitStatusForm(itemId, newStatus) {
     form.submit(); // Submit the form
 }
 
-function submitStatusValidateForm(itemId, newStatus) {
+  function submitStatusValidateForm(itemId, newStatus) {
     const statusField = document.querySelector(`#status_${itemId}`);
     const form = document.querySelector(`#status-form-${itemId}`);
     const checklistItemQuantityField = document.querySelector(`#checklist-item-quantity-${itemId}`); // The current checklist item quantity
@@ -756,95 +1235,40 @@ function submitStatusValidateForm(itemId, newStatus) {
     // Submit the form to update the status and the quantities in the backend
     form.submit(); // Submit the form
 }
-
-
-function printChecklist() {
-    // Récupère le contenu de la section à imprimer
-    const printContent = document.getElementById('print-section').innerHTML;
-
-    // Ouvre une nouvelle fenêtre pour l'impression
-    const printWindow = window.open('', '', 'height=600,width=800');
-    printWindow.document.write('<html><head><title>Imprimer les Checklists</title>');
-    printWindow.document.write('<style>');
-    printWindow.document.write(`
-        @page {
-            size: A4 landscape; /* Mode paysage */
-            margin: 0; /* Pas de marges */
-        }
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-        }
-        .page {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            height: 100vh; /* Hauteur complète de la page */
-            font-size: 3rem; /* Texte plus grand */
-            text-align: center;
-            box-sizing: border-box;
-            padding: 20px;
-            page-break-after: always; /* Une page par checklist */
-        }
-    `);
-    printWindow.document.write('</style>');
-    printWindow.document.write('</head><body>');
-    printWindow.document.write(printContent);
-    printWindow.document.write('</body></html>');
-
-    // Ferme le document pour garantir que tout est chargé avant l'impression
-    printWindow.document.close();
-
-    // Déclenche la boîte de dialogue d'impression
-    printWindow.print();
-
-    // Facultatif : ferme la fenêtre après l'impression
-    printWindow.close();
-}
-
-$(document).on('click', '.edit-item', function() {
-    const itemId = $(this).data('id');
-    const productId = $(this).data('product');
-    const quantity = $(this).data('quantity');
-    
-    // Set the values in the modal
-    $('#edit-item-id').val(itemId);
-    $('#edit-product').val(productId);
-    $('#edit-quantity').val(quantity);
-    
-    // Show the modal
-    $('#editItemModal').modal('show');
-});
-
-// Save changes button click handler
-$('#saveChanges').click(function() {
-    const itemId = $('#edit-item-id').val();
-    const productId = $('#edit-product').val();
-    const quantity = $('#edit-quantity').val();
-    
-    $.ajax({
-        url: "{% url 'update_checklist_item' %}",  // Adjust your URL here
-        method: "POST",
-        data: {
-            'item_id': itemId,
-            'product_id': productId,
-            'quantity': quantity,
-            'csrfmiddlewaretoken': '{{ csrf_token }}'
+  
+  // Ajout de gestion pour la remise en stock
+  $(document).on('click', '.remise-stock-btn', function() {
+    const id = $(this).data('id');
+    const quantity = parseInt($(this).data('quantity'), 10);
+        // Exemple d'action pour remettre en stock : demander confirmation si nécessaire
+        if (confirm('Remettre en stock ' + quantity + ' unité(s) ?')) {
+      // Envoi via AJAX
+      fetch("{% url 'remettre_stock' %}", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': '{{ csrf_token }}'
         },
-        success: function(response) {
-            alert("Item updated successfully!");
-            location.reload(); // Optionally reload the page to reflect changes
-        },
-        error: function(xhr, status, error) {
-            alert("Error updating item");
-            console.error("Error:", error);
+        body: new URLSearchParams({
+          'product_id': id,
+          'quantity': quantity
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert('Stock mis à jour avec succès');
+          location.reload();
+        } else {
+          alert('Erreur lors de la mise à jour du stock');
         }
-    });
-});
-
-
+      })
+      .catch(() => alert('Erreur réseau'));
+    }
+  });
 </script>
+
 {% endblock %}
+             
+
+

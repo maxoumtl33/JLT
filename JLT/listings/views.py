@@ -216,6 +216,25 @@ def submission_detail(request, submission_id):
     }
     return render(request, 'listings/submission_detail.html', context)
 
+import qrcode
+import io
+import base64
+
+def generate_qr_code_base64(url):
+    qr = qrcode.QRCode(
+        version=1,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(url)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color='black', back_color='white')
+
+    buf = io.BytesIO()
+    img.save(buf, format='PNG')
+    encoded_string = base64.b64encode(buf.getvalue()).decode()
+    return f"data:image/png;base64,{encoded_string}"
+
 
 from django.views.decorators.csrf import csrf_exempt
 from django.db import IntegrityError
@@ -504,7 +523,8 @@ from .models import Livraison
 @login_required
 def geocode_all_livraisons(request):
     if request.method == 'GET':  # Ensure the request method is GET
-        livraisons = Livraison.objects.filter(lat__isnull=True, lng__isnull=True, place_id__isnull=True)
+        today = timezone.localdate()
+        livraisons = Livraison.objects.filter(lat__isnull=True, lng__isnull=True, place_id__isnull=True,date__gte=today)
 
         if livraisons.exists():
             try:
@@ -687,11 +707,58 @@ def get_checklist_items_for_date(request):
 
     return JsonResponse({'items': list(checklist_items)}, safe=False)
 
+
+from django.views.decorators.http import require_GET
+from django.http import JsonResponse
+from .models import ChecklistItem, Checklist
+
+@require_GET
+def checklist_items_encours_par_date(request):
+    date_str = request.GET.get('date')
+    if not date_str:
+        return JsonResponse({'items': []})
+
+    date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
+
+    # Filtrer tous les checklist items liés à un checklist en statut 'encours' pour cette date
+    checklist_encours = Checklist.objects.filter(date=date_obj, is_active=True, status='en_cours').first()
+    if not checklist_encours:
+        return JsonResponse({'items': []})
+
+    items_qs = (
+        ChecklistItem.objects.filter(checklist=checklist_encours)
+        .values('product__name', 'checklist__name')
+        .annotate(total_quantity=Sum('quantity'))
+        .filter(total_quantity__gt=0)
+    )
+
+    data = {
+        'items': list(items_qs)
+    }
+    return JsonResponse(data)
+
+def format_time_without_seconds(time_str):
+    if ':' in time_str:
+        parts = time_str.split(':')
+        return f"{parts[0]}:{parts[1]}"
+    return time_str
+
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_GET
+from django.db.models import Sum
+from django.http import JsonResponse
+from datetime import date, datetime, timedelta
+import calendar
+from django.http import JsonResponse
+
 @login_required
 @require_GET
 def voir_checklist(request):
     today = date.today()  # Get today's date
     checklists = Checklist.objects.filter(is_active=True)
+    
     encours = "en_cours"
     today = date.today()
     valide = "valide"
@@ -701,6 +768,10 @@ def voir_checklist(request):
     current_year = today.year
     years = [year for year in range(current_year - 5, current_year + 1)]
     livraisons = Livraison.objects.filter(recuperation=False)
+
+    for livraison in livraisons:
+        livraison.formatted_heure_livraison = format_time_without_seconds(livraison.heure_livraison)
+
     selected_day = int(request.GET.get('day', 1))  # Default to the first day of the month if none selected
     current_year = date.today().year
     months = [(month, calendar.month_name[month]) for month in range(1, 13)]
@@ -746,6 +817,11 @@ def voir_checklist(request):
     # Check if the request is an AJAX request
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return JsonResponse(data)
+
+    for checklist in checklists:
+        url = request.build_absolute_uri(reverse('checklist_en_cours', args=[checklist.id]))
+        checklist.qr_code_uri = generate_qr_code_base64(url)
+        checklist.formatted_heure_livraison = format_time_without_seconds(checklist.heure_livraison)
 
 
     context = {
@@ -801,9 +877,12 @@ def delete_route(request, route_id):
 
     return JsonResponse({'success': False}, status=400)
 
+
+
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse
 from .models import Checklist, ChecklistItem, QuantityChangeLog
+
 @login_required
 def checklistvoir_detail(request, checklist_id):
     products = Product.objects.all()
@@ -908,6 +987,17 @@ def checklistvoir_detail(request, checklist_id):
 
         return redirect('checklistvoir-detail', checklist_id=checklist.id)
 
+          # Generate URL for the checklist "en_cours" page
+    checklist_url = request.build_absolute_uri(reverse('checklist_en_cours', args=[checklist.id]))
+    # Generate QR code image
+    qr_code_data_uri = generate_qr_code_base64(checklist_url)
+
+    items_encours = [item for item in checklist_items_unique if item.status == 'en_cours']
+    # 2. Les autres sauf 'valide' et 'complete'
+    items_autres = [item for item in checklist_items_unique if item.status not in ('en_cours', 'valide', 'complete')]
+    # 3. Valide ou complete en dernier
+    items_valides_completes = [item for item in checklist_items_unique if item.status in ('valide', 'complete')]
+
     context = {
         'checklist': checklist,
         'normal_items': checklist_items_unique,
@@ -915,8 +1005,42 @@ def checklistvoir_detail(request, checklist_id):
         'nt_items': nt_items,
         'quantity_change_logs': quantity_change_logs,
         'nt_items_ids': nt_items_ids,
+        'qr_code_data_uri': qr_code_data_uri,
+        'items_encours': items_encours,
+        'items_autres': items_autres,
+        'items_valides_completes': items_valides_completes,
     }
     return render(request, 'listings/checklistevoir_detail.html', context)
+
+@login_required
+def checklist_en_cours_view(request, checklist_id):
+    checklist = get_object_or_404(Checklist, pk=checklist_id)
+    items_en_cours = ChecklistItem.objects.filter(checklist=checklist, status='en_cours')
+    sac_de_glace_items = items_en_cours.filter(product__name="Sac de glace")
+    context = {
+        'checklist': checklist,
+        'items_en_cours': items_en_cours,
+        'sac_de_glace_items': sac_de_glace_items,
+    }
+    return render(request, 'listings/checklist_en_cours.html', context)
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt  # Pour simplifier, sinon gérer le CSRF côté fetch
+def remettre_en_stock(request):
+    if request.method == 'POST':
+        product_id = request.POST.get('product_id')
+        quantity = int(request.POST.get('quantity', 0))
+        try:
+            product = Product.objects.get(id=product_id)
+            product.adjust_quantity(quantity)  # Méthode à définir dans votre modèle
+            product.save()
+            return JsonResponse({'success': True})
+        except Product.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Produit non trouvé'})
+    return JsonResponse({'success': False, 'error': 'Methode non autorisée'})
+
 
 @login_required
 def product_detail(request, item_id):
@@ -1913,12 +2037,10 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from .models import Checklist, Livraison
 
+from django.http import JsonResponse
+
 @login_required
 def associate_all_livraisons(request):
-    """
-    Associates all checklists to their corresponding Livraison where num_commande matches num_contrat
-    and the livraison date is today or in the future.
-    """
     today = now().date()
     checklists = Checklist.objects.all()
     associated_count = 0
@@ -1926,7 +2048,7 @@ def associate_all_livraisons(request):
     for checklist in checklists:
         livraison = Livraison.objects.filter(
             num_commande=checklist.num_contrat,
-            date__gte=today  # Assuming 'date' is the field storing the date of the livraison
+            date__gte=today
         ).first()
         if livraison:
             checklist.livraison = livraison
@@ -1934,11 +2056,15 @@ def associate_all_livraisons(request):
             associated_count += 1
 
     if associated_count > 0:
-        messages.success(request, f"{associated_count} checklists ont été associées avec succès.")
+        message = f"{associated_count} checklists ont été associées avec succès."
     else:
-        messages.warning(request, "Aucune checklist n'a pu être associée.")
+        message = "Aucune checklist n'a pu être associée."
 
-    return redirect('livraisonstomorrow')  # Update with your actual checklist listing view
+    # Return JSON response
+    return JsonResponse({
+        'associated_count': associated_count,
+        'message': message
+    })
 
 
 from django.http import JsonResponse
@@ -3367,7 +3493,7 @@ def create_shift(request):
                         start_time=shift_start,
                         notes=""
                     )
-            return redirect('create_shift')
+            return redirect('create-shift')
 
         # Si c’est une requête de modification d’un shift existant
         elif 'edit_shift' in request.POST:
@@ -3760,7 +3886,7 @@ class MapAujourView(View):
         context = {
             'key': key,
             'livraisons': livraisons,
-            'selected_date': selected_date,
+            'selected_date': selected_date.strftime('%Y-%m-%d'),
             'routes': routes,
             'todo_livraison': todo_livraison,
             'routes21': routes21,
@@ -3815,7 +3941,7 @@ class MapApremAujourView(View):
         context = {
             'key': key,
             'livraisons': livraisons,
-            'selected_date': selected_date,
+            'selected_date': selected_date.strftime('%Y-%m-%d'),
             'routes': filtered_routes,  # Pass routes to the context
             'todo_livraison':todo_livraison,
             'routes21':routes21,
@@ -3871,7 +3997,7 @@ class MapMidiAujourView(View):
         context = {
             'key': key,
             'livraisons': livraisons,
-            'selected_date': selected_date,
+            'selected_date': selected_date.strftime('%Y-%m-%d'),
             'routes': filtered_routes,  # Pass routes to the context
             'todo_livraison':todo_livraison,
             'routes21':routes21,
@@ -4935,8 +5061,11 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt  # Only use if necessary for non-POST actions
 from .models import LoadingDock, Livraison
 
+from django.utils import timezone
+
 def associate_livraisons_with_docks(request):
     if request.method == 'POST':
+        today = timezone.localdate()  # ou timezone.now().date() si vous utilisez datetime
         # Get all loading docks
         loading_docks = LoadingDock.objects.all()
 
@@ -4945,16 +5074,18 @@ def associate_livraisons_with_docks(request):
         # Loop through each loading dock to find matching livraisons
         for dock in loading_docks:
             # Find livraisons where place_id matches the dock's place_id
-            livraisons = Livraison.objects.filter(place_id=dock.place_id)
+            livraisons = Livraison.objects.filter(
+                place_id=dock.place_id,
+                date__gte=today  # Ajout du filtre pour aujourd'hui et futur
+            )
 
             # For each matching livraison, perform the association
             for livraison in livraisons:
-                livraison.loading_dock = dock  # Assuming there's a ForeignKey named 'loading_dock'
+                livraison.loading_dock = dock
                 livraison.save()
                 associations_made += 1
 
         return JsonResponse({'status': 'success', 'message': f'{associations_made} livraisons associées avec succès.'})
-
     return JsonResponse({'status': 'error', 'message': 'Méthode non supportée.'}, status=400)
 
 
