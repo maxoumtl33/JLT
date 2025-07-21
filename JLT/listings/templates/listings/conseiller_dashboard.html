@@ -183,6 +183,9 @@ body {
   <a href="{% url 'submit_request' %}" target="_blank" class="aref" >
     <i class="fa-solid fa-file-signature me-2"></i>Créer Soumission
                             </a>
+                            <a class="aref" data-bs-toggle="modal" data-bs-target="#createChecklistModal" style="cursor: pointer;">
+                                <i class="fa-solid fa-cart-flatbed me-2"></i>Créer Checklist
+                            </a>
                             <a class="aref" href="{% url 'etiquette-tente' %}"><i class="fa-solid fa-print me-2"></i>Etiquette tente</a>
 
                             {% if user.username == "Audrey" or user.username == "Maxime" or user.username == "Roxanne" %}

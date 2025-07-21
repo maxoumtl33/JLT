@@ -45,7 +45,7 @@ body {
             text-decoration: none;
         }
 
-        .recup {
+        .soumicheck {
             flex: 1;
             padding: 20px;
             background-color: #F0F2F5;
@@ -69,11 +69,11 @@ body {
             cursor: pointer;
             color: #007BFF;
         }
-        #recup.expanded {
+        #soumicheck.expanded {
     margin-left: 0;
 }
 
-#recup.full-width {
+#soumicheck.full-width {
     transition: margin-left 0s;
 }
 
@@ -160,8 +160,7 @@ body {
     <br>
 
 
-    <div class="d-flex align-items-center justify-content-center" style="height: 100vh; text-align: center; margin-left: 220%; width: 100%; ">
-        <form method="POST" class="needs-validation" novalidate style="width: 100%;">
+        <form method="POST" class="needs-validation" novalidate>
           {% csrf_token %}
       
           <!-- Détails de l'Événement -->
@@ -211,7 +210,6 @@ body {
         </form>
       </div>
       
-</div>
 
 
 <script>
