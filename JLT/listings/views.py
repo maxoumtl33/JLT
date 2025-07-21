@@ -235,6 +235,203 @@ def generate_qr_code_base64(url):
     encoded_string = base64.b64encode(buf.getvalue()).decode()
     return f"data:image/png;base64,{encoded_string}"
 
+# views.py
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from .models import Product, Checklist, ChecklistItem, Category
+
+def checklist_products(request, checklist_id):
+    checklist = get_object_or_404(Checklist, pk=checklist_id)
+    checklist_documents = ChecklistDocument.objects.filter(checklist=checklist)
+    recup_photos = ChecklistRecupPhoto.objects.filter(checklist=checklist)
+    md_photos = ChecklistMDPhoto.objects.filter(checklist=checklist)
+    existing_items = list(ChecklistItem.objects.filter(checklist=checklist).values('id', 'product_id', 'quantity', 'product__name'))
+    special_categories = ["ALCOOL FORT", "BIERES", "SANS ALCOOL", "VINS"]
+    category_icons = {
+    'ALCOOL FORT': 'fa-bottle-water',
+    'BIERES': 'fa-beer',
+    'VINS': 'fa-wine-glass',
+    'SANS ALCOOL': 'fa-glass-water',
+    'ÉQUIPEMENT DE BASE': 'fa-cogs',                 # example icon
+    'JETABLE': 'fa-recycle',                          # example icon
+    'ACCESSOIRES DE DÉCOR': 'fa-image',               # example icon
+    'ÉQUIPEMENT DE BAR': 'fa-mug-hot',                # example icon
+    'ÉQUIPEMENT POUR SERVICE CAFÉ': 'fa-coffee',     # example icon
+    'ITEMS DIVERS': 'fa-boxes-stacked',               # example icon
+    'TABLE ET LINGE DE TABLE': 'fa-table',            # example icon
+    'VERRERIE': 'fa-glass-cheers',                     # example icon
+    'PORCELAINE ET COUTELLERIE': 'fa-utensils',        # example icon
+    'ÉQUIPEMENT POUR MONTAGE CANAPÉS': 'fa-dolly-flatbed', # example icon
+    'ÉQUIPEMENT DE CUISSON': 'fa-mortar-pestle',       # example icon
+    'USTENSILES DE SERVICE': 'fa-hand-holding',       # example icon
+    'CFCDN': 'fa-flag',                                # example icon
+}
+
+    breuvages = ChecklistItem.objects.filter(checklist=checklist, product__category__name__in=["ALCOOL FORT", "SANS ALCOOL", "VINS",  "BIERES"], quantity__gt=0)
+    # Create the formset (always include an extra form)
+    document_formset = ChecklistDocumentFormSet(
+        request.POST or None,
+        request.FILES or None,
+        queryset=checklist_documents,  # Existing docs
+        prefix='documents'
+    )
+    if not document_formset.forms:
+        document_formset = ChecklistDocumentFormSet(queryset=ChecklistDocument.objects.none(), prefix='documents')
+
+    if request.method == 'POST' and document_formset.is_valid():
+        for form in document_formset:
+            if form.cleaned_data.get('DELETE', False):
+                form.instance.delete()
+            else:
+                document_instance = form.save(commit=False)
+                document_instance.checklist = checklist
+                document_instance.uploaded_by = request.user
+                document_instance.save()
+
+        # 🔹 After saving, reinitialize the formset to include at least one blank form
+        return redirect('checklist-detail', checklist_id=checklist.id)
+
+
+    # Checklist form instance
+    formbis = ChecklistForm(request.POST or None, instance=checklist, prefix='checklist_form')
+    commentairemd_form = CommentairemdForm(request.POST or None, instance=checklist, prefix='commentaire_form')
+    product_form = ProductsForm
+    forminfo = ChecklistInfosForm(request.POST or None, instance=checklist, prefix='checklistinfos_form')
+
+    if request.method == 'POST':
+        # Handle checklistinfos_form submission
+        if 'submit_checklistinfos' in request.POST:
+            forminfo = ChecklistInfosForm(request.POST, instance=checklist, prefix='checklistinfos_form')
+            if forminfo.is_valid():
+                forminfo.save()
+                messages.success(request, 'Les informations ont été ajoutées avec succès.')
+                return redirect('checklist-detail', checklist_id=checklist_id)
+        # Handle commentaire_form submission separately
+        elif 'commentaire_form' in request.POST:
+            commentaire_form = CommentaireForm(request.POST, instance=checklist)
+            if commentaire_form.is_valid():
+                commentaire_form.save()
+                messages.success(request, 'Commentaire ajouté avec succès.')
+                return redirect('checklist-detail', checklist_id=checklist_id)
+
+        # Handle checklist form submission
+        elif 'checklist_form-name' in request.POST and formbis.is_valid():
+            if checklist.statusro == 'verifié':
+                    checklist.statusro = 'modifié'  # Update the status to 'modifié'
+            formbis.save()
+            checklist.save()
+            return HttpResponseRedirect(reverse('checklist-detail', args=[checklist_id]))
+    categories = Category.objects.all().order_by('name')
+    products_by_category = {}
+    for cat in categories:
+        products_by_category[cat.name] = Product.objects.filter(category=cat)
+    checklist_itemss = ChecklistItem.objects.select_related('product').filter(checklist=checklist, quantity__gt=0).prefetch_related('product__category')
+    checklist_items_by_category = {}
+
+    for item in checklist_itemss:
+        product = item.product
+        for category in product.category.all():  # Iterate over each category of the product
+            if category.name not in checklist_items_by_category:
+                checklist_items_by_category[category.name] = []
+            checklist_items_by_category[category.name].append({
+                'product': product,
+                'quantity': item.quantity,
+                'status': item.status,
+                'commentaire': item.commentaire,
+                'com': item.com,
+                'is_completed': item.is_completed,
+                'consumed_quantity': item.consumed_quantity,
+                'unconsumed_quantity': item.unconsumed_quantity,
+            })
+    context = {
+        'checklist': checklist,
+        'categories': categories,
+        'existing_items': existing_items,
+        'special_categories': special_categories,
+        'category_icons': category_icons,
+        'products_by_category': products_by_category,
+        'formbis': formbis,
+        'document_formset': document_formset,
+        'commentairemd_form': commentairemd_form,
+        'checklist_documents': checklist_documents,
+        'recup_photos': recup_photos,
+        'md_photos': md_photos,
+        'product_form': product_form,
+        'forminfo': forminfo,
+        'breuvages': breuvages,
+        'checklist_items_by_category': checklist_items_by_category,
+    }
+    return render(request, 'listings/checklist_detail.html', context)
+
+from django.db import transaction
+
+@csrf_exempt
+def add_products_to_checklist(request, checklist_id):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        checklist = get_object_or_404(Checklist, pk=checklist_id)
+        items = data.get('items', [])
+
+        with transaction.atomic():
+            for item in items:
+                product_id = item['product_id']
+                quantity = int(item['quantity'])
+                commentaire = item.get('commentaire', '')  # récupère le commentaire
+
+                product = Product.objects.get(pk=product_id)
+
+                checklist_item, created = ChecklistItem.objects.update_or_create(
+                    checklist=checklist,
+                    product=product,
+                    defaults={
+                        'quantity': quantity,
+                        'status': 'en_cours',
+                        'commentaire': commentaire  # sauvegarde le commentaire
+                    }
+                )
+
+        return JsonResponse({'status': 'success'})
+
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from .models import Category, Product
+
+def get_products_by_category(request):
+    category_name = request.GET.get('category', '')
+    search_term = request.GET.get('search', '')
+    print(f"Category: {category_name}, Search: {search_term}")  # pour déboguer
+    try:
+        category = Category.objects.get(name=category_name)
+    except Category.DoesNotExist:
+        return JsonResponse({'products': []})
+    products_qs = Product.objects.filter(category=category)
+    if search_term:
+        products_qs = products_qs.filter(name__icontains=search_term)
+    products = list(products_qs.values('id', 'name'))
+    return JsonResponse({'products': products})
+
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+import json
+
+@csrf_exempt
+def update_checklist_item_quantity(request, item_id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            new_quantity = int(data.get('quantity', 0))
+            if new_quantity < 0:
+                return JsonResponse({'status': 'error', 'message': 'Quantité invalide'}, status=400)
+
+            item = ChecklistItem.objects.get(pk=item_id)
+            item.quantity = new_quantity
+            item.save()
+            return JsonResponse({'status': 'ok'})
+        except ChecklistItem.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Item non trouvé'}, status=404)
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
 
 from django.views.decorators.csrf import csrf_exempt
 from django.db import IntegrityError
