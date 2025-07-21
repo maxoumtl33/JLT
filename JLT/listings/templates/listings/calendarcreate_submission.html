@@ -9,8 +9,15 @@
 <style>
     /* General styling */
     body {
-        background-color: #f0f2f5;
-    }
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s linear, color 0.3s linear;
+        }
 
     .clickable-row {
         cursor: pointer;
@@ -65,11 +72,13 @@
 
     /* Calendar section */
     .calendar-section {
-        width: 45%;
+        width: 100%;
         background-color: #f9f9f9;
         padding: 20px;
         border-radius: 8px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        max-width: 40%; /* Restrict width on large screens */
+        transition: width 0.3s ease; /* Smooth transition */
     }
     .calendar {
         display: grid;
@@ -117,9 +126,9 @@
         color: white;
     }
     
-    /* Submission section */
-    .submission-section {
-        width: 55%;
+    .submission-sections {
+        width: 100%;
+        max-width: 60%;
         background-color: #ffffff;
         padding: 20px;
         border-radius: 8px;
@@ -173,18 +182,7 @@
     .submissioncreate-table td a:hover {
         text-decoration: underline;
     }
-     /* Responsiveness */
-     @media (max-width: 768px) {
-        .calendar {
-            grid-template-columns: repeat(7, 1fr);
-        }
-    }
-
-    @media (max-width: 480px) {
-        .calendar {
-            grid-template-columns: repeat(5, 1fr); /* Adjust for small screens */
-        }
-    }
+    
 
 
     /* Selected day button style */
@@ -263,26 +261,228 @@
     transform: rotate(45deg); /* Rotate to form a checkmark */
 }
 
+.sidebar {
+            width: 250px;
+            background-color: #007BFF;
+            height: 100%;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar .sidebar-header {
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .aref {
+            color: #fff;
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .aref.active, .aref:hover {
+            background-color: #0056b3;
+            color: #fff;
+            text-decoration: none;
+            
+        }
+
+        .checklistss {
+            flex: 1;
+            padding: 20px;
+            background-color: #F0F2F5;
+            overflow-y: auto;
+            transition: margin-left 0.3s ease; /* Improves smoothness of layout change */
+        }
+
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            
+        }
+
+        .header .toggle-theme {
+            cursor: pointer;
+            color: #007BFF;
+        }
+        #checklistss.expanded {
+    margin-left: 0;
+}
+
+#checklistss.full-width {
+    transition: margin-left 0s;
+}
+
+.collapsed {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    width: 0; /* Ensure width collapses at the end */
+}
+
+.dark-mode {
+            background-color: #121212;
+            color: #e4e4e4;
+        }
+
+        .dark-mode .header, .dark-mode .card {
+            background-color: #1e1e1e;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .dark-mode .sidebar {
+            background-color: #1e1e1e;
+        }
+
+        .dark-mode .sidebar a {
+            color: #e4e4e4;
+        }
+
+        .dark-mode .sidebar a.active, .dark-mode .sidebar a:hover {
+            background-color: #333;
+            color: #fff;
+        }
+
+            @media (max-width: 1200px) {
+    .agenda-container {
+        flex-direction: column; /* Change layout to column */
+        align-items: stretch; /* Ensure children stretch to available width */
+    }
+    .calendar-section,
+    .submission-sections {
+        width: 100%; /* Allow elements to take full width */
+        max-width: none;
+    }
+
+}
+    /* Responsive adjustments */
+    @media (max-width: 932px) {
+    .agenda-container {
+        flex-direction: column; /* Change layout to column */
+        align-items: stretch; /* Ensure children stretch to available width */
+    }
+    .calendar-section,
+    .submission-sections {
+        width: 100%; /* Allow elements to take full width */
+        max-width: none;
+    }
+
+}
+    @media (max-width: 768px) {
+    .agenda-container {
+        flex-direction: column; /* Change layout to column */
+        align-items: stretch; /* Ensure children stretch to available width */
+    }
+    .calendar,
+    .submission-sections {
+        width: 100%; /* Allow elements to take full width */
+        max-width: none;
+    }
+
+}
+@media (max-width: 480px) {
+    .calendar-section {
+        grid-template-columns: repeat(2, 1fr); /* Adjust columns further for smallest screens */
+        gap: 5px; /* Smaller gap */
+    }
+    
+    /* Ensure both sections stack and adjust fully in mobile view */
+    .agenda-container {
+        align-items: stretch; /* Makes sure sections take full width even in the stack */
+    }
+    .calendar,
+    .submission-sections
+     {
+        width: 100%;
+        max-width: none;
+    }
+
+    .day-btn {
+        font-size: 0.7rem; /* Smaller button font */
+        height: 28px; /* Shorter button height */
+        padding: 4px; /* Smaller padding */
+    }
+    
+    .agenda-title {
+        font-size: 1.5rem; /* Smaller title font */
+    }
+    
+    .month-dropdown {
+        font-size: 0.9rem; /* Adjust dropdown font size */
+        padding: 8px; /* Adjust padding */
+    }
+
+}
 
 </style>
 
-<nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
-    <div class="container">
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <li>
-                    <a href="{% url 'conseiller_dashboard' %}" class="nav__link" style="margin-left: 20px;">
-                        <i class="fa-solid fa-display"></i>
-                        <span>Dashboard</span>
-                    </a>
-                </li>
-            </ul>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header" style="margin-top: 100px;">Menu <button class="toggle-sidebar" id="sidebar-toggle"><i class="fas fa-bars"></i></button></div>
+    <a href="{% url 'conseiller_dashboard' %}" class="aref"><i class="fa-solid fa-desktop me-2"></i> Tableau de bord</a>
+    <a href="{% url 'journees-list' %}" class="aref"><i class="fa-solid fa-truck me-2"></i> Livraisons</a>
+      <a href="{% url 'creerchecklist' %}" class="aref"><i class="fas fa-list-check me-2"></i> Checklists</a>
+
+    <a href="{% url 'calendarsub_view' %}" class="aref">
+        <i class="fa-solid fa-file-contract me-2"></i>Soumissions
+                                          </a>
+    
+    <a href="{% url 'submit_request' %}" target="_blank" class="aref" >
+      <i class="fa-solid fa-file-signature me-2"></i>Créer Soumission
+                              </a>
+                              <a class="aref" href="{% url 'etiquette-tente' %}" class="aref"><i class="fa-solid fa-print me-2"></i>Etiquette tente</a>
+  
+                              {% if user.username == "Audrey" or user.username == "Maxime" or user.username == "Roxanne" %}
+                              
+                               
+                                  
+                                          <a href="{% url 'manage_submissions' %}" class="aref">
+                                              <i class="fa-solid fa-file-pdf me-2"></i>PDF et Recherche Soumission
+                                          </a>
+                                     
+                                        
+                                    
+                                          
+                             
+                              {% endif %}
+                                
+    <button class="toggle-theme" id="theme-toggle" style="margin-top:10px;"><i class="fas fa-moon"></i> Thème</button>
+    <div style="margin-top:20px; font-size:14px; color:#ccc;">Utilisateur: {{ user.username }}</div>
+  </div>
+
+
+
+
+
+<div class="checklistss" id="checklistss">
+
+      <div class="header">
+        <h2>CALENDRIER SOUMISSIONS / COMMANDES <strong><u>DATE DE CRÉATION</u></strong></h2>
+            <button id="show-sidebar" style="display:none; position: fixed; top: 12%; left: 10px;">
+                <i class="fas fa-bars fa-2xl"></i>
+            </button>
+        <div class="user-info">
+            <button id="logoutBtn" style="border:none; background:none; cursor:pointer;"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
         </div>
     </div>
-</nav>
+    <br>
+    <br>
+    <br>
+    <br>
+
 {% if submissions_48h_envoye.exists %}
 <div class="alert alert-warning d-flex align-items-center" role="alert" style="margin-top:20px;">
     <div><i class="fas fa-bell me-2"></i>
@@ -370,10 +570,6 @@
                         </div>
                     </div>
                     {% endif %}
-<br>
-<h1 style="text-align: center;">CALENDRIER SOUMISSIONS / COMMANDES <strong><u>DATE DE CRÉATION</u></strong>
-</h1>
-<br>
 
 <div class="agenda-container">
     <!-- Calendar to get submissions by creation date -->
@@ -390,13 +586,13 @@
         </div>
 
         <div id="calendar-create" class="calendar">
-            <div class="day"><strong>Dimanche</strong></div>
-            <div class="day"><strong>Lundi</strong></div>
-            <div class="day"><strong>Mardi</strong></div>
-            <div class="day"><strong>Mercredi</strong></div>
-            <div class="day"><strong>Jeudi</strong></div>
-            <div class="day"><strong>Vendredi</strong></div>
-            <div class="day"><strong>Samedi</strong></div>
+            <div class="day"><strong>Dim</strong></div>
+            <div class="day"><strong>Lun</strong></div>
+            <div class="day"><strong>Mar</strong></div>
+            <div class="day"><strong>Mer</strong></div>
+            <div class="day"><strong>Jeu</strong></div>
+            <div class="day"><strong>Ven</strong></div>
+            <div class="day"><strong>Sam</strong></div>
 
             {% for day in days %}
                 <div class="day">
@@ -417,76 +613,79 @@
         </div>
     </div>
 
-        <!-- Submission Section for Creation Date Submissions -->
-        <div id="submissioncreate-section" class="submission-section">
-            <div class="submission-section" style="display: flex;">
-                <div class="filter-section">
-                    <span style="margin-right: 10px;">Afficher :</span>
-                    <label>
-                        <input type="radio" name="status-filter" value="all" checked onchange="filterSubmissions()" />
-                        Tous
-                    </label>
-                    <label>
-                        <input type="radio" name="status-filter" value="en_cours" onchange="filterSubmissions()" />
-                        En cours
-                    </label>
-                    <label>
-                        <input type="radio" name="status-filter" value="valide" onchange="filterSubmissions()" />
-                        Validé
-                    </label>
-                    <label>
-                        <input type="radio" name="status-filter" value="refuse" onchange="filterSubmissions()" />
-                        Refusé
-                    </label>
-                    <label>
-                        <input type="radio" name="status-filter" value="envoye" onchange="filterSubmissions()" />
-                        Envoyé
-                    </label>
-                </div>
-            
-                <div class="type-filter-section">
-                    <span style="margin-right: 10px;">Type de soumission :</span>
-                    <label>
-                        <input type="checkbox" name="type-filter" value="Soumission événement" onchange="filterSubmissions()" />
-                        Soumission événement
-                    </label>
-                    <label>
-                        <input type="checkbox" name="type-filter" value="Commande événement" onchange="filterSubmissions()" />
-                        Commande événement
-                    </label>
-                    <label>
-                        <input type="checkbox" name="type-filter" value="Soumission BAL/Buffet" onchange="filterSubmissions()" />
-                        Soumission BAL/Buffet
-                    </label>
-                    <label>
-                        <input type="checkbox" name="type-filter" value="Commande BAL/Buffet" onchange="filterSubmissions()" />
-                        Commande BAL/Buffet
-                    </label>
-                </div>
-            
-                
+     <div id="submissioncreate-section" class="submission-sections">
+        <div class="submission-section" style="display: flex;">
+            <div class="filter-section">
+                <span style="margin-right: 10px;">Afficher :</span>
+                <label>
+                    <input type="radio" name="status-filter" value="all" checked onchange="filterSubmissions()" />
+                    Tous
+                </label>
+                <label>
+                    <input type="radio" name="status-filter" value="en_cours" onchange="filterSubmissions()" />
+                    En cours
+                </label>
+                <label>
+                    <input type="radio" name="status-filter" value="valide" onchange="filterSubmissions()" />
+                    Validé
+                </label>
+                <label>
+                    <input type="radio" name="status-filter" value="refuse" onchange="filterSubmissions()" />
+                    Refusé
+                </label>
+                <label>
+                    <input type="radio" name="status-filter" value="envoye" onchange="filterSubmissions()" />
+                    Envoyé
+                </label>
             </div>
+        
+            <div class="type-filter-section">
+                <span style="margin-right: 10px;">Type de soumission :</span>
+                <label>
+                    <input type="checkbox" name="type-filter" value="Soumission événement" onchange="filterSubmissions()" />
+                    Soumission événement
+                </label>
+                <label>
+                    <input type="checkbox" name="type-filter" value="Commande événement" onchange="filterSubmissions()" />
+                    Commande événement
+                </label>
+                <label>
+                    <input type="checkbox" name="type-filter" value="Soumission BAL/Buffet" onchange="filterSubmissions()" />
+                    Soumission BAL/Buffet
+                </label>
+                <label>
+                    <input type="checkbox" name="type-filter" value="Commande BAL/Buffet" onchange="filterSubmissions()" />
+                    Commande BAL/Buffet
+                </label>
+            </div>
+        
             
-            
-            <br>
-            <table class="table table-hover submissioncreate-table">
-                <thead>
-                    <tr>
-                        <th data-sort="client" style="cursor: pointer;">Client</th>
-                        <th data-sort="type" style="cursor: pointer;">Type</th>
-                        <th data-sort="ajoute_par" style="cursor: pointer;">Ajouté par</th>
-                        <th data-sort="ajoute_le" style="cursor: pointer;">Ajouté le</th>
-                        <th data-sort="date" style="cursor: pointer;">Date</th>
-                        <th data-sort="status" style="cursor: pointer;">Status</th>
-                    </tr>
-                </thead>
-                <tbody id="submissioncreate-list" data-detail-url="{% url 'submission_detail' submission_id=0 %}">
-                    <!-- Submissions will appear dynamically here -->
-                </tbody>
-            </table>
         </div>
+        
+        
+        <br>
+        <table class="table table-hover submissioncreate-table">
+            <thead>
+                <tr>
+                    <th data-sort="client" style="cursor: pointer;">Client</th>
+                    <th data-sort="type" style="cursor: pointer;">Type</th>
+                    <th data-sort="ajoute_par" style="cursor: pointer;">Ajouté par</th>
+                    <th data-sort="ajoute_le" style="cursor: pointer;">Ajouté le</th>
+                    <th data-sort="date" style="cursor: pointer;">Date</th>
+                    <th data-sort="status" style="cursor: pointer;">Status</th>
+                </tr>
+            </thead>
+            <tbody id="submissioncreate-list" data-detail-url="{% url 'submission_detail' submission_id=0 %}">
+                <!-- Submissions will appear dynamically here -->
+            </tbody>
+        </table>
     </div>
-    
+        
+        
+    </div>
+   
+</div>
+
     <script>
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -662,6 +861,40 @@ document.addEventListener('DOMContentLoaded', function() {
       listDiv.style.display = (listDiv.style.display === 'none' || listDiv.style.display === '') ? 'block' : 'none';
     }
   });
+});
+
+const toggleBtn = document.getElementById('theme-toggle');
+        toggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+        });
+
+          document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.getElementById('sidebar');
+    const btnShowSidebar = document.getElementById('show-sidebar');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    const dashboard = document.getElementById('dashboard');
+
+    // Quand on clique sur le bouton toggle pour cacher ou réafficher
+    toggleBtn.addEventListener('click', () => {
+        if (sidebar.classList.contains('collapsed')) {
+            // La sidebar est masquée, on la remonte
+            sidebar.classList.remove('collapsed');
+            btnShowSidebar.style.display = 'none';   // cache le bouton
+            dashboard.classList.remove('full-width');
+        } else {
+            // La sidebar est visible, on la cache
+            sidebar.classList.add('collapsed');
+            btnShowSidebar.style.display = 'block';  // montre le bouton pour la réafficher
+            dashboard.classList.add('full-width');
+        }
+    });
+
+    // Quand on clique sur le bouton pour faire réapparaître la sidebar
+    btnShowSidebar.addEventListener('click', () => {
+        sidebar.classList.remove('collapsed');
+        btnShowSidebar.style.display = 'none'; // cache le bouton
+        dashboard.classList.remove('full-width');
+    });
 });
 </script>
 {% endblock %}

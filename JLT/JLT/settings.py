@@ -173,3 +173,9 @@ DYNAMIC_DATATB = {
     # SLUG -> Import_PATH 
     'livraisons'  : "listings.models.Livraison",
 }
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}

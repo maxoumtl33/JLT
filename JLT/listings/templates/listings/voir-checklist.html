@@ -159,17 +159,19 @@
     /* Calendar section */
     .calendar-section {
         width: 100%;
-        max-width: 40%;
         background-color: #f9f9f9;
         padding: 20px;
         border-radius: 8px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        max-width: 40%; /* Restrict width on large screens */
+        transition: width 0.3s ease; /* Smooth transition */
     }
 
     .calendar {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
         grid-gap: 10px;
+        width: 100%;
     }
 
     .day {
@@ -287,77 +289,77 @@
         max-width: 200px; /* Set a maximum width */
         margin-right: 10px; /* Add some space to the right */
     }
-
-    /* Responsive adjustments */
-@media (max-width: 768px) {
+    @media (max-width: 1200px) {
     .agenda-container {
-        flex-direction: column;
+        flex-direction: column; /* Change layout to column */
+        align-items: stretch; /* Ensure children stretch to available width */
     }
-    .calendar-section, .checklist-section {
-        width: 100%;
-    }
-
-    .calendar {
-        grid-template-columns: repeat(7, 1fr); /* Maintain 7-day structure */
-        gap: 5px; /* Reduce spacing */
+    .calendar-section,
+    .checklist-section {
+        width: 100%; /* Allow elements to take full width */
+        max-width: none;
     }
 
-    .day-btn {
-        font-size: 0.8rem;
-        height: 30px; /* Smaller buttons */
-        padding: 5px;
-    }
-
-    .checklist-table {
-        font-size: 0.9rem; /* Smaller font in tables */
-    }
-
-    .checklist-table th, .checklist-table td {
-        padding: 6px;
-    }
 }
+    /* Responsive adjustments */
+    @media (max-width: 932px) {
+    .agenda-container {
+        flex-direction: column; /* Change layout to column */
+        align-items: stretch; /* Ensure children stretch to available width */
+    }
+    .calendar-section,
+    .checklist-section {
+        width: 100%; /* Allow elements to take full width */
+        max-width: none;
+    }
 
+}
+    @media (max-width: 768px) {
+    .agenda-container {
+        flex-direction: column; /* Change layout to column */
+        align-items: stretch; /* Ensure children stretch to available width */
+    }
+    .calendar-section,
+    .checklist-section {
+        width: 100%; /* Allow elements to take full width */
+        max-width: none;
+    }
+
+}
 @media (max-width: 480px) {
-    .calendar {
-        grid-template-columns: repeat(5, 1fr); /* Adjust to fit smaller screens */
+    .calendar-section {
+        grid-template-columns: repeat(2, 1fr); /* Adjust columns further for smallest screens */
+        gap: 5px; /* Smaller gap */
+    }
+    
+    /* Ensure both sections stack and adjust fully in mobile view */
+    .agenda-container {
+        align-items: stretch; /* Makes sure sections take full width even in the stack */
+    }
+    .calendar-section,
+    .checklist-section
+     {
+        width: 100%;
+        max-width: none;
     }
 
     .day-btn {
-        font-size: 0.7rem;
-        height: 28px;
-        padding: 4px;
+        font-size: 0.7rem; /* Smaller button font */
+        height: 28px; /* Shorter button height */
+        padding: 4px; /* Smaller padding */
     }
-
+    
     .agenda-title {
         font-size: 1.5rem; /* Smaller title font */
     }
-
+    
     .month-dropdown {
-        font-size: 0.9rem;
-        padding: 8px;
+        font-size: 0.9rem; /* Adjust dropdown font size */
+        padding: 8px; /* Adjust padding */
     }
 
-    /* Table scrolling for very small screens */
-    .checklist-section {
-        overflow-x: auto;
-    }
-
-    .checklist-table {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap; /* Prevent table wrapping */
-    }
-
-    .checklist-table tr {
-        display: inline-block; /* Stack rows for scrolling */
-        width: 100%;
-    }
-
-    .checklist-table th, .checklist-table td {
-        display: block;
-        text-align: left;
-    }
 }
+
 
 </style>
 
@@ -402,25 +404,47 @@
 
 <!-- Date Pickers with enhanced UI -->
 <div class="row g-3 mb-4 justify-content-center">
-  <div class="col-md-3">
-    <label for="checklist-date" class="form-label">Date des Checklists</label>
-    <input type="date" id="checklist-date" class="form-control form-control-lg" />
-  </div>
-  <div class="col-md-3">
-    <label for="livraison-date" class="form-label">Date des Livraisons</label>
-    <input type="date" id="livraison-date" class="form-control form-control-lg" />
-  </div>
-</div>
 
-<!-- Button Group with icons -->
-<div class="d-flex justify-content-center gap-3 mb-5">
-  <button onclick="printChecklists()" class="btn btn-info btn-lg d-flex align-items-center gap-2 shadow" title="Imprimer Checklists">
-    <i class="bi bi-printer"></i> Imprimer Checklists
-  </button>
-  <button onclick="printLivraisons()" class="btn btn-info btn-lg d-flex align-items-center gap-2 shadow" title="Imprimer Livraisons">
-    <i class="bi bi-printer"></i> Imprimer Livraisons
-  </button>
-</div>
+    <!-- Card 1: Date des Checklists -->
+    <div class="col-md-5">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <h5 class="card-title mb-0">Date des Checklists</h5>
+        </div>
+        <div class="card-body">
+          <label for="checklist-date" class="form-label">Sélectionnez la date</label>
+          <input type="date" id="checklist-date" class="form-control form-control-lg" />
+          <div class="boutton" style="margin-top: 10px;">
+          <button onclick="printChecklists()" class="btn btn-info btn-lg d-flex align-items-center gap-2 shadow" title="Imprimer Checklists">
+            <i class="bi bi-printer"></i> Imprimer Checklists
+          </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Card 2: Date des Livraisons -->
+    <div class="col-md-5">
+      <div class="card shadow">
+        <div class="card-header bg-success text-white">
+          <h5 class="card-title mb-0">Date des Livraisons</h5>
+        </div>
+        <div class="card-body">
+          <label for="livraison-date" class="form-label">Sélectionnez la date</label>
+          <input type="date" id="livraison-date" class="form-control form-control-lg" />
+          <div class="boutton" style="margin-top: 10px;">
+          <button onclick="printLivraisons()" class="btn btn-info btn-lg d-flex align-items-center gap-2 shadow" title="Imprimer Livraisons">
+      <i class="bi bi-printer"></i> Imprimer Livraisons
+    </button>
+    </div>
+        </div>
+      </div>
+    </div>
+  
+  </div>
+  
+
+  
 
     <br>
     <!-- Checklist Section -->
@@ -428,10 +452,7 @@
         {% for checklist in checklists %}
         {% if checklist.is_active %}
         <div class="page" data-checklist-date="{{ checklist.date|date:'Y-m-d' }}">
-        <div style="text-align:center; margin-top:10px;">
-            <img src="{{ checklist.qr_code_uri }}" alt="QR Code" width="150" />
-        </div>
-            <h2 style="text-align:center;">{{ checklist.date|date:"l d F Y" }}</h2>
+            <h2 style="text-align:center;"><img src="{{ checklist.qr_code_uri }}" alt="QR Code" width="150" /> {{ checklist.date|date:"l d F Y" }}</h2>
             <h1 style="text-align:center;">{{ checklist.name }}</h1>
             <p style="text-align:center;"><strong>{{ checklist.formatted_heure_livraison }}</strong></p>
             {% if checklist.notechecklist %}
@@ -465,7 +486,7 @@
 
 <h2 class="text-center mb-4">Liste Checklists</h2>
 
-<div class="agenda-container">
+<div class="agenda-container" id="agenda-container">
     <!-- Calendar Section -->
     <div id="calendar-section" class="calendar-section">
         <div class="month-selection">

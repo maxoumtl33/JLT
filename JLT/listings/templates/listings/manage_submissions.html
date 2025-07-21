@@ -1,85 +1,221 @@
 {% extends 'listings/base.html' %}
 {% load custom_filters %}
 {% block content %}
-<nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
-    <div class="container">
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <li>
-                    <a href="{% url 'conseiller_dashboard' %}" class="nav__link" style="margin-left: 20px;">
-                        <i class="fa-solid fa-display"></i>
-                        <span>Dashboard</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
-    </div>
-</nav>
-<div class="container">
-    <h2 class="mt-5 text-center">Statistique des Soumissions et Commandes</h2>
+<style>
+    body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s linear, color 0.3s linear;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #007BFF;
+            height: 100%;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar .sidebar-header {
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .sidebar a {
+            color: #fff;
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar a.active, .sidebar a:hover {
+            background-color: #0056b3;
+        }
+
+        .stats {
+            flex: 1;
+            padding: 20px;
+            background-color: #F0F2F5;
+            overflow-y: auto;
+            transition: margin-left 0.3s ease; /* Improves smoothness of layout change */
+        }
+
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            
+        }
+
+        .header .toggle-theme {
+            cursor: pointer;
+            color: #007BFF;
+        }
+        #stats.expanded {
+    margin-left: 0;
+}
+
+#stats.full-width {
+    transition: margin-left 0s;
+}
+
+.collapsed {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    width: 0; /* Ensure width collapses at the end */
+}
+
+.dark-mode {
+            background-color: #121212;
+            color: #e4e4e4;
+        }
+
+        .dark-mode .header, .dark-mode .card {
+            background-color: #1e1e1e;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .dark-mode .sidebar {
+            background-color: #1e1e1e;
+        }
+
+        .dark-mode .sidebar a {
+            color: #e4e4e4;
+        }
+
+        .dark-mode .sidebar a.active, .dark-mode .sidebar a:hover {
+            background-color: #333;
+            color: #fff;
+        }
+
+</style>
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header" style="margin-top: 100px;">Menu <button class="toggle-sidebar" id="sidebar-toggle"><i class="fas fa-bars"></i></button></div>
+    <a href="{% url 'conseiller_dashboard' %}" class="aref"><i class="fa-solid fa-desktop me-2"></i> Tableau de bord</a>
+    <a href="{% url 'journees-list' %}" class="aref"><i class="fa-solid fa-truck me-2"></i> Livraisons</a>
+      <a href="{% url 'creerchecklist' %}" class="aref"><i class="fas fa-list-check me-2"></i> Checklists</a>    
+      <a href="{% url 'calendarsub_view' %}">
+        <i class="fa-solid fa-file-contract me-2"></i>Soumissions
+                                            </a>
+    <a href="{% url 'submit_request' %}" target="_blank" class="aref" >
+      <i class="fa-solid fa-file-signature me-2"></i>Créer Soumission
+                              </a>
+                              <a class="aref" href="{% url 'etiquette-tente' %}" class="aref"><i class="fa-solid fa-print me-2"></i>Etiquette tente</a>
+  
+                              {% if user.username == "Audrey" or user.username == "Maxime" or user.username == "Roxanne" %}
+                              
+                               
+                                  
+                                          
+                                          <a href="{% url 'calendarsubcreate_view' %}" class="aref">
+                                            <i class="fa-solid fa-calendar-days me-2"></i>Suivi Soumissions
+                                        </a>
+                                     
+                                        
+                                    
+                                          
+                             
+                              {% endif %}
+                                
+    <button class="toggle-theme" id="theme-toggle" style="margin-top:10px;"><i class="fas fa-moon"></i> Thème</button>
+    <div style="margin-top:20px; font-size:14px; color:#ccc;">Utilisateur: {{ user.username }}</div>
+  </div>
+
+<div class="stats" id="stats">
+
+        <div class="header">
+      <h2>Statistique des Soumissions et Commandes</h2>
+          <button id="show-sidebar" style="display:none; position: fixed; top: 12%; left: 10px;">
+              <i class="fas fa-bars fa-2xl"></i>
+          </button>
+      <div class="user-info">
+          <button id="logoutBtn" style="border:none; background:none; cursor:pointer;"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
+      </div>
+  </div>
+  <br>
+  <br>
+  <br>
+  <br>
 
     <!-- Filter Section -->
-    <div class="mb-4">
-        <form method="GET" action="{% url 'manage_submissions' %}" class="form-inline">
-            <div class="form-group me-2">
-                <label for="conseiller" class="form-label">Conseiller:</label>
-                <select name="conseiller" id="conseiller" class="form-select me-2">
-                    <option value="">Tous les conseillers</option>
-                    {% for conseiller in conseillers %}
-                        <option value="{{ conseiller.id }}" {% if conseiller.id|stringformat:"s" == selected_conseiller %}selected{% endif %}>
-                            {{ conseiller.name }} ({{ conseiller.user.username }})
-                        </option>
-                    {% endfor %}
-                </select>
+    <div class="container my-4">
+        <form method="GET" action="{% url 'manage_submissions' %}" class="row g-3 align-items-end">
+      
+          <!-- Conseiller Selector -->
+          <div class="col-md-4">
+            <label for="conseiller" class="form-label fw-bold">Conseiller:</label>
+            <select name="conseiller" id="conseiller" class="form-select">
+              <option value="">Tous les conseillers</option>
+              {% for conseiller in conseillers %}
+                <option value="{{ conseiller.id }}" {% if conseiller.id|stringformat:"s" == selected_conseiller %}selected{% endif %}>
+                  {{ conseiller.name }} ({{ conseiller.user.username }})
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+      
+          <!-- Type de Soumission Selector -->
+          <div class="col-md-4">
+            <label for="submission_type" class="form-label fw-bold">Type de Soumission:</label>
+            <select name="submission_type" id="submission_type" class="form-select">
+              <option value="">Tous</option>
+              <option value="Soumission événement">Soumission événement</option>
+              <option value="Commande événement">Commande événement</option>
+              <option value="Soumission BAL/Buffet">Soumission BAL/Buffet</option>
+              <option value="Commande BAL/Buffet">Commande BAL/Buffet</option>
+            </select>
+          </div>
+      
+          <!-- Status Selector -->
+          <div class="col-md-4">
+            <label for="status" class="form-label fw-bold">Statut:</label>
+            <select name="status" id="status" class="form-select">
+              <option value="">Tous les statuts</option>
+              <option value="valide">Validé</option>
+              <option value="refuse">Refusé</option>
+              <option value="en_cours">En cours</option>
+              <option value="envoyé">Envoyé</option>
+            </select>
+          </div>
+      
+          <!-- Date Range Pickers -->
+          <div class="col-12 d-flex flex-wrap gap-3 mt-4">
+            <div class="flex-fill">
+              <label for="start_date" class="form-label fw-bold">Date de début:</label>
+              <input type="date" id="start_date" name="start_date" class="form-control" />
             </div>
-<br>
-
-            <div class="form-group me-2">
-                <label for="submission_type" class="form-label">Type de Soumission:</label>
-                <select name="submission_type" id="submission_type" class="form-select me-2">
-                    <option value="">Tous</option>
-                    <option value="Soumission événement">Soumission événement</option>
-                    <option value="Commande événement">Commande événement</option>
-                    <option value="Soumission BAL/Buffet">Soumission BAL/Buffet</option>
-                    <option value="Commande BAL/Buffet">Commande BAL/Buffet</option>
-                </select>
+            <div class="flex-fill">
+              <label for="end_date" class="form-label fw-bold">Date de fin:</label>
+              <input type="date" id="end_date" name="end_date" class="form-control" />
             </div>
-<br>
-            <div class="form-group me-2">
-                <label for="status" class="form-label">Status:</label>
-                <select name="status" id="status" class="form-select me-2">
-                    <option value="">Tous les statuts</option>
-                    <option value="valide">Validé</option>
-                    <option value="refuse">Refusé</option>
-                    <option value="en_cours">En cours</option>
-                    <option value="envoyé">Envoyé</option>
-                </select>
-            </div>
-<br>
-            <div class="mb-4">
-                <div class="row">
-                    <div class="col-auto me-2">
-                        <label for="start_date" class="form-label">Date de début:</label>
-                        <input type="date" id="start_date" name="start_date" class="form-control">
-                    </div>
-                    
-                    <div class="col-auto me-2">
-                        <label for="end_date" class="form-label">Date de fin:</label>
-                        <input type="date" id="end_date" name="end_date" class="form-control">
-                    </div>
-                </div>
-            </div>
-            
-            <br>
-        
-            <button type="submit" class="btn btn-primary">Filtrer</button>
-            <a href="{% url 'manage_submissions' %}" class="btn btn-primary" >Réinitialiser
-              </a>
+          </div>
+      
+          <!-- Buttons -->
+          <div class="col-12 d-flex gap-3 mt-4">
+            <button type="submit" class="btn btn-primary flex-fill">Filtrer</button>
+            <a href="{% url 'manage_submissions' %}" class="btn btn-outline-secondary flex-fill">Réinitialiser</a>
+          </div>
+      
         </form>
-    </div>
+      </div>
+      
 
     <!-- Display Submission Count -->
     <div class="mb-4">
@@ -90,8 +226,8 @@
 <br>
 <br>
 
-<form method="GET" action="{% url 'manage_submissions' %}" class="d-inline-block">
-    <div class="input-group mb-3" style="max-width: 400px; margin: 0 auto;">
+<form method="GET" action="{% url 'manage_submissions' %}" class="mb-3">
+    <div class="input-group mb-3" style="max-width: 400px;">
         <input type="text" name="search" class="form-control" placeholder="Rechercher une soumission" aria-label="Rechercher une soumission" value="{{ request.GET.search }}">
         <button class="btn btn-outline-secondary" type="submit">Rechercher</button>
     </div>
@@ -240,7 +376,39 @@
         // Save the generated PDF
         pdf.save(`soumissions_${submissionType.replace(/\s+/g, '_')}_${userName.replace(/\s+/g, '_')}.pdf`);
     }
+    const toggleBtn = document.getElementById('theme-toggle');
+        toggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+        });
 
+          document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.getElementById('sidebar');
+    const btnShowSidebar = document.getElementById('show-sidebar');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    const dashboard = document.getElementById('dashboard');
+
+    // Quand on clique sur le bouton toggle pour cacher ou réafficher
+    toggleBtn.addEventListener('click', () => {
+        if (sidebar.classList.contains('collapsed')) {
+            // La sidebar est masquée, on la remonte
+            sidebar.classList.remove('collapsed');
+            btnShowSidebar.style.display = 'none';   // cache le bouton
+            dashboard.classList.remove('full-width');
+        } else {
+            // La sidebar est visible, on la cache
+            sidebar.classList.add('collapsed');
+            btnShowSidebar.style.display = 'block';  // montre le bouton pour la réafficher
+            dashboard.classList.add('full-width');
+        }
+    });
+
+    // Quand on clique sur le bouton pour faire réapparaître la sidebar
+    btnShowSidebar.addEventListener('click', () => {
+        sidebar.classList.remove('collapsed');
+        btnShowSidebar.style.display = 'none'; // cache le bouton
+        dashboard.classList.remove('full-width');
+    });
+});
 </script>
 
 

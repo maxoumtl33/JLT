@@ -467,9 +467,106 @@ function filterLivraisonsChaudByJournee() {
 <style>
     /* Styling for the page */
     body {
-        font-family: Arial, sans-serif;
-        margin: 20px;
-    }
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s linear, color 0.3s linear;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #007BFF;
+            height: 100%;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar .sidebar-header {
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .sidebar a {
+            color: #fff;
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar a.active, .sidebar a:hover {
+            background-color: #0056b3;
+        }
+
+        .journeess {
+            flex: 1;
+            padding: 20px;
+            background-color: #F0F2F5;
+            overflow-y: auto;
+            transition: margin-left 0.3s ease; /* Improves smoothness of layout change */
+        }
+
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            
+        }
+
+        .header .toggle-theme {
+            cursor: pointer;
+            color: #007BFF;
+        }
+        #journeess.expanded {
+    margin-left: 0;
+}
+
+#journeess.full-width {
+    transition: margin-left 0s;
+}
+
+.collapsed {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    width: 0; /* Ensure width collapses at the end */
+}
+
+.dark-mode {
+            background-color: #121212;
+            color: #e4e4e4;
+        }
+
+        .dark-mode .header, .dark-mode .card {
+            background-color: #1e1e1e;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .dark-mode .sidebar {
+            background-color: #1e1e1e;
+        }
+
+        .dark-mode .sidebar a {
+            color: #e4e4e4;
+        }
+
+        .dark-mode .sidebar a.active, .dark-mode .sidebar a:hover {
+            background-color: #333;
+            color: #fff;
+        }
 
     h1 {
         color: #116EFD;
@@ -510,41 +607,56 @@ function filterLivraisonsChaudByJournee() {
   color: white; /* Active text color */
 }
 </style>
-<nav class="navbar navbar-expand-lg navbar-custom sticky-top">
-  <div class="container">
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-            <li class="nav-item">
-                <a href="{% url 'conseiller_dashboard' %}" class="nav__link" style="margin-left: 20px;">
-                  <i class="fa-solid fa-display"></i>
-                    <span>Dashboard</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{% url 'creerchecklist' %}" class="nav__link" style="margin-left: 20px; margin-right: 20px">
-                    <i class="fa-solid fa-cart-flatbed"></i>
-                    <span>Checklist</span>
-                </a>
-            </li>
-            <li class="nav__item">
-              <form action="{% url 'logout' %}" method="post">
-                {% csrf_token %}
-                <button type="submit" class="nav__link" style="color: red;">
-                  <i class="fa-solid fa-arrow-right-from-bracket"></i> Déconnexion
-                </button>
-              </form>
-            </li>
-        </ul>
-    </div>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header" style="margin-top: 100px;">Menu <button class="toggle-sidebar" id="sidebar-toggle"><i class="fas fa-bars"></i></button></div>
+    <a href="{% url 'conseiller_dashboard' %}" class="aref"><i class="fa-solid fa-desktop me-2"></i> Tableau de bord</a>
+    <a href="{% url 'creerchecklist' %}"><i class="fas fa-list-check me-2"></i> Checklists</a>
+    <a href="{% url 'calendarsub_view' %}">
+      <i class="fa-solid fa-file-contract me-2"></i>Soumissions
+                                          </a>
+                                          <a href="{% url 'submit_request' %}" target="_blank" class="aref" >
+                                            <i class="fa-solid fa-file-signature me-2"></i>Créer Soumission
+                                                                    </a>
+    
+                              <a class="aref" href="{% url 'etiquette-tente' %}"><i class="fa-solid fa-print me-2"></i>Etiquette tente</a>
+  
+                              {% if user.username == "Audrey" or user.username == "Maxime" or user.username == "Roxanne" %}
+                              
+                               
+                                  
+                                          <a href="{% url 'manage_submissions' %}">
+                                              <i class="fa-solid fa-file-pdf me-2"></i>PDF et Recherche Soumission
+                                          </a>
+                                     
+                                          <a href="{% url 'calendarsubcreate_view' %}">
+                                              <i class="fa-solid fa-calendar-days me-2"></i>Suivi Soumissions
+                                          </a>
+                                    
+                                          
+                             
+                              {% endif %}
+                                
+    <button class="toggle-theme" id="theme-toggle" style="margin-top:10px;"><i class="fas fa-moon"></i> Thème</button>
+    <div style="margin-top:20px; font-size:14px; color:#ccc;">Utilisateur: {{ user.username }}</div>
   </div>
-</nav>
-<div class="container mt-5">
-    <h1 class="text-center">Liste des Journées</h1>
-<br>
+<div class="journeess" id="journees">
+
+  <div class="header">
+        <h2>Liste des Journées de Livraison</h2>
+            <button id="show-sidebar" style="display:none; position: fixed; top: 12%; left: 10px;">
+                <i class="fas fa-bars fa-2xl"></i>
+            </button>
+        <div class="user-info">
+            <button id="logoutBtn" style="border:none; background:none; cursor:pointer;"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
+        </div>
+    </div>
+    <br>
+    <br>
+    <br>
+    <br>
+
     <!-- Date Filter Form -->
     <form method="get" class="d-flex justify-content-center mb-4">
         {{ form.date|add_class:"form-control" }} <!-- Use the add_class filter -->
@@ -606,6 +718,42 @@ function filterLivraisonsChaudByJournee() {
     </div>
 </div>
 
+<script>
+  const toggleBtn = document.getElementById('theme-toggle');
+        toggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+        });
+
+          document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.getElementById('sidebar');
+    const btnShowSidebar = document.getElementById('show-sidebar');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    const dashboard = document.getElementById('dashboard');
+
+    // Quand on clique sur le bouton toggle pour cacher ou réafficher
+    toggleBtn.addEventListener('click', () => {
+        if (sidebar.classList.contains('collapsed')) {
+            // La sidebar est masquée, on la remonte
+            sidebar.classList.remove('collapsed');
+            btnShowSidebar.style.display = 'none';   // cache le bouton
+            dashboard.classList.remove('full-width');
+        } else {
+            // La sidebar est visible, on la cache
+            sidebar.classList.add('collapsed');
+            btnShowSidebar.style.display = 'block';  // montre le bouton pour la réafficher
+            dashboard.classList.add('full-width');
+        }
+    });
+
+    // Quand on clique sur le bouton pour faire réapparaître la sidebar
+    btnShowSidebar.addEventListener('click', () => {
+        sidebar.classList.remove('collapsed');
+        btnShowSidebar.style.display = 'none'; // cache le bouton
+        dashboard.classList.remove('full-width');
+    });
+});
+
+</script>
 
 
 {% endif %}

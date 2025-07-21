@@ -745,87 +745,110 @@ def format_time_without_seconds(time_str):
 
 
 from django.shortcuts import render
+from django.http import JsonResponse
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET
+from django.utils import timezone
+from django.core.cache import cache
 from django.db.models import Sum
-from django.http import JsonResponse
-from datetime import date, datetime, timedelta
 import calendar
-from django.http import JsonResponse
+from datetime import date, datetime, timedelta
 
 @login_required
 @require_GET
 def voir_checklist(request):
-    today = date.today()  # Get today's date
+    today = date.today()
+
+    # Préchargement des checklists actives
     checklists = Checklist.objects.filter(is_active=True)
     
     encours = "en_cours"
-    today = date.today()
     valide = "valide"
     refuse = "refuse"
     tomorrow = timezone.now().date() + timedelta(days=1)
+
+    # Checklists du jour
     checklists_of_the_day = Checklist.objects.filter(date=today, is_active=True)
+
+    # Années pour le filtre
     current_year = today.year
     years = [year for year in range(current_year - 5, current_year + 1)]
-    livraisons = Livraison.objects.filter(recuperation=False)
 
+    # Livraison
+    livraisons = Livraison.objects.filter(recuperation=False)
     for livraison in livraisons:
         livraison.formatted_heure_livraison = format_time_without_seconds(livraison.heure_livraison)
 
-    selected_day = int(request.GET.get('day', 1))  # Default to the first day of the month if none selected
-    current_year = date.today().year
-    months = [(month, calendar.month_name[month]) for month in range(1, 13)]
+    # Séléction du mois
+    selected_day = int(request.GET.get('day', 1))
     selected_month = int(request.GET.get('month', today.month))
-    # Get the number of days in the selected month
     _, num_days_in_month = calendar.monthrange(current_year, selected_month)
-    days_in_month = [day for day in range(1, num_days_in_month + 1)]  # Adjust days in month
+    days_in_month = [day for day in range(1, num_days_in_month + 1)]
 
+    # Listes de noms de mois en français
     french_months = [
         "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
         "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
     ]
 
-    # Fetch checklists for the selected month
-    checklists = Checklist.objects.filter(date__month=int(selected_month))
+    # Requêtes pour checklists du mois
+    checklists = Checklist.objects.filter(date__month=selected_month)
 
+    # Logs
     change_logs = ChecklistItemChangeLog.objects.all().order_by('-timestamp')
     change_logs_checklist = ChecklistChangeLog.objects.all().order_by('-timestamp')
 
-    selected_date_str = request.GET.get('selected_datee')  # Get selected date from request
-
+    # Date sélectionnée
+    selected_date_str = request.GET.get('selected_datee')
     if selected_date_str:
-        selected_datee = datetime.strptime(selected_date_str, '%Y-%m-%d').date()  # Parse date
+        selected_datee = datetime.strptime(selected_date_str, '%Y-%m-%d').date()
     else:
-        selected_datee = tomorrow  # Default to today if no date is selected
+        selected_datee = tomorrow
 
-    checklist_item_totals = (
-        ChecklistItem.objects.filter(checklist__date=selected_datee, checklist__is_active=True)
-        .values('product__name')  # Assuming `Product` has the `name` field
-        .annotate(total_quantity=Sum('quantity'))
-        .filter(total_quantity__gt=0)
-          .order_by('product__category', 'product__name')  # Filter to only include items with quantity > 0
-    )
+    # --- Optimisation de la requête checklist_item_totals avec cache ---
+    cache_key = f'checklist_item_totals_{selected_datee}'
+    checklist_item_totals = cache.get(cache_key)
 
+    if checklist_item_totals is None:
+        # Si pas dans le cache, faire la requête
+        checklist_items_qs = ChecklistItem.objects.filter(
+            checklist__date=selected_datee,
+            checklist__is_active=True
+        ).select_related('product')  # Précharger 'product' pour éviter N+1
 
-    # Prepare the response data
-    # Prepare the response data
+        checklist_item_totals = (
+            checklist_items_qs
+            .values('product__name', 'product__category')
+            .annotate(total_quantity=Sum('quantity'))
+            .filter(total_quantity__gt=0)
+            .order_by('product__category', 'product__name')
+        )
+
+        # Stocker dans le cache (15 min par exemple)
+        cache.set(cache_key, list(checklist_item_totals), timeout=900)
+    else:
+        # Si en cache, convertir en liste
+        checklist_item_totals = checklist_item_totals
+
+    # Préparer les données JSON pour la requête AJAX
     data = {
-        'checklist_item_totals': list(checklist_item_totals),  # Convert queryset to a list
+        'checklist_item_totals': list(checklist_item_totals),
         'selected_datee': selected_datee,
     }
 
-    # Check if the request is an AJAX request
+    # Si requête AJAX, renvoyer JSON
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return JsonResponse(data)
 
+    # Générez les QR Codes
     for checklist in checklists:
         url = request.build_absolute_uri(reverse('checklist_en_cours', args=[checklist.id]))
         checklist.qr_code_uri = generate_qr_code_base64(url)
         checklist.formatted_heure_livraison = format_time_without_seconds(checklist.heure_livraison)
 
-
+    # Contexte pour le rendu
     context = {
-
         'checklists': checklists,
         'encours': encours,
         'valide': valide,
@@ -833,12 +856,11 @@ def voir_checklist(request):
         'today': today,
         'change_logs': change_logs,
         'change_logs_checklist': change_logs_checklist,
-        'today': today,
-        'months': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],  # Months as numbers
+                'months': list(range(1, 13)),  # Mois sous forme de liste
         'selected_month': selected_month,
         'days': days_in_month,
         'checklists_of_the_day': checklists_of_the_day,
-        'months': months,
+        'months': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
         'french_months': french_months,
         'selected_day': selected_day,
         'selected_date': date(current_year, selected_month, selected_day).strftime('%d %B %Y'),
@@ -848,6 +870,7 @@ def voir_checklist(request):
         'livraisons': livraisons,
     }
     return render(request, 'listings/voir-checklist.html', context)
+
 
 @login_required
 def view_items_by_category(request, category):
@@ -1015,8 +1038,8 @@ def checklistvoir_detail(request, checklist_id):
 @login_required
 def checklist_en_cours_view(request, checklist_id):
     checklist = get_object_or_404(Checklist, pk=checklist_id)
-    items_en_cours = ChecklistItem.objects.filter(checklist=checklist, status='en_cours')
-    sac_de_glace_items = items_en_cours.filter(product__name="Sac de glace")
+    items_en_cours = ChecklistItem.objects.filter(checklist=checklist, status='en_cours', quantity__gt=0)
+    sac_de_glace_items = ChecklistItem.objects.filter(checklist=checklist, product__name="SAC DE GLACE")
     context = {
         'checklist': checklist,
         'items_en_cours': items_en_cours,
