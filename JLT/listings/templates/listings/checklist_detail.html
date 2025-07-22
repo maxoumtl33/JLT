@@ -562,11 +562,13 @@ body {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 
 {{ existing_items|json_script:"existingItems" }}
+{{ product_quantities|json_script:"productQuantities" }}
   
 <script>
 // Variables globales
 var uploadDocumentUrl = "{% url 'upload_document' checklist.id %}";
 const existingItems = JSON.parse(document.getElementById('existingItems').textContent);
+const productQuantities = JSON.parse(document.getElementById('productQuantities').textContent);
 const cart = existingItems.map(e => ({
   id: e.id,  // ID de ChecklistItem
   product_id: e.product_id,
@@ -586,6 +588,21 @@ productModal.addEventListener('show.bs.modal', function (event) {
   document.getElementById('searchInput').value = '';
 });
 
+function updateAddButtons() {
+  document.querySelectorAll('.card').forEach(card => {
+    const btn = card.querySelector('button[data-product-id]');
+    const productId = parseInt(btn.dataset.productId);
+    const exists = cart.some(i => i.product_id === productId);
+    if (exists) {
+      btn.innerHTML = 'Ajouté'; // changer le texte
+      btn.disabled = true; // désactiver
+    } else {
+      btn.innerHTML = 'Ajouter'; // revenir à l'état initial si besoin
+      btn.disabled = false;
+    }
+  });
+}
+
 // Charger les produits d'une catégorie avec recherche
 function loadProducts(categoryName, searchTerm='') {
   fetch(`{% url 'get_products_by_category' %}?category=${encodeURIComponent(categoryName)}&search=${encodeURIComponent(searchTerm)}`)
@@ -597,23 +614,37 @@ function loadProducts(categoryName, searchTerm='') {
         listContainer.innerHTML = '<p class="text-muted">Aucun produit trouvé.</p>';
       } else {
         data.products.forEach(prod => {
+          const totalQty = productQuantities[prod.id] || 0;
+          const existingInCart = cart.some(i => i.product_id === prod.id);
+          const btnLabel = existingInCart ? 'Ajouté' : 'Ajouter';
+          const btnDisabled = existingInCart ? 'disabled' : '';
           const item = document.createElement('div');
-          item.className = 'list-group-item';
+          item.className = 'card shadow-sm rounded mb-3';
           item.innerHTML = `
-            <div class="d-flex justify-content-between align-items-center flex-column">
-              <div class="w-100 text-center mb-2">
-                <h6>${prod.name}</h6>
-              </div>
-              <div class="d-flex align-items-center w-100 gap-2 justify-content-center">
-                <input type="number" min="1" class="form-control form-control-sm" value="1" style="width:60px" data-product-id="${prod.id}">
-                <input type="text" placeholder="Commentaire" class="form-control form-control-sm" style="width:150px" data-product-id="${prod.id}" data-commentaire="">
-                <button class="btn btn-sm btn-success" onclick="addProductToCart(${prod.id}, '${prod.name}', this)">Ajouter</button>
-              </div>
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="mb-0 text-truncate">
+                      ${prod.name} <span class="text-muted small">(${getProductQuantityInCart(prod.id) || 0} / ${totalQty} en stock)</span>
+                    </h6>
+                    <button class="btn btn-sm btn-outline-primary" ${btnDisabled} onclick="addProductToCart(${prod.id}, '${prod.name}', this)" data-product-id="${prod.id}">
+                      <i class="fas fa-plus me-1"></i> ${btnLabel}
+                    </button>
+                </div>
+                <div class="d-flex gap-2 align-items-center">
+                    <input type="number" min="1" class="form-control form-control-sm" placeholder="Qty" style="width:80px" data-product-id="${prod.id}">
+                    <input type="text" placeholder="Commentaire" class="form-control form-control-sm" style="flex:1;" data-product-id="${prod.id}" data-commentaire="">
+                </div>
             </div>`;
           listContainer.appendChild(item);
         });
+        updateAddButtons(); // Mettre à jour si nécessaire
       }
     });
+}
+// Fonction pour obtenir la quantité si elle existe dans le panier
+function getProductQuantityInCart(productId) {
+  const item = cart.find(i => i.product_id === productId);
+  return item ? item.quantity : 0;
 }
 
 // Recherche en temps réel
@@ -623,19 +654,20 @@ document.getElementById('searchInput').addEventListener('input', function() {
 });
 
 // Ajouter un produit au panier
+// Fonction pour ajouter un produit au panier en prenant en compte la quantité et commentaire
 function addProductToCart(productId, productName, btn) {
-  const parentDiv = btn.closest('.d-flex');
-  const quantityInput = parentDiv.querySelector('input[type="number"]');
-  const commentInput = parentDiv.querySelector('input[type="text"][placeholder="Commentaire"]');
-  const quantity = parseInt(quantityInput.value);
+  const parent = btn.closest('.card-body');
+  const qtyInput = parent.querySelector('input[type="number"]');
+  const commentInput = parent.querySelector('input[type="text"]');
+
+  const quantity = parseInt(qtyInput.value);
   const commentaire = commentInput.value;
 
-  if (quantity <= 0 || isNaN(quantity)) {
-    alert('Entrez une quantité valide.');
+  if (isNaN(quantity) || quantity <= 0) {
+    alert('Entrez une quantité valable.');
     return;
   }
 
-  // Appel API pour ajouter dans le panier, en incluant le commentaire
   fetch(`{% url 'add_products_to_checklist' checklist.id %}`, {
     method: 'POST',
     headers: {
@@ -648,21 +680,25 @@ function addProductToCart(productId, productName, btn) {
   }).then(res => res.json())
     .then(data => {
       if (data.status === 'success') {
-        // Mettre à jour le panier si besoin
-        const existingItemIdx = cart.findIndex(i => i.product_id === productId);
-        if (existingItemIdx !== -1) {
-          cart[existingItemIdx].quantity = quantity;
-          cart[existingItemIdx].commentaire = commentaire; // mets à jour le commentaire
+        // Mettre à jour le bouton cliqué
+        btn.innerHTML = 'Ajouté';
+        btn.disabled = true;
+
+        // Mettre à jour la liste du panier
+        const index = cart.findIndex(i => i.product_id === productId);
+        if (index !== -1) {
+          cart[index].quantity = quantity;
+          cart[index].commentaire = commentaire;
         } else {
           cart.push({ product_id: productId, name: productName, quantity: quantity, commentaire: commentaire });
         }
+        updateAddButtons(); // updater tous les boutons si besoin
         renderCart();
       } else {
         alert('Erreur lors de l\'ajout.');
       }
     });
 }
-
 // Modifier la quantité dans le panier
 function updateCartItemQuantity(index, newQuantity) {
   if (newQuantity <= 0 || isNaN(newQuantity)) {

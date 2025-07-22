@@ -246,6 +246,8 @@ def checklist_products(request, checklist_id):
     recup_photos = ChecklistRecupPhoto.objects.filter(checklist=checklist)
     md_photos = ChecklistMDPhoto.objects.filter(checklist=checklist)
     existing_items = list(ChecklistItem.objects.filter(checklist=checklist).values('id', 'product_id', 'quantity', 'product__name'))
+    products = Product.objects.all()
+    product_quantities = {product.id: product.quantity for product in products}
     special_categories = ["ALCOOL FORT", "BIERES", "SANS ALCOOL", "VINS"]
     category_icons = {
     'ALCOOL FORT': 'fa-bottle-water',
@@ -351,6 +353,7 @@ def checklist_products(request, checklist_id):
         'category_icons': category_icons,
         'products_by_category': products_by_category,
         'formbis': formbis,
+        'product_quantities': product_quantities,
         'document_formset': document_formset,
         'commentairemd_form': commentairemd_form,
         'checklist_documents': checklist_documents,

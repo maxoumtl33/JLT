@@ -867,14 +867,15 @@ $('#searchEnCoursItemsBtn').on('click', function() {
                 font-size: 40px;
                 margin: 0;
                 padding: 0;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
             }
-           
-            .page {
+            /* Chaque livraison sur sa propre page */
+            .livraison-page {
                 page-break-after: always;
                 width: 100%;
+            }
+            /* Supprimer le saut de page après la dernière livraison */
+            .livraison-page:last-child {
+                page-break-after: auto;
             }
         }
     `);
@@ -888,7 +889,6 @@ $('#searchEnCoursItemsBtn').on('click', function() {
     printWindow.document.close();
     printWindow.print();
 }
-
     function filterByDate(containerSelector, attribute, selectedDate) {
         const items = document.querySelectorAll(containerSelector);
         return Array.from(items).filter(item => item.getAttribute(attribute) === selectedDate);
@@ -920,23 +920,26 @@ $('#searchEnCoursItemsBtn').on('click', function() {
 }
 
 
-    function printLivraisons() {
-        const selectedDate = document.getElementById('livraison-date').value;
-        if (!selectedDate) {
-            alert('Veuillez sélectionner une date pour les livraisons.');
-            return;
-        }
-    
-        const filteredItems = filterByDate('.livraison-page', 'data-livraison-date', selectedDate);
-        if (filteredItems.length === 0) {
-            alert('Aucune livraison trouvée pour la date sélectionnée.');
-            return;
-        }
-    
-        const content = filteredItems.map(item => item.outerHTML).join('');
-        openPrintWindow(content, 'Imprimer les Livraisons');
+function printLivraisons() {
+    const selectedDate = document.getElementById('livraison-date').value;
+    if (!selectedDate) {
+        alert('Veuillez sélectionner une date pour les livraisons.');
+        return;
     }
-    
+
+    const filteredItems = filterByDate('.livraison-page', 'data-livraison-date', selectedDate);
+    if (filteredItems.length === 0) {
+        alert('Aucune livraison trouvée pour la date sélectionnée.');
+        return;
+    }
+
+    // Ajoute la classe 'livraison-page' à chaque élément pour appliquer la CSS
+    const content = filteredItems.map(item => {
+        return `<div class="livraison-page">${item.outerHTML}</div>`;
+    }).join('');
+
+    openPrintWindow(content, 'Imprimer les Livraisons');
+}
     
     
     
