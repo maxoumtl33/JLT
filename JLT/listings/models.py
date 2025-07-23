@@ -677,10 +677,11 @@ class Submission(models.Model):
         blank=True
     )
     refusal_comment = models.TextField(null=True, blank=True)
+    commentaire_boissons = models.TextField(blank=True, null=True)
     commentaire_items = models.TextField(null=True, blank=True)
-    commentaire_boissons = models.TextField(null=True, blank=True)
     document = models.FileField(upload_to='listings/media/commandesdetail', null=True, blank=True)
     event_postcode = models.TextField(null=True, blank=True)
+    billing_postcode = models.TextField(null=True, blank=True)
     company_name = models.CharField(max_length=100, null=True, blank=True)  # Company name
     event_location = models.CharField(max_length=200, null=True, blank=True)  # Lieu événement
     contact_person = models.CharField(max_length=100, null=True, blank=True)  # Contact sur place
@@ -694,6 +695,9 @@ class Submission(models.Model):
     ascenseur = models.BooleanField(default=False)
     carte_dock = models.BooleanField(default=False)
     avec_service = models.BooleanField(default=False)
+    avec_service_md = models.BooleanField(default=False)
+    language = models.TextField(null=True, blank=True)
+    location_materiel = models.BooleanField(default=False)
     commentaire = models.CharField(max_length=200, null=True, blank=True) 
     payment_mode = models.CharField(max_length=200, null=True, blank=True) 
     client = models.ForeignKey(Client, null=True, blank=True, on_delete=models.SET_NULL, related_name='submissions_client')

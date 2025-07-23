@@ -208,20 +208,7 @@ body {
             </div>
           </div>
         </div>
-                <!-- Geocode Card -->
-                <div class="col-md-4">
-                    <div class="card h-100">
-                        <div class="card-body d-flex flex-column justify-content-between">
-                            <h5 class="card-title"><i class="fas fa-map-marker-alt"></i> Géocodage</h5>
-                            <p class="card-text">Géocodez toutes les livraisons pour obtenir leurs coordonnées.</p>
-                            <form id="geocode-form" method="get" action="{% url 'geocode_all_livraisons' %}">
-                                <button type="button" class="btn btn-primary w-100" onclick="triggerGeocode()">
-                                    <i class="fas fa-globe"></i> Géocoder
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+                
         
                 <!-- Create Journee Card -->
                 <div class="col-md-4">
@@ -251,7 +238,20 @@ body {
                         </div>
                     </div>
                 </div>
-        
+                <!-- Geocode Card -->
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body d-flex flex-column justify-content-between">
+                            <h5 class="card-title"><i class="fas fa-map-marker-alt"></i> Géocodage</h5>
+                            <p class="card-text">Géocodez toutes les livraisons pour obtenir leurs coordonnées.</p>
+                            <form id="geocode-form" method="get" action="{% url 'geocode_all_livraisons' %}">
+                                <button type="button" class="btn btn-primary w-100" onclick="triggerGeocode()">
+                                    <i class="fas fa-globe"></i> Géocoder
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
                 <!-- Associer Checklist Card -->
                 <div class="col-md-4">
                     <div class="card h-100">

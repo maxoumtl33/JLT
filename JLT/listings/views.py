@@ -196,7 +196,12 @@ def submission_detail(request, submission_id):
     key = settings.GOOGLE_API_KEY
     all_menus = Menu.objects.all()
     all_payment_modes = PaymentMode.objects.all()
+    # Récupérer uniquement la catégorie "SANS ALCOOL"
+    category_sans_alcool = Category.objects.filter(name="SANS ALCOOL").prefetch_related('product_set').first()
 
+    categories = []
+    if category_sans_alcool:
+        categories.append(category_sans_alcool)
     all_delivery_modes = DeliveryMode.objects.all()
     menus = Menu.objects.all()
     # Build a dict: menu.id -> list of delivery mode ids
@@ -208,6 +213,7 @@ def submission_detail(request, submission_id):
     context = {
         'submission': submission,
         'menus': menus,
+        'categories': categories,
         'menus_with_modes_ids': menus_with_modes_ids,
         'all_menus' : all_menus,
         'all_delivery_modes' : all_delivery_modes,
@@ -6761,7 +6767,10 @@ def update_submission(request, submission_id):
 
             submission.company_name = request.POST.get('company_name', '').strip()
             submission.event_postcode = request.POST.get('postal_code', '').strip()
+            submission.billing_postcode = request.POST.get('postal_code_billing', '').strip()
             ordered_by = request.POST.get('ordered_by', '').strip()
+            
+
 
             # Vérifier si la valeur est "None" (chaîne)
             if ordered_by.lower() == 'none':
@@ -6769,7 +6778,10 @@ def update_submission(request, submission_id):
                 
             # Ensuite, enregistrer
             submission.ordered_by = ordered_by
-
+            submission.language = request.POST.get('language', '').strip()
+            submission.location_materiel = request.POST.get('location_materiel', '').strip()
+            submission.avec_service = request.POST.get('avec_service', '').strip()
+            submission.avec_service_md = request.POST.get('avec_service_md', '').strip()
             submission.event_location = request.POST.get('event_location', '').strip()
             submission.contact_person = request.POST.get('contact_person', '').strip()
             submission.payment_mode = request.POST.get('payment_mode', '').strip()
@@ -6789,7 +6801,9 @@ def update_submission(request, submission_id):
             submission.escalier = request.POST.get('escalier', '').strip()
             submission.ascenseur = request.POST.get('ascenseur', '').strip()
             submission.carte_dock = request.POST.get('carte_dock', '').strip()
-            submission.avec_service = request.POST.get('avec_service', '').strip()
+            submission.delivery_time = request.POST.get('delivery_time_select', '').strip()
+            submission.event_time = request.POST.get('event_time_select', '').strip()
+            submission.carte_dock = request.POST.get('carte_dock', '').strip()
 
 
             commentaire_items = request.POST.get('commentaire_items', '').strip()
@@ -6828,17 +6842,6 @@ def update_submission(request, submission_id):
                 submission.guest_count = int(guest_str)
             except ValueError:
                 submission.guest_count = None
-
-            # Time fields with validation
-            event_time_str = request.POST.get('event_time', '').strip()
-            if event_time_str and not validate_time_format(event_time_str):
-                return JsonResponse({'success': False, 'error': "Le format de l'heure de l'événement est invalide."}, status=400)
-            submission.event_time = event_time_str or None
-
-            delivery_time_str = request.POST.get('delivery_time', '').strip()
-            if delivery_time_str and not validate_time_format(delivery_time_str):
-                return JsonResponse({'success': False, 'error': "Le format de l'heure de livraison est invalide."}, status=400)
-            submission.delivery_time = delivery_time_str or None
 
             # Save main submission data
             submission.save()
