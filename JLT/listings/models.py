@@ -416,6 +416,7 @@ class Category(models.Model):
         ('VINS','VINS'),
         ('SANS ALCOOL','SANS ALCOOL'),
         ('CFCDN', 'CFCDN'),
+        ('SOUMISSIONS', 'SOUMISSIONS'),
     )
     name = models.CharField(max_length=100, choices=choices, unique=True)
 
@@ -787,7 +788,7 @@ class MenuSubmission(models.Model):
     menu = models.ForeignKey(Menu, on_delete=models.CASCADE)
     allergies = models.TextField(null=True, blank=True)  # Field to save allergies
     service_count = models.CharField(max_length=100, null=True, blank=True)  # Nombre de service (as string)
-    delivery_mode = models.ForeignKey(DeliveryMode, on_delete=models.SET_NULL, null=True, blank=True)  # Link to DeliveryMode
+    delivery_mode = models.ForeignKey(DeliveryMode, on_delete=models.SET_NULL, null=True, blank=True, default ="Valeur non définie")  # Link to DeliveryMode
     commentaire_menu = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):

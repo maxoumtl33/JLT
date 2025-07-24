@@ -198,10 +198,16 @@ def submission_detail(request, submission_id):
     all_payment_modes = PaymentMode.objects.all()
     # Récupérer uniquement la catégorie "SANS ALCOOL"
     category_sans_alcool = Category.objects.filter(name="SANS ALCOOL").prefetch_related('product_set').first()
+    category_submission = Category.objects.filter(name="SOUMISSIONS").prefetch_related('product_set').first()
 
     categories = []
     if category_sans_alcool:
         categories.append(category_sans_alcool)
+
+    categoriess = []
+    if category_submission:
+        categoriess.append(category_submission)
+
     all_delivery_modes = DeliveryMode.objects.all()
     menus = Menu.objects.all()
     # Build a dict: menu.id -> list of delivery mode ids
@@ -214,6 +220,7 @@ def submission_detail(request, submission_id):
         'submission': submission,
         'menus': menus,
         'categories': categories,
+        'categoriess': categoriess,
         'menus_with_modes_ids': menus_with_modes_ids,
         'all_menus' : all_menus,
         'all_delivery_modes' : all_delivery_modes,
@@ -6815,7 +6822,7 @@ def update_submission(request, submission_id):
             submission.carte_dock = request.POST.get('carte_dock', '').strip()
 
 
-            commentaire_items = request.POST.get('commentaire_items', '').strip()
+            commentaire_items = request.POST.get('commentaire_matos', '').strip()
             # Vérifier si la valeur est "None" (chaîne)
             if commentaire_items.lower() == 'none':
                 commentaire_items = ''

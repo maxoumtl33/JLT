@@ -724,64 +724,126 @@ body {
             <div class="row">
                 <div class="col-md-12">
                     <p><i class="fa-solid fa-comment info-icon"></i><strong style="{% if submission.commentaire %}border-bottom: 3px solid lightgreen; padding-bottom: 2px;{% endif %}">Commentaire Général:</strong>
-                        <span class="view-section">{{ submission.commentaire|default_if_none:'' }}</span>
-                        <input type="text" class="form-control edit-section d-none" name="commentaire" value="{{ submission.commentaire }}" />
+                        <span class="view-section" style="font-size: 1.4rem;">{{ submission.commentaire|default_if_none:'' }}</span>
+                        <input type="text" class="form-control form-control edit-section d-none" name="commentaire" value="{{ submission.commentaire }}">
                     </p>
                 </div>
+             <!-- Bouton pour ouvrir modal Boissons -->
+<button id="btnOpenAddBoissonsModal" class="btn btn-primary d-none" style="margin-top:10px; width: 15%; margin-bottom: 10px;">Ajouter Boisson</button>
 
-                <button id="btnOpenAddBoissonsModal" class="btn btn-primary d-none" style="margin-top:10px; width: 15%; margin-bottom: 10px;">Ajouter Boisson</button>
+{% if submission.commentaire_boissons %}
+<div class="col-md-12">
+    <p><i class="fa-solid fa-bottle-water info-icon"></i>
+    <strong style="{% if submission.commentaire_boissons %}border-bottom: 3px solid lightgreen; padding-bottom: 2px;{% endif %}">Boissons:</strong>
+    <span class="view-section">{{ submission.commentaire_boissons|default_if_none:'' }}</span></p>
+</div>
+{% endif %}
+<input type="text" class="form-control edit-section d-none" id="commentaireBoissons" name="commentaire_boissons" rows="3" value="{{ submission.commentaire_boissons|default_if_none:'' }}" />
 
-                {% if submission.commentaire_boissons %}
-                <div class="col-md-12">
-                    <p><i class="fa-solid fa-bottle-water info-icon"></i><strong style="{% if submission.commentaire_boissons %}border-bottom: 3px solid lightgreen; padding-bottom: 2px;{% endif %}">Boissons:</strong>
-                        <span class="view-section">{{ submission.commentaire_boissons|default_if_none:'' }}</span>
-                    </p>
-                </div>
-                {% endif %}
-                <input type="text" class="form-control edit-section d-none" id="commentaireBoissons" name="commentaire_boissons" rows="3" value="{{ submission.commentaire_boissons|default_if_none:'' }}" />
-    
+<!-- Bouton pour ouvrir modal Produits -->
+<button id="btnOpenAddMatosModal" class="btn btn-primary d-none" style="margin-top:10px; width: 15%; margin-bottom: 10px;">Ajouter Produits</button>
 
+{% if submission.commentaire_items %}
+<div class="col-md-12">
+    <p><i class="fa-solid fa-toolbox info-icon"></i>
+    <strong style="{% if submission.commentaire_items %}border-bottom: 3px solid lightgreen; padding-bottom: 2px;{% endif %}">Produits:</strong>
+    <span class="view-section">{{ submission.commentaire_items|default_if_none:'' }}</span></p>
+</div>
+{% endif %}
+<input type="text" class="form-control edit-section d-none" id="commentaireMatos" name="commentaire_matos" rows="3" value="{{ submission.commentaire_items|default_if_none:'' }}" />
 
-                <!-- Modal pour ajouter boissons -->
+<!-- Modal pour ajouter boissons -->
 <div class="modal fade" id="addBoissonsModal" tabindex="-1" aria-labelledby="addBoissonsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addBoissonsModalLabel">Sélectionner les boissons</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body">
+        <form id="boissonSelectionForm">
+          <div class="row">
+            <!-- Barre de recherche unique -->
+            <input type="text" class="form-control mb-3" placeholder="Rechercher une boisson..." oninput="filterItems('boissons', this.value)">
+
+            {% for category in categories %}
+            <div class="category-group" data-category="{{ category.id }}">
+            {% for product in category.product_set.all %}
+            <div class="form-check product-item" data-product-name="{{ product.name|lower }}">
+                <input class="form-check-input" type="checkbox" id="boisson-{{ product.id }}" 
+                    data-product-id="{{ product.id }}" data-product-name="{{ product.name }}" 
+                    data-current-qty="{{ product.quantity }}">
+                <label class="form-check-label" for="boisson-{{ product.id }}">
+                {{ product.name }} (Quantité Disponible : {{ product.quantity }})
+                </label>
+                <input type="number" class="form-control quantity-input d-none" min="1" value="1" style="width:auto; display: none; margin-left:10px;">
+            </div>
+            {% endfor %}
+            </div>
+            {% endfor %}
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+        <button type="button" class="btn btn-primary" id="saveBoissonsBtn">Sauvegarder</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal pour ajouter produits -->
+<div class="modal fade" id="addMatosModal" tabindex="-1" aria-labelledby="addMatosModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
+        <!-- En-tête -->
         <div class="modal-header">
-          <h5 class="modal-title" id="addBoissonsModalLabel">Sélectionner les boissons</h5>
+          <h5 class="modal-title" id="addMatosModalLabel">Sélectionner les produits</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
         </div>
+  
+        <!-- Corps de la modal -->
         <div class="modal-body">
-          <form id="boissonSelectionForm">
+          <form id="matosSelectionForm">
             <div class="row">
-              {% for category in categories %}
+  
+              <!-- Recherchez ici un produit -->
               <div class="col-md-12 mb-3">
-                <input type="text" id="searchBoissons" class="form-control" placeholder="Rechercher une boisson...">
-                <br>
-                {% for product in category.product_set.all %}
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" 
-                         id="boisson-{{ product.id }}" 
-                         data-product-id="{{ product.id }}" data-product-name="{{ product.name }}" 
-                         data-current-qty="{{ product.quantity }}" />
-                  <label class="form-check-label" for="boisson-{{ product.id }}">
-                    {{ product.name }} (Quantité Disponible : {{ product.quantity }})
-                  </label>
-                  <input type="number" class="form-control quantity-input d-none" min="1" value="1" style="width:auto; display: none; margin-left:10px;">
-                </div>
-                {% endfor %}
+                <!-- Barre de recherche unique -->
+<input type="text" class="form-control mb-3" placeholder="Rechercher un produit..." oninput="filterItems('matos', this.value)">
+
+{% for category in categoriess %}
+<div class="category-group" data-category="{{ category.id }}">
+
+  {% for product in category.product_set.all %}
+  <div class="form-check product-item" data-product-name="{{ product.name|lower }}">
+    <input class="form-check-input" type="checkbox" id="boisson-{{ product.id }}" 
+           data-product-id="{{ product.id }}" data-product-name="{{ product.name }}" 
+           data-current-qty="{{ product.quantity }}">
+    <label class="form-check-label" for="boisson-{{ product.id }}">
+      {{ product.name }} (Quantité Disponible : {{ product.quantity }})
+    </label>
+    <input type="number" class="form-control quantity-input d-none" min="1" value="1" style="width:auto; display: none; margin-left:10px;">
+  </div>
+  {% endfor %}
+</div>
+{% endfor %}
+
               </div>
-              {% endfor %}
             </div>
           </form>
         </div>
+  
+        <!-- Pied de la modal -->
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-          <button type="button" class="btn btn-primary" id="saveBoissonsSelection">Sauvegarder</button>
+          <button type="button" class="btn btn-primary" id="saveMatosBtn">Sauvegarder</button>
         </div>
       </div>
     </div>
   </div>
   
+
 
                  
 
@@ -837,8 +899,8 @@ document.getElementById('modifyButton').addEventListener('click', function() {
     this.classList.toggle('d-none');
     document.getElementById('saveButton').classList.toggle('d-none');
     document.getElementById('btnAddMenu').classList.toggle('d-none');
-    document.getElementById('boissons-checkboxes').classList.toggle('d-none');
-    document.getElementById('produits-checkboxes').classList.toggle('d-none');
+    document.getElementById('btnOpenAddBoissonsModal').classList.toggle('d-none');
+    document.getElementById('btnOpenAddMatosModal').classList.toggle('d-none');
 });
 
 
@@ -965,6 +1027,7 @@ document.getElementById('btnAddMenu').addEventListener('click', function() {
             <div class="view-section d-none"></div>
             <div class="edit-section" id="edit-new-delivery-${newMenuCounter}">
                 <select name="delivery_modes_new_${newMenuCounter}" class="form-control">
+                    
                     {% for mode in all_delivery_modes %}
                     <option value="{{ mode.id }}">{{ mode.name }}</option>
                     {% endfor %}
@@ -1043,56 +1106,84 @@ function initAutocomplete() {
     }
 }
 
-// En mode édition, rendre le bouton visible
-document.getElementById('modifyButton').addEventListener('click', () => {
-  // Existing toggle...
-  document.getElementById('btnOpenAddBoissonsModal').classList.toggle('d-none');
-});
 
+
+// Fonction pour ouvrir le modal Boissons
 document.getElementById('btnOpenAddBoissonsModal').addEventListener('click', () => {
   const modalEl = document.getElementById('addBoissonsModal');
   const modal = new bootstrap.Modal(modalEl);
   modal.show();
 });
 
-document.getElementById('saveBoissonsSelection').addEventListener('click', () => {
+// Fonction pour ouvrir le modal Produits (Matos)
+document.getElementById('btnOpenAddMatosModal').addEventListener('click', () => {
+  const modalEl = document.getElementById('addMatosModal');
+  const modal = new bootstrap.Modal(modalEl);
+  modal.show();
+});
+
+// Fonction pour enregistrer la sélection des boissons
+document.getElementById('saveBoissonsBtn').addEventListener('click', () => {
   const selectedProducts = [];
-  document.querySelectorAll('.form-check input[type="checkbox"]:checked').forEach(checkbox => {
+  document.querySelectorAll('#addBoissonsModal .form-check input[type="checkbox"]:checked').forEach(checkbox => {
     const productId = checkbox.dataset.productId;
     const productName = checkbox.dataset.productName;
-    const qtyInput = checkbox.parentElement.querySelector('.quantity-input');
+    const parentDiv = checkbox.parentElement;
+    const qtyInput = parentDiv.querySelector('.quantity-input');
     let qty = 1;
     if (qtyInput && !qtyInput.classList.contains('d-none')) {
       qty = qtyInput.value;
     }
     selectedProducts.push({ id: productId, name: productName, quantity: qty });
   });
-  // Construire la chaîne pour la commentée, ou un JSON
+  
+  // Construire la chaîne ou un JSON selon votre besoin
   const commentStr = selectedProducts.map(p => `${p.name} x ${p.quantity}`).join(', ');
   document.getElementById('commentaireBoissons').value = commentStr;
   
-    // Fermer la modale
-    const modalInstance = bootstrap.Modal.getInstance(document.getElementById('addBoissonsModal'));
+  // Fermer la modale
+  const modalInstance = bootstrap.Modal.getInstance(document.getElementById('addBoissonsModal'));
   modalInstance.hide();
 });
 
-// Lorsqu'une checkbox est changée
-document.querySelectorAll('.form-check input[type="checkbox"]').forEach(checkbox => {
+// Fonction pour enregistrer la sélection des produits
+document.getElementById('saveMatosBtn').addEventListener('click', () => {
+  const selectedItems = [];
+  document.querySelectorAll('#addMatosModal .form-check input[type="checkbox"]:checked').forEach(checkbox => {
+    const productId = checkbox.dataset.productId;
+    const productName = checkbox.dataset.productName;
+    const parentDiv = checkbox.parentElement;
+    const qtyInput = parentDiv.querySelector('.quantity-input');
+    let qty = 1;
+    if (qtyInput && !qtyInput.classList.contains('d-none')) {
+      qty = qtyInput.value;
+    }
+    selectedItems.push({ id: productId, name: productName, quantity: qty });
+  });
+  
+  // Construire la chaîne ou JSON pour votre champ
+  const commentStr = selectedItems.map(p => `${p.name} x ${p.quantity}`).join(', ');
+  document.getElementById('commentaireMatos').value = commentStr;
+  
+  // Fermer la modale
+  const modalInstance = bootstrap.Modal.getInstance(document.getElementById('addMatosModal'));
+  modalInstance.hide();
+});
+
+// Gestion du toggle de visibilité du champ quantité pour les produits
+document.querySelectorAll('#addBoissonsModal .form-check input[type="checkbox"], #addMatosModal .form-check input[type="checkbox"]').forEach(checkbox => {
   checkbox.addEventListener('change', () => {
     const parentDiv = checkbox.parentElement;
     const qtyInput = parentDiv.querySelector('.quantity-input');
     if (checkbox.checked) {
-      // Si coche, afficher la quantité
       if (qtyInput) {
         qtyInput.classList.remove('d-none');
         qtyInput.style.display = 'inline-block';
-        // Mettre une valeur par défaut si vide
         if (!qtyInput.value || qtyInput.value === '0') {
           qtyInput.value = 1;
         }
       }
     } else {
-      // Si décoche, masquer la quantité
       if (qtyInput) {
         qtyInput.classList.add('d-none');
         qtyInput.style.display = 'none';
@@ -1100,7 +1191,6 @@ document.querySelectorAll('.form-check input[type="checkbox"]').forEach(checkbox
     }
   });
 });
-
 
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -1218,18 +1308,7 @@ $('#modifyButton').on('click', function() {
     activateTimeSelects();
 });
 
-// Fonction pour filtrer les boissons selon la recherche
-$('#searchBoissons').on('keyup', function() {
-  const query = $(this).val().toLowerCase();
-  $('#addBoissonsModal .form-check').each(function() {
-    const labelText = $(this).find('label').text().toLowerCase();
-    if (labelText.includes(query)) {
-      $(this).show();
-    } else {
-      $(this).hide();
-    }
-  });
-});
+
 
 const toggleBtn = document.getElementById('theme-toggle');
         toggleBtn.addEventListener('click', () => {
@@ -1264,6 +1343,29 @@ const toggleBtn = document.getElementById('theme-toggle');
         dashboard.classList.remove('full-width');
     });
 });
+function filterItems(type, searchTerm) {
+  if (type === 'boissons') {
+    // Filter boissons
+    document.querySelectorAll('#addBoissonsModal .form-check').forEach(item => {
+      const label = item.querySelector('label').textContent.toLowerCase();
+      if (label.includes(searchTerm.toLowerCase())) {
+        item.style.display = '';
+      } else {
+        item.style.display = 'none';
+      }
+    });
+  } else if (type === 'matos') {
+    // Filter produits
+    document.querySelectorAll('#addMatosModal .form-check').forEach(item => {
+      const label = item.querySelector('label').textContent.toLowerCase();
+      if (label.includes(searchTerm.toLowerCase())) {
+        item.style.display = '';
+      } else {
+        item.style.display = 'none';
+      }
+    });
+  }
+}
 
 </script>
 

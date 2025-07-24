@@ -1049,7 +1049,7 @@ window.downloadChecklistItemsGroupedPDF = function() {
 
   const categories = [
     {% for cat_name, items in checklist_items_by_category.items %}
-      {% if cat_name not in special_categories %}
+      {% if cat_name not in special_categories and cat_name != "CFCDN" %}
       {
         name: "{{ cat_name|escapejs }}",
         items: [
@@ -1168,10 +1168,9 @@ window.generatePDFbreuvage = function() {
     // Use autoTable to create a table dynamically
     const breuvagesData = [
         {% for breuvage in breuvages %}
-            ['{{ breuvage.product.name }}', {{ breuvage.quantity }}, {{ breuvage.quantity|subtract:breuvage.consumed_quantity }}, {{ breuvage.consumed_quantity }}],
+            ['{{ breuvage.product.name }}', {{ breuvage.quantity }},{{ breuvage.consumed_quantity }}, {{ breuvage.quantity|subtract:breuvage.consumed_quantity }}],
         {% endfor %}
     ];
-
     pdf.autoTable({
         head: [['Boissons', 'Total', 'Restant', 'Consommé']],
         body: breuvagesData,
