@@ -172,6 +172,10 @@ body {
             background-color: #333;
             color: #fff;
         }
+
+        .highlight {
+            color: #8CE78B;
+        }
 </style>
 
 <input type="hidden" id="current_submission_id" value="{{ submission.id }}">
@@ -303,14 +307,14 @@ body {
             <div class="row">
                 
                 <div class="col-md-6">
-                    <p><i class="fas fa-calendar-alt info-icon"></i><strong style="{% if submission.date %}color:#8CE78B;{% endif %}">Date:</strong>
+                    <p><i class="fas fa-calendar-alt info-icon"></i><strong style="{% if submission.date %}border-bottom: 3px solid lightgreen; padding-bottom: 2px;{% endif %}">Date:</strong>
                         <span class="view-section">{{ submission.date|date:"d F Y" }}</span>
                         <input type="date" class="form-control edit-section d-none" name="date" value="{{ submission.date|date:"Y-m-d" }}" />
                     </p>
                 </div>
                 <div class="col-md-6">
                     <p>
-                        <i class="fas fa-building info-icon"></i><strong style="{% if submission.company_name %}color:#8CE78B;{% endif %}">Nom de la compagnie:</strong>
+                        <i class="fas fa-building info-icon"></i><strong style="{% if submission.company_name %}border-bottom: 3px solid lightgreen; padding-bottom: 2px;{% endif %}">Nom de la compagnie:</strong>
                         <span class="view-section">
                             {{ submission.company_name|default_if_none:'' }}
                         </span>
@@ -323,13 +327,13 @@ body {
             <div class="row">
                 
                 <div class="col-md-6">
-                    <p><i class="fas fa-clock info-icon"></i><strong style="{% if submission.delivery_time %}color:#8CE78B;{% endif %}">Heure de livraison:</strong>
+                    <p><i class="fas fa-clock info-icon"></i><strong style="{% if submission.delivery_time %}border-bottom: 3px solid lightgreen; padding-bottom: 2px;{% endif %}">Heure de livraison:</strong>
                         <span class="view-section">{{ submission.delivery_time|default_if_none:'' }}</span>
                         <select name="delivery_time_select" class="form-control edit-section d-none"></select>
                     </p>
                 </div>
                 <div class="col-md-6">
-                    <p><i class="fas fa-clock info-icon"></i><strong style="{% if submission.event_time %}color:#8CE78B;{% endif %}">Heure de l'événement:</strong>
+                    <p><i class="fas fa-clock info-icon"></i><strong style="{% if submission.event_time %}border-bottom: 3px solid lightgreen; padding-bottom: 2px;{% endif %}">Heure de l'événement:</strong>
                         <span class="view-section">{{ submission.event_time|default_if_none:'' }}</span>
                         <select name="event_time_select" class="form-control edit-section d-none"></select>
                     </p>
@@ -338,7 +342,7 @@ body {
                 </div>
                 <div class="row">
                     <div class="col-md-6">
-                        <p><i class="fas fa-users info-icon"></i><strong style="{% if submission.guest_count %}color:#8CE78B;{% endif %}">Nombre de personnes:</strong>
+                        <p><i class="fas fa-users info-icon"></i><strong style="{% if submission.guest_count %}border-bottom: 3px solid lightgreen; padding-bottom: 2px;{% endif %}">Nombre de personnes:</strong>
                             <span class="view-section">{{ submission.guest_count|default_if_none:'' }}</span>
                             <input type="number" class="form-control edit-section d-none" name="guest_count" value="{{ submission.guest_count }}" />
                         </p>
@@ -347,7 +351,7 @@ body {
                     <div class="col-md-6">
                         <p>
                             <i class="fa-solid fa-location-dot info-icon"></i>
-                            <strong style="{% if submission.event_postcode %}color:#8CE78B;{% endif %}">
+                            <strong style="{% if submission.event_postcode %}border-bottom: 3px solid lightgreen; padding-bottom: 2px;{% endif %}">
                                 Adresse:
                             </strong>
                             <span class="view-section" name="event_loc">{{ submission.event_location|default_if_none:'' }}</span>
@@ -357,7 +361,7 @@ body {
                         </p>
                     </div>
                     <div class="col-md-6">
-                        <p><i class="fa-solid fa-bell-concierge info-icon"></i><strong style="color:#8CE78B;">Avec Service:</strong>
+                        <p><i class="fa-solid fa-bell-concierge info-icon"></i><strong style="border-bottom: 3px solid lightgreen; padding-bottom: 2px;">Avec Service:</strong>
                             <span class="view-section">{{ submission.avec_service_md|yesno:"Oui,Non" }}</span>
                             <select class="form-control edit-section d-none" name="avec_service_md">
                                 <option value="True" {% if submission.avec_service_md %}selected{% endif %}>Oui</option>
@@ -366,7 +370,7 @@ body {
                         </p>
                     </div>
                     <div class="col-md-6">
-                        <p><i class="fa-solid fa-truck-ramp-box info-icon"></i><strong style="color:#8CE78B;">Location Matériel:</strong>
+                        <p><i class="fa-solid fa-truck-ramp-box info-icon"></i><strong style="border-bottom: 3px solid lightgreen; padding-bottom: 2px;">Location Matériel:</strong>
                             <span class="view-section">{{ submission.location_materiel|yesno:"Oui,Non" }}</span>
                             <select class="form-control edit-section d-none" name="location_materiel">
                                 <option value="True" {% if submission.location_materiel %}selected{% endif %}>Oui</option>
@@ -395,13 +399,13 @@ body {
                 <h3 class="mt-3" style="margin-bottom: 10px;">Détails livraison</h3>
                 <div class="row">
                     <div class="col-md-6">
-                        <p><i class="fas fa-level-up-alt info-icon"></i><strong style="{% if submission.etage %}color:#8CE78B;{% endif %}">Etage:</strong>
+                        <p><i class="fas fa-level-up-alt info-icon"></i><strong style="{% if submission.etage %}border-bottom: 3px solid lightgreen; padding-bottom: 2px;{% endif %}">Etage:</strong>
                             <span class="view-section">{{ submission.etage|default_if_none:'' }}</span>
                             <input type="text" class="form-control edit-section d-none" name="etage" value="{{ submission.etage }}" />
                         </p>
                     </div>
                     <div class="col-md-6">
-                        <p><i class="fas fa-truck-loading info-icon"></i><strong style="{% if submission.dock_livraison %}color:#8CE78B;{% endif %}">Dock de livraison:</strong>
+                        <p><i class="fas fa-truck-loading info-icon"></i><strong style="{% if submission.dock_livraison %}border-bottom: 3px solid lightgreen; padding-bottom: 2px;{% endif %}">Dock de livraison:</strong>
                             <span class="view-section">{{ submission.dock_livraison|default_if_none:'' }} </span>
                             <input type="text" class="form-control edit-section d-none" name="dock_livraison" value="{{ submission.dock_livraison }}" />
                         </p>
@@ -409,7 +413,7 @@ body {
                 </div>
                 <div class="row">
                     <div class="col-md-6">
-                        <p><i class="fas fa-stairs info-icon"></i><strong style="color:#8CE78B;">Escalier:</strong>
+                        <p><i class="fas fa-stairs info-icon"></i><strong style="border-bottom: 3px solid lightgreen; padding-bottom: 2px;">Escalier:</strong>
                             <span class="view-section">{{ submission.escalier|yesno:"Oui,Non" }}
                             </span>
                             <select class="form-control edit-section d-none" name="escalier">
@@ -419,7 +423,7 @@ body {
                         </p>
                     </div>
                     <div class="col-md-6">
-                        <p><i class="fas fa-elevator info-icon"></i><strong style="color:#8CE78B;">Ascenseur:</strong>
+                        <p><i class="fas fa-elevator info-icon"></i><strong style="border-bottom: 3px solid lightgreen; padding-bottom: 2px;">Ascenseur:</strong>
                             <span class="view-section">{{ submission.ascenseur|yesno:"Oui,Non" }}
                             </span>
                             <select class="form-control edit-section d-none" name="ascenseur">
@@ -431,7 +435,7 @@ body {
                 </div>
                 <div class="row">
                     <div class="col-md-6">
-                        <p><i class="fas fa-id-card info-icon"></i><strong style="color:#8CE78B;">Carte d'accès:</strong>
+                        <p><i class="fas fa-id-card info-icon"></i><strong style="border-bottom: 3px solid lightgreen; padding-bottom: 2px;">Carte d'accès:</strong>
                             <span class="view-section">{{ submission.carte_dock|yesno:"Oui,Non" }}</span>
                             <select class="form-control edit-section d-none" name="carte_dock">
                                 <option value="True" {% if submission.carte_dock %}selected{% endif %}>Oui</option>
@@ -440,7 +444,7 @@ body {
                         </p>
                     </div>
                     <div class="col-md-6">
-                        <p><i class="fas fa-concierge-bell info-icon"></i><strong style="color:#8CE78B;">Installation:</strong>
+                        <p><i class="fas fa-concierge-bell info-icon"></i><strong style="border-bottom: 3px solid lightgreen; padding-bottom: 2px;">Installation:</strong>
                             <span class="view-section">{{ submission.avec_service|yesno:"Oui,Non" }}</span>
                             <select class="form-control edit-section d-none" name="avec_service">
                                 <option value="True" {% if submission.avec_service %}selected{% endif %}>Oui</option>
@@ -456,7 +460,7 @@ body {
             <div class="row">
                 
                 <div class="col-md-6">
-                    <p><i class="fas fa-user info-icon"></i><strong style="{% if submission.ordered_by %}color:#8CE78B;{% endif %}">Commandé par:</strong>
+                    <p><i class="fas fa-user info-icon"></i><strong style="{% if submission.ordered_by %}border-bottom: 3px solid lightgreen; padding-bottom: 2px;{% endif %}">Commandé par:</strong>
                         <span class="view-section">{% if submission.ordered_by|stringformat:"s" != "None" %}
                             {{ submission.ordered_by }}
                         {% else %}
@@ -467,7 +471,7 @@ body {
                     </p>
                 </div>
                 <div class="col-md-6">
-                    <p><i class="fas fa-user-circle info-icon"></i><strong style="{% if submission.contact_person %}color:#8CE78B;{% endif %}">Contact sur place:</strong>
+                    <p><i class="fas fa-user-circle info-icon"></i><strong style="{% if submission.contact_person %}border-bottom: 3px solid lightgreen; padding-bottom: 2px;{% endif %}">Contact sur place:</strong>
                         <span class="view-section">{{ submission.contact_person|default_if_none:'' }}</span>
                         <input type="text" class="form-control edit-section d-none" name="contact_person" value="{{ submission.contact_person }}" />
                         <button type="button" class="btn btn-secondary btn-sm copy-to-ordered-by" style="display: none;">
@@ -478,13 +482,13 @@ body {
             </div>
             <div class="row">
                 <div class="col-md-6">
-                    <p><i class="fas fa-envelope info-icon"></i><strong style="{% if submission.email %}color:#8CE78B;{% endif %}">Email:</strong>
+                    <p><i class="fas fa-envelope info-icon"></i><strong style="{% if submission.email %}border-bottom: 3px solid lightgreen; padding-bottom: 2px;{% endif %}">Email:</strong>
                         <span class="view-section">{{ submission.email|default_if_none:'' }}</span>
                         <input type="email" class="form-control edit-section d-none" name="email" value="{{ submission.email }}" />
                     </p>
                 </div>
                 <div class="col-md-6">
-                    <p><i class="fas fa-phone info-icon"></i><strong style="{% if submission.phone %}color:#8CE78B;{% endif %}">Téléphone:</strong>
+                    <p><i class="fas fa-phone info-icon"></i><strong style="{% if submission.phone %}border-bottom: 3px solid lightgreen; padding-bottom: 2px;{% endif %}">Téléphone:</strong>
                         <span class="view-section">{{ submission.phone|default_if_none:'' }}</span>
                         <input type="tel" class="form-control edit-section d-none" name="phone" value="{{ submission.phone }}" />
                     </p>
@@ -492,7 +496,7 @@ body {
                 <div class="col-md-6">
                     <p>
                         <i class="fas fa-address-card info-icon"></i>
-                        <strong style="{% if submission.billing_address %}color:#8CE78B;{% endif %}">
+                        <strong style="{% if submission.billing_address %}border-bottom: 3px solid lightgreen; padding-bottom: 2px;{% endif %}">
                             Adresse de facturation:
                         </strong>
                         <span class="view-section" name="billing_loc">{{ submission.billing_address|default_if_none:'' }}</span>
@@ -502,7 +506,7 @@ body {
                     </p>
                 </div>
                 <div class="col-md-6">
-                    <p><i class="fa-solid fa-earth-europe info-icon"></i><strong style="{% if submission.language %}color:#8CE78B;{% endif %}">Language:</strong>
+                    <p><i class="fa-solid fa-earth-europe info-icon"></i><strong style="{% if submission.language %}border-bottom: 3px solid lightgreen; padding-bottom: 2px;{% endif %}">Language:</strong>
                         <span class="view-section">{{ submission.language|default_if_none:'' }}</span>
                         <input type="text" class="form-control edit-section d-none" name="language" value="{{ submission.language }}" />
                     </p>
@@ -513,7 +517,7 @@ body {
             <h3 class="mt-3" style="margin-bottom: 10px;">Informations Financières</h3>
             <div class="row">
                 <div class="col-md-6">
-                    <p><i class="fas fa-dollar-sign info-icon"></i><strong style="{% if submission.budget %}color:#8CE78B;{% endif %}">Budget:</strong>
+                    <p><i class="fas fa-dollar-sign info-icon"></i><strong style="{% if submission.budget %}border-bottom: 3px solid lightgreen; padding-bottom: 2px;{% endif %}">Budget:</strong>
                         <span class="view-section">{{ submission.budget|default_if_none:'' }} $</span>
                         <input type="number" step="0.01" class="form-control edit-section d-none" name="budget" value="{{ submission.budget }}" />
                     </p>
@@ -521,7 +525,7 @@ body {
                 <div class="col-md-6">
                     <p>
                         <i class="fa-solid fa-credit-card info-icon"></i>
-                        <strong style="{% if submission.payment_mode %}color:#8CE78B;{% endif %}">
+                        <strong style="{% if submission.payment_mode %}border-bottom: 3px solid lightgreen; padding-bottom: 2px;{% endif %}">
                             Mode de paiement:
                         </strong>
                         <span class="view-section">{{ submission.payment_mode|default_if_none:'' }}</span>
@@ -719,7 +723,7 @@ body {
             
             <div class="row">
                 <div class="col-md-12">
-                    <p><i class="fa-solid fa-comment info-icon"></i><strong style="{% if submission.commentaire %}color:#8CE78B;{% endif %}">Commentaire Général:</strong>
+                    <p><i class="fa-solid fa-comment info-icon"></i><strong style="{% if submission.commentaire %}border-bottom: 3px solid lightgreen; padding-bottom: 2px;{% endif %}">Commentaire Général:</strong>
                         <span class="view-section">{{ submission.commentaire|default_if_none:'' }}</span>
                         <input type="text" class="form-control edit-section d-none" name="commentaire" value="{{ submission.commentaire }}" />
                     </p>
@@ -729,13 +733,12 @@ body {
 
                 {% if submission.commentaire_boissons %}
                 <div class="col-md-12">
-                    <p><i class="fa-solid fa-bottle-water info-icon"></i><strong style="{% if submission.commentaire_boissons %}color:#8CE78B;{% endif %}">Boissons:</strong>
+                    <p><i class="fa-solid fa-bottle-water info-icon"></i><strong style="{% if submission.commentaire_boissons %}border-bottom: 3px solid lightgreen; padding-bottom: 2px;{% endif %}">Boissons:</strong>
                         <span class="view-section">{{ submission.commentaire_boissons|default_if_none:'' }}</span>
-                      <input type="text" class="form-control edit-section d-none" id="commentaireBoissons" name="commentaire_boissons" rows="3" value="{{ submission.commentaire_boissons|default_if_none:'' }}" />
                     </p>
                 </div>
                 {% endif %}
-                 
+                <input type="text" class="form-control edit-section d-none" id="commentaireBoissons" name="commentaire_boissons" rows="3" value="{{ submission.commentaire_boissons|default_if_none:'' }}" />
     
 
 
@@ -752,7 +755,8 @@ body {
             <div class="row">
               {% for category in categories %}
               <div class="col-md-12 mb-3">
-                <h6>{{ category.name }}</h6>
+                <input type="text" id="searchBoissons" class="form-control" placeholder="Rechercher une boisson...">
+                <br>
                 {% for product in category.product_set.all %}
                 <div class="form-check">
                   <input class="form-check-input" type="checkbox" 
@@ -1214,6 +1218,52 @@ $('#modifyButton').on('click', function() {
     activateTimeSelects();
 });
 
+// Fonction pour filtrer les boissons selon la recherche
+$('#searchBoissons').on('keyup', function() {
+  const query = $(this).val().toLowerCase();
+  $('#addBoissonsModal .form-check').each(function() {
+    const labelText = $(this).find('label').text().toLowerCase();
+    if (labelText.includes(query)) {
+      $(this).show();
+    } else {
+      $(this).hide();
+    }
+  });
+});
+
+const toggleBtn = document.getElementById('theme-toggle');
+        toggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+        });
+
+          document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.getElementById('sidebar');
+    const btnShowSidebar = document.getElementById('show-sidebar');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    const dashboard = document.getElementById('dashboard');
+
+    // Quand on clique sur le bouton toggle pour cacher ou réafficher
+    toggleBtn.addEventListener('click', () => {
+        if (sidebar.classList.contains('collapsed')) {
+            // La sidebar est masquée, on la remonte
+            sidebar.classList.remove('collapsed');
+            btnShowSidebar.style.display = 'none';   // cache le bouton
+            dashboard.classList.remove('full-width');
+        } else {
+            // La sidebar est visible, on la cache
+            sidebar.classList.add('collapsed');
+            btnShowSidebar.style.display = 'block';  // montre le bouton pour la réafficher
+            dashboard.classList.add('full-width');
+        }
+    });
+
+    // Quand on clique sur le bouton pour faire réapparaître la sidebar
+    btnShowSidebar.addEventListener('click', () => {
+        sidebar.classList.remove('collapsed');
+        btnShowSidebar.style.display = 'none'; // cache le bouton
+        dashboard.classList.remove('full-width');
+    });
+});
 
 </script>
 

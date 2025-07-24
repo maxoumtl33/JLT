@@ -722,24 +722,60 @@ class Submission(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='en_cours')
 
     def save(self, *args, **kwargs):
-        # Convertir les None en chaîne vide pour les champs de texte
+        # Vérifie si le submission n'a pas encore de client
+        if not self.client:
+            # Préparer les données du client à partir des champs de la soumission
+            client_data = {
+                'company_name': self.company_name,
+                'contact_person': self.contact_person,
+                'ordered_by': self.ordered_by,
+                'phone': self.phone,
+                'email': self.email,
+                'billing_address': self.billing_address,
+                'etage': self.etage,
+                'event_location': self.event_location,
+                'dock_livraison': self.dock_livraison,
+                'escalier': self.escalier,
+                'ascenseur': self.ascenseur,
+                'carte_dock': self.carte_dock,
+            }
+
+            # Vérifier si au moins un champ utile est rempli
+            if any(client_data[field] for field in ['company_name', 'contact_person', 'email', 'phone', 'billing_address']):
+                # Essayer de récupérer un client existant avec les mêmes données
+                client_qs = Client.objects.filter(
+                    company_name=client_data['company_name'],
+                    contact_person=client_data['contact_person'],
+                    email=client_data['email'],
+                    phone=client_data['phone']
+                )
+                if client_qs.exists():
+                    self.client = client_qs.first()
+                else:
+                    # Créer un nouveau client si au moins un champ est rempli
+                    new_client = Client(**client_data)
+                    new_client.save()
+                    self.client = new_client
+            else:
+                # Aucun champ utile rempli, ne pas créer de client
+                self.client = None
+
+        # Convertir None en chaîne vide pour certains champs de texte
         text_fields = [
             'company_name', 'refusal_comment', 'commentaire_items', 'commentaire_boissons',
             'event_postcode', 'event_location', 'contact_person', 'ordered_by', 'phone',
             'email', 'billing_address', 'etage', 'dock_livraison', 'commentaire', 'service_count'
         ]
-
         for field in text_fields:
             value = getattr(self, field)
             if value is None:
                 setattr(self, field, '')
 
-        # Pour created_at
+        # Si pas de created_at, définir l'heure
         if not self.created_at:
             self.created_at = timezone.now() - timedelta(hours=4)
 
         super().save(*args, **kwargs)
-
     def __str__(self):
         return f"{self.submission_type} by {self.user} at {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}. Company: {self.company_name if self.company_name else 'N/A'}"
     

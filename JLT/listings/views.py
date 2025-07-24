@@ -6283,7 +6283,8 @@ def submit_request(request):
         'clients': clients,
       
     })
-# views.py
+
+
 from django.shortcuts import render
 from django.db.models import Count, Q, F, Case, When, FloatField
 from .models import Livraison
@@ -6778,7 +6779,15 @@ def update_submission(request, submission_id):
                 
             # Ensuite, enregistrer
             submission.ordered_by = ordered_by
-            submission.language = request.POST.get('language', '').strip()
+
+            language = request.POST.get('language', '').strip()
+            
+
+
+            # Vérifier si la valeur est "None" (chaîne)
+            if language.lower() == 'none':
+                language = ''
+            submission.language = language
             submission.location_materiel = request.POST.get('location_materiel', '').strip()
             submission.avec_service = request.POST.get('avec_service', '').strip()
             submission.avec_service_md = request.POST.get('avec_service_md', '').strip()
