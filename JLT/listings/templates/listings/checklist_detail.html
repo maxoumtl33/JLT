@@ -809,6 +809,7 @@ function updateQuantity(checklistItemId, newQuantity) {
                 const item = cart.find(i => i.id === checklistItemId);
                 if (item) {
                     item.quantity = newQuantity;
+                    item.status = 'pending';
                     renderCart();
                 }
             } else {

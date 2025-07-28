@@ -165,10 +165,16 @@ body {
             background-color: #333;
             color: #fff;
         }
+        #calendar {
+  width: 600px; /* smaller width */
+  height: 490px; /* smaller height */
+  margin: auto; /* center horizontally if desired */
+}
 </style>
 
 
 
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
 <div class="sidebar" id="sidebar">
@@ -321,6 +327,7 @@ body {
                     </div>
                     {% endif %}
 
+                                 
                     
 <div class="container-fluid py-4">
     <div class="btn-group mb-4" role="group" aria-label="Choix Affichage">
@@ -487,7 +494,12 @@ body {
 </div>
 <hr>
 <hr>
-<div id="submissionsSection" style="display: none;">
+
+<div id="submissionsSection">
+
+    <div id="calendar"></div>
+    <div id="submissionByDate" style="margin-top:20px;"></div> 
+
 <!-- Submission Summary Stats -->
 <div class="row g-4 mb-4">
     <!-- Total Submissions/Orders -->
@@ -760,7 +772,105 @@ body {
 </div>
 </div>
 </div>
+
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/fr.js'></script>
+
+
 <script>
+      document.addEventListener('DOMContentLoaded', function() {
+  var calendarEl = document.getElementById('calendar');
+  var calendar = new FullCalendar.Calendar(calendarEl, {
+    initialView: 'dayGridMonth',
+    locale: 'fr',
+    headerToolbar: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'dayGridMonth'
+    },
+    selectable: true,
+    dateClick: function(info) {
+      // When user clicks a date, fetch and show submissions for that date
+      const selectedDate = info.dateStr; // Format: YYYY-MM-DD
+      loadSubmissionsForDate(selectedDate);
+    }
+  });
+  calendar.render();
+
+  // Optional: Load current month's submissions or keep calendar interactive
+});
+function loadSubmissionsForDate(dateStr) {
+  fetch(`/submissions/date/${dateStr}/`)
+    .then(response => response.json())
+    .then(data => {
+      displaySubmissionsTable(data.submissions);
+    })
+    .catch(error => {
+      console.error('Error fetching submissions:', error);
+      // Optional: show a message if desired
+    });
+}
+
+// Function to display submissions for a selected date
+function displaySubmissionsTable(submissions) {
+  let container = document.getElementById('submissionByDate');
+  if (!container) {
+    // Create container if it doesn't exist
+    container = document.createElement('div');
+    container.id = 'submissionByDate';
+    document.querySelector('.subcheck').appendChild(container);
+  }
+
+  container.innerHTML = ''; // Clear previous content
+
+  if (submissions.length === 0) {
+    container.innerHTML = '<p>Aucune soumission pour cette date.</p>';
+    return;
+  }
+
+  // Build and insert the table
+  const table = document.createElement('table');
+  table.className = 'table table-bordered';
+
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>Client</th>
+        <th>Type</th>
+        <th>Statut</th>
+        <th>Commandé par</th>
+        <th>Note</th>
+        <th>Détail</th>
+      </tr>
+    </thead>
+  `;
+
+  const tbody = document.createElement('tbody');
+  submissions.forEach(sub => {
+    const row = document.createElement('tr');
+
+    row.innerHTML = `
+      <td>${sub.company_name}</td>
+      <td>${sub.submission_type}</td>
+      <td>
+        ${sub.status === 'valide' ? '<span class="badge bg-success">Validée</span>' : 
+          sub.status === 'refuse' ? '<span class="badge bg-danger">Refusée</span>' :
+          sub.status === 'envoyé' ? '<span class="badge bg-primary">Envoyé</span>' :
+          '<span class="badge bg-warning">En cours</span>'}
+      </td>
+      <td>${sub.ordered_by}</td>
+      <td>${sub.note}</td>
+      <td>
+        <a href="/submission/${sub.id}/" style="color: #116EFD;"><i class="fa-solid fa-eye me-1"></i></a>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+
+  table.appendChild(tbody);
+  container.appendChild(table);
+}
+
 function filterChecklistshide() {
 const checkbox = document.getElementById('hideCompleted');
 const rows = document.querySelectorAll('.checklist-row');

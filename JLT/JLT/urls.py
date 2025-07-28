@@ -211,6 +211,8 @@ path('notification/read/<int:notification_id>/', views.mark_notification_as_read
 path('checklist/<int:checklist_id>/search_productscfcdn/', views.search_productscfcdn, name='search_productscfcdn'),
 path('md_dashboard/', views.md_dashboard, name='md_dashboard'),
 path('conseiller-dashboard/', views.conseiller_dashboard, name='conseiller_dashboard'),
+path('submission/<int:submission_id>/add-note/', views.add_note, name='add_note'),
+path('submissions/date/<str:date>/', views.submissions_by_date, name='submissions_by_date'),
 path('shifts/', views.view_shifts_by_date, name='view_shifts_by_date'),
 path('create-loading-dock/', create_loading_dock, name='create_loading_dock'),
 path('routesfrigo/', routesfrigo, name='routesfrigo'),

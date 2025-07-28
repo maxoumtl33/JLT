@@ -149,7 +149,47 @@ def change_submission_user(request, submission_id):
     return JsonResponse({'success': True})
 
 from django.views.decorators.http import require_GET, require_POST
-        
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+@csrf_exempt
+def add_note(request, submission_id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            note_content = data.get('note', '')
+            submission = Submission.objects.get(id=submission_id)
+            submission.note = note_content
+            submission.save()
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+# views.py
+from django.http import JsonResponse
+from .models import Submission
+
+def submissions_by_date(request, date):
+    # Filtrer par date
+    user = request.user
+    submissions = Submission.objects.filter(user=user, date=date)
+    data = [
+        {
+            'id': sub.id,
+            'company_name': sub.company_name,
+            'submission_type': sub.submission_type,
+            'status': sub.status,
+            'ordered_by': sub.ordered_by,
+            'note': sub.note,
+        }
+        for sub in submissions
+    ]
+    return JsonResponse({'submissions': data})
+
+
 @require_POST  # ou @require_POST selon la méthode utilisée
 def mark_notification_as_read(request, notification_id):
     notification = get_object_or_404(Notification, id=notification_id, recipient=request.user)

@@ -713,6 +713,7 @@ class Submission(models.Model):
     escalier = models.BooleanField(default=False)
     ascenseur = models.BooleanField(default=False)
     carte_dock = models.BooleanField(default=False)
+    note = models.TextField(blank=True, null=True)
     avec_service = models.BooleanField(default=False)
     avec_service_md = models.BooleanField(default=False)
     language = models.TextField(null=True, blank=True)
@@ -783,7 +784,7 @@ class Submission(models.Model):
         text_fields = [
             'company_name', 'refusal_comment', 'commentaire_items', 'commentaire_boissons',
             'event_postcode', 'event_location', 'contact_person', 'ordered_by', 'phone',
-            'email', 'billing_address', 'etage', 'dock_livraison', 'commentaire', 'service_count'
+            'email', 'billing_address', 'etage', 'dock_livraison', 'commentaire', 'service_count', 'payment_mode', 'billing_postcode'
         ]
         for field in text_fields:
             value = getattr(self, field)

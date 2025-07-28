@@ -190,6 +190,19 @@
                      </button>
 
                  {% endif %}
+                 {% if checklist_product.status == 'en_cours' and checklist_product.previous_status == 'en_cours' %}
+                 <button type="button" class="btn btn-outline-success swipe-btn" 
+                 onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"
+                 title="Validé">
+                 <i class="fa-solid fa-check"></i>
+                 </button>
+                 <button type="button"class="btn btn-outline-danger swipe-btn" 
+                             onclick="submitStatusForm('{{ checklist_product.id }}', 'denied')"
+                             title="Refusé">
+                             <i class="fa-solid fa-ban"></i>
+                     </button>
+
+                 {% endif %}
                  {% if checklist_product.status == 'deniedprevious' and checklist_product.previous_status == 'complete' %}
                  <button type="button" class="btn btn-outline-success swipe-btn" 
                  onclick="submitStatusValidateForm('{{ checklist_product.id }}', 'complete')"

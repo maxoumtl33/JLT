@@ -305,6 +305,9 @@ body {
     <button id="changeUserBtn" data-submission-id="{{ submission.id }}" class="btn btn-primary">
         Modifier utilisateur
       </button>
+      <!-- Add this button above the "Détails de l'Événement" section -->
+    <button id="printEventDetails" class="btn btn-primary">Imprimer PDF</button>
+    <button id="btnAddNote" class="btn btn-primary">Ajouter Note</button>
       
 
     <!-- Modal pour sélectionner un nouvel utilisateur -->
@@ -345,7 +348,7 @@ body {
         </div>
         
         </div>
-        
+        <div id="eventDetailsSection">
         <div class="card-body">
             <h3 class="mt-3" style="margin-bottom: 10px;">Détails de l'Événement</h3>
             
@@ -905,7 +908,7 @@ body {
        
     </div>
 </div>
-    
+        </div>
 </div>
 
 <script src="https://maps.googleapis.com/maps/api/js?key={{ key }}&libraries=places"></script>
@@ -1481,6 +1484,53 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 });
+// Event listener for print button
+document.getElementById('printEventDetails').addEventListener('click', function() {
+    const content = document.getElementById('eventDetailsSection').innerHTML; // Content to print
+    
+    const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]')).map(tag => tag.outerHTML).join('');
+    // Or, include needed styles explicitly if you prefer
+    
+    const printWindow = window.open('', '', 'height=600,width=800');
+    printWindow.document.write('<html><head><title>Impression Détails de l\'Événement</title>');
+    // Include styles for consistent display
+    printWindow.document.write(styles);
+    printWindow.document.write('</head><body>');
+    printWindow.document.write('<div class="card-body">');
+    printWindow.document.write(content);
+    printWindow.document.write('</div>');
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+});
+
+document.getElementById('btnAddNote').addEventListener('click', function() {
+  const currentNote = '{{ submission.note|default:"" }}';
+  const newNote = prompt('Entrez votre note:', currentNote);
+  if (newNote !== null) {
+    // Save the note via AJAX
+    fetch("{% url 'add_note' submission.id %}", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token }}'
+      },
+      body: JSON.stringify({ note: newNote })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        alert('Note enregistrée!');
+        // Optionally, refresh or update page section
+        location.reload();
+      } else {
+        alert('Erreur lors de l\'enregistrement de la note.');
+      }
+    });
+  }
+});
+
 
 </script>
 
