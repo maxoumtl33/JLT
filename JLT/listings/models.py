@@ -718,7 +718,7 @@ class Submission(models.Model):
     avec_service_md = models.BooleanField(default=False)
     language = models.TextField(null=True, blank=True)
     location_materiel = models.BooleanField(default=False)
-    commentaire = models.CharField(max_length=200, null=True, blank=True) 
+    commentaire = models.CharField(max_length=2000, null=True, blank=True) 
     payment_mode = models.CharField(max_length=200, null=True, blank=True) 
     client = models.ForeignKey(Client, null=True, blank=True, on_delete=models.SET_NULL, related_name='submissions_client')
     date = models.DateField(null=True, blank=True)  # Date
