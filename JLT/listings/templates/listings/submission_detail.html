@@ -278,21 +278,65 @@ body {
             <button id="show-sidebar" style="display:none; position: fixed; top: 12%; left: 10px;">
                 <i class="fas fa-bars fa-2xl"></i>
             </button>
-        <div class="user-info">
-            <button type="button" id="modifyButton" class="nav__link">
-                <i class="fa-solid fa-pen-to-square"></i>
-                <span>Remplir</span>
-            </button>
-            <button type="button" class="btn btn-success d-none" id="saveButton">
-                Enregistrer les modifications
-            </button>
-        </div>
+            <div class="user-info">
+                <button type="button" id="modifyButton" class="nav__link">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <span>Remplir</span>
+                </button>
+                <button type="button" class="btn btn-success d-none" id="saveButton">
+                    Enregistrer les modifications
+                </button>
+            </div>
     </div>
     <br>
     <br>
     <br>
+    <br>
 
+    <form id="duplicateForm" method="post" action="/submission/{{ submission.id }}/duplicate/" style="display:none;" target="_blank">
+        {% csrf_token %}
+    </form>
+    <button type="button" class="btn btn-primary" id="duplicateButton">Dupliquer</button>
 
+    <form id="duplicateFormSansMenu" method="post" action="/submission/{{ submission.id }}/duplicate-without-menus/" style="display:none;" target="_blank">
+        {% csrf_token %}
+    </form>
+    <button type="button" class="btn btn-primary" id="duplicateButtonSansMenu">Dupliquer sans menu</button>
+    <button id="changeUserBtn" data-submission-id="{{ submission.id }}" class="btn btn-primary">
+        Modifier utilisateur
+      </button>
+      
+
+    <!-- Modal pour sélectionner un nouvel utilisateur -->
+<div class="modal fade" id="changeUserModal" tabindex="-1" aria-labelledby="changeUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="changeUserModalLabel">Changer l'utilisateur</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+        <div class="modal-body">
+          <form id="changeUserForm">
+            <div class="mb-3">
+              <label for="newUserSelect" class="form-label">Sélectionnez un utilisateur</label>
+              <select class="form-select" id="newUserSelect" required>
+                {% for user_obj in all_users %}
+                  <option value="{{ user_obj.id }}" {% if user_obj.id == submission.user.id %}selected{% endif %}>
+                    {{ user_obj.username }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+          </form>
+          <div id="changeUserAlert" class="alert alert-info d-none"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-primary" id="saveChangeUser">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+  </div>
     <div class="card shadow-sm mt-4">
         <div class="d-flex justify-content-between align-items-center card-header bg-secondary text-white">
             <div>
@@ -301,12 +345,14 @@ body {
         </div>
         
         </div>
+        
         <div class="card-body">
             <h3 class="mt-3" style="margin-bottom: 10px;">Détails de l'Événement</h3>
             
             <div class="row">
                 
                 <div class="col-md-6">
+                    
                     <p><i class="fas fa-calendar-alt info-icon"></i><strong style="{% if submission.date %}border-bottom: 3px solid lightgreen; padding-bottom: 2px;{% endif %}">Date:</strong>
                         <span class="view-section">{{ submission.date|date:"d F Y" }}</span>
                         <input type="date" class="form-control edit-section d-none" name="date" value="{{ submission.date|date:"Y-m-d" }}" />
@@ -724,9 +770,9 @@ body {
             <div class="row">
                 <div class="col-md-12">
                     <p><i class="fa-solid fa-comment info-icon"></i><strong style="{% if submission.commentaire %}border-bottom: 3px solid lightgreen; padding-bottom: 2px;{% endif %}">Commentaire Général:</strong>
-                        <span class="view-section" style="font-size: 1.4rem;">{{ submission.commentaire|default_if_none:'' }}</span>
-                        <input type="text" class="form-control form-control edit-section d-none" name="commentaire" value="{{ submission.commentaire }}">
+                        <textarea class="form-control form-control edit-section d-none" name="commentaire" rows="3">{{ submission.commentaire }}</textarea>
                     </p>
+                    <span class="view-section" >{{ submission.commentaire|linebreaksbr|default_if_none:'' }}</span>
                 </div>
              <!-- Bouton pour ouvrir modal Boissons -->
 <button id="btnOpenAddBoissonsModal" class="btn btn-primary d-none" style="margin-top:10px; width: 15%; margin-bottom: 10px;">Ajouter Boisson</button>
@@ -774,7 +820,7 @@ body {
                     data-product-id="{{ product.id }}" data-product-name="{{ product.name }}" 
                     data-current-qty="{{ product.quantity }}">
                 <label class="form-check-label" for="boisson-{{ product.id }}">
-                {{ product.name }} (Quantité Disponible : {{ product.quantity }})
+                {{ product.name }}
                 </label>
                 <input type="number" class="form-control quantity-input d-none" min="1" value="1" style="width:auto; display: none; margin-left:10px;">
             </div>
@@ -821,9 +867,8 @@ body {
            data-product-id="{{ product.id }}" data-product-name="{{ product.name }}" 
            data-current-qty="{{ product.quantity }}">
     <label class="form-check-label" for="boisson-{{ product.id }}">
-      {{ product.name }} (Quantité Disponible : {{ product.quantity }})
+      {{ product.name }}
     </label>
-    <input type="number" class="form-control quantity-input d-none" min="1" value="1" style="width:auto; display: none; margin-left:10px;">
   </div>
   {% endfor %}
 </div>
@@ -1162,7 +1207,7 @@ document.getElementById('saveMatosBtn').addEventListener('click', () => {
   });
   
   // Construire la chaîne ou JSON pour votre champ
-  const commentStr = selectedItems.map(p => `${p.name} x ${p.quantity}`).join(', ');
+  const commentStr = selectedItems.map(p => `${p.name}`).join(', ');
   document.getElementById('commentaireMatos').value = commentStr;
   
   // Fermer la modale
@@ -1366,6 +1411,76 @@ function filterItems(type, searchTerm) {
     });
   }
 }
+
+
+document.getElementById('duplicateButton').addEventListener('click', function() {
+    document.getElementById('duplicateForm').submit();
+});
+
+document.getElementById('duplicateButtonSansMenu').addEventListener('click', function() {
+    document.getElementById('duplicateFormSansMenu').submit();
+});
+
+// Déclaration d'une variable globale pour stocker l'ID de la soumission
+let currentSubmissionId = null;
+
+// Lors du chargement, récupérer l'ID du submission depuis le dataset du bouton
+document.addEventListener('DOMContentLoaded', () => {
+  
+  // Récupérer la référence du bouton "Modifier utilisateur"
+  const btnChangeUser = document.getElementById('changeUserBtn');
+  if (btnChangeUser) {
+    currentSubmissionId = btnChangeUser.dataset.submissionId;
+
+    // Ouvrir le modal quand on clique sur le bouton
+    btnChangeUser.addEventListener('click', () => {
+      const modalEl = document.getElementById('changeUserModal');
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
+    });
+  }
+
+  // Gérer le clic sur le bouton "Enregistrer" dans le modal
+  const saveBtn = document.getElementById('saveChangeUser');
+  if (saveBtn) {
+    saveBtn.onclick = () => {
+      const selectedUserId = document.getElementById('newUserSelect').value;
+      if (!currentSubmissionId) {
+        alert('ID de la soumission introuvable.');
+        return;
+      }
+
+      // Envoi AJAX POST pour changer l'utilisateur
+      fetch("{% url 'change-user' submission.id %}", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}' // Veuillez le faire passer en contexte Django
+        },
+        body: JSON.stringify({ user_id: selectedUserId })
+      })
+      .then(res => res.json())
+      .then(data => {
+        const alertDiv = document.getElementById('changeUserAlert');
+        if (data.success) {
+          alertDiv.classList.remove('d-none', 'alert-danger');
+          alertDiv.classList.add('alert-success');
+          alertDiv.textContent = 'Utilisateur modifié avec succès.';
+          // Recharger la page après courte attente
+          setTimeout(() => { location.reload(); }, 1500);
+        } else {
+          alertDiv.classList.remove('d-none', 'alert-success');
+          alertDiv.classList.add('alert-danger');
+          alertDiv.textContent = "Erreur: " + data.error;
+        }
+      })
+      .catch(error => {
+        console.error('Erreur fetch:', error);
+        alert('Une erreur est survenue.');
+      });
+    };
+  }
+});
 
 </script>
 

@@ -220,7 +220,19 @@ body {
     <br>
  
 
-
+<!-- Notifications -->
+<div id="notifications-container" style="position: fixed; top: 10px; right: 10px; z-index: 9999;">
+    {% for notif in unread_notifications %}
+    <div id="notification-{{ notif.id }}" class="alert alert-info" style="margin-bottom: 10px;">
+        <a href="{{ notif.get_absolute_url }}" class="text-decoration-none" onclick="hideNotification({{ notif.id }}); markNotificationAsRead({{ notif.id }});" target="_blank">
+          {{ notif.message }}
+        </a>
+      </div>
+    {% empty %}
+      <!-- Pas de notifications -->
+    {% endfor %}
+  </div>
+  
 {% if submissions_48h_envoye.exists %}
 <div class="alert alert-warning d-flex align-items-center" role="alert" style="margin-top:20px;">
     <div><i class="fas fa-bell me-2"></i>
@@ -1011,14 +1023,44 @@ const toggleBtn = document.getElementById('theme-toggle');
     });
 });
 
-document.getElementById('vente-toggle').addEventListener('click', function() {
-    const venteGroup = document.getElementById('vente-group');
-    if (venteGroup.style.display === 'none') {
-      venteGroup.style.display = 'block';
-    } else {
-      venteGroup.style.display = 'none';
+
+function markNotificationAsRead(notificationId) {
+  fetch('/notification/read/' + notificationId + '/', {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': '{{ csrf_token }}',
+    },
+  }).then(() => {
+    // Supprime la notification du DOM
+    const notifLink = document.querySelector('#notifications-container a[href$="' + notificationId + '"]');
+    if (notifLink) {
+      notifLink.parentElement.remove(); // Supprime le div alert
     }
   });
+}
+
+  // Function to hide the notification and store the state
+  function hideNotification(notifId) {
+    const notifDiv = document.getElementById('notification-' + notifId);
+    if (notifDiv) {
+      notifDiv.style.display = 'none';
+      localStorage.setItem('notification-' + notifId, 'hidden');
+    }
+  }
+
+  // On page load, check if this notification was hidden before
+  document.addEventListener('DOMContentLoaded', () => {
+    {% for notif in notifications %}
+      const notifId = {{ notif.id }};
+      const notifDiv = document.getElementById('notification-{{ notif.id }}');
+      if (localStorage.getItem('notification-' + notifId) === 'hidden') {
+        if (notifDiv) {
+          notifDiv.style.display = 'none';
+        }
+      }
+    {% endfor %}
+  });
+
 </script>
 {% endblock %}
 

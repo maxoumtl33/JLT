@@ -104,4 +104,5 @@ admin.site.register(Plat, PlatAdmin)
 admin.site.register(MenuSubmission)
 admin.site.register(Score)
 admin.site.register(PaymentMode)
+admin.site.register(Notification)
 

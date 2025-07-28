@@ -636,6 +636,24 @@ class PaymentMode(models.Model):
     def __str__(self):
         return self.name
 
+from django.db import models
+from django.contrib.auth.models import User
+from django.urls import reverse
+
+class Notification(models.Model):
+    recipient = models.ForeignKey(User, related_name='notifications', on_delete=models.CASCADE)
+    message = models.TextField()
+    link = models.URLField(null=True, blank=True)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Notification for {self.recipient.username}'
+
+    def get_absolute_url(self):
+        return reverse('submission_detail', args=[self.link.split('/')[-2]])
+
+
 class Client(models.Model):
     company_name = models.CharField(max_length=100, null=True, blank=True)  # Company name
     contact_person = models.CharField(max_length=100, null=True, blank=True)  # Contact sur place
@@ -777,6 +795,11 @@ class Submission(models.Model):
             self.created_at = timezone.now() - timedelta(hours=4)
 
         super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        # Assurez que 'submission_detail' correspond à votre nom d’URL
+        return reverse('submission_detail', args=[self.id])
+    
     def __str__(self):
         return f"{self.submission_type} by {self.user} at {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}. Company: {self.company_name if self.company_name else 'N/A'}"
     

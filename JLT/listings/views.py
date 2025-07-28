@@ -109,6 +109,156 @@ from django.http import JsonResponse
 import pandas as pd
 import io
 
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.contrib.auth.models import User
+
+from django.http import JsonResponse, HttpResponseNotAllowed
+import json
+from django.utils.translation import activate, deactivate
+
+@login_required
+@csrf_exempt
+def change_submission_user(request, submission_id):
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+
+    try:
+        data = json.loads(request.body)
+        new_user_id = data.get('user_id')
+        if not new_user_id:
+            return JsonResponse({'success': False, 'error': 'No user_id provided'})
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON'})
+        
+    new_user = get_object_or_404(User, id=new_user_id)
+    submission = get_object_or_404(Submission, id=submission_id)
+
+    old_user = submission.user.username
+    submission.user = new_user
+    submission.save()
+    activate('fr')
+    formatted_date = formats.date_format(submission.date, "l, d F Y", use_l10n=True) 
+    deactivate()
+    # Notification
+    message = f"{old_user} vous a attribué la soumission '{submission.company_name} pour le {formatted_date}'"
+    link = request.build_absolute_uri(submission.get_absolute_url())
+    Notification.objects.create(recipient=new_user, message=message, link=link)
+
+    return JsonResponse({'success': True})
+
+from django.views.decorators.http import require_GET, require_POST
+        
+@require_POST  # ou @require_POST selon la méthode utilisée
+def mark_notification_as_read(request, notification_id):
+    notification = get_object_or_404(Notification, id=notification_id, recipient=request.user)
+    notification.is_read = True
+    notification.save()
+    return JsonResponse({'status': 'ok'})
+
+
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from .models import Submission, MenuSubmission
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+
+@csrf_exempt
+@require_POST
+def duplicate_submission(request, submission_id):
+    # Get the existing submission
+    original_submission = get_object_or_404(Submission, id=submission_id)
+
+    # Copy the submission, including all specified fields
+    new_submission = Submission.objects.create(
+        user=original_submission.user,
+        submission_type=original_submission.submission_type,
+        type_prise_de_commande=original_submission.type_prise_de_commande,
+        company_name=f"COPIE DE {original_submission.company_name}",
+        event_location=original_submission.event_location,
+        contact_person=original_submission.contact_person,
+        ordered_by=original_submission.ordered_by,
+        phone=original_submission.phone,
+        email=original_submission.email,
+        billing_address=original_submission.billing_address,
+        etage=original_submission.etage,
+        dock_livraison=original_submission.dock_livraison,
+        escalier=original_submission.escalier,
+        ascenseur=original_submission.ascenseur,
+        carte_dock=original_submission.carte_dock,
+        avec_service=original_submission.avec_service,
+        avec_service_md=original_submission.avec_service_md,
+        language=original_submission.language,
+        location_materiel=original_submission.location_materiel,
+        commentaire=original_submission.commentaire,
+        payment_mode=original_submission.payment_mode,
+        client=original_submission.client,
+        commentaire_boissons=original_submission.commentaire_boissons,
+        commentaire_items=original_submission.commentaire_items,
+        document=original_submission.document,
+        event_postcode=original_submission.event_postcode,
+        billing_postcode=original_submission.billing_postcode,
+    )
+
+    # Copy MenuSubmissions associated with the original
+    menu_submissions = MenuSubmission.objects.filter(submission=original_submission)
+    for menu_submission in menu_submissions:
+        MenuSubmission.objects.create(
+            submission=new_submission,
+            menu=menu_submission.menu,
+            allergies=menu_submission.allergies,
+            service_count=menu_submission.service_count,
+            commentaire_menu=menu_submission.commentaire_menu,
+            delivery_mode=menu_submission.delivery_mode,
+        )
+
+    return HttpResponseRedirect(reverse('submission_detail', args=[new_submission.id]))
+
+
+
+@csrf_exempt
+@require_POST
+def duplicate_submission_without_menus(request, submission_id):
+    # Get the existing submission
+    original_submission = get_object_or_404(Submission, id=submission_id)
+
+    # Copy the submission without menus and specific comments
+    new_submission = Submission.objects.create(
+        user=original_submission.user,
+        submission_type=original_submission.submission_type,
+        type_prise_de_commande=original_submission.type_prise_de_commande,
+        company_name=f"COPIE DE {original_submission.company_name}",
+        event_location=original_submission.event_location,
+        contact_person=original_submission.contact_person,
+        ordered_by=original_submission.ordered_by,
+        phone=original_submission.phone,
+        email=original_submission.email,
+        billing_address=original_submission.billing_address,
+        etage=original_submission.etage,
+        dock_livraison=original_submission.dock_livraison,
+        escalier=original_submission.escalier,
+        ascenseur=original_submission.ascenseur,
+        carte_dock=original_submission.carte_dock,
+        avec_service=original_submission.avec_service,
+        avec_service_md=original_submission.avec_service_md,
+        language=original_submission.language,
+        location_materiel=original_submission.location_materiel,
+        commentaire=original_submission.commentaire,
+        payment_mode=original_submission.payment_mode,
+        client=original_submission.client,
+        document=original_submission.document,
+        event_postcode=original_submission.event_postcode,
+        billing_postcode=original_submission.billing_postcode,
+        # Exclude the following:
+        # commentaire_boissons=original_submission.commentaire_boissons,
+        # commentaire_items=original_submission.commentaire_items,
+    )
+
+    return HttpResponseRedirect(reverse('submission_detail', args=[new_submission.id]))
+
+
+
 @login_required
 def import_xlsx(request):
     print("📂 import_xlsx view was called!")
@@ -195,6 +345,7 @@ def submission_detail(request, submission_id):
     submission = get_object_or_404(Submission, id=submission_id)
     key = settings.GOOGLE_API_KEY
     all_menus = Menu.objects.all()
+    all_users = User.objects.all()
     all_payment_modes = PaymentMode.objects.all()
     # Récupérer uniquement la catégorie "SANS ALCOOL"
     category_sans_alcool = Category.objects.filter(name="SANS ALCOOL").prefetch_related('product_set').first()
@@ -219,6 +370,7 @@ def submission_detail(request, submission_id):
     context = {
         'submission': submission,
         'menus': menus,
+        'all_users': all_users,
         'categories': categories,
         'categoriess': categoriess,
         'menus_with_modes_ids': menus_with_modes_ids,
@@ -279,7 +431,7 @@ def checklist_products(request, checklist_id):
     'ÉQUIPEMENT POUR MONTAGE CANAPÉS': 'fa-dolly-flatbed', # example icon
     'ÉQUIPEMENT DE CUISSON': 'fa-mortar-pestle',       # example icon
     'USTENSILES DE SERVICE': 'fa-hand-holding',       # example icon
-    'CFCDN': 'fa-flag',                                # example icon
+    'CFCDN': 'fa-skull',                                # example icon
 }
 
     breuvages = ChecklistItem.objects.filter(checklist=checklist, product__category__name__in=["ALCOOL FORT", "SANS ALCOOL", "VINS",  "BIERES"], quantity__gt=0)
@@ -1646,7 +1798,8 @@ def conseiller_dashboard(request):
     envoye = "envoyé"
     conseiller_instance = get_object_or_404(Conseiller, user=request.user)
 
-   
+    # Fetch unread notifications for the current user
+    unread_notifications = request.user.notifications.filter(is_read=False)
 
     # Fetch checklists
     checklists = Checklist.objects.filter(conseillere=conseiller_instance).order_by("-date")
@@ -1654,8 +1807,8 @@ def conseiller_dashboard(request):
     inactive_checklists = checklists.filter(is_active=False)
 
     # Paginate checklists
-    checklist_paginator = Paginator(checklists, 10)  # Show 10 checklists per page
-    checklist_page_number = request.GET.get('checklist_page')  # Different page number for checklists
+    checklist_paginator = Paginator(checklists, 10)
+    checklist_page_number = request.GET.get('checklist_page')
     try:
         checklist_page_obj = checklist_paginator.page(checklist_page_number)
     except PageNotAnInteger:
@@ -1665,34 +1818,31 @@ def conseiller_dashboard(request):
 
     # Pagination for user's submissions
     submissions = Submission.objects.filter(user=request.user).order_by("-created_at")
-    
 
     submissions_48h_encours = submissions.filter(
-    status='en_cours',
-    created_at__lt=timezone.now() - timedelta(hours=48),
-    submission_type__icontains='soumission'  # Filtre pour 'soumission' dans submission_type
-)
+        status='en_cours',
+        created_at__lt=timezone.now() - timedelta(hours=48),
+        submission_type__icontains='soumission'
+    )
     commande_48h_encours = submissions.filter(
-    status='en_cours',
-    created_at__lt=timezone.now() - timedelta(hours=48),
-    submission_type__icontains='commande'  # Filtre pour 'soumission' dans submission_type
-)
+        status='en_cours',
+        created_at__lt=timezone.now() - timedelta(hours=48),
+        submission_type__icontains='commande'
+    )
     submissions_48h_envoye = submissions.filter(
-    status='envoyé',
-    created_at__lt=timezone.now() - timedelta(hours=48),
-    submission_type__icontains='soumission'  # Filtre pour 'soumission' dans submission_type
-)
+        status='envoyé',
+        created_at__lt=timezone.now() - timedelta(hours=48),
+        submission_type__icontains='soumission'
+    )
     commande_48h_envoye = submissions.filter(
-    status='envoyé',
-    created_at__lt=timezone.now() - timedelta(hours=48),
-    submission_type__icontains='commande'  # Filtre pour 'soumission' dans submission_type
-)
-
- 
+        status='envoyé',
+        created_at__lt=timezone.now() - timedelta(hours=48),
+        submission_type__icontains='commande'
+    )
 
     # Paginate submissions
-    submission_paginator = Paginator(submissions, 10)  # Show 10 submissions per page
-    submission_page_number = request.GET.get('submission_page')  # Different page number for submissions
+    submission_paginator = Paginator(submissions, 10)
+    submission_page_number = request.GET.get('submission_page')
     try:
         submission_page_obj = submission_paginator.page(submission_page_number)
     except PageNotAnInteger:
@@ -1734,7 +1884,8 @@ def conseiller_dashboard(request):
                 product.save()
                 messages.success(request, 'Nouveau produit créé avec succès.')
                 return redirect('creerchecklist')
-     # Calculate counts for each status
+
+    # Calculate counts for each status
     total_submissions = submissions.count()
     count_encours = submissions.filter(status='en_cours').count()
     count_valide = submissions.filter(status='valide').count()
@@ -1756,19 +1907,20 @@ def conseiller_dashboard(request):
         'product_form': product_form,
         'refuse': refuse,
         'checklists': checklists,
-        'checklist_page_obj': checklist_page_obj,  # Passing checklist pagination
-        'submission_page_obj': submission_page_obj,  # Passing submission pagination
+        'checklist_page_obj': checklist_page_obj,
+        'submission_page_obj': submission_page_obj,
         'today': timezone.now().date(),
-        'submissions_48h_envoye':submissions_48h_envoye,
-        'submissions_48h_encours':submissions_48h_encours,
-        'commande_48h_encours':commande_48h_encours,
-        'commande_48h_envoye':commande_48h_envoye,
-        'envoye':envoye,
-        
-        
+        'submissions_48h_envoye': submissions_48h_envoye,
+        'submissions_48h_encours': submissions_48h_encours,
+        'commande_48h_encours': commande_48h_encours,
+        'commande_48h_envoye': commande_48h_envoye,
+        'envoye': envoye,
+        # Ajouter les notifications non lues pour la page
+        'unread_notifications': unread_notifications,
     }
 
     return render(request, 'listings/conseiller_dashboard.html', context)
+
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt

@@ -269,7 +269,7 @@ body {
 <hr>
 <div class="d-flex flex-wrap gap-3 mb-4">
     {% for category in categories %}
-    {% if not category.name in special_categories %}
+    {% if not category.name in special_categories and category.name != "SOUMISSIONS"%}
         {% with icon=category_icons|get_item:category.name %}
         <div class="card text-center shadow-sm" style="width: 20%; cursor: pointer;"
              data-bs-toggle="modal" data-bs-target="#productModal"
@@ -345,7 +345,7 @@ body {
 <div id="rapportmd-section" class="rapport-section collapse">
   <div class="card p-3 shadow-sm bg-light border-0 rounded-3">
     <h3>Rapport événement</h3>
-    <p>{{ checklist.rapportmd }}</p>
+    <p>{{ checklist.rapportmd|linebreaksbr }}</p>
   </div>
 </div>
 
