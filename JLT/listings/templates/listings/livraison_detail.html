@@ -1,975 +1,936 @@
-{% extends 'listings/base.html' %}
-{%  load static%}
-{% block content %}
-<style>
-.attention-link {
-  color: #fff; /* Couleur du texte, par exemple blanc */
-  background-color: #e74c3c; /* Couleur qui attire, rouge vif */
-  padding: 8px 12px;
-  border-radius: 4px;
-  font-weight: bold;
-  text-decoration: none;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  transition: background-color 0.3s, transform 0.2s;
-}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Détails Livraison</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-.attention-link:hover {
-  background-color: #c0392b; /* Couleur encore plus foncée au survol */
-  transform: scale(1.05); /* Effet de zoom léger au survol */
-}
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
 
-.swipe-container {
-  position: relative;
-  width: 90%;
-  height: 60px;
-  background-color: #f8f8f8;
-  border-radius: 30px;
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
+        /* Header */
+        .app-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 15px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        }
 
-.swipe-button {
-  position: absolute;
-  left: 0;
-  height: 50px;
-  width: 50px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: left 0.3s ease, background-color 0.2s ease;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
+        .app-header.recuperation {
+            background: linear-gradient(135deg, #F1B3DA 0%, #FFB6D9 100%);
+        }
 
-.swipe-text {
-  font-size: 16px;
-  color: white;
-  user-select: none;
-  pointer-events: none;
-  text-transform: uppercase;
-}
+        .header-content {
+            text-align: center;
+        }
 
-.swipe-button.dragging {
-  transition: none;
-}
+        .header-title {
+            font-size: 24px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
 
+        .header-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
 
-.swipe-container:hover .swipe-button {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
+        /* Content Container */
+        .content-container {
+            padding: 15px;
+            padding-bottom: 100px;
+        }
 
-.swipe-button.done {
-  background-color: #2196f3; /* Blue color once swipe is complete */
-  left: 100%;
-  transform: translateX(-100%);
-  box-shadow: none;
-}
+        /* Section Cards */
+        .section-card {
+            background: white;
+            border-radius: 16px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
 
+        .section-header {
+            padding: 15px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
 
+        .section-header:active {
+            background: #e9ecef;
+        }
 
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
 
-.card {
-    margin-bottom: 20px;
-    border-radius: 15px;
-}
+        .section-icon {
+            color: #667eea;
+            transition: transform 0.3s;
+        }
 
-.card-title {
-    font-weight: bold;
-}
+        .section-header.active .section-icon {
+            transform: rotate(180deg);
+        }
 
-.card-body {
-    background-color: #f9f9f9;
-    padding: 20px;
-    border-radius: 15px;
-}
+        .section-content {
+            display: none;
+            padding: 15px;
+            animation: slideDown 0.3s ease-out;
+        }
 
-.offcanvas-title {
-    font-size: 1.5rem;
-    color: #4a90e2;
-}
-#signaturePad {
-    touch-action: none; /* Prevent scrolling while signing */
-    background-color: white; /* Ensure contrast */
-}
+        .section-content.show {
+            display: block;
+        }
 
-.card-body img {
-    transition: transform 0.3s ease;
-}
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-.card-body img:hover {
-    transform: scale(1.05); /* Slightly enlarge the photo on hover */
-    cursor: pointer; /* Change cursor to pointer */
-}
+        /* Info Items */
+        .info-grid {
+            display: grid;
+            gap: 12px;
+        }
 
-.btn-primary {
-    background-color: #4a90e2;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 25px;
-    transition: background-color 0.3s ease;
-}
+        .info-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 12px;
+        }
 
-.btn-primary:hover {
-    background-color: #3a78c2;
-}
+        .info-item.warning {
+            background: #FFF3CD;
+            border-left: 4px solid #FFC107;
+        }
 
-  * {
-     margin: 0;
-     padding: 0;
-     box-sizing: border-box;
- }
+        .info-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
 
- body {
-     font-family: Arial, sans-serif;
-     padding: 20px;
-     background-color: #f9f9f9;
- }
+        .info-value {
+            font-size: 15px;
+            color: #333;
+            word-break: break-word;
+        }
 
- /* Heading */
- h1 {
-     text-align: center;
-     color: #333;
-     margin-bottom: 20px;
- }
+        .info-value a {
+            color: #667eea;
+            text-decoration: none;
+        }
 
+        /* Dock Button */
+        .dock-button {
+            display: inline-block;
+            background: #FF4444;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 10px;
+            box-shadow: 0 4px 10px rgba(255, 68, 68, 0.3);
+            transition: all 0.3s;
+        }
 
+        .dock-button:active {
+            transform: scale(0.95);
+            color: white;
+        }
 
+        /* Photo Grid */
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
 
- /* Footer Navigation Bar (Fixed to bottom) */
- .bottom-navbar {
-     position: fixed;
-     bottom: 0;
-     left: 0;
-     width: 100%;
-     background-color: #333;
-     padding: 10px 0;
-     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
-     z-index: 1000; /* Ensures it's above other content */
- }
+        .photo-thumbnail {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
 
- .bottom-navbar ul {
-     list-style: none;
-     display: flex;
-     justify-content: space-around;
-     margin: 0;
-     padding: 0;
- }
+        .photo-thumbnail:active {
+            transform: scale(0.95);
+        }
 
- .bottom-navbar ul li {
-     flex: 1;
-     text-align: center;
- }
+        /* Checklist Items */
+        .checklist-item {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
 
- .bottom-navbar ul li a {
-     color: white;
-     text-decoration: none;
-     font-size: 16px;
- }
+        .checklist-products {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0;
+        }
 
- .bottom-navbar ul li a:hover {
-     text-decoration: underline;
- }
+        .checklist-products li {
+            padding: 6px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+        }
 
- /* Responsive Design */
- @media (max-width: 768px) {
-     .header-container {
-         flex-direction: column;
-         text-align: center;
-     }
+        .checklist-products li:last-child {
+            border-bottom: none;
+        }
 
-     .navbar ul {
-         flex-direction: column;
-     }
+        .product-quantity {
+            background: #667eea;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 10px;
+        }
 
-     .navbar ul li {
-         margin: 10px 0;
-     }
+        /* Bottom Action Bar */
+        .bottom-action-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 -2px 15px rgba(0,0,0,0.1);
+            z-index: 1000;
+            padding: 10px 15px;
+            padding-bottom: calc(10px + env(safe-area-inset-bottom));
+            display: flex;
+            gap: 10px;
+        }
 
-     .stats-section {
-         flex-direction: column;
-         align-items: center;
-     }
+        .action-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            text-decoration: none;
+            color: #333;
+            background: #f0f0f0;
+        }
 
-     .map-section {
-         padding: 10px;
-     }
+        .action-btn:active {
+            transform: scale(0.95);
+        }
 
-     .order {
-         font-size: 14px;
-     }
-     .dashboard-header {
-     text-align: center;
-     padding: 20px;
-     background-color: #f5f5f5;
-     border-radius: 10px;
-     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-     margin: 20px;
- }
+        .action-btn.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
 
+        .action-btn.success {
+            background: #4CAF50;
+            color: white;
+        }
 
- }
+        .action-btn.pending {
+            background: #FFC107;
+            color: white;
+        }
 
+        .action-btn-icon {
+            font-size: 18px;
+        }
 
- </style>
- <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.0/css/bootstrap.min.css" rel="stylesheet">
- <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.5.0/font/bootstrap-icons.css" rel="stylesheet">
- 
-<nav class="bottom-navbar">
-  <ul>
-      <li><a href="{% url 'dashboard' livraison.journee.id request.user.id %}" class="nav__link" ><i class="fa-solid fa-reply"></i>
-        <span>Retour</span>
-      </a>
-    </li>
-    {% if livraison.recuperation == True %}
-      <li>
-        <a type="button" class="nav__link" data-bs-toggle="offcanvas" data-bs-target="#uploadOffcanvasrecup" role="button" aria-controls="offcanvasExample">
-          <i class="fa-solid fa-camera"></i>
-          <span>Photo</span>
-        </a>
-      </li>
-      {% else %}
-      <li>
-        <a type="button" class="nav__link" data-bs-toggle="offcanvas" data-bs-target="#uploadOffcanvas" role="button" aria-controls="offcanvasExample">
-          <i class="fa-solid fa-camera"></i>
-          <span>Photo</span>
-        </a>
-      </li>
-      {% endif %}
-      {% if livraison.status == False %}
+        .action-btn-label {
+            font-size: 11px;
+        }
 
-      <li>
-        <a type="button" class="nav__link" data-bs-toggle="offcanvas" data-bs-target="#validateOffcanvas" role="button" aria-controls="offcanvasExample">
-          <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i>
-          <span>En cours</span>
-        </a>
-      </li>
-      {% else %}
+        /* Signature Section */
+        .signature-section {
+            padding: 20px;
+            background: white;
+            border-radius: 16px;
+        }
 
-      <li>
-        <a type="button" class="nav__link" data-bs-toggle="offcanvas" data-bs-target="#validateOffcanvas" role="button" aria-controls="offcanvasExample">
-          <i class="fa-solid fa-circle-check" style="color: green;"></i>
-          <span>Validé</span>
-        </a>
-      </li>
-      {% endif %}
+        .signature-canvas {
+            width: 100%;
+            height: 150px;
+            border: 2px dashed #667eea;
+            border-radius: 12px;
+            background: white;
+            touch-action: none;
+        }
 
+        .clear-signature-btn {
+            margin-top: 10px;
+            padding: 8px 16px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
 
-    </ul>
-</nav>
+        /* Swipe to Validate */
+        .swipe-container {
+            position: relative;
+            height: 60px;
+            background: #f0f0f0;
+            border-radius: 30px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
 
-<div class="offcanvas offcanvas-start" tabindex="-1" id="uploadOffcanvasrecup" aria-labelledby="uploadOffcanvasLabelrecup">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="uploadOffcanvasLabelrecup">Déposer photos récup</h5>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-  </div>
-  <div class="offcanvas-body">
-    <form method="post" enctype="multipart/form-data">
-      {% csrf_token %}
-  
-      <div class="mb-3">
-          <label for="photo-upload" class="form-label">Ajouter des photos</label>
-          <input type="file" name="imagerecup" id="photo-upload" class="form-control" multiple>
-      </div>
-  
-      <button type="submit" name="photo_form" class="btn btn-primary">Déposer</button>
-  </form>
+        .swipe-track {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #999;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            user-select: none;
+        }
 
-  </div>
-</div>
-<header>
-  <div class="header-container text-center py-3">
-    {% if livraison.recuperation == True %}
-    <h1 class="text-uppercase" style="color: #F1B3DA;">Récupération {{ livraison.nom }}</h1>
-    {% else %}
-    <h1 class="text-uppercase" style="color: #116EFD;">Livraison {{ livraison.nom }}</h1>
-    {% endif %}
-  </div>
-</header>
+        .swipe-button {
+            position: absolute;
+            left: 4px;
+            top: 4px;
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            cursor: grab;
+            transition: left 0.3s ease;
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.4);
+        }
 
-<div class="container">
-  <!-- Main Informations Section -->
-  <div class="card shadow mb-4">
-    <ul class="list-group list-group-flush">
-      <!-- Toggle Header -->
-      <li class="list-group-item active" data-bs-toggle="collapse" href="#informationContent" aria-expanded="false" aria-controls="informationContent" style="cursor: pointer;">
-        Informations Livraison
-      </li>
-    </ul>
-    <!-- Collapsible Content -->
-    <div id="informationContent" class="collapse">
-      <ul class="list-group list-group-flush">
-        <li class="list-group-item">
-          <div class="row g-4">
-            <!-- Nom -->
-            <div class="col-md-6">
-              <div class="card border-0">
-                <div class="card-body">
-                  <h5 class="card-title">Nom</h5>
-                  <p class="card-text">{{ livraison.nom }}</p>
-                </div>
-              </div>
+        .swipe-button.dragging {
+            cursor: grabbing;
+            transition: none;
+        }
+
+        .swipe-button.validated {
+            background: #4CAF50;
+            left: calc(100% - 56px) !important;
+        }
+
+        /* Modal Styles */
+        .modal-content {
+            border-radius: 20px;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px 20px 0 0;
+            padding: 20px;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        /* Offcanvas Mobile Optimized */
+        .offcanvas {
+            width: 100% !important;
+            max-width: 400px;
+        }
+
+        .offcanvas-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+        }
+
+        .offcanvas-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .btn-close {
+            filter: brightness(0) invert(1);
+        }
+
+        /* Form Elements */
+        .form-control, .form-select {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        /* Submit Button */
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .btn-submit:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="app-header {% if livraison.recuperation %}recuperation{% endif %}">
+        <div class="header-content">
+            <div class="header-title">
+                {% if livraison.recuperation %}
+                    📦 Récupération
+                {% else %}
+                    🚚 Livraison
+                {% endif %}
             </div>
-            <!-- Adresse -->
-            <div class="col-md-6">
-              <div class="card border-0">
-                <div class="card-body">
-                  <h5 class="card-title">Adresse</h5>
-                  <p class="card-text">
-                    <a href="https://maps.google.com/?q={{ livraison.adress }}, {{ livraison.zipcode }}, {{ livraison.city }}" target="_blank">
-                      {{ livraison.adress }}, {{ livraison.zipcode }}, {{ livraison.city }} {{ livraison.app }}, {{ livraison.ligne2 }}
-                    </a>
-                  </p>
-                  <hr>
-                  {% if livraison.loading_docks.all %}
-                    <p class="card-text">
-                      <a href="#" data-bs-toggle="modal" data-bs-target="#dockModal" class="attention-link">Aller au Dock</a>
-                    </p>
-                  {% endif %}
+            <div class="header-subtitle">{{ livraison.nom }}</div>
+        </div>
+    </div>
 
-                </div>
-              </div>
+    <!-- Content -->
+    <div class="content-container">
+        <!-- Main Information Section -->
+        <div class="section-card">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span class="section-title">📋 Informations Livraison</span>
+                <i class="fas fa-chevron-down section-icon"></i>
             </div>
-          <!-- Heure de Livraison -->
-          <div class="col-md-6">
-            <div class="card border-0">
-              <div class="card-body">
-                <h5 class="card-title">Heure de Livraison</h5>
-                <p class="card-text">{{ livraison.heure_livraison }}</p>
-              </div>
-            </div>
-          </div>
+            <div class="section-content show">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Client</div>
+                        <div class="info-value">{{ livraison.nom }}</div>
+                    </div>
 
-          <!-- Infos supplementaires -->
-          {% if livraison.infodetail %}
-          <div class="col-md-6">
-            <div class="card border-0">
-              <div class="card-body" style="background-color: orange;">
-                <h5 class="card-title">Infos Supplementaires</h5>
-                <p class="card-text">{{ livraison.infodetail }}</p>
-              </div>
-            </div>
-          </div>
-          {% endif %}
-          <!-- Commentaire du Dispatch -->
-          {% if livraison.commentairedispatch %}
-          <div class="col-md-6">
-            <div class="card border-0">
-              <div class="card-body" style="background-color: orange;">
-                <h5 class="card-title">Commentaire du Dispatch</h5>
-                <p class="card-text">{{ livraison.commentairedispatch }}</p>
-              </div>
-            </div>
-          </div>
-          {% endif %}
-          <!-- Commentaire du Livreur -->
-          <div class="col-md-6">
-            <div class="card border-0">
-              <div class="card-body">
-                <h5 class="card-title">Commentaire du Livreur</h5>
-                <p class="card-text">{{ livraison.commentaire }}</p>
-              </div>
-            </div>
-          </div>
+                    <div class="info-item">
+                        <div class="info-label">Adresse</div>
+                        <div class="info-value">
+                            <a href="https://maps.google.com/?q={{ livraison.adress }}, {{ livraison.zipcode }}, {{ livraison.city }}" target="_blank">
+                                📍 {{ livraison.adress }}, {{ livraison.zipcode }}, {{ livraison.city }}
+                                {% if livraison.app %}, {{ livraison.app }}{% endif %}
+                                {% if livraison.ligne2 %}, {{ livraison.ligne2 }}{% endif %}
+                            </a>
+                        </div>
+                        {% if livraison.loading_docks.all %}
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#dockModal" class="dock-button">
+                                🚨 Aller au Dock
+                            </a>
+                        {% endif %}
+                    </div>
 
-          <!-- N° de Commande -->
-          <div class="col-md-6">
-            <div class="card border-0">
-              <div class="card-body">
-                <h5 class="card-title">N° de Commande</h5>
-                <p class="card-text">{{ livraison.num_commande }}</p>
-              </div>
-            </div>
-          </div>
+                    <div class="info-item">
+                        <div class="info-label">Heure de livraison</div>
+                        <div class="info-value">🕐 {{ livraison.heure_livraison }}</div>
+                    </div>
 
-          <!-- Nombre Convives -->
-          <div class="col-md-6">
-            <div class="card border-0">
-              <div class="card-body">
-                <h5 class="card-title">Nombre de Convives</h5>
-                <p class="card-text">{{ livraison.convives }}</p>
-              </div>
-            </div>
-          </div>
+                    {% if livraison.infodetail %}
+                    <div class="info-item warning">
+                        <div class="info-label">⚠️ Infos Supplémentaires</div>
+                        <div class="info-value">{{ livraison.infodetail }}</div>
+                    </div>
+                    {% endif %}
 
-          <!-- Mode d'envoi -->
-          <div class="col-md-6">
-            <div class="card border-0">
-              <div class="card-body">
-                <h5 class="card-title">Mode d'Envoi</h5>
-                <p class="card-text">{{ livraison.mode_envoi }}</p>
-              </div>
-            </div>
-          </div>
+                    {% if livraison.commentairedispatch %}
+                    <div class="info-item warning">
+                        <div class="info-label">⚠️ Commentaire Dispatch</div>
+                        <div class="info-value">{{ livraison.commentairedispatch }}</div>
+                    </div>
+                    {% endif %}
 
-          <!-- Vendeur -->
-          <div class="col-md-6">
-            <div class="card border-0">
-              <div class="card-body">
-                <h5 class="card-title">Vendeur</h5>
-                <p class="card-text">{{ livraison.vendeur }}</p>
-              </div>
-            </div>
-          </div>
+                    {% if livraison.commentaire %}
+                    <div class="info-item">
+                        <div class="info-label">Commentaire Livreur</div>
+                        <div class="info-value">{{ livraison.commentaire }}</div>
+                    </div>
+                    {% endif %}
 
-          <!-- Photo Livraison -->
+                    <div class="info-item">
+                        <div class="info-label">N° Commande</div>
+                        <div class="info-value">{{ livraison.num_commande|default:"—" }}</div>
+                    </div>
 
-          <!-- Image Gallery -->
+                    <div class="info-item">
+                        <div class="info-label">Nombre de Convives</div>
+                        <div class="info-value">👥 {{ livraison.convives|default:"—" }}</div>
+                    </div>
 
-          <div class="col-md-6">
-            <div class="card border-0">
-                <div class="card-body">
-                    <h5 class="card-title">Photo Récupération</h5>
-                    <div class="row">
-                        {% for photo in livraison.livraison_photos_recups.all %}
-                            <div class="col-md-3">
-                                <!-- Small Thumbnail -->
+                    <div class="info-item">
+                        <div class="info-label">Mode d'envoi</div>
+                        <div class="info-value">{{ livraison.mode_envoi|default:"—" }}</div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">Vendeur</div>
+                        <div class="info-value">{{ livraison.vendeur|default:"—" }}</div>
+                    </div>
+
+                    <!-- Photos -->
+                    {% if livraison.livraison_photos.all or livraison.livraison_photos_recups.all %}
+                    <div class="info-item">
+                        <div class="info-label">Photos</div>
+                        <div class="photo-grid">
+                            {% for photo in livraison.livraison_photos.all %}
                                 <img src="{{ photo.image.url }}" 
-                                     class="img-fluid rounded shadow-sm" 
-                                     alt="Photo"
+                                     class="photo-thumbnail" 
+                                     data-bs-toggle="modal" 
+                                     data-bs-target="#photoModal{{ forloop.counter }}">
+                            {% endfor %}
+                            {% for photo in livraison.livraison_photos_recups.all %}
+                                <img src="{{ photo.image.url }}" 
+                                     class="photo-thumbnail" 
                                      data-bs-toggle="modal" 
                                      data-bs-target="#photoModalR{{ forloop.counter }}">
-                            </div>
-          
-                            <!-- Bootstrap Modal for Large Image -->
-                            <div class="modal fade" id="photoModalR{{ forloop.counter }}" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content">
-                                        <div class="modal-body text-center">
-                                            <img src="{{ photo.image.url }}" class="img-fluid rounded" alt="Photo">
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endfor %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Client Information Section -->
+        <div class="section-card">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span class="section-title">👤 Informations Client</span>
+                <i class="fas fa-chevron-down section-icon"></i>
+            </div>
+            <div class="section-content">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Contact sur place</div>
+                        <div class="info-value">{{ livraison.contact_site|default:"—" }}</div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">Commandé par</div>
+                        <div class="info-value">{{ livraison.nom_client|default:"—" }}</div>
+                    </div>
+
+                    {% if livraison.nom_client_signature %}
+                    <div class="info-item">
+                        <div class="info-label">Signature de</div>
+                        <div class="info-value">{{ livraison.nom_client_signature }}</div>
+                        {% if livraison.signature %}
+                            <img src="{{ livraison.signature }}" alt="Signature" style="max-width: 200px; margin-top: 10px;">
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Checklist Section -->
+        {% if checklist %}
+        <div class="section-card">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span class="section-title">📦 Checklist</span>
+                <i class="fas fa-chevron-down section-icon"></i>
+            </div>
+            <div class="section-content">
+                {% for item in checklist %}
+                <div class="checklist-item">
+                    {% if item.notechecklist %}
+                    <div class="info-item warning">
+                        <div class="info-label">Note</div>
+                        <div class="info-value">{{ item.notechecklist }}</div>
+                    </div>
+                    {% endif %}
+
+                    {% if item.md %}
+                    <div class="info-item">
+                        <div class="info-label">MD</div>
+                        <div class="info-value">
+                            {{ item.md.name }} 
+                            <a href="tel:{{ item.md.phone }}">📞 {{ item.md.phone }}</a>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if item.commentairevente %}
+                    <div class="info-item">
+                        <div class="info-label">Commentaire ventes</div>
+                        <div class="info-value">{{ item.commentairevente }}</div>
+                    </div>
+                    {% endif %}
+
+                    {% if item.filtered_checklist_items %}
+                    <div class="info-item">
+                        <div class="info-label">Produits</div>
+                        <ul class="checklist-products">
+                            {% for checklist_item in item.filtered_checklist_items %}
+                                <li>
+                                    <span class="product-quantity">{{ checklist_item.quantity }}</span>
+                                    <span>{{ checklist_item.product.name }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    {% if livraison.recuperation and item.rapportrecup %}
+                    <div class="info-item">
+                        <div class="info-label">Rapport Récup</div>
+                        <div class="info-value">{{ item.rapportrecup }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Bottom Action Bar -->
+    <div class="bottom-action-bar">
+        <a href="{% url 'dashboard' livraison.journee.id request.user.id %}" class="action-btn">
+            <i class="fas fa-arrow-left action-btn-icon"></i>
+            <span class="action-btn-label">Retour</span>
+        </a>
+
+        <button class="action-btn primary" data-bs-toggle="offcanvas" 
+                data-bs-target="{% if livraison.recuperation %}#uploadOffcanvasrecup{% else %}#uploadOffcanvas{% endif %}">
+            <i class="fas fa-camera action-btn-icon"></i>
+            <span class="action-btn-label">Photo</span>
+        </button>
+
+        <button class="action-btn {% if livraison.status %}success{% else %}pending{% endif %}" 
+                data-bs-toggle="offcanvas" data-bs-target="#validateOffcanvas">
+            {% if livraison.status %}
+                <i class="fas fa-check-circle action-btn-icon"></i>
+                <span class="action-btn-label">Validé</span>
+            {% else %}
+                <i class="fas fa-spinner fa-spin action-btn-icon"></i>
+                <span class="action-btn-label">En cours</span>
+            {% endif %}
+        </button>
+    </div>
+
+    <!-- Validation Offcanvas -->
+    <div class="offcanvas offcanvas-bottom" tabindex="-1" id="validateOffcanvas">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title">Valider la livraison</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body">
+            <form id="validateForm" action="{% url 'validate_livraison' livraison.id %}" method="POST">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label class="form-label">Commentaire</label>
+                    <textarea name="commentaire" class="form-control" rows="3" 
+                              placeholder="Ajouter un commentaire..." required></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Nom du client</label>
+                    <input type="text" name="nom_client_signature" class="form-control" 
+                           placeholder="Entrez le nom du client" required>
+                </div>
+
+                <div class="signature-section">
+                    <label class="form-label">Signature</label>
+                    <canvas id="signaturePad" class="signature-canvas"></canvas>
+                    <button type="button" id="clearButton" class="clear-signature-btn">
+                        <i class="fas fa-eraser"></i> Effacer
+                    </button>
+                    <input type="hidden" id="signatureInput" name="signature">
+                </div>
+
+                <div class="swipe-container">
+                    <div class="swipe-track">Glissez pour valider →</div>
+                    <div id="swipeButton" class="swipe-button">
+                        <i class="fas fa-arrow-right"></i>
                     </div>
                 </div>
-            </div>
-          </div>
-
-<div class="col-md-6">
-  <div class="card border-0">
-      <div class="card-body">
-          <h5 class="card-title">Photo Livraison</h5>
-          <div class="row">
-              {% for photo in livraison.livraison_photos.all %}
-                  <div class="col-md-3">
-                      <!-- Small Thumbnail -->
-                      <img src="{{ photo.image.url }}" 
-                           class="img-fluid rounded shadow-sm" 
-                           alt="Photo"
-                           data-bs-toggle="modal" 
-                           data-bs-target="#photoModal{{ forloop.counter }}">
-                  </div>
-
-                  <!-- Bootstrap Modal for Large Image -->
-                  <div class="modal fade" id="photoModal{{ forloop.counter }}" tabindex="-1" aria-hidden="true">
-                      <div class="modal-dialog modal-dialog-centered">
-                          <div class="modal-content">
-                              <div class="modal-body text-center">
-                                  <img src="{{ photo.image.url }}" class="img-fluid rounded" alt="Photo">
-                              </div>
-                              <div class="modal-footer">
-                                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-              {% endfor %}
-          </div>
-      </div>
-  </div>
-</div>
-
-
+            </form>
         </div>
-      </li>
-    </ul>
-  </div>
-</div>
+    </div>
 
- <!-- Client Information Section -->
- <div class="card shadow mb-4">
-  <ul class="list-group list-group-flush">
-    <!-- Toggle Header -->
-    <li class="list-group-item active" data-bs-toggle="collapse" href="#clientInfoContent" aria-expanded="false" aria-controls="clientInfoContent" style="cursor: pointer;">
-      Informations Client sur place
-    </li>
-  </ul>
-  <!-- Collapsible Content -->
-  <div id="clientInfoContent" class="collapse">
-    <ul class="list-group list-group-flush">
-      <li class="list-group-item">
-        <div class="row g-4">
-          <!-- Contact Client -->
-          <div class="col-md-6">
-            <div class="card border-0">
-              <div class="card-body">
-                <h5 class="card-title">Contact Client</h5>
-                <p class="card-text">{{ livraison.contact_site }}</p>
-              </div>
-            </div>
-          </div>
-          <!-- Commandé par -->
-          <div class="col-md-6">
-            <div class="card border-0">
-              <div class="card-body">
-                <h5 class="card-title">Commandé par</h5>
-                <p class="card-text">{{ livraison.nom_client }}</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="card border-0">
-              <div class="card-body">
-                <h5 class="card-title">Signature</h5>
-                <p class="card-text">{{ livraison.nom_client_signature }}</p>
-                {% if livraison.signature %}
-                <img src="{{ livraison.signature }}" alt="Signature" width="150">
-                {% endif %}</p>
-              </div>
-            </div>
-          </div>
+    <!-- Photo Upload Offcanvas -->
+    <div class="offcanvas offcanvas-bottom" tabindex="-1" id="uploadOffcanvas">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title">Ajouter des photos</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
         </div>
-      </li>
-    </ul>
-  </div>
-</div>
+        <div class="offcanvas-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">Photos de livraison</label>
+                    <input type="file" name="image" class="form-control" multiple accept="image/*">
+                </div>
+                <button type="submit" name="photo_form" class="btn-submit">
+                    <i class="fas fa-upload"></i> Déposer les photos
+                </button>
+            </form>
+        </div>
+    </div>
 
-<!-- Checklist Section -->
-<div class="card shadow mb-4">
-  <ul class="list-group list-group-flush">
-    <!-- Toggle Header -->
-    <li class="list-group-item active" data-bs-toggle="collapse" href="#checklistContent" aria-expanded="false" aria-controls="checklistContent" style="cursor: pointer;">
-      Informations Checklist
-    </li>
-  </ul>
-  <!-- Collapsible Content -->
-  <div id="checklistContent" class="collapse">
-    <ul class="list-group list-group-flush">
-      {% for item in checklist %}
-        <li class="list-group-item">
-            <div class="row g-4">
-                            {% if item.notechecklist %}
-                            <div class="col-md-6">
-                              <div class="card border-0">
-                                <div class="card-body" style="background-color: orange;">
-                                  <h5 class="card-title">Note</h5>
-                                  <p class="card-text">{{ item.notechecklist }}</p>
-                                </div>
-                              </div>
-                            </div>
-                            {% endif %}
-                            {% if item.md %}
-                            <div class="col-md-6">
-                              <div class="card border-0">
-                                <div class="card-body">
-                                  <h5 class="card-title">MD</h5>
-                                  <p class="card-text">{{ item.md.name }} (<a href="tel:{{ item.md.phone }}">{{ item.md.phone }}</a>)</p>
-                                </div>
-                              </div>
-                            </div>
-                            {% endif %}
-                            {% if item.commentairevente %}
-                            <div class="col-md-6">
-                              <div class="card border-0">
-                                <div class="card-body">
-                                  <h5 class="card-title">Commentaire ventes</h5>
-                                  <p class="card-text">{{ item.commentairevente }}</p>
-                                </div>
-                              </div>
-                            </div>
-                            {% endif %}
-                            <div class="col-md-6">
-                              <div class="card border-0">
-                                <div class="card-body">
-                                  <h5 class="card-title">Produits</h5>
-                                  <p class="card-text">
-                                    <ul>
-                                      {% if item.filtered_checklist_items %}
-                                          {% for checklist_item in item.filtered_checklist_items %}
-                                              <li><strong>{{ checklist_item.quantity }}</strong> <strong style="margin-left: 10px;">{{ checklist_item.product.name }}</strong>
-                                              </li>
-                                          {% endfor %}
-                                      {% else %}
-                                          <li>Aucun produit associé.</li>
-                                      {% endif %}
-                                  </ul>
+    <!-- Photo Upload Offcanvas Recup -->
+    <div class="offcanvas offcanvas-bottom" tabindex="-1" id="uploadOffcanvasrecup">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title">Photos de récupération</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">Photos de récupération</label>
+                    <input type="file" name="imagerecup" class="form-control" multiple accept="image/*">
+                </div>
+                <button type="submit" name="photo_form" class="btn-submit">
+                    <i class="fas fa-upload"></i> Déposer les photos
+                </button>
+            </form>
+        </div>
+    </div>
 
-                              </p>
-                                </div>
-                              </div>
-                            </div>
-                            {% if livraison.recuperation %}
-                            <div class="col-md-6">
-                              <div class="card border-0">
-                                  <div class="card-body">
-                                      <h5 class="card-title">Photos Récup</h5>
-                                      <div class="row">
-                                          {% for photo in item.checklistrecupphoto_set.all %}
-                                              <div class="col-6 mb-2">
-                                                  <img src="{{ photo.image.url }}" alt="Photo" class="img-fluid rounded thumbnail"
-                                                       data-bs-toggle="modal"
-                                                       data-bs-target="#photoModal"
-                                                       data-photo-url="{{ photo.image.url }}"
-                                                       style="cursor: pointer;" />
-                                              </div>
-                                          {% empty %}
-                                              <div class="col-12">
-                                                  <p>Aucune photo disponible.</p>
-                                              </div>
-                                          {% endfor %}
-                                      </div>
-                                  </div>
-                              </div>
-                          </div>
-
-                          <!-- Modal for displaying full-sized images -->
-                          <div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
-                              <div class="modal-dialog modal-lg">
-                                  <div class="modal-content">
-                                      <div class="modal-header">
-                                          <h5 class="modal-title" id="photoModalLabel">Photo</h5>
-                                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                      </div>
-                                      <div class="modal-body">
-                                          <img id="modalImage" class="img-fluid rounded" src="" alt="Full Size Photo" />
-                                      </div>
-                                  </div>
-                              </div>
-                          </div>
-
-
-                            <div class="col-md-6">
-                              <div class="card border-0">
-                                <div class="card-body">
-                                  <h5 class="card-title">Rapport Récup</h5>
-                                  <p class="card-text">{{ item.rapportrecup }}</p>
-                                </div>
-                              </div>
-                            </div>
-                            {% endif %}
+    <!-- Dock Modal -->
+    {% if docks %}
+    <div class="modal fade" id="dockModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">📍 Détails du Dock</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    {% for dock in docks %}
+                    <div class="text-center mb-3">
+                        <h3>{{ dock.name }}</h3>
+                        <p><strong>Adresse:</strong> {{ dock.address }}</p>
+                        {% if dock.adresse_compagny %}
+                            <p><strong>Compagnie:</strong> {{ dock.adresse_compagny }}</p>
+                        {% endif %}
+                        {% if dock.photo %}
+                            <img src="{{ dock.photo.url }}" alt="Dock" class="img-fluid rounded" style="max-height: 300px;">
+                        {% endif %}
+                        {% if dock.description %}
+                            <p class="mt-3">{{ dock.description }}</p>
+                        {% endif %}
+                        {% if dock.link or dock.place_id %}
+                            <a href="{% if dock.link %}{{ dock.link }}{% else %}https://www.google.com/maps/place/?q=place_id:{{ dock.place_id }}{% endif %}" 
+                               target="_blank" class="btn btn-primary mt-3">
+                                <i class="fas fa-map"></i> Ouvrir dans Maps
+                            </a>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
-        </li>
-    {% empty %}
-        <li class="list-group-item">Pas de checklist disponible.</li>
-    {% endfor %}
-    </ul>
-  </div>
-</div>
-
-<!-- Optional JavaScript if Bootstrap isn't toggling correctly -->
-<script>
-  document.querySelectorAll('.list-group-item.active').forEach(item => {
-    item.addEventListener('click', function() {
-      const content = document.getElementById(this.getAttribute('href').substring(1));
-      content.classList.toggle('show');
-    });
-  });
-</script>
-
-</div>
-
-<br>
-<br>
-<br>
-
-<!-- Validation Form -->
-<div class="offcanvas offcanvas-start" tabindex="-1" id="validateOffcanvas" aria-labelledby="validateOffcanvasLabel">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="validateOffcanvasLabel">Valider Livraison</h5>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-  </div>
-  <div class="offcanvas-body">
-    <form id="validateForm" action="{% url 'validate_livraison' livraison.id %}" method="POST">
-      {% csrf_token %}
-    <div class="mb-3">
-        <label for="commentaire" class="form-label">Commentaire</label>
-        <textarea id="commentaire" name="commentaire" class="form-control" rows="3" placeholder="Ajouter un commentaire" required></textarea>
-    </div>
-    <div class="mb-3">
-      <label for="nom_client_signature" class="form-label">Nom du Client</label>
-      <input 
-          type="text" 
-          id="nom_client_signature" 
-          name="nom_client_signature" 
-          class="form-control rounded-3 shadow-sm p-2" 
-          placeholder="Entrez le nom du client" 
-          required 
-          autocomplete="off">
-  </div>
-  
-
-    <label for="signaturePad">Signature</label>
-    <canvas id="signaturePad" width="300" height="150" style="border:1px solid #000; border-radius: 8px;"></canvas>
-    <button type="button" id="clearButton" class="btn btn-secondary btn-sm mt-2">Effacer</button>
-
-    <!-- Hidden Input for Signature -->
-    <input type="hidden" id="signatureInput" name="signature">
-   
-    <div class="swipe-container" style="margin-top: 60px !important; margin-left: 20px;">
-        <div id="swipeButton" class="swipe-button">
-            <span class="swipe-text"><i class="fa-solid fa-circle-arrow-right" style="color: #63E6BE;"></i></i></span>
         </div>
     </div>
-    </form>
-  </div>
-</div>
+    {% endif %}
 
-
-
-
-
-<!-- Photo Upload Form -->
-<div class="offcanvas offcanvas-start" tabindex="-1" id="uploadOffcanvas" aria-labelledby="uploadOffcanvasLabel">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="uploadOffcanvasLabel">Déposer photos</h5>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-  </div>
-  <div class="offcanvas-body">
-    <form method="post" enctype="multipart/form-data">
-      {% csrf_token %}
-  
-      <div class="mb-3">
-          <label for="photo-upload" class="form-label">Ajouter des photos</label>
-          <input type="file" name="image" id="photo-upload" class="form-control" multiple>
-      </div>
-  
-      <button type="submit" name="photo_form" class="btn btn-primary">Déposer</button>
-  </form>
-
-  </div>
-</div>
-
-
-<!-- Dock Modal -->
-<div class="modal fade" id="dockModal" tabindex="-1" aria-labelledby="dockModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content">
-      <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title" id="dockModalLabel">
-          <i class="bi bi-info-circle-fill"></i> Détails du Dock
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-      </div>
-
-      {% for dock in docks %}
-      <div class="modal-body">
-        <div class="text-center mb-3 pb-3 border-bottom">
-          <h1 class="display-6">{{ dock.name }}</h1>
-          <h6><strong><i class="bi bi-geo-alt-fill"></i> Adresse du dock :</strong> {{ dock.address }}</h6>
-          
-          {% if dock.adresse_compagny %}
-            <h6><strong><i class="bi bi-building"></i> Adresse de la compagnie :</strong> {{ dock.adresse_compagny }}</h6>
-          {% endif %}
-    
-          {% if dock.photo %}
-            <img src="{{ dock.photo.url }}" alt="Loading Dock Image" class="img-fluid rounded mt-3" style="max-height: 300px; width: auto;">
-          {% else %}
-            <p class="text-muted">Pas d'image disponible</p>
-          {% endif %}
-          <br>
-          {% if dock.description %}
-            <p><strong><i class="bi bi-file-earmark-text-fill"></i> Description :</strong></p>
-            <p> {{ dock.description }}</p>
-          {% endif %}
-        </div>
-        
-        <div class="text-center mb-3">
-          {% if dock.link %}
-            <a href="{{ dock.link }}" target="_blank" class="btn btn-primary">
-              <i class="bi bi-map"></i> Ouvrir dans Google Maps
-            </a>
-          {% elif dock.place_id %}
-            <a href="https://www.google.com/maps/place/?q=place_id:{{ dock.place_id }}" target="_blank" class="btn btn-primary">
-              <i class="bi bi-map"></i> Ouvrir dans Google Maps
-            </a>
-          {% endif %}
-        </div>
-      </div>
-      <hr>
-      {% endfor %}
-      
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-
-
-
-<script>
-
-const swipeButton = document.getElementById('swipeButton');
-const commentaire = document.getElementById('commentaire');
-const form = document.getElementById('validateForm');
-let isDragging = false;
-let startX = 0;
-
-const startDrag = (e) => {
-    e.preventDefault();
-    isDragging = true;
-    // for mobile and desktop
-    startX = e.touches ? e.touches[0].clientX : e.clientX; // Use touches for touchscreen devices
-    swipeButton.classList.add('dragging');
-};
-
-const dragMove = (e) => {
-    if (!isDragging) return;
-
-    // Calculate the offset from the initial position
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX; // Use touches for touchscreen devices
-    const offset = Math.max(0, Math.min(clientX - startX, form.offsetWidth - swipeButton.offsetWidth));
-    swipeButton.style.left = `${offset}px`; // Move the swipe button
-
-    // Check if the button is swiped all the way to the right
-    if (offset >= form.offsetWidth - swipeButton.offsetWidth) {
-        swipeButton.style.backgroundColor = '#45a049'; // Change color on proper swipe
-    } else {
-        swipeButton.style.backgroundColor = '#4caf50'; // Reset color
-    }
-};
-
-const endDrag = () => {
-    if (isDragging) {
-        const offset = parseFloat(swipeButton.style.left); // Get the current position
-
-        // Check if the swipe button reached the end
-        if (offset >= form.offsetWidth - swipeButton.offsetWidth) {
-            validateLivraison(); // If reached, validate
-        } else {
-            resetButton(); // Reset to start position if not
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Toggle sections
+        function toggleSection(header) {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('.section-icon');
+            
+            content.classList.toggle('show');
+            header.classList.toggle('active');
         }
-    }
-};
 
-document.addEventListener('mouseup', endDrag);
-document.addEventListener('mouseleave', resetButton);
+        // Signature Pad
+        const canvas = document.getElementById('signaturePad');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            const signatureInput = document.getElementById('signatureInput');
+            let isDrawing = false;
 
-swipeButton.addEventListener('mousedown', startDrag);
-swipeButton.addEventListener('touchstart', startDrag); // Touch start event for mobile
+            // Set canvas size
+            canvas.width = canvas.offsetWidth;
+            canvas.height = 150;
 
-document.addEventListener('mousemove', dragMove);
-document.addEventListener('touchmove', dragMove); // Touch move event for mobile
+            // Setup context
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#000';
 
-document.addEventListener('mouseup', endDrag);
-document.addEventListener('touchend', endDrag); // Touch end event for mobile
+            // Get position
+            function getPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+                const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+                return {
+                    x: clientX - rect.left,
+                    y: clientY - rect.top
+                };
+            }
 
-function validateLivraison() {
-    form.submit(); // Directly submit the form
-}
+            // Start drawing
+            function startDrawing(e) {
+                e.preventDefault();
+                isDrawing = true;
+                const pos = getPos(e);
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y);
+            }
 
-function resetButton() {
-    isDragging = false;
-    swipeButton.style.left = '0'; // Reset button position
-    swipeButton.classList.remove('dragging');
-}
+            // Draw
+            function draw(e) {
+                if (!isDrawing) return;
+                e.preventDefault();
+                const pos = getPos(e);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+            }
 
-  document.querySelectorAll('.list-group-item.active').forEach(item => {
-    item.addEventListener('click', function() {
-      const content = document.getElementById(this.getAttribute('href').substring(1));
-      content.classList.toggle('show');
-    });
-  });
+            // Stop drawing
+            function stopDrawing() {
+                if (isDrawing) {
+                    isDrawing = false;
+                    signatureInput.value = canvas.toDataURL();
+                }
+            }
 
-  
+            // Mouse events
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseleave', stopDrawing);
 
-    document.addEventListener('DOMContentLoaded', function() {
-    const signaturePad = document.getElementById('signaturePad');
-    const signatureInput = document.getElementById('signatureInput');
-    const clearButton = document.getElementById('clearButton');
+            // Touch events
+            canvas.addEventListener('touchstart', startDrawing);
+            canvas.addEventListener('touchmove', draw);
+            canvas.addEventListener('touchend', stopDrawing);
 
-    if (!signaturePad || !signatureInput || !clearButton) {
-        console.error("One or more required elements are missing.");
-        return;
-    }
+            // Clear button
+            document.getElementById('clearButton')?.addEventListener('click', () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                signatureInput.value = '';
+            });
+        }
 
-    const ctx = signaturePad.getContext('2d');
-    if (!ctx) {
-        console.error("Canvas context could not be initialized.");
-        return;
-    }
+        // Swipe to validate
+        const swipeButton = document.getElementById('swipeButton');
+        const form = document.getElementById('validateForm');
+        let isDragging = false;
+        let startX = 0;
 
-    ctx.lineWidth = 2;
-    ctx.lineJoin = 'round';
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = '#000';
+        if (swipeButton) {
+            const container = swipeButton.parentElement;
+            const maxX = container.offsetWidth - swipeButton.offsetWidth - 8;
 
-    let drawing = false;
+            function startDrag(e) {
+                e.preventDefault();
+                isDragging = true;
+                startX = e.clientX || e.touches[0].clientX;
+                swipeButton.classList.add('dragging');
+            }
 
-    const getPosition = (e) => {
-        const rect = signaturePad.getBoundingClientRect();
-        const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
-        const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
-        return {
-            x: clientX - rect.left,
-            y: clientY - rect.top
-        };
-    };
+            function drag(e) {
+                if (!isDragging) return;
+                e.preventDefault();
+                
+                const currentX = e.clientX || e.touches[0].clientX;
+                const diffX = currentX - startX;
+                const newX = Math.max(4, Math.min(maxX, diffX));
+                
+                swipeButton.style.left = newX + 'px';
+                
+                // Check if validated
+                if (newX >= maxX * 0.9) {
+                    swipeButton.classList.add('validated');
+                    form.submit();
+                }
+            }
 
-    const startDrawing = (e) => {
-        e.preventDefault();
-        drawing = true;
-        const pos = getPosition(e);
-        ctx.beginPath();
-        ctx.moveTo(pos.x, pos.y);
-        console.log("Start Drawing:", pos);
-    };
+            function stopDrag() {
+                if (!isDragging) return;
+                isDragging = false;
+                swipeButton.classList.remove('dragging');
+                
+                // Reset if not validated
+                if (!swipeButton.classList.contains('validated')) {
+                    swipeButton.style.left = '4px';
+                }
+            }
 
-    const draw = (e) => {
-        if (!drawing) return;
-        e.preventDefault();
-        const pos = getPosition(e);
-        ctx.lineTo(pos.x, pos.y);
-        ctx.stroke();
-        console.log("Drawing:", pos);
-    };
+            // Mouse events
+            swipeButton.addEventListener('mousedown', startDrag);
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', stopDrag);
 
-    const stopDrawing = () => {
-        drawing = false;
-        saveSignature();
-        console.log("Stopped Drawing");
-    };
-
-    const clearSignature = () => {
-        ctx.clearRect(0, 0, signaturePad.width, signaturePad.height);
-        signatureInput.value = '';
-        console.log("Signature Cleared");
-    };
-
-    const saveSignature = () => {
-        const dataURL = signaturePad.toDataURL();
-        signatureInput.value = dataURL;
-        console.log("Signature Saved:", dataURL);
-    };
-
-    signaturePad.addEventListener('mousedown', startDrawing);
-    signaturePad.addEventListener('mousemove', draw);
-    signaturePad.addEventListener('mouseup', stopDrawing);
-    signaturePad.addEventListener('mouseleave', stopDrawing);
-
-    signaturePad.addEventListener('touchstart', startDrawing);
-    signaturePad.addEventListener('touchmove', draw);
-    signaturePad.addEventListener('touchend', stopDrawing);
-
-    clearButton.addEventListener('click', clearSignature);
-});
-
-
-
-
-</script>
-
-
-{% endblock %}
-
+            // Touch events  
+            swipeButton.addEventListener('touchstart', startDrag);
+            document.addEventListener('touchmove', drag);
+            document.addEventListener('touchend', stopDrag);
+        }
+    </script>
+</body>
+</html>

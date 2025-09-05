@@ -1,910 +1,836 @@
-{% extends 'listings/base.html' %}
-{% load static %}
-{% load custom_filters %}
-{% block content %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard Livreur</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            padding-bottom: 70px;
+        }
 
-<style>
-    * {
-       margin: 0;
-       padding: 0;
-       box-sizing: border-box;
-   }
-   
-   body {
-       font-family: Arial, sans-serif;
-       padding: 20px;
-       background-color: #f9f9f9;
-   }
-   
-   header {
-        background: #127BFF;
-        color: #fff;
-        padding: 20px 0;
-    }
+        /* Header */
+        .app-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 15px 25px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        }
 
-    .header-container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 20px;
-    }
-
-    .header-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-    }
-
-    .header-title {
-        font-size: 2em;
-        margin: 0;
-        font-family: 'Roboto', sans-serif;
-    }
-
-    .header-subtitle {
-        font-size: 1.5em;
-        margin: 0;
-        font-family: 'Roboto', sans-serif;
-    }
-
-    .logout-form {
-        margin: 0;
-    }
-
-    .logout-button {
-        background: #e94e77;
-        border: none;
-        padding: 10px 20px;
-        color: #fff;
-        font-size: 1em;
-        font-family: 'Roboto', sans-serif;
-        border-radius: 5px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        transition: background 0.3s ease;
-    }
-
-    .logout-button:hover {
-        background: #d43f65;
-    }
-
-    .logout-button i {
-        margin-right: 8px;
-    }
-
-    /* Navigation Bar Styles */
-    html, body {
-       height: 100%;
-       margin: 0;
-       padding: 0;
-       display: flex;
-       flex-direction: column;
-   }
-   
-   body {
-       flex: 1;
-   }
-   /* Heading */
-   h1 {
-       text-align: center;
-       color: #333;
-       margin-bottom: 20px;
-   }
-   
-    /* Stats Section Styles */
-    .stats-section {
-        display: flex;
-        justify-content: space-around;
-        background-color: white;
-        padding: 20px;
-        margin: 20px 0;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .stat-box {
-        text-align: center;
-        padding: 10px;
-    }
-
-    .stat-box h3 {
-        color: #007BFF;
-    }
-
-    .stat-box p {
-        font-size: 24px;
-        font-weight: bold;
-    }
-
-    /* Map Section Styles */
-    .map-section {
-        padding: 20px;
-        background-color: white;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-
-    #map {
-        height: 400px;
-        width: 100%;
-        border-radius: 5px;
-    }
-
-    /* Delivery Card Styles */
-
-    .delivery-item {
-    padding: 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin: 0 0 15px 0;
-    border-radius: 8px;
-}
-    .delivery-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 20px;
-        padding: 20px;
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-
-    .delivery-card {
-        background-color: white;
-        border-radius: 10px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        padding: 20px;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-    }
-
-    .delivery-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-    }
-
-    .delivery-title {
-        font-size: 1.5em;
-        margin-bottom: 10px;
-    }
-
-    .delivery-info {
-        margin-bottom: 15px;
-    }
-
-    .delivery-info p {
-        margin: 5px 0;
-    }
-
-    .delivery-status {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-    .delivery-status .status-icon {
-        font-size: 1.5em;
-    }
-
-    .delivery-header h4 {
-    margin: 0;
-    font-size: 1.2rem;
-}
-
-.delivery-icons {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-}
-
-.delivery-icons i {
-    font-size: 1.5rem;
-}
-
-    .success {
-        color: #28a745;
-    }
-
-    .pending {
-        color: #ffc107;
-    }
-
-    .status-icon {
-    font-size: 1.2rem;
-}
-    
-
-    /* Footer Link Styles */
-    .delivery-footer {
-        margin-top: 10px;
-        text-align: center;
-    }
-
-    .map-link {
-        display: inline-block;
-        background-color: #333;
-        color: white;
-        padding: 10px 20px;
-        border-radius: 5px;
-        text-decoration: none;
-        transition: background-color 0.3s ease;
-    }
-
-    .map-link:hover {
-        background-color: #555;
-    }
-
-    .map-link i {
-        margin-right: 8px;
-    }
-
-    .routes {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-    .route-container {
-        background-color: #f9f9f9;
-        border-radius: 8px;
-        margin-bottom: 20px;
-    }
-
-
-
-    .route-header {
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Centers all children (text and icons) horizontally */
-    cursor: pointer;
-    padding: 10px;
-    background-color: #f5f5f5;
-    border-radius: 5px;
-    width: 100%; /* Ensures full width for centering */
-    text-align: center; /* Ensures text inside `<p>` is centered */
-}
-
-.route-header p {
-    margin: 5px 0; /* Adds spacing between text */
-    width: 100%; /* Ensures text is centered properly */
-    text-align: center;
-}
-
-.stats-section, .map-section, .routes-section, .taches-section {
-    padding: 15px;
-    border: 1px solid #ccc; /* Add a border for better visibility */
-    margin-bottom: 15px;
-    border-radius: 8px; /* Rounded corners */
-}
-.button-container {
-    display: flex; /* Use Flexbox */
-    flex-direction: column; /* Stack items vertically */
-    align-items: center; /* Center items horizontally */
-    margin: 20px 0; /* Optional: Add vertical spacing */
-}
-.btn-togglezz {
-    display: inline-block;
-    padding: 12px 20px; /* Increased padding for better click area */
-    margin-bottom: 10px; /* Space between buttons */
-    font-size: 16px; /* Text size */
-    color: white; /* Text color */
-    width: 40%;
-    background-color: #007bff; /* Primary background color */
-    border: none; /* No border */
-    border-radius: 5px; /* Slightly rounded corners */
-    cursor: pointer; /* Pointer cursor on hover */
-    text-align: center; /* Center text */
-    text-decoration: none; /* Remove underline */
-    transition: background-color 0.3s ease, transform 0.3s ease; /* Transition for hover effects */
-}
-.btn-togglezz:active {
-    background-color: #00428a; /* Even darker background when clicked */
-    transform: scale(0.98); /* Slightly shrink button when clicked */
-}
-.route-header i.fa-chevron-down {
-    margin-top: 5px; /* Adds spacing between text and chevron */
-    font-size: 18px; /* Adjust size if needed */
-}
-
-.chevron-icon {
-    transition: transform 0.3s;  /* Smooth transition for rotation */
-}
-
-.rotate {
-    transform: rotate(180deg);    /* Rotate icon when expanded */
-}
-
-
-
-
-    .delivery-list {
-        margin-top: 10px;
-        display: none;
-    }
-
-    .delivery-item {
-        padding: 10px;
-        background-color: #f1f1f1;
-        margin-bottom: 5px;
-        border-radius: 5px;
-    }
-
-    .delivery-item h4 {
-        font-size: 16px;
-        margin: 0;
-    }
-   
-   .bottom-navbar {
-       position: fixed;
-       bottom: 0;
-       left: 0;
-       width: 100%;
-       background-color: #333;
-       padding: 10px 0;
-       box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
-       z-index: 1000; /* Ensures it's above other content */
-   }
-   
-   .bottom-navbar ul {
-       list-style: none;
-       display: flex;
-       justify-content: space-around;
-       margin: 0;
-       padding: 0;
-   }
-   
-   .bottom-navbar ul li {
-       flex: 1;
-       text-align: center;
-   }
-   
-   .bottom-navbar ul li a {
-       color: white;
-       text-decoration: none;
-       font-size: 16px;
-   }
-   
-   .bottom-navbar ul li a:hover {
-       text-decoration: underline;
-   }
-   
-   /* Media query for responsive behavior */
-   @media (max-width: 768px) {
-       .navbar ul {
-           flex-direction: column;
-       }
-   
-       .navbar ul li {
-           margin: 10px 0;
-       }
-   }
-   #lii {
+        .header-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px;
-            background-color: #f9f9f9;
-            margin: 5px 0;
-            border-radius: 4px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
         }
-        .task-name {
-            font-weight: bold;
-        }
-        .task-status {
-            color: #555;
-        }
-        i {
-            margin-left: 10px;
-        }
-   
-   /* Responsive Design */
-   @media (max-width: 768px) {
-       .header-container {
-           flex-direction: column;
-           text-align: center;
-       }
-   
-   
-       .stats-section {
-           flex-direction: column;
-           align-items: center;
-       }
-   
-       .map-section {
-           padding: 10px;
-       }
-   
-       .order {
-           font-size: 14px;
-       }
-       .dashboard-header {
-       text-align: center;
-       padding: 20px;
-       background-color: #f5f5f5;
-       border-radius: 10px;
-       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-       margin: 20px;
-   }
-   
-   
-   }
-   
-   </style>
 
-<header>
-    <div class="header-container">
-        <div class="header-content">
-            <h1 class="header-title">Dashboard {{ livreur.nom }}</h1>
-            <h2 class="header-subtitle">{{ journee }}</h2>
-            {% if user.is_authenticated %}
-            <form action="{% url 'logout' %}" method="post" class="logout-form">
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .journey-date {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            padding: 10px;
+            border-radius: 12px;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .logout-btn:active {
+            transform: scale(0.95);
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* Quick Actions Grid */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding: 15px;
+            margin-top: -20px;
+        }
+
+        .action-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            border: none;
+            width: 100%;
+        }
+
+        .action-card:active {
+            transform: scale(0.98);
+        }
+
+        .action-card.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .action-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .action-label {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding: 0 15px 15px;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-item {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .stat-item.delivery .stat-value { color: #667eea; }
+        .stat-item.recovery .stat-value { color: #F1B3DA; }
+        .stat-item.task .stat-value { color: #333; }
+        .stat-item.done .stat-value { color: #4CAF50; }
+
+        /* Map Section */
+        .map-container {
+            margin: 0 15px 15px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            animation: slideDown 0.3s ease-out;
+        }
+
+        #map {
+            height: 300px;
+            width: 100%;
+        }
+
+        /* Routes Section */
+        .routes-section {
+            padding: 0 15px 15px;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .info-btn {
+            background: #74C0FC;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .route-card {
+            background: white;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .route-header {
+            padding: 15px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .route-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .route-info {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .route-info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .route-info-icon {
+            width: 20px;
+            color: #667eea;
+        }
+
+        .route-warning {
+            background: #FFF3CD;
+            color: #856404;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-top: 8px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .truck-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #667eea;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chevron-icon {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            color: #999;
+            transition: transform 0.3s;
+        }
+
+        .chevron-icon.rotate {
+            transform: rotate(180deg);
+        }
+
+        .delivery-list {
+            display: none;
+            padding: 0 15px 15px;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .delivery-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-left: 4px solid #667eea;
+            text-decoration: none;
+            display: block;
+            color: inherit;
+        }
+
+        .delivery-item.recuperation {
+            border-left-color: #F1B3DA;
+            background: #FFF0F7;
+        }
+
+        .delivery-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .delivery-time {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .delivery-icons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+
+        .delivery-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .status-icon.success { color: #4CAF50; }
+        .status-icon.pending { color: #FFD43B; }
+
+        /* Tasks Section */
+        .tasks-section {
+            padding: 0 15px 15px;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .task-item {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .task-item:active {
+            transform: scale(0.98);
+        }
+
+        .task-name {
+            font-weight: 600;
+            color: #333;
+            flex: 1;
+        }
+
+        .task-status {
+            font-size: 20px;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 -2px 15px rgba(0,0,0,0.1);
+            z-index: 1000;
+            border-radius: 20px 20px 0 0;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .nav-items {
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            color: #999;
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+
+        .nav-item:active {
+            transform: scale(0.95);
+        }
+
+        .nav-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .nav-label {
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        /* Hidden sections */
+        .section-hidden {
+            display: none;
+        }
+
+        /* Modal styles mobile-friendly */
+        .modal-content {
+            border-radius: 20px;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .icon-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .icon-item:last-child {
+            border-bottom: none;
+        }
+
+        .icon-item i {
+            font-size: 24px;
+            width: 40px;
+        }
+
+        .icon-label {
+            font-weight: 500;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="app-header">
+        <div class="header-top">
+            <div class="user-info">
+                <div class="user-name">{{ livreur.nom }}</div>
+                <div class="journey-date">{{ journee }}</div>
+            </div>
+            <form action="{% url 'logout' %}" method="post" style="margin: 0;">
                 {% csrf_token %}
-                <button type="submit" class="logout-button">
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                    Déconnexion
+                <button type="submit" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
                 </button>
             </form>
-            {% endif %}
         </div>
     </div>
-</header>
 <br>
-
-
-<nav class="bottom-navbar">
-    <ul>
-        <li><a href="{% url 'journee-detail' journee.id %}" class="nav__link"><i class="fa-regular fa-paste"></i><span class="nav__name">Feuille de route</span> </a></li>
-        <li><a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#offcanvasExample">
-            <i class="fa-solid fa-link"></i> <span class="nav__name">Liens</span>
-          </a>
-          </li>
-        <li><a href="{% url 'faq' %}" class="nav__link"><i class="fa-regular fa-circle-question"></i><span class="nav__name">FAQ</span></a></li>
-    </ul>
-</nav>
-<!-- Button Container -->
-<div class="button-container">
-    <button id="toggleButtonStats" class="btn-togglezz btn-primary">
-        <i class="fa-solid fa-chart-line"></i> STATS
-    </button>
-    <button id="toggleButtonMap" class="btn-togglezz btn-primary">
-        <i class="fa-solid fa-map"></i> MAP
-    </button>
-    <button id="toggleButtonRoutes" class="btn-togglezz btn-primary">
-        <i class="fa-solid fa-route"></i> Routes
-    </button>
-    <button id="toggleButtonTaches" class="btn-togglezz btn-primary">
-        <i class="fa-solid fa-tasks"></i> Tâches
-    </button>
-</div>
-<!-- Stats Section -->
-<section class="stats-section" id="statsSection">
-    <div class="stat-box">
-        <h3>Livraisons en cours</h3>
-        <p id="totalDeliveries">{{ livraisonstatusko|length }}</p>
+<br>
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <button class="action-card active" onclick="toggleSection('stats', this)">
+            <div class="action-icon"><i class="fas fa-chart-line"></i></div>
+            <div class="action-label">Stats</div>
+        </button>
+        <button class="action-card" onclick="toggleSection('map', this)">
+            <div class="action-icon"><i class="fas fa-map-marked-alt"></i></div>
+            <div class="action-label">Carte</div>
+        </button>
+        <button class="action-card" onclick="toggleSection('routes', this)">
+            <div class="action-icon"><i class="fas fa-route"></i></div>
+            <div class="action-label">Mes Routes</div>
+        </button>
+        <button class="action-card" onclick="toggleSection('tasks', this)">
+            <div class="action-icon"><i class="fas fa-tasks"></i></div>
+            <div class="action-label">Tâches</div>
+        </button>
     </div>
-    <div class="stat-box">
-        <h3>Livraisons validées</h3>
-        <p id="completedDeliveries">{{ livraisonstatusok|length }}</p>
-    </div>
-    <div class="stat-box">
-        <h3 style="color: #E5AACF;">Récupérations en cours</h3>
-        <p id="totalRecups">{{ recuperationko|length }}</p>
-    </div>
-    <div class="stat-box">
-        <h3 style="color: #E5AACF;">Récupérations validées</h3>
-        <p id="completedRecups">{{ recuperationok|length }}</p>
-    </div>
-    <div class="stat-box">
-        <h3 style="color: black;">Tâches en cours</h3>
-        <p id="ongoingTasks">{{ tacheko|length }}</p>
-    </div>
-    <div class="stat-box">
-        <h3 style="color: black;">Tâches validées</h3>
-        <p id="completedTasks">{{ tacheok|length }}</p>
-    </div>
-</section>
 
+    <!-- Stats Section -->
+    <div id="stats-section" class="stats-grid">
+        <div class="stat-item delivery">
+            <div class="stat-value">{{ livraisonstatusko|length }}</div>
+            <div class="stat-label">Livraisons en cours</div>
+        </div>
+        <div class="stat-item done">
+            <div class="stat-value">{{ livraisonstatusok|length }}</div>
+            <div class="stat-label">Livraisons validées</div>
+        </div>
+        <div class="stat-item recovery">
+            <div class="stat-value">{{ recuperationko|length }}</div>
+            <div class="stat-label">Récupérations en cours</div>
+        </div>
+        <div class="stat-item done">
+            <div class="stat-value">{{ recuperationok|length }}</div>
+            <div class="stat-label">Récupérations validées</div>
+        </div>
+        <div class="stat-item task">
+            <div class="stat-value">{{ tacheko|length }}</div>
+            <div class="stat-label">Tâches en cours</div>
+        </div>
+        <div class="stat-item done">
+            <div class="stat-value">{{ tacheok|length }}</div>
+            <div class="stat-label">Tâches validées</div>
+        </div>
+    </div>
 
-<!-- Map Section -->
-<section class="map-section" id="mapSection">
-    <h2>Carte</h2>
-    <div id="map"></div>
-</section>
+    <!-- Map Section -->
+    <div id="map-section" class="map-container section-hidden">
+        <div id="map"></div>
+    </div>
 
+    <!-- Routes Section -->
+    <div id="routes-section" class="routes-section section-hidden">
+        <div class="section-header">
+            <h2 class="section-title">Mes Routes</h2>
+            <button class="info-btn" data-bs-toggle="modal" data-bs-target="#infoModal">
+                <i class="fas fa-info"></i>
+            </button>
+        </div>
 
-<section class="routes-section" id="routesSection">
-<h1>
-    Mes routes 
-    <a href="#" data-bs-toggle="modal" data-bs-target="#infoModal">
-        <i class="fa-solid fa-circle-info fa-bounce fa-2xs" style="color: #74C0FC;"></i>
-    </a>
-</h1>
-
-<!-- Modal Structure -->
-<div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="infoModalLabel">
-                    <i class="fa-solid fa-info-circle"></i> Information des Logos
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="container">
-                    <div class="row gy-3">
-                        <div class="col-12 col-md-6">
-                            <div class="d-flex align-items-center">
-                                <i class="fa-solid fa-mug-hot fa-2xl me-3" style="color: #533018;"></i>
-                                <p class="mb-0"><strong>Café Thermos</strong></p>
-                            </div>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <div class="d-flex align-items-center">
-                                <i class="fa-solid fa-mug-hot fa-2xl me-3" style="color: #74C0FC;"></i>
-                                <p class="mb-0"><strong>Thé Thermos</strong></p>
-                            </div>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <div class="d-flex align-items-center">
-                                <box-icon name="coffee-togo" color="#533018" size="md" class="me-3"></box-icon>
-                                <p class="mb-0"><strong>Café Jetable</strong></p>
-                            </div>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <div class="d-flex align-items-center">
-                                <box-icon name="coffee-togo" color="#74C0FC" size="md" class="me-3"></box-icon>
-                                <p class="mb-0"><strong>Thé Jetable</strong></p>
-                            </div>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <div class="d-flex align-items-center">
-                                <i class="fa-solid fa-box-archive fa-2xl me-3" style="color: #a24716;"></i>
-                                <p class="mb-0"><strong> Cambro (pour café ou thé)</strong></p>
-                            </div>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <div class="d-flex align-items-center">
-                                <i class="fa-solid fa-fire-flame-curved fa-2xl me-3" style="color: #f4a15d;"></i>
-                                <p class="mb-0"><strong>Part Chaud</strong></p>
-                            </div>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <div class="d-flex align-items-center">
-                                <i class="fa-solid fa-cart-flatbed fa-2xl me-3"></i>
-                                <p class="mb-0"><strong>Checklist</strong></p>
-                            </div>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <div class="d-flex align-items-center">
-                                <i class="fa-regular fa-snowflake fa-2xl me-3" style="color: #74C0FC;"></i>
-                                <p class="mb-0"><strong> Sac de glace</strong></p>
-                            </div>
-                        </div>
-                        
-                        <div class="col-12 col-md-6">
-                            <div class="d-flex align-items-center">
-                                <i class="fa-solid fa-triangle-exclamation fa-xl me-3" style="color: #FFD43B;"></i>
-                                <p class="mb-0"><strong>Commentaire Important</strong></p>
-                            </div>
-                        </div>
+        {% for route in routes_with_livraisons %}
+        <div class="route-card">
+            <div class="route-header">
+                <button class="truck-btn" data-bs-toggle="modal" data-bs-target="#vehicleModal{{ route.id }}">
+                    <i class="fas fa-truck"></i>
+                </button>
+                
+                <div class="route-title">Route n°{{ route.nom }}</div>
+                
+                <div class="route-info">
+                    <div class="route-info-item">
+                        <i class="fas fa-user route-info-icon"></i>
+                        <span>
+                            {% for livreur in route.livreur.all %}
+                                {{ livreur.nom }}{% if not forloop.last %}, {% endif %}
+                            {% empty %}
+                                Aucun livreur
+                            {% endfor %}
+                        </span>
+                    </div>
+                    
+                    {% if route.vehicles.all %}
+                    <div class="route-info-item">
+                        <i class="fas fa-truck route-info-icon"></i>
+                        <span>
+                            {% for vehicle in route.vehicles.all %}
+                                {{ vehicle.name }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </span>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="route-info-item">
+                        <i class="fas fa-clock route-info-icon"></i>
+                        <span>Départ: {{ route.heure_depart }}</span>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<div class="routes">
-    {% for route in routes_with_livraisons %}
-    <div class="route-container">
-        <!-- Route Header Section -->
-        <div class="route-header" style="position: relative;">
-            <button type="button"  data-bs-toggle="modal" data-bs-target="#vehicleModal{{ route.id }}" style="position: absolute; top: 10px; right: 10px;">
-                <i class="fa-solid fa-truck-front fa-xl"></i>
-            </button>
-
-<!-- Modal Structure -->
-<div class="modal fade" id="vehicleModal{{ route.id }}" tabindex="-1" role="dialog" aria-labelledby="vehicleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="vehicleModalLabel">Choisir véhicule</h5>
-            </div>
-            <div class="modal-body">
-                <form id="vehicleForm{{ route.id }}" method="post" enctype="multipart/form-data" action="{% url 'dashboard' id=journee.id pk=livreur.user.id %}">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <label for="id_name">{{ form.name.label }}</label>
-                        {{ form.name|add_class:"form-control" }}
-                    </div>
-                    <div class="mb-3">
-                        <label for="media-upload" class="form-label">Ajouter des photos & vidéos</label>
-                        <input type="file" name="media" id="media-upload" class="form-control" multiple>
-                    </div>
-                    <input type="hidden" name="route_vehicule" value="{{ route.id }}">
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                </form>
                 
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
-                
-            </div>
-        </div>
-    </div>
-</div>
-
-
-
-
-
-
-
-            <!-- Route Details -->
-            <div class="route-info">
-                <p class="route-title">Route n°{{ route.nom }}</p>
-                <p><i class="fa-solid fa-person"></i> <strong>Livreur(s):</strong>
-                    {% for livreur in route.livreur.all %}
-                    {{ livreur.nom }}{% if not forloop.last %}, {% endif %}
-                    {% empty %}
-                        Aucun livreur assigné
-                    {% endfor %}
-                </p>
-                    {% for vehicle in route.vehicles.all %}
-                        <span style="display: inline-flex; align-items: center;">  <!-- Flex container -->
-                             <!-- Wrap vehicle name in a separate span -->
-                            <form method="POST" action="{% url 'delete_vehicle' vehicle.id %}" style="margin-left: 5px;">
-                                {% csrf_token %}
-                                <i class="fa-solid fa-truck"></i> <strong>Truck:</strong>
-                               {{ vehicle.name }}
-                                <button type="submit" style="border: none; background: none; color: #ff0033; cursor: pointer;" onclick="return confirm('Supprimer le véhicule ?');">
-                                    <i class="fa-solid fa-xmark"></i>
-                                </button>
-                            </form>
-                        </span>
-                        {% if not forloop.last %}, {% endif %}
-                    {% empty %}
-                        Aucun véhicule assigné
-                    {% endfor %}
-                
-                
-                
-                
-                
-                <p><i class="fa-solid fa-clock"></i> <strong>Départ:</strong> {{ route.heure_depart }}</p>
                 {% if route.commentaire %}
-                    <p class="route-comment" style="color: orange;">
-                        <i class="fa-solid fa-triangle-exclamation" style="color: #FFD43B;"></i> {{ route.commentaire }}
-                    </p>
+                <div class="route-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    {{ route.commentaire }}
+                </div>
                 {% endif %}
-                <i class="fa-solid fa-chevron-down chevron-icon" onclick="toggleDeliveries(this)"></i>
+                
+                <i class="fas fa-chevron-down chevron-icon" onclick="toggleDeliveries(this)"></i>
             </div>
-        </div>
-
-        <!-- Delivery List Section -->
-        <div class="delivery-list">
-            {% for livraison in route.ordered_livraisons %}
-                <a href="{% url 'livraison-detail' livraison.id %}" class="delivery-link">
-                    <div class="delivery-item" style="border-left: 5px solid; color: {{ livraison.recuperation|yesno:'#E5AACF,#127BFF' }};">
-                        <div class="delivery-header">
-                            <h4>{{ livraison.recuperation|yesno:"RECUPERATION,LIVRAISON" }} {{ livraison.nom }}</h4>
-                            <p><strong>Heure Livraison:</strong> {{ livraison.heure_livraison }}</p>
-                        </div>
-                        
-                        {% if livraison.infodetail %}
-                            <div class="delivery-icons-details">
-                                {{ livraison.infodetail|render_mugs|safe }}
-                                {{ livraison.infodetail|render_mugscafe|safe }}
-                                {{ livraison.infodetail|render_mugscafetherm|safe }}
-
-                                {% with 'thé jetable' as item %}
-                                    {{ livraison.infodetail|generate_icons:item|safe }}
-                                {% endwith %}
-
-                                {% if 'cambro' in livraison.infodetail|lower %}
-                                    <i class="fa-solid fa-box-archive" style="color: #a24716;"></i>
-                                {% endif %}
-                            </div>
+            
+            <div class="delivery-list">
+                {% for livraison in route.ordered_livraisons %}
+                <a href="{% url 'livraison-detail' livraison.id %}" 
+                   class="delivery-item {% if livraison.recuperation %}recuperation{% endif %}">
+                    <div class="delivery-name">
+                        {{ livraison.recuperation|yesno:"📦 RÉCUPÉRATION,🚚 LIVRAISON" }} - {{ livraison.nom }}
+                    </div>
+                    <div class="delivery-time">
+                        <i class="fas fa-clock"></i> {{ livraison.heure_livraison }}
+                    </div>
+                    
+                    {% if livraison.infodetail %}
+                    <div class="delivery-icons">
+                        <!-- Icons would be rendered here with custom filters -->
+                    </div>
+                    {% endif %}
+                    
+                    <div class="delivery-status">
+                        {% if livraison.status %}
+                            <i class="fas fa-check-circle status-icon success"></i>
+                            <span>Validée</span>
+                        {% else %}
+                            <i class="fas fa-spinner fa-spin status-icon pending"></i>
+                            <span>En attente</span>
                         {% endif %}
-
-                        <div class="delivery-icons">
-                            {% if livraison.nom|contains_keyword:"part chaud" or livraison.infodetail|contains_keyword:"part chaud" %}
-                                <i class="fa-solid fa-fire-flame-curved" style="color: #f4a15d;"></i>
-                            {% endif %}
                         
-                            {% if 'checklist' in livraison.infodetail|lower or 'checklist' in livraison.nom|lower %}
-                                <i class="fa-solid fa-cart-flatbed"></i>
-                            {% endif %}
-                        
-                            {% if 'glace' in livraison.infodetail|lower %}
-                                <i class="fa-regular fa-snowflake" style="color: #74C0FC;"></i>
-                            {% endif %}
-                        </div>
-
-                        <div class="delivery-status">
-                            {% if livraison.status %}
-                                <i class="fa-solid fa-circle-check status-icon success"></i> Validée
-                            {% else %}
-                                <i class="fa-solid fa-spinner fa-spin status-icon pending"></i> En attente
-                            {% endif %}
-                            {% if livraison.commentairedispatch %}
-                                <i class="fa-solid fa-triangle-exclamation fa-2xl" style="color: #FFD43B;"></i>
-                            {% endif %}
-                        </div>
+                        {% if livraison.commentairedispatch %}
+                            <i class="fas fa-exclamation-triangle" style="color: #FFD43B; margin-left: 10px;"></i>
+                        {% endif %}
                     </div>
                 </a>
                 {% endfor %}
-        </div>
-    </div>
-    {% endfor %}
-</div>
-</section>
-
-
-
-
-
-
-
-<section class="taches-section" id="tachesSection">
-
-<h1>Mes Tâches du Jour</h1>
-    <ul>
-        {% for task in taches %}
-        {% if task.date == today %}
-        <a  href="{% url 'taskdetail' task.id %}" class="nav__link">
-        <li>
-            <span class="task-name">{{ task.nom }}</span>
-            {% if task.status %}
-            <i class="fa-solid fa-square-check fa-2xl" style="color: #63E6BE;"></i>
-            {% else %}
-            <i class="fa-solid fa-spinner fa-spin fa-2xl" style="color: #FFD43B;"></i>
-            {% endif %}
-        </li>
-        </a>
-        {% endif %}
-        {% endfor %}
-    </ul>
-
-</section>
-
-<!-- Modal -->
-<div class="modal fade" id="offcanvasExample" tabindex="-1" aria-labelledby="offcanvasExampleLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="offcanvasExampleLabel">Liens Importants</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <!-- Modal content here, such as links or other information -->
-                <ul>
-                    <li><a href="https://oakmnxgj.forms.app/essence">Essence</a></li>
-                    <li><a href="{% url 'create_loading_dock' %}" target="_blank">Ajouter un dock</a></li>
-                </ul>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
             </div>
         </div>
-    </div>
-</div>
 
- 
-<br>
-<br>
-  
-<!-- JavaScript -->
-<!-- Bootstrap Bundle with Popper -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-<script>
-
-    function initMap() {
-    const montreal = { lat: 45.50884, lng: -73.58781 };
-    const mapOptions = {
-        zoom: 12,
-        center: montreal,
-    };
-    const map = new google.maps.Map(document.getElementById('map'), mapOptions);
-
-    const livraisons = {{ livraisonss|safe }};
-    livraisons.forEach(livraison => {
-        const marker = new google.maps.Marker({
-            position: { lat: livraison.latitude, lng: livraison.longitude },
-            map: map,
-            title: `Client ${livraison.nom}`,
-        });
-
-        const infoWindow = new google.maps.InfoWindow({
-            content: `
-                <div>
-                    <h3>${livraison.nom}</h3>
-                    <p><strong>Heure livraison:</strong> ${livraison.heure_livraison}</p>
-                    
+        <!-- Vehicle Modal -->
+        <div class="modal fade" id="vehicleModal{{ route.id }}" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Choisir véhicule</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="post" action="{% url 'dashboard' id=journee.id pk=livreur.user.id %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="form-label">Nom du véhicule</label>
+                                <input type="text" name="name" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Photos & vidéos</label>
+                                <input type="file" name="media" class="form-control" multiple>
+                            </div>
+                            <input type="hidden" name="route_vehicule" value="{{ route.id }}">
+                            <button type="submit" class="btn btn-primary w-100">Enregistrer</button>
+                        </form>
+                    </div>
                 </div>
-            `,
-        });
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 
-        marker.addListener('click', () => {
-            infoWindow.open(map, marker);
-        });
-    });
-}
+    <!-- Tasks Section -->
+    <div id="tasks-section" class="tasks-section section-hidden">
+        <div class="section-header">
+            <h2 class="section-title">Mes Tâches du Jour</h2>
+        </div>
+        
+        {% for task in taches %}
+            {% if task.date == today %}
+            <a href="{% url 'taskdetail' task.id %}" class="task-item">
+                <span class="task-name">{{ task.nom }}</span>
+                <span class="task-status">
+                    {% if task.status %}
+                        <i class="fas fa-check-square" style="color: #4CAF50;"></i>
+                    {% else %}
+                        <i class="fas fa-spinner fa-spin" style="color: #FFD43B;"></i>
+                    {% endif %}
+                </span>
+            </a>
+            {% endif %}
+        {% endfor %}
+    </div>
 
+    <!-- Info Modal -->
+    <div class="modal fade" id="infoModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Information des Logos</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="icon-item">
+                        <i class="fas fa-mug-hot" style="color: #533018;"></i>
+                        <span class="icon-label">Café Thermos</span>
+                    </div>
+                    <div class="icon-item">
+                        <i class="fas fa-mug-hot" style="color: #74C0FC;"></i>
+                        <span class="icon-label">Thé Thermos</span>
+                    </div>
+                    <div class="icon-item">
+                        <i class="fas fa-coffee" style="color: #533018;"></i>
+                        <span class="icon-label">Café Jetable</span>
+                    </div>
+                    <div class="icon-item">
+                        <i class="fas fa-coffee" style="color: #74C0FC;"></i>
+                        <span class="icon-label">Thé Jetable</span>
+                    </div>
+                    <div class="icon-item">
+                        <i class="fas fa-box-archive" style="color: #a24716;"></i>
+                        <span class="icon-label">Cambro</span>
+                    </div>
+                    <div class="icon-item">
+                        <i class="fas fa-fire-flame-curved" style="color: #f4a15d;"></i>
+                        <span class="icon-label">Part Chaud</span>
+                    </div>
+                    <div class="icon-item">
+                        <i class="fas fa-cart-flatbed"></i>
+                        <span class="icon-label">Checklist</span>
+                    </div>
+                    <div class="icon-item">
+                        <i class="fas fa-snowflake" style="color: #74C0FC;"></i>
+                        <span class="icon-label">Sac de glace</span>
+                    </div>
+                    <div class="icon-item">
+                        <i class="fas fa-exclamation-triangle" style="color: #FFD43B;"></i>
+                        <span class="icon-label">Commentaire Important</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- Links Modal -->
+    <div class="modal fade" id="linksModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Liens Importants</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="list-group">
+                        <a href="https://oakmnxgj.forms.app/essence" class="list-group-item list-group-item-action">
+                            <i class="fas fa-gas-pump"></i> Essence
+                        </a>
+                        <a href="{% url 'create_loading_dock' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-warehouse"></i> Ajouter un dock
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-function toggleDeliveries(icon) {
-    const deliveryList = icon.closest('.route-header').nextElementSibling;  // Get the next sibling delivery list
-    icon.classList.toggle('rotate');  // Toggle the rotate class
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <div class="nav-items">
+            <a href="{% url 'journee-detail' journee.id %}" class="nav-item">
+                <i class="fas fa-clipboard-list nav-icon"></i>
+                <span class="nav-label">Feuille</span>
+            </a>
+            <button class="nav-item" data-bs-toggle="modal" data-bs-target="#linksModal">
+                <i class="fas fa-link nav-icon"></i>
+                <span class="nav-label">Liens</span>
+            </button>
+            <a href="{% url 'faq' %}" class="nav-item">
+                <i class="fas fa-circle-question nav-icon"></i>
+                <span class="nav-label">FAQ</span>
+            </a>
+        </div>
+    </nav>
 
-    // Check visibility of the delivery list to toggle its display
-    if (deliveryList.style.display === "none" || deliveryList.style.display === "") {
-        deliveryList.style.display = "block";  // Show the delivery list
-    } else {
-        deliveryList.style.display = "none";   // Hide the delivery list
-    }
-}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Toggle sections
+        function toggleSection(section, btn) {
+            // Hide all sections
+            document.querySelectorAll('[id$="-section"]').forEach(s => {
+                s.classList.add('section-hidden');
+            });
+            
+            // Remove active from all buttons
+            document.querySelectorAll('.action-card').forEach(b => {
+                b.classList.remove('active');
+            });
+            
+            // Show selected section
+            const sectionEl = document.getElementById(section + '-section');
+            if (sectionEl) {
+                sectionEl.classList.remove('section-hidden');
+            }
+            
+            // Mark button as active
+            btn.classList.add('active');
+        }
 
-document.getElementById("toggleButtonStats").addEventListener("click", function() {
-    var statsSection = document.getElementById("statsSection");
-    if (statsSection.style.display === "none" || statsSection.style.display === "") {
-        statsSection.style.display = "block";
-    } else {
-        statsSection.style.display = "none";
-    }
-});
+        // Toggle delivery list
+        function toggleDeliveries(icon) {
+            const deliveryList = icon.closest('.route-header').nextElementSibling;
+            icon.classList.toggle('rotate');
+            
+            if (deliveryList.style.display === 'none' || deliveryList.style.display === '') {
+                deliveryList.style.display = 'block';
+            } else {
+                deliveryList.style.display = 'none';
+            }
+        }
 
-// Optionally, hide the section on page load
-document.getElementById("statsSection").style.display = "none";
+        // Initialize map
+        function initMap() {
+            const montreal = { lat: 45.50884, lng: -73.58781 };
+            const map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 12,
+                center: montreal,
+                disableDefaultUI: true,
+                zoomControl: true
+            });
 
-document.getElementById("toggleButtonMap").addEventListener("click", function() {
-    var statsSection = document.getElementById("mapSection");
-    if (statsSection.style.display === "none" || statsSection.style.display === "") {
-        statsSection.style.display = "block";
-    } else {
-        statsSection.style.display = "none";
-    }
-});
+            const livraisons = {{ livraisonss|safe }};
+            livraisons.forEach(livraison => {
+                const marker = new google.maps.Marker({
+                    position: { lat: livraison.latitude, lng: livraison.longitude },
+                    map: map,
+                    title: livraison.nom
+                });
 
-// Optionally, hide the section on page load
-document.getElementById("mapSection").style.display = "none";
+                const infoWindow = new google.maps.InfoWindow({
+                    content: `
+                        <div style="padding: 10px;">
+                            <h4 style="margin: 0 0 5px 0;">${livraison.nom}</h4>
+                            <p style="margin: 0;">Livraison: ${livraison.heure_livraison}</p>
+                        </div>
+                    `
+                });
 
-document.getElementById("toggleButtonRoutes").addEventListener("click", function() {
-    var statsSection = document.getElementById("routesSection");
-    if (statsSection.style.display === "none" || statsSection.style.display === "") {
-        statsSection.style.display = "block";
-    } else {
-        statsSection.style.display = "none";
-    }
-});
-
-// Optionally, hide the section on page load
-document.getElementById("routesSection").style.display = "none";
-
-document.getElementById("toggleButtonTaches").addEventListener("click", function() {
-    var statsSection = document.getElementById("tachesSection");
-    if (statsSection.style.display === "none" || statsSection.style.display === "") {
-        statsSection.style.display = "block";
-    } else {
-        statsSection.style.display = "none";
-    }
-});
-
-// Optionally, hide the section on page load
-document.getElementById("tachesSection").style.display = "none";
-</script>
-
-<!-- Load Google Maps API -->
-<script src="https://maps.googleapis.com/maps/api/js?key={{ key }}&callback=initMap" async defer></script>
-
-{% endblock %}
+                marker.addListener('click', () => {
+                    infoWindow.open(map, marker);
+                });
+            });
+        }
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ key }}&callback=initMap" async defer></script>
+</body>
+</html>

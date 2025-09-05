@@ -398,61 +398,444 @@ function filterLivraisonsChaudByJournee() {
 {% endif %}
 
 {% if is_livreur %}
-<div class="container mt-5">
-  <h1 class="text-center mb-4">Liste des Journées</h1>
-<br>
-<br>
-  <!-- Date Filter Form -->
-  <form method="get" class="d-flex justify-content-center mb-4">
-    <div class="form-group me-2">
-      {{ form.date }}  <!-- The class is added directly in the form field -->
-    </div>
-    <button type="submit" class="btn btn-primary me-2">Filtrer</button>
-    <a href="{% url 'journees-list' %}" class="btn btn-secondary">Voir toute la liste</a>
-  </form>
-<br>
-  <!-- Display Events -->
-  <div class="row">
-    {% for journee in journees %}
-      <div class="col-md-4 col-lg-3 mb-4">
-        <a href="{% url 'journee-detail' journee.id %}" class="text-decoration-none">
-          <div class="card shadow-sm h-100 {% if journee.date == today %}border-success{% else %}border-light{% endif %}">
-            <div class="card-body">
-              <h5 class="card-title text-center {% if journee.date == today %}text-success{% else %}text-secondary{% endif %}">
-                {{ journee.nom }}
-              </h5>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mes Livraisons</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Mobile Container */
+        .mobile-container {
+            max-width: 100%;
+            min-height: 100vh;
+            background: #f8f9fa;
+            position: relative;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* Header */
+        .app-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 20px 30px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+
+        .header-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .delivery-icon {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            background: white;
+            margin: -20px 15px 20px;
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            position: relative;
+            z-index: 10;
+        }
+
+        .date-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background: #f8f9fa;
+        }
+
+        .date-input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #666;
+        }
+
+        .btn-secondary:active {
+            transform: scale(0.98);
+        }
+
+        /* Journées List */
+        .journees-container {
+            padding: 0 15px 20px;
+        }
+
+        .journee-card {
+            background: white;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+            cursor: pointer;
+            overflow: hidden;
+            text-decoration: none;
+            display: block;
+            position: relative;
+        }
+
+        .journee-card:active {
+            transform: scale(0.98);
+        }
+
+        .journee-card.today {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+        }
+
+        .journee-card.today .card-content {
+            color: white;
+        }
+
+        .card-content {
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .date-badge {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .today .date-badge {
+            background: white;
+            color: #56ab2f;
+        }
+
+        .date-day {
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        .date-month {
+            font-size: 11px;
+            text-transform: uppercase;
+            opacity: 0.9;
+        }
+
+        .card-info {
+            flex: 1;
+        }
+
+        .card-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .card-subtitle {
+            font-size: 13px;
+            color: #999;
+        }
+
+        .today .card-subtitle {
+            color: rgba(255,255,255,0.9);
+        }
+
+        .card-arrow {
+            color: #ccc;
+            font-size: 18px;
+        }
+
+        .today .card-arrow {
+            color: rgba(255,255,255,0.8);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            background: #e0e0e0;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: #999;
+        }
+
+        .empty-title {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .empty-subtitle {
+            font-size: 14px;
+            color: #999;
+        }
+
+        /* Pagination */
+        .pagination-container {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            background: white;
+            margin-top: 20px;
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+
+        .page-btn {
+            padding: 10px 16px;
+            border: none;
+            background: #f0f0f0;
+            color: #666;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .page-btn:active {
+            transform: scale(0.95);
+        }
+
+        .page-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Loading animation */
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.4;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .loading {
+            animation: pulse 1.5s infinite;
+        }
+
+        /* Stats bar */
+        .stats-bar {
+            background: white;
+            padding: 15px 20px;
+            margin: -10px 15px 20px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: space-around;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-container">
+        <!-- Header -->
+        <div class="app-header">
+            <div class="header-title">
+                <div class="delivery-icon">🚚</div>
+                Mes journées
             </div>
-          </div>
-        </a>
-      </div>
-    {% empty %}
-      <div class="col">
-        <p class="text-center">Aucune journée disponible</p>
-      </div>
-    {% endfor %}
-  </div>
-<br>
-<br>
-  <!-- Pagination -->
-  <div class="d-flex justify-content-center mt-4">
-    <nav aria-label="Page navigation">
-      <ul class="pagination">
-        {% if journees.has_previous %}
-          <li class="page-item"><a class="page-link" href="?page=1">1ère page</a></li>
-          <li class="page-item"><a class="page-link" href="?page={{ journees.previous_page_number }}">Précédent</a></li>
+            <div class="header-subtitle">Gérez vos journées de livraison</div>
+        </div>
+
+        <br>
+        <br>
+
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <form method="get">
+                <input type="date" 
+                       class="date-input" 
+                       name="date"
+                       placeholder="Sélectionner une date">
+                <div class="filter-buttons">
+                    <button type="submit" class="btn btn-primary">
+                        🔍 Filtrer
+                    </button>
+                    <a href="{% url 'journees-list' %}" class="btn btn-secondary">
+                        📋 Tout voir
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        
+
+        <!-- Journées List -->
+        <div class="journees-container">
+            {% for journee in journees %}
+                <a href="{% url 'journee-detail' journee.id %}" 
+                   class="journee-card {% if journee.date == today %}today{% endif %}">
+                    <div class="card-content">
+                        <div class="card-left">
+                            <div class="date-badge">
+                                <div class="date-day">{{ journee.date|date:"d" }}</div>
+                                <div class="date-month">{{ journee.date|date:"M" }}</div>
+                            </div>
+                            <div class="card-info">
+                                <div class="card-title">{{ journee.nom }}</div>
+                                <div class="card-subtitle">
+                                    {% if journee.date == today %}
+                                        🟢 Aujourd'hui
+                                    {% else %}
+                                        {{ journee.date|date:"l d F" }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-arrow">›</div>
+                    </div>
+                </a>
+            {% empty %}
+                <div class="empty-state">
+                    <div class="empty-icon">📦</div>
+                    <div class="empty-title">Aucune journée</div>
+                    <div class="empty-subtitle">Aucune livraison programmée</div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if journees.has_other_pages %}
+        <div class="pagination-container">
+            {% if journees.has_previous %}
+                <a href="?page=1" class="page-btn">««</a>
+                <a href="?page={{ journees.previous_page_number }}" class="page-btn">‹</a>
+            {% endif %}
+            
+            <span class="page-btn active">{{ journees.number }}</span>
+            
+            {% if journees.has_next %}
+                <a href="?page={{ journees.next_page_number }}" class="page-btn">›</a>
+                <a href="?page={{ journees.paginator.num_pages }}" class="page-btn">»»</a>
+            {% endif %}
+        </div>
         {% endif %}
-        <li class="page-item active"><a class="page-link" href="?page={{ journees.number }}">{{ journees.number }}</a></li>
-        {% if journees.has_next %}
-          <li class="page-item"><a class="page-link" href="?page={{ journees.next_page_number }}">Suivant</a></li>
-          <li class="page-item"><a class="page-link" href="?page={{ journees.paginator.num_pages }}">Dernière page</a></li>
-        {% endif %}
-      </ul>
-    </nav>
-  </div>
-</div>
-
-
-
+    </div>
+</body>
+</html>
 
   {% endif %}
   {% if is_checklist %}

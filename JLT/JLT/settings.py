@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os, inspect
-import django_dyn_dt
+# import django_dyn_dt  # Removed because not available
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -50,15 +50,13 @@ INSTALLED_APPS = [
     'import_export',
     'crispy_forms',
     'crispy_bootstrap4',
-    'django_dyn_dt',
+    # 'django_dyn_dt',  # Removed because not available
     'django_htmx',
     'bootstrap_datepicker_plus',
     'widget_tweaks',
     'django_select2',
     'rest_framework',
     'rest_framework.authtoken',
-   
-  
 ]
 
 MIDDLEWARE = [
@@ -71,17 +69,17 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django_htmx.middleware.HtmxMiddleware',
     'listings.middleware.ForcePasswordChangeMiddleware',
-    
 ]
 
 ROOT_URLCONF = 'JLT.urls'
 
-TEMPLATE_DIR_DATATB = os.path.join(BASE_DIR, "django_dyn_dt/templates")
+# TEMPLATE_DIR_DATATB = os.path.join(BASE_DIR, "django_dyn_dt/templates")  # Removed
+TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")  # Use a generic templates directory
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [TEMPLATE_DIR_DATATB],
+        'DIRS': [TEMPLATE_DIR],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -106,8 +104,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
-
 
 
 # Password validation
@@ -137,7 +133,6 @@ GOOGLE_API_KEY = 'AIzaSyC2GqoZLMIMuAihXl8271sJN3kJ_57smdM'
 LANGUAGE_CODE = 'fr'
 USE_L10N = True
 
-
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
@@ -163,10 +158,12 @@ MEDIA_URL = '/media/'
 
 STATIC_ROOT = "/home/maxoufaya33/JLT/JLT/listings/static"
 
-DYN_DB_PKG_ROOT = os.path.dirname( inspect.getfile( django_dyn_dt ) ) # <-- NEW App
-
+# DYN_DB_PKG_ROOT = os.path.dirname( inspect.getfile( django_dyn_dt ) ) # <-- Removed
+# STATICFILES_DIRS = (
+#     os.path.join(DYN_DB_PKG_ROOT, "templates/static"),
+# )
 STATICFILES_DIRS = (
-    os.path.join(DYN_DB_PKG_ROOT, "templates/static"),
+    # Add your static directories here if needed
 )
 
 DYNAMIC_DATATB = {
