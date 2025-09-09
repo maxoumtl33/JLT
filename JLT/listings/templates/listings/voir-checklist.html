@@ -853,48 +853,184 @@ $('#searchEnCoursItemsBtn').on('click', function() {
         });
     }
     
-    function openPrintWindow(content, title) {
+    function openPrintWindow(content, title, isLivraison = false) {
     const printWindow = window.open('', '', 'height=800,width=1200');
 
-    // Styles pour la mise en page
     printWindow.document.write('<html><head><title>' + title + '</title>');
     printWindow.document.write('<style>');
     printWindow.document.write(`
         @media print {
-            @page { size: A4 landscape; margin: 20mm; }
+            @page { 
+                size: A4 landscape; 
+                margin: 10mm; 
+            }
+            
             body {
                 font-family: Arial, sans-serif;
-                font-size: 40px;
                 margin: 0;
                 padding: 0;
             }
-            /* Chaque livraison sur sa propre page */
-            .livraison-page {
+            
+            /* Style pour chaque page individuelle */
+            .print-page {
                 page-break-after: always;
+                page-break-inside: avoid;
+                min-height: 100vh;
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+                padding: 20px;
+                box-sizing: border-box;
+                position: relative;
+            }
+            
+            /* Supprimer le saut de page après le dernier élément */
+            .print-page:last-child {
+                page-break-after: auto;
+            }
+            
+            /* Styles pour les livraisons */
+            .livraison-page {
+                width: 100%;
+                font-size: 48px; /* Taille augmentée pour paysage */
+            }
+            
+            .livraison-page h1 {
+                font-size: 56px;
+                margin: 30px 0;
+                font-weight: bold;
+            }
+            
+            .livraison-page p {
+                font-size: 40px;
+                margin: 20px 0;
+            }
+            
+            .livraison-page p strong {
+                font-size: 44px;
+            }
+            
+            /* Styles pour les checklists */
+            .checklist-page {
+                width: 100%;
+                font-size: 36px;
+                position: relative;
+                padding-top: 20px;
+            }
+            
+            /* QR Code positionné en haut à gauche */
+            .qr-code-container {
+                position: absolute;
+                top: 20px;
+                left: 20px;
+                z-index: 10;
+            }
+            
+            .qr-code-container img {
+                width: 150px;
+                height: 150px;
+                object-fit: contain;
+            }
+            
+            /* Contenu centré de la checklist */
+            .checklist-content {
+                width: 100%;
+                padding-top: 50px;
+            }
+            
+            .checklist-page h1 {
+                font-size: 48px;
+                margin: 25px 0;
+                font-weight: bold;
+            }
+            
+            .checklist-page h2 {
+                font-size: 40px;
+                margin: 20px 0;
+            }
+            
+            .checklist-page p {
+                font-size: 36px;
+                margin: 15px 0;
+            }
+            
+            .checklist-page p strong {
+                font-size: 40px;
+            }
+            
+            /* Protection contre le débordement avec réduction automatique */
+            .overflow-protection {
+                max-height: 85vh;
+                overflow: hidden;
+                transform-origin: center center;
                 width: 100%;
             }
-            /* Supprimer le saut de page après la dernière livraison */
-            .livraison-page:last-child {
-                page-break-after: auto;
+            
+            /* Si le contenu est trop long, réduire la taille */
+            .overflow-protection.reduce-size {
+                transform: scale(0.8);
+            }
+            
+            /* Cache tout ce qui n'est pas nécessaire */
+            .no-print {
+                display: none !important;
+            }
+        }
+        
+        @media screen {
+            body {
+                font-family: Arial, sans-serif;
+                padding: 20px;
+            }
+            
+            .print-page {
+                border: 2px solid #ccc;
+                margin-bottom: 20px;
+                padding: 30px;
+                min-height: 210mm; /* Hauteur A4 paysage */
+                width: 297mm; /* Largeur A4 paysage */
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+                position: relative;
+                background: white;
+            }
+            
+            .qr-code-container {
+                position: absolute;
+                top: 20px;
+                left: 20px;
+            }
+            
+            .qr-code-container img {
+                width: 120px;
+                height: 120px;
             }
         }
     `);
     printWindow.document.write('</style>');
     printWindow.document.write('</head><body>');
-
-    // Contenu des checklists
+    
+    // Injecter le contenu
     printWindow.document.write(content);
-
+    
     printWindow.document.write('</body></html>');
     printWindow.document.close();
-    printWindow.print();
-}
-    function filterByDate(containerSelector, attribute, selectedDate) {
-        const items = document.querySelectorAll(containerSelector);
-        return Array.from(items).filter(item => item.getAttribute(attribute) === selectedDate);
-    }
     
-    function printChecklists() {
+    // Attendre que le contenu soit chargé avant d'imprimer
+    printWindow.onload = function() {
+        setTimeout(function() {
+            printWindow.print();
+        }, 250);
+    };
+}
+
+function printChecklists() {
     const selectedDate = document.getElementById('checklist-date').value;
     if (!selectedDate) {
         alert('Veuillez sélectionner une date.');
@@ -910,15 +1046,54 @@ $('#searchEnCoursItemsBtn').on('click', function() {
         return;
     }
 
-    // Construire la liste HTML des checklists
-    const content = filteredItems.map(item => item.outerHTML).join('');
-
- 
+    // Construire le contenu HTML avec une page par checklist
+    const content = filteredItems.map(item => {
+        // Cloner l'élément pour ne pas affecter l'original
+        const clonedItem = item.cloneNode(true);
+        
+        // Extraire le QR code et le reste du contenu
+        let htmlContent = clonedItem.innerHTML;
+        
+        // Rechercher l'image QR code
+        const imgRegex = /<img[^>]*src="([^"]*)"[^>]*>/i;
+        const imgMatch = htmlContent.match(imgRegex);
+        
+        let qrCodeHtml = '';
+        let contentWithoutQR = htmlContent;
+        
+        if (imgMatch) {
+            // Créer le HTML du QR code
+            qrCodeHtml = `<div class="qr-code-container">${imgMatch[0]}</div>`;
+            
+            // Retirer le QR code du contenu principal (il est dans le h2)
+            contentWithoutQR = htmlContent.replace(/<h2[^>]*>.*?<\/h2>/i, function(match) {
+                // Garder le h2 mais sans l'image
+                const h2WithoutImg = match.replace(imgMatch[0], '');
+                // Extraire juste le texte de la date du h2
+                const dateMatch = h2WithoutImg.match(/>([^<]+)</);
+                if (dateMatch && dateMatch[1].trim()) {
+                    return `<h2>${dateMatch[1].trim()}</h2>`;
+                }
+                return '';
+            });
+        }
+        
+        // Construire la page finale avec QR code séparé
+        return `
+            <div class="print-page">
+                ${qrCodeHtml}
+                <div class="checklist-page overflow-protection">
+                    <div class="checklist-content">
+                        ${contentWithoutQR}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
 
     // Appeler la fenêtre d'impression
-    openPrintWindow(content, 'Imprimer les Checklists');
+    openPrintWindow(content, 'Imprimer les Checklists', false);
 }
-
 
 function printLivraisons() {
     const selectedDate = document.getElementById('livraison-date').value;
@@ -927,22 +1102,33 @@ function printLivraisons() {
         return;
     }
 
-    const filteredItems = filterByDate('.livraison-page', 'data-livraison-date', selectedDate);
+    // Filtrer les livraisons par date
+    const filteredItems = Array.from(document.querySelectorAll('.livraison-page'))
+        .filter(item => item.getAttribute('data-livraison-date') === selectedDate);
+    
     if (filteredItems.length === 0) {
         alert('Aucune livraison trouvée pour la date sélectionnée.');
         return;
     }
 
-    // Ajoute la classe 'livraison-page' à chaque élément pour appliquer la CSS
+    // Construire le contenu HTML avec une page par livraison
     const content = filteredItems.map(item => {
-        return `<div class="livraison-page">${item.outerHTML}</div>`;
+        // Cloner l'élément pour ne pas affecter l'original
+        const clonedItem = item.cloneNode(true);
+        
+        // Wrapper chaque livraison dans une div print-page
+        return `
+            <div class="print-page">
+                <div class="livraison-page overflow-protection">
+                    ${clonedItem.innerHTML}
+                </div>
+            </div>
+        `;
     }).join('');
 
-    openPrintWindow(content, 'Imprimer les Livraisons');
+    // Appeler la fenêtre d'impression
+    openPrintWindow(content, 'Imprimer les Livraisons', true);
 }
-    
-    
-    
     
     
     

@@ -859,67 +859,81 @@ class ChecklistItem(models.Model):
     quantity = models.IntegerField(default=0, null=True)
     is_completed = models.BooleanField(default=False)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='en_cours')
-    consumed_quantity = models.PositiveIntegerField(default=0)  # Amount that has been consumed
-    unconsumed_quantity = models.PositiveIntegerField(default=0)  # Amount that remains unconsumed
-    commentaire = models.CharField(max_length=100, null=True)
-    com = models.CharField(max_length=100, null=True)
+    consumed_quantity = models.PositiveIntegerField(default=0)
+    unconsumed_quantity = models.PositiveIntegerField(default=0)
+    commentaire = models.CharField(max_length=100, null=True, blank=True)
+    com = models.CharField(max_length=100, null=True, blank=True)
     previous_quantity = models.PositiveIntegerField(default=0)
-    previous_status = models.CharField(max_length=100, null=True)
+    previous_status = models.CharField(max_length=100, null=True, blank=True)
     is_stock_updated = models.BooleanField(default=False)
 
-    # Remove or comment this line if you won't use it
-    # skip_inventory_update = False  
-
     class Meta:
-        unique_together = ('checklist', 'product', 'status')
-
-    def clean(self):
-        super().clean()
-        if ChecklistItem.objects.filter(checklist=self.checklist, product=self.product).exclude(id=self.id).exists():
-            raise ValidationError('This product already has a status in this checklist.')
+        unique_together = ('checklist', 'product')
 
     def save(self, *args, **kwargs):
         if self.commentaire:
             self.commentaire = self.commentaire.lower()
 
-        if self.pk:  # If the object exists, retrieve the previous state
+        if self.pk:  # Si l'objet existe déjà
             try:
                 original = ChecklistItem.objects.get(pk=self.pk)
-            except ChecklistItem.DoesNotExist:
-                original = None
-
-            if original:
+                
+                # Stocker les valeurs précédentes
                 self.previous_quantity = original.quantity
-                self.previous_status = original.status  # Store previous status
+                self.previous_status = original.status
 
-                # If quantity changes, update status to 'pending'
-                if self.quantity != original.quantity:
-                    self.status = 'pending'  
+                # Cas 1: Changement EXPLICITE de statut (depuis l'interface admin ou modal)
+                if hasattr(self, '_explicit_status_change') and self._explicit_status_change:
+                    # Garder le nouveau statut tel quel
+                    pass
+                
+                # Cas 2: Changement de quantité
+                elif self.quantity != original.quantity:
+                    # TOUJOURS changer le statut en 'pending' quand la quantité change
+                    # Peu importe le statut précédent
+                    self.status = 'pending'
                     self.com = 'complete'
 
-                    # Log the changes
+                    # Log des changements
                     QuantityChangeLog.objects.create(
                         checklist_item=self,
                         previous_quantity=original.quantity,
                         new_quantity=self.quantity,
                         quantity_change=self.quantity - original.quantity,
                         changed_by=getattr(self, '_changed_by', None),
-                        previous_status=original.status,  # Log previous status
+                        previous_status=original.status,
                     )
+                
+                # Cas 3: Aucun changement de quantité et pas de changement explicite
+                else:
+                    # Si le statut a changé mais pas la quantité, c'est un changement manuel
+                    if self.status != original.status:
+                        # Permettre le changement de statut
+                        pass
+                    else:
+                        # Garder tout tel quel
+                        self.status = original.status
+                        
+            except ChecklistItem.DoesNotExist:
+                pass
 
         super().save(*args, **kwargs)
+        
+        # Après la sauvegarde, mettre à jour le statut du checklist parent
+        if self.checklist:
+            self.checklist.update_status()
+        
+        # Nettoyer l'attribut temporaire
+        if hasattr(self, '_explicit_status_change'):
+            delattr(self, '_explicit_status_change')
 
     def __str__(self):
         return f"{self.product.name} - {self.checklist.name}"
 
-
-
-
     def delete(self, *args, **kwargs):
         if self.product:
-            self.product.adjust_quantity(self.quantity) # Optional: Only if you want to handle deletions
+            self.product.adjust_quantity(self.quantity)
         super().delete(*args, **kwargs)
-
 
 class QuantityChangeLog(models.Model):
     checklist_item = models.ForeignKey(ChecklistItem, on_delete=models.CASCADE)

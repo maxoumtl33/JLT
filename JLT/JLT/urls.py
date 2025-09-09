@@ -42,6 +42,7 @@ path('validate_checklist/<int:checklist_item_id>/', validate_checklist_item, nam
 path('adjust-quantity/', views.adjust_product_quantity, name='adjust_product_quantity'),
 path('admin/', admin.site.urls, name ="admin"),
 path('login/', views.custom_login, name='login'),
+path('update_checklist_item_comment/<int:item_id>/', views.update_checklist_item_comment, name='update_checklist_item_comment'),
 path('associate_livraison/<int:checklist_id>/', views.associate_livraison, name='associate_livraison'),
 path('livraison/<int:ip>/', views.livraison_detail, name='livraison-detail'),
 path('accounts/login/', LoginView.as_view(template_name='registration/login.html'), name='login'),

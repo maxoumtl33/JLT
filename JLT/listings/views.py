@@ -450,7 +450,9 @@ def checklist_products(request, checklist_id):
     checklist_documents = ChecklistDocument.objects.filter(checklist=checklist)
     recup_photos = ChecklistRecupPhoto.objects.filter(checklist=checklist)
     md_photos = ChecklistMDPhoto.objects.filter(checklist=checklist)
-    existing_items = list(ChecklistItem.objects.filter(checklist=checklist).values('id', 'product_id', 'quantity', 'product__name'))
+    existing_items = list(ChecklistItem.objects.filter(checklist=checklist).values(
+    'id', 'product_id', 'quantity', 'product__name', 'commentaire'  # Ajouter 'commentaire'
+    ))
     products = Product.objects.all()
     product_quantities = {product.id: product.quantity for product in products}
     special_categories = ["ALCOOL FORT", "BIERES", "SANS ALCOOL", "VINS"]
@@ -573,32 +575,19 @@ def checklist_products(request, checklist_id):
 
 from django.db import transaction
 
+
 @csrf_exempt
-def add_products_to_checklist(request, checklist_id):
+def update_checklist_item_comment(request, item_id):
     if request.method == 'POST':
         data = json.loads(request.body)
-        checklist = get_object_or_404(Checklist, pk=checklist_id)
-        items = data.get('items', [])
-
-        with transaction.atomic():
-            for item in items:
-                product_id = item['product_id']
-                quantity = int(item['quantity'])
-                commentaire = item.get('commentaire', '')  # récupère le commentaire
-
-                product = Product.objects.get(pk=product_id)
-
-                checklist_item, created = ChecklistItem.objects.update_or_create(
-                    checklist=checklist,
-                    product=product,
-                    defaults={
-                        'quantity': quantity,
-                        'status': 'en_cours',
-                        'commentaire': commentaire  # sauvegarde le commentaire
-                    }
-                )
-
-        return JsonResponse({'status': 'success'})
+        commentaire = data.get('commentaire', '')
+        
+        item = get_object_or_404(ChecklistItem, pk=item_id)
+        item.commentaire = commentaire
+        item.save()
+        
+        return JsonResponse({'status': 'ok'})
+    return JsonResponse({'status': 'error'})
 
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -628,24 +617,90 @@ def update_checklist_item_quantity(request, item_id):
         try:
             data = json.loads(request.body)
             new_quantity = int(data.get('quantity', 0))
-            if new_quantity < 0:
-                return JsonResponse({'status': 'error', 'message': 'Quantité invalide'}, status=400)
-
+            
+            # Récupérer l'item spécifique
             item = ChecklistItem.objects.get(pk=item_id)
-            item.quantity = new_quantity
-            item.save()
-            return JsonResponse({'status': 'ok'})
+            
+            # Sauvegarder l'ancienne quantité
+            old_quantity = item.quantity
+            old_status = item.status
+            
+            # Ne mettre à jour que si la quantité change vraiment
+            if old_quantity != new_quantity:
+                item.quantity = new_quantity
+                # La méthode save() gérera automatiquement le changement de statut
+                item.save()
+                
+                return JsonResponse({
+                    'status': 'ok',
+                    'item_status': item.status,
+                    'old_quantity': old_quantity,
+                    'new_quantity': new_quantity,
+                    'status_changed': old_status != item.status
+                })
+            else:
+                return JsonResponse({
+                    'status': 'ok',
+                    'message': 'No change needed',
+                    'quantity': old_quantity
+                })
+                
         except ChecklistItem.DoesNotExist:
-            return JsonResponse({'status': 'error', 'message': 'Item non trouvé'}, status=404)
+            return JsonResponse({'status': 'error', 'message': 'Item not found'})
+        except (ValueError, TypeError) as e:
+            return JsonResponse({'status': 'error', 'message': f'Invalid quantity: {str(e)}'})
         except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-    return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+
+def add_products_to_checklist(request, checklist_id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            items = data.get('items', [])
+            created_items = []
+            
+            for item in items:
+                product_id = item.get('product_id')
+                quantity = item.get('quantity', 0)
+                commentaire = item.get('commentaire', '')
+                
+                checklist_item, created = ChecklistItem.objects.update_or_create(
+                    checklist_id=checklist_id,
+                    product_id=product_id,
+                    defaults={
+                        'quantity': quantity,
+                        'commentaire': commentaire
+                    }
+                )
+                created_items.append({
+                    'id': checklist_item.id,
+                    'product_id': product_id,
+                    'quantity': quantity
+                })
+            
+            # Retourner les IDs des items créés/modifiés
+            if created_items:
+                return JsonResponse({
+                    'status': 'success',
+                    'items': created_items,
+                    'item_id': created_items[0]['id'] if len(created_items) == 1 else None
+                })
+            
+            return JsonResponse({'status': 'success'})
+            
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'})
 
 from django.views.decorators.csrf import csrf_exempt
 from django.db import IntegrityError
 import json
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
+
 
 @login_required
 @csrf_exempt
@@ -1316,130 +1371,89 @@ def checklistvoir_detail(request, checklist_id):
     products = Product.objects.all()
     checklist = get_object_or_404(Checklist, pk=checklist_id)
 
-    normal_items = (
-    ChecklistItem.objects
-    .filter(checklist=checklist, quantity__gt=0)
-    .exclude(commentaire__regex=r'\bnt\b')
-    .prefetch_related('product__category')  # Pre-fetch related category data
-    .order_by('product__category__name')    # Order by the name of the category
-)
-        # Group unique checklist items by product
+    # Get all checklist items
+    all_items = (
+        ChecklistItem.objects
+        .filter(checklist=checklist, quantity__gt=0)
+        .prefetch_related('product__category')
+        .order_by('product__category__name')
+    )
+    
+    # Group unique checklist items by product
     checklist_items_map = {}
-
-    for item in normal_items:
+    for item in all_items:
         if item.product_id not in checklist_items_map:
             checklist_items_map[item.product_id] = item  # Keep the first occurrence
 
-    checklist_items_unique = checklist_items_map.values()  # Get the unique checklist items
-
-    nt_items = ChecklistItem.objects.filter(checklist=checklist, quantity__gt=0, commentaire__regex=r'\bnt\b')
-    nt_items_ids = set(nt_items.values_list('id', flat=True))
-    for item in normal_items:
-        last_log = QuantityChangeLog.objects.filter(checklist_item=item).order_by('-timestamp').first()
-        item.previous_status = last_log.previous_status if last_log else "N/A"
-        item.previous_quantity = last_log.previous_quantity if last_log else item.quantity
-
-    for item in nt_items:
-        if item.status != 'valide':
-            item.status = 'valide'
-            item.save()
-
-    quantity_change_logs = QuantityChangeLog.objects.filter(checklist_item__checklist_id=checklist_id).order_by('-timestamp')
+    checklist_items_unique = list(checklist_items_map.values())  # Get the unique checklist items
 
     if request.method == 'POST':
-
+        # Handle note update
         note = request.POST.get('note')
         if note is not None:
             checklist.notechecklist = note
             checklist.save()
             return redirect('checklistvoir-detail', checklist_id=checklist.id)
 
+        # Handle product/quantity update
+        action = request.POST.get('action')
+        if action == 'update_item':
+            item_id = request.POST.get('item_id')
+            product_id = request.POST.get('product_id')
+            quantity = request.POST.get('quantity')
+            
+            if item_id and product_id and quantity:
+                checklist_item = get_object_or_404(ChecklistItem, id=item_id, checklist=checklist)
+                new_product = get_object_or_404(Product, id=product_id)
+                
+                # Update the item
+                checklist_item.product = new_product
+                checklist_item.quantity = int(quantity)
+                checklist_item.save()
+                
+                messages.success(request, 'Produit mis à jour avec succès!')
+                return redirect('checklistvoir-detail', checklist_id=checklist.id)
+
+        # Handle status update - SIMPLIFIED VERSION
         item_id = request.POST.get('item_id')
         status = request.POST.get('status')
-        quantity = int(request.POST.get('quantity', 0))
-        previous_quantity = int(request.POST.get('previous_quantity', 0))
-        current_quantity = int(request.POST.get('current_quantity', 0))
-        quantity_change = current_quantity - previous_quantity
-        checklist_item = get_object_or_404(ChecklistItem, id=item_id, checklist=checklist)
-        product = checklist_item.product
-
-        if product:
-
+        
+        if item_id and status:
             checklist_item = get_object_or_404(ChecklistItem, id=item_id, checklist=checklist)
-            product = checklist_item.product
+            
+            # Simply update the status without any inventory logic
+            checklist_item.status = status
+            checklist_item.save()
+            
+            # Update the parent checklist status
+            checklist.update_status()
 
-            if status == 'remettrestock' and product:
-                product.adjust_quantity(quantity)
-                checklist_item.is_stock_updated = True
-                product.save()
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': True, 'message': 'Mise à jour réussie!'})
 
-            if status == 'remettrestockchange' and product:
-                product.adjust_quantity(quantity)
-                checklist_item.is_stock_updated = True
-                product.save()
+            return redirect('checklistvoir-detail', checklist_id=checklist.id)
 
-            # Store previous status for logging
-            previous_status = checklist_item.status
-            if status == 'valide' and product:
-                product.adjust_quantity(-quantity_change)
-                product.save()
-
-            if status == 'complete' and product:
-                product.adjust_quantity(-current_quantity)  # Subtract quantity
-                product.save()
-
-
-            if status == 'denied' and product:
-                checklist_item.status = status
-                checklist_item.save()
-
-            if status == 'en_cours':
-                checklist_item.product.quantity += checklist_item.quantity  # Add the checklist item’s quantity to the product quantity
-                checklist_item.product.save()  # Save the updated product quantity
-
-            if status == 'refuse':
-                checklist_item.product.quantity += current_quantity  # Add the checklist item’s quantity to the product quantity
-                checklist_item.product.save()  # Save the updated product quantity
-
-            if status == 'deniedprevious':
-                checklist_item.product.quantity += previous_quantity  # Add the checklist item’s quantity to the product quantity
-                checklist_item.product.save()  # Save the updated product quantity
-
-            product.save()
-
-        checklist_item.status = status
-        checklist_item.save()
-
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({'success': True, 'message': 'Mise à jour réussie!'})  # ✅ Include success message
-
-        return redirect('checklistvoir-detail', checklist_id=checklist.id)
-
-          # Generate URL for the checklist "en_cours" page
+    # Generate URL for the checklist "en_cours" page
     checklist_url = request.build_absolute_uri(reverse('checklist_en_cours', args=[checklist.id]))
     # Generate QR code image
     qr_code_data_uri = generate_qr_code_base64(checklist_url)
 
+    # Sort items by status for display
     items_encours = [item for item in checklist_items_unique if item.status == 'en_cours']
-    # 2. Les autres sauf 'valide' et 'complete'
-    items_autres = [item for item in checklist_items_unique if item.status not in ('en_cours', 'valide', 'complete')]
-    # 3. Valide ou complete en dernier
-    items_valides_completes = [item for item in checklist_items_unique if item.status in ('valide', 'complete')]
+    items_autres = [item for item in checklist_items_unique if item.status not in ('en_cours', 'valide', 'refuse')]
+    items_valides_refuses = [item for item in checklist_items_unique if item.status in ('valide', 'refuse')]
+    
+    # Combine all items in the desired order
+    all_items_ordered = items_encours + items_autres + items_valides_refuses
 
     context = {
         'checklist': checklist,
-        'normal_items': checklist_items_unique,
-        'products':products,
-        'nt_items': nt_items,
-        'quantity_change_logs': quantity_change_logs,
-        'nt_items_ids': nt_items_ids,
+        'all_items': all_items_ordered,  # Use this single list in template
+        'products': products,
         'qr_code_data_uri': qr_code_data_uri,
-        'items_encours': items_encours,
-        'items_autres': items_autres,
-        'items_valides_completes': items_valides_completes,
     }
+    
     return render(request, 'listings/checklistevoir_detail.html', context)
-
 @login_required
 def checklist_en_cours_view(request, checklist_id):
     checklist = get_object_or_404(Checklist, pk=checklist_id)

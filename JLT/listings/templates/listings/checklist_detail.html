@@ -145,6 +145,22 @@ body {
 .card i {
   transition: color 0.2s;
 }
+
+/* Styles pour les statuts */
+.status-valide {
+    background-color: #28a745 !important;
+    color: white !important;
+}
+
+.status-en-cours {
+    background-color: #ffc107 !important;
+    color: black !important;
+}
+
+.status-refuse {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
 </style>
 <!-- Inclure Bootstrap CSS et JS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
@@ -219,27 +235,63 @@ body {
       </button>
       <form action="{% url 'duplicate-checklist' checklist_id=checklist.id %}" method="POST">
         {% csrf_token %}
-        <button type="submit" class="btn btn-secondary mb-3"> Dupliquer
+        <button type="submit" class="btn btn-secondary mb-3" style="margin-right: 10px;"> Dupliquer
           <i class="fa-solid fa-copy"></i>
       </button>
     </form>
-    <button type="button" class="btn btn-info mb-3" id="showSpecialItemsBtn" data-bs-toggle="modal" data-bs-target="#specialItemsModal">
-      Voir Produits Spéciaux
-    </button>
+    <button type="button" class="btn btn-secondary mb-3" data-bs-toggle="modal" data-bs-target="#statusModal">
+      Voir Statuts des Produits
+      <i class="fa-solid fa-chart-simple"></i>
+  </button>
+
     
 </div>
-<!-- Modal for Special Categories Items -->
-<div class="modal fade" id="specialItemsModal" tabindex="-1" aria-labelledby="specialItemsModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="specialItemsModalLabel">Produits Spéciaux - Détails</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermé"></button>
+<!-- Modal pour voir les statuts -->
+<div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="statusModalLabel">Statuts des Produits</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+              <div id="statusContent">
+                  {% for cat_name, items in checklist_items_by_category.items %}
+                      {% if cat_name != "SOUMISSIONS" %}
+                      <h5 class="mt-3">{{ cat_name }}</h5>
+                      <table class="table table-bordered table-hover">
+                          <thead>
+                              <tr>
+                                  <th style="width: 40%">Produit</th>
+                                  <th style="width: 15%">Quantité</th>
+                                  <th style="width: 20%">Statut</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                              {% for item in items %}
+                              <tr>
+                                  <td>{{ item.product.name }}</td>
+                                  <td>{{ item.quantity }}</td>
+                                  <td>
+                                    <span class="badge rounded-pill 
+                                        {% if item.status == 'valide' %}status-valide
+                                        {% elif item.status == 'en_cours' %}status-en-cours
+                                        {% elif item.status == 'pending' %}status-en-cours
+                                        {% elif item.status == 'refuse' or item.status == 'refused' %}status-refuse
+                                        {% elif item.status == 'complete' %}status-valide
+                                        {% endif %}">
+                                        {% if item.status == 'pending' %}en_cours{% else %}{{ item.status|default:"en_cours" }}{% endif %}
+                                    </span>
+                                </td>
+                              </tr>
+                              {% endfor %}
+                          </tbody>
+                      </table>
+                      {% endif %}
+                  {% endfor %}
+              </div>
+          </div>
       </div>
-      <div class="modal-body" id="specialItemsContent">
-        <!-- Content will be injected here -->
-      </div>
-    </div>
   </div>
 </div>
 
@@ -455,20 +507,21 @@ body {
         </div>
       </div>
   
-<!-- Panier -->
-<div id="cartContainer" style="display: none; position: fixed; top: 50px; right: 10px; width: 350px; max-height: 40vh; overflow-y: auto; background: #fff; border: 1px solid #ccc; padding: 10px; z-index: 1050;">
-    <h5>Votre Panier</h5>
-    <table class="table table-sm" id="cart-table">
-      <thead>
-        <tr>
-          <th>Produit</th>
-          <th>Quantité</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <button class="btn btn-primary" onclick="submitCart()">Valider le panier</button>
-  </div>
+<!-- Panier avec commentaires -->
+<div id="cartContainer" style="display: none; position: fixed; top: 50px; right: 10px; width: 450px; max-height: 50vh; overflow-y: auto; background: #fff; border: 1px solid #ccc; padding: 10px; z-index: 1050; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+  <h5>Votre Panier</h5>
+  <table class="table table-sm" id="cart-table">
+    <thead>
+      <tr>
+        <th>Produit</th>
+        <th>Quantité</th>
+        <th>Commentaire</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <button class="btn btn-primary" onclick="submitCart()">Valider le panier</button>
+</div>
   
 
         <!-- Document Modal -->
@@ -593,7 +646,8 @@ const cart = existingItems.map(e => ({
   id: e.id,  // ID de ChecklistItem
   product_id: e.product_id,
   name: e.product__name,
-  quantity: e.quantity
+  quantity: e.quantity,
+  commentaire: e.commentaire || ''  // Ajouter le commentaire existant
 }));
 let currentCategory = '';
 
@@ -628,6 +682,9 @@ function escapeForJS(str) {
 
 // Charger les produits d'une catégorie avec recherche
 function loadProducts(categoryName, searchTerm='') {
+  const specialCategories = ["ALCOOL FORT", "BIERES", "SANS ALCOOL", "VINS"];
+  const showStock = specialCategories.includes(categoryName);
+  
   fetch(`{% url 'get_products_by_category' %}?category=${encodeURIComponent(categoryName)}&search=${encodeURIComponent(searchTerm)}`)
     .then(res => res.json())
     .then(data => {
@@ -643,31 +700,32 @@ function loadProducts(categoryName, searchTerm='') {
           const safeName = escapeForJS(prod.name);
           const btnLabel = !existingInCart || currentCartItem.quantity === 0 ? '<i class="fas fa-plus me-1"></i> Ajouter' : '<i class="fa-solid fa-check"></i> Ajouté';
           const btnDisabled = !existingInCart || currentCartItem.quantity === 0 ? '' : 'disabled';
-          const commentairePlaceholder = currentCartItem && currentCartItem.commentaire ? currentCartItem.commentaire : "Commentaire";
+          
+          // Afficher le stock seulement pour les catégories spéciales
+          const stockInfo = showStock ? ` <span class="text-muted small">(${getProductQuantityInCart(prod.id) || 0} / ${totalQty} en stock)</span>` : '';
+          
           const item = document.createElement('div');
           item.className = 'card shadow-sm rounded mb-3';
           item.innerHTML = `
             <div class="card-body p-3">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                   <h6 class="mb-0 text-truncate">
-                      ${prod.name} <span class="text-muted small">(${getProductQuantityInCart(prod.id) || 0} / ${totalQty} en stock)</span>
-                    </h6>
-                    <button class="btn btn-sm btn-outline-primary" ${btnDisabled} onclick="addProductToCart(${prod.id}, '${safeName}', this)" data-product-id="${prod.id}">
-                       ${btnLabel}
-                    </button>
+                      ${prod.name}${stockInfo}
+                  </h6>
+                  <button class="btn btn-sm btn-outline-primary" ${btnDisabled} onclick="addProductToCart(${prod.id}, '${safeName}', this)" data-product-id="${prod.id}">
+                     ${btnLabel}
+                  </button>
                 </div>
                 <div class="d-flex gap-2 align-items-center">
                     <input type="number" min="1" class="form-control form-control-sm" placeholder="${getProductQuantityInCart(prod.id) || 0}" style="width:90px" data-product-id="${prod.id}">
-                    <input type="text" placeholder="${commentairePlaceholder}" class="form-control form-control-sm" style="flex:1;" data-product-id="${prod.id}" data-commentaire="">
                 </div>
             </div>`;
           listContainer.appendChild(item);
         });
-        updateAddButtons(); // Ensures all buttons are updated
+        updateAddButtons();
       }
     });
 }
-
 // Fonction pour obtenir la quantité si elle existe dans le panier
 function getProductQuantityInCart(productId) {
   const item = cart.find(i => i.product_id === productId);
@@ -680,15 +738,11 @@ document.getElementById('searchInput').addEventListener('input', function() {
   loadProducts(currentCategory, searchTerm);
 });
 
-// Ajouter un produit au panier
-// Fonction pour ajouter un produit au panier en prenant en compte la quantité et commentaire
+// Fonction pour ajouter un produit au panier
 function addProductToCart(productId, productName, btn) {
   const parent = btn.closest('.card-body');
   const qtyInput = parent.querySelector('input[type="number"]');
-  const commentInput = parent.querySelector('input[type="text"]');
-
   const quantity = parseInt(qtyInput.value);
-  const commentaire = commentInput.value;
 
   if (isNaN(quantity) || quantity <= 0) {
     alert('Entrez une quantité valable.');
@@ -702,30 +756,42 @@ function addProductToCart(productId, productName, btn) {
       'X-CSRFToken': '{{ csrf_token }}'
     },
     body: JSON.stringify({
-      items: [{ product_id: productId, quantity: quantity, commentaire: commentaire }]
+      items: [{ product_id: productId, quantity: quantity, commentaire: '' }]
     })
   }).then(res => res.json())
     .then(data => {
       if (data.status === 'success') {
-        // Mettre à jour le bouton cliqué
-        btn.innerHTML = 'Ajouté';
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Ajouté';
         btn.disabled = true;
 
-        // Mettre à jour la liste du panier
-        const index = cart.findIndex(i => i.product_id === productId);
-        if (index !== -1) {
-          cart[index].quantity = quantity;
-          cart[index].commentaire = commentaire;
+        // Chercher si l'item existe déjà dans le panier
+        const existingIndex = cart.findIndex(i => i.product_id === productId);
+        
+        if (existingIndex !== -1) {
+          // Mettre à jour l'item existant avec l'ID retourné
+          cart[existingIndex].quantity = quantity;
+          if (data.item_id) {
+            cart[existingIndex].id = data.item_id;
+          }
         } else {
-          cart.push({ product_id: productId, name: productName, quantity: quantity, commentaire: commentaire });
+          // Ajouter un nouvel item avec l'ID retourné
+          cart.push({ 
+            id: data.item_id || null,
+            product_id: productId, 
+            name: productName, 
+            quantity: quantity, 
+            commentaire: '' 
+          });
         }
-        updateAddButtons(); // updater tous les boutons si besoin
+        
+        updateAddButtons();
         renderCart();
       } else {
         alert('Erreur lors de l\'ajout.');
       }
     });
 }
+
 // Modifier la quantité dans le panier
 function updateCartItemQuantity(index, newQuantity) {
   if (newQuantity <= 0 || isNaN(newQuantity)) {
@@ -742,41 +808,89 @@ function removeCartItem(index) {
   renderCart();
 }
 
-// Afficher le contenu du panier
+// Fonction pour afficher le contenu du panier
 function renderCart() {
     const tbody = document.querySelector('#cart-table tbody');
-    tbody.innerHTML = ''; // Clear the table body
+    tbody.innerHTML = '';
 
     cart.forEach((item, index) => {
-        // Only render the item if its quantity is greater than 0
         if (item.quantity > 0) {
             const row = document.createElement('tr');
 
-            // Nom
+            // Nom du produit
             const cellName = document.createElement('td');
             cellName.innerText = item.name;
+            cellName.style.width = '40%';
             row.appendChild(cellName);
 
-            // Quantité modifiable
+            // Quantité
             const cellQty = document.createElement('td');
             const inputQty = document.createElement('input');
             inputQty.type = 'number';
             inputQty.min = '0';
             inputQty.value = item.quantity;
             inputQty.className = 'form-control form-control-sm';
-            inputQty.style.width = '80px';
-
-            // Lier l'ID ChecklistItem pour la mise à jour
-            inputQty.dataset.checklistItemId = item.id;
-
+            inputQty.style.width = '70px';
+            
+            // Stocker l'index dans le cart pour les nouveaux items sans ID
+            inputQty.dataset.cartIndex = index;
+            
+            if (item.id) {
+                inputQty.dataset.checklistItemId = item.id;
+            }
+            
             inputQty.onchange = () => {
-                const checklistItemId = parseInt(inputQty.dataset.checklistItemId);
                 const newVal = parseInt(inputQty.value);
-                updateQuantity(checklistItemId, newVal);
+                const checklistItemId = inputQty.dataset.checklistItemId;
+                const cartIndex = parseInt(inputQty.dataset.cartIndex);
+                
+                if (checklistItemId && !isNaN(parseInt(checklistItemId))) {
+                    // Item existant avec ID - appeler le serveur
+                    updateQuantity(parseInt(checklistItemId), newVal);
+                } else {
+                    // Nouvel item sans ID - mettre à jour localement
+                    cart[cartIndex].quantity = newVal;
+                }
             };
-
+            
+            cellQty.style.width = '20%';
             cellQty.appendChild(inputQty);
             row.appendChild(cellQty);
+
+            // Commentaire
+            const cellComment = document.createElement('td');
+            const inputComment = document.createElement('input');
+            inputComment.type = 'text';
+            inputComment.className = 'form-control form-control-sm';
+            
+            if (item.commentaire && item.commentaire.trim() !== '') {
+                inputComment.placeholder = item.commentaire;
+                inputComment.value = item.commentaire;
+            } else {
+                inputComment.placeholder = 'Ajouter un commentaire...';
+                inputComment.value = '';
+            }
+            
+            inputComment.dataset.cartIndex = index;
+            if (item.id) {
+                inputComment.dataset.checklistItemId = item.id;
+            }
+            
+            inputComment.onblur = () => {
+                const checklistItemId = inputComment.dataset.checklistItemId;
+                const cartIndex = parseInt(inputComment.dataset.cartIndex);
+                
+                if (checklistItemId && !isNaN(parseInt(checklistItemId))) {
+                    updateItemComment(parseInt(checklistItemId), inputComment.value);
+                } else {
+                    // Nouvel item - stocker le commentaire localement
+                    cart[cartIndex].commentaire = inputComment.value;
+                }
+            };
+            
+            cellComment.style.width = '40%';
+            cellComment.appendChild(inputComment);
+            row.appendChild(cellComment);
 
             tbody.appendChild(row);
         }
@@ -814,8 +928,16 @@ function submitCart() {
     alert('Erreur lors de l\'envoi.');
   });
 }
+
+// Fonction pour mettre à jour la quantité
 function updateQuantity(checklistItemId, newQuantity) {
-    console.log("updateQuantity called", checklistItemId, newQuantity); // ADD THIS
+    if (!checklistItemId || isNaN(checklistItemId)) {
+        console.log("Pas d'ID valide pour cet item");
+        return;
+    }
+
+    console.log("Mise à jour de l'item", checklistItemId, "avec quantité", newQuantity);
+    
     fetch(`{% url 'update_checklist_item_quantity' 0 %}`.replace('0', checklistItemId), {
         method: 'POST',
         headers: {
@@ -823,21 +945,26 @@ function updateQuantity(checklistItemId, newQuantity) {
             'X-CSRFToken': '{{ csrf_token }}'
         },
         body: JSON.stringify({ quantity: newQuantity })
-    }).then(res => res.json())
-        .then(data => {
-            if (data.status === 'ok') {
-                const item = cart.find(i => i.id === checklistItemId);
-                if (item) {
-                    item.quantity = newQuantity;
-                    item.status = 'pending';
-                    renderCart();
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'ok') {
+            const item = cart.find(i => i.id === checklistItemId);
+            if (item) {
+                item.quantity = newQuantity;
+                if (data.item_status) {
+                    item.status = data.item_status;
                 }
-            } else {
-                alert('Erreur: ' + data.message);
             }
-        });
+            console.log("Quantité mise à jour avec succès pour l'item", checklistItemId);
+        } else {
+            alert('Erreur: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Erreur lors de la mise à jour:', error);
+    });
 }
-
 const toggleBtn = document.getElementById('theme-toggle');
         toggleBtn.addEventListener('click', () => {
             document.body.classList.toggle('dark-mode');
@@ -1292,5 +1419,29 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+function updateItemComment(checklistItemId, comment) {
+    if (!checklistItemId || isNaN(checklistItemId)) {
+        console.log("Pas d'ID valide pour cet item");
+        return;
+    }
+    
+    fetch(`/update_checklist_item_comment/${checklistItemId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ commentaire: comment })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'ok') {
+            const item = cart.find(i => i.id === checklistItemId);
+            if (item) {
+                item.commentaire = comment;
+            }
+        }
+    });
+}
 </script>
 {% endblock %}
