@@ -536,79 +536,99 @@
 <br>
 <div class="container d-flex flex-row gap-3 justify-content-center mb-4">
 
-    <!-- First Card: Date form and button to show products -->
+    <!-- First Card: Produits au total -->
     <div class="card mb-4" style="width: 20rem;">
       <div class="card-body">
         <h5 class="card-title text-center">Produits au total</h5>
-        <form id="dateForm" method="get" action="#">
-            <label for="dateEnCoursItems" class="form-label">Voir la quantité totale de produits pour une date</label>
-          <input type="date" name="selected_datee" class="form-control mb-3 text-center" 
-                 value="{{ selected_datee|date:'d-m-Y' }}" style="width: 100%;" required 
-                 id="selectedDateInput"/>
-        </form>
-        <!-- Button to trigger the modal for products -->
-        <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#checklistItemsModal">
+        <div class="mb-3">
+          <label for="totalProductsDate" class="form-label">Sélectionnez une date</label>
+          <input type="date" id="totalProductsDate" class="form-control mb-3" />
+        </div>
+        <button class="btn btn-primary" onclick="loadTotalProducts()">
           Rechercher
         </button>
       </div>
     </div>
   
-    <!-- Second Card: 'produits en cours' with date picker and search button -->
+    <!-- Second Card: Produits en cours -->
     <div class="card mb-4" style="width: 20rem;">
       <div class="card-body">
         <h5 class="card-title text-center">Produits en cours</h5>
         <div class="mb-3">
-          <label for="dateEnCoursItems" class="form-label">Voir les produits en cours pour une date</label>
+          <label for="dateEnCoursItems" class="form-label">Sélectionnez une date</label>
           <input type="date" id="dateEnCoursItems" class="form-control"/>
         </div>
-        <button id="searchEnCoursItemsBtn" class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#enCoursModal">Rechercher</button>
+        <button class="btn btn-primary mt-2" onclick="loadEnCoursProducts()">
+          Rechercher
+        </button>
       </div>
     </div>
-  
-    <!-- Modal for displaying Produits en cours -->
-    <div class="modal fade" id="enCoursModal" tabindex="-1" aria-labelledby="enCoursModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="enCoursModalLabel">Produits en cours pour la date sélectionnée</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body" id="enCoursModalBody">
-            <!-- Results will be injected here -->
-            <div style="text-align:center;">Sélectionnez une date et cliquez sur "Rechercher".</div>
-          </div>
+</div>
+
+<!-- Modal for Produits au total -->
+<div class="modal fade" id="totalProductsModal" tabindex="-1" aria-labelledby="totalProductsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="totalProductsModalLabel">Produits au total</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Barre de recherche -->
+        <div class="mb-3">
+          <input type="text" id="searchProductInput" class="form-control" placeholder="Rechercher un produit..." onkeyup="filterProducts()">
         </div>
-      </div>
-    </div>
-  
-    <!-- Modal for 'Afficher les produits' -->
-    <div class="modal fade" id="checklistItemsModal" tabindex="-1" aria-labelledby="checklistItemsModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="checklistItemsModalLabel">Produits pour la date</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <table class="table">
-              <thead>
+        <div id="totalProductsContent">
+          <table class="table table-striped" id="totalProductsTable">
+            <thead>
                 <tr>
-                  <th>Nom du Produit</th>
+                  <th>Produit</th>
                   <th>Quantité Totale</th>
+                  <th>Détails</th>
                 </tr>
               </thead>
-              <tbody id="checklistItemsBody">
-                <tr>
-                  <td colspan="2" class="text-center">Sélectionnez une date pour voir les produits.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+            <tbody id="totalProductsBody">
+              <tr>
+                <td colspan="3" class="text-center">Sélectionnez une date pour voir les produits.</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
-  
   </div>
+</div>
+
+<!-- Modal for Produits en cours -->
+<div class="modal fade" id="enCoursModal" tabindex="-1" aria-labelledby="enCoursModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="enCoursModalLabel">Produits en cours/pending</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="enCoursContent">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Checklist</th>
+                <th>Produit</th>
+                <th>Quantité</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody id="enCoursBody">
+              <tr>
+                <td colspan="4" class="text-center">Sélectionnez une date pour voir les produits en cours.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
   
 
 </div>
@@ -627,151 +647,53 @@
 
 
 <script>
-const toggleBtn = document.getElementById('theme-toggle');
-        toggleBtn.addEventListener('click', () => {
-            document.body.classList.toggle('dark-mode');
-        });
-
-          document.addEventListener('DOMContentLoaded', () => {
-    const sidebar = document.getElementById('sidebar');
-    const btnShowSidebar = document.getElementById('show-sidebar');
-    const toggleBtn = document.getElementById('sidebar-toggle');
-    const dashboard = document.getElementById('dashboard');
-
-    // Quand on clique sur le bouton toggle pour cacher ou réafficher
+    const toggleBtn = document.getElementById('theme-toggle');
     toggleBtn.addEventListener('click', () => {
-        if (sidebar.classList.contains('collapsed')) {
-            // La sidebar est masquée, on la remonte
-            sidebar.classList.remove('collapsed');
-            btnShowSidebar.style.display = 'none';   // cache le bouton
-            dashboard.classList.remove('full-width');
-        } else {
-            // La sidebar est visible, on la cache
-            sidebar.classList.add('collapsed');
-            btnShowSidebar.style.display = 'block';  // montre le bouton pour la réafficher
-            dashboard.classList.add('full-width');
-        }
+        document.body.classList.toggle('dark-mode');
     });
-
-    // Quand on clique sur le bouton pour faire réapparaître la sidebar
-    btnShowSidebar.addEventListener('click', () => {
-        sidebar.classList.remove('collapsed');
-        btnShowSidebar.style.display = 'none'; // cache le bouton
-        dashboard.classList.remove('full-width');
-    });
-});
-
-// Écouteur sur le clic du bouton "Rechercher"
-$('#searchEnCoursItemsBtn').on('click', function() {
-    const selectedDate = $('#dateEnCoursItems').val();
-
-    if (!selectedDate) {
-        alert('Veuillez sélectionner une date.');
-        return;
-    }
-
-    // Effectuer la requête AJAX (remplace l'URL par la tienne)
-    $.ajax({
-        url: "{% url 'checklist_items_encours_par_date' %}", // adapter cette URL dans Django
-        type: 'GET',
-        data: {
-            'date': selectedDate,
-        },
-        success: function(data) {
-            const container = $('#enCoursModalBody');
-            container.empty();
-
-            if (data.items && data.items.length > 0) {
-                const table = $('<table class="table table-striped"></table>');
-                table.html(`
-                    <thead>
-                        <tr>
-                            <th>Nom du Produit</th>
-                            <th>Quantité</th>
-                            <th>Nom de la Checklist</th>
-                        </tr>
-                    </thead>
-                `);
-
-                const tbody = $('<tbody></tbody>');
-                data.items.forEach(function(item) {
-                    $('<tr></tr>').html(`
-                        <td>${item.product__name}</td>
-                        <td>${item.total_quantity}</td>
-                        <td>${item.checklist__name}</td>
-                    `).appendTo(tbody);
-                });
-                table.append(tbody);
-                container.append(table);
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        const sidebar = document.getElementById('sidebar');
+        const btnShowSidebar = document.getElementById('show-sidebar');
+        const toggleBtn = document.getElementById('sidebar-toggle');
+        const dashboard = document.getElementById('dashboard');
+    
+        // Quand on clique sur le bouton toggle pour cacher ou réafficher
+        toggleBtn.addEventListener('click', () => {
+            if (sidebar.classList.contains('collapsed')) {
+                // La sidebar est masquée, on la remonte
+                sidebar.classList.remove('collapsed');
+                btnShowSidebar.style.display = 'none';   // cache le bouton
+                dashboard.classList.remove('full-width');
             } else {
-                container.html('Aucun produit en cours pour cette date.');
+                // La sidebar est visible, on la cache
+                sidebar.classList.add('collapsed');
+                btnShowSidebar.style.display = 'block';  // montre le bouton pour la réafficher
+                dashboard.classList.add('full-width');
             }
-        },
-        error: function() {
-            alert('Erreur lors de la récupération des données.');
-        }
-    });
-});
-
-
-    $(document).ready(function() {
-        // Listen for changes in the date input
-        $('#selectedDateInput').on('change', function() {
-            const selectedDate = $(this).val();  // Get the selected date value
+        });
     
-            // Make an AJAX request to fetch checklist items for the selected date
-            $.ajax({
-                url: "{% url 'voir_checklist' %}",  // Make sure this URL points to the correct view
-                method: 'GET',
-                data: {
-                    selected_datee: selectedDate,  // Send the selected date as a parameter
-                },
-                success: function(data) {
-        // Update modal content with new data
-        $('#checklistItemsBody').empty(); // Clear previous content
-        if (data.checklist_item_totals.length > 0) {
-            // Format the date as needed, here `selectedDate` is in the format YYYY-MM-DD
-            $('#modalDate').text(selectedDate); // Set the formatted date in the modal title
-            
-            // Loop through each item and append it to the modal table body
-            data.checklist_item_totals.forEach(item => {
-                $('#checklistItemsBody').append(`
-                    <tr>
-                        <td>${item.product__name}</td>
-                        <td>${item.total_quantity}</td>
-                    </tr>
-                `);
-            });
-        } else {
-            // If no items are found, display a message in the modal
-            $('#checklistItemsBody').append(`
-                <tr>
-                    <td colspan="2" class="text-center">Aucun item trouvé pour cette date.</td>
-                </tr>
-            `);
-        }
-    
-    },
-    
-                error: function(xhr, status, error) {
-                    // Log any errors that occur during the AJAX request
-                    console.error('An AJAX error occurred: ' + status + ': ' + error);
-                }
-            });
+        // Quand on clique sur le bouton pour faire réapparaître la sidebar
+        btnShowSidebar.addEventListener('click', () => {
+            sidebar.classList.remove('collapsed');
+            btnShowSidebar.style.display = 'none'; // cache le bouton
+            dashboard.classList.remove('full-width');
         });
     });
     
-        setTimeout(function(){
-           window.location.reload(1);
-        }, 300000); // 300000 milliseconds = 5 minutes
+
+
+    // Auto refresh every 5 minutes
+    setTimeout(function(){
+       window.location.reload(1);
+    }, 300000); // 300000 milliseconds = 5 minutes
     
-        function updateAgenda() {
-            const month = document.getElementById('month').value;
-            window.location.href = '?month=' + month + '&day=1';  // Reload page with selected month and day set to 1
-        }
+    function updateAgenda() {
+        const month = document.getElementById('month').value;
+        window.location.href = '?month=' + month + '&day=1';  // Reload page with selected month and day set to 1
+    }
     
-        function getChecklists(day) {
-    
+    function getChecklists(day) {
         const month = document.getElementById('month').value;
         fetch(`/get_checklists_for_day/${day}/?month=${month}`)
             .then(response => response.json())
@@ -804,8 +726,6 @@ $('#searchEnCoursItemsBtn').on('click', function() {
                             <td>${checklist.name}</td>
                             <td>${checklist.conseillere || 'N/A'}</td>
                             <td>${formatDateTime(updatedDate)}</td>
-    
-    
                         `;
                         row.addEventListener('click', function() {
                             window.location.href = this.dataset.href;
@@ -854,285 +774,523 @@ $('#searchEnCoursItemsBtn').on('click', function() {
     }
     
     function openPrintWindow(content, title, isLivraison = false) {
-    const printWindow = window.open('', '', 'height=800,width=1200');
-
-    printWindow.document.write('<html><head><title>' + title + '</title>');
-    printWindow.document.write('<style>');
-    printWindow.document.write(`
-        @media print {
-            @page { 
-                size: A4 landscape; 
-                margin: 10mm; 
+        const printWindow = window.open('', '', 'height=800,width=1200');
+    
+        printWindow.document.write('<html><head><title>' + title + '</title>');
+        printWindow.document.write('<style>');
+        printWindow.document.write(`
+            @media print {
+                @page { 
+                    size: A4 landscape; 
+                    margin: 10mm; 
+                }
+                
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                }
+                
+                /* Style pour chaque page individuelle */
+                .print-page {
+                    page-break-after: always;
+                    page-break-inside: avoid;
+                    min-height: 100vh;
+                    width: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    text-align: center;
+                    padding: 20px;
+                    box-sizing: border-box;
+                    position: relative;
+                }
+                
+                /* Supprimer le saut de page après le dernier élément */
+                .print-page:last-child {
+                    page-break-after: auto;
+                }
+                
+                /* Styles pour les livraisons */
+                .livraison-page {
+                    width: 100%;
+                    font-size: 48px; /* Taille augmentée pour paysage */
+                }
+                
+                .livraison-page h1 {
+                    font-size: 56px;
+                    margin: 30px 0;
+                    font-weight: bold;
+                }
+                
+                .livraison-page p {
+                    font-size: 40px;
+                    margin: 20px 0;
+                }
+                
+                .livraison-page p strong {
+                    font-size: 44px;
+                }
+                
+                /* Styles pour les checklists */
+                .checklist-page {
+                    width: 100%;
+                    font-size: 36px;
+                    position: relative;
+                    padding-top: 20px;
+                }
+                
+                /* QR Code positionné en haut à gauche */
+                .qr-code-container {
+                    position: absolute;
+                    top: 20px;
+                    left: 20px;
+                    z-index: 10;
+                }
+                
+                .qr-code-container img {
+                    width: 150px;
+                    height: 150px;
+                    object-fit: contain;
+                }
+                
+                /* Contenu centré de la checklist */
+                .checklist-content {
+                    width: 100%;
+                    padding-top: 50px;
+                }
+                
+                .checklist-page h1 {
+                    font-size: 48px;
+                    margin: 25px 0;
+                    font-weight: bold;
+                }
+                
+                .checklist-page h2 {
+                    font-size: 40px;
+                    margin: 20px 0;
+                }
+                
+                .checklist-page p {
+                    font-size: 36px;
+                    margin: 15px 0;
+                }
+                
+                .checklist-page p strong {
+                    font-size: 40px;
+                }
+                
+                /* Protection contre le débordement avec réduction automatique */
+                .overflow-protection {
+                    max-height: 85vh;
+                    overflow: hidden;
+                    transform-origin: center center;
+                    width: 100%;
+                }
+                
+                /* Si le contenu est trop long, réduire la taille */
+                .overflow-protection.reduce-size {
+                    transform: scale(0.8);
+                }
+                
+                /* Cache tout ce qui n'est pas nécessaire */
+                .no-print {
+                    display: none !important;
+                }
             }
             
-            body {
-                font-family: Arial, sans-serif;
-                margin: 0;
-                padding: 0;
+            @media screen {
+                body {
+                    font-family: Arial, sans-serif;
+                    padding: 20px;
+                }
+                
+                .print-page {
+                    border: 2px solid #ccc;
+                    margin-bottom: 20px;
+                    padding: 30px;
+                    min-height: 210mm; /* Hauteur A4 paysage */
+                    width: 297mm; /* Largeur A4 paysage */
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    text-align: center;
+                    position: relative;
+                    background: white;
+                }
+                
+                .qr-code-container {
+                    position: absolute;
+                    top: 20px;
+                    left: 20px;
+                }
+                
+                .qr-code-container img {
+                    width: 120px;
+                    height: 120px;
+                }
             }
-            
-            /* Style pour chaque page individuelle */
-            .print-page {
-                page-break-after: always;
-                page-break-inside: avoid;
-                min-height: 100vh;
-                width: 100%;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                text-align: center;
-                padding: 20px;
-                box-sizing: border-box;
-                position: relative;
-            }
-            
-            /* Supprimer le saut de page après le dernier élément */
-            .print-page:last-child {
-                page-break-after: auto;
-            }
-            
-            /* Styles pour les livraisons */
-            .livraison-page {
-                width: 100%;
-                font-size: 48px; /* Taille augmentée pour paysage */
-            }
-            
-            .livraison-page h1 {
-                font-size: 56px;
-                margin: 30px 0;
-                font-weight: bold;
-            }
-            
-            .livraison-page p {
-                font-size: 40px;
-                margin: 20px 0;
-            }
-            
-            .livraison-page p strong {
-                font-size: 44px;
-            }
-            
-            /* Styles pour les checklists */
-            .checklist-page {
-                width: 100%;
-                font-size: 36px;
-                position: relative;
-                padding-top: 20px;
-            }
-            
-            /* QR Code positionné en haut à gauche */
-            .qr-code-container {
-                position: absolute;
-                top: 20px;
-                left: 20px;
-                z-index: 10;
-            }
-            
-            .qr-code-container img {
-                width: 150px;
-                height: 150px;
-                object-fit: contain;
-            }
-            
-            /* Contenu centré de la checklist */
-            .checklist-content {
-                width: 100%;
-                padding-top: 50px;
-            }
-            
-            .checklist-page h1 {
-                font-size: 48px;
-                margin: 25px 0;
-                font-weight: bold;
-            }
-            
-            .checklist-page h2 {
-                font-size: 40px;
-                margin: 20px 0;
-            }
-            
-            .checklist-page p {
-                font-size: 36px;
-                margin: 15px 0;
-            }
-            
-            .checklist-page p strong {
-                font-size: 40px;
-            }
-            
-            /* Protection contre le débordement avec réduction automatique */
-            .overflow-protection {
-                max-height: 85vh;
-                overflow: hidden;
-                transform-origin: center center;
-                width: 100%;
-            }
-            
-            /* Si le contenu est trop long, réduire la taille */
-            .overflow-protection.reduce-size {
-                transform: scale(0.8);
-            }
-            
-            /* Cache tout ce qui n'est pas nécessaire */
-            .no-print {
-                display: none !important;
-            }
-        }
+        `);
+        printWindow.document.write('</style>');
+        printWindow.document.write('</head><body>');
         
-        @media screen {
-            body {
-                font-family: Arial, sans-serif;
-                padding: 20px;
-            }
-            
-            .print-page {
-                border: 2px solid #ccc;
-                margin-bottom: 20px;
-                padding: 30px;
-                min-height: 210mm; /* Hauteur A4 paysage */
-                width: 297mm; /* Largeur A4 paysage */
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                text-align: center;
-                position: relative;
-                background: white;
-            }
-            
-            .qr-code-container {
-                position: absolute;
-                top: 20px;
-                left: 20px;
-            }
-            
-            .qr-code-container img {
-                width: 120px;
-                height: 120px;
-            }
+        // Injecter le contenu
+        printWindow.document.write(content);
+        
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        
+        // Attendre que le contenu soit chargé avant d'imprimer
+        printWindow.onload = function() {
+            setTimeout(function() {
+                printWindow.print();
+            }, 250);
+        };
+    }
+    
+    function printChecklists() {
+        const selectedDate = document.getElementById('checklist-date').value;
+        if (!selectedDate) {
+            alert('Veuillez sélectionner une date.');
+            return;
         }
-    `);
-    printWindow.document.write('</style>');
-    printWindow.document.write('</head><body>');
     
-    // Injecter le contenu
-    printWindow.document.write(content);
+        // Filtrer les pages par date
+        const filteredItems = Array.from(document.querySelectorAll('.page'))
+            .filter(item => item.getAttribute('data-checklist-date') === selectedDate);
     
-    printWindow.document.write('</body></html>');
-    printWindow.document.close();
+        if (filteredItems.length === 0) {
+            alert('Aucune checklist trouvée pour cette date.');
+            return;
+        }
     
-    // Attendre que le contenu soit chargé avant d'imprimer
-    printWindow.onload = function() {
-        setTimeout(function() {
-            printWindow.print();
-        }, 250);
-    };
-}
+        // Construire le contenu HTML avec une page par checklist
+        const content = filteredItems.map(item => {
+            // Cloner l'élément pour ne pas affecter l'original
+            const clonedItem = item.cloneNode(true);
+            
+            // Extraire le QR code et le reste du contenu
+            let htmlContent = clonedItem.innerHTML;
+            
+            // Rechercher l'image QR code
+            const imgRegex = /<img[^>]*src="([^"]*)"[^>]*>/i;
+            const imgMatch = htmlContent.match(imgRegex);
+            
+            let qrCodeHtml = '';
+            let contentWithoutQR = htmlContent;
+            
+            if (imgMatch) {
+                // Créer le HTML du QR code
+                qrCodeHtml = `<div class="qr-code-container">${imgMatch[0]}</div>`;
+                
+                // Retirer le QR code du contenu principal (il est dans le h2)
+                contentWithoutQR = htmlContent.replace(/<h2[^>]*>.*?<\/h2>/i, function(match) {
+                    // Garder le h2 mais sans l'image
+                    const h2WithoutImg = match.replace(imgMatch[0], '');
+                    // Extraire juste le texte de la date du h2
+                    const dateMatch = h2WithoutImg.match(/>([^<]+)</);
+                    if (dateMatch && dateMatch[1].trim()) {
+                        return `<h2>${dateMatch[1].trim()}</h2>`;
+                    }
+                    return '';
+                });
+            }
+            
+            // Construire la page finale avec QR code séparé
+            return `
+                <div class="print-page">
+                    ${qrCodeHtml}
+                    <div class="checklist-page overflow-protection">
+                        <div class="checklist-content">
+                            ${contentWithoutQR}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    
+        // Appeler la fenêtre d'impression
+        openPrintWindow(content, 'Imprimer les Checklists', false);
+    }
+    
+    function printLivraisons() {
+        const selectedDate = document.getElementById('livraison-date').value;
+        if (!selectedDate) {
+            alert('Veuillez sélectionner une date pour les livraisons.');
+            return;
+        }
+    
+        // Filtrer les livraisons par date
+        const filteredItems = Array.from(document.querySelectorAll('.livraison-page'))
+            .filter(item => item.getAttribute('data-livraison-date') === selectedDate);
+        
+        if (filteredItems.length === 0) {
+            alert('Aucune livraison trouvée pour la date sélectionnée.');
+            return;
+        }
+    
+        // Construire le contenu HTML avec une page par livraison
+        const content = filteredItems.map(item => {
+            // Cloner l'élément pour ne pas affecter l'original
+            const clonedItem = item.cloneNode(true);
+            
+            // Wrapper chaque livraison dans une div print-page
+            return `
+                <div class="print-page">
+                    <div class="livraison-page overflow-protection">
+                        ${clonedItem.innerHTML}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    
+        // Appeler la fenêtre d'impression
+        openPrintWindow(content, 'Imprimer les Livraisons', true);
+    }
+    
+// Variables globales pour stocker les données
+let allProducts = [];
 
-function printChecklists() {
-    const selectedDate = document.getElementById('checklist-date').value;
+// Fonction pour charger les produits totaux
+function loadTotalProducts() {
+    const selectedDate = document.getElementById('totalProductsDate').value;
+    
     if (!selectedDate) {
         alert('Veuillez sélectionner une date.');
         return;
     }
 
-    // Filtrer les pages par date
-    const filteredItems = Array.from(document.querySelectorAll('.page'))
-        .filter(item => item.getAttribute('data-checklist-date') === selectedDate);
+    // Mettre à jour le titre de la modale avec la bonne date
+    const dateObj = new Date(selectedDate + 'T00:00:00');
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const formattedDate = dateObj.toLocaleDateString('fr-FR', options);
+    document.getElementById('totalProductsModalLabel').textContent = `Produits au total pour le ${formattedDate}`;
 
-    if (filteredItems.length === 0) {
-        alert('Aucune checklist trouvée pour cette date.');
+    // Afficher la modale
+    const modal = new bootstrap.Modal(document.getElementById('totalProductsModal'));
+    modal.show();
+
+    // Afficher un message de chargement
+    document.getElementById('totalProductsBody').innerHTML = `
+        <tr>
+            <td colspan="3" class="text-center">Chargement...</td>
+        </tr>
+    `;
+
+    // Faire la requête AJAX pour récupérer TOUS les ChecklistItem de cette date
+    fetch(`/api/checklist-items-by-date/?date=${selectedDate}`)
+        .then(response => response.json())
+        .then(data => {
+            allProducts = data.items || [];
+            displayAllProducts();
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            document.getElementById('totalProductsBody').innerHTML = `
+                <tr>
+                    <td colspan="3" class="text-center text-danger">Erreur lors du chargement des données.</td>
+                </tr>
+            `;
+        });
+}
+
+// Fonction pour afficher tous les produits AVEC REGROUPEMENT
+function displayAllProducts() {
+    const tbody = document.getElementById('totalProductsBody');
+    
+    if (allProducts.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="3" class="text-center">Aucun produit trouvé pour cette date.</td>
+            </tr>
+        `;
         return;
     }
 
-    // Construire le contenu HTML avec une page par checklist
-    const content = filteredItems.map(item => {
-        // Cloner l'élément pour ne pas affecter l'original
-        const clonedItem = item.cloneNode(true);
+    // IMPORTANT: Regrouper les produits par nom et calculer le total pour chaque produit unique
+    const productTotals = {};
+    const productDetails = {};
+    
+    allProducts.forEach(item => {
+        const productName = item.product_name || 'N/A';
         
-        // Extraire le QR code et le reste du contenu
-        let htmlContent = clonedItem.innerHTML;
-        
-        // Rechercher l'image QR code
-        const imgRegex = /<img[^>]*src="([^"]*)"[^>]*>/i;
-        const imgMatch = htmlContent.match(imgRegex);
-        
-        let qrCodeHtml = '';
-        let contentWithoutQR = htmlContent;
-        
-        if (imgMatch) {
-            // Créer le HTML du QR code
-            qrCodeHtml = `<div class="qr-code-container">${imgMatch[0]}</div>`;
-            
-            // Retirer le QR code du contenu principal (il est dans le h2)
-            contentWithoutQR = htmlContent.replace(/<h2[^>]*>.*?<\/h2>/i, function(match) {
-                // Garder le h2 mais sans l'image
-                const h2WithoutImg = match.replace(imgMatch[0], '');
-                // Extraire juste le texte de la date du h2
-                const dateMatch = h2WithoutImg.match(/>([^<]+)</);
-                if (dateMatch && dateMatch[1].trim()) {
-                    return `<h2>${dateMatch[1].trim()}</h2>`;
-                }
-                return '';
-            });
+        if (!productTotals[productName]) {
+            productTotals[productName] = 0;
+            productDetails[productName] = [];
         }
         
-        // Construire la page finale avec QR code séparé
-        return `
-            <div class="print-page">
-                ${qrCodeHtml}
-                <div class="checklist-page overflow-protection">
-                    <div class="checklist-content">
-                        ${contentWithoutQR}
-                    </div>
-                </div>
-            </div>
-        `;
-    }).join('');
+        productTotals[productName] += item.quantity || 0;
+        productDetails[productName].push({
+            checklist: item.checklist_name,
+            quantity: item.quantity
+        });
+    });
 
-    // Appeler la fenêtre d'impression
-    openPrintWindow(content, 'Imprimer les Checklists', false);
-}
+    tbody.innerHTML = '';
 
-function printLivraisons() {
-    const selectedDate = document.getElementById('livraison-date').value;
-    if (!selectedDate) {
-        alert('Veuillez sélectionner une date pour les livraisons.');
-        return;
-    }
-
-    // Filtrer les livraisons par date
-    const filteredItems = Array.from(document.querySelectorAll('.livraison-page'))
-        .filter(item => item.getAttribute('data-livraison-date') === selectedDate);
-    
-    if (filteredItems.length === 0) {
-        alert('Aucune livraison trouvée pour la date sélectionnée.');
-        return;
-    }
-
-    // Construire le contenu HTML avec une page par livraison
-    const content = filteredItems.map(item => {
-        // Cloner l'élément pour ne pas affecter l'original
-        const clonedItem = item.cloneNode(true);
+    // Afficher les produits regroupés avec leur total (exclure ceux avec quantité 0)
+    Object.keys(productTotals)
+        .filter(productName => productTotals[productName] > 0) // Filtrer les quantités nulles
+        .sort()
+        .forEach(productName => {
+        const row = document.createElement('tr');
+        row.className = 'product-row';
         
-        // Wrapper chaque livraison dans une div print-page
-        return `
-            <div class="print-page">
-                <div class="livraison-page overflow-protection">
-                    ${clonedItem.innerHTML}
-                </div>
-            </div>
+        // Créer le bouton de détails qui affiche les checklists
+        const detailsButton = `
+            <button class="btn btn-sm btn-outline-info" type="button" data-bs-toggle="collapse" 
+                    data-bs-target="#details-${productName.replace(/[^a-zA-Z0-9]/g, '')}" 
+                    aria-expanded="false">
+                <i class="bi bi-eye"></i> Voir détails
+            </button>
         `;
-    }).join('');
+        
+        row.innerHTML = `
+            <td>${productName}</td>
+            <td><strong>${productTotals[productName]}</strong></td>
+            <td>${detailsButton}</td>
+        `;
+        tbody.appendChild(row);
+        
+        // Ajouter une ligne collapsible pour les détails
+        const detailsRow = document.createElement('tr');
+        detailsRow.className = 'collapse';
+        detailsRow.id = `details-${productName.replace(/[^a-zA-Z0-9]/g, '')}`;
+        detailsRow.innerHTML = `
+            <td colspan="3">
+                <div class="small text-muted ps-3">
+                    ${productDetails[productName].map(d => 
+                        `• ${d.checklist}: <strong>${d.quantity}</strong>`
+                    ).join('<br>')}
+                </div>
+            </td>
+        `;
+        tbody.appendChild(detailsRow);
+    });
+}
 
-    // Appeler la fenêtre d'impression
-    openPrintWindow(content, 'Imprimer les Livraisons', true);
+// Fonction pour filtrer les produits
+function filterProducts() {
+    const searchTerm = document.getElementById('searchProductInput').value.toLowerCase();
+    const rows = document.querySelectorAll('#totalProductsBody .product-row');
+    
+    rows.forEach(row => {
+        const productName = row.cells[0].textContent.toLowerCase();
+        
+        if (productName.includes(searchTerm)) {
+            row.style.display = '';
+            // Afficher aussi la ligne de détails si elle existe
+            const nextRow = row.nextElementSibling;
+            if (nextRow && nextRow.classList.contains('collapse')) {
+                // Ne pas changer la visibilité de la ligne collapse, 
+                // laisser Bootstrap gérer son état
+            }
+        } else {
+            row.style.display = 'none';
+            // Cacher aussi la ligne de détails
+            const nextRow = row.nextElementSibling;
+            if (nextRow && nextRow.classList.contains('collapse')) {
+                nextRow.style.display = 'none';
+            }
+        }
+    });
+}
+
+// Fonction pour charger les produits en cours
+function loadEnCoursProducts() {
+    const selectedDate = document.getElementById('dateEnCoursItems').value;
+    
+    if (!selectedDate) {
+        alert('Veuillez sélectionner une date.');
+        return;
+    }
+
+    // Mettre à jour le titre de la modale avec la bonne date
+    const dateObj = new Date(selectedDate + 'T00:00:00');
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const formattedDate = dateObj.toLocaleDateString('fr-FR', options);
+    document.getElementById('enCoursModalLabel').textContent = `Produits en cours/pending pour le ${formattedDate}`;
+
+    // Afficher la modale
+    const modal = new bootstrap.Modal(document.getElementById('enCoursModal'));
+    modal.show();
+
+    // Afficher un message de chargement
+    document.getElementById('enCoursBody').innerHTML = `
+        <tr>
+            <td colspan="4" class="text-center">Chargement...</td>
+        </tr>
+    `;
+
+    // Faire la requête AJAX pour récupérer uniquement les items en_cours ou pending
+    fetch(`/api/checklist-items-encours/?date=${selectedDate}&status=en_cours,pending`)
+        .then(response => response.json())
+        .then(data => {
+            displayEnCoursProducts(data.items || []);
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            document.getElementById('enCoursBody').innerHTML = `
+                <tr>
+                    <td colspan="4" class="text-center text-danger">Erreur lors du chargement des données.</td>
+                </tr>
+            `;
+        });
+}
+
+// Fonction pour afficher les produits en cours
+function displayEnCoursProducts(items) {
+    const tbody = document.getElementById('enCoursBody');
+    
+    if (items.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="4" class="text-center">Aucun produit en cours ou pending pour cette date.</td>
+            </tr>
+        `;
+        return;
+    }
+
+    tbody.innerHTML = '';
+    let totalEnCours = 0;
+
+    items.forEach(item => {
+        const row = document.createElement('tr');
+        // Ajouter une classe selon le statut
+        if (item.status === 'en_cours') {
+            row.className = 'table-warning';
+        } else if (item.status === 'pending') {
+            row.className = 'table-info';
+        }
+        
+        row.innerHTML = `
+            <td>${item.checklist_name || 'N/A'}</td>
+            <td>${item.product_name || 'N/A'}</td>
+            <td><strong>${item.quantity || 0}</strong></td>
+            <td>
+                <span class="badge ${item.status === 'en_cours' ? 'bg-warning text-dark' : 'bg-info'}">
+                    ${item.status === 'en_cours' ? 'En cours' : 'Pending'}
+                </span>
+            </td>
+        `;
+        tbody.appendChild(row);
+        totalEnCours += item.quantity || 0;
+    });
+
+    // Ajouter la ligne du total
+    const totalRow = document.createElement('tr');
+    totalRow.className = 'table-secondary';
+    totalRow.innerHTML = `
+        <td colspan="2"><strong>TOTAL EN COURS/PENDING</strong></td>
+        <td><strong>${totalEnCours}</strong></td>
+        <td></td>
+    `;
+    tbody.appendChild(totalRow);
 }
     
-    
-    
-    </script>
+</script>
     
 
 {% endblock %}

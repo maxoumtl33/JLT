@@ -671,6 +671,10 @@ class Client(models.Model):
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
+from datetime import timedelta
+from django.urls import reverse
+
 TYPE_PRISE_DE_COMMANDE_CHOICES = [
     ('Téléphone', 'Téléphone'),
     ('En ligne', 'En ligne'),
@@ -683,6 +687,13 @@ class Submission(models.Model):
         ('Commande événement', 'Commande_événement'),
         ('Soumission BAL/Buffet', 'Soumission_BAL_Buffet'),
         ('Commande BAL/Buffet', 'Commande_BAL_Buffet'),
+    ]
+
+    STATUS_CHOICES = [
+        ('en_cours', 'En cours'),
+        ('valide', 'Validé'),
+        ('refuse', 'Refusé'),
+        ('envoyé', 'Envoyé'),
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -716,33 +727,57 @@ class Submission(models.Model):
     note = models.TextField(blank=True, null=True)
     avec_service = models.BooleanField(default=False)
     avec_service_md = models.BooleanField(default=False)
+    avec_alcool = models.BooleanField(default=False)
     language = models.TextField(null=True, blank=True)
     location_materiel = models.BooleanField(default=False)
     commentaire = models.CharField(max_length=2000, null=True, blank=True) 
     payment_mode = models.CharField(max_length=200, null=True, blank=True) 
-    client = models.ForeignKey(Client, null=True, blank=True, on_delete=models.SET_NULL, related_name='submissions_client')
-    date = models.DateField(null=True, blank=True)  # Date
+    client = models.ForeignKey('Client', null=True, blank=True, on_delete=models.SET_NULL, related_name='submissions_client')
+    date = models.DateField(null=True, blank=True)  # Date événement
     event_time = models.TimeField(null=True, blank=True)  # Heure événement
     guest_count = models.IntegerField(null=True, blank=True)  # Nombre personne
     delivery_time = models.TimeField(null=True, blank=True)  # Heure livraison
     budget = models.IntegerField(null=True, blank=True)  # Budget
     service_count = models.CharField(max_length=100, null=True, blank=True)  # Nombre de service (as string)
-    sub_menus = models.ManyToManyField(Menu, blank=True)
+    sub_menus = models.ManyToManyField('Menu', blank=True)
     created_at = models.DateTimeField(null=True, blank=True)
-
-    STATUS_CHOICES = [
-        ('en_cours', 'En cours'),
-        ('valide', 'Validé'),
-        ('refuse', 'Refusé'),
-        ('envoyé', 'Envoyé'),
-    ]
-
-
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    # NOUVEAUX CHAMPS AJOUTÉS
+    sent_at = models.DateTimeField(null=True, blank=True, verbose_name="Date d'envoi")
+    status_history = models.JSONField(default=list, blank=True, verbose_name="Historique des statuts")
 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='en_cours')
 
     def save(self, *args, **kwargs):
-        # Vérifie si le submission n'a pas encore de client
+        # NOUVELLE LOGIQUE : Logger automatiquement quand le statut passe à "envoyé"
+        if self.pk:  # Si l'objet existe déjà (mise à jour)
+            try:
+                old_instance = Submission.objects.get(pk=self.pk)
+                old_status = old_instance.status
+                
+                # Si le statut change vers "envoyé" et sent_at n'est pas défini
+                if old_status != 'envoyé' and self.status == 'envoyé' and not self.sent_at:
+                    self.sent_at = timezone.now()
+                    
+                    # Ajouter à l'historique des statuts
+                    if not self.status_history:
+                        self.status_history = []
+                    self.status_history.append({
+                        'status': 'envoyé',
+                        'date': timezone.now().isoformat(),
+                        'user': self.user.username if self.user else None,
+                        'old_status': old_status
+                    })
+                    
+            except Submission.DoesNotExist:
+                pass
+        
+        # Si guest_count est rempli mais pas nombre_personnes, copier la valeur
+        if self.guest_count and not self.nombre_personnes:
+            self.nombre_personnes = self.guest_count
+        
+        # Logique existante pour le client
         if not self.client:
             # Préparer les données du client à partir des champs de la soumission
             client_data = {
@@ -763,6 +798,7 @@ class Submission(models.Model):
             # Vérifier si au moins un champ utile est rempli
             if any(client_data[field] for field in ['company_name', 'contact_person', 'email', 'phone', 'billing_address']):
                 # Essayer de récupérer un client existant avec les mêmes données
+                from .models import Client  # Import local pour éviter les imports circulaires
                 client_qs = Client.objects.filter(
                     company_name=client_data['company_name'],
                     contact_person=client_data['contact_person'],
@@ -784,7 +820,8 @@ class Submission(models.Model):
         text_fields = [
             'company_name', 'refusal_comment', 'commentaire_items', 'commentaire_boissons',
             'event_postcode', 'event_location', 'contact_person', 'ordered_by', 'phone',
-            'email', 'billing_address', 'etage', 'dock_livraison', 'commentaire', 'service_count', 'payment_mode', 'billing_postcode'
+            'email', 'billing_address', 'etage', 'dock_livraison', 'commentaire', 'service_count', 
+            'payment_mode', 'billing_postcode'
         ]
         for field in text_fields:
             value = getattr(self, field)
@@ -798,12 +835,11 @@ class Submission(models.Model):
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
-        # Assurez que 'submission_detail' correspond à votre nom d’URL
+        # Assurez que 'submission_detail' correspond à votre nom d'URL
         return reverse('submission_detail', args=[self.id])
     
     def __str__(self):
         return f"{self.submission_type} by {self.user} at {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}. Company: {self.company_name if self.company_name else 'N/A'}"
-    
 
 from django.db import models
 

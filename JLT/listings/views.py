@@ -387,6 +387,7 @@ def submission_detail(request, submission_id):
     all_menus = Menu.objects.all()
     all_users = User.objects.all()
     all_payment_modes = PaymentMode.objects.all()
+    conseillers = Conseiller.objects.select_related('user').all()
     # Récupérer uniquement la catégorie "SANS ALCOOL"
     category_sans_alcool = Category.objects.filter(name="SANS ALCOOL").prefetch_related('product_set').first()
     category_submission = Category.objects.filter(name="SOUMISSIONS").prefetch_related('product_set').first()
@@ -416,6 +417,7 @@ def submission_detail(request, submission_id):
         'menus_with_modes_ids': menus_with_modes_ids,
         'all_menus' : all_menus,
         'all_delivery_modes' : all_delivery_modes,
+        'conseillers': conseillers,
         'key':key,
         'all_payment_modes':all_payment_modes,
     }
@@ -1172,30 +1174,34 @@ from django.views.decorators.http import require_GET
 from django.http import JsonResponse
 from .models import ChecklistItem, Checklist
 
-@require_GET
+# Dans votre vue Django
 def checklist_items_encours_par_date(request):
-    date_str = request.GET.get('date')
-    if not date_str:
-        return JsonResponse({'items': []})
-
-    date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
-
-    # Filtrer tous les checklist items liés à un checklist en statut 'encours' pour cette date
-    checklist_encours = Checklist.objects.filter(date=date_obj, is_active=True, status='en_cours').first()
-    if not checklist_encours:
-        return JsonResponse({'items': []})
-
-    items_qs = (
-        ChecklistItem.objects.filter(checklist=checklist_encours)
-        .values('product__name', 'checklist__name')
-        .annotate(total_quantity=Sum('quantity'))
-        .filter(total_quantity__gt=0)
+    date = request.GET.get('date')
+    status_filter = request.GET.get('status_filter', '')
+    
+    # Convertir la date
+    selected_date = datetime.strptime(date, '%Y-%m-%d').date()
+    
+    # Requête de base
+    items = ChecklistItem.objects.filter(
+        checklist__date=selected_date,
+        checklist__is_active=True
     )
-
-    data = {
-        'items': list(items_qs)
-    }
-    return JsonResponse(data)
+    
+    # Appliquer le filtre de statut si fourni
+    if status_filter:
+        status_list = status_filter.split(',')
+        items = items.filter(status__in=status_list)
+    
+    # Grouper par produit et calculer les totaux
+    items = items.values(
+        'product__name', 
+        'checklist__name'
+    ).annotate(
+        total_quantity=Sum('quantity')
+    )
+    
+    return JsonResponse({'items': list(items)})
 
 def format_time_without_seconds(time_str):
     if ':' in time_str:
@@ -2175,6 +2181,7 @@ def creerchecklist(request):
         'is_chefcuisine': request.user.groups.filter(name='chefcuisine').exists(),
         'is_ventes': request.user.groups.filter(name='ventes').exists(),
         'is_admin': request.user.groups.filter(name='admin').exists(),
+        'categories': Category.objects.all(),
     }
 
     return render(request, 'listings/checklistcreate.html', context)
@@ -3760,29 +3767,48 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
 
         if request.method == 'POST':
             if 'route_vehicule' in request.POST:
-                vehicle_form = VehicleForm(request.POST)
-                if vehicle_form.is_valid():
-                    vehicle = vehicle_form.save(commit=False)
-                    route_id = request.POST.get('route_vehicule')
-                    route_instance = Route.objects.filter(id=route_id).first()
-
-                    if route_instance:
+                route_id = request.POST.get('route_vehicule')
+                route_instance = Route.objects.filter(id=route_id).first()
+                
+                if route_instance:
+                    # Récupérer ou créer le véhicule
+                    vehicle_name = request.POST.get('vehicle_name')
+                    vehicle_commentaire = request.POST.get('vehicle_commentaire', '')
+                    
+                    # Créer un nouveau véhicule ou récupérer un existant
+                    vehicle, created = Vehicle.objects.get_or_create(
+                        name=vehicle_name,
+                        defaults={'commentaire': vehicle_commentaire}
+                    )
+                    
+                    # Si le véhicule existe déjà, mettre à jour le commentaire si nécessaire
+                    if not created and vehicle_commentaire:
+                        vehicle.commentaire = vehicle_commentaire
                         vehicle.save()
-                        route_instance.vehicles.add(vehicle)
-
-                        # Handle media uploads for this vehicle
-                        media_files = request.FILES.getlist("media")
-                        for file in media_files:
-                            if file.content_type.startswith('image/'):
-                                PhotoVehicle.objects.create(vehicle=vehicle, image=file)
-                            elif file.content_type.startswith('video/'):
-                                PhotoVehicle.objects.create(vehicle=vehicle, video=file)
-
+                    
+                    # Ajouter le véhicule à la route
+                    route_instance.vehicles.add(vehicle)
+                    
+                    # Récupérer la légende pour les photos/vidéos
+                    caption = request.POST.get('photo_caption', '')
+                    
+                    # Gérer les photos
+                    for photo in request.FILES.getlist('vehicle_photos'):
+                        PhotoVehicle.objects.create(
+                            vehicle=vehicle,
+                            image=photo,
+                            caption=caption
+                        )
+                    
+                    # Gérer les vidéos
+                    for video in request.FILES.getlist('vehicle_videos'):
+                        PhotoVehicle.objects.create(
+                            vehicle=vehicle,
+                            video=video,
+                            caption=caption
+                        )
+                
                 return redirect('dashboard', pk=pk, id=id)
-
-
-        else:
-            form = VehicleForm()
 
 
         livraisons_data = [
@@ -3825,7 +3851,6 @@ def dashboard(request, pk, id):  # notez le paramètre id supplémentaire
                                                                 'taches':taches,
                                                                 'tacheok':tacheok,
                                                                 'tacheko':tacheko,
-                                                                'form': form,
                                                                 'vehicles': vehicles,
 
 
@@ -3862,6 +3887,138 @@ def update_task(request, pk):
 
 
     return render(request, 'listings/update_task.html', {'task': task})
+
+
+from django.http import JsonResponse
+from django.db.models import Q
+from django.contrib.auth.decorators import login_required
+from datetime import datetime
+
+@login_required
+def api_checklist_items_by_date(request):
+    """
+    API pour récupérer TOUS les ChecklistItems d'une date donnée
+    avec le détail par checklist
+    """
+    date_str = request.GET.get('date')
+    
+    if not date_str:
+        return JsonResponse({'error': 'Date requise'}, status=400)
+    
+    try:
+        selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    except ValueError:
+        return JsonResponse({'error': 'Format de date invalide'}, status=400)
+    
+    # Récupérer tous les ChecklistItems pour cette date
+    checklist_items = ChecklistItem.objects.filter(
+        checklist__date=selected_date,
+        checklist__is_active=True
+    ).select_related('product', 'checklist').order_by('checklist__name', 'product__name')
+    
+    items_data = []
+    for item in checklist_items:
+        items_data.append({
+            'checklist_id': item.checklist.id,
+            'checklist_name': item.checklist.name,
+            'product_id': item.product.id if item.product else None,
+            'product_name': item.product.name if item.product else 'Produit inconnu',
+            'quantity': item.quantity,
+            'status': item.status,
+        })
+    
+    return JsonResponse({
+        'items': items_data,
+        'count': len(items_data),
+        'date': selected_date.isoformat()
+    })
+
+
+@login_required
+def api_checklist_items_encours(request):
+    """
+    API pour récupérer uniquement les ChecklistItems 
+    avec status en_cours ou pending pour une date donnée
+    """
+    date_str = request.GET.get('date')
+    status_filter = request.GET.get('status', 'en_cours,pending')
+    
+    if not date_str:
+        return JsonResponse({'error': 'Date requise'}, status=400)
+    
+    try:
+        selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    except ValueError:
+        return JsonResponse({'error': 'Format de date invalide'}, status=400)
+    
+    # Parser les statuts
+    statuses = [s.strip() for s in status_filter.split(',')]
+    
+    # Construire la requête avec filtre sur les statuts
+    query = Q()
+    for status in statuses:
+        query |= Q(status=status)
+    
+    # Récupérer uniquement les items en_cours ou pending
+    checklist_items = ChecklistItem.objects.filter(
+        checklist__date=selected_date,
+        checklist__is_active=True
+    ).filter(query).select_related('product', 'checklist').order_by('checklist__name', 'product__name')
+    
+    items_data = []
+    for item in checklist_items:
+        items_data.append({
+            'checklist_id': item.checklist.id,
+            'checklist_name': item.checklist.name,
+            'product_id': item.product.id if item.product else None,
+            'product_name': item.product.name if item.product else 'Produit inconnu',
+            'quantity': item.quantity,
+            'status': item.status,
+        })
+    
+    return JsonResponse({
+        'items': items_data,
+        'count': len(items_data),
+        'date': selected_date.isoformat(),
+        'filtered_statuses': statuses
+    })
+
+from django.http import JsonResponse
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
+from .models import Product, Category
+from decimal import Decimal
+import json
+
+@login_required
+def create_product(request):
+    if request.method == 'POST':
+        try:
+            name = request.POST.get('name')
+            quantity = request.POST.get('quantity', '0.00')
+            category_ids = request.POST.getlist('category')
+            
+            # Create the product
+            product = Product.objects.create(
+                name=name,
+                quantity=Decimal(quantity),
+                created_by=request.user
+            )
+            
+            # Add categories
+            if category_ids:
+                product.category.set(category_ids)
+            
+            messages.success(request, 'Produit créé avec succès!')
+            return redirect('creerchecklist')  # Rediriger vers votre page actuelle
+                
+        except Exception as e:
+            messages.error(request, f'Erreur: {str(e)}')
+            return redirect('creerchecklist')
+    
+    return redirect('creerchecklist')
+
 @login_required
 def update_photo_task(request, pk):
     task = get_object_or_404(Tacheafaire, pk=pk)
@@ -6719,22 +6876,22 @@ def calendarsub_view(request):
     return render(request, 'listings/calendar_submission.html', context)
 
 
-from collections import defaultdict
 from django.shortcuts import render
 from django.utils import timezone
+from datetime import date, datetime, timedelta
+from collections import defaultdict
 import calendar
-from datetime import date
 
 def calendarsubcreate_view(request):
     current_year = date.today().year
     years = [year for year in range(current_year - 5, current_year + 1)]
     today = date.today()
-    selected_day = int(request.GET.get('day', 1))  # Default to the first day of the month if none selected
+    selected_day = int(request.GET.get('day', 1))
     selected_month = int(request.GET.get('month', today.month))
 
     # Get the number of days in the selected month
     _, num_days_in_month = calendar.monthrange(current_year, selected_month)
-    days_in_month = list(range(1, num_days_in_month + 1))  # Adjust days in month
+    days_in_month = list(range(1, num_days_in_month + 1))
 
     # Get the starting day of the month (0 = Monday, ..., 6 = Sunday)
     first_day_of_month = (date(current_year, selected_month, 1).weekday() + 1) % 7
@@ -6748,28 +6905,38 @@ def calendarsubcreate_view(request):
     ]
 
     # Fetch all submissions for the selected month
-    submissions = Submission.objects.filter(created_at__month=selected_month, created_at__year=current_year)
+    submissions = Submission.objects.filter(
+        created_at__month=selected_month, 
+        created_at__year=current_year
+    )
 
-    submissions_48h_encours = submissions.filter(
-    status='en_cours',
-    created_at__lt=timezone.now() - timedelta(hours=48),
-    submission_type__icontains='soumission'  # Filtre pour 'soumission' dans submission_type
-)
-    commande_48h_encours = submissions.filter(
-    status='en_cours',
-    created_at__lt=timezone.now() - timedelta(hours=48),
-    submission_type__icontains='commande'  # Filtre pour 'soumission' dans submission_type
-)
-    submissions_48h_envoye = submissions.filter(
-    status='envoyé',
-    created_at__lt=timezone.now() - timedelta(hours=48),
-    submission_type__icontains='soumission'  # Filtre pour 'soumission' dans submission_type
-)
-    commande_48h_envoye = submissions.filter(
-    status='envoyé',
-    created_at__lt=timezone.now() - timedelta(hours=48),
-    submission_type__icontains='commande'  # Filtre pour 'soumission' dans submission_type
-)
+    # NOUVEAU SYSTÈME DE NOTIFICATIONS
+    now = timezone.now()
+    
+    # 1. Soumissions événement avec date événement dans moins de 48h et toujours en cours
+    notifications_urgentes = Submission.objects.filter(
+        submission_type='Soumission événement',
+        status='en_cours',
+        date__lte=now + timedelta(hours=48),
+        date__gte=now  # Pour ne pas inclure les événements passés
+    ).select_related('user').order_by('date')
+    
+    # 2. Soumissions événement du mois actuel, créées depuis plus de 48h et toujours en cours
+    debut_mois_actuel = date.today().replace(day=1)
+    fin_mois_actuel = (debut_mois_actuel.replace(month=debut_mois_actuel.month % 12 + 1, day=1) 
+                       if debut_mois_actuel.month < 12 
+                       else debut_mois_actuel.replace(year=debut_mois_actuel.year + 1, month=1, day=1))
+    
+    notifications_mois_actuel = Submission.objects.filter(
+        submission_type='Soumission événement',
+        status='en_cours',
+        date__gte=debut_mois_actuel,
+        date__lt=fin_mois_actuel,
+        created_at__lt=now - timedelta(hours=48)
+    ).exclude(
+        # Exclure celles qui sont déjà dans notifications_urgentes
+        id__in=notifications_urgentes.values_list('id', flat=True)
+    ).select_related('user').order_by('date')
 
     # Initialize a dictionary to hold counts of statuses per day
     daily_counts = defaultdict(lambda: {'en_cours': 0})
@@ -6780,11 +6947,16 @@ def calendarsubcreate_view(request):
         if submission.status == 'en_cours':
             daily_counts[day]['en_cours'] += 1
 
+    notifications_envoyees_48h = Submission.objects.filter(
+    submission_type='Soumission événement',
+    status='envoyé',
+    created_at__lt=now - timedelta(hours=48)  # Utiliser created_at si sent_at n'existe pas
+    )
 
     context = {
         'submissions': submissions,
         'today': today,
-        'months': list(enumerate(calendar.month_name[1:], start=1)),  # Months as (number, name)
+        'months': list(enumerate(calendar.month_name[1:], start=1)),
         'selected_month': selected_month,
         'days': padded_days,
         'french_months': french_months,
@@ -6796,113 +6968,152 @@ def calendarsubcreate_view(request):
         'is_chefcuisine': request.user.groups.filter(name='chefcuisine').exists(),
         'is_ventes': request.user.groups.filter(name='ventes').exists(),
         'is_admin': request.user.groups.filter(name='admin').exists(),
-        'submissions_48h_encours':submissions_48h_encours,
-        'commande_48h_encours':commande_48h_encours,
-        'submissions_48h_envoye':submissions_48h_envoye,
-        'commande_48h_envoye':commande_48h_envoye,
+        # Nouvelles variables pour les notifications
+        'notifications_urgentes': notifications_urgentes,
+        'notifications_mois_actuel': notifications_mois_actuel,
+        'notifications_envoyees_48h': notifications_envoyees_48h,
     }
 
     return render(request, 'listings/calendarcreate_submission.html', context)
 
-from django.shortcuts import redirect, render, get_object_or_404
+from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from django.utils import timezone
-from .models import Submission
-from django.http import JsonResponse
-from datetime import timedelta
-from datetime import datetime
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Q
+from datetime import datetime, timedelta
+from .models import Submission, Conseiller
+
 @login_required
 def manage_submissions(request):
-
-
-    conseillers = Conseiller.objects.select_related('user').all()  # Fetch all Conseillers with related Users
+    # Récupérer tous les conseillers
+    conseillers = Conseiller.objects.select_related('user').all()
+    
+    # Commencer avec toutes les soumissions
     submissions = Submission.objects.all().order_by('-created_at')
-    submissionss = Submission.objects.all().order_by('-created_at')
-    submission_type = request.GET.get('submission_type', '')
-    count_validated = submissions.filter(status='valide', submission_type="soumission").count()
-    count_rejected = submissions.filter(status='refuse', submission_type="soumission").count()
-    count_in_progress = submissions.filter(status='en_cours', submission_type="soumission").count()
-
-    count_validatedcontrat = submissions.filter(status='valide', submission_type="commande").count()
-    count_rejectedontrat = submissions.filter(status='refuse', submission_type="commande").count()
-    count_in_progressontrat = submissions.filter(status='en_cours', submission_type="commande").count()
-
+    
+    # Filtre par Conseiller
     selected_conseiller = request.GET.get('conseiller')
-
     if selected_conseiller:
-        # Filter submissions where the user (creator) is associated with the selected conseiller
         submissions = submissions.filter(user__conseiller__id=selected_conseiller)
 
-    # Filter by Submission Type
+    # Filtre par Type de Soumission
     submission_type = request.GET.get('submission_type')
     if submission_type:
         submissions = submissions.filter(submission_type=submission_type)
 
-    # Filter by Status
+    # Filtre par Statut
     status_filter = request.GET.get('status')
     if status_filter:
         submissions = submissions.filter(status=status_filter)
 
-
-    # Handle date range filtering
-    start_date = request.GET.get('start_date')
-    end_date = request.GET.get('end_date')
-
-    if start_date and end_date:
-        # Adjust the date range to include the whole day
-        start_datetime = datetime.strptime(start_date, "%Y-%m-%d")
-        end_datetime = datetime.strptime(end_date, "%Y-%m-%d") + timedelta(days=1)  # Add one day to include the full final day
-
+    # NOUVEAU : Filtres de date de création
+    creation_start_date = request.GET.get('creation_start_date')
+    creation_end_date = request.GET.get('creation_end_date')
+    
+    if creation_start_date and creation_end_date:
+        start_datetime = datetime.strptime(creation_start_date, "%Y-%m-%d")
+        end_datetime = datetime.strptime(creation_end_date, "%Y-%m-%d") + timedelta(days=1)
         submissions = submissions.filter(created_at__range=[start_datetime, end_datetime])
+    elif creation_start_date:
+        start_datetime = datetime.strptime(creation_start_date, "%Y-%m-%d")
+        submissions = submissions.filter(created_at__gte=start_datetime)
+    elif creation_end_date:
+        end_datetime = datetime.strptime(creation_end_date, "%Y-%m-%d") + timedelta(days=1)
+        submissions = submissions.filter(created_at__lt=end_datetime)
 
-    # Pagination logic
-    paginator = Paginator(submissions, 15)  # Show 10 submissions per page
-    page_number = request.GET.get('page')  # Get the page number from the request
-    try:
-        submissions = paginator.page(page_number)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        submissions = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 999), deliver last page of results.
-        submissions = paginator.page(paginator.num_pages)
+    # NOUVEAU : Filtres de date d'événement
+    event_start_date = request.GET.get('event_start_date')
+    event_end_date = request.GET.get('event_end_date')
+    
+    if event_start_date and event_end_date:
+        submissions = submissions.filter(
+            date__gte=event_start_date,
+            date__lte=event_end_date
+        )
+    elif event_start_date:
+        submissions = submissions.filter(date__gte=event_start_date)
+    elif event_end_date:
+        submissions = submissions.filter(date__lte=event_end_date)
 
+    # NOUVEAU : Filtre pour activer/désactiver Soumissions et Commandes
+    show_soumissions = request.GET.get('show_soumissions', 'on') == 'on'
+    show_commandes = request.GET.get('show_commandes', 'on') == 'on'
+    
+    type_filter = Q()
+    if show_soumissions and not show_commandes:
+        type_filter = Q(submission_type__icontains='Soumission')
+    elif show_commandes and not show_soumissions:
+        type_filter = Q(submission_type__icontains='Commande')
+    elif not show_soumissions and not show_commandes:
+        # Si aucun n'est sélectionné, ne rien afficher
+        type_filter = Q(pk__in=[])
+    # Si les deux sont sélectionnés, on ne filtre pas (affiche tout)
+    
+    if type_filter:
+        submissions = submissions.filter(type_filter)
 
-    # Count the number of filtered submissions
-    submission_count = submissions.paginator.count
-
+    # Recherche
     search_query = request.GET.get('search', '')
-
     if search_query:
-        # Filter submissions based on a search query
-        submissions = submissionss.filter(
+        submissions = submissions.filter(
             Q(company_name__icontains=search_query) |
             Q(user__username__icontains=search_query) |
-            Q(created_at__icontains=search_query) |
             Q(ordered_by__icontains=search_query) |
             Q(contact_person__icontains=search_query) |
-            Q(phone__icontains=search_query) |  # Add phone to query
-            Q(email__icontains=search_query)  # Add email to query
+            Q(phone__icontains=search_query) |
+            Q(email__icontains=search_query)
         )
 
-    return render(request, 'listings/manage_submissions.html', {
-        'submissions': submissions,
+    # Statistiques (avant pagination)
+    submission_count = submissions.count()
+    
+    # Calcul des statistiques par type
+    count_validated = submissions.filter(status='valide', submission_type__icontains='Soumission').count()
+    count_rejected = submissions.filter(status='refuse', submission_type__icontains='Soumission').count()
+    count_in_progress = submissions.filter(status='en_cours', submission_type__icontains='Soumission').count()
+    
+    count_validatedcontrat = submissions.filter(status='valide', submission_type__icontains='Commande').count()
+    count_rejectedontrat = submissions.filter(status='refuse', submission_type__icontains='Commande').count()
+    count_in_progressontrat = submissions.filter(status='en_cours', submission_type__icontains='Commande').count()
+
+    # Pagination
+    paginator = Paginator(submissions, 15)  # 15 soumissions par page
+    page_number = request.GET.get('page')
+    
+    try:
+        submissions_page = paginator.page(page_number)
+    except PageNotAnInteger:
+        submissions_page = paginator.page(1)
+    except EmptyPage:
+        submissions_page = paginator.page(paginator.num_pages)
+
+    context = {
+        'submissions': submissions_page,
+        'conseillers': conseillers,
+        'selected_conseiller': selected_conseiller,
         'submission_type': submission_type,
+        'status_filter': status_filter,
         'submission_count': submission_count,
         'count_validated': count_validated,
         'count_rejected': count_rejected,
         'count_in_progress': count_in_progress,
-        'count_validatedcontrat' : count_validatedcontrat,
+        'count_validatedcontrat': count_validatedcontrat,
         'count_rejectedontrat': count_rejectedontrat,
-         'conseillers': conseillers,
         'count_in_progressontrat': count_in_progressontrat,
-        'start_date': start_date,  # Add start_date to context
-        'end_date': end_date,
+        # Dates de création
+        'creation_start_date': creation_start_date,
+        'creation_end_date': creation_end_date,
+        # Dates d'événement  
+        'event_start_date': event_start_date,
+        'event_end_date': event_end_date,
+        # Toggles
+        'show_soumissions': show_soumissions,
+        'show_commandes': show_commandes,
+        # Recherche
         'search_query': search_query,
-        'submissionss': submissionss,
+    }
 
-                })
-
+    return render(request, 'listings/manage_submissions.html', context)
 
 def get_conseiller_username(request):
     # Retrieve the conseiller id from the GET request
@@ -6947,13 +7158,6 @@ from django.core.files.base import ContentFile
 @csrf_exempt
 def update_submission(request, submission_id):
     if request.method == 'POST':
-        # Nettoyer toutes les valeurs POST
-        clean_post = {}
-        for key, value in request.POST.items():
-            if value is None or value.lower() == 'none':
-                clean_post[key] = ''
-            else:
-                clean_post[key] = value.strip()
         try:
             submission = get_object_or_404(Submission, id=submission_id)
 
@@ -6961,207 +7165,63 @@ def update_submission(request, submission_id):
             if 'document' in request.FILES:
                 file = request.FILES['document']
                 if submission.document:
-                    # Delete the old file if it exists
                     default_storage.delete(submission.document.path)
-                
-                # Save the new file
                 path = default_storage.save(f'submission_documents/{file.name}', ContentFile(file.read()))
                 submission.document = path
-                submission.save()
 
-            # Parse and validate main fields
-            # (Similar to your current approach)
-            # Example: date parsing
+            # Parse date
             date_str = request.POST.get('date', '').strip()
             if date_str:
                 from datetime import datetime
                 submission.date = datetime.strptime(date_str, "%Y-%m-%d").date()
 
-            # Update simple text fields
-
+            # Update text fields
             submission.company_name = request.POST.get('company_name', '').strip()
             submission.event_postcode = request.POST.get('postal_code', '').strip()
-            submission.billing_postcode = request.POST.get('postal_code_billing', '').strip()
-            ordered_by = request.POST.get('ordered_by', '').strip()
+            submission.event_location = request.POST.get('event_location', '').strip()
+            submission.phone = request.POST.get('phone', '').strip()
+            submission.email = request.POST.get('email', '').strip()
             
-
-
-            # Vérifier si la valeur est "None" (chaîne)
+            # Handle ordered_by
+            ordered_by = request.POST.get('ordered_by', '').strip()
             if ordered_by.lower() == 'none':
                 ordered_by = ''
-                
-            # Ensuite, enregistrer
             submission.ordered_by = ordered_by
 
-            language = request.POST.get('language', '').strip()
+            # Handle boolean fields properly
+            boolean_fields = ['avec_service_md', 'location_materiel', 'avec_alcool']
             
+            for field in boolean_fields:
+                if field in request.POST:
+                    value = request.POST.get(field, '').strip()
+                    # Remove non-breaking spaces and regular spaces
+                    value = value.replace('\xa0', '').replace(' ', '')
+                    
+                    # Convert to boolean
+                    if value in ['True', 'true', '1']:
+                        setattr(submission, field, True)
+                    elif value in ['False', 'false', '0', '']:
+                        setattr(submission, field, False)
+                    else:
+                        # Default to False if unrecognized
+                        setattr(submission, field, False)
 
-
-            # Vérifier si la valeur est "None" (chaîne)
-            if language.lower() == 'none':
-                language = ''
-            submission.language = language
-            submission.location_materiel = request.POST.get('location_materiel', '').strip()
-            submission.avec_service = request.POST.get('avec_service', '').strip()
-            submission.avec_service_md = request.POST.get('avec_service_md', '').strip()
-            submission.event_location = request.POST.get('event_location', '').strip()
-            submission.contact_person = request.POST.get('contact_person', '').strip()
-            submission.payment_mode = request.POST.get('payment_mode', '').strip()
-            submission.phone = request.POST.get('phone', '').strip()
-            commentaire = request.POST.get('commentaire', '').strip()
-
-            # Vérifier si la valeur est "None" (chaîne)
-            if commentaire.lower() == 'none':
-                commentaire = ''
-                
-            # Ensuite, enregistrer
-            submission.commentaire = commentaire
-            submission.email = request.POST.get('email', '').strip()
-            submission.billing_address = request.POST.get('billing_address', '').strip()
-            submission.etage = request.POST.get('etage', '').strip()
-            submission.dock_livraison = request.POST.get('dock_livraison', '').strip()
-            submission.escalier = request.POST.get('escalier', '').strip()
-            submission.ascenseur = request.POST.get('ascenseur', '').strip()
-            submission.carte_dock = request.POST.get('carte_dock', '').strip()
-            submission.delivery_time = request.POST.get('delivery_time_select', '').strip()
-            submission.event_time = request.POST.get('event_time_select', '').strip()
-            submission.carte_dock = request.POST.get('carte_dock', '').strip()
-
-
-            commentaire_items = request.POST.get('commentaire_matos', '').strip()
-            # Vérifier si la valeur est "None" (chaîne)
-            if commentaire_items.lower() == 'none':
-                commentaire_items = ''
-                
-            # Ensuite, enregistrer
-            submission.commentaire_items = commentaire_items
-
-            commentaire_boissons = request.POST.get('commentaire_boissons', '').strip()
-            # Vérifier si la valeur est "None" (chaîne)
-            if commentaire_boissons.lower() == 'none':
-                commentaire_boissons = ''
-                
-            # Ensuite, enregistrer
-            submission.commentaire_boissons = commentaire_boissons
-
-            submission.save()
-
-
-
-
-
-
-
-            # Numeric fields with validation and sanitization
-            budget_str = request.POST.get('budget', '').replace("\xa0", "").strip()
-            try:
-                submission.budget = float(budget_str)
-            except ValueError:
-                submission.budget = None
-
+            # Handle guest_count
             guest_str = request.POST.get('guest_count', '').replace("\xa0", "").strip()
             try:
-                submission.guest_count = int(guest_str)
+                submission.guest_count = int(guest_str) if guest_str else None
             except ValueError:
                 submission.guest_count = None
 
-            # Save main submission data
+            # Save submission
             submission.save()
-
-            existing_ids = set(submission.menu_submissions.values_list('id', flat=True))
-            processed_ids = set()
-
-            # 2. Parcourir tous `request.POST` pour traiter
-            for key in request.POST:
-                if key.startswith('sub_menus_'):
-                    menu_sub_id = key.split('sub_menus_')[1]
-                    menu_id = request.POST.get(key)
-                    commentaire_menu = request.POST.get(f'commentaire_menu_{menu_sub_id}', '').strip()
-                    allergies = request.POST.get(f'allergies_{menu_sub_id}', '').strip()
-                    delivery_mode_id = request.POST.get(f'delivery_modes_{menu_sub_id}', '')
-                    service_count_str = request.POST.get(f'service_count_{menu_sub_id}', '').strip()
-
-
-                    # Validation
-                    if not menu_id or not menu_id.isdigit():
-                        continue
-                    if not delivery_mode_id or not delivery_mode_id.isdigit():
-                        continue
-
-                    menu = get_object_or_404(Menu, id=int(menu_id))
-                    delivery_mode = get_object_or_404(DeliveryMode, id=int(delivery_mode_id))
-
-                    # Si c'est une modification existante
-                    if menu_sub_id.isdigit():
-                        try:
-                            ms = MenuSubmission.objects.get(id=int(menu_sub_id))
-                            ms.menu = menu
-                            ms.allergies = allergies
-                            ms.delivery_mode = delivery_mode
-                            ms.commentaire_menu = commentaire_menu
-                            ms.service_count = service_count_str
-                            ms.save()
-                            processed_ids.add(ms.id)
-                        except MenuSubmission.DoesNotExist:
-                            # Créer si n'existe pas
-                            ms = MenuSubmission.objects.create(
-                                submission=submission,
-                                menu=menu,
-                                allergies=allergies,
-                                delivery_mode=delivery_mode
-                            )
-                            processed_ids.add(ms.id)
-                    else:
-                        # Nouvelle entrée
-                        ms = MenuSubmission.objects.create(
-                            submission=submission,
-                            menu=menu,
-                            commentaire_menu=commentaire_menu,
-                            allergies=allergies,
-                            delivery_mode=delivery_mode
-                        )
-                        processed_ids.add(ms.id)
-
-            # 3. Supprimer ceux qui ne sont plus présents
-            to_delete_ids = existing_ids - processed_ids
-            MenuSubmission.objects.filter(id__in=to_delete_ids).delete()
-
-
-            for key in request.POST:
-                if key.startswith('new_sub_menus_'):
-                    index = key.split('new_sub_menus_')[1]
-                    menu_id = request.POST.get(key)
-                    commentaire_menu = request.POST.get(f'commentaire_menu_new_{index}', '').strip()
-                    allergies = request.POST.get(f'allergies_new_{index}', '').strip()
-                    delivery_mode_id = request.POST.get(f'delivery_modes_new_{index}', '')
-                    service_count_str = request.POST.get(f'service_count_new_{index}', '').strip()
-
-
-                    if not menu_id or not menu_id.isdigit():
-                        continue
-                    if not delivery_mode_id or not delivery_mode_id.isdigit():
-                        continue
-
-                    menu = get_object_or_404(Menu, id=int(menu_id))
-                    delivery_mode = get_object_or_404(DeliveryMode, id=int(delivery_mode_id))
-                    MenuSubmission.objects.create(
-                        submission=submission,
-                        menu=menu,
-                        allergies=allergies,
-                        commentaire_menu=commentaire_menu,
-                        delivery_mode=delivery_mode,
-                        service_count=service_count_str,
-                    )
 
             return JsonResponse({'success': True})
 
-        except Submission.DoesNotExist:
-            return JsonResponse({'success': False, 'error': 'Soumission non trouvée.'}, status=404)
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
     else:
         return JsonResponse({'success': False, 'error': 'Méthode non autorisée.'}, status=405)
-
 
 def get_livraisons(request, journee_id):
     livraisons = Livraison.objects.filter(journee_id=journee_id, recuperation=False)

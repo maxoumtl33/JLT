@@ -704,17 +704,7 @@
             <form id="validateForm" action="{% url 'validate_livraison' livraison.id %}" method="POST">
                 {% csrf_token %}
 
-                <div class="mb-3">
-                    <label class="form-label">Commentaire</label>
-                    <textarea name="commentaire" class="form-control" rows="3"
-                              placeholder="Ajouter un commentaire..." required></textarea>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Nom du client</label>
-                    <input type="text" name="nom_client_signature" class="form-control"
-                           placeholder="Entrez le nom du client" required>
-                </div>
+                
 
                 <div class="signature-section mb-3">
                     <label class="form-label">Signature</label>
@@ -724,6 +714,20 @@
                     </button>
                     <input type="hidden" id="signatureInput" name="signature">
                 </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Nom du client</label>
+                    <input type="text" name="nom_client_signature" class="form-control"
+                           placeholder="Entrez le nom du client" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Commentaire</label>
+                    <textarea name="commentaire" class="form-control" rows="3"
+                              placeholder="Ajouter un commentaire..." required></textarea>
+                </div>
+
+                
 
                 <div class="swipe-container mb-3">
                     <div class="swipe-track">Glissez pour valider →</div>
@@ -738,65 +742,90 @@
         </div>
     </div>
 
-    <!-- Photo Upload Offcanvas FULLSCREEN -->
-    <div class="offcanvas offcanvas-bottom offcanvas-fullscreen" tabindex="-1" id="uploadOffcanvas">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title">Ajouter des photos</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
-        </div>
-        <div class="offcanvas-body" style="margin-top: 120px;">
-            <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                <div class="mb-3">
-                    <label class="form-label">Photos de livraison</label>
-                    <input type="file" name="image" class="form-control" multiple accept="image/*">
-                    <small class="text-muted mt-2 d-block">
-                        Vous pouvez sélectionner plusieurs photos à la fois
-                    </small>
-                </div>
-
-                <!-- Preview area -->
-                <div id="photoPreview" class="photo-grid preview"></div>
-
-                <button type="submit" name="photo_form" class="btn-submit">
-                    <i class="fas fa-upload"></i> Déposer les photos
-                </button>
-
-                <!-- Spacer for scrolling -->
-                <div style="height: 50px;"></div>
-            </form>
-        </div>
+<!-- Photo Upload Offcanvas FULLSCREEN -->
+<div class="offcanvas offcanvas-bottom offcanvas-fullscreen" tabindex="-1" id="uploadOffcanvas">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">Ajouter des photos</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
     </div>
+    <div class="offcanvas-body" style="margin-top: 120px;">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label">Photos de livraison</label>
+                
+                <!-- Bouton pour prendre une photo -->
+                <input type="file" name="image" class="form-control mb-2" accept="image/*" capture="camera" id="camera-input" style="display: none;">
+                <label for="camera-input" class="btn btn-primary w-100 mb-2">
+                    <i class="fas fa-camera"></i> Prendre une photo
+                </label>
+                
+                <!-- Bouton pour choisir depuis la galerie -->
+                <input type="file" name="image" class="form-control" multiple accept="image/*" id="gallery-input" style="display: none;">
+                <label for="gallery-input" class="btn btn-secondary w-100">
+                    <i class="fas fa-images"></i> Choisir depuis la galerie
+                </label>
+                
+                <small class="text-muted mt-2 d-block">
+                    Vous pouvez sélectionner plusieurs photos à la fois
+                </small>
+            </div>
 
-    <!-- Photo Upload Offcanvas Recup FULLSCREEN -->
-    <div class="offcanvas offcanvas-bottom offcanvas-fullscreen" tabindex="-1" id="uploadOffcanvasrecup">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title">Photos de récupération</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
-        </div>
-        <div class="offcanvas-body" style="margin-top: 120px;">
-            <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                <div class="mb-3">
-                    <label class="form-label">Photos de récupération</label>
-                    <input type="file" name="imagerecup" class="form-control" multiple accept="image/*">
-                    <small class="text-muted mt-2 d-block">
-                        Vous pouvez sélectionner plusieurs photos à la fois
-                    </small>
-                </div>
+            <!-- Preview area -->
+            <div id="photoPreview" class="photo-grid preview"></div>
 
-                <!-- Preview area -->
-                <div id="photoPreviewRecup" class="photo-grid preview"></div>
+            <button type="submit" name="photo_form" class="btn-submit">
+                <i class="fas fa-upload"></i> Déposer les photos
+            </button>
 
-                <button type="submit" name="photo_form" class="btn-submit">
-                    <i class="fas fa-upload"></i> Déposer les photos
-                </button>
-
-                <!-- Spacer for scrolling -->
-                <div style="height: 50px;"></div>
-            </form>
-        </div>
+            <!-- Spacer for scrolling -->
+            <div style="height: 50px;"></div>
+        </form>
     </div>
+</div>
+
+   <!-- Photo Upload Offcanvas Recup FULLSCREEN -->
+<div class="offcanvas offcanvas-bottom offcanvas-fullscreen" tabindex="-1" id="uploadOffcanvasrecup">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">Photos de récupération</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body" style="margin-top: 120px;">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label class="form-label">Photos de récupération</label>
+                
+                <!-- Bouton pour prendre une photo -->
+                <input type="file" name="imagerecup" class="form-control mb-2" accept="image/*" capture="camera" id="camera-input-recup" style="display: none;">
+                <label for="camera-input-recup" class="btn btn-primary w-100 mb-2">
+                    <i class="fas fa-camera"></i> Prendre une photo
+                </label>
+                
+                <!-- Bouton pour choisir depuis la galerie -->
+                <input type="file" name="imagerecup" class="form-control" multiple accept="image/*" id="gallery-input-recup" style="display: none;">
+                <label for="gallery-input-recup" class="btn btn-secondary w-100">
+                    <i class="fas fa-images"></i> Choisir depuis la galerie
+                </label>
+                
+                <small class="text-muted mt-2 d-block">
+                    Vous pouvez sélectionner plusieurs photos à la fois
+                </small>
+            </div>
+
+            <!-- Preview area -->
+            <div id="photoPreviewRecup" class="photo-grid preview"></div>
+
+            <button type="submit" name="photo_form" class="btn-submit">
+                <i class="fas fa-upload"></i> Déposer les photos
+            </button>
+
+            <!-- Spacer for scrolling -->
+            <div style="height: 50px;"></div>
+        </form>
+    </div>
+</div>
 
     <!-- Dock Modal -->
     {% if docks %}
@@ -871,13 +900,22 @@
         }
 
         // Add event listeners for file inputs
-        document.querySelector('input[name="image"]')?.addEventListener('change', function() {
-            handleFileSelect(this, 'photoPreview');
-        });
+            document.querySelector('#gallery-input')?.addEventListener('change', function() {
+                handleFileSelect(this, 'photoPreview');
+            });
 
-        document.querySelector('input[name="imagerecup"]')?.addEventListener('change', function() {
-            handleFileSelect(this, 'photoPreviewRecup');
-        });
+            document.querySelector('#camera-input')?.addEventListener('change', function() {
+                handleFileSelect(this, 'photoPreview');
+            });
+
+            // Pour récupération
+            document.querySelector('#gallery-input-recup')?.addEventListener('change', function() {
+                handleFileSelect(this, 'photoPreviewRecup');
+            });
+
+            document.querySelector('#camera-input-recup')?.addEventListener('change', function() {
+                handleFileSelect(this, 'photoPreviewRecup');
+            });
 
         // Signature Pad
         const canvas = document.getElementById('signaturePad');

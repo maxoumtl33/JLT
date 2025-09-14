@@ -197,13 +197,19 @@ body {
     </a>
   
     {% if user.username == "Audrey" or user.username == "Maxime" or user.username == "Roxanne" %}
-    <a href="{% url 'manage_submissions' %}">
-      <i class="fa-solid fa-file-pdf me-2"></i>PDF et Recherche Soumission
+    <a href="{% url 'manage_submissions' %}" class="aref">
+        <i class="fa-solid fa-file-pdf me-2"></i>PDF et Recherche Soumission
     </a>
-    <a href="{% url 'calendarsubcreate_view' %}">
-      <i class="fa-solid fa-calendar-days me-2"></i>Suivi Soumissions
+    
+    <a href="{% url 'calendarsubcreate_view' %}" class="aref">
+        <i class="fa-solid fa-calendar-days me-2"></i>Suivi Soumissions
     </a>
-    {% endif %}
+    
+    <!-- New Product Creation Link -->
+    <a href="#" class="aref" data-bs-toggle="modal" data-bs-target="#createProductModal">
+        <i class="fa-solid fa-box me-2"></i>Créer un Produit
+    </a>
+{% endif %}
   
   
     <button class="toggle-theme" id="theme-toggle" style="margin-top:10px;"><i class="fas fa-moon"></i> Thème</button>
