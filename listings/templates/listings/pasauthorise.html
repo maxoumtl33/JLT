@@ -1,0 +1,92 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+
+{% block content %}
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Non-Authorized Zone</title>
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        .non-authorized-zone {
+            text-align: center;
+            max-width: 500px;
+            padding: 40px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .non-authorized-zone h1 {
+            font-size: 2.5rem;
+            color: #d9534f;
+            margin-bottom: 20px;
+        }
+
+        .non-authorized-zone p {
+            font-size: 1.2rem;
+            color: #555;
+            margin-bottom: 30px;
+        }
+
+        .non-authorized-zone .back-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #1176F5;
+            color: #fff;
+            font-size: 1rem;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .non-authorized-zone .back-button:hover {
+            background-color: #0d63cc;
+        }
+    </style>
+</head>
+<body>
+    <div class="non-authorized-zone">
+        
+        <p>Tu n'as rien à faire ici :)</p>
+        <a href="javascript:goBack()" class="back-button">Retour</a>
+    </div>
+
+    <script>
+        // JavaScript to navigate back to the previous page
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+{% endblock %}

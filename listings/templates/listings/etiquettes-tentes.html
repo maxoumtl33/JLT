@@ -1,0 +1,353 @@
+
+
+
+
+{% extends 'listings/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s linear, color 0.3s linear;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #007BFF;
+            height: 100%;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar .sidebar-header {
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .sidebar a {
+            color: #fff;
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar a.active, .sidebar a:hover {
+            background-color: #0056b3;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .etiquette {
+            flex: 1;
+            padding: 20px;
+            background-color: #F0F2F5;
+            overflow-y: auto;
+            transition: margin-left 0.3s ease; /* Improves smoothness of layout change */
+        }
+
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            
+        }
+
+        .header .toggle-theme {
+            cursor: pointer;
+            color: #007BFF;
+        }
+        #etiquette.expanded {
+    margin-left: 0;
+}
+
+#etiquette.full-width {
+    transition: margin-left 0s;
+}
+
+.collapsed {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    width: 0; /* Ensure width collapses at the end */
+}
+
+.dark-mode {
+            background-color: #121212;
+            color: #e4e4e4;
+        }
+
+        .dark-mode .header, .dark-mode .card {
+            background-color: #1e1e1e;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .dark-mode .sidebar {
+            background-color: #1e1e1e;
+        }
+
+        .dark-mode .sidebar a {
+            color: #e4e4e4;
+        }
+
+        .dark-mode .sidebar a.active, .dark-mode .sidebar a:hover {
+            background-color: #333;
+            color: #fff;
+        }
+</style>
+<!-- Lien Bootstrap déjà dans base si inclus, sinon décommentez -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header" style="margin-top: 100px;">Menu <button class="toggle-sidebar" id="sidebar-toggle"><i class="fas fa-bars"></i></button></div>
+    <a href="{% url 'conseiller_dashboard' %}" class="aref"><i class="fa-solid fa-desktop me-2"></i> Tableau de bord</a>
+    <a href="{% url 'journees-list' %}" class="aref"><i class="fa-solid fa-truck me-2"></i> Livraisons</a>
+    <a href="{% url 'creerchecklist' %}"><i class="fas fa-list-check me-2"></i> Checklists</a>
+    <a href="{% url 'calendarsub_view' %}">
+        <i class="fa-solid fa-file-contract me-2"></i>Soumissions
+                                          </a>
+    
+    <a href="{% url 'submit_request' %}" target="_blank" class="aref" >
+      <i class="fa-solid fa-file-signature me-2"></i>Créer Soumission
+                              </a>
+                             
+  
+                              {% if user.username == "Audrey" or user.username == "Maxime" or user.username == "Roxanne" %}
+                              
+                               
+                                  
+                              <a href="{% url 'manage_submissions' %}">
+                                <i class="fa-solid fa-file-pdf me-2"></i>PDF et Recherche Soumission
+                            </a>
+                                     
+                                          <a href="{% url 'calendarsubcreate_view' %}">
+                                              <i class="fa-solid fa-calendar-days me-2"></i>Suivi Soumissions
+                                          </a>
+                                    
+                                          
+                             
+                              {% endif %}
+                                
+    <button class="toggle-theme" id="theme-toggle" style="margin-top:10px;"><i class="fas fa-moon"></i> Thème</button>
+    <div style="margin-top:20px; font-size:14px; color:#ccc;">Utilisateur: {{ user.username }}</div>
+  </div>
+<div class="etiquette" id="etiquette">
+    <div class="header">
+        <h2>Impression étiquettes tente</h2>
+            <button id="show-sidebar" style="display:none; position: fixed; top: 12%; left: 10px;">
+                <i class="fas fa-bars fa-2xl"></i>
+            </button>
+        <div class="user-info">
+            <button id="logoutBtn" style="border:none; background:none; cursor:pointer;"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
+        </div>
+    </div>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+
+    <!-- Boutons d'action -->
+    <div class="mb-4 text-center">
+        <button type="button" class="btn btn-primary mx-2" data-toggle="modal" data-target="#addPlatModal">
+            Ajouter un Plat
+        </button>
+        <button type="button" class="btn btn-secondary mx-2" data-toggle="modal" data-target="#selectPlatsModal">
+            PDF 🇫🇷
+        </button>
+        <button type="button" class="btn btn-secondary mx-2" data-toggle="modal" data-target="#selectPlatsModalEn">
+            PDF 🇬🇧
+        </button>
+    </div>
+
+    <!-- Modal Ajout Plat -->
+    <div class="modal fade" id="addPlatModal" tabindex="-1" role="dialog" aria-labelledby="addPlatModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addPlatModalLabel">Ajouter un Nouveau Plat</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form method="post" action="{% url 'etiquette-tente' %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="nom">NOM 🇫🇷</label>
+                            <input type="text" class="form-control" id="nom" name="nom" required>
+                            <label for="nom">NOM 🇬🇧</label>
+                            <input type="text" class="form-control" id="nom_english" name="nom_english" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                        <button type="submit" class="btn btn-primary">Ajouter</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal sélection Plats -->
+    <div class="modal fade" id="selectPlatsModal" tabindex="-1" role="dialog" aria-labelledby="selectPlatsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="selectPlatsModalLabel">PDF 🇫🇷</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form method="get" action="{% url 'generate_multiple_pdfs' %}">
+                    <div class="mb-3 px-3">
+                        <input type="text" class="form-control" id="searchBar" onkeyup="searchFunction()" placeholder="Rechercher un plat...">
+                    </div>
+                    <div style="max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                        <ul class="list-group" id="platList">
+                            {% for plat in plats %}
+                            <li class="list-group-item form-check">
+                                <input class="form-check-input" type="checkbox" id="plat_{{ plat.id }}" name="plats" value="{{ plat.nom }}">
+                                <label class="form-check-label" for="plat_{{ plat.id }}">{{ plat.nom }}</label>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="text-center my-3">
+                        <button type="submit" class="btn btn-primary">Générer PDF</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+        <!-- Modal sélection Plats -->
+        <div class="modal fade" id="selectPlatsModalEn" tabindex="-1" role="dialog" aria-labelledby="selectPlatsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="selectPlatsModalLabel">PDF 🇬🇧</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form method="get" action="{% url 'generate_multiple_pdfs_en' %}">
+                        <div class="mb-3 px-3">
+                            <input type="text" class="form-control" id="searchBarEn" onkeyup="searchFunctionEn()" placeholder="Rechercher un plat...">
+                        </div>
+                        <div style="max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                            <ul class="list-group" id="platListEn">
+                                {% for plat in plats %}
+                                <li class="list-group-item form-check">
+                                    <input class="form-check-input" type="checkbox" id="plat_{{ plat.id }}" name="plats_en" value="{{ plat.nom_english }}">
+                                    <label class="form-check-label" for="plat_{{ plat.id }}">{{ plat.nom_english }}</label>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="text-center my-3">
+                            <button type="submit" class="btn btn-primary">Générer PDF</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+</div> <!-- Fin container -->
+
+<!-- Inclusion des scripts Bootstrap -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<!-- Script de recherche -->
+<script>
+function searchFunction() {
+    var input = document.getElementById("searchBar");
+    var filter = input.value.toUpperCase();
+    var ul = document.getElementById("platList");
+    var li = ul.getElementsByTagName("li");
+    for (var i = 0; i < li.length; i++) {
+        var label = li[i].getElementsByTagName("label")[0];
+        var txtValue = label.textContent || label.innerText;
+        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            li[i].style.display = "";
+        } else {
+            li[i].style.display = "none";
+        }
+    }
+}
+
+function searchFunctionEn() {
+    var input = document.getElementById("searchBarEn");
+    var filter = input.value.toUpperCase();
+    var ul = document.getElementById("platListEn");
+    var li = ul.getElementsByTagName("li");
+    for (var i = 0; i < li.length; i++) {
+        var label = li[i].getElementsByTagName("label")[0];
+        var txtValue = label.textContent || label.innerText;
+        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            li[i].style.display = "";
+        } else {
+            li[i].style.display = "none";
+        }
+    }
+}
+
+const toggleBtn = document.getElementById('theme-toggle');
+        toggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+        });
+
+          document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.getElementById('sidebar');
+    const btnShowSidebar = document.getElementById('show-sidebar');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    const dashboard = document.getElementById('dashboard');
+
+    // Quand on clique sur le bouton toggle pour cacher ou réafficher
+    toggleBtn.addEventListener('click', () => {
+        if (sidebar.classList.contains('collapsed')) {
+            // La sidebar est masquée, on la remonte
+            sidebar.classList.remove('collapsed');
+            btnShowSidebar.style.display = 'none';   // cache le bouton
+            dashboard.classList.remove('full-width');
+        } else {
+            // La sidebar est visible, on la cache
+            sidebar.classList.add('collapsed');
+            btnShowSidebar.style.display = 'block';  // montre le bouton pour la réafficher
+            dashboard.classList.add('full-width');
+        }
+    });
+
+    // Quand on clique sur le bouton pour faire réapparaître la sidebar
+    btnShowSidebar.addEventListener('click', () => {
+        sidebar.classList.remove('collapsed');
+        btnShowSidebar.style.display = 'none'; // cache le bouton
+        dashboard.classList.remove('full-width');
+    });
+});
+</script>
+{% endblock %}
+                           
+

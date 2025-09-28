@@ -1,0 +1,95 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% block content %}
+
+
+
+<div class="container mt-5">
+    <h2>Créer un Dock de Chargement</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <div class="mb-3">
+            <button type="button" class="btn btn-secondary" id="getLocation">Utiliser ma Position GPS</button>
+        </div>
+
+        <input type="hidden" id="latitude" name="latitude" value="">
+        <input type="hidden" id="longitude" name="longitude" value="">
+        <input type="hidden" id="place_id" name="place_id" value="">
+
+        <div id="chargingTime" class="mt-3" style="display:none;">
+            <h5>Temps de chargement estimé: <span id="estimatedTime"></span></h5>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Créer</button>
+    </form>
+</div>
+
+
+<script>
+    document.getElementById('getLocation').addEventListener('click', function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                const latitude = position.coords.latitude;
+                const longitude = position.coords.longitude;
+                document.getElementById('latitude').value = latitude;
+                document.getElementById('longitude').value = longitude;
+    
+                // Geocode the coordinates to get the place_id
+                fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key={{ key }}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "OK" && data.results.length > 0) {
+                        const address = data.results[0].formatted_address;
+                        const place_id = data.results[0].place_id;
+                        document.getElementById('id_address').value = address; // Update the address field in your form
+                        document.getElementById('place_id').value = place_id; // Update hidden place_id field
+    
+                        // Now fetch estimated charging time
+                        const destination = 'Destination_Address'; // Replace with the actual destination address or coordinates
+                        fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${latitude},${longitude}&destination=${destination}&key={{ key }}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === "OK" && data.routes.length > 0) {
+                                const estimatedTime = data.routes[0].legs[0].duration.text; // Get estimated travel time
+                                document.getElementById('estimatedTime').innerText = estimatedTime;
+                                document.getElementById('chargingTime').style.display = 'block'; // Show estimated time section
+                            } else {
+                                alert('Unable to calculate estimated charging time. Status: ' + data.status);
+                            }
+                        });
+                    } else {
+                        alert('No address found for this location. Status: ' + data.status);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error occurred while fetching the address: ' + error.message);
+                });
+            }, function(error) {
+                // Handle errors from geolocation
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        alert("User denied the request for Geolocation.");
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        alert("Location information is unavailable.");
+                        break;
+                    case error.TIMEOUT:
+                        alert("The request to get user location timed out.");
+                        break;
+                    case error.UNKNOWN_ERROR:
+                        alert("An unknown error occurred.");
+                        break;
+                }
+            });
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
+    });
+    </script>
+    
+    
+
+{% endblock %}

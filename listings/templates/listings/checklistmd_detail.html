@@ -1,0 +1,564 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% block content %}
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<style>
+    .photo-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 10px;
+        margin: 20px 0;
+    }
+    
+    .photo-gallery img {
+        width: 100%;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+        cursor: pointer;
+    }
+
+    .photo-gallery img:hover {
+        transform: scale(1.05);
+    }
+
+    .no-photos-message {
+        font-size: 1em;
+        color: #888;
+        text-align: center;
+        margin: 20px 0;
+    }
+
+    .btn-outline-primary {
+        color: #007bff;
+        border-color: #007bff;
+        transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .btn-outline-primary:hover {
+        color: #fff;
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+    
+    .collapsible {
+        cursor: pointer;
+    }
+
+    .back-link {
+        color: #007bff;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        font-size: 1rem;
+    }
+    .back-link i {
+        margin-right: 8px;
+    }
+
+</style>
+
+<div class="container my-5">
+    <a href="{% url 'md_dashboard' %}" class="back-link">
+        <i class="fas fa-arrow-left"></i> Retour
+    </a>
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="text-center mb-4">Contrat - {{ checklist.name }}</h1>
+
+            <!-- Collapsible Checklist Information Section -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-primary text-white collapsible" onclick="toggleSection('formation-MD')">
+                    <h5 class="mb-0">Rôle et Responsabilités<i class="bi bi-chevron-down float-end"></i></h5>
+                </div>
+                <div id="formation-MD" class="card-body" style="display: none;">
+                    <h6 class="font-weight-bold">LA COMPAGNIE</h6>
+        <p>Julien-Leblanc, traiteur depuis 1989.</p>
+        <p>Président : Eric McNabb</p>
+        <p>Situé au centre-ville de Montréal sur la rue St-Marc/Sherbrooke</p>
+
+        <h6 class="font-weight-bold">ROLE DU MD</h6>
+        <ul>
+            <li><i class="fa-solid fa-chevron-right"></i> Le MD est le représentant du traiteur, un exemple pour le personnel et une référence pour le client.</li>
+            <li><i class="fa-solid fa-chevron-right"></i> Interface entre la cuisine, le service et le client, son rôle est d’organiser le bon déroulement de l’événement.</li>
+            <li><i class="fa-solid fa-chevron-right"></i> Pour ce faire, il doit prendre contact avec le client ou le responsable sur place, valider les horaires, les endroits réservés pour le traiteur, local poubelle, toilettes, etc., les consignes particulières.</li>
+            <li><i class="fa-solid fa-chevron-right"></i> Il accueille le personnel de service, se charge de vérifier leur tenue, note les heures d’arrivée et de départ.</li>
+            <li><i class="fa-solid fa-chevron-right"></i> Il rappelle les consignes : cigarette, cellulaire, alcool, pauses, attitude en salle, nourriture client, etc.</li>
+            <li><i class="fa-solid fa-chevron-right"></i> Il désigne également les serveurs seniors comme référant pour les nouveaux.</li>
+            <li><i class="fa-solid fa-chevron-right"></i> Il s’assure de la formation continue et corrige avec pédagogie les erreurs.</li>
+        </ul>
+
+        <h6 class="font-weight-bold">RESPONSABILITÉS DU MD</h6>
+        <ul>
+            <li><i class="fa-solid fa-chevron-right"></i> Le MD est responsable du bon fonctionnement de l’événement et du travail du personnel de service.</li>
+            <li><i class="fa-solid fa-chevron-right"></i> Il doit valider avec le client si les horaires changent et s’adapter tout en gardant en tête de respecter les heures prévues du contrat. Il doit en référer à la cuisine si ça joue sur la sortie des plats en salle ou du service des bouchées chaudes.</li>
+            <li><i class="fa-solid fa-chevron-right"></i> En cas de dépassement des heures possibles, il doit rapidement avertir le client pour valider avec lui si le dépassement est autorisé (modification de la facture finale).</li>
+            <li><i class="fa-solid fa-chevron-right"></i> Environ 30 minutes avant la fin prévue : « …nous approchons de l’heure de fin prévue au contrat, cela ne nous dérange pas de rester, sachez simplement que le prix sera ajusté en fonction du temps supplémentaire. Êtes-vous d’accord avec ça ? »</li>
+            <li><i class="fa-solid fa-chevron-right"></i> Pendant l’événement, il s’assure que tout le monde effectue bien son travail, et que le matériel est correctement rangé tout au long de l’événement.</li>
+            <li><i class="fa-solid fa-chevron-right"></i> Il peut désigner un serveur pour s’occuper de la logistique et ainsi gagner du temps pour le close.</li>
+            <li><i class="fa-solid fa-chevron-right"></i> Le matériel étant souvent ramassé le lendemain, il doit s’assurer que les plats sales sont nettoyés un minimum, emballés dans des sacs pour éviter les odeurs.</li>
+            <li><i class="fa-solid fa-chevron-right"></i> Il sépare le matériel en toute logique : Un bac pour le linge sale, un bac pour la vaisselle sale, protéger les couteaux avec un linge, etc. S’il y a du matériel propre, il identifie ce matériel pour éviter un lavage inutile. Toujours penser à ceux qui reçoivent ce matériel et aux plongeurs.</li>
+            <li><i class="fa-solid fa-chevron-right"></i> Poubelles : local sur place, retour traiteur, équipe de nettoyage ?</li>
+            <li><i class="fa-solid fa-chevron-right"></i> Il prend des photos du matériel et du local dans lequel il est rangé et l’envoie à #récupération sur Discord.</li>
+            <li><i class="fa-solid fa-chevron-right"></i> Il fait un rapport sur son #chat personnel sur Discord pour le chargé (en copie Roxanne) avec tous les points intéressants, les inventaires de boissons, les heures du personnel et si dépassement d’heure, la justification de ce dépassement.</li>
+            <li><i class="fa-solid fa-chevron-right"></i> Il fait un rapport à Salin (Nahil) concernant le personnel d’agence en cas de problème ou inversement si un serveur se démarque par son travail ou son attitude.</li>
+            <li><i class="fa-solid fa-chevron-right"></i> Il renseigne la fiche client, et en fait quoi ? Photo et post sur Discord ? En ligne ? à finaliser…</li>
+        </ul>
+                </div>
+            </div>
+            <br>
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white collapsible" onclick="toggleSection('checklist-info')">
+                    <h5 class="mb-0">Informations et Détails <i class="bi bi-chevron-down float-end"></i></h5>
+                </div>
+                <div id="checklist-info" class="card-body" style="display: none;">
+                    <p><strong>Date:</strong> {{ checklist.date|date:"d F Y" }}</p>
+                    <p><strong>Heure de livraison:</strong> {{ checklist.heure_livraison }}</p>
+                    <p><strong>Adresse:</strong> 
+                        <a href="https://maps.google.com/?q={{ checklist.livraison.adress }}" target="_blank" class="text-decoration-none">
+                            {{ checklist.lieu }}
+                        </a>
+                    </p>
+                    <p><strong>Numéro de contrat:</strong> {{ checklist.num_contrat }}</p>
+                    <p><strong>Conseillère:</strong> {{ checklist.conseillere }}</p>
+                    <p><strong>Nombre de convives:</strong> {{ checklist.nb_convive }}</p>
+                    <p><strong>MD:</strong> {{ checklist.md }}</p>
+                    
+                    
+                    <p><strong>Livreur:</strong> {% for livreur in checklist.livraison.statut.livreur.all %}
+                        {{ livreur.nom }}    <i class="fa-solid fa-phone"></i> <a href="tel:{{ livreur.phone }}">{{ livreur.phone }}</a>{% if not forloop.last %}, {% endif %}
+                        {% empty %}
+                            Aucun livreur assigné {% endfor %}</p>
+                    
+                    <!-- Button to Show Checklist Items -->
+                    <button class="btn btn-primary mt-3" onclick="toggleChecklistItems()">Voir le contenu de la checklist</button>
+                    <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#documentsModal"> Voir les documents
+                    </button>
+                    <div id="checklist-items" style="display: none; margin-top: 20px;">
+                        <div class="container mt-5">
+                            <h2 class="text-center">Produits par catégorie</h2>
+                            {% for category, checklist_items in checklist_items_by_category.items %}
+                                {% if category == "CFCDN" and not show_cfcdn_category %}
+                                    {% comment %} Skip rendering this category if it doesn't belong to the checklist {% endcomment %}
+                                {% else %}
+                                <div class="card my-2">
+                                    <div class="card-header bg-info text-white collapsible" onclick="toggleSection('category-{{ forloop.counter }}')">
+                                        <h5 class="mb-0">
+                                            {{ category }} <i class="bi bi-chevron-down float-end"></i>
+                                        </h5>
+                                    </div>
+                                    <div id="category-{{ forloop.counter }}" class="card-body" style="display: none;">
+                                        <ul class="list-group">
+                                            {% for product in checklist_items %}
+                                                <li class="list-group-item">
+                                                    <strong>{{ product.product.name }}</strong> - Quantité: {{ product.quantity }}
+                                                </li>
+                                            {% empty %}
+                                                <li class="list-group-item">Aucun produit dans cette catégorie.</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Additional Information Section -->
+<div class="card shadow-sm mt-4">
+    <div class="card-header bg-primary text-white collapsible" onclick="toggleSection('additional-info')">
+        <h5 class="mb-0">Informations Supplémentaires <i class="bi bi-chevron-down float-end"></i></h5>
+    </div>
+    <div id="additional-info" class="card-body" style="display: none;">
+        {% if checklist.commentairemd %}
+        <h6 class="font-weight-bold">Commentaires MD</h6>
+        <p>{{ checklist.commentairemd }}</p>
+        {% endif %}
+        {% if checklist.type_service %}
+        <h6 class="font-weight-bold">Type de Service</h6>
+        <p>{{ checklist.type_service }}</p>
+        {% endif %}
+
+        {% if checklist.occasion %}
+        <h6 class="font-weight-bold">Occasion</h6>
+        <p>{{ checklist.occasion }}</p>
+        {% endif %}
+
+        {% if checklist.depart_traiteur %}
+        <h6 class="font-weight-bold">Départ du Traiteur</h6>
+        <p>{{ checklist.depart_traiteur }}</p>
+        {% endif %}
+
+        {% if checklist.heure_arrive %}
+        <h6 class="font-weight-bold">Heure d'Arrivée sur Place</h6>
+        <p>{{ checklist.heure_arrive }}</p>
+        {% endif %}
+
+        {% if checklist.heure_convives %}
+        <h6 class="font-weight-bold">Heure des Convives</h6>
+        <p>{{ checklist.heure_convives }}</p>
+                {% endif %}
+
+        {% if checklist.debut_cocktail %}
+        <h6 class="font-weight-bold">Début du Cocktail</h6>
+        <p>{{ checklist.debut_cocktail }}</p>
+        {% endif %}
+
+        {% if checklist.debut_repas %}
+        <h6 class="font-weight-bold">Début du Repas</h6>
+        <p>{{ checklist.debut_repas }}</p>
+        {% endif %}
+
+        {% if checklist.fin_evenement %}
+        <h6 class="font-weight-bold">Fin de l'Événement</h6>
+        <p>{{ checklist.fin_evenement }}</p>
+        {% endif %}
+
+        {% if checklist.commodite %}
+        <h6 class="font-weight-bold">Commodités</h6>
+        <p>{{ checklist.commodite }}</p>
+        {% endif %}
+
+        {% if checklist.fourni_client %}
+        <h6 class="font-weight-bold">Matériel Fourni par le Client</h6>
+        <p>{{ checklist.fourni_client }}</p>
+        {% endif %}
+
+        {% if checklist.fourni_salle %}
+        <h6 class="font-weight-bold">Matériel dans la Salle</h6>
+        <p>{{ checklist.fourni_salle }}</p>
+        {% endif %}
+
+    </div>
+</div>
+
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-primary text-white collapsible" onclick="toggleSection('rapports')">
+                    <h5 class="mb-0">Rapports <i class="bi bi-chevron-down float-end"></i></h5>
+                </div>
+                <div id="rapports" class="card-body" style="display: none;">
+                    <!-- Action Buttons -->
+                    <div class="d-flex flex-wrap gap-3 mt-4 justify-content-center">
+                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#formsetModal">
+                            <i class="bi bi-camera"></i> Ajouter photos événement
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#formset1Modal">
+                            <i class="bi bi-camera"></i> Ajouter photos récupération
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#rapportmdModal">
+                            <i class="bi bi-pencil-square"></i> Ecrire rapport événement
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#breuvagesModal">
+                            <i class="bi bi-folder"></i> Rapport breuvages
+                        </button>
+                        
+                    </div>
+                    <ul class="nav nav-tabs mt-4">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="rapport-tab" data-bs-toggle="tab" href="#photos-rapport">Photos événement</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="recup-tab" data-bs-toggle="tab" href="#photos-recuperation">Photos Récupération</a>
+                        </li>
+                    </ul>
+        
+                    <div class="tab-content">
+                        <!-- Photos Rapport -->
+                        <div id="photos-rapport" class="tab-pane fade show active photo-gallery mt-3">
+                            <br>
+                            <br>
+                            <br>
+                            {% for photo in md_photos %}
+                                <div class="photo position-relative">
+                                    <img src="{{ photo.image.url }}" alt="MD Photo" 
+                                         data-bs-toggle="modal" data-bs-target="#imageModal" 
+                                         onclick="openModal('{{ photo.image.url }}')">
+                                    <!-- Delete Button -->
+                                    <button class="btn btn-danger btn-sm position-absolute" 
+                                            style="top: 0; right: 0;" 
+                                            onclick="deletePhoto('{{ photo.id }}')">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            
+                            {% endfor %}
+                        </div>
+                        
+                    
+                        <!-- Photos Récupération -->
+                        <div id="photos-recuperation" class="tab-pane fade photo-gallery mt-3">
+                            <br>
+                            <br>
+                            <br>
+                            {% for photo in recup_photos %}
+                                <div class="photo position-relative">
+                                    <img src="{{ photo.image.url }}" alt="Recup Photo" 
+                                         data-bs-toggle="modal" data-bs-target="#imageModal" 
+                                         onclick="openModal('{{ photo.image.url }}')">
+                                    <!-- Delete Button -->
+                                    <button class="btn btn-danger btn-sm position-absolute" 
+                                            style="top: 0; right: 0;" 
+                                            onclick="deletePhoto('{{ photo.id }}')">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            
+                            {% endfor %}
+                    
+                           
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+
+            
+
+            <!-- Modal for Documents-->
+            <div class="modal fade" id="documentsModal" tabindex="-1" aria-labelledby="documentsModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title mx-auto" id="documentsModalLabel">Documents</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <ul class="list-group">
+                                {% for document in checklist_documents %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <a href="{{ document.document.url }}" target="_blank">Voir document</a>
+                                        <span class="text-muted">{{ document.uploaded_at|date:"d M Y, H:i" }}</span>
+                                    </li>
+                                {% empty %}
+                                    <p class="no-photos-message">Pas de documents pour cette checklist.</p>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="breuvagesModal" tabindex="-1" aria-labelledby="breuvagesModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title mx-auto" id="breuvagesModalLabel">Rapport des Breuvages Consommés</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="breuvagesReportForm">
+                                {% csrf_token %}
+                                <ul class="list-group">
+                                    {% for item in checklist_itemsbreuvage %}
+                                        
+                                            <li class="list-group-item">
+                                                <div class="d-flex flex-column">
+                                                    <span class="mb-2">{{ item.product.name }} - Total: {{ item.quantity }}</span>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text">Restant</span>
+                                                        <input type="number" class="form-control" name="consumed_{{ item.id }}" 
+                                                               placeholder="Quantité consommée" min="0" max="{{ item.quantity }}"
+                                                               value="{{ item.consumed_quantity|default:0 }}">
+                                                        
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        
+                                    {% endfor %}
+                                </ul>
+                                <div class="text-center mt-3">
+                                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            
+            
+
+        
+            
+
+            
+
+            <!-- Modal for Rapport MD -->
+            <div class="modal fade" id="rapportmdModal" tabindex="-1" aria-labelledby="rapportmdModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title mx-auto" id="rapportmdModalLabel">RAPPORT ÉVÉNEMENT</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="post"> {% csrf_token %}
+                                
+                                {{ form.rapportmd }}
+                                <input type="hidden" name="rapportmd" value="true"> 
+                                <button type="submit" class="btn btn-primary mt-3 w-100">Enregistrer</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+           
+
+            <!-- Modal for Formset (Photos rapport) -->
+            <div class="modal fade" id="formsetModal" tabindex="-1" aria-labelledby="formsetModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title mx-auto" id="formsetModalLabel">Photos Rapport</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                            
+                                <div class="mb-3">
+                                    <label for="photo-upload" class="form-label">Ajouter des photos</label>
+                                    <input type="file" name="image" id="photo-upload" class="form-control" multiple>
+                                </div>
+                            
+                                <button type="submit" name="photo" class="btn btn-primary">Déposer</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal for Formset1 (Photos récupération) -->
+            <div class="modal fade" id="formset1Modal" tabindex="-1" aria-labelledby="formset1ModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title mx-auto" id="formset1ModalLabel">Photos Récupération</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                
+                                <div class="mb-3">
+                                    <label for="photo-upload" class="form-label">Ajouter des photos</label>
+                                    <input type="file" name="imagerecup" id="photo-upload" class="form-control" multiple>
+                                </div>
+                            
+                                <button type="submit" name="photo" class="btn btn-primary">Déposer</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+ 
+
+            <!-- Photos and Actions Section with Tabs -->
+            
+
+            <!-- Toast Notification -->
+            <div id="toast" class="toast position-fixed bottom-0 end-0 p-3" style="display:none; background-color: #28a745; color: white;">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        Action réussie!
+                    </div>
+                    <button type="button" class="btn-close btn-close-white ms-auto me-2" onclick="hideToast()"></button>
+                </div>
+            </div>
+
+            <!-- Image Modal -->
+            <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-body text-center">
+                            <img id="modalImage" src="" class="img-fluid rounded">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+document.getElementById("breuvagesReportForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+    const formData = new FormData(this);
+
+    fetch("{% url 'save_breuvages_report' checklist.id %}", {
+        method: "POST",
+        body: formData,
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("Rapport enregistré avec succès !");
+            location.reload();  // Reload to reflect changes
+        } else {
+            alert("Erreur lors de l'enregistrement du rapport.");
+        }
+    })
+    .catch(error => console.error("Error:", error));
+});
+
+    function toggleSection(id) {
+        const section = document.getElementById(id);
+        section.style.display = section.style.display === "none" ? "block" : "none";
+    }
+
+
+
+    function toggleChecklistItems() {
+        const itemsDiv = document.getElementById("checklist-items");
+        itemsDiv.style.display = itemsDiv.style.display === "none" ? "block" : "none";
+    }
+
+    function openModal(imgSrc) {
+        document.getElementById("modalImage").src = imgSrc;
+    }
+
+    function showToast() {
+        const toast = document.getElementById("toast");
+        toast.style.display = "block";
+        setTimeout(() => toast.style.display = "none", 3000);
+    }
+
+    function hideToast() {
+        document.getElementById("toast").style.display = "none";
+    }
+
+    function deletePhoto(photoId) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cette photo?')) {
+        $.ajax({
+            url: `/delete_photo/${photoId}/`, // Modify URL to your deletion route
+            type: 'DELETE',
+            headers: {
+                'X-CSRFToken': "{{ csrf_token }}",
+            },
+            success: function() {
+                // Optionally, reload the page or remove the photo from the DOM
+                location.reload(); // Reloads the page to reflect deletion
+            },
+            error: function() {
+                alert('Erreur lors de la suppression de la photo.');
+            }
+        });
+    }
+}
+
+</script>
+
+{% endblock %}

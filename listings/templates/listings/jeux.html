@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Mini Jeu</title>
+{% load static %}
+<style>
+body {
+    margin: 0;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    touch-action: manipulation; /* Éviter le zoom dû au double tap */
+    -webkit-user-select: none; /* Pour Safari / Chrome */
+    -webkit-tap-highlight-color: transparent; /* Supprimer la surbrillance sur iOS */
+    -webkit-text-size-adjust: none; /* Éviter changement taille texte en zoom */
+}
+#gameContainer {
+    position: relative;
+    width: 100vw;
+    height: 90vh;
+    background: #a0d2eb;
+    overflow: hidden;
+    display: flex;
+
+    align-items: flex-end;   /* aligne en bas verticalement */
+}
+
+/* Personnage */
+#character {
+    position: relative; /* change from absolute à relatif pour mieux gérer sur flex */
+    width: 140px;
+    height: 150px;
+    bottom: 150px;
+    background: url('{% static "listings/gen.png" %}') no-repeat center/contain;
+    /* ou un peu de marge si tu veux */
+    /* Si tu veux jouer avec un fixe bottom, tu peux aussi */
+}
+
+
+
+/* Zone d'apparition limitée pour PNJ */
+.pnj {
+    position: absolute;
+    width: 80px;
+    height: 130px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+}
+
+.boss-pnj {
+    position: absolute;
+    width: 80px;
+    height: 130px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+}
+/* Projectile */
+.projectile {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  font-size: 20px; /* ou la taille désirée */
+  color: green; /* couleure pour le billet */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+/* Boutons rond à gauche/droite */
+#controls {
+    position: fixed;
+    bottom: 10px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 10;
+}
+/* Boutons rondes, plus gros et éloignés du bord */
+#btnJump2 {
+  position: fixed;
+  bottom: 5%;
+  left: 30px; /* plus loin du bord gauche */
+  width: 90px; /* plus gros */
+  height: 90px;
+  border-radius: 50%;
+  font-size: 1.8em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  cursor: pointer;
+  touch-action: manipulation; /* empêche le zoom par double tap */
+  -webkit-touch-callout: none;  /* pour Safari / iOS */
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent; /* supprime la highlight sur tap */
+}
+#btnShoot2 {
+  position: fixed;
+  bottom: 5%;
+  right: 30px; /* plus loin du bord droit */
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  font-size: 1.8em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  cursor: pointer;
+  touch-action: manipulation; /* empêche le zoom par double tap */
+  -webkit-touch-callout: none;  /* pour Safari / iOS */
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent; /* supprime la highlight sur tap */
+}
+
+
+#score {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    font-size: 20px;
+    background: rgba(255,255,255,0.8);
+    padding: 5px 10px;
+    border-radius: 8px;
+    z-index: 10;
+}
+/* Écran GAME OVER */
+#gameOverScreen {
+    position: fixed;
+    top:0; left:0; right:0; bottom:0;
+    background: rgba(0,0,0,0.8);
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-size: 2em;
+    z-index: 100;
+}
+#restartBtn {
+    margin-top: 20px;
+    padding: 12px 24px;
+    font-size: 1.2em;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.pnj-image:nth-child(1) { border: 3px solid red; }
+.pnj-image:nth-child(2) { border: 3px solid blue; }
+.pnj-image:nth-child(3) { border: 3px solid green; }
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+</head>
+<body>
+    <!-- Bouton "Meilleurs Scores" en haut à droite -->
+<div style="position: fixed; top:10px; right:10px; z-index:20;">
+    <button id="topScoresBtn" style="padding:10px; border-radius:20px;">Meilleurs Scores</button>
+</div>
+
+
+
+<!-- Modal d'instructions -->
+<div id="instructionModal" style="
+  position: fixed; top:0; left:0; right:0; bottom:0;
+  background: rgba(0,0,0,0.8);
+  display:flex; justify-content:center; align-items:center;
+  z-index: 2000; flex-direction:column; text-align:center; padding:20px; color:#fff;">
+  <h2>Comment jouer</h2>
+  <p style="font-size:1.2em;">  
+    Bienvenue dans ce jeu !  
+    Ton objectif est de refuser les augmentations de tes employés.
+    Pour se faire, évite les ennemis en sautant, et utilise le bouton "Tirer" pour infliger des dégâts.  
+    Combine le saut + le tire au bon moment.
+    Plus le score est haut, plus les employés arrivent vite.
+    Au score 100 apparait l'employé ultime qui te demandera une énorme augmentation, extermine le !
+    Si tu arrives à lui refuser son augmentation, tu recevras 50 points bonus
+  </p>
+  <button id="closeInstructionBtn" style="
+    padding: 10px 20px; font-size: 1.2em; border:none; border-radius:10px; cursor:pointer; margin-top:20px;">
+    Démarrer le jeu
+  </button>
+</div>
+
+
+<!-- Bouton "Démarrer" en dessous -->
+<div style="position: fixed; top:50px; right:10px; z-index:20;">
+    <button id="startBtn" style="padding:10px; border-radius:20px;">Démarrer</button>
+</div>
+
+<!-- Modal -->
+<div id="scoresModal" style="
+  display:none; position:fixed; top:0; left:0; right:0; bottom:0;
+  background:rgba(0,0,0,0.5);
+  justify-content:center; align-items:center; z-index:1000;">
+  <div style="background:#fff; padding:20px; border-radius:10px; max-height:80%; overflow:auto; width:300px; display:flex; flex-direction:column;">
+    <h3>Top 5 Scores</h3>
+    <ul id="scoresList" style="list-style:none; padding:0;">
+      {% for s in top_scores %}
+        <li style="padding:5px 0;">{{ s.user.username }} : {{ s.score }} pts</li>
+      {% endfor %}
+    </ul>
+    <button id="closeScores" style="margin-top:10px; padding:5px 10px;">Fermer</button>
+  </div>
+</div>
+
+<!-- Son général -->
+<audio id="sound1" src="{% static 'listings/sound1.mp3' %}" preload="auto" style="display:none;"></audio>
+<audio id="sound2" src="{% static 'listings/sound2.mp3' %}" preload="auto" style="display:none;"></audio>
+<audio id="sound3" src="{% static 'listings/sound3.mp3' %}" preload="auto" style="display:none;"></audio>
+<audio id="sound4" src="{% static 'listings/sound4.mp3' %}" preload="auto" style="display:none;"></audio>
+<audio id="sound5" src="{% static 'listings/sound5.mp3' %}" preload="auto" style="display:none;"></audio>
+
+<!-- Son d'ambiance de début -->
+<audio id="bgMusic" src="{% static 'listings/background.mp3' %}" loop preload="auto" style="display:none;"></audio>
+
+<!-- Son du boss spawn -->
+<audio id="bossSpawnSound" src="{% static 'listings/boss_spawn.mp3' %}" preload="auto" style="display:none;"></audio>
+
+<!-- Son du boss tué -->
+<audio id="bossKilledSound" src="{% static 'listings/boss_killed.mp3' %}" preload="auto" style="display:none;"></audio>
+
+<audio id="successSound" src="{% static 'listings/success_sound.mp3' %}" preload="auto"></audio>
+
+
+<!-- Son pour les tirs -->
+<audio id="shotSound" src="{% static 'listings/son_tir.mp3' %}" preload="auto" style="display:none;"></audio>
+
+<!-- Score -->
+<div id="score">Score: 0</div>
+
+<!-- Zone de jeu -->
+<div id="gameContainer">
+    <div id="character"></div>
+</div>
+
+<!-- Controls -->
+<div id="bottomControls" style="
+  position: fixed; bottom: 10px; width: 100%; display:flex; justify-content:center; gap:20px; z-index: 200;">
+  <button id="btnJump2" style="
+    width:60px; height:60px; border-radius:50%; font-size:2em; background:#fff; box-shadow:0 2px 4px rgba(0,0,0,0.3); cursor:pointer;">
+    ⛹️
+  </button>
+  <button id="btnShoot2" style="
+    width:60px; height:60px; border-radius:50%; font-size:2em; background:#fff; box-shadow:0 2px 4px rgba(0,0,0,0.3); cursor:pointer;">
+    🎯
+  </button>
+</div>
+
+
+<div id="countdown" style="position: fixed; top: 50%; left:50%; transform: translate(-50%, -50%); font-size: 4em; color:#fff; z-index:200; display:none;">3</div>
+
+<!-- Modal Game Over -->
+<div id="gameOverScreen" style="
+  display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8);
+  justify-content:center; align-items:center; flex-direction:column; color:#fff; font-size:2em; z-index:1000;">
+    <div>GAME OVER</div>
+    <button id="restartBtn" style="margin-top:20px; padding:12px 24px; font-size:1.2em; border:none; border-radius:10px;">Rejouer</button>
+</div>
+
+<div id="successModal" style="
+  display:none; position:fixed; top:0; left:0; right:0; bottom:0;
+  background:rgba(0,0,0,0.5);
+  justify-content:center; align-items:center; z-index:2000;">
+  <div style="background:#fff; padding:20px; border-radius:10px; min-width:200px; text-align:center;">
+    <h2>Augmentation refusée pour Sam, bien joué !</h2>
+    <p>TYPE SHIIIT, j'ai pas eu mon augmentation ! heureusement que jai un autre job a 30$ l'heure esti</p>
+  </div>
+</div>
+
+<script>
+let gameStart = false;
+let gameRunning = false;
+let spawnDelay = 5000;
+let spawnTimeout;
+let startTime;
+let score = 0;
+let scoreSauvegardeEnvoyee = false;
+let isJumping = false;
+let scoreStarted = false;
+let hasPlayedSound = false;
+let lastShotTime = 0;
+
+const pnjImages = [
+    "{% static 'listings/ennemie1.png' %}",
+    "{% static 'listings/ennemie2.png' %}",
+    "{% static 'listings/ennemie3.png' %}",
+    "{% static 'listings/ennemie4.png' %}",
+    "{% static 'listings/ennemie5.png' %}",
+    "{% static 'listings/ennemie6.png' %}",
+    "{% static 'listings/ennemie7.png' %}",
+    "{% static 'listings/ennemie8.png' %}",
+    "{% static 'listings/ennemie9.png' %}",
+    "{% static 'listings/ennemie10.png' %}"
+];
+
+
+
+
+let scoreAllowed = false; // commence à compter après démarrage
+
+const startBtn = document.getElementById('startBtn');
+const topScoresBtn = document.getElementById('topScoresBtn');
+const closeScores = document.getElementById('closeScores');
+const restartBtn = document.getElementById('restartBtn');
+const container = document.getElementById('gameContainer');
+
+// Initialement, vous pouvez charger tous les sons pour éviter les problèmes de chargement
+for (let i=1; i<=5; i++) {
+    const sound = document.getElementById('sound' + i);
+    if (sound) {
+        sound.load(); // charge les sons
+    }
+}
+
+function setupInitialEventListeners() {
+    document.getElementById('topScoresBtn').onclick = () => {
+        document.getElementById('scoresModal').style.display = 'flex';
+    };
+    document.getElementById('closeScores').onclick = () => {
+        document.getElementById('scoresModal').style.display = 'none';
+    };
+}
+
+
+// Quand la page est prête
+window.onload = () => {
+    const instructionModal = document.getElementById('instructionModal');
+    const startGameBtn = document.getElementById('closeInstructionBtn');
+
+    startGameBtn.onclick = () => {
+        instructionModal.style.display = 'none';  // Hide the modal
+        startGame();
+    };
+
+    // Initially hide the shoot button
+    document.getElementById('btnShoot2').style.display = 'none';
+
+    // Event listeners for buttons
+    document.getElementById('btnJump2').addEventListener('click', () => {
+        if (gameStart && gameRunning) jump();
+    });
+
+    document.getElementById('btnShoot2').addEventListener('click', () => {
+        if (gameStart && gameRunning) shoot();
+    });
+
+    setupInitialEventListeners();
+};
+
+function startGame() {
+  // Code de démarrage du jeu, repris de votre logique
+  if (gameStart) return;  // Si le jeu a déjà commencé
+  gameStart = true;
+
+  const bgMusic = document.getElementById('bgMusic');
+  if (bgMusic) {
+      bgMusic.currentTime = 0;
+      bgMusic.play().catch(e => {
+          console.log("Lecture de la musique de fond bloquée");
+      });
+  }
+
+  // Démarre le décompte
+  const countdown = document.getElementById('countdown');
+  countdown.style.display='block';
+  let count = 3;
+  const countdownInterval = setInterval(() => {
+    if (count > 1) {
+      countdown.innerHTML = count;
+      count--;
+    } else if (count === 1) {
+      countdown.innerHTML = 'GO !';
+      count--;
+    } else {
+      clearInterval(countdownInterval);
+      countdown.style.display='none';
+
+      // Après 1 sec, lance le jeu
+      setTimeout(() => {
+        startTime = Date.now();
+        gameRunning = true;
+        scoreSauvegardeEnvoyee = false;
+        startScore();
+        spawnPnj();
+      }, 1000);
+    }
+  }, 1000);
+}
+
+// Lancement du jeu
+
+document.getElementById('startBtn').onclick = () => {
+  if (gameStart) return;
+  gameStart = true;
+
+  const bgMusic = document.getElementById('bgMusic');
+    if (bgMusic) {
+        bgMusic.currentTime = 0;
+        bgMusic.play().catch(e => {
+            console.log("Lecture de la musique de fond bloquée par le navigateur");
+        });
+    }
+
+  // Affiche le décompte 3-2-1-GO
+  const countdown = document.getElementById('countdown');
+  countdown.style.display='block';
+
+  let count = 3;
+  const countdownInterval = setInterval(() => {
+    if (count > 1) {
+      countdown.innerHTML = count;
+      count--;
+    } else if (count === 1) {
+      countdown.innerHTML = 'GO !';
+      count--;
+    } else {
+      clearInterval(countdownInterval);
+      countdown.style.display='none';
+
+      // Après 1 sec d'attente
+      setTimeout(() => {
+        // Lance le score, spawn PNJ
+        startTime = Date.now();
+        gameRunning = true;
+        scoreSauvegardeEnvoyee = false;
+        startScore();
+        spawnPnj();
+      }, 1000);
+    }
+  }, 1000);
+};
+// Fonction pour le score
+let bossSpawned = false;     // indique si le boss est lancé
+let bossHits = 0;            // compteur hits au boss
+
+
+
+// Fonction pour spawn le boss
+// Lors du spawn du boss
+function spawnBoss() {
+    const boss = document.createElement('div');
+    boss.id='boss';
+    boss.className='boss-pnj';
+    boss.style.backgroundImage = `url('{% static "listings/boss.png" %}')`;
+    boss.style.left='100%';
+    boss.style.bottom='150px'; // dans la moitié basse
+    boss.style.width='130px';
+    boss.style.height='130px';
+
+    container.appendChild(boss);
+
+    // Jouer le son du spawn du boss
+    const bossSound = document.getElementById('bossSpawnSound');
+    if (bossSound) {
+        const bgMusic = document.getElementById('bgMusic');
+        if (bgMusic && !bgMusic.paused) {
+            bgMusic.pause();
+        }
+        bossSound.currentTime=0;
+        bossSound.play();
+    }
+
+    let bossHits = 0;
+    let gameRunning = true;
+    let scoreSauvegardeEnvoyee = false;
+
+    // Fonction pour faire sauter le boss
+    function jumpBoss() {
+        if (!boss || !gameRunning) return;
+        const jumpHeight = 150; // La hauteur du saut en pixels
+        const jumpDuration = 200; // La durée du saut en ms
+
+        // Animation du saut (monter)
+        boss.animate([
+            { transform: 'translateY(0)' },
+            { transform: `translateY(-${jumpHeight}px)` }
+        ], { duration: jumpDuration, easing: 'ease-out' }).onfinish = () => {
+            // Animation de la descente
+            boss.animate([
+                { transform: `translateY(-${jumpHeight}px)` },
+                { transform: 'translateY(0)' }
+            ], { duration: jumpDuration, easing: 'ease-in' });
+        };
+    }
+
+    // Appel initial de la fonction pour le jump
+    function scheduleJump() {
+        if (!gameRunning || !boss) return;
+        const interval = Math.random() * 1000 + 1000; // entre 2 et 5 secondes
+        setTimeout(() => {
+            jumpBoss();
+            scheduleJump();
+        }, interval);
+    }
+    scheduleJump();
+
+    // Mouvement lent et gestion collision
+    const move = setInterval(() => {
+        if (!boss || !gameRunning) return;
+        boss.style.left = (boss.offsetLeft - 0.7) + 'px';
+         // Vérification collision entre boss et personnage
+    if (checkCollision(boss, character)) {
+        gameOver();
+        clearInterval(move);
+        return;
+    }
+
+        document.querySelectorAll('.projectile').forEach(p => {
+            if (checkCollision(p, boss)) {
+                p.remove();
+                bossHits++;
+                const bossKilledSound = document.getElementById('bossKilledSound');
+                if (bossKilledSound) {
+                    bossKilledSound.currentTime=0;
+                    bossKilledSound.play();
+                }
+                if (bossHits >= 10) {
+                    clearInterval(move);
+                    boss.remove();
+
+                    // Arrêter le son du spawn
+                    if (bossSound) {
+                        bossSound.pause();
+                        bossSound.currentTime = 0;
+                    }
+
+                    // Jouer le son de succès
+                    const successSound = document.getElementById('successSound');
+                    if (successSound) {
+                        successSound.currentTime=0;
+                        successSound.play();
+                    }
+
+                    // Afficher modal succès
+                    document.getElementById('successModal').style.display='flex';
+
+                    // Arrêter le jeu
+                    gameRunning = false;
+
+                    score += 50;
+                    // Sauvegarder le score
+                    if (!scoreSauvegardeEnvoyee) {
+                        fetch('/save_score/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token }}'
+                            },
+                            body: JSON.stringify({ score: score })
+                        });
+                        scoreSauvegardeEnvoyee = true;
+                    }
+                }
+            }
+        });
+
+        // Fin du boss si hors écran ou tué
+        if (boss.offsetLeft < -boss.offsetWidth || bossHits >= 15) {
+            clearInterval(move);
+            boss.remove();
+        }
+    }, 20);
+}
+
+
+
+
+
+// Fonction spawnPNJ, appelée une fois que le jeu est lancé
+function spawnPnj() {
+    if (!gameStart || !gameRunning) return;
+    createPnj();
+    // La vitesse du spawn s’accélère avec le score
+    spawnTimeout = setTimeout(spawnPnj, spawnDelay);
+}
+
+// Fonction pour créer un PNJ
+function createPnj() {
+    if (!gameStart || !gameRunning) return;
+    const pnj = document.createElement('div');
+    pnj.className = 'pnj';
+
+    const imgUrl = pnjImages[Math.floor(Math.random() * pnjImages.length)];
+    pnj.style.backgroundImage = `url('${imgUrl}')`;
+
+    // Initialise the position at the right side of the container
+    pnj.style.left = '100%';
+
+    // Allow random vertical placement between 10 and 40 px when the score is >= 30
+    const minBottom = 150;
+    const maxBottom = score >= 30 ? 240 : 150;  // Increase maxBottom to 40 when score is 30 or more
+    const randBottom = minBottom + Math.random() * (maxBottom - minBottom);
+    pnj.style.bottom = randBottom + 'px';
+
+    container.appendChild(pnj);
+
+    // Movement function
+    const move = setInterval(() => {
+        pnj.style.left = (pnj.offsetLeft - 5) + 'px';
+
+        if (pnj.offsetLeft < -pnj.offsetWidth) {
+            clearInterval(move);
+            pnj.remove();
+        }
+
+        if (checkCollision(character, pnj)) {
+            gameOver();
+        }
+    }, 20);
+}
+
+// Fonction gameOver
+function gameOver() {
+    if (!gameStart || !gameRunning) return;
+    gameRunning = false;
+
+    const bgMusic = document.getElementById('bgMusic');
+    if (bgMusic) {
+        bgMusic.pause();
+        bgMusic.currentTime = 0;
+    }
+
+
+    if (hasPlayedSound) return; // évite de jouer plusieurs fois
+    hasPlayedSound = true;
+
+    // Jouer un son aléatoire
+    const n = Math.floor(Math.random() * 5) + 1;
+    const sound = document.getElementById('sound' + n);
+    if (sound) {
+        try {
+            sound.currentTime = 0;
+            sound.play();
+        } catch(e) {
+            console.warn('Lecture du son impossible en mobile.');
+        }}
+    // (le reste de votre code)
+
+
+
+    // Sauvegarder le score une fois
+    if (!scoreSauvegardeEnvoyee) {
+        fetch('/save_score/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ score: Math.floor((Date.now() - startTime) / 1000) })
+        });
+        scoreSauvegardeEnvoyee = true;
+    }
+
+    // Arrête spawn et désactive boutons
+    clearTimeout(spawnTimeout);
+    document.getElementById('btnJump2').disabled = true;
+    document.getElementById('btnShoot2').disabled = true;
+
+    // Affiche l'écran Game Over
+    document.getElementById('gameOverScreen').style.display='flex';
+}
+
+// Voir si le collision détecte bien
+function checkCollision(a, b) {
+    const rectA = a.getBoundingClientRect();
+    const rectB = b.getBoundingClientRect();
+
+    // Réduire la hitbox en paddant les bords
+    const paddingX = 0.2 * Math.min(rectA.width, rectB.width);  // 20% de la largeur
+    const paddingY = 0.2 * Math.min(rectA.height, rectB.height); // 20% de la hauteur
+
+    return (
+        rectA.right - paddingX > rectB.left + paddingX &&
+        rectA.left + paddingX < rectB.right - paddingX &&
+        rectA.bottom - paddingY > rectB.top + paddingY &&
+        rectA.top + paddingY < rectB.bottom - paddingY
+    );
+}
+
+// La gestion du clic sur "Rejouer"
+restartBtn.onclick = () => {
+    location.reload();
+};
+
+// La gestion du clic sur “Top Scores”
+document.getElementById('topScoresBtn').onclick = () => {
+    document.getElementById('scoresModal').style.display='flex';
+};
+document.getElementById('closeScores').onclick = () => {
+    document.getElementById('scoresModal').style.display='none';
+};
+
+// Fonction pour faire sauter le personnage
+function jump() {
+    if (isJumping) return;  // Empêche le double saut
+    isJumping = true;
+
+    const maxHeight = 250; // hauteur du saut en pixels
+    const originalBottom = 150; // hauteur fixe où doit rester le personnage
+    let start = null;
+    const duration = 600; // durée du saut en ms
+
+    function step(timestamp) {
+        if (!start) start = timestamp;
+        const progress = timestamp - start;
+        const progressNorm = Math.min(progress / duration, 1);
+
+        // Animation de saut : sinusoïde pour un saut fluide
+        const heightOffset = Math.sin(progressNorm * Math.PI) * maxHeight;
+        character.style.bottom = (originalBottom + heightOffset) + 'px';
+
+        // Vérification de collision avec PNJs pendant le saut
+        document.querySelectorAll('.pnj').forEach(pnj => {
+            if (checkCollision(character, pnj)) {
+                pnj.remove(); // Supprime le PNJ
+                // Ajoutez éventuellement du score ou d'autres effets
+            }
+        });
+
+        if (progress < duration) {
+            requestAnimationFrame(step);
+        } else {
+            // Fin du saut : reste à la hauteur fixée
+            character.style.bottom = originalBottom + 'px';
+            isJumping = false;
+
+            // Vérification finale de collision
+            document.querySelectorAll('.pnj').forEach(pnj => {
+                if (checkCollision(character, pnj)) {
+                    pnj.remove();
+                }
+            });
+        }
+    }
+    requestAnimationFrame(step);
+}
+
+// Fonction pour tirer un projectile
+
+function shoot() {
+    if (!gameRunning) return;
+
+    const now = Date.now();
+    if (now - lastShotTime < 100) {
+        // If less than 200ms have passed since the last shot, don't shoot
+        return;
+    }
+    lastShotTime = now;
+
+    const projectile = document.createElement('div');
+    projectile.className = 'projectile';
+    projectile.innerHTML = "<img src=\"{% static 'listings/golf.png' %}\" style=\"width:20px; height:20px;\">";
+
+    container.appendChild(projectile);
+
+    // Get the character's position
+    const rectChar = character.getBoundingClientRect();
+
+    // Position of the projectile: at the center of the character
+    const containerRect = container.getBoundingClientRect();
+    const projectileLeft = rectChar.left + rectChar.width / 2 - containerRect.left;
+    const projectileTop = rectChar.top + rectChar.height / 2 - containerRect.top;
+
+    // Apply the position
+    projectile.style.left = projectileLeft + 'px';
+    projectile.style.top = projectileTop + 'px';
+
+    container.appendChild(projectile);
+
+    const moveInterval = setInterval(() => {
+        projectile.style.left = (projectile.offsetLeft + 10) + 'px';
+
+        // Check collision with PNJ
+        document.querySelectorAll('.pnj').forEach(pnj => {
+            if (checkCollision(projectile, pnj)) {
+                pnj.remove();
+                projectile.remove();
+                clearInterval(moveInterval);
+            }
+        });
+
+        if (projectile.offsetLeft > container.clientWidth) {
+            clearInterval(moveInterval);
+            projectile.remove();
+        }
+    }, 20);
+
+    // Play shot sound
+    const shotSound = document.getElementById('shotSound');
+    if (shotSound) {
+        shotSound.currentTime = 0;
+        shotSound.play().catch(e => console.log("Shot sound playback was prevented"));
+    }
+}
+
+
+
+
+
+function startScore() {
+    function update() {
+        if (!gameStart || !gameRunning) return;
+        score = Math.floor((Date.now() - startTime) / 1000);
+        document.getElementById('score').innerHTML = 'Score: ' + score;
+
+        // Show the shoot button when score reaches 30
+        if (score >= 30) {
+            document.getElementById('btnShoot2').style.display = 'flex';
+        }
+
+        // If score >= 100, create the boss if not yet done
+        if (score >= 100 && !bossSpawned) {
+            // Hide existing PNJs
+            document.querySelectorAll('.pnj').forEach(p => p.style.display='none');
+            spawnBoss();
+            bossSpawned = true;
+            clearTimeout(spawnTimeout);
+        }
+
+        // Spawn rate of PNJs continues to accelerate until 100
+        spawnDelay = Math.max(500, 5000 - score * 60);
+        requestAnimationFrame(update);
+    }
+    update();
+}
+
+
+
+
+
+</script>
+
+

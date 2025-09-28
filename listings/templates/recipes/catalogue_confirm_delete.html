@@ -1,0 +1,50 @@
+{% extends "recipes/base.html" %}
+{% block title %}Supprimer Prix Catalogue{% endblock %}
+
+{% block content %}
+<div class="content-body">
+    <div class="text-center py-5">
+        <i class="bi bi-exclamation-triangle text-warning" style="font-size: 4rem;"></i>
+        
+        <h2 class="mt-4">Confirmer la suppression</h2>
+        
+        <p class="lead mt-3">
+            Êtes-vous sûr de vouloir supprimer ce prix du catalogue ?
+        </p>
+        
+        <div class="card d-inline-block mt-3">
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Fournisseur:</dt>
+                    <dd class="col-sm-8">{{ cataloguefournisseur.fournisseur.nom }}</dd>
+                    
+                    <dt class="col-sm-4">Ingrédient:</dt>
+                    <dd class="col-sm-8">{{ cataloguefournisseur.ingredient.nom }}</dd>
+                    
+                    <dt class="col-sm-4">Prix:</dt>
+                    <dd class="col-sm-8">{{ cataloguefournisseur.prix }}€/{{ cataloguefournisseur.ingredient.unite_mesure.symbole }}</dd>
+                    
+                    <dt class="col-sm-4">Statut:</dt>
+                    <dd class="col-sm-8">
+                        {% if cataloguefournisseur.actif %}
+                        <span class="badge bg-success">Actif</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Inactif</span>
+                        {% endif %}
+                    </dd>
+                </dl>
+            </div>
+        </div>
+        
+        <form method="post" class="mt-4">
+            {% csrf_token %}
+            <a href="{% url 'catalogue_list' %}" class="btn btn-secondary">
+                <i class="bi bi-x-circle"></i> Annuler
+            </a>
+            <button type="submit" class="btn btn-danger ms-2">
+                <i class="bi bi-trash"></i> Supprimer définitivement
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

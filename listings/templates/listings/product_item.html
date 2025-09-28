@@ -1,0 +1,46 @@
+{% load custom_filters %}
+
+<!-- templates/listings/product_item.html -->
+<form id="checklistForm" action="{% url 'add_to_checklist' checklist.id %}" method="post" class="product-form">
+    {% csrf_token %}
+    <div class="row">
+        {% for product in products %}
+            
+            <div class="col-12 d-flex align-items-center justify-content-between product-item">
+                <div class="product-info d-flex align-items-center">
+                    <h6 class="product-name mb-0 me-3">{{ product.name }} 
+                        <strong style="color: {% if product.quantity <= 0 %}red{% else %}green{% endif %};">({{ product.quantity }})</strong>
+                    </h6>
+                </div>
+
+                <div class="form-group d-flex align-items-center me-2">
+                    <label for="quantity-{{ product.id }}" class="form-label me-2" style="font-weight: bold;">Quantité:</label>
+                    <input type="number" class="form-control quantity text-center" 
+                           id="quantity-{{ product.id }}" name="quantities[{{ product.id }}]" min="0" 
+                           value="{{ checklist_item_quantities|get_item:product.id|default:0 }}" required style="width: 80px;">
+                </div>
+
+                <!-- Comment Button and Field -->
+                <button type="button" class="btn btn-secondary me-2" onclick="toggleCommentInput({{ product.id }})">
+                    <i class="fa-regular fa-comment-dots"></i>
+                </button>
+
+                <div class="form-group" id="comment-section-{{ product.id }}" style="display: none;">
+                    <textarea class="form-control" id="commentaire-{{ product.id }}" 
+                              name="commentaires[{{ product.id }}]" 
+                              placeholder="{% if checklist_item_comments|get_item:product.id %}{{ checklist_item_comments|get_item:product.id }}{% else %}Écrire un commentaire{% endif %}"
+                              style="width: 150px;"></textarea>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Single Submit Button -->
+    <div class="d-flex justify-content-end mt-3">
+        <button type="submit" class="btn btn-primary d-flex align-items-center custom-submit-btn">
+            <i class="fa-solid fa-cart-plus me-2"></i> Valider
+        </button>
+    </div>
+</form>
+
+

@@ -1,0 +1,638 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% block content %}
+<style>
+
+
+.date-picker-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.date-picker-container input {
+    width: 100%;
+    max-width: 300px; /* Adjust the width as needed */
+    margin-bottom: 10px; /* Space between date picker and button */
+}
+.alert-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;  /* Ensures it stays above other elements */
+    min-width: 250px;
+    max-width: 350px;
+}
+
+.alert {
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s linear, color 0.3s linear;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #007BFF;
+            height: 100%;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar .sidebar-header {
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .sidebar a {
+            color: #fff;
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar a.active, .sidebar a:hover {
+            background-color: #0056b3;
+        }
+
+        .dispatch {
+            flex: 1;
+            padding: 20px;
+            background-color: #F0F2F5;
+            overflow-y: auto;
+            transition: margin-left 0.3s ease; /* Improves smoothness of layout change */
+        }
+
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            
+        }
+
+        .header .toggle-theme {
+            cursor: pointer;
+            color: #007BFF;
+        }
+        #dispatch.expanded {
+    margin-left: 0;
+}
+
+#dispatch.full-width {
+    transition: margin-left 0s;
+}
+
+.collapsed {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    width: 0; /* Ensure width collapses at the end */
+}
+
+.dark-mode {
+            background-color: #121212;
+            color: #e4e4e4;
+        }
+
+        .dark-mode .header, .dark-mode .card {
+            background-color: #1e1e1e;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .dark-mode .sidebar {
+            background-color: #1e1e1e;
+        }
+
+        .dark-mode .sidebar a {
+            color: #e4e4e4;
+        }
+
+        .dark-mode .sidebar a.active, .dark-mode .sidebar a:hover {
+            background-color: #333;
+            color: #fff;
+        }
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header" style="margin-top: 100px;">Menu <button class="toggle-sidebar" id="sidebar-toggle"><i class="fas fa-bars"></i></button></div>
+  <a href="{% url 'acceuilresponsables' %}"><i class="fa-solid fa-desktop"></i> Tableau de bord Admin</a>
+  <a href="{% url 'responsablelist' %}"><i class="fas fa-home"></i> Suivi journée</a>
+  <a href="{% url 'dashboard_stats' %}"><i class="fas fa-chart-bar"></i> Stats</a>
+  <a href="{% url 'recuptoday' %}"><i class="fas fa-sync"></i> Récups</a>
+  <a href="{% url 'create-shift' %}"><i class="fas fa-calendar-plus"></i> Planning</a>
+  <a href="{% url 'voir_checklist' %}"><i class="fas fa-clipboard-list"></i> Checklist</a>
+  <a href="{% url 'creerchecklist' %}"><i class="fas fa-list-check"></i> Checklist Ventes</a>
+  <a href="{% url 'product_list' %}"><i class="fas fa-box-open"></i> Liste produits (checklist)</a>
+  <a href="/admin" target="_blank"><i class="fas fa-tools"></i> Menu admin</a>
+  <button class="toggle-theme" id="theme-toggle" style="margin-top:20px;"><i class="fas fa-moon"></i> Thème</button>
+  <div style="margin-top:20px; font-size:14px; color:#ccc;">Utilisateur: {{ user.username }}</div>
+</div>
+
+
+<div class="dispatch" id="dispatch">
+
+    <div class="header">
+    <h2>Dispatch livraisons</h2>
+        <button id="show-sidebar" style="display:none; position: fixed; top: 12%; left: 10px;">
+            <i class="fas fa-bars fa-2xl"></i>
+        </button>
+    <div class="user-info">
+        <button id="logoutBtn" style="border:none; background:none; cursor:pointer;"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
+    </div>
+</div>
+<br>
+<br>
+<br>
+<br>
+    <div class="text-center mb-4 d-flex justify-content-center align-items-center">
+        
+    
+
+
+        </div>
+        <div class="container mt-4">
+            <div class="row g-4">
+
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body d-flex flex-column justify-content-between">
+                            <h5 class="card-title"><i class="fas fa-file-import"></i> Importer fichier</h5>
+                            <p class="card-text">Importer fichier XLSX pour les livraisons</p>
+                            <button id="importBtn" class="btn btn-warning w-100" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                                <i class="fas fa-upload"></i> Import XLSX
+                            </button>
+                        </div>
+                    </div>
+                </div>
+               
+        
+        
+        <!-- Modal -->
+        <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="uploadModalLabel">Import XLSX File</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <form id="uploadForm" method="post" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  {{ form.as_p }}
+                  <div class="text-center mt-3">
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+                
+        
+                <!-- Create Journee Card -->
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body d-flex flex-column justify-content-between">
+                            <h5 class="card-title"><i class="fas fa-calendar-plus"></i> Créer une journée</h5>
+                            <p class="card-text">Sélectionnez une date et créez une nouvelle journée.</p>
+                            <div class="date-picker-container">
+                                <input type="date" id="selected-date" name="selected-date" class="form-control mb-3">
+                                <button type="button" class="btn btn-success w-100" onclick="createJourneeFromSelectedDate()">
+                                    <i class="fas fa-plus-circle"></i> Créer journée
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        
+                <!-- Livraisons sans date Card -->
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body d-flex flex-column justify-content-between">
+                            <h5 class="card-title"><i class="fas fa-calendar-times"></i> Livraisons sans date</h5>
+                            <p class="card-text">Affichez toutes les livraisons qui n'ont pas de date assignée.</p>
+                            <a href="{% url 'livraisons_without_date'%}" class="btn btn-primary w-100">
+                                <i class="fas fa-list"></i> Voir les livraisons
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <!-- Geocode Card -->
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body d-flex flex-column justify-content-between">
+                            <h5 class="card-title"><i class="fas fa-map-marker-alt"></i> Géocodage</h5>
+                            <p class="card-text">Géocodez toutes les livraisons pour obtenir leurs coordonnées.</p>
+                            <form id="geocode-form" method="get" action="{% url 'geocode_all_livraisons' %}">
+                                <button type="button" class="btn btn-primary w-100" onclick="triggerGeocode()">
+                                    <i class="fas fa-globe"></i> Géocoder
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <!-- Associer Checklist Card -->
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body d-flex flex-column justify-content-between">
+                            <h5 class="card-title"><i class="fas fa-tasks"></i> Associer Checklists</h5>
+                            <p class="card-text">Associez toutes les checklists aux livraisons correspondantes.</p>
+                            <form id="associer-form" method="POST" action="{% url 'associate_all_livraisons' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-link"></i> Associer Checklists
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+        
+                        <!-- Associer Docks Card -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column justify-content-between">
+                    <h5 class="card-title"><i class="fas fa-warehouse"></i> Associer Docks</h5>
+                    <p class="card-text">Associez toutes les livraisons à tous les docks disponibles.</p>
+                    <form action="{% url 'associer_toutes_dock' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-link"></i> Associer Docks
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+        
+        
+    </div>
+
+    
+
+    <div id="message" style="display: none; color: green;"></div>
+
+    <br>
+    <br>
+    <br>
+    <hr>
+<br>
+    <div class="text-center mb-4">
+        <label for="date-picker"><strong>Sélectionnez une date :</strong></label>
+        <input type="date" id="date-picker" class="form-control" value="{{ selected_date|default:'' }}">
+    </div>
+    <br>
+<hr>
+<br>
+    {% for periode_data in livraisons_par_periode %}
+    {% with periode=periode_data.0 livraisons=periode_data.1 map_url=periode_data.2 %}
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="text-center mb-0">{{ periode }}</h3>
+                <a href="{% url map_url %}" class="btn btn-custom">
+                    <i class="fa-solid fa-map-location-dot"></i>
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped text-center">
+                        <thead>
+                            <tr>
+                                <th>Heure départ</th>
+                                <th>Nom du contrat</th>
+                                <th>Infos</th>
+                                <th>Heure livraison</th>
+                                <th>Livreur</th>
+                                <th>Geocode</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for livraison in livraisons %}
+                            <tr>
+                                <td {% if livraison.recuperation %}style="background-color: #F1B3DA;"{% endif %}><strong>{{ livraison.statut.heure_depart }}</strong></td>
+                                <td {% if livraison.recuperation %}style="background-color: #F1B3DA;"{% endif %}><strong>{{ livraison.nom }}</strong></td>
+                                <td {% if livraison.recuperation %}style="background-color: #F1B3DA;"{% endif %}><strong>{{ livraison.infodetail }}</strong></td>
+                                <td {% if livraison.recuperation %}style="background-color: #F1B3DA;"{% endif %}><strong>{{ livraison.heure_livraison }}</strong></td>
+                                <td {% if livraison.recuperation %}style="background-color: #F1B3DA;"{% endif %}><strong>{% for livreur in livraison.statut.livreur.all %}
+                                    {{ livreur.nom }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}</strong></td>
+                                <td>
+                                    {% if livraison.lng %}
+                                        <i class="fa-solid fa-location-dot" style="color: #63E6BE;"></i>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% endwith %}
+{% endfor %}
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+
+<script>
+document.getElementById("date-picker").addEventListener("change", function () {
+    let selectedDate = this.value;
+    window.location.href = `?date=${selectedDate}`;
+});
+
+function triggerGeocode() {
+        const form = document.getElementById('geocode-form');
+        const url = form.action;
+
+        // Use fetch to send a GET request to the geocoding URL
+        fetch(url, {
+            method: 'GET',
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Show success or error popup depending on the response
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    text: 'Géocode réussit',
+                    confirmButtonColor: '#009879',
+                    confirmButtonText: 'OK'
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message || data.error,
+                    confirmButtonColor: '#009879',
+                    confirmButtonText: 'OK'
+                });
+            }
+        })
+        .catch(error => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Déjà géocodé ou aucune livraisons à géocoder',
+                confirmButtonColor: '#009879',
+                confirmButtonText: 'OK'
+            });
+        });
+    }
+
+    $(document).ready(function() {
+    // Show modal when clicking the import button
+    $("#importBtn").click(function() {
+        $("#uploadModal").show();
+    });
+
+    // Handle form submission via AJAX
+    $("#uploadForm").submit(function(event) {
+    event.preventDefault();
+    var formData = new FormData(this);
+
+    $.ajax({
+        url: "{% url 'import_xlsx' %}",
+        method: "POST",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Succès',
+                text: 'Fichier importé avec succès !',
+                confirmButtonColor: '#3085d6',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "{% url 'livraisonstomorrow' %}";
+                }
+            });
+        },
+        error: function() {
+            Swal.fire({
+                icon: 'error',
+                title: 'Erreur',
+                text: 'Erreur lors de l\'importation du fichier. Vérifiez le format de votre fichier.',
+                confirmButtonColor: '#3085d6',
+            });
+        }
+    });
+});
+
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+    async function createJourneeFromSelectedDate() {
+    const selectedDate = document.getElementById("selected-date").value;
+    
+    if (!selectedDate) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Date non sélectionnée',
+            text: 'Veuillez sélectionner une date.',
+            confirmButtonColor: '#3085d6',
+        });
+        return;
+    }
+
+    const [year, month, day] = selectedDate.split('-');
+    const date = new Date(year, month - 1, day);
+    
+    const name = date.toLocaleDateString('fr-FR', {
+        weekday: 'long', day: '2-digit', month: 'long'
+    });
+
+    const nameCapitalized = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+    const formattedDate = `${year}-${month}-${day}`;
+
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    try {
+        const response = await fetch('/create_journee/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                name: nameCapitalized,
+                date: formattedDate
+            })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Succès',
+                text: 'Journée créée avec succès !',
+                confirmButtonColor: '#3085d6',
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Erreur',
+                text: result.error || 'Une erreur est survenue lors de la création de la journée.',
+                confirmButtonColor: '#3085d6',
+            });
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: 'Une erreur est survenue lors de la requête.',
+            confirmButtonColor: '#3085d6',
+        });
+    }
+}
+
+    // Attach the function to the button click event
+    document.querySelector('.btn-success').addEventListener('click', createJourneeFromSelectedDate);
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('#associer-form');
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        axios.post(form.action, new FormData(form))
+            .then(function(response) {
+                if (response.data.associated_count > 0) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Succès',
+                        text: response.data.message,
+                        confirmButtonColor: '#3085d6',
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Avertissement',
+                        text: "Aucune checklist n'a pu être associée.",
+                        confirmButtonColor: '#3085d6',
+                    });
+                }
+
+                var modal = bootstrap.Modal.getInstance(document.getElementById('associer'));
+                if (modal) {
+                    modal.hide();
+                }
+            })
+            .catch(function(error) {
+                let errorMsg = 'Une erreur est survenue.';
+                if (error.response && error.response.data && error.response.data.error) {
+                    errorMsg = error.response.data.error;
+                }
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    text: errorMsg,
+                    confirmButtonColor: '#3085d6',
+                });
+            });
+    });
+});
+
+$(document).ready(function() {
+    $('form[action="{% url 'associer_toutes_dock' %}"]').submit(function(event) {
+        event.preventDefault();
+        $.ajax({
+            url: this.action,
+            method: "POST",
+            data: $(this).serialize(),
+            success: function(response) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Succès',
+                    text: response.message,
+                    confirmButtonColor: '#3085d6',
+                });
+            },
+            error: function(xhr, status, error) {
+                var errorMessage;
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    errorMessage = xhr.responseJSON.error;
+                } else {
+                    errorMessage = 'Une erreur inconnue est survenue lors de l\'association des livraisons aux docks.';
+                }
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    text: errorMessage,
+                    confirmButtonColor: '#3085d6',
+                });
+            }
+        });
+    });
+});
+
+const toggleBtn = document.getElementById('theme-toggle');
+        toggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+        });
+
+          document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.getElementById('sidebar');
+    const btnShowSidebar = document.getElementById('show-sidebar');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    const dashboard = document.getElementById('dashboard');
+
+    // Quand on clique sur le bouton toggle pour cacher ou réafficher
+    toggleBtn.addEventListener('click', () => {
+        if (sidebar.classList.contains('collapsed')) {
+            // La sidebar est masquée, on la remonte
+            sidebar.classList.remove('collapsed');
+            btnShowSidebar.style.display = 'none';   // cache le bouton
+            dashboard.classList.remove('full-width');
+        } else {
+            // La sidebar est visible, on la cache
+            sidebar.classList.add('collapsed');
+            btnShowSidebar.style.display = 'block';  // montre le bouton pour la réafficher
+            dashboard.classList.add('full-width');
+        }
+    });
+
+    // Quand on clique sur le bouton pour faire réapparaître la sidebar
+    btnShowSidebar.addEventListener('click', () => {
+        sidebar.classList.remove('collapsed');
+        btnShowSidebar.style.display = 'none'; // cache le bouton
+        dashboard.classList.remove('full-width');
+    });
+});
+
+</script>
+
+{% endblock %}

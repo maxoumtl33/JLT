@@ -1,0 +1,178 @@
+
+@login_required
+def checklist_detail(request, checklist_id):
+    checklist = get_object_or_404(Checklist, pk=checklist_id)
+    checklist_items = ChecklistItem.objects.filter(checklist=checklist, quantity__gt=0).select_related('product')
+    checklist_products = checklist_items.values_list('product__id', flat=True)
+    breuvages = ChecklistItem.objects.filter(checklist=checklist, product__category__name__in=["ALCOOL FORT", "SANS ALCOOL", "VINS",  "BIERES"], quantity__gt=0)
+    checklist_documents = ChecklistDocument.objects.filter(checklist=checklist)
+    recup_photos = ChecklistRecupPhoto.objects.filter(checklist=checklist)
+    md_photos = ChecklistMDPhoto.objects.filter(checklist=checklist)
+    products = Product.objects.prefetch_related('category').all()  # Prefetch categories to avoid additional queries
+    bieres_category = Category.objects.get(name="BIERES")
+    vins_category = Category.objects.get(name="VINS")
+    alcool_category = Category.objects.get(name="ALCOOL FORT")
+    sansalcool_category = Category.objects.get(name="SANS ALCOOL")
+    base_category = Category.objects.get(name="ÉQUIPEMENT DE BASE")
+    jetable_category = Category.objects.get(name="JETABLE")
+    decor_category = Category.objects.get(name="ACCESSOIRES DE DÉCOR")
+    bar_category = Category.objects.get(name="ÉQUIPEMENT DE BAR")
+    cafe_category = Category.objects.get(name="ÉQUIPEMENT POUR SERVICE CAFÉ")
+    table_category = Category.objects.get(name="TABLE ET LINGE DE TABLE")
+    verre_category = Category.objects.get(name="VERRERIE")
+    porcelaine_category = Category.objects.get(name="PORCELAINE ET COUTELLERIE")
+    canape_category = Category.objects.get(name="ÉQUIPEMENT POUR MONTAGE CANAPÉS")
+    cuisson_category = Category.objects.get(name="ÉQUIPEMENT DE CUISSON")
+    service_category = Category.objects.get(name="USTENSILES DE SERVICE")
+    divers_category = Category.objects.get(name="ITEMS DIVERS")
+    cfcdn_category = Category.objects.get(name="CFCDN")
+
+
+    for product in products:
+        product.is_bieres = bieres_category in product.category.all()
+        product.is_vins = vins_category in product.category.all()
+        product.is_alcool = alcool_category in product.category.all()
+        product.is_sansalcool = sansalcool_category in product.category.all()
+        product.is_base = base_category in product.category.all()
+        product.is_jetable = jetable_category in product.category.all()
+        product.is_decor = decor_category in product.category.all()
+        product.is_bar = bar_category in product.category.all()
+        product.is_cafe = cafe_category in product.category.all()
+        product.is_table = table_category in product.category.all()
+        product.is_verre = verre_category in product.category.all()
+        product.is_porcelaine = porcelaine_category in product.category.all()
+        product.is_canape = canape_category in product.category.all()
+        product.is_cuisson = cuisson_category in product.category.all()
+        product.is_service = service_category in product.category.all()
+        product.is_divers = divers_category in product.category.all()
+        product.is_cfcdn = cfcdn_category in product.category.all()
+
+    query = request.GET.get('query')
+    checklist_item_quantities = {
+        item.product_id: item.quantity for item in checklist_items
+    }
+    checklist_itemss = ChecklistItem.objects.select_related('product').filter(checklist=checklist, quantity__gt=0).prefetch_related('product__category')
+    checklist_item_comments = {item.product_id: item.commentaire for item in checklist_items}
+
+
+
+    checklist_items_by_category = {}
+
+    for item in checklist_itemss:
+        product = item.product
+        for category in product.category.all():  # Iterate over each category of the product
+            if category.name not in checklist_items_by_category:
+                checklist_items_by_category[category.name] = []
+            checklist_items_by_category[category.name].append({
+                'product': product,
+                'quantity': item.quantity,
+                'status': item.status,
+                'commentaire': item.commentaire,
+                'com': item.com,
+                'is_completed': item.is_completed,
+                'consumed_quantity': item.consumed_quantity,
+                'unconsumed_quantity': item.unconsumed_quantity,
+            })
+
+   # Get unique product categories
+
+    product_categories = Category.objects.filter(product__isnull=False).distinct()
+
+
+
+    user_groups = request.user.groups.values_list('name', flat=True)
+    checklist_documents = ChecklistDocument.objects.filter(checklist=checklist)
+
+    # Create the formset (always include an extra form)
+    document_formset = ChecklistDocumentFormSet(
+        request.POST or None,
+        request.FILES or None,
+        queryset=checklist_documents,  # Existing docs
+        prefix='documents'
+    )
+    if not document_formset.forms:
+        document_formset = ChecklistDocumentFormSet(queryset=ChecklistDocument.objects.none(), prefix='documents')
+
+    if request.method == 'POST' and document_formset.is_valid():
+        for form in document_formset:
+            if form.cleaned_data.get('DELETE', False):
+                form.instance.delete()
+            else:
+                document_instance = form.save(commit=False)
+                document_instance.checklist = checklist
+                document_instance.uploaded_by = request.user
+                document_instance.save()
+
+        # 🔹 After saving, reinitialize the formset to include at least one blank form
+        return redirect('checklist-detail', checklist_id=checklist.id)
+
+
+    # Checklist form instance
+    formbis = ChecklistForm(request.POST or None, instance=checklist, prefix='checklist_form')
+    commentaire_form = CommentaireForm(request.POST or None, instance=checklist, prefix='commentaire_form')
+    product_form = ProductsForm
+
+    if request.method == 'POST':
+        if 'product-form' in request.POST:
+            product_form = ProductsForm(request.POST, user=request.user)
+            if product_form.is_valid():
+                product = product_form.save()
+
+                # Log the product creation
+                ProductLog.objects.create(product=product, created_by=request.user)
+
+                messages.success(request, 'Nouveau produit créé avec succès.')
+                return HttpResponseRedirect(reverse('checklist-detail', args=[checklist_id]))
+
+
+
+
+    # Handle checklist form submission
+    if 'checklist_form-name' in request.POST and formbis.is_valid():
+        if checklist.statusro == 'verifié':
+                checklist.statusro = 'modifié'  # Update the status to 'modifié'
+        formbis.save()
+        checklist.save()
+        return HttpResponseRedirect(reverse('checklist-detail', args=[checklist_id]))
+
+    # Handle commentaire form submission
+    elif 'commentaire_form-commentairevente' in request.POST and commentaire_form.is_valid():
+        commentaire_form.save()
+        return HttpResponseRedirect(reverse('checklist-detail', args=[checklist_id]))
+
+    # Filter products based on the search query
+    if query:
+        products = products.filter(name__icontains=query)
+
+    # Group products by categories
+    products_by_category = defaultdict(list)
+    for product in products:
+        for category in product.category.all():
+            products_by_category[category.name].append(product)
+
+    is_cfcdn = "cfcdn" in checklist.name.lower()
+
+    context = {
+        'products_by_category': dict(products_by_category),
+        'breuvages': breuvages,
+        'checklist': checklist,
+        'checklist_products': checklist_products,
+        'checklist_items': checklist_items,
+        'products': products,
+        'formbis': formbis,
+        'commentaire_form': commentaire_form,
+        'document_formset': document_formset,
+        'checklist_documents': checklist_documents,
+        'recup_photos': recup_photos,
+        'md_photos': md_photos,
+        'product_form': product_form,
+        'checklist_item_quantities': checklist_item_quantities,
+        'checklist_item_comments': checklist_item_comments,
+        'checklist_items_by_category': checklist_items_by_category,
+        'product_categories': product_categories,
+        'is_admin': 'admin' in user_groups,
+        'is_chefcuisine': request.user.groups.filter(name='chefcuisine').exists(),
+        'is_ventes': request.user.groups.filter(name='ventes').exists(),
+        'is_cfcdn': is_cfcdn,
+    }
+    return render(request, 'listings/checklist_detail.html', context)

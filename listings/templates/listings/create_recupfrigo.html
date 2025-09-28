@@ -1,0 +1,46 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Formulaire Récup Frigo</h2>
+
+    <form method="POST" class="needs-validation" novalidate>
+        {% csrf_token %}
+
+        <!-- RecupFrigo Form -->
+        <div class="form-group mb-4">
+            {{ recupfrigo_form.as_p }}
+        </div>
+
+        <!-- Items Formset -->
+        <h3 class="mb-3">Items</h3>
+        {{ formset.management_form }}
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Nom de l'item</th>
+                        <th>Quantité</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for form in formset %}
+                    <tr>
+                        <td>{{ form.item_name.label_tag }} {{ form.item_name }}</td>
+                        <td>{{ form.quantity.label_tag }} {{ form.quantity }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2" class="text-center">Aucun item disponible</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg btn-block mt-4">Valider</button>
+    </form>
+</div>
+
+{% endblock %}

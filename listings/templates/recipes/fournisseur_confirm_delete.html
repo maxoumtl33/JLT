@@ -1,0 +1,29 @@
+{% extends "recipes/base.html" %}
+{% block title %}Supprimer Fournisseur{% endblock %}
+
+{% block content %}
+<div class="content-body">
+    <div class="text-center py-5">
+        <i class="bi bi-exclamation-triangle text-warning" style="font-size: 4rem;"></i>
+        <h2 class="mt-4">Confirmer la suppression</h2>
+        <p class="lead mt-3">
+            Êtes-vous sûr de vouloir supprimer le fournisseur <strong>{{ fournisseur.nom }}</strong> ?
+        </p>
+        
+        {% if fournisseur.commandes.count > 0 %}
+        <div class="alert alert-danger">
+            <i class="bi bi-exclamation-octagon"></i>
+            Ce fournisseur a {{ fournisseur.commandes.count }} commande(s) associée(s).
+        </div>
+        {% endif %}
+        
+        <form method="post" class="mt-4">
+            {% csrf_token %}
+            <a href="{% url 'fournisseur_list' %}" class="btn btn-secondary">Annuler</a>
+            <button type="submit" class="btn btn-danger ms-2">
+                <i class="bi bi-trash"></i> Supprimer
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

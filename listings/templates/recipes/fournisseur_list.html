@@ -1,0 +1,133 @@
+{% extends "recipes/base.html" %}
+{% block title %}Fournisseurs - Gestion Recettes{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <h1 class="h3 mb-0">Gestion des Fournisseurs</h1>
+        <div>
+            <a href="{% url 'fournisseur_create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Nouveau Fournisseur
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="table-container">
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <form method="get" class="d-flex search-box">
+                <input type="text" name="search" class="form-control" placeholder="Rechercher un fournisseur..." value="{{ request.GET.search }}">
+                <button type="submit" class="btn btn-outline-secondary ms-2">
+                    <i class="bi bi-search"></i>
+                </button>
+                {% if request.GET.search %}
+                <a href="{% url 'fournisseur_list' %}" class="btn btn-outline-danger ms-2">
+                    <i class="bi bi-x"></i>
+                </a>
+                {% endif %}
+            </form>
+        </div>
+        <div class="col-md-6 text-end">
+            <span class="text-muted">{{ fournisseurs.paginator.count }} fournisseur(s) trouvé(s)</span>
+        </div>
+    </div>
+
+    <div class="row">
+        {% for fournisseur in fournisseurs %}
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-building text-primary"></i> {{ fournisseur.nom }}
+                    </h5>
+                    
+                    <div class="mb-3">
+                        {% if fournisseur.contact_principal %}
+                        <p class="mb-1">
+                            <i class="bi bi-person"></i> <strong>Contact:</strong> {{ fournisseur.contact_principal }}
+                        </p>
+                        {% endif %}
+                        
+                        {% if fournisseur.email %}
+                        <p class="mb-1">
+                            <i class="bi bi-envelope"></i> <a href="mailto:{{ fournisseur.email }}">{{ fournisseur.email }}</a>
+                        </p>
+                        {% endif %}
+                        
+                        {% if fournisseur.telephone %}
+                        <p class="mb-1">
+                            <i class="bi bi-telephone"></i> {{ fournisseur.telephone }}
+                        </p>
+                        {% endif %}
+                        
+                        {% if fournisseur.adresse %}
+                        <p class="mb-1">
+                            <i class="bi bi-geo-alt"></i> {{ fournisseur.adresse|truncatewords:10 }}
+                        </p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge bg-info">
+                            {{ fournisseur.catalogues.count }} produit(s)
+                        </span>
+                        <span class="badge bg-success">
+                            {{ fournisseur.commandes.count }} commande(s)
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-transparent">
+                    <div class="btn-group btn-group-sm w-100">
+                        <a href="{% url 'catalogue_list' %}?fournisseur={{ fournisseur.id }}" class="btn btn-outline-info" title="Voir catalogue">
+                            <i class="bi bi-tags"></i> Catalogue
+                        </a>
+                        <a href="{% url 'fournisseur_update' fournisseur.pk %}" class="btn btn-outline-primary">
+                            <i class="bi bi-pencil"></i> Modifier
+                        </a>
+                        <a href="{% url 'fournisseur_delete' fournisseur.pk %}" class="btn btn-outline-danger">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="bi bi-truck text-muted" style="font-size: 4rem;"></i>
+                <p class="mt-3 text-muted">Aucun fournisseur trouvé</p>
+                <a href="{% url 'fournisseur_create' %}" class="btn btn-primary mt-2">
+                    <i class="bi bi-plus-circle"></i> Ajouter un premier fournisseur
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if fournisseurs.has_other_pages %}
+    <nav>
+        <ul class="pagination justify-content-center">
+            {% if fournisseurs.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ fournisseurs.previous_page_number }}">Précédent</a>
+            </li>
+            {% endif %}
+            
+            {% for num in fournisseurs.paginator.page_range %}
+            <li class="page-item {% if fournisseurs.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+            {% endfor %}
+            
+            {% if fournisseurs.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ fournisseurs.next_page_number }}">Suivant</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

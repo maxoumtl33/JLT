@@ -1,0 +1,201 @@
+{% extends 'listings/base.html' %}
+{%  load static%}
+{% block content %}
+
+
+  
+             
+         
+
+{% if livraison.recuperation == recuperation%}
+<h1 style="text-align: center; color: #F1B3DA;">RECUPERATION {{livraison.nom|upper}}</h1>
+<br>
+<a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
+    <i class="fa-solid fa-pen-to-square"></i><span>Editer</span>
+</a> 
+<br>
+<a  href="{% url 'acceuilresponsables' %}" class="nav__link"><i class="fa-solid fa-user-ninja"></i>
+    <span class="nav__name">Retour</span>
+  </a>
+  <br>
+
+
+  {% else %}
+  <h1 style="text-align: center;">LIVRAISON {{livraison.nom|upper}}</h1>
+  <br>
+  <a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
+    <i class="fa-solid fa-pen-to-square"></i><span>Editer</span>
+  </a> 
+  <br>
+<a  href="{% url 'acceuilresponsables' %}" class="nav__link"><i class="fa-solid fa-user-ninja"></i>
+    <span class="nav__name">Retour</span>
+  </a>
+  <br>
+
+  {% endif %}
+  
+  
+  
+    <div class="card card-body">
+      <ul class="list-group">
+        <li class="list-group-item active" aria-current="true">Informations Livraison</li>
+        <li class="list-group-item"><div class="row row-cols-1 row-cols-md-2 g-4">
+          <div class="col">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><strong>Nom</strong></h5>
+                <p class="card-text">{{ livraison.nom }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><strong>N° de commande</strong></h5>
+                <p class="card-text">{{ livraison.num_commande}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><strong>Nombre convives</strong></h5>
+                <p class="card-text">{{ livraison.convives}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><strong>Adresse</strong></h5>
+                <p class="card-text">{{ livraison.adress }}, {{livraison.zipcode}}, {{livraison.city}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><strong>Route n°</strong></h5>
+                <p class="card-text">{{ livraison.statut }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><strong>Heure départ</strong></h5>
+                <p class="card-text">{{ livraison.heure_depart }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><strong>Heure de livraison</strong></h5>
+                <p class="card-text">{{ livraison.heure_livraison }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><strong>Mode d'envoi</strong></h5>
+                <p class="card-text">{{ livraison.mode_envoi}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><strong>Checklist</strong></h5>
+                <p class="card-text">{{ livraison.checklist }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><strong>Infos supplemmentaires</strong></h5>
+                <p class="card-text">{{livraison.infodetail}}</p>
+              </div>
+            </div>
+          </div>
+        <div class="col">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title"><strong>Commentaire du livreur</strong></h5>
+              <p class="card-text">{{livraison.commentaire}}</p>
+            </div>
+          </div>
+        </div>
+        
+      </li>
+      </ul>
+    </div>
+  
+    
+      <div class="card card-body">
+        <ul class="list-group">
+          <li class="list-group-item active" aria-current="true">Informations Client</li>
+          <li class="list-group-item"><div class="row row-cols-1 row-cols-md-2 g-4">
+            <div class="col">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title"><strong>Nom</strong></h5>
+                  <p class="card-text">{{livraison.nom_client}}</p>
+                </div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title"><strong>Adresse Dock</strong></h5>
+                  <p class="card-text"><a href="{{livraison.client.adresse_dock}}" target="_blank">ici</a></p>
+                </div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title"><strong>Contact</strong></h5>
+                  <p class="card-text">{{livraison.contact_site}}</p>
+                </div>
+              </div>
+            </div>
+        </li>
+        </ul>
+      </div>
+    </div>
+    
+  
+  
+
+  <br>
+  <br>
+  <br>
+
+  
+
+    
+
+      <!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form action="" method=POST >
+          {% csrf_token %}
+          {{ formbis.as_p }}
+          <input type="submit" value="valider" class="btn btn-primary">
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
+

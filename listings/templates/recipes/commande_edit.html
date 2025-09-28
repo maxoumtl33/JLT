@@ -1,0 +1,687 @@
+{% extends "recipes/base.html" %}
+{% load static %}
+{% block title %}Modifier Commande - {{ object.numero }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .ligne-commande-row {
+        padding: 10px;
+        margin-bottom: 10px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        transition: all 0.3s;
+    }
+    
+    .ligne-commande-row:hover {
+        background-color: #e9ecef;
+    }
+    
+    .ligne-commande-row.modifiable {
+        background-color: #fff3cd;
+        border: 1px solid #ffc107;
+    }
+    
+    .btn-remove-ligne {
+        cursor: pointer;
+        color: #dc3545;
+    }
+    
+    .btn-add-ligne {
+        margin-top: 10px;
+    }
+    
+    .prix-info {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    .total-ligne {
+        font-weight: bold;
+        color: #28a745;
+    }
+    
+    #ingredientsDisponibles {
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        padding: 10px;
+        background-color: #f8f9fa;
+        margin-top: 10px;
+    }
+    
+    .ingredient-disponible {
+        padding: 5px;
+        margin: 2px 0;
+        cursor: pointer;
+        border-radius: 3px;
+    }
+    
+    .ingredient-disponible:hover {
+        background-color: #e9ecef;
+    }
+    
+    .stock-badge {
+        float: right;
+        font-size: 0.85rem;
+    }
+    
+    .modify-checkbox {
+        margin-right: 10px;
+    }
+    
+    .quantite-input[readonly] {
+        background-color: #e9ecef;
+        cursor: not-allowed;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="content-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="h3 mb-0">
+                <i class="bi bi-pencil-square"></i> Modifier la Commande {{ object.numero }}
+            </h1>
+            <a href="{% url 'commande_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Retour
+            </a>
+        </div>
+    </div>
+
+    <form method="post" id="editForm">
+        {% csrf_token %}
+        
+        <!-- Informations générales -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0">Informations générales</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="id_fournisseur" class="form-label">Fournisseur</label>
+                            <select name="fournisseur" id="id_fournisseur" class="form-select" required>
+                                <option value="">-- Sélectionnez un fournisseur --</option>
+                                {% for fournisseur in fournisseurs %}
+                                <option value="{{ fournisseur.id }}" 
+                                        {% if fournisseur.id == object.fournisseur.id %}selected{% endif %}>
+                                    {{ fournisseur.nom }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">
+                                Attention : changer le fournisseur réinitialisera la liste des ingrédients disponibles
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="id_statut" class="form-label">Statut</label>
+                            <select name="statut" id="id_statut" class="form-select" required>
+                                <option value="BROUILLON" {% if object.statut == "BROUILLON" %}selected{% endif %}>Brouillon</option>
+                                <option value="CONFIRMEE" {% if object.statut == "CONFIRMEE" %}selected{% endif %}>Confirmée</option>
+                                <option value="EN_COURS" {% if object.statut == "EN_COURS" %}selected{% endif %}>En cours</option>
+                                <option value="LIVREE" {% if object.statut == "LIVREE" %}selected{% endif %}>Livrée</option>
+                                <option value="ANNULEE" {% if object.statut == "ANNULEE" %}selected{% endif %}>Annulée</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="id_date_livraison_prevue" class="form-label">Date de livraison prévue</label>
+                            <input type="date" 
+                                   name="date_livraison_prevue" 
+                                   id="id_date_livraison_prevue" 
+                                   class="form-control"
+                                   value="{{ object.date_livraison_prevue|date:'Y-m-d' }}">
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="id_notes" class="form-label">Notes</label>
+                            <textarea name="notes" 
+                                      id="id_notes" 
+                                      class="form-control" 
+                                      rows="3">{{ object.notes|default:'' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lignes de commande modifiables -->
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Lignes de commande</h5>
+                <div>
+                    <button type="button" class="btn btn-sm btn-warning me-2" onclick="toggleAllModify()">
+                        <i class="bi bi-check2-square"></i> Tout modifier
+                    </button>
+                    <button type="button" class="btn btn-sm btn-success" id="btnAddLigne">
+                        <i class="bi bi-plus-circle"></i> Ajouter un ingrédient
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> Cochez la case pour modifier la quantité d'une ligne. Si non cochée, la quantité d'origine sera conservée.
+                </div>
+                
+                <div id="lignesContainer">
+                    {% for ligne in object.lignes.all %}
+                    <div class="ligne-commande-row" data-ligne-id="{{ ligne.id }}">
+                        <div class="row align-items-center">
+                            <div class="col-md-5">
+                                <label>
+                                    <input type="checkbox" 
+                                           class="modify-checkbox" 
+                                           data-ligne-id="{{ ligne.id }}"
+                                           onchange="toggleModify(this)">
+                                    Modifier cet ingrédient
+                                </label>
+                                <select name="ingredient_{{ ligne.id }}" 
+                                        class="form-select ingredient-select mt-2" 
+                                        data-ligne-id="{{ ligne.id }}"
+                                        disabled
+                                        required>
+                                    <option value="{{ ligne.ingredient.id }}" selected>
+                                        {{ ligne.ingredient.nom }}
+                                    </option>
+                                </select>
+                                <small class="prix-info">
+                                    Prix unitaire: <span class="prix-unitaire">{{ ligne.prix_unitaire }}</span>€/{{ ligne.ingredient.unite_mesure.symbole }}
+                                </small>
+                            </div>
+                            <div class="col-md-3">
+                                <label>Quantité</label>
+                                <div class="input-group">
+                                    <input type="number" 
+                                           name="quantite_{{ ligne.id }}" 
+                                           class="form-control quantite-input" 
+                                           value="{{ ligne.quantite }}"
+                                           data-original-value="{{ ligne.quantite }}"
+                                           min="0.01"
+                                           step="0.01"
+                                           data-ligne-id="{{ ligne.id }}"
+                                           readonly
+                                           required>
+                                    <span class="input-group-text">{{ ligne.ingredient.unite_mesure.symbole }}</span>
+                                </div>
+                                <small class="text-muted">Quantité originale: {{ ligne.quantite }}</small>
+                            </div>
+                            <div class="col-md-3">
+                                <label>Total</label>
+                                <div class="total-ligne">
+                                    <span class="total-amount">{{ ligne.sous_total }}</span>€
+                                </div>
+                            </div>
+                            <div class="col-md-1 text-center">
+                                <label>&nbsp;</label>
+                                <div>
+                                    <i class="bi bi-trash btn-remove-ligne" 
+                                       onclick="removeLigne(this)"
+                                       title="Supprimer cette ligne"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Total général -->
+                <div class="mt-3 pt-3 border-top">
+                    <div class="row">
+                        <div class="col-md-8 text-end">
+                            <strong>Total général :</strong>
+                        </div>
+                        <div class="col-md-4">
+                            <strong id="totalGeneral">{{ object.montant_total }}</strong> €
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liste des ingrédients disponibles (caché par défaut) -->
+        <div class="card mb-3" id="ingredientsCard" style="display: none;">
+            <div class="card-header">
+                <h5 class="mb-0">Ingrédients disponibles chez ce fournisseur</h5>
+            </div>
+            <div class="card-body">
+                <input type="text" 
+                       class="form-control mb-2" 
+                       id="searchIngredient" 
+                       placeholder="Rechercher un ingrédient...">
+                <div id="ingredientsDisponibles">
+                    <!-- Chargé dynamiquement -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Boutons d'action -->
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-circle"></i> Enregistrer les modifications
+            </button>
+            <a href="{% url 'commande_detail' object.pk %}" class="btn btn-secondary">
+                Annuler
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Template pour nouvelle ligne -->
+<template id="ligneTemplate">
+    <div class="ligne-commande-row new-ligne modifiable" data-ligne-id="new_ID">
+        <div class="row align-items-center">
+            <div class="col-md-5">
+                <label class="text-success">
+                    <i class="bi bi-plus-circle"></i> Nouvel ingrédient
+                </label>
+                <select name="ingredient_new_ID" 
+                        class="form-select ingredient-select mt-2" 
+                        data-ligne-id="new_ID"
+                        required>
+                    <option value="">-- Sélectionnez --</option>
+                </select>
+                <small class="prix-info">
+                    Prix unitaire: <span class="prix-unitaire">-</span>€
+                </small>
+            </div>
+            <div class="col-md-3">
+                <label>Quantité</label>
+                <div class="input-group">
+                    <input type="number" 
+                           name="quantite_new_ID" 
+                           class="form-control quantite-input" 
+                           value="1"
+                           min="0.01"
+                           step="0.01"
+                           data-ligne-id="new_ID"
+                           required>
+                    <span class="input-group-text">-</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label>Total</label>
+                <div class="total-ligne">
+                    <span class="total-amount">0.00</span>€
+                </div>
+            </div>
+            <div class="col-md-1 text-center">
+                <label>&nbsp;</label>
+                <div>
+                    <i class="bi bi-trash btn-remove-ligne" 
+                       onclick="removeLigne(this)"
+                       title="Supprimer cette ligne"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Variables globales
+let ingredientsData = {};
+let ligneCounter = 0;
+
+// Fonction pour obtenir le CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Toggle modification d'une ligne
+function toggleModify(checkbox) {
+    const ligneId = checkbox.dataset.ligneId;
+    const ligneRow = document.querySelector(`.ligne-commande-row[data-ligne-id="${ligneId}"]`);
+    const quantiteInput = ligneRow.querySelector('.quantite-input');
+    const ingredientSelect = ligneRow.querySelector('.ingredient-select');
+    
+    if (checkbox.checked) {
+        // Activer la modification
+        ligneRow.classList.add('modifiable');
+        quantiteInput.removeAttribute('readonly');
+        ingredientSelect.removeAttribute('disabled');
+    } else {
+        // Désactiver la modification et remettre la valeur d'origine
+        ligneRow.classList.remove('modifiable');
+        quantiteInput.setAttribute('readonly', true);
+        ingredientSelect.setAttribute('disabled', true);
+        
+        // Remettre la quantité d'origine
+        const originalValue = quantiteInput.dataset.originalValue;
+        if (originalValue) {
+            quantiteInput.value = originalValue;
+            updateLigneTotal(ligneId);
+        }
+    }
+}
+
+// Toggle toutes les modifications
+function toggleAllModify() {
+    const checkboxes = document.querySelectorAll('.modify-checkbox');
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = !allChecked;
+        toggleModify(checkbox);
+    });
+}
+
+// Au chargement de la page
+document.addEventListener('DOMContentLoaded', function() {
+    // Charger les ingrédients du fournisseur actuel
+    const fournisseurSelect = document.getElementById('id_fournisseur');
+    if (fournisseurSelect.value) {
+        loadIngredients(fournisseurSelect.value, true);
+    }
+    
+    // Événement changement de fournisseur
+    fournisseurSelect.addEventListener('change', function() {
+        if (this.value) {
+            if (document.querySelectorAll('.ligne-commande-row').length > 0) {
+                if (confirm('Attention : changer le fournisseur réinitialisera la liste des ingrédients. Continuer ?')) {
+                    loadIngredients(this.value, false);
+                } else {
+                    // Remettre l'ancienne valeur
+                    this.value = '{{ object.fournisseur.id }}';
+                }
+            } else {
+                loadIngredients(this.value, false);
+            }
+        }
+    });
+    
+    // Bouton ajouter ligne
+    document.getElementById('btnAddLigne').addEventListener('click', addNewLigne);
+    
+    // Calculer le total initial
+    calculateTotal();
+    
+    // Recherche d'ingrédients
+    document.getElementById('searchIngredient').addEventListener('keyup', function(e) {
+        filterIngredients(e.target.value);
+    });
+    
+    // Gestion des changements de quantité
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('quantite-input')) {
+            updateLigneTotal(e.target.dataset.ligneId);
+        }
+        if (e.target.classList.contains('ingredient-select')) {
+            updateIngredientInfo(e.target);
+        }
+    });
+});
+
+// Charger les ingrédients disponibles pour un fournisseur
+function loadIngredients(fournisseurId, isInitial) {
+    fetch(`/api/fournisseur/${fournisseurId}/ingredients/`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        ingredientsData = {};
+        data.forEach(item => {
+            ingredientsData[item.ingredient_id] = {
+                nom: item.ingredient_nom,
+                prix: item.prix,
+                unite: item.unite,
+                stock: item.stock_actuel
+            };
+        });
+        
+        if (!isInitial) {
+            // Mettre à jour toutes les listes déroulantes
+            updateAllIngredientSelects();
+        } else {
+            // Mettre à jour seulement les options disponibles
+            updateIngredientOptions();
+        }
+        
+        // Afficher la liste des ingrédients disponibles
+        displayAvailableIngredients();
+    })
+    .catch(error => {
+        console.error('Erreur lors du chargement des ingrédients:', error);
+        // Fallback : utiliser les données statiques si disponibles
+        loadStaticIngredients();
+    });
+}
+
+// Fallback avec données statiques
+function loadStaticIngredients() {
+    // Utiliser les données déjà présentes dans le formulaire
+    updateIngredientOptions();
+}
+
+// Mettre à jour toutes les listes déroulantes d'ingrédients
+function updateAllIngredientSelects() {
+    const selects = document.querySelectorAll('.ingredient-select');
+    selects.forEach(select => {
+        // Seulement si la ligne est modifiable
+        const ligneRow = select.closest('.ligne-commande-row');
+        const checkbox = ligneRow.querySelector('.modify-checkbox');
+        if (checkbox && !checkbox.checked) {
+            return; // Ne pas modifier si pas coché
+        }
+        
+        const currentValue = select.value;
+        select.innerHTML = '<option value="">-- Sélectionnez --</option>';
+        
+        for (const [id, data] of Object.entries(ingredientsData)) {
+            const option = document.createElement('option');
+            option.value = id;
+            option.textContent = `${data.nom} (${data.prix}€/${data.unite})`;
+            if (id == currentValue && ingredientsData[currentValue]) {
+                option.selected = true;
+            }
+            select.appendChild(option);
+        }
+        
+        // Si l'ingrédient précédent n'est plus disponible
+        if (currentValue && !ingredientsData[currentValue]) {
+            ligneRow.classList.add('table-warning');
+            alert(`L'ingrédient de cette ligne n'est pas disponible chez ce fournisseur`);
+        }
+    });
+}
+
+// Mettre à jour les options disponibles
+function updateIngredientOptions() {
+    const selects = document.querySelectorAll('.ingredient-select');
+    selects.forEach(select => {
+        // Ajouter les options manquantes
+        for (const [id, data] of Object.entries(ingredientsData)) {
+            if (!select.querySelector(`option[value="${id}"]`)) {
+                const option = document.createElement('option');
+                option.value = id;
+                option.textContent = `${data.nom} (${data.prix}€/${data.unite})`;
+                select.appendChild(option);
+            }
+        }
+    });
+}
+
+// Afficher les ingrédients disponibles
+function displayAvailableIngredients() {
+    const container = document.getElementById('ingredientsDisponibles');
+    container.innerHTML = '';
+    
+    for (const [id, data] of Object.entries(ingredientsData)) {
+        const div = document.createElement('div');
+        div.className = 'ingredient-disponible';
+        div.innerHTML = `
+            <span>${data.nom}</span>
+            <span class="stock-badge badge ${data.stock > 10 ? 'bg-success' : 'bg-warning'}">
+                Stock: ${data.stock} ${data.unite}
+            </span>
+            <br>
+            <small class="text-muted">${data.prix}€/${data.unite}</small>
+        `;
+        div.onclick = () => addIngredientQuick(id);
+        container.appendChild(div);
+    }
+    
+    document.getElementById('ingredientsCard').style.display = 'block';
+}
+
+// Filtrer les ingrédients affichés
+function filterIngredients(search) {
+    const items = document.querySelectorAll('.ingredient-disponible');
+    const searchLower = search.toLowerCase();
+    
+    items.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        item.style.display = text.includes(searchLower) ? 'block' : 'none';
+    });
+}
+
+// Ajouter rapidement un ingrédient
+function addIngredientQuick(ingredientId) {
+    addNewLigne();
+    const newLignes = document.querySelectorAll('.new-ligne');
+    const lastLigne = newLignes[newLignes.length - 1];
+    const select = lastLigne.querySelector('.ingredient-select');
+    select.value = ingredientId;
+    updateIngredientInfo(select);
+}
+
+// Ajouter une nouvelle ligne
+function addNewLigne() {
+    const template = document.getElementById('ligneTemplate');
+    const clone = template.content.cloneNode(true);
+    
+    // Remplacer les ID
+    ligneCounter++;
+    const ligneId = `new_${ligneCounter}`;
+    const ligneRow = clone.querySelector('.ligne-commande-row');
+    ligneRow.dataset.ligneId = ligneId;
+    ligneRow.classList.add('modifiable'); // Nouvelle ligne toujours modifiable
+    
+    clone.querySelector('.ingredient-select').name = `ingredient_${ligneId}`;
+    clone.querySelector('.ingredient-select').dataset.ligneId = ligneId;
+    clone.querySelector('.quantite-input').name = `quantite_${ligneId}`;
+    clone.querySelector('.quantite-input').dataset.ligneId = ligneId;
+    
+    // Ajouter les options d'ingrédients
+    const select = clone.querySelector('.ingredient-select');
+    for (const [id, data] of Object.entries(ingredientsData)) {
+        const option = document.createElement('option');
+        option.value = id;
+        option.textContent = `${data.nom} (${data.prix}€/${data.unite})`;
+        select.appendChild(option);
+    }
+    
+    document.getElementById('lignesContainer').appendChild(clone);
+}
+
+// Supprimer une ligne
+function removeLigne(button) {
+    if (confirm('Supprimer cette ligne ?')) {
+        button.closest('.ligne-commande-row').remove();
+        calculateTotal();
+    }
+}
+
+// Mettre à jour les informations d'un ingrédient
+function updateIngredientInfo(select) {
+    const ligneRow = select.closest('.ligne-commande-row');
+    const ingredientId = select.value;
+    
+    if (ingredientId && ingredientsData[ingredientId]) {
+        const data = ingredientsData[ingredientId];
+        ligneRow.querySelector('.prix-unitaire').textContent = data.prix;
+        ligneRow.querySelector('.input-group-text').textContent = data.unite;
+        updateLigneTotal(select.dataset.ligneId);
+    }
+}
+
+// Mettre à jour le total d'une ligne
+function updateLigneTotal(ligneId) {
+    const ligneRow = document.querySelector(`.ligne-commande-row[data-ligne-id="${ligneId}"]`);
+    if (!ligneRow) return;
+    
+    const quantite = parseFloat(ligneRow.querySelector('.quantite-input').value) || 0;
+    const prix = parseFloat(ligneRow.querySelector('.prix-unitaire').textContent) || 0;
+    const total = (quantite * prix).toFixed(2);
+    
+    ligneRow.querySelector('.total-amount').textContent = total;
+    calculateTotal();
+}
+
+// Calculer le total général
+function calculateTotal() {
+    let total = 0;
+    document.querySelectorAll('.total-amount').forEach(elem => {
+        total += parseFloat(elem.textContent) || 0;
+    });
+    document.getElementById('totalGeneral').textContent = total.toFixed(2);
+}
+
+// Validation avant soumission
+document.getElementById('editForm').addEventListener('submit', function(e) {
+    const lignes = document.querySelectorAll('.ligne-commande-row');
+    if (lignes.length === 0) {
+        e.preventDefault();
+        alert('Veuillez ajouter au moins un ingrédient à la commande');
+        return false;
+    }
+    
+    // Pour les lignes non modifiées, s'assurer que la quantité d'origine est envoyée
+    lignes.forEach(ligne => {
+        const checkbox = ligne.querySelector('.modify-checkbox');
+        const quantiteInput = ligne.querySelector('.quantite-input');
+        
+        if (checkbox && !checkbox.checked && quantiteInput.dataset.originalValue) {
+            quantiteInput.value = quantiteInput.dataset.originalValue;
+            quantiteInput.removeAttribute('readonly'); // Temporairement pour la soumission
+        }
+    });
+    
+    // Vérifier que tous les ingrédients sont sélectionnés
+    let valid = true;
+    lignes.forEach(ligne => {
+        const select = ligne.querySelector('.ingredient-select');
+        const checkbox = ligne.querySelector('.modify-checkbox');
+        
+        // Pour les nouvelles lignes ou lignes modifiées
+        if (!checkbox || checkbox.checked || ligne.classList.contains('new-ligne')) {
+            if (!select.value) {
+                valid = false;
+                select.classList.add('is-invalid');
+            }
+        }
+    });
+    
+    if (!valid) {
+        e.preventDefault();
+        alert('Veuillez sélectionner un ingrédient pour chaque ligne modifiée');
+        return false;
+    }
+});
+</script>
+{% endblock %}

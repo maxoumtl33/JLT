@@ -1,0 +1,11 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% block content %}
+
+<form action="{% url 'duplicate-model' original_object.id %}" method="post">
+    {% csrf_token %}
+    <button type="submit">Duplicate Model</button>
+</form>
+
+
+{% endblock %}

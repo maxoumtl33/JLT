@@ -1,0 +1,84 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% block content %}
+
+<h1>Comparaison des récupérations / {{ journee }}</h1>
+<br>
+<br>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Objets</th>
+            <th>Quantité Frigo</th>
+            <th>Quantité Livreur</th>
+            <th>Difference</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in comparison_data %}
+        <tr class="{% if item.quantity_difference > 0 %}table-warning{% elif item.mismatch %}table-danger{% else %}table-success{% endif %}">
+            <!-- Add clickable span for item_name -->
+            <td>
+                <span class="item-name" style="cursor: pointer;" data-item-id="{{ forloop.counter }}">{{ item.item_name }}</span>
+                
+                <!-- Hidden div for displaying all livraison details -->
+                <div id="livraison-details-{{ forloop.counter }}" class="livraison-details" style="display: none; margin-top: 10px;">
+                    
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Livraison</th>
+                                <th>Quantité Frigo</th>
+                                <th>Quantité Livreur</th>
+                                <th>Différence</th>
+                                <th>Frigo Rempli Par</th>
+                                <th>Frigo Date de Remplissage</th>
+                                <th>Livraison Rempli Par</th>
+                                <th>Livraison Date de Remplissage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for livraison in item.livraisons %}
+                            <tr>
+                                <td>{{ livraison.nom }}</td>
+                                <td>{{ livraison.frigo_quantity }}</td>
+                                <td>{{ livraison.livreur_quantity }}</td>
+                                <td>{{ livraison.difference }}</td>
+                                <td>{{ livraison.frigo_filled_by.username }}</td>
+                                <td>{{ livraison.frigo_filled_at }}</td>
+                                <td>{{ livraison.livreur_filled_by.username }}</td>
+                                <td>{{ livraison.livreur_filled_at }}</td>                           
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </td>
+            <td>{{ item.frigo_quantity }}</td>
+            <td>{{ item.livreur_quantity }}</td>
+            <td>{{ item.quantity_difference }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6">No items to compare</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- JavaScript to toggle the livraison and quantity details -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Add click event to item-name span
+        $(".item-name").click(function() {
+            var itemId = $(this).data("item-id");
+            var detailsDiv = $("#livraison-details-" + itemId);
+            
+            // Toggle the display of the livraison details div
+            detailsDiv.toggle();
+        });
+    });
+</script>
+
+{% endblock %}

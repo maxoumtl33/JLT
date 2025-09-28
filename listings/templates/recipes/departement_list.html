@@ -1,0 +1,92 @@
+{% extends "recipes/base.html" %}
+{% block title %}Départements - Gestion Recettes{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <h1 class="h3 mb-0">Gestion des Départements</h1>
+        <a href="{% url 'departement_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Nouveau Département
+        </a>
+    </div>
+</div>
+
+<div class="table-container">
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <form method="get" class="d-flex search-box">
+                <input type="text" name="search" class="form-control" placeholder="Rechercher..." value="{{ request.GET.search }}">
+                <button type="submit" class="btn btn-outline-secondary ms-2">
+                    <i class="bi bi-search"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Description</th>
+                    <th>Nombre de recettes</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for departement in departements %}
+                <tr>
+                    <td><strong>{{ departement.nom }}</strong></td>
+                    <td>{{ departement.description|truncatewords:20|default:"-" }}</td>
+                    <td>
+                        <span class="badge bg-info">{{ departement.recettes.count }} recette(s)</span>
+                    </td>
+                    <td>
+                        <a href="{% url 'recette_list' %}?departement={{ departement.id }}" class="btn btn-sm btn-outline-info" title="Voir les recettes">
+                            <i class="bi bi-journal-text"></i>
+                        </a>
+                        <a href="{% url 'departement_update' departement.pk %}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <a href="{% url 'departement_delete' departement.pk %}" class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center py-4">
+                        <i class="bi bi-building text-muted" style="font-size: 2rem;"></i>
+                        <p class="mt-2 mb-0 text-muted">Aucun département trouvé</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if departements.has_other_pages %}
+    <nav>
+        <ul class="pagination justify-content-center">
+            {% if departements.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ departements.previous_page_number }}">Précédent</a>
+            </li>
+            {% endif %}
+            
+            {% for num in departements.paginator.page_range %}
+            <li class="page-item {% if departements.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+            {% endfor %}
+            
+            {% if departements.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ departements.next_page_number }}">Suivant</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends "recipes/base.html" %}
+{% block title %}{% if form.instance.pk %}Modifier{% else %}Créer{% endif %} un Ingrédient{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <h1 class="h3 mb-0">{% if form.instance.pk %}Modifier l'ingrédient{% else %}Nouvel Ingrédient{% endif %}</h1>
+        <a href="{% url 'ingredient_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Retour à la liste
+        </a>
+    </div>
+</div>
+
+<div class="content-body">
+    <form method="post" novalidate>
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="{{ form.nom.id_for_label }}" class="form-label required">Nom</label>
+                    {{ form.nom }}
+                    {% if form.nom.errors %}
+                    <div class="text-danger small">{{ form.nom.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="{{ form.unite_mesure.id_for_label }}" class="form-label required">Unité de mesure</label>
+                    {{ form.unite_mesure }}
+                    {% if form.unite_mesure.errors %}
+                    <div class="text-danger small">{{ form.unite_mesure.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="{{ form.stock_reel.id_for_label }}" class="form-label">Stock réel</label>
+                    {{ form.stock_reel }}
+                    {% if form.stock_reel.errors %}
+                    <div class="text-danger small">{{ form.stock_reel.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="{{ form.stock_alerte.id_for_label }}" class="form-label">Stock d'alerte</label>
+                    {{ form.stock_alerte }}
+                    {% if form.stock_alerte.errors %}
+                    <div class="text-danger small">{{ form.stock_alerte.errors.0 }}</div>
+                    {% endif %}
+                    <small class="text-muted">Niveau de stock déclenchant une alerte</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+            {{ form.description }}
+            {% if form.description.errors %}
+            <div class="text-danger small">{{ form.description.errors.0 }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="d-flex justify-content-end">
+            <a href="{% url 'ingredient_list' %}" class="btn btn-secondary me-2">Annuler</a>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-circle"></i> 
+                {% if form.instance.pk %}Enregistrer les modifications{% else %}Créer l'ingrédient{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

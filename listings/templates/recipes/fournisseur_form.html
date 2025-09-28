@@ -1,0 +1,59 @@
+{% extends "recipes/base.html" %}
+{% block title %}{% if fournisseur %}Modifier{% else %}Créer{% endif %} un Fournisseur{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <h1 class="h3 mb-0">{% if fournisseur %}Modifier le fournisseur{% else %}Nouveau Fournisseur{% endif %}</h1>
+</div>
+
+<div class="content-body">
+    <form method="post" novalidate>
+        {% csrf_token %}
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label required">Nom du fournisseur</label>
+                    {{ form.nom }}
+                    {% if form.nom.errors %}
+                    <div class="text-danger small">{{ form.nom.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Contact principal</label>
+                    {{ form.contact_principal }}
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                    <div class="text-danger small">{{ form.email.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Téléphone</label>
+                    {{ form.telephone }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label">Adresse</label>
+            {{ form.adresse }}
+        </div>
+        
+        <div class="d-flex justify-content-end">
+            <a href="{% url 'fournisseur_list' %}" class="btn btn-secondary me-2">Annuler</a>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-circle"></i> 
+                {% if fournisseur %}Enregistrer{% else %}Créer{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

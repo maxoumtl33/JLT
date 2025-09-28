@@ -1,0 +1,426 @@
+<!-- templates/recipes/commande_list.html -->
+{% extends "recipes/base.html" %}
+{% load static %}
+{% block title %}Liste des Commandes - Gestion Recettes{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Styles pour les statuts */
+    .status-badge {
+        font-size: 0.85rem;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-weight: 500;
+    }
+    
+    .status-confirmee {
+        background-color: #e3f2fd;
+        color: #1976d2;
+    }
+    
+    .status-en-cours {
+        background-color: #fff3e0;
+        color: #f57c00;
+    }
+    
+    .status-livree {
+        background-color: #e8f5e9;
+        color: #388e3c;
+    }
+    
+    .status-annulee {
+        background-color: #ffebee;
+        color: #c62828;
+    }
+    
+    /* Styles pour les cartes de stats */
+    .stats-card {
+        transition: transform 0.2s;
+        border: none;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    /* Barre de recherche */
+    .search-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .search-input {
+        padding: 12px 20px;
+        font-size: 1rem;
+        border: none;
+        border-radius: 25px;
+        width: 100%;
+    }
+    
+    .search-input:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(255,255,255,0.3);
+    }
+    
+    .search-info {
+        color: white;
+        font-size: 0.9rem;
+        margin-top: 10px;
+        opacity: 0.9;
+    }
+    
+    /* Styles pour les filtres */
+    .filter-group {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    
+    /* Styles pour la table */
+    .table-hover tbody tr {
+        transition: all 0.2s;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: #f5f5f5;
+        cursor: pointer;
+    }
+    
+    /* Boutons d'action */
+    .action-buttons .btn {
+        margin: 0 2px;
+    }
+    
+    /* Badge résultat de recherche */
+    .search-result-badge {
+        background-color: #ffc107;
+        color: #000;
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+        display: inline-block;
+    }
+    
+    .clear-search {
+        margin-left: 10px;
+        color: #dc3545;
+        text-decoration: none;
+        font-weight: bold;
+    }
+    
+    /* Style pour le montant total */
+    .total-amount {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 0.95rem;
+    }
+    
+    .total-amount.zero {
+        color: #6c757d;
+        font-style: italic;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- En-tête -->
+    <div class="content-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="h3 mb-0">
+                <i class="bi bi-clipboard-check"></i> Liste des Commandes
+            </h1>
+            <a href="{% url 'commande_create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Nouvelle Commande
+            </a>
+        </div>
+    </div>
+
+    <!-- Barre de recherche -->
+    <div class="search-container">
+        <form method="get" action="{% url 'commande_list' %}">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-0">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" 
+                       name="search" 
+                       class="form-control search-input border-0" 
+                       placeholder="Rechercher par N° commande, fournisseur, ingrédient..."
+                       value="{{ request.GET.search }}">
+                <button class="btn btn-light" type="submit">
+                    Rechercher
+                </button>
+            </div>
+            <div class="search-info">
+                <i class="bi bi-info-circle"></i> 
+                Vous pouvez rechercher par : numéro de commande, nom du fournisseur, nom d'ingrédient
+            </div>
+        </form>
+    </div>
+
+    <!-- Badge de recherche active -->
+    {% if request.GET.search %}
+    <div class="search-result-badge">
+        <i class="bi bi-search"></i> Recherche : "{{ request.GET.search }}"
+        <a href="{% url 'commande_list' %}" class="clear-search">× Effacer</a>
+    </div>
+    {% endif %}
+
+    <!-- Cartes de statistiques -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stats-card text-center">
+                <div class="card-body p-3">
+                    <h6 class="text-muted mb-1">Total commandes</h6>
+                    <h4 class="mb-0">{{ total_count }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card text-center">
+                <div class="card-body p-3">
+                    <h6 class="text-muted mb-1">En cours</h6>
+                    <h4 class="mb-0 text-warning">{{ stats.en_cours|default:0 }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card text-center">
+                <div class="card-body p-3">
+                    <h6 class="text-muted mb-1">Confirmées</h6>
+                    <h4 class="mb-0 text-primary">{{ stats.confirmees|default:0 }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card text-center">
+                <div class="card-body p-3">
+                    <h6 class="text-muted mb-1">Livrées</h6>
+                    <h4 class="mb-0 text-success">{{ stats.livrees|default:0 }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtres avancés -->
+    <div class="filter-group">
+        <h5 class="mb-3"><i class="bi bi-funnel"></i> Filtres avancés</h5>
+        <form method="get" class="row g-3">
+            <!-- Conserver la recherche si elle existe -->
+            {% if request.GET.search %}
+            <input type="hidden" name="search" value="{{ request.GET.search }}">
+            {% endif %}
+            
+            <div class="col-md-3">
+                <label class="form-label">Fournisseur</label>
+                <select name="fournisseur" class="form-select">
+                    <option value="">Tous les fournisseurs</option>
+                    {% for fournisseur in fournisseurs %}
+                    <option value="{{ fournisseur.id }}" {% if request.GET.fournisseur == fournisseur.id|stringformat:"s" %}selected{% endif %}>
+                        {{ fournisseur.nom }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-3">
+                <label class="form-label">Statut</label>
+                <select name="statut" class="form-select">
+                    <option value="">Tous les statuts</option>
+                    <option value="CONFIRMEE" {% if request.GET.statut == "CONFIRMEE" %}selected{% endif %}>Confirmée</option>
+                    <option value="EN_COURS" {% if request.GET.statut == "EN_COURS" %}selected{% endif %}>En cours</option>
+                    <option value="LIVREE" {% if request.GET.statut == "LIVREE" %}selected{% endif %}>Livrée</option>
+                    <option value="ANNULEE" {% if request.GET.statut == "ANNULEE" %}selected{% endif %}>Annulée</option>
+                </select>
+            </div>
+            
+            <div class="col-md-3">
+                <label class="form-label">Date de début</label>
+                <input type="date" name="date_debut" class="form-control" value="{{ request.GET.date_debut }}">
+            </div>
+            
+            <div class="col-md-3">
+                <label class="form-label">Date de fin</label>
+                <input type="date" name="date_fin" class="form-control" value="{{ request.GET.date_fin }}">
+            </div>
+            
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-funnel"></i> Appliquer les filtres
+                </button>
+                <a href="{% url 'commande_list' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-clockwise"></i> Réinitialiser
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Table des commandes -->
+    <div class="card">
+        <div class="card-body">
+            {% if commandes %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>N° Commande</th>
+                            <th>Fournisseur</th>
+                            <th>Date création</th>
+                            <th>Date livraison prévue</th>
+                            <th>Nb. articles</th>
+                            <th>Montant Total</th>
+                            <th>Statut</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for commande in commandes %}
+                        <tr onclick="window.location.href='{% url 'commande_detail' commande.id %}';" style="cursor: pointer;">
+                            <td>
+                                <strong>{{ commande.numero|default:"CMD-DRAFT" }}</strong>
+                            </td>
+                            <td>{{ commande.fournisseur.nom }}</td>
+                            <td>{{ commande.date_creation|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                {% if commande.date_livraison_prevue %}
+                                    {{ commande.date_livraison_prevue|date:"d/m/Y" }}
+                                    {% if commande.jours_restants <= 0 and commande.statut != "LIVREE" %}
+                                        <span class="badge bg-danger ms-1">En retard</span>
+                                    {% elif commande.jours_restants <= 2 and commande.statut != "LIVREE" %}
+                                        <span class="badge bg-warning ms-1">{{ commande.jours_restants }}j</span>
+                                    {% endif %}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>{{ commande.nb_lignes }}</td>
+                            <td>
+                                {% if commande.total and commande.total > 0 %}
+                                    <span class="total-amount">{{ commande.total|floatformat:2 }} €</span>
+                                {% elif commande.montant_total and commande.montant_total > 0 %}
+                                    <span class="total-amount">{{ commande.montant_total|floatformat:2 }} €</span>
+                                {% else %}
+                                    <span class="total-amount zero">Non calculé</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if commande.statut == "CONFIRMEE" %}
+                                    <span class="status-badge status-confirmee">Confirmée</span>
+                                {% elif commande.statut == "EN_COURS" %}
+                                    <span class="status-badge status-en-cours">En cours</span>
+                                {% elif commande.statut == "LIVREE" %}
+                                    <span class="status-badge status-livree">Livrée</span>
+                                {% elif commande.statut == "ANNULEE" %}
+                                    <span class="status-badge status-annulee">Annulée</span>
+                                {% else %}
+                                    <span class="status-badge">{{ commande.get_statut_display|default:commande.statut }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center action-buttons" onclick="event.stopPropagation();">
+                                <a href="{% url 'commande_detail' commande.id %}" 
+                                   class="btn btn-sm btn-outline-info" 
+                                   title="Voir détails">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                {% if commande.statut != "LIVREE" and commande.statut != "ANNULEE" %}
+                                <a href="{% url 'commande_edit' commande.id %}" 
+                                   class="btn btn-sm btn-outline-warning" 
+                                   title="Modifier">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                {% endif %}
+                                <form method="post" 
+                                    action="{% url 'commande_delete' commande.id %}" 
+                                    style="display: inline;"
+                                    onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette commande ?');">
+                                    {% csrf_token %}
+                                    <button type="submit" 
+                                            class="btn btn-sm btn-outline-danger" 
+                                            title="Supprimer">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <nav aria-label="Navigation">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' and value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                            Précédent
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' and value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' and value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                            Suivant
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+            
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-inbox" style="font-size: 3rem; color: #dee2e6;"></i>
+                {% if request.GET.search %}
+                <p class="text-muted mt-3">Aucune commande trouvée pour "{{ request.GET.search }}"</p>
+                <a href="{% url 'commande_list' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-clockwise"></i> Réinitialiser la recherche
+                </a>
+                {% else %}
+                <p class="text-muted mt-3">Aucune commande trouvée</p>
+                <a href="{% url 'commande_create' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Créer une première commande
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function confirmDelete(commandeId) {
+    // Définir l'action du formulaire
+    const form = document.getElementById('deleteForm');
+    form.action = `/commandes/${commandeId}/delete/`;
+    
+    // Afficher la modal
+    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    modal.show();
+}
+</script>
+{% endblock %}

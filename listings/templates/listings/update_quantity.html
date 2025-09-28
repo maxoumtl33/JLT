@@ -1,0 +1,57 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+
+{% block content %}
+    {% if user.is_authenticated %}
+        <div class="container py-5">
+            <!-- Heading -->
+            <h3 class="mb-4 text-center">Mise à jour de la quantité pour <strong>{{ product.name }}</strong></h3>
+
+            <div class="row justify-content-center">
+                <div class="col-12 col-md-6">
+                    <!-- Form -->
+                    <form method="POST" action="{% url 'product_quantity_update' product.id %}" class="card p-4 shadow-sm">
+                        {% csrf_token %}
+                        
+                        <!-- Current Quantity (readonly) -->
+                        <div class="mb-3">
+                            <label for="current_quantity" class="form-label">Quantité actuelle:</label>
+                            <input type="text" id="current_quantity" class="form-control" value="{{ product.quantity }}" readonly>
+                        </div>
+
+                        <!-- Quantity Input Field (increment to be added) -->
+                        <div class="mb-3">
+                            <label for="quantity" class="form-label">Quantité à ajouter:</label>
+                            <input type="number" name="quantity" id="id_quantity" class="form-control" value="0" required min="0" style="font-size: 1.1rem;">
+                        </div>
+                        
+                        <!-- Display error message if there is an invalid quantity -->
+                        {% if error %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endif %}
+                        
+                        <!-- Submit Button -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">Valider</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- Add the new button -->
+            <div class="text-center mt-4">
+                <a href="{% url 'adjust_product_quantity' %}" class="btn btn-secondary btn-lg">
+                    Ajuster la quantité
+                </a>
+            </div>
+        </div>
+    {% else %}
+        <div class="container py-5">
+            <div class="alert alert-danger text-center">
+                <p>Vous devez être connecté pour mettre à jour la quantité.</p>
+                <a href="{% url 'home' %}" class="btn btn-primary">Se connecter</a>
+            </div>
+        </div>
+    {% endif %}
+
+
+{% endblock %}

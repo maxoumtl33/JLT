@@ -1,0 +1,1733 @@
+<!-- templates/recipes/commande_create.html -->
+{% extends "recipes/base.html" %}
+{% load static %}
+{% block title %}Créer une Commande - Gestion Recettes{% endblock %}
+
+{% block extra_css %}
+<style>
+    .ingredient-card {
+        cursor: pointer;
+        transition: all 0.3s;
+        border: 2px solid transparent;
+    }
+    .ingredient-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .ingredient-card.selected {
+        background-color: #e8f4f8;
+        border-color: #0d6efd;
+    }
+    .ingredient-card.stock-low {
+        border-left: 4px solid #ffc107;
+    }
+    .step-indicator {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 30px;
+        position: relative;
+    }
+    .step-indicator::before {
+        content: '';
+        position: absolute;
+        top: 25px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: #dee2e6;
+        z-index: 0;
+    }
+    .step {
+        flex: 1;
+        text-align: center;
+        position: relative;
+        z-index: 1;
+    }
+    .step-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: white;
+        border: 3px solid #dee2e6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 10px;
+        font-weight: bold;
+        transition: all 0.3s;
+    }
+    .step.active .step-circle {
+        background: #0d6efd;
+        border-color: #0d6efd;
+        color: white;
+        transform: scale(1.1);
+    }
+    .step.completed .step-circle {
+        background: #28a745;
+        border-color: #28a745;
+        color: white;
+    }
+    .step-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    .step.active .step-label {
+        color: #0d6efd;
+        font-weight: 500;
+    }
+    .step.completed .step-label {
+        color: #28a745;
+    }
+    .etape-content {
+        display: none;
+        animation: fadeIn 0.3s;
+    }
+    .etape-content.active {
+        display: block;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Styles hiérarchiques pour étape 2 */
+    .navigation-hierarchique {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    .nav-column {
+        flex: 1;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 15px;
+        max-height: 500px;
+        overflow-y: auto;
+    }
+    .nav-column h5 {
+        margin-bottom: 15px;
+        color: #495057;
+        border-bottom: 2px solid #0d6efd;
+        padding-bottom: 10px;
+    }
+    .nav-item {
+        padding: 10px;
+        margin: 5px 0;
+        border: 1px solid #e9ecef;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    .nav-item:hover {
+        background-color: #f8f9fa;
+        transform: translateX(5px);
+    }
+    .nav-item.selected {
+        background-color: #e8f4f8;
+        border-color: #0d6efd;
+        font-weight: 500;
+    }
+    .nav-item.has-selection {
+        background-color: #d4edda;
+    }
+    
+    .recette-item {
+        padding: 12px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        margin: 8px 0;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+    .recette-item:hover {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        background-color: #f8f9fa;
+    }
+    .recette-item.selected {
+        background-color: #e8f4f8;
+        border-color: #0d6efd;
+    }
+    .quantity-input {
+        width: 100px;
+    }
+    #searchBox {
+        position: sticky;
+        top: 70px;
+        z-index: 100;
+        background: white;
+        padding: 15px 0;
+    }
+    .loading-spinner {
+        display: none;
+    }
+    .loading-spinner.active {
+        display: inline-block;
+    }
+    
+    /* Styles pour le tableau des fournisseurs */
+    .table-fournisseur-col {
+        min-width: 200px;
+        vertical-align: top;
+    }
+    .fournisseur-header {
+        background-color: #f8f9fa;
+        font-weight: bold;
+    }
+    .fournisseur-option-cell {
+        padding: 8px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    .fournisseur-option-cell:hover {
+        background-color: #e9ecef;
+    }
+    .fournisseur-option-cell.selected {
+        background-color: #d4edda;
+        border: 2px solid #28a745;
+    }
+    
+    /* Styles pour la séparation des ingrédients */
+    .ingredients-separator {
+        background-color: #f0f0f0;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    .ingredients-separator:hover {
+        background-color: #e0e0e0;
+    }
+    .ingredients-separator td {
+        padding: 12px;
+        font-weight: 600;
+        color: #495057;
+    }
+    .ingredients-separator .chevron {
+        transition: transform 0.3s;
+        display: inline-block;
+    }
+    .ingredients-separator.expanded .chevron {
+        transform: rotate(90deg);
+    }
+    .other-ingredients-row {
+        display: none;
+    }
+    .other-ingredients-row.show {
+        display: table-row;
+    }
+    .ingredient-selected-row {
+        background-color: #e8f4f8;
+    }
+    .prix-badge {
+        display: inline-block;
+        padding: 2px 6px;
+        background-color: #6c757d;
+        color: white;
+        border-radius: 3px;
+        font-size: 0.85rem;
+    }
+    .prix-editable {
+        width: 80px;
+        display: inline-block;
+        margin-left: 5px;
+    }
+    .delai-input {
+        width: 50px;
+        display: inline-block;
+        margin-left: 5px;
+    }
+    .quantite-cell {
+        background-color: #f8f9fa;
+        font-weight: 500;
+    }
+    .no-fournisseur {
+        color: #6c757d;
+        font-style: italic;
+        text-align: center;
+        padding: 20px;
+    }
+    .badge-count {
+        background-color: #6c757d;
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        margin-left: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="content-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="h3 mb-0">
+                <i class="bi bi-cart-plus"></i> Créer une Nouvelle Commande
+            </h1>
+            <a href="{% url 'commande_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Retour
+            </a>
+        </div>
+    </div>
+
+    <!-- Indicateur d'étapes -->
+    <div class="step-indicator">
+        <div class="step active" data-step="1">
+            <div class="step-circle">1</div>
+            <div class="step-label">Sélection Ingrédients</div>
+        </div>
+        <div class="step" data-step="2">
+            <div class="step-circle">2</div>
+            <div class="step-label">Sélection Recettes</div>
+        </div>
+        <div class="step" data-step="3">
+            <div class="step-circle">3</div>
+            <div class="step-label">Quantités Production</div>
+        </div>
+        <div class="step" data-step="4">
+            <div class="step-circle">4</div>
+            <div class="step-label">Attribution Fournisseurs</div>
+        </div>
+    </div>
+
+    <!-- Étape 1: Sélection des ingrédients -->
+    <div id="etape1" class="etape-content active">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title mb-4">
+                    <i class="bi bi-basket"></i> Sélectionnez les ingrédients à commander
+                </h4>
+                
+                <div id="searchBox">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" id="ingredientSearch" class="form-control" 
+                                       placeholder="Rechercher un ingrédient...">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="showLowStock">
+                                <label class="form-check-label" for="showLowStock">
+                                    Stock bas uniquement
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-end">
+                            <span class="badge bg-info">
+                                <span id="selectedCount">0</span> sélectionné(s)
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3" id="ingredientsList">
+                    {% for ingredient in ingredients %}
+                    <div class="col-md-4 col-lg-3 mb-3 ingredient-col" 
+                         data-name="{{ ingredient.nom|lower }}"
+                         data-stock-low="{% if ingredient.besoin_reappro %}true{% else %}false{% endif %}">
+                        <div class="card ingredient-card h-100 {% if ingredient.besoin_reappro %}stock-low{% endif %}" 
+                             data-id="{{ ingredient.id }}">
+                            <div class="card-body">
+                                <h6 class="card-title">{{ ingredient.nom }}</h6>
+                                <p class="card-text mb-1">
+                                    <small class="text-muted">Stock actuel:</small><br>
+                                    <strong>{{ ingredient.stock_reel }} {{ ingredient.unite_mesure.symbole }}</strong>
+                                </p>
+                                <p class="card-text">
+                                    <small class="text-muted">Stock d'alerte: {{ ingredient.stock_alerte }} {{ ingredient.unite_mesure.symbole }}</small>
+                                </p>
+                                {% if ingredient.besoin_reappro %}
+                                <span class="badge bg-warning">
+                                    <i class="bi bi-exclamation-triangle"></i> Stock bas
+                                </span>
+                                {% else %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle"></i> Stock OK
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="text-end mt-4">
+                    <button class="btn btn-primary btn-lg" onclick="goToStep2()" disabled id="btnStep2">
+                        Suivant <i class="bi bi-arrow-right"></i>
+                        <span class="loading-spinner spinner-border spinner-border-sm ms-2"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Étape 2: Navigation hiérarchique Ingrédients → Départements → Recettes -->
+    <div id="etape2" class="etape-content">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title mb-4">
+                    <i class="bi bi-diagram-3"></i> Sélection hiérarchique des recettes
+                </h4>
+                
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    Cliquez sur un ingrédient pour voir les départements associés, puis sur un département pour voir les recettes disponibles.
+                </div>
+                
+                <div class="navigation-hierarchique">
+                    <!-- Colonne Ingrédients -->
+                    <div class="nav-column">
+                        <h5>
+                            <i class="bi bi-basket"></i> Ingrédients sélectionnés
+                            <span class="badge bg-secondary float-end" id="ingredientCount">0</span>
+                        </h5>
+                        <div id="ingredientNavList">
+                            <!-- Chargé dynamiquement -->
+                        </div>
+                    </div>
+                    
+                    <!-- Colonne Départements -->
+                    <div class="nav-column">
+                        <h5>
+                            <i class="bi bi-building"></i> Départements
+                            <span class="badge bg-secondary float-end" id="departementCount">0</span>
+                        </h5>
+                        <div id="departementNavList">
+                            <p class="text-muted">Sélectionnez un ingrédient...</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Colonne Recettes -->
+                    <div class="nav-column">
+                        <h5>
+                            <i class="bi bi-card-list"></i> Recettes
+                            <span class="badge bg-primary float-end" id="recetteAvailableCount">0</span>
+                        </h5>
+                        <div id="recetteNavList">
+                            <p class="text-muted">Sélectionnez un département...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <h5 class="mt-4">
+                    <i class="bi bi-check2-square"></i> Recettes sélectionnées: 
+                    <span class="badge bg-success" id="recettesCount">0</span>
+                </h5>
+                <div id="recettesSelectedContainer">
+                    <p class="text-muted">Aucune recette sélectionnée.</p>
+                </div>
+                
+                <div class="d-flex justify-content-between mt-4">
+                    <button class="btn btn-secondary" onclick="goToStep1()">
+                        <i class="bi bi-arrow-left"></i> Retour
+                    </button>
+                    <button class="btn btn-primary btn-lg" onclick="goToStep3()" disabled id="btnStep3">
+                        Suivant <i class="bi bi-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Étape 3: Quantités de production -->
+    <div id="etape3" class="etape-content">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4 class="card-title mb-4">
+                    <i class="bi bi-calculator"></i> Définir les quantités à produire
+                </h4>
+                
+                <div id="productionContainer">
+                    <!-- Chargé dynamiquement -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-list-check"></i> Besoins calculés en ingrédients
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm" id="besoinsTable">
+                        <thead>
+                            <tr>
+                                <th>Ingrédient</th>
+                                <th>Besoin Total</th>
+                                <th>Stock Actuel</th>
+                                <th>À Commander (suggéré)</th>
+                                <th>Fournisseurs Disponibles</th>
+                            </tr>
+                        </thead>
+                        <tbody id="besoinsBody">
+                            <!-- Chargé dynamiquement -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-between mt-4">
+            <button class="btn btn-secondary" onclick="goToStep2()">
+                <i class="bi bi-arrow-left"></i> Retour
+            </button>
+            <button class="btn btn-primary btn-lg" onclick="goToStep4()">
+                Attribuer Fournisseurs <i class="bi bi-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Étape 4: Attribution des fournisseurs avec prix modifiables -->
+    <div id="etape4" class="etape-content">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title mb-4">
+                    <i class="bi bi-truck"></i> Attribuer les fournisseurs et finaliser
+                </h4>
+                
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label">Date de livraison souhaitée:</label>
+                        <input type="date" id="dateLivraison" class="form-control">
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label">Notes générales pour la commande:</label>
+                        <textarea id="notesCommande" class="form-control" rows="2" 
+                                  placeholder="Instructions spéciales, remarques..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="alert alert-warning">
+                    <i class="bi bi-info-circle"></i> Vous pouvez modifier les prix unitaires en cochant la case "Modifier prix" pour chaque fournisseur.
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="fournisseursTable">
+                        <thead id="fournisseursHeader">
+                            <!-- Généré dynamiquement -->
+                        </thead>
+                        <tbody id="fournisseursBody">
+                            <!-- Généré dynamiquement -->
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-light" id="totauxFournisseursRow">
+                                <!-- Généré dynamiquement -->
+                            </tr>
+                            <tr class="table-info">
+                                <th>Total général</th>
+                                <th colspan="100" id="totalGeneral"></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                
+                <div class="alert alert-info mt-3">
+                    <i class="bi bi-info-circle"></i>
+                    <strong>Récapitulatif:</strong>
+                    <div id="recapCommandes">
+                        <!-- Chargé dynamiquement -->
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-between mt-4">
+                    <button class="btn btn-secondary" onclick="goToStep3()">
+                        <i class="bi bi-arrow-left"></i> Retour
+                    </button>
+                    <button class="btn btn-success btn-lg" onclick="creerCommandes()">
+                        <i class="bi bi-check-circle"></i> Créer les Commandes
+                        <span class="loading-spinner spinner-border spinner-border-sm ms-2"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour les notes -->
+<div class="modal fade" id="noteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Note pour le fournisseur</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="noteIngredientId">
+                <input type="hidden" id="noteFournisseurId">
+                <textarea class="form-control" id="noteFournisseurText" rows="3" 
+                          placeholder="Ajoutez une note spécifique pour ce fournisseur..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" onclick="saveNote()">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast pour les notifications -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="toast" class="toast" role="alert">
+        <div class="toast-header">
+            <i class="bi bi-info-circle text-primary me-2"></i>
+            <strong class="me-auto">Notification</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body" id="toastMessage">
+            <!-- Message dynamique -->
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Variables globales
+let selectedIngredients = new Set();
+let ingredientsData = new Map();
+let selectedDepartements = new Map(); // Map: ingredientId -> Set of departmentIds
+let departementsData = new Map();
+let allRecettes = new Map();
+let selectedRecettes = new Map();
+let productionQuantites = new Map();
+let besoinsIngredients = new Map();
+let fournisseurSelections = new Map();
+let fournisseurNotes = new Map();
+let prixModifies = new Map(); // Pour stocker les prix modifiés
+
+// Fonction pour obtenir le CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    // Date par défaut: J+2
+    const dateLivraison = new Date();
+    dateLivraison.setDate(dateLivraison.getDate() + 2);
+    document.getElementById('dateLivraison').valueAsDate = dateLivraison;
+    
+    // Recherche d'ingrédients
+    document.getElementById('ingredientSearch').addEventListener('keyup', function(e) {
+        const search = e.target.value.toLowerCase();
+        document.querySelectorAll('.ingredient-col').forEach(col => {
+            const name = col.dataset.name;
+            if (name.includes(search)) {
+                col.style.display = '';
+            } else {
+                col.style.display = 'none';
+            }
+        });
+    });
+    
+    // Filtre stock bas
+    document.getElementById('showLowStock').addEventListener('change', function(e) {
+        const showOnlyLow = e.target.checked;
+        document.querySelectorAll('.ingredient-col').forEach(col => {
+            if (showOnlyLow && col.dataset.stockLow !== 'true') {
+                col.style.display = 'none';
+            } else {
+                col.style.display = '';
+            }
+        });
+    });
+    
+    // Click sur les cartes d'ingrédients
+    document.querySelectorAll('.ingredient-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const id = parseInt(this.dataset.id);
+            const nom = this.querySelector('.card-title').textContent;
+            
+            if (selectedIngredients.has(id)) {
+                selectedIngredients.delete(id);
+                ingredientsData.delete(id);
+                this.classList.remove('selected');
+            } else {
+                selectedIngredients.add(id);
+                ingredientsData.set(id, {nom: nom});
+                this.classList.add('selected');
+            }
+            
+            document.getElementById('selectedCount').textContent = selectedIngredients.size;
+            document.getElementById('btnStep2').disabled = selectedIngredients.size === 0;
+        });
+    });
+});
+
+// Navigation entre étapes
+function updateStepIndicator(step) {
+    document.querySelectorAll('.step').forEach(s => {
+        const stepNum = parseInt(s.dataset.step);
+        s.classList.remove('active', 'completed');
+        if (stepNum < step) {
+            s.classList.add('completed');
+        } else if (stepNum === step) {
+            s.classList.add('active');
+        }
+    });
+    
+    document.querySelectorAll('.etape-content').forEach(e => {
+        e.classList.remove('active');
+    });
+    document.getElementById(`etape${step}`).classList.add('active');
+}
+
+function goToStep1() {
+    updateStepIndicator(1);
+}
+
+function goToStep2() {
+    if (selectedIngredients.size === 0) return;
+    updateStepIndicator(2);
+    loadIngredientNavigation();
+}
+
+function goToStep3() {
+    if (selectedRecettes.size === 0) return;
+    updateStepIndicator(3);
+    loadProduction();
+}
+
+function goToStep4() {
+    updateStepIndicator(4);
+    calculateBesoins();
+    loadFournisseursTableFormat();
+}
+
+// Chargement de la navigation hiérarchique (Étape 2)
+function loadIngredientNavigation() {
+    const container = document.getElementById('ingredientNavList');
+    container.innerHTML = '';
+    
+    document.getElementById('ingredientCount').textContent = selectedIngredients.size;
+    
+    selectedIngredients.forEach(ingId => {
+        const ingData = ingredientsData.get(ingId);
+        const div = document.createElement('div');
+        div.className = 'nav-item';
+        div.dataset.id = ingId;
+        
+        const recetteCount = getRecetteCountForIngredient(ingId);
+        
+        div.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <span>
+                    <i class="bi bi-basket-fill"></i> 
+                    <strong>${ingData.nom}</strong>
+                </span>
+                <span class="badge-count" id="badge_ing_${ingId}">0</span>
+            </div>
+        `;
+        
+        div.onclick = () => selectIngredientNav(ingId);
+        container.appendChild(div);
+    });
+    
+    // Sélectionner automatiquement le premier ingrédient
+    if (selectedIngredients.size > 0) {
+        selectIngredientNav(Array.from(selectedIngredients)[0]);
+    }
+}
+
+function selectIngredientNav(ingId) {
+    // Désélectionner tous les ingrédients
+    document.querySelectorAll('#ingredientNavList .nav-item').forEach(item => {
+        item.classList.remove('selected');
+    });
+    
+    // Sélectionner l'ingrédient cliqué
+    const item = document.querySelector(`#ingredientNavList .nav-item[data-id="${ingId}"]`);
+    if (item) {
+        item.classList.add('selected');
+    }
+    
+    // Charger les départements pour cet ingrédient
+    loadDepartementsForIngredient(ingId);
+}
+
+function loadDepartementsForIngredient(ingId) {
+    const container = document.getElementById('departementNavList');
+    container.innerHTML = '<div class="text-center"><div class="spinner-border spinner-border-sm"></div> Chargement...</div>';
+    
+    fetch("{% url 'commande_create' %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCookie('csrftoken'),
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: new URLSearchParams({
+            'action': 'get_departements',
+            'ingredient_ids': JSON.stringify([ingId])
+        })
+    })
+    .then(response => response.json())
+    .then(departements => {
+        container.innerHTML = '';
+        document.getElementById('departementCount').textContent = departements.length;
+        
+        if (departements.length === 0) {
+            container.innerHTML = '<p class="text-muted">Aucun département trouvé.</p>';
+            document.getElementById('recetteNavList').innerHTML = '<p class="text-muted">Sélectionnez un département...</p>';
+            return;
+        }
+        
+        departements.forEach(dept => {
+            const div = document.createElement('div');
+            div.className = 'nav-item';
+            div.dataset.id = dept.id;
+            div.dataset.ingredient = ingId;
+            
+            // Vérifier si ce département était déjà sélectionné
+            if (!selectedDepartements.has(ingId)) {
+                selectedDepartements.set(ingId, new Set());
+            }
+            
+            if (selectedDepartements.get(ingId).has(dept.id)) {
+                div.classList.add('selected');
+            }
+            
+            div.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>
+                        <i class="bi bi-building-fill"></i> 
+                        ${dept.nom}
+                    </span>
+                    <span class="badge-count" id="badge_dept_${ingId}_${dept.id}">0</span>
+                </div>
+            `;
+            
+            div.onclick = () => selectDepartementNav(ingId, dept.id, dept.nom);
+            container.appendChild(div);
+            
+            // Stocker les données du département
+            departementsData.set(`${ingId}_${dept.id}`, dept);
+        });
+        
+        // Sélectionner automatiquement le premier département
+        if (departements.length > 0) {
+            selectDepartementNav(ingId, departements[0].id, departements[0].nom);
+        }
+        
+        updateIngredientBadge(ingId);
+    });
+}
+
+function selectDepartementNav(ingId, deptId, deptNom) {
+    // Désélectionner tous les départements
+    document.querySelectorAll('#departementNavList .nav-item').forEach(item => {
+        item.classList.remove('selected');
+    });
+    
+    // Sélectionner le département cliqué
+    const item = document.querySelector(`#departementNavList .nav-item[data-id="${deptId}"]`);
+    if (item) {
+        item.classList.add('selected');
+    }
+    
+    // Marquer comme sélectionné
+    if (!selectedDepartements.has(ingId)) {
+        selectedDepartements.set(ingId, new Set());
+    }
+    selectedDepartements.get(ingId).add(deptId);
+    
+    // Charger les recettes
+    loadRecettesForDepartement(ingId, deptId);
+}
+
+function loadRecettesForDepartement(ingId, deptId) {
+    const container = document.getElementById('recetteNavList');
+    container.innerHTML = '<div class="text-center"><div class="spinner-border spinner-border-sm"></div> Chargement...</div>';
+    
+    fetch("{% url 'commande_create' %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCookie('csrftoken'),
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: new URLSearchParams({
+            'action': 'get_recettes',
+            'ingredient_id': ingId,
+            'departement_id': deptId
+        })
+    })
+    .then(response => response.json())
+    .then(recettes => {
+        container.innerHTML = '';
+        document.getElementById('recetteAvailableCount').textContent = recettes.length;
+        
+        if (recettes.length === 0) {
+            container.innerHTML = '<p class="text-muted">Aucune recette trouvée.</p>';
+            return;
+        }
+        
+        recettes.forEach(recette => {
+            const div = document.createElement('div');
+            div.className = 'recette-item';
+            div.dataset.id = recette.id;
+            div.dataset.name = recette.nom;
+            
+            // Stocker la recette
+            if (!allRecettes.has(recette.id)) {
+                allRecettes.set(recette.id, {
+                    nom: recette.nom,
+                    ingredient_id: ingId,
+                    departement_id: deptId
+                });
+            }
+            
+            if (selectedRecettes.has(recette.id)) {
+                div.classList.add('selected');
+            }
+            
+            div.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="bi ${selectedRecettes.has(recette.id) ? 'bi-check-square-fill text-primary' : 'bi-square'}"></i>
+                        <strong class="ms-2">${recette.nom}</strong>
+                    </div>
+                </div>
+            `;
+            
+            div.onclick = () => toggleRecette(recette.id, recette);
+            container.appendChild(div);
+        });
+        
+        updateDepartementBadge(ingId, deptId);
+        updateIngredientBadge(ingId);
+    });
+}
+
+function toggleRecette(id, recette) {
+    const item = document.querySelector(`.recette-item[data-id="${id}"]`);
+    
+    if (selectedRecettes.has(id)) {
+        selectedRecettes.delete(id);
+        if (item) {
+            item.classList.remove('selected');
+            item.querySelector('i').className = 'bi bi-square';
+        }
+    } else {
+        selectedRecettes.set(id, recette);
+        if (item) {
+            item.classList.add('selected');
+            item.querySelector('i').className = 'bi bi-check-square-fill text-primary';
+        }
+    }
+    
+    updateRecettesDisplay();
+    
+    // Mettre à jour les badges
+    const recetteData = allRecettes.get(id);
+    if (recetteData) {
+        updateDepartementBadge(recetteData.ingredient_id, recetteData.departement_id);
+        updateIngredientBadge(recetteData.ingredient_id);
+    }
+}
+
+function updateIngredientBadge(ingId) {
+    let count = 0;
+    selectedRecettes.forEach((recette, recetteId) => {
+        const recetteData = allRecettes.get(recetteId);
+        if (recetteData && recetteData.ingredient_id === ingId) {
+            count++;
+        }
+    });
+    
+    const badge = document.getElementById(`badge_ing_${ingId}`);
+    if (badge) {
+        badge.textContent = count;
+        if (count > 0) {
+            badge.style.backgroundColor = '#28a745';
+        } else {
+            badge.style.backgroundColor = '#6c757d';
+        }
+    }
+    
+    // Marquer l'ingrédient si il a des sélections
+    const item = document.querySelector(`#ingredientNavList .nav-item[data-id="${ingId}"]`);
+    if (item) {
+        if (count > 0) {
+            item.classList.add('has-selection');
+        } else {
+            item.classList.remove('has-selection');
+        }
+    }
+}
+
+function updateDepartementBadge(ingId, deptId) {
+    let count = 0;
+    selectedRecettes.forEach((recette, recetteId) => {
+        const recetteData = allRecettes.get(recetteId);
+        if (recetteData && recetteData.ingredient_id === ingId && recetteData.departement_id === deptId) {
+            count++;
+        }
+    });
+    
+    const badge = document.getElementById(`badge_dept_${ingId}_${deptId}`);
+    if (badge) {
+        badge.textContent = count;
+        if (count > 0) {
+            badge.style.backgroundColor = '#28a745';
+        } else {
+            badge.style.backgroundColor = '#6c757d';
+        }
+    }
+}
+
+function getRecetteCountForIngredient(ingId) {
+    let count = 0;
+    selectedRecettes.forEach((recette, recetteId) => {
+        const recetteData = allRecettes.get(recetteId);
+        if (recetteData && recetteData.ingredient_id === ingId) {
+            count++;
+        }
+    });
+    return count;
+}
+
+function updateRecettesDisplay() {
+    const selectedContainer = document.getElementById('recettesSelectedContainer');
+    
+    if (selectedRecettes.size === 0) {
+        selectedContainer.innerHTML = '<p class="text-muted">Aucune recette sélectionnée.</p>';
+    } else {
+        selectedContainer.innerHTML = '';
+        selectedRecettes.forEach((recette, id) => {
+            const badge = document.createElement('span');
+            badge.className = 'badge bg-primary me-2 mb-2';
+            badge.style.fontSize = '0.9rem';
+            badge.innerHTML = `${recette.nom} <i class="bi bi-x-circle ms-1" style="cursor: pointer;" onclick="event.stopPropagation(); toggleRecette(${id}, ${JSON.stringify(recette).replace(/"/g, '&quot;')})"></i>`;
+            selectedContainer.appendChild(badge);
+        });
+    }
+    
+    document.getElementById('recettesCount').textContent = selectedRecettes.size;
+    document.getElementById('btnStep3').disabled = selectedRecettes.size === 0;
+}
+
+// Chargement de la production
+function loadProduction() {
+    const container = document.getElementById('productionContainer');
+    container.innerHTML = '';
+    
+    selectedRecettes.forEach((recette, id) => {
+        const div = document.createElement('div');
+        div.className = 'row mb-3 align-items-center';
+        div.innerHTML = `
+            <div class="col-md-6">
+                <strong>${recette.nom}</strong>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Nombre de portions:</label>
+            </div>
+            <div class="col-md-3">
+                <input type="number" 
+                       class="form-control quantity-input" 
+                       id="qty_${id}" 
+                       value="${productionQuantites.get(id) || 1}" 
+                       min="1"
+                       onchange="updateQuantite(${id}, this.value)">
+            </div>
+        `;
+        container.appendChild(div);
+    });
+    
+    calculateBesoinsInitial();
+}
+
+function updateQuantite(recetteId, quantite) {
+    productionQuantites.set(recetteId, parseInt(quantite));
+    calculateBesoinsInitial();
+}
+
+function calculateBesoinsInitial() {
+    if (selectedRecettes.size === 0) return;
+    
+    const productions = [];
+    selectedRecettes.forEach((recette, id) => {
+        const quantite = productionQuantites.get(id) || 1;
+        productions.push({
+            recette_id: id,
+            quantite: quantite
+        });
+    });
+    
+    const tbody = document.getElementById('besoinsBody');
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center"><div class="spinner-border"></div> Calcul en cours...</td></tr>';
+    
+    fetch("{% url 'commande_create' %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCookie('csrftoken'),
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: new URLSearchParams({
+            'action': 'calculer_quantites',
+            'productions': JSON.stringify(productions)
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        besoinsIngredients.clear();
+        for (const [key, value] of Object.entries(data)) {
+            besoinsIngredients.set(key, value);
+        }
+        updateBesoinsTable();
+    })
+    .catch(error => {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Erreur lors du calcul des besoins</td></tr>';
+        showToast('Erreur lors du calcul des besoins', 'danger');
+    });
+}
+
+function updateBesoinsTable() {
+    const tbody = document.getElementById('besoinsBody');
+    tbody.innerHTML = '';
+    
+    besoinsIngredients.forEach((besoin, ingId) => {
+        const row = document.createElement('tr');
+        if (besoin.quantite_commander > 0) {
+            row.classList.add('table-warning');
+        }
+        
+        row.innerHTML = `
+            <td>${besoin.nom}</td>
+            <td>${besoin.quantite.toFixed(2)} ${besoin.unite}</td>
+            <td>${besoin.stock_actuel.toFixed(2)} ${besoin.unite}</td>
+            <td>
+                <strong>${besoin.quantite_commander.toFixed(2)} ${besoin.unite}</strong>
+                <br><small class="text-muted">(modifiable à l'étape suivante)</small>
+            </td>
+            <td>
+                ${besoin.fournisseurs.map(f => 
+                    `<span class="badge bg-secondary">${f.fournisseur__nom} (${f.prix}€)</span>`
+                ).join(' ')}
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+// Fonction pour charger les fournisseurs avec prix modifiables et séparation des ingrédients
+function loadFournisseursTableFormat() {
+    // Collecter tous les fournisseurs uniques
+    const fournisseursUniques = new Map();
+    
+    // Séparer les ingrédients sélectionnés des autres
+    const ingredientsSelectionnes = new Map();
+    const autresIngredients = new Map();
+    
+    besoinsIngredients.forEach((besoin, ingId) => {
+        if (selectedIngredients.has(parseInt(ingId))) {
+            ingredientsSelectionnes.set(ingId, besoin);
+        } else {
+            autresIngredients.set(ingId, besoin);
+        }
+        
+        if (besoin.fournisseurs) {
+            besoin.fournisseurs.forEach(f => {
+                if (!fournisseursUniques.has(f.fournisseur__id)) {
+                    fournisseursUniques.set(f.fournisseur__id, {
+                        id: f.fournisseur__id,
+                        nom: f.fournisseur__nom
+                    });
+                }
+            });
+        }
+    });
+    
+    // Créer l'en-tête du tableau
+    const thead = document.getElementById('fournisseursHeader');
+    let headerHTML = '<tr class="fournisseur-header"><th width="250">Ingrédient & Quantité</th>';
+    
+    fournisseursUniques.forEach(fournisseur => {
+        headerHTML += `
+            <th class="table-fournisseur-col">
+                ${fournisseur.nom}
+                <div class="mt-2">
+                    <div class="form-check">
+                        <input type="checkbox" 
+                               class="form-check-input" 
+                               id="modif_prix_${fournisseur.id}"
+                               onchange="togglePrixModification(${fournisseur.id}, this.checked)">
+                        <label class="form-check-label" for="modif_prix_${fournisseur.id}">
+                            Modifier prix
+                        </label>
+                    </div>
+                    <small>Délai: 
+                        <input type="number" 
+                               class="form-control form-control-sm delai-input" 
+                               id="delai_global_${fournisseur.id}"
+                               value="2" 
+                               min="1" 
+                               max="30"
+                               onchange="updateGlobalDelai(${fournisseur.id}, this.value)">
+                        jours
+                    </small>
+                </div>
+            </th>`;
+    });
+    
+    if (fournisseursUniques.size === 0) {
+        headerHTML += '<th>Aucun fournisseur disponible</th>';
+    }
+    
+    headerHTML += '<th width="100">Actions</th></tr>';
+    thead.innerHTML = headerHTML;
+    
+    // Créer le corps du tableau
+    const tbody = document.getElementById('fournisseursBody');
+    tbody.innerHTML = '';
+    
+    // D'abord, ajouter les ingrédients sélectionnés
+    ingredientsSelectionnes.forEach((besoin, ingId) => {
+        const row = createIngredientRow(besoin, ingId, fournisseursUniques, true);
+        tbody.appendChild(row);
+    });
+    
+    // Ajouter la ligne de séparation si il y a des ingrédients supplémentaires
+    if (autresIngredients.size > 0) {
+        const separatorRow = document.createElement('tr');
+        separatorRow.className = 'ingredients-separator';
+        separatorRow.onclick = toggleOtherIngredients;
+        separatorRow.innerHTML = `
+            <td colspan="${fournisseursUniques.size + 2}">
+                <span class="chevron">▶</span>
+                <strong>Autres ingrédients nécessaires aux recettes (${autresIngredients.size})</strong>
+                <span class="text-muted ms-2">- Cliquez pour afficher/masquer</span>
+            </td>
+        `;
+        tbody.appendChild(separatorRow);
+        
+        // Ajouter les autres ingrédients (cachés par défaut)
+        autresIngredients.forEach((besoin, ingId) => {
+            const row = createIngredientRow(besoin, ingId, fournisseursUniques, false);
+            row.classList.add('other-ingredients-row');
+            tbody.appendChild(row);
+        });
+    }
+    
+    // Ligne des totaux
+    updateTotauxFournisseurs();
+    
+    // Restaurer les sélections
+    fournisseurSelections.forEach((selection, ingId) => {
+        const radio = document.getElementById(`fourn_${ingId}_${selection.fournisseur_id}`);
+        if (radio) {
+            radio.checked = true;
+            const cell = document.getElementById(`cell_${ingId}_${selection.fournisseur_id}`);
+            if (cell) cell.classList.add('selected');
+        }
+    });
+    
+    updateAllPrixTotaux();
+    updateRecapitulatif();
+}
+
+// Fonction pour créer une ligne d'ingrédient
+function createIngredientRow(besoin, ingId, fournisseursUniques, isSelected) {
+    const quantiteCommander = besoin.quantite_commander > 0 ? besoin.quantite_commander : 0;
+    
+    const row = document.createElement('tr');
+    row.dataset.ingredientId = ingId;
+    
+    if (isSelected) {
+        row.classList.add('ingredient-selected-row');
+    }
+    
+    let rowHTML = `
+        <td class="quantite-cell">
+            <strong>${besoin.nom}</strong>
+            ${isSelected ? '<span class="badge bg-primary ms-2">Sélectionné</span>' : ''}
+            <div class="mt-2">
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="skip_${ingId}" 
+                           onchange="toggleSkipIngredient('${ingId}', this.checked)">
+                    <label class="form-check-label text-danger" for="skip_${ingId}">
+                        Ne pas commander
+                    </label>
+                </div>
+                <label>Quantité:</label>
+                <input type="number" 
+                       class="form-control form-control-sm d-inline-block" 
+                       style="width: 80px;"
+                       id="qte_${ingId}"
+                       value="${quantiteCommander.toFixed(2)}" 
+                       min="0"
+                       step="0.01"
+                       onchange="updateQuantiteCommande('${ingId}', this.value)">
+                <span class="text-muted">${besoin.unite}</span>
+            </div>
+            ${besoin.quantite_commander > 0 ? 
+                '<span class="badge bg-warning mt-2">Stock bas</span>' : 
+                '<span class="badge bg-success mt-2">Stock OK</span>'}
+        </td>`;
+    
+    fournisseursUniques.forEach(fournisseurGlobal => {
+        const fournisseurLocal = besoin.fournisseurs ? 
+            besoin.fournisseurs.find(f => f.fournisseur__id === fournisseurGlobal.id) : null;
+        
+        if (fournisseurLocal) {
+            rowHTML += `
+                <td class="fournisseur-option-cell" 
+                    id="cell_${ingId}_${fournisseurGlobal.id}"
+                    onclick="selectFournisseurCell('${ingId}', '${fournisseurGlobal.id}', '${fournisseurGlobal.nom}', ${fournisseurLocal.prix})">
+                    <div class="form-check">
+                        <input class="form-check-input" 
+                               type="radio" 
+                               name="fournisseur_${ingId}"
+                               id="fourn_${ingId}_${fournisseurGlobal.id}"
+                               value="${fournisseurGlobal.id}">
+                        <label class="form-check-label">
+                            <div>
+                                Prix: <span id="prix_display_${ingId}_${fournisseurGlobal.id}" class="prix-badge">${fournisseurLocal.prix}€</span>
+                                <input type="number" 
+                                       class="form-control form-control-sm prix-editable" 
+                                       id="prix_input_${ingId}_${fournisseurGlobal.id}"
+                                       value="${fournisseurLocal.prix}" 
+                                       min="0"
+                                       step="0.01"
+                                       style="display: none;"
+                                       onchange="updatePrixModifie('${ingId}', '${fournisseurGlobal.id}', this.value)"
+                                       onclick="event.stopPropagation()">
+                            </div>
+                            <div class="mt-1">
+                                <strong id="total_${ingId}_${fournisseurGlobal.id}"></strong>
+                            </div>
+                        </label>
+                    </div>
+                </td>`;
+        } else {
+            rowHTML += '<td class="text-center text-muted">-</td>';
+        }
+    });
+    
+    if (fournisseursUniques.size === 0) {
+        rowHTML += '<td class="no-fournisseur">Aucun fournisseur disponible</td>';
+    }
+    
+    rowHTML += `
+        <td>
+            <button class="btn btn-sm btn-outline-info" 
+                    onclick="openNoteModalForIngredient('${ingId}', '${besoin.nom}')">
+                <i class="bi bi-sticky"></i>
+            </button>
+        </td>`;
+    
+    row.innerHTML = rowHTML;
+    return row;
+}
+
+// Fonction pour toggle les autres ingrédients
+function toggleOtherIngredients() {
+    const separator = document.querySelector('.ingredients-separator');
+    const otherRows = document.querySelectorAll('.other-ingredients-row');
+    
+    separator.classList.toggle('expanded');
+    
+    otherRows.forEach(row => {
+        row.classList.toggle('show');
+    });
+}
+
+// Toggle modification des prix pour un fournisseur
+function togglePrixModification(fournisseurId, active) {
+    besoinsIngredients.forEach((besoin, ingId) => {
+        const prixDisplay = document.getElementById(`prix_display_${ingId}_${fournisseurId}`);
+        const prixInput = document.getElementById(`prix_input_${ingId}_${fournisseurId}`);
+        
+        if (prixDisplay && prixInput) {
+            if (active) {
+                prixDisplay.style.display = 'none';
+                prixInput.style.display = 'inline-block';
+            } else {
+                prixDisplay.style.display = 'inline-block';
+                prixInput.style.display = 'none';
+                // Restaurer la valeur originale si pas de modification
+                const key = `${ingId}_${fournisseurId}`;
+                if (!prixModifies.has(key)) {
+                    const fournisseur = besoin.fournisseurs?.find(f => f.fournisseur__id === parseInt(fournisseurId));
+                    if (fournisseur) {
+                        prixInput.value = fournisseur.prix;
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Mise à jour du prix modifié
+function updatePrixModifie(ingId, fournisseurId, nouveauPrix) {
+    const key = `${ingId}_${fournisseurId}`;
+    prixModifies.set(key, parseFloat(nouveauPrix));
+    
+    // Mettre à jour l'affichage
+    const prixDisplay = document.getElementById(`prix_display_${ingId}_${fournisseurId}`);
+    if (prixDisplay) {
+        prixDisplay.textContent = `${nouveauPrix}€`;
+    }
+    
+    // Si ce fournisseur est sélectionné, mettre à jour le calcul
+    const selection = fournisseurSelections.get(ingId);
+    if (selection && selection.fournisseur_id === parseInt(fournisseurId)) {
+        selection.prix = parseFloat(nouveauPrix);
+        updatePrixTotal(ingId, fournisseurId, selection.quantite, parseFloat(nouveauPrix));
+        updateTotauxFournisseurs();
+        updateRecapitulatif();
+    }
+}
+
+// Sélection d'un fournisseur (modifié pour gérer les prix)
+function selectFournisseurCell(ingId, fournisseurId, fournisseurNom, prixOriginal) {
+    const row = document.querySelector(`tr[data-ingredient-id="${ingId}"]`);
+    if (row) {
+        row.querySelectorAll('.fournisseur-option-cell').forEach(cell => {
+            cell.classList.remove('selected');
+        });
+    }
+    
+    const cell = document.getElementById(`cell_${ingId}_${fournisseurId}`);
+    if (cell) {
+        cell.classList.add('selected');
+    }
+    
+    const radio = document.getElementById(`fourn_${ingId}_${fournisseurId}`);
+    if (radio) {
+        radio.checked = true;
+    }
+    
+    // Vérifier si il y a un prix modifié
+    const key = `${ingId}_${fournisseurId}`;
+    const prix = prixModifies.has(key) ? prixModifies.get(key) : prixOriginal;
+    
+    const delaiInput = document.getElementById(`delai_global_${fournisseurId}`);
+    const delai = delaiInput ? parseInt(delaiInput.value) : 2;
+    
+    const quantite = parseFloat(document.getElementById(`qte_${ingId}`).value) || 0;
+    fournisseurSelections.set(ingId, {
+        fournisseur_id: parseInt(fournisseurId),
+        fournisseur_nom: fournisseurNom,
+        prix: prix,
+        prix_original: prixOriginal,
+        quantite: quantite,
+        delai: delai
+    });
+    
+    updatePrixTotal(ingId, fournisseurId, quantite, prix);
+    updateTotauxFournisseurs();
+    updateRecapitulatif();
+}
+
+// Mise à jour délai global
+function updateGlobalDelai(fournisseurId, delai) {
+    const delaiInt = parseInt(delai);
+    fournisseurSelections.forEach((selection, ingId) => {
+        if (selection.fournisseur_id === parseInt(fournisseurId)) {
+            selection.delai = delaiInt;
+        }
+    });
+    updateRecapitulatif();
+}
+
+// Mise à jour prix total
+function updatePrixTotal(ingId, fournisseurId, quantite, prix) {
+    const totalSpan = document.getElementById(`total_${ingId}_${fournisseurId}`);
+    if (totalSpan) {
+        const total = (prix * quantite).toFixed(2);
+        totalSpan.textContent = quantite > 0 ? `Total: ${total}€` : '';
+    }
+}
+
+// Mise à jour tous les prix
+function updateAllPrixTotaux() {
+    besoinsIngredients.forEach((besoin, ingId) => {
+        const quantite = parseFloat(document.getElementById(`qte_${ingId}`).value) || 0;
+        if (besoin.fournisseurs) {
+            besoin.fournisseurs.forEach(f => {
+                const key = `${ingId}_${f.fournisseur__id}`;
+                const prix = prixModifies.has(key) ? prixModifies.get(key) : f.prix;
+                updatePrixTotal(ingId, f.fournisseur__id, quantite, prix);
+            });
+        }
+    });
+}
+
+// Mise à jour des totaux par fournisseur
+function updateTotauxFournisseurs() {
+    const totauxParFournisseur = new Map();
+    let totalGeneral = 0;
+    
+    fournisseurSelections.forEach((selection, ingId) => {
+        const total = selection.prix * selection.quantite;
+        totalGeneral += total;
+        
+        if (!totauxParFournisseur.has(selection.fournisseur_id)) {
+            totauxParFournisseur.set(selection.fournisseur_id, 0);
+        }
+        totauxParFournisseur.set(selection.fournisseur_id, 
+            totauxParFournisseur.get(selection.fournisseur_id) + total);
+    });
+    
+    document.getElementById('totalGeneral').textContent = `${totalGeneral.toFixed(2)}€`;
+}
+
+// Toggle skip ingredient
+function toggleSkipIngredient(ingId, skip) {
+    const qteInput = document.getElementById(`qte_${ingId}`);
+    if (skip) {
+        qteInput.value = '0';
+        qteInput.disabled = true;
+        if (fournisseurSelections.has(ingId)) {
+            fournisseurSelections.get(ingId).quantite = 0;
+        }
+    } else {
+        qteInput.disabled = false;
+        const besoin = besoinsIngredients.get(ingId);
+        qteInput.value = besoin.quantite_commander.toFixed(2);
+        if (fournisseurSelections.has(ingId)) {
+            fournisseurSelections.get(ingId).quantite = parseFloat(qteInput.value);
+        }
+    }
+    updateAllPrixTotaux();
+    updateRecapitulatif();
+}
+
+// Mise à jour quantité
+function updateQuantiteCommande(ingId, quantite) {
+    const qte = parseFloat(quantite) || 0;
+    
+    if (fournisseurSelections.has(ingId)) {
+        fournisseurSelections.get(ingId).quantite = qte;
+    }
+    
+    const skipCheckbox = document.getElementById(`skip_${ingId}`);
+    if (skipCheckbox) {
+        skipCheckbox.checked = (qte === 0);
+    }
+    
+    updateAllPrixTotaux();
+    updateRecapitulatif();
+}
+
+// Modal notes
+function openNoteModalForIngredient(ingId, ingredientNom) {
+    const selection = fournisseurSelections.get(ingId);
+    if (!selection) {
+        showToast('Veuillez d\'abord sélectionner un fournisseur pour cet ingrédient', 'warning');
+        return;
+    }
+    openNoteModal(ingId, selection.fournisseur_id, selection.fournisseur_nom, ingredientNom);
+}
+
+function openNoteModal(ingId, fournisseurId, fournisseurNom, ingredientNom) {
+    document.getElementById('noteIngredientId').value = ingId;
+    document.getElementById('noteFournisseurId').value = fournisseurId;
+    
+    const noteKey = `${ingId}_${fournisseurId}`;
+    const existingNote = fournisseurNotes.get(noteKey) || '';
+    document.getElementById('noteFournisseurText').value = existingNote;
+    
+    document.querySelector('#noteModal .modal-title').textContent = 
+        `Note pour ${fournisseurNom} - ${ingredientNom}`;
+    
+    const modal = new bootstrap.Modal(document.getElementById('noteModal'));
+    modal.show();
+}
+
+function saveNote() {
+    const ingId = document.getElementById('noteIngredientId').value;
+    const fournisseurId = document.getElementById('noteFournisseurId').value;
+    const note = document.getElementById('noteFournisseurText').value;
+    
+    const noteKey = `${ingId}_${fournisseurId}`;
+    if (note.trim()) {
+        fournisseurNotes.set(noteKey, note);
+    } else {
+        fournisseurNotes.delete(noteKey);
+    }
+    
+    const modal = bootstrap.Modal.getInstance(document.getElementById('noteModal'));
+    modal.hide();
+}
+
+// Récapitulatif
+function updateRecapitulatif() {
+    const recap = document.getElementById('recapCommandes');
+    const totalElement = document.getElementById('totalGeneral');
+    
+    const commandesParFournisseur = new Map();
+    let totalGeneral = 0;
+    
+    fournisseurSelections.forEach((selection, ingId) => {
+        const total = selection.prix * selection.quantite;
+        totalGeneral += total;
+        
+        if (!commandesParFournisseur.has(selection.fournisseur_id)) {
+            commandesParFournisseur.set(selection.fournisseur_id, {
+                nom: selection.fournisseur_nom,
+                total: 0,
+                nbLignes: 0,
+                delai: selection.delai,
+                hasModifiedPrices: false
+            });
+        }
+        
+        const cmd = commandesParFournisseur.get(selection.fournisseur_id);
+        cmd.total += total;
+        cmd.nbLignes++;
+        
+        // Vérifier si des prix ont été modifiés
+        const key = `${ingId}_${selection.fournisseur_id}`;
+        if (prixModifies.has(key)) {
+            cmd.hasModifiedPrices = true;
+        }
+    });
+    
+    totalElement.textContent = `${totalGeneral.toFixed(2)}€`;
+    
+    if (commandesParFournisseur.size === 0) {
+        recap.innerHTML = 'Aucune commande configurée. Sélectionnez des fournisseurs et définissez des quantités.';
+        return;
+    }
+    
+    let recapHtml = `<p>Nombre de commandes à créer: <strong>${commandesParFournisseur.size}</strong></p><ul>`;
+    commandesParFournisseur.forEach(cmd => {
+        let priceNote = cmd.hasModifiedPrices ? ' <span class="badge bg-warning">Prix modifiés</span>' : '';
+        recapHtml += `<li>${cmd.nom}: ${cmd.nbLignes} article(s), <strong>${cmd.total.toFixed(2)}€</strong> (délai: ${cmd.delai} jours)${priceNote}</li>`;
+    });
+    recapHtml += '</ul>';
+    
+    recap.innerHTML = recapHtml;
+}
+
+// Calcul des besoins
+function calculateBesoins() {
+    calculateBesoinsInitial();
+}
+
+// Créer les commandes avec prix modifiés
+function creerCommandes() {
+    const dateLivraison = document.getElementById('dateLivraison').value;
+    const notes = document.getElementById('notesCommande').value;
+    
+    if (!dateLivraison) {
+        showToast('Veuillez sélectionner une date de livraison', 'warning');
+        return;
+    }
+    
+    if (fournisseurSelections.size === 0) {
+        showToast('Aucune commande à créer. Veuillez sélectionner au moins un fournisseur.', 'warning');
+        return;
+    }
+    
+    document.querySelector('.loading-spinner').classList.add('active');
+    
+    const commandesData = [];
+    const commandesParFournisseur = new Map();
+    
+    fournisseurSelections.forEach((selection, ingId) => {
+        if (selection.quantite > 0) {
+            if (!commandesParFournisseur.has(selection.fournisseur_id)) {
+                commandesParFournisseur.set(selection.fournisseur_id, {
+                    fournisseur_id: selection.fournisseur_id,
+                    lignes: [],
+                    delai: selection.delai
+                });
+            }
+            
+            const noteKey = `${ingId}_${selection.fournisseur_id}`;
+            const note = fournisseurNotes.get(noteKey) || '';
+            
+            // Vérifier si le prix a été modifié
+            const prixKey = `${ingId}_${selection.fournisseur_id}`;
+            const prixFinal = prixModifies.has(prixKey) ? prixModifies.get(prixKey) : selection.prix;
+            
+            commandesParFournisseur.get(selection.fournisseur_id).lignes.push({
+                ingredient_id: parseInt(ingId),
+                quantite: selection.quantite,
+                prix_unitaire: prixFinal,  // Inclure le prix modifié
+                note: note
+            });
+        }
+    });
+    
+    commandesParFournisseur.forEach(cmd => commandesData.push(cmd));
+    
+    if (commandesData.length === 0) {
+        document.querySelector('.loading-spinner').classList.remove('active');
+        showToast('Aucune commande valide à créer (quantités nulles)', 'warning');
+        return;
+    }
+    
+    fetch("{% url 'commande_create' %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCookie('csrftoken'),
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: new URLSearchParams({
+            'action': 'creer_commandes',
+            'commandes_data': JSON.stringify(commandesData),
+            'date_livraison': dateLivraison,
+            'notes': notes
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.querySelector('.loading-spinner').classList.remove('active');
+        
+        if (data.success) {
+            showToast(`✅ ${data.commandes.length} commande(s) créée(s) avec succès!`, 'success');
+            setTimeout(() => {
+                window.location.href = "{% url 'commande_list' %}";
+            }, 2000);
+        } else {
+            showToast(data.error || 'Erreur lors de la création des commandes', 'danger');
+        }
+    })
+    .catch(error => {
+        document.querySelector('.loading-spinner').classList.remove('active');
+        showToast('Erreur réseau', 'danger');
+        console.error('Error:', error);
+    });
+}
+
+// Toast notifications
+function showToast(message, type = 'info') {
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toastMessage');
+    
+    toastMessage.textContent = message;
+    toast.classList.remove('text-bg-primary', 'text-bg-success', 'text-bg-warning', 'text-bg-danger');
+    toast.classList.add(`text-bg-${type}`);
+    
+    const bsToast = new bootstrap.Toast(toast);
+    bsToast.show();
+}
+</script>
+{% endblock %}

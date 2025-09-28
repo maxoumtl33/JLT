@@ -1,0 +1,114 @@
+<!-- templates/livraisons/statistics.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistiques de Livraison</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .stats-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Statistiques de Livraison</h1>
+        
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <form method="get" class="mb-4">
+                    <div class="card stats-card">
+                        <div class="card-body">
+                            {{ form.as_p }}
+                            <button type="submit" class="btn btn-primary w-100">Afficher les statistiques</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if stats.total_no_recup is not None %}
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card stats-card">
+                    <div class="card-header bg-primary text-white">
+                        <h2 class="mb-0">Statistiques</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Total livraisons
+                                        <span class="badge bg-primary rounded-pill">{{ stats.total_no_recup }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Total Récupérations
+                                        <span class="badge bg-primary rounded-pill">{{ stats.livraisons_recup }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Livraisons avec checklist
+                                        <span class="badge bg-primary rounded-pill">{{ stats.livraisons_with_checklist }}</span>
+                                    </li>
+                                    
+                                    
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-group list-group-flush">
+                                    
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        % Livraison Valide
+                                        <span class="badge bg-primary rounded-pill">{{ stats.valide_pct|floatformat:2 }}%</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        % Livraisons avec checklist
+                                        <span class="badge bg-primary rounded-pill">{{ stats.livraisons_with_checklist_pct|floatformat:2 }}%</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        % Nom client signature
+                                        <span class="badge bg-primary rounded-pill">{{ stats.nom_client_signature_pct|floatformat:2 }}%</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        % Signature
+                                        <span class="badge bg-primary rounded-pill">{{ stats.signature_pct|floatformat:2 }}%</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        % Photos
+                                        <span class="badge bg-primary rounded-pill">{{ stats.pourcentage_photo|floatformat:2 }}%</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        % Véhicule avec photo
+                                        <span class="badge bg-primary rounded-pill">{{ percentage_with_vehicle_photo|floatformat:2 }}%</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        % Véhicule
+                                        <span class="badge bg-primary rounded-pill">{{ percentage_with_vehicle|floatformat:2 }}%</span>
+                                    </li>
+                                    
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // You can add Chart.js code here to create visual representations of the statistics
+    </script>
+</body>
+</html>
+
+                                        

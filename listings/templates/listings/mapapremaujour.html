@@ -1,0 +1,739 @@
+{% extends 'listings/base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s linear, color 0.3s linear;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #007BFF;
+            height: 100%;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar .sidebar-header {
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .sidebar a {
+            color: #fff;
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar a.active, .sidebar a:hover {
+            background-color: #0056b3;
+        }
+
+        .aprem {
+            flex: 1;
+            padding: 20px;
+            background-color: #F0F2F5;
+            overflow-y: auto;
+            transition: margin-left 0.3s ease; /* Improves smoothness of layout change */
+        }
+
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            
+        }
+
+        .header .toggle-theme {
+            cursor: pointer;
+            color: #007BFF;
+        }
+        #aprem.expanded {
+    margin-left: 0;
+}
+
+#aprem.full-width {
+    transition: margin-left 0s;
+}
+
+.collapsed {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    width: 0; /* Ensure width collapses at the end */
+}
+
+.dark-mode {
+            background-color: #121212;
+            color: #e4e4e4;
+        }
+
+        .dark-mode .header, .dark-mode .card {
+            background-color: #1e1e1e;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .dark-mode .sidebar {
+            background-color: #1e1e1e;
+        }
+
+        .dark-mode .sidebar a {
+            color: #e4e4e4;
+        }
+
+        .dark-mode .sidebar a.active, .dark-mode .sidebar a:hover {
+            background-color: #333;
+            color: #fff;
+        }
+
+    .column {
+        float: left;
+        width: 30%;
+        padding: 15px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        margin: 10px;
+        background-color: #fafafa;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: box-shadow 0.3s ease;
+    }
+    .column:hover {
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    .task {
+        padding: 12px;
+        margin: 10px 0;
+        background-color: #ffffff;
+        border-radius: 5px;
+        cursor: pointer;
+        border: 1px solid #ddd;
+        transition: background-color 0.3s ease;
+    }
+    .task:hover {
+        background-color: #f0f0f0;
+    }
+    .mapholder {
+        height: 500px;
+        width: 100%;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    #map {
+        height: 100%;
+        border-radius: 8px;
+    }
+
+    .table th, .table td {
+        vertical-align: middle;
+    }
+    .form1 {
+        margin-bottom: 15px;
+    }
+    .pink-bg {
+    background-color: pink;
+}
+#date-picker {
+        width: 200px; /* Adjust the width as needed */
+        padding: 8px; /* Add some padding for better touch targets */
+        border-radius: 4px; /* Slightly rounded corners */
+        border: 1px solid #ccc; /* Lighter border for a modern look */
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* Optional shadow for depth */
+        transition: border-color 0.2s; /* Smooth transition effect */
+    }
+
+    #date-picker:focus {
+        border-color: #007bff; /* Blue border when focused */
+        outline: none; /* Remove default outline */
+    }
+
+    .text-center {
+    display: flex;              /* Enable flexbox */
+    flex-direction: column;     /* Stack items vertically */
+    align-items: center;       /* Center items horizontally */
+    justify-content: center;    /* Center items vertically if needed */
+}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header" style="margin-top: 100px;">Menu <button class="toggle-sidebar" id="sidebar-toggle"><i class="fas fa-bars"></i></button></div>
+    <a href="{% url 'acceuilresponsables' %}"><i class="fa-solid fa-desktop"></i> Tableau de bord Admin</a>
+    <a href="{% url 'responsablelist' %}"><i class="fas fa-home"></i> Suivi journée</a>
+    <a href="{% url 'recuptoday' %}"><i class="fas fa-sync"></i> Récups</a>
+    <a href="{% url 'livraisonstomorrow' %}"><i class="fas fa-shipping-fast"></i> Dispatch</a>
+    <a href="{% url 'my_mapaujour_view' %}"><i class="fa-solid fa-map"></i> Carte matin</a>
+    <a href="{% url 'my_mapmidiaujour_view' %}"><i class="fa-solid fa-map"></i> Carte midi</a>
+    <a href="{% url 'voir_checklist' %}"><i class="fas fa-clipboard-list"></i> Checklist</a>
+    <a href="{% url 'creerchecklist' %}"><i class="fas fa-list-check"></i> Checklist Ventes</a>
+    <a href="/admin" target="_blank"><i class="fas fa-tools"></i> Menu admin</a>
+    <button class="toggle-theme" id="theme-toggle" style="margin-top:20px;"><i class="fas fa-moon"></i> Thème</button>
+    <div style="margin-top:20px; font-size:14px; color:#ccc;">Utilisateur: {{ user.username }}</div>
+  </div>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+
+<div class="aprem" id="aprem">
+<div class="header">
+    <h2>Carte de l'aprem ( {{ selected_date|date:"l d F" }} )
+    </h2>
+        <button id="show-sidebar" style="display:none; position: fixed; top: 12%; left: 10px;">
+            <i class="fas fa-bars fa-2xl"></i>
+        </button>
+    <div class="user-info">
+        <button id="logoutBtn" style="border:none; background:none; cursor:pointer;"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
+    </div>
+</div>
+<br>
+<br>
+<br>
+<br>
+<div class="text-center mb-4">
+    <label for="date-picker"><strong>Sélectionnez une date :</strong></label>
+    <input type="date" id="date-picker" class="form-control text-center" value="{{ selected_date|date:'Y-m-d' }}">
+</div>
+<br>
+<div class="mapholder">
+    <div id="map"></div>
+
+</div>
+
+<h1 class="text-center my-4">Créer les routes</h1>
+<div class="text-center mb-4">
+    <form method="POST" action="{% url 'create_routeaujour' %}">
+        {% csrf_token %}
+        <input type="hidden" name="selected_date" value="{{ selected_date }}">
+        <input type="hidden" name="route_name" value="1">
+        <button type="submit" class="btn btn-success">Créer route</button>
+    </form>
+</div>
+
+<div style="display: flex; flex-wrap: wrap;" id="sortable-table">
+    {% for a in routes21 %}
+    <div class="column" data-id="{{ a.id }}" data-statut="{{ a.id }}">
+        <h2>{{ a.nom }}</h2>
+        {% for task in todo_livraison %}
+        {% if task.statut.nom == a.nom and task.recuperation == True %}
+        <div class="task" data-task-id="{{ task.id }}" style="background-color: pink;">
+            <a data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a>
+        </div>
+        {% else %}
+        <div class="task" data-task-id="{{ task.id }}">
+            <a data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a>
+        </div>
+        {% endif %}
+    {% endfor %}
+    </div>
+    {% endfor %}
+
+
+    {% for a in routes %}
+    <div class="column" data-id="{{ a.id }}" data-statut="{{ a.id }}">
+        <h1>Route N° {{ a.nom }}
+            <button class="btn btn-danger btn-sm float-end delete-route" data-id="{{ a.id }}" title="Supprimer cette route">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </h1>
+        <p class="d-flex justify-content-between align-items-center">
+            <a href="#" class="edit-route" data-id="{{ a.id }}" data-nom="{{ a.nom }}" data-livreur="{{ a.livreur }}" data-heure="{{ a.heure_depart }}" data-toggle="modal" data-commentaire="{{ a.commentaire }}" data-target="#routeDetailModal">
+                <i class="fa-solid fa-pen-to-square"></i>
+            </a>
+            
+            <button class="edit-routes border-0 bg-transparent p-0" data-id="{{ a.id }}" data-nom="{{ a.nom }}">
+                <i class="fa-solid fa-sort fa-xl" style="color: #74C0FC;"></i>
+            </button>
+        </p>
+        
+        <hr>
+        <p>Livreurs:
+            {% for livreur in a.livreur.all %}
+                {{ livreur.nom }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+        </p>
+        <p>Heure départ: {{ a.heure_depart }}</p>
+        <hr>
+        <div class="tasks-container" data-column-id="{{ a.id }}">
+            <table id="sortable-livraisons" class="table">
+                <thead>
+                </thead>
+                <tbody>
+                    {% for task in route1 %}
+                        {% if task.statut.nom == a.nom %}
+                            <tr class="task" data-task-id="{{ task.id }}" data-position="{{ forloop.counter0 }}">
+                                <td {% if task.recuperation %}style="background-color: #F1B3DA;"{% endif %}>{{ task.nom }}</td>
+                                <td {% if task.recuperation %}style="background-color: #F1B3DA;"{% endif %}>
+                                    <a data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}" class="btn">
+                                        <i class="fa-solid fa-circle-info"></i>
+                                    </a>
+                                </td>
+                                <td {% if task.recuperation %}style="background-color: #F1B3DA;"{% endif %}>
+                                    <!-- Button to trigger the modal -->
+                                    <button type="button" class="btn edit-task" data-toggle="modal" data-target="#editModal" data-task-id="{{ task.id }}">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
+                                    
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+                
+            </table>
+            
+        
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<!-- Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Modifier la livraison</h5>
+                
+            </div>
+            <div class="modal-body">
+                <!-- The form will be injected here by JavaScript -->
+                <form id="editForm" method="post">
+                    {% csrf_token %}
+                    <div id="modalFormContent"></div> <!-- The form content will be injected here -->
+                    <button type="submit" class="btn btn-primary">Valider</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="editRoutesModal" tabindex="-1" role="dialog" aria-labelledby="editRouteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Modifier l'ordre des livraisons</h5>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Heure Livraison</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody id="sortable-livraisons-modal">
+                        <!-- Livraisons will be inserted here dynamically -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="save-order">Enregistrer l'ordre</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Structure -->
+<div class="modal fade" id="routeDetailModal" tabindex="-1" role="dialog" aria-labelledby="routeDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="routeDetailModalLabel">Assigner livreurs + heure départ</h5>
+            </div>
+            <div class="modal-body">
+                <form id="routeDetailForm" method="POST" novalidate>
+                    {% csrf_token %}
+                    <div class="form-group">
+                        {{ routedetail_form.livreur.label_tag }}
+                        {{ routedetail_form.livreur }}  <!-- Multiple checkboxes for selecting livreurs -->
+                    </div>
+                    <br>
+                    <div class="form-group">
+                        {{ routedetail_form.heure_depart.label_tag }}
+                        {{ routedetail_form.heure_depart }}
+                    </div>
+                    <br>
+                    <div class="form-group">
+                        {{ routedetail_form.commentaire.label_tag }}
+                        {{ routedetail_form.commentaire }}
+                    </div>
+                    <br>
+                    <button type="submit" class="btn btn-primary">Valider</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<script async src="https://maps.googleapis.com/maps/api/js?key={{ key }}&callback=initMap" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+
+<script>
+   let map;
+
+function initMap() {
+    const livraisons = {{ livraisons|safe }};
+    if (livraisons.length === 0) {
+        console.error('No livraisons available for the selected date.');
+        return; // Exit the function if there are no livraisons
+    }
+
+    const firstLocation = livraisons[0];
+    map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: firstLocation.lat, lng: firstLocation.lng },
+        zoom: 10.5,
+    });
+
+    // Object to group livraisons by coordinates
+    const markersMap = {};
+
+    livraisons.forEach(livraison => {
+        const position = `${livraison.lat},${livraison.lng}`;
+        
+        // Group deliveries by position
+        if (!markersMap[position]) {
+            markersMap[position] = []; // Initialize array for this position
+        }
+        markersMap[position].push(livraison); // Add the livraison to the array
+    });
+
+    for (const position in markersMap) {
+        const livraisonsAtPosition = markersMap[position];
+
+        // Select the first livraison for marker placement
+        const firstLivraison = livraisonsAtPosition[0]; // Use first to get lat/lng
+        const markerInfo = livraisonsAtPosition.map(l => `${l.nom} / ${l.heure_livraison} / ${l.mode_envoi} / ${l.convives}`).join('<br>');
+
+        // Define marker options
+        const markerOptions = {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: livraisonsAtPosition[0].heure_livraison === 'recup' ? '#F1B3DA' : '#74C0FC',
+            fillOpacity: 1,
+            scale: 10,
+            strokeColor: '#FFFFFF',
+            strokeWeight: 4,
+        };
+
+        // Create the marker
+        const marker = new google.maps.Marker({
+            position: { lat: parseFloat(firstLivraison.lat), lng: parseFloat(firstLivraison.lng) },
+            map: map,
+            title: `Deliveries at this location`,
+            icon: markerOptions
+        });
+
+        // Create an info window that shows details of all livraisons
+        const infowindow = new google.maps.InfoWindow({
+            content: markerInfo,
+        });
+
+        marker.addListener('click', () => {
+            infowindow.open(map, marker);
+        });
+    }
+}
+
+$(document).ready(function() {
+        $('[data-toggle="popover"]').popover();
+        $(".task").draggable({
+            revert: 'invalid',
+            helper: "clone"
+        });
+
+        $(".column").droppable({
+            accept: ".task",
+            drop: function(event, ui) {
+                const livraisonId = ui.draggable.data('task-id');
+                const newStatut = $(this).data('statut');
+                $.ajax({
+                    url: "{% url 'update_status' %}",
+                    method: 'POST',
+                    data: {
+                        'livraison_id': livraisonId,
+                        'new_statut_id': newStatut,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function(data) {
+                        location.reload();
+                    }
+                });
+            }
+        });
+    });
+
+
+
+    document.getElementById("date-picker").addEventListener("change", function () {
+    let selectedDate = this.value;
+    window.location.href = `?date=${selectedDate}`; // Redirect to the new date’s route
+});
+
+$(document).ready(function() {
+    $(document).on('click', '.edit-route', function(event) {
+        event.preventDefault(); // Prevent the default anchor click behavior
+
+        const routeId = $(this).data('id');
+        const routeNom = $(this).data('nom');
+        const routeLivreur = $(this).data('livreur');
+        const routeHeure = $(this).data('heure');
+        const routeCommentaire = $(this).data('commentaire');
+
+        // Update the form action URL
+        $('#routeDetailForm').attr('action', '/route/update/' + routeId + '/');
+        
+        // Update form fields with data
+        $('#id_livreur').val(routeLivreur);
+        $('#id_heure_depart').val(routeHeure);
+        $('#id_commentaire').val(routeCommentaire);  // Populate commentaire field
+
+        // Show the modal
+        $('#routeDetailModal').modal('show'); // This line ensures the modal is displayed
+    });
+});
+
+
+$(document).ready(function() {
+    let selectedRouteId = null;
+
+    $(".edit-routes").on("click", function() {
+        selectedRouteId = $(this).data("id");  // Get selected route ID
+
+        // Fetch route livraisons
+        $.ajax({
+            url: `/get-route-livraisons/${selectedRouteId}/`, // Django view to get livraisons
+            method: "GET",
+            success: function(data) {
+                let tbody = $("#sortable-livraisons-modal");
+                tbody.empty();
+
+                data.livraisons.forEach(liv => {
+                    let bgColor = liv.heure_livraison === 'recup' ? 'style="background-color: #F1B3DA;"' : '';
+
+                    tbody.append(`
+                        <tr class="sortable-item" data-livraison-id="${liv.id}">
+                            <td ${bgColor}>${liv.nom}</td>
+                            <td ${bgColor}>${liv.heure_livraison}</td>
+                        </tr>
+                    `);
+                });
+
+
+                // Make the table rows sortable
+                new Sortable(tbody[0], {
+                    animation: 150,
+                });
+
+                // Open the modal
+                $("#editRoutesModal").modal("show");
+            }
+        });
+    });
+
+    // Save new order
+    $("#save-order").on("click", function() {
+        let updatedOrder = [];
+        $("#sortable-livraisons-modal tr").each(function(index) {
+            updatedOrder.push({
+                id: $(this).data("livraison-id"),
+                position: index
+            });
+        });
+
+        // Send updated order to Django
+        $.ajax({
+            url: "/update-livraison-positions/",
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCookie("csrftoken")
+            },
+            contentType: "application/json",
+            data: JSON.stringify({ positions: updatedOrder, route_id: selectedRouteId }),
+            success: function(response) {
+                alert("Ordre mis à jour !");
+                $("#editRoutesModal").modal("hide"); // Fixed modal ID
+                location.reload();
+            },
+            error: function() {
+                alert("Erreur lors de la mise à jour");
+            }
+        });
+    });
+
+    // CSRF Token Function
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+$(document).on('click', '.edit-task', function(event) {
+    event.preventDefault(); // Prevent default behavior
+
+    var taskId = $(this).data('task-id'); // Get the task ID from the button
+
+    $.ajax({
+        url: '/edit_task_form/' + taskId + '/', // Endpoint for fetching task details
+        method: 'GET',
+        success: function(response) {
+            // Assuming the server returns form HTML
+            $('#modalFormContent').html(response.form_html);
+            $('#editForm').attr('action', '/edit_task_form/' + taskId + '/'); // Update the form action URL
+
+            // Show the modal after the form is injected
+            $('#editModal').modal('show');
+        },
+        error: function(xhr, status, error) {
+            console.error("Error loading form:", error);
+        }
+    });
+});
+
+// Handle the form submission via AJAX
+$(document).on('submit', '#editForm', function(event) {
+    event.preventDefault(); // Prevent the form from submitting normally
+
+    var form = $(this);
+    var taskId = $(this).data('task-id'); // Task ID from the form (if necessary)
+
+    $.ajax({
+        url: form.attr('action'), // This is the URL you set for form submission
+        method: 'POST',
+        data: form.serialize(), // Serialize form data for sending
+        success: function(response) {
+            // Handle the success response (e.g., update the UI, close the modal, etc.)
+            if (response.success) {
+                alert('Task updated successfully!');
+                $('#editModal').modal('hide'); // Hide the modal
+                // Optionally, you can update the task data on the page dynamically
+                location.reload();
+            } else {
+                alert('There was an error updating the task.');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("Error submitting form:", error);
+        }
+    });
+});
+
+// CSRF Token Function
+function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    $(document).ready(function() {
+        // Your other code goes here...
+ 
+        // Event handler for delete route button
+        $(document).on('click', '.delete-route', function(event) {
+            event.preventDefault(); // Prevent default behavior
+
+            const routeId = $(this).data('id');  // Get the route ID
+
+            // Confirm deletion
+            if (confirm("Êtes-vous sûr de vouloir supprimer cette route ?")) {
+                // AJAX request to delete the route
+                $.ajax({
+                    url: `/route/delete/${routeId}/`,  // Your URL to handle deletion
+                    method: 'DELETE',
+                    headers: {
+                        "X-CSRFToken": getCookie("csrftoken")  // Use the defined getCookie function
+                    },
+                    success: function(response) {
+                    location.reload();  // Reload the page to reflect the deletion
+                    },
+                    error: function(xhr, status, error) {
+                        alert("Erreur lors de la suppression de la route.");
+                        console.error("Error deleting route:", error);
+                    }
+                });
+            }
+        });
+    });
+    const toggleBtn = document.getElementById('theme-toggle');
+        toggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+        });
+
+          document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.getElementById('sidebar');
+    const btnShowSidebar = document.getElementById('show-sidebar');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    const dashboard = document.getElementById('dashboard');
+
+    // Quand on clique sur le bouton toggle pour cacher ou réafficher
+    toggleBtn.addEventListener('click', () => {
+        if (sidebar.classList.contains('collapsed')) {
+            // La sidebar est masquée, on la remonte
+            sidebar.classList.remove('collapsed');
+            btnShowSidebar.style.display = 'none';   // cache le bouton
+            dashboard.classList.remove('full-width');
+        } else {
+            // La sidebar est visible, on la cache
+            sidebar.classList.add('collapsed');
+            btnShowSidebar.style.display = 'block';  // montre le bouton pour la réafficher
+            dashboard.classList.add('full-width');
+        }
+    });
+
+    // Quand on clique sur le bouton pour faire réapparaître la sidebar
+    btnShowSidebar.addEventListener('click', () => {
+        sidebar.classList.remove('collapsed');
+        btnShowSidebar.style.display = 'none'; // cache le bouton
+        dashboard.classList.remove('full-width');
+    });
+});
+</script>
+{% endblock %}

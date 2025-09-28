@@ -1,0 +1,4 @@
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}  <!-- Render the form fields as paragraph elements (you can customize this as needed) -->
+</form>

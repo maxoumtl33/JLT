@@ -1,0 +1,262 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% block content %}
+<style>
+body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s linear, color 0.3s linear;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #007BFF;
+            height: 100%;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar .sidebar-header {
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .sidebar a {
+            color: #fff;
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar a.active, .sidebar a:hover {
+            background-color: #0056b3;
+        }
+
+        .shift {
+            flex: 1;
+            padding: 20px;
+            background-color: #F0F2F5;
+            overflow-y: auto;
+            transition: margin-left 0.3s ease; /* Improves smoothness of layout change */
+        }
+
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            
+        }
+
+        .header .toggle-theme {
+            cursor: pointer;
+            color: #007BFF;
+        }
+        #shift.expanded {
+    margin-left: 0;
+}
+
+#shift.full-width {
+    transition: margin-left 0s;
+}
+
+.collapsed {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    width: 0; /* Ensure width collapses at the end */
+}
+
+.dark-mode {
+            background-color: #121212;
+            color: #e4e4e4;
+        }
+
+        .dark-mode .header, .dark-mode .card {
+            background-color: #1e1e1e;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .dark-mode .sidebar {
+            background-color: #1e1e1e;
+        }
+
+        .dark-mode .sidebar a {
+            color: #e4e4e4;
+        }
+
+        .dark-mode .sidebar a.active, .dark-mode .sidebar a:hover {
+            background-color: #333;
+            color: #fff;
+        }
+
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header" style="margin-top: 100px;">Menu <button class="toggle-sidebar" id="sidebar-toggle"><i class="fas fa-bars"></i></button></div>
+  <a href="{% url 'acceuilresponsables' %}"><i class="fa-solid fa-desktop"></i> Tableau de bord Admin</a>
+  <a href="{% url 'responsablelist' %}"><i class="fas fa-home"></i> Suivi journée</a>
+  <a href="{% url 'dashboard_stats' %}"><i class="fas fa-chart-bar"></i> Stats</a>
+  <a href="{% url 'recuptoday' %}"><i class="fas fa-sync"></i> Récups</a>
+  <a href="{% url 'livraisonstomorrow' %}"><i class="fas fa-shipping-fast"></i> Dispatch</a>
+  <a href="{% url 'voir_checklist' %}"><i class="fas fa-clipboard-list"></i> Checklist</a>
+  <a href="{% url 'creerchecklist' %}"><i class="fas fa-list-check"></i> Checklist Ventes</a>
+  <a href="{% url 'product_list' %}"><i class="fas fa-box-open"></i> Liste produits (checklist)</a>
+  <a href="admin/" target="_blank"><i class="fas fa-tools"></i> Menu admin</a>
+  <button class="toggle-theme" id="theme-toggle" style="margin-top:20px;"><i class="fas fa-moon"></i> Thème</button>
+  <div style="margin-top:20px; font-size:14px; color:#ccc;">Utilisateur: {{ user.username }}</div>
+</div>
+<div class="shift" id="shift">
+    <div class="header">
+        <h2>Création et Modification Planning</h2>
+            <button id="show-sidebar" style="display:none; position: fixed; top: 12%; left: 10px;">
+                <i class="fas fa-bars fa-2xl"></i>
+            </button>
+        <div class="user-info">
+            <button id="logoutBtn" style="border:none; background:none; cursor:pointer;"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
+        </div>
+    </div>
+    <br>
+    <br>
+    <br>
+    <br>
+  <!-- Partie création -->
+  <h3>Créer un planning pour les livreurs</h3>
+  <form method="post" action="">
+    {% csrf_token %}
+   
+    <div class="form-group">
+      <label for="global_shift_date">Date de Shift</label>
+      <input type="date" id="global_shift_date" name="global_shift_date" class="form-control" required>
+    </div>
+    <div class="livreur-shift-container" style="display:flex; flex-wrap:wrap;">
+      {% for livreur in liste_livreur %}
+      <div class="livreur-shift" style="background:#f1f5f9; padding:20px; margin:10px;        flex:1 0 30%; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+        <h4 style="text-align:center;">{{ livreur.nom }}</h4>
+        <!-- Heure de début -->
+        <div class="form-group">
+          <label>Heure de Début</label>
+          <select name="shift_start_{{ livreur.id }}" class="form-control">
+            <option value="06:00">Matin - 06:00</option>
+            <option value="09:00">Pré-midi - 09:00</option>
+            <option value="" selected>Autre (sélectionner l'heure)</option>
+          </select>
+          <input type="time" name="custom_start_time_{{ livreur.id }}" class="form-control" placeholder="Entrer heure">
+        </div>
+        <!-- Repos checkbox -->
+        <div class="form-check">
+          <input type="checkbox" name="repos_{{ livreur.id }}" class="form-check-input" id="repos_{{ livreur.id }}">
+          <label class="form-check-label" for="repos_{{ livreur.id }}">En Repos</label>
+        </div>
+        <!-- Note -->
+        <div class="form-group">
+          <label>Note</label>
+          <textarea name="note_{{ livreur.id }}" rows="2" class="form-control" placeholder="Ajouter une note..."></textarea>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <button type="submit" name="create_planning" class="btn btn-primary mb-3">Créer Planning</button>
+  </form>
+
+  <!-- Section : liste & modification des shifts existants -->
+  <hr style="margin-top:50px;">
+  <h3>Voir & Modifier les shifts existants</h3>
+  <!-- Sélection de date -->
+  <form method="get" action="">
+    <div class="form-group" style="margin-top:20px;">
+      <label>Filtrer par date :</label>
+      <input type="date" name="date" class="form-control" value="{{ date }}">
+      <button type="submit" class="btn btn-secondary mt-2">Voir</button>
+    </div>
+  </form>
+
+  {% if shifts %}
+    <table class="table" style="margin-top:20px;">
+      <thead>
+        <tr>
+          <th>Livreur</th>
+          <th>Heure de Début</th>
+          <th>Note</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for shift in shifts %}
+        <tr>
+          <td>{{ shift.livreur.nom }}</td>
+          <td>
+            <form method="post" action="">
+              {% csrf_token %}
+              <input type="hidden" name="shift_id" value="{{ shift.id }}">
+              <input type="time" name="start_time" value="{{ shift.start_time|default:'' }}" required>
+          </td>
+          <td>
+            <textarea name="notes" rows="2" style="width:100%;">{{ shift.notes }}</textarea>
+          </td>
+          <td style="display:flex; gap:10px; align-items:center;">
+            <button type="submit" name="edit_shift" class="btn btn-sm btn-primary">Enregistrer</button>
+          </form>
+        </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>Aucun shift pour cette date.</p>
+  {% endif %}
+
+</div>
+
+<script>
+    const toggleBtn = document.getElementById('theme-toggle');
+        toggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+        });
+
+          document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.getElementById('sidebar');
+    const btnShowSidebar = document.getElementById('show-sidebar');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    const dashboard = document.getElementById('dashboard');
+
+    // Quand on clique sur le bouton toggle pour cacher ou réafficher
+    toggleBtn.addEventListener('click', () => {
+        if (sidebar.classList.contains('collapsed')) {
+            // La sidebar est masquée, on la remonte
+            sidebar.classList.remove('collapsed');
+            btnShowSidebar.style.display = 'none';   // cache le bouton
+            dashboard.classList.remove('full-width');
+        } else {
+            // La sidebar est visible, on la cache
+            sidebar.classList.add('collapsed');
+            btnShowSidebar.style.display = 'block';  // montre le bouton pour la réafficher
+            dashboard.classList.add('full-width');
+        }
+    });
+
+    // Quand on clique sur le bouton pour faire réapparaître la sidebar
+    btnShowSidebar.addEventListener('click', () => {
+        sidebar.classList.remove('collapsed');
+        btnShowSidebar.style.display = 'none'; // cache le bouton
+        dashboard.classList.remove('full-width');
+    });
+});
+</script>
+{% endblock %}
+

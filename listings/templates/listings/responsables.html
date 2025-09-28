@@ -1,0 +1,515 @@
+{% extends 'listings/base.html' %}
+
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block content %}
+<style>
+
+
+/* styles.css */
+
+body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s linear, color 0.3s linear;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #007BFF;
+            height: 100%;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar .sidebar-header {
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .sidebar a {
+            color: #fff;
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar a.active, .sidebar a:hover {
+            background-color: #0056b3;
+        }
+
+        .journee {
+            flex: 1;
+            padding: 20px;
+            background-color: #F0F2F5;
+            overflow-y: auto;
+            transition: margin-left 0.3s ease; /* Improves smoothness of layout change */
+        }
+
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            
+        }
+
+        .header .toggle-theme {
+            cursor: pointer;
+            color: #007BFF;
+        }
+        #journee.expanded {
+    margin-left: 0;
+}
+
+#journee.full-width {
+    transition: margin-left 0s;
+}
+
+.collapsed {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    width: 0; /* Ensure width collapses at the end */
+}
+
+.dark-mode {
+            background-color: #121212;
+            color: #e4e4e4;
+        }
+
+        .dark-mode .header, .dark-mode .card {
+            background-color: #1e1e1e;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .dark-mode .sidebar {
+            background-color: #1e1e1e;
+        }
+
+        .dark-mode .sidebar a {
+            color: #e4e4e4;
+        }
+
+        .dark-mode .sidebar a.active, .dark-mode .sidebar a:hover {
+            background-color: #333;
+            color: #fff;
+        }
+    .no-data {
+        color: #888;
+        font-style: italic;
+    }
+
+    .vehicle-container {
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 15px;
+        background-color: #f9f9f9;
+    }
+    .vehicle-header {
+        font-size: 1.5em;
+        color: #333;
+    }
+    .hidden {
+        display: none;
+    }
+    .show-btn {
+        margin-bottom: 10px;
+        cursor: pointer;
+    }
+    .no-data {
+        color: #888;
+        font-style: italic;
+    }
+
+
+/* Stats Section */
+/* Style pour la section stats, déjà dans ton code initial, sinon rajoute ici */
+.stats-section {
+  display: flex;
+  justify-content: space-around;
+  background-color: white;
+  padding: 20px;
+  margin: 20px 0;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  flex-wrap: wrap; /* pour la responsivité sur petits écrans */
+}
+.stat-box {
+  text-align: center;
+  padding: 10px;
+}
+.stat-box h3 {
+  color: #007BFF;
+}
+.stat-box p {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+
+/* Map Section */
+.map-section {
+padding: 20px;
+background-color: white;
+box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#map {
+height: 400px;
+width: 100%;
+border-radius: 5px;
+}
+
+/* Order List Section */
+.order-card {
+background-color: #ffffff;
+border-radius: 8px;
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+margin: 15px;
+padding: 20px;
+text-align: center;
+transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.order-card:hover {
+transform: translateY(-5px);
+box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.order-title {
+color: #e5aacf;
+font-size: 1.2em;
+margin: 0;
+}
+
+.order-detail {
+color: #333;
+font-size: 1em;
+margin: 5px 0;
+}
+
+.order-info {
+color: #ffa500;
+font-size: 1em;
+margin: 10px 0;
+}
+
+.order-status {
+margin: 15px 0;
+}
+
+.status-icon {
+font-size: 1.5em;
+}
+
+.success {
+color: #28a745;
+}
+
+.pending {
+color: #ffc107;
+}
+
+.order-footer {
+margin-top: 20px;
+}
+
+.map-link {
+display: inline-block;
+background-color: #333;
+color: #fff;
+padding: 10px 20px;
+border-radius: 5px;
+text-decoration: none;
+font-size: 1em;
+transition: background-color 0.3s ease;
+}
+
+.map-link:hover {
+background-color: #555;
+}
+
+.map-link i {
+margin-right: 8px;
+}
+/* Ajoute ceci dans ton fichier CSS */
+.custom-green {
+    background-color: #28a745; /* Vert foncé Bootstrap */
+}
+
+
+/* Responsive Design */
+
+@media (max-width: 768px) {
+
+
+.header-title {
+    font-size: 1.5em;
+}
+
+.header-subtitle {
+    font-size: 1.2em;
+}
+
+.header-content {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.logout-button {
+    margin-top: 10px;
+}
+.navbar ul {
+    flex-direction: column;
+}
+
+.navbar ul li {
+    margin: 10px 0;
+}
+
+.stats-section {
+    flex-direction: column;
+    align-items: center;
+}
+
+.map-section {
+    padding: 10px;
+}
+
+.order {
+    font-size: 14px;
+}
+}
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header" style="margin-top: 100px;">Menu <button class="toggle-sidebar" id="sidebar-toggle"><i class="fas fa-bars"></i></button></div>
+  <a href="{% url 'acceuilresponsables' %}"><i class="fa-solid fa-desktop"></i> Tableau de bord Admin</a>
+  <a href="{% url 'responsablelist' %}"><i class="fas fa-home"></i> Suivi journée</a>
+  <a href="{% url 'recuptoday' %}"><i class="fas fa-sync"></i> Récups</a>
+  <a href="{% url 'livraisonstomorrow' %}"><i class="fas fa-shipping-fast"></i> Dispatch</a>
+  <a href="{% url 'voir_checklist' %}"><i class="fas fa-clipboard-list"></i> Checklist</a>
+  <a href="{% url 'creerchecklist' %}"><i class="fas fa-list-check"></i> Checklist Ventes</a>
+  <a href="/admin" target="_blank"><i class="fas fa-tools"></i> Menu admin</a>
+  <button class="toggle-theme" id="theme-toggle" style="margin-top:20px;"><i class="fas fa-moon"></i> Thème</button>
+  <div style="margin-top:20px; font-size:14px; color:#ccc;">Utilisateur: {{ user.username }}</div>
+</div>
+
+<div class="journee" id="journee">
+    <div class="header">
+        <h2>Suivi du {{journee}}</h2>
+            <button id="show-sidebar" style="display:none; position: fixed; top: 12%; left: 10px;">
+                <i class="fas fa-bars fa-2xl"></i>
+            </button>
+        <div class="user-info">
+            <button id="logoutBtn" style="border:none; background:none; cursor:pointer;"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
+        </div>
+    </div>
+    <br>
+    <br>
+    <br>
+    <br>
+
+    <section class="stats-section">
+        <div class="stat-box">
+            <h3>Livraisons en cours</h3>
+            <p id="totalDeliveries">{{livraisonstatusko|length}}</p>
+        </div>
+        <div class="stat-box">
+          <h3>Livraisons validées</h3>
+          <p id="completedDeliveries">{{livraisonstatusok|length}} / {{livraison|length}}</p>
+      </div>
+        <div class="stat-box">
+          <h3 style="color: #E5AACF;">Récupérations en cours</h3>
+          <p id="totalRecups">{{recuperationko|length}}</p>
+      </div>
+        <div class="stat-box">
+            <h3 style="color: #E5AACF;">Récupérations validées</h3>
+            <p id="completedRecups">{{recuperationok|length}} / {{recuperation|length}}</p>
+        </div>
+      </section>
+      
+
+    <div class="container">
+      <div class="table-responsive">
+        <table class="table table-striped align-middle mb-4">
+          <thead>
+            <tr>
+              <th>Livreur</th>
+              <th>Heure Départ</th>
+              <th>Contrat</th>
+              <th>Heure Livraison</th>
+              <th>Route</th>
+              <th>Statut</th>
+              <th>Commentaires</th>
+              <th>Véhicules</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for livraison in livraisons %}
+              {% if livraison.date == journee.date %}
+                <!-- Définir la classe selon le status -->
+                <tr class="{% if livraison.status %}custom-green{% else %}table-warning{% endif %}">
+
+
+                  
+                  <!-- Livreur -->
+                  <td>
+                    {% for livreur in livraison.statut.livreur.all %}
+                      {{ livreur.nom }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                  </td>
+                  
+                  <!-- Heures, contrat, route -->
+                  <td>{{ livraison.statut.heure_depart }}</td>
+                  <td>{{ livraison.nom }}</td>
+                  <td>{{ livraison.heure_livraison }}</td>
+                  <td>{{ livraison.statut.nom }}</td>
+                  
+                  <!-- Statut badge -->
+                  <td>
+                    {% if livraison.status %}
+                      <span class="badge bg-success">Validé</span>
+                    {% else %}
+                      <span class="badge bg-warning text-dark">En cours</span>
+                    {% endif %}
+                  </td>
+                  
+                  
+                  <!-- Commentaires -->
+                  <td>
+                    {% if livraison.commentaire %}
+                      <button class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#comment-{{ livraison.id }}">
+                        Voir Commentaire
+                      </button>
+                      <div class="collapse mt-2" id="comment-{{ livraison.id }}">
+                        <div class="card card-body">
+                          {{ livraison.commentaire }}
+                        </div>
+                      </div>
+                    {% else %}
+                      <em>Aucun commentaire</em>
+                    {% endif %}
+                  </td>
+                  
+                  <!-- Véhicules avec modal -->
+                  <td>
+                    {% for vehicle in livraison.statut.vehicles.all %}
+                      <a href="#" data-bs-toggle="modal" data-bs-target="#vehicleModal{{ vehicle.id }}">{{ vehicle.name }}</a>
+                      {% if not forloop.last %}, {% endif %}
+                      
+                      <!-- Modal Véhicule -->
+                      <div class="modal fade" id="vehicleModal{{ vehicle.id }}" tabindex="-1" aria-labelledby="vehicleLabel{{ vehicle.id }}" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-scrollable modal-lg">
+                          <div class="modal-content">
+                            <div class="modal-header bg-primary text-white">
+                              <h5 class="modal-title" id="vehicleLabel{{ vehicle.id }}">Photos de {{ vehicle.name }}</h5>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                            </div>
+                            <div class="modal-body">
+                              {% for photo in vehicle.vehicle_photos.all %}
+                                {% if photo.image %}
+                                  <img src="{{ photo.image.url }}" class="img-fluid mb-3" alt="{{ photo.caption }}">
+                                {% endif %}
+                                {% if photo.video %}
+                                  <video controls class="w-100 mb-3">
+                                    <source src="{{ photo.video.url }}" type="video/mp4" />
+                                    Votre navigateur ne supporte pas la vidéo.
+                                  </video>
+                                {% endif %}
+                              {% empty %}
+                                <p>Aucune photo ou vidéo pour ce véhicule.</p>
+                              {% endfor %}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    {% endfor %}
+                  </td>
+                </tr>
+                <!-- Ligne supplémentaire pour détails si nécessaire -->
+                <tr class="collapse" id="details-{{ livraison.id }}">
+                  <td colspan="8" class="bg-light">
+                    <h6>Informations complémentaires</h6>
+                    <p>Autres infos ou logs ici...</p>
+                  </td>
+                </tr>
+              {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+    </div>
+</div>
+
+    
+    
+        
+
+        
+        </div>
+
+<script>
+  function toggleComment(livraisonId) {
+    const commentDiv = document.getElementById('comment-' + livraisonId);
+    if (commentDiv.style.display === 'none' || commentDiv.style.display === '') {
+        commentDiv.style.display = 'block';  // Show comment
+    } else {
+        commentDiv.style.display = 'none';   // Hide comment
+    }
+}
+
+const toggleBtn = document.getElementById('theme-toggle');
+        toggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+        });
+
+          document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.getElementById('sidebar');
+    const btnShowSidebar = document.getElementById('show-sidebar');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    const dashboard = document.getElementById('dashboard');
+
+    // Quand on clique sur le bouton toggle pour cacher ou réafficher
+    toggleBtn.addEventListener('click', () => {
+        if (sidebar.classList.contains('collapsed')) {
+            // La sidebar est masquée, on la remonte
+            sidebar.classList.remove('collapsed');
+            btnShowSidebar.style.display = 'none';   // cache le bouton
+            dashboard.classList.remove('full-width');
+        } else {
+            // La sidebar est visible, on la cache
+            sidebar.classList.add('collapsed');
+            btnShowSidebar.style.display = 'block';  // montre le bouton pour la réafficher
+            dashboard.classList.add('full-width');
+        }
+    });
+
+    // Quand on clique sur le bouton pour faire réapparaître la sidebar
+    btnShowSidebar.addEventListener('click', () => {
+        sidebar.classList.remove('collapsed');
+        btnShowSidebar.style.display = 'none'; // cache le bouton
+        dashboard.classList.remove('full-width');
+    });
+});
+</script>
+
+    {% endblock %}
+    

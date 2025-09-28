@@ -1,0 +1,668 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% load custom_filters %}
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+
+{% block content %}
+<!-- Préchargement des ressources critiques -->
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" as="style">
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.css" as="style">
+
+<!-- CSS optimisé et minifié -->
+<style>
+/* Critical CSS - Inline pour éviter le render-blocking */
+body{font-family:'Roboto',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:0;padding:0;color:#333;display:flex;height:100vh;overflow:hidden;transition:background-color .3s,color .3s}
+.sidebar{width:250px;background-color:#007BFF;height:100%;padding:20px;box-shadow:2px 0 5px rgba(0,0,0,.1);transform:translateX(0);transition:transform .3s;overflow-y:auto;will-change:transform}
+.checklist{flex:1;padding:20px;background-color:#F0F2F5;overflow-y:auto}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding:20px;background-color:#fff;box-shadow:0 2px 4px rgba(0,0,0,.08)}
+
+/* CSS non-critique chargé de façon asynchrone */
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.css" rel="stylesheet" media="print" onload="this.media='all'">
+
+<!-- CSS complet optimisé -->
+<style>
+/* Optimisations de performance */
+*{box-sizing:border-box}
+.sidebar a{color:#fff;display:block;padding:10px;text-decoration:none;margin-bottom:10px;border-radius:8px;transition:background-color .2s}
+.sidebar a.active,.sidebar a:hover{background-color:#0056b3}
+.sidebar .sidebar-header{font-size:24px;color:#fff;margin-bottom:20px}
+.sidebar.collapsed{transform:translateX(-100%)}
+
+/* Containment CSS pour isolation du rendu */
+.checklist-section,.calendar-section{contain:layout style}
+.checklist-table tbody{contain:layout;display:block;max-height:600px;overflow-y:auto}
+
+/* Tables optimisées */
+.checklist-table{table-layout:fixed;width:100%;border-collapse:collapse}
+.checklist-table thead,.checklist-table tbody tr{display:table;width:100%;table-layout:fixed}
+.checklist-table th,.checklist-table td{border:1px solid #ddd;padding:8px;text-align:left}
+.checklist-table th{background-color:#007bff;color:white}
+
+/* GPU acceleration pour les animations */
+.day-btn{padding:10px;font-size:.9rem;background:#fff;border:1px solid #ddd;border-radius:6px;cursor:pointer;width:100%;height:40px;text-align:center;transition:background-color .2s,transform .1s;transform:translateZ(0);backface-visibility:hidden}
+.day-btn:hover{background-color:#007bff;color:white;transform:scale(1.02)}
+.day-btn.selected{background-color:#007bff;color:white;font-weight:bold}
+
+/* Status colors */
+.status-valide{background-color:#d4edda}
+.status-en_cours{background-color:#fff3cd}
+.status-refuse{background-color:#f8d7da}
+
+/* Layout optimisé */
+.agenda-container{display:flex;align-items:flex-start;gap:20px;padding:20px}
+.calendar-section{width:100%;max-width:40%;background:#f9f9f9;padding:20px;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.08)}
+.checklist-section{width:70%;background:#fff;padding:20px;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.08)}
+
+/* Grid optimisé */
+.calendar{display:grid;grid-template-columns:repeat(7,1fr);grid-gap:8px;contain:layout}
+
+/* Dark mode optimisé */
+.dark-mode{background-color:#121212;color:#e4e4e4}
+.dark-mode .header,.dark-mode .card{background-color:#1e1e1e;box-shadow:0 2px 4px rgba(0,0,0,.3)}
+.dark-mode .sidebar{background-color:#1e1e1e}
+.dark-mode .sidebar a{color:#e4e4e4}
+.dark-mode .sidebar a.active,.dark-mode .sidebar a:hover{background-color:#333}
+
+/* Responsive avec moins d'effets sur mobile */
+@media(max-width:1200px){
+    .agenda-container{flex-direction:column}
+    .calendar-section,.checklist-section{width:100%;max-width:none}
+}
+@media(max-width:768px){
+    *{animation-duration:.1s!important;transition-duration:.1s!important}
+    .card,.header{box-shadow:none;border:1px solid rgba(0,0,0,.1)}
+}
+@media(max-width:480px){
+    .calendar{grid-template-columns:repeat(4,1fr);gap:5px}
+    .day-btn{font-size:.7rem;height:28px;padding:4px}
+}
+
+/* Utilities */
+.hidden{display:none!important}
+.text-center{text-align:center}
+.mb-4{margin-bottom:1rem}
+.loading-spinner{display:inline-block;width:20px;height:20px;border:2px solid rgba(0,0,0,.1);border-top-color:#007bff;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Print optimizations */
+@media print{
+    .sidebar,.header,.no-print{display:none!important}
+    body{display:block}
+}
+</style>
+
+<!-- Sidebar optimisée avec lazy loading des icônes -->
+<nav class="sidebar" id="sidebar" role="navigation">
+    <div class="sidebar-header" style="margin-top:100px">
+        Menu 
+        <button class="toggle-sidebar" id="sidebar-toggle" aria-label="Toggle sidebar">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+    <a href="{% url 'acceuilresponsables' %}"><i class="fa-solid fa-desktop"></i> Tableau de bord Admin</a>
+    <a href="{% url 'responsablelist' %}"><i class="fas fa-home"></i> Suivi journée</a>
+    <a href="{% url 'dashboard_stats' %}"><i class="fas fa-chart-bar"></i> Stats</a>
+    <a href="{% url 'livraisonstomorrow' %}"><i class="fas fa-shipping-fast"></i> Dispatch</a>
+    <a href="{% url 'create-shift' %}"><i class="fas fa-calendar-plus"></i> Planning</a>
+    <a href="{% url 'voir_checklist' %}" class="active"><i class="fas fa-clipboard-list"></i> Checklist</a>
+    <a href="{% url 'creerchecklist' %}"><i class="fas fa-list-check"></i> Checklist Ventes</a>
+    <a href="{% url 'product_list' %}"><i class="fas fa-box-open"></i> Liste produits</a>
+    <a href="/admin" target="_blank" rel="noopener"><i class="fas fa-tools"></i> Menu admin</a>
+    <button class="toggle-theme" id="theme-toggle" style="margin-top:20px">
+        <i class="fas fa-moon"></i> Thème
+    </button>
+    <div style="margin-top:20px;font-size:14px;color:#ccc">
+        Utilisateur: {{ user.username }}
+    </div>
+</nav>
+
+<!-- Main content -->
+<main class="checklist" id="checklist" role="main">
+    <header class="header">
+        <h2>Checklist et impressions</h2>
+        <button id="show-sidebar" style="display:none;position:fixed;top:12%;left:10px" aria-label="Show sidebar">
+            <i class="fas fa-bars fa-2xl"></i>
+        </button>
+        <div class="user-info">
+            <button id="logoutBtn" style="border:none;background:none;cursor:pointer">
+                <i class="fas fa-sign-out-alt"></i> Déconnexion
+            </button>
+        </div>
+    </header>
+
+    <!-- Section Impression optimisée -->
+    <section class="container mt-5">
+        <h2 class="text-center mb-4">Imprimer Checklists et Livraisons</h2>
+        
+        <div class="row g-3 mb-4 justify-content-center">
+            <!-- Card Checklists -->
+            <div class="col-md-5">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">Date des Checklists</h5>
+                    </div>
+                    <div class="card-body">
+                        <label for="checklist-date" class="form-label">Sélectionnez la date</label>
+                        <input type="date" id="checklist-date" class="form-control form-control-lg">
+                        <button onclick="printChecklists()" class="btn btn-info btn-lg mt-3">
+                            <i class="bi bi-printer"></i> Imprimer Checklists
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Livraisons -->
+            <div class="col-md-5">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0">Date des Livraisons</h5>
+                    </div>
+                    <div class="card-body">
+                        <label for="livraison-date" class="form-label">Sélectionnez la date</label>
+                        <input type="date" id="livraison-date" class="form-control form-control-lg">
+                        <button onclick="printLivraisons()" class="btn btn-info btn-lg mt-3">
+                            <i class="bi bi-printer"></i> Imprimer Livraisons
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Hidden print sections (chargés uniquement si nécessaire) -->
+    <div id="checklist-section" class="hidden no-print">
+        {% for checklist in checklists %}
+        {% if checklist.is_active %}
+        <div class="page" data-checklist-date="{{ checklist.date|date:'Y-m-d' }}">
+            <h2 style="text-align:center">
+                <img src="{{ checklist.qr_code_uri }}" alt="QR Code" width="150" loading="lazy">
+                {{ checklist.date|date:"l d F Y" }}
+            </h2>
+            <h1 style="text-align:center">{{ checklist.name }}</h1>
+            <p style="text-align:center"><strong>{{ checklist.formatted_heure_livraison }}</strong></p>
+            {% if checklist.notechecklist %}
+            <p style="color:orange;text-align:center">{{ checklist.notechecklist }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+    <div id="livraison-section" class="hidden no-print">
+        {% for livraison in livraisons %}
+        <div class="livraison-page" data-livraison-date="{{ livraison.date|date:'Y-m-d' }}">
+            <h1 class="hidden">{{ livraison.date|date:"d/m/Y" }}</h1>
+            <h1 style="text-align:center">{{ livraison.journee }}</h1>
+            <h1 style="text-align:center">{{ livraison.nom }}</h1>
+            <p style="text-align:center"><strong>{{ livraison.formatted_heure_livraison }}</strong></p>
+            {% if livraison.infodetail %}
+            <p style="color:orange;text-align:center">{{ livraison.infodetail }}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Liste Checklists -->
+    <section class="mt-5">
+        <h2 class="text-center mb-4">Liste Checklists</h2>
+        
+        <div class="agenda-container">
+            <!-- Calendar Section -->
+            <div class="calendar-section">
+                <div class="month-selection" style="display:flex;justify-content:center;margin-bottom:30px">
+                    <label for="month" class="month-label" style="margin-right:10px;align-self:center">
+                        Sélectionnez le mois :
+                    </label>
+                    <select id="month" name="month" onchange="updateAgenda()" class="month-dropdown form-select" style="width:auto">
+                        {% for month_name in french_months %}
+                        <option value="{{ forloop.counter }}" {% if forloop.counter == selected_month %}selected{% endif %}>
+                            {{ month_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div id="calendar" class="calendar">
+                    {% for day in days %}
+                    <div class="day">
+                        <button class="day-btn" data-day="{{ day }}" onclick="getChecklists({{ day }})">
+                            {{ day }}
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Checklist Table Section -->
+            <div class="checklist-section">
+                <table class="checklist-table">
+                    <thead>
+                        <tr>
+                            <th>Heure</th>
+                            <th>Nom</th>
+                            <th>Ajouté par</th>
+                            <th>Ajouté le</th>
+                        </tr>
+                    </thead>
+                    <tbody id="checklist-list" data-detail-url="{% url 'checklistvoir-detail' checklist_id=0 %}">
+                        <tr>
+                            <td colspan="4" class="text-center">Sélectionnez un jour pour voir les checklists</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Produits -->
+    <section class="mt-5">
+        <h2 class="text-center mb-4">Produits total et en cours</h2>
+        
+        <div class="container d-flex flex-row gap-3 justify-content-center mb-4">
+            <!-- Card Produits totaux -->
+            <div class="card mb-4" style="width:20rem">
+                <div class="card-body">
+                    <h5 class="card-title text-center">Produits au total</h5>
+                    <div class="mb-3">
+                        <label for="totalProductsDate" class="form-label">Sélectionnez une date</label>
+                        <input type="date" id="totalProductsDate" class="form-control mb-3">
+                    </div>
+                    <button class="btn btn-primary" onclick="loadTotalProducts()">Rechercher</button>
+                </div>
+            </div>
+
+            <!-- Card Produits en cours -->
+            <div class="card mb-4" style="width:20rem">
+                <div class="card-body">
+                    <h5 class="card-title text-center">Produits en cours</h5>
+                    <div class="mb-3">
+                        <label for="dateEnCoursItems" class="form-label">Sélectionnez une date</label>
+                        <input type="date" id="dateEnCoursItems" class="form-control">
+                    </div>
+                    <button class="btn btn-primary mt-2" onclick="loadEnCoursProducts()">Rechercher</button>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- Modals (chargés à la demande) -->
+<div class="modal fade" id="totalProductsModal" tabindex="-1" aria-labelledby="totalProductsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="totalProductsModalLabel">Produits au total</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <input type="text" id="searchProductInput" class="form-control" placeholder="Rechercher un produit..." onkeyup="filterProducts()">
+                </div>
+                <div id="totalProductsContent">
+                    <table class="table table-striped" id="totalProductsTable">
+                        <thead>
+                            <tr>
+                                <th>Produit</th>
+                                <th>Quantité Totale</th>
+                                <th>Détails</th>
+                            </tr>
+                        </thead>
+                        <tbody id="totalProductsBody">
+                            <tr>
+                                <td colspan="3" class="text-center">Sélectionnez une date</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="enCoursModal" tabindex="-1" aria-labelledby="enCoursModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="enCoursModalLabel">Produits en cours/pending</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="enCoursContent">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Checklist</th>
+                                <th>Produit</th>
+                                <th>Quantité</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody id="enCoursBody">
+                            <tr>
+                                <td colspan="4" class="text-center">Sélectionnez une date</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts optimisés avec defer et async -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js" defer></script>
+
+<!-- JavaScript optimisé inline pour les fonctions critiques -->
+<script>
+// Performance monitoring
+const perfData = window.performance.timing;
+const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
+console.log('Page load time:', pageLoadTime, 'ms');
+
+// Cache et optimisations
+const cache = new Map();
+const debounce = (fn, delay) => {
+    let timeoutId;
+    return (...args) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => fn(...args), delay);
+    };
+};
+
+// Fonctions critiques optimisées
+function getChecklists(day) {
+    const month = document.getElementById('month').value;
+    const cacheKey = `checklists_${month}_${day}`;
+    
+    if (cache.has(cacheKey)) {
+        displayChecklists(cache.get(cacheKey), day);
+        return;
+    }
+    
+    const list = document.getElementById('checklist-list');
+    list.innerHTML = '<tr><td colspan="4" class="text-center"><span class="loading-spinner"></span> Chargement...</td></tr>';
+    
+    fetch(`/get_checklists_for_day/${day}/?month=${month}`)
+        .then(r => r.json())
+        .then(data => {
+            cache.set(cacheKey, data);
+            displayChecklists(data, day);
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            list.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Erreur de chargement</td></tr>';
+        });
+}
+
+function displayChecklists(data, day) {
+    const list = document.getElementById('checklist-list');
+    const baseUrl = list.dataset.detailUrl.replace(/0\/$/, '');
+    const fragment = document.createDocumentFragment();
+    
+    document.querySelectorAll('.day-btn').forEach(btn => btn.classList.remove('selected'));
+    document.querySelector(`.day-btn[data-day='${day}']`)?.classList.add('selected');
+    
+    if (data.checklists?.length > 0) {
+        data.checklists.forEach(checklist => {
+            const row = document.createElement('tr');
+            row.className = `clickable-row status-${checklist.status}`;
+            row.dataset.href = `${baseUrl}${checklist.id}/`;
+            
+            const date = new Date(new Date(checklist.added_on).getTime() + 5 * 60 * 60 * 1000);
+            row.innerHTML = `
+                <td>${formatTimeWithoutSeconds(checklist.heure_livraison)}</td>
+                <td>${checklist.name}</td>
+                <td>${checklist.conseillere || 'N/A'}</td>
+                <td>${formatDateTime(date)}</td>
+            `;
+            row.onclick = function() { window.location.href = this.dataset.href; };
+            fragment.appendChild(row);
+        });
+    } else {
+        const row = document.createElement('tr');
+        row.innerHTML = '<td colspan="4">Aucune checklist disponible</td>';
+        fragment.appendChild(row);
+    }
+    
+    list.innerHTML = '';
+    list.appendChild(fragment);
+}
+
+const formatDateTime = d => new Intl.DateTimeFormat('fr-FR', {
+    year: 'numeric', month: 'long', day: 'numeric',
+    hour: '2-digit', minute: '2-digit', hour12: false
+}).format(d);
+
+const formatTimeWithoutSeconds = t => t?.includes(':') ? t.split(':').slice(0,2).join(':') : t || '';
+
+function updateAgenda() {
+    const month = document.getElementById('month').value;
+    window.location.href = `?month=${month}&day=1`;
+}
+
+// Optimized product loading
+let allProducts = [];
+let productRequest = null;
+
+function loadTotalProducts() {
+    const date = document.getElementById('totalProductsDate').value;
+    if (!date) { alert('Sélectionnez une date'); return; }
+    
+    productRequest?.abort();
+    const controller = new AbortController();
+    productRequest = controller;
+    
+    const modal = new bootstrap.Modal(document.getElementById('totalProductsModal'));
+    modal.show();
+    
+    document.getElementById('totalProductsBody').innerHTML = '<tr><td colspan="3" class="text-center">Chargement...</td></tr>';
+    
+    fetch(`/api/checklist-items-by-date/?date=${date}`, { signal: controller.signal })
+        .then(r => r.json())
+        .then(data => {
+            allProducts = data.items || [];
+            displayProducts();
+            productRequest = null;
+        })
+        .catch(err => {
+            if (err.name !== 'AbortError') {
+                console.error('Error:', err);
+                document.getElementById('totalProductsBody').innerHTML = '<tr><td colspan="3" class="text-center text-danger">Erreur</td></tr>';
+            }
+            productRequest = null;
+        });
+}
+
+function displayProducts() {
+    const tbody = document.getElementById('totalProductsBody');
+    if (allProducts.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" class="text-center">Aucun produit trouvé</td></tr>';
+        return;
+    }
+    
+    const productMap = new Map();
+    allProducts.forEach(item => {
+        const name = item.product_name || 'N/A';
+        if (!productMap.has(name)) productMap.set(name, { total: 0, details: [] });
+        const p = productMap.get(name);
+        p.total += item.quantity || 0;
+        p.details.push({ checklist: item.checklist_name, quantity: item.quantity });
+    });
+    
+    const fragment = document.createDocumentFragment();
+    Array.from(productMap.entries())
+        .filter(([_, d]) => d.total > 0)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .forEach(([name, data]) => {
+            const safeId = name.replace(/[^a-zA-Z0-9]/g, '');
+            const row = document.createElement('tr');
+            row.className = 'product-row';
+            row.innerHTML = `
+                <td>${name}</td>
+                <td><strong>${data.total}</strong></td>
+                <td><button class="btn btn-sm btn-outline-info" data-bs-toggle="collapse" data-bs-target="#details-${safeId}">Détails</button></td>
+            `;
+            fragment.appendChild(row);
+            
+            const detailRow = document.createElement('tr');
+            detailRow.className = 'collapse';
+            detailRow.id = `details-${safeId}`;
+            detailRow.innerHTML = `<td colspan="3"><div class="small text-muted ps-3">${data.details.map(d => `• ${d.checklist}: <strong>${d.quantity}</strong>`).join('<br>')}</div></td>`;
+            fragment.appendChild(detailRow);
+        });
+    
+    tbody.innerHTML = '';
+    tbody.appendChild(fragment);
+}
+
+const filterProducts = debounce(() => {
+    const search = document.getElementById('searchProductInput').value.toLowerCase();
+    document.querySelectorAll('#totalProductsBody .product-row').forEach(row => {
+        const show = row.cells[0].textContent.toLowerCase().includes(search);
+        row.style.display = show ? '' : 'none';
+        const next = row.nextElementSibling;
+        if (next?.classList.contains('collapse') && !show) next.style.display = 'none';
+    });
+}, 300);
+
+function loadEnCoursProducts() {
+    const date = document.getElementById('dateEnCoursItems').value;
+    if (!date) { alert('Sélectionnez une date'); return; }
+    
+    const modal = new bootstrap.Modal(document.getElementById('enCoursModal'));
+    modal.show();
+    
+    document.getElementById('enCoursBody').innerHTML = '<tr><td colspan="4" class="text-center">Chargement...</td></tr>';
+    
+    fetch(`/api/checklist-items-encours/?date=${date}&status=en_cours,pending`)
+        .then(r => r.json())
+        .then(data => {
+            const items = data.items || [];
+            const tbody = document.getElementById('enCoursBody');
+            
+            if (items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center">Aucun produit en cours</td></tr>';
+                return;
+            }
+            
+            const fragment = document.createDocumentFragment();
+            let total = 0;
+            
+            items.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = item.status === 'en_cours' ? 'table-warning' : 'table-info';
+                row.innerHTML = `
+                    <td>${item.checklist_name || 'N/A'}</td>
+                    <td>${item.product_name || 'N/A'}</td>
+                    <td><strong>${item.quantity || 0}</strong></td>
+                    <td><span class="badge ${item.status === 'en_cours' ? 'bg-warning text-dark' : 'bg-info'}">${item.status === 'en_cours' ? 'En cours' : 'Pending'}</span></td>
+                `;
+                fragment.appendChild(row);
+                total += item.quantity || 0;
+            });
+            
+            const totalRow = document.createElement('tr');
+            totalRow.className = 'table-secondary';
+            totalRow.innerHTML = `<td colspan="2"><strong>TOTAL</strong></td><td><strong>${total}</strong></td><td></td>`;
+            fragment.appendChild(totalRow);
+            
+            tbody.innerHTML = '';
+            tbody.appendChild(fragment);
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            document.getElementById('enCoursBody').innerHTML = '<tr><td colspan="4" class="text-center text-danger">Erreur</td></tr>';
+        });
+}
+
+// Print functions optimized
+function printChecklists() {
+    const date = document.getElementById('checklist-date').value;
+    if (!date) { alert('Sélectionnez une date'); return; }
+    
+    const items = Array.from(document.querySelectorAll('.page')).filter(i => i.dataset.checklistDate === date);
+    if (items.length === 0) { alert('Aucune checklist trouvée'); return; }
+    
+    const content = items.map(item => {
+        const clone = item.cloneNode(true);
+        return `<div class="print-page">${clone.innerHTML}</div>`;
+    }).join('');
+    
+    openPrintWindow(content, 'Checklists');
+}
+
+function printLivraisons() {
+    const date = document.getElementById('livraison-date').value;
+    if (!date) { alert('Sélectionnez une date'); return; }
+    
+    const items = Array.from(document.querySelectorAll('.livraison-page')).filter(i => i.dataset.livraisonDate === date);
+    if (items.length === 0) { alert('Aucune livraison trouvée'); return; }
+    
+    const content = items.map(item => `<div class="print-page">${item.cloneNode(true).innerHTML}</div>`).join('');
+    openPrintWindow(content, 'Livraisons');
+}
+
+function openPrintWindow(content, title) {
+    const w = window.open('', '', 'height=800,width=1200');
+    w.document.write(`
+        <html><head><title>${title}</title>
+        <style>
+            @media print {
+                @page { size: A4 landscape; margin: 10mm; }
+                .print-page { page-break-after: always; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+                .print-page:last-child { page-break-after: auto; }
+            }
+        </style>
+        </head><body>${content}</body></html>
+    `);
+    w.document.close();
+    w.onload = () => setTimeout(() => w.print(), 250);
+}
+
+// Initialize on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+    // Theme
+    const theme = localStorage.getItem('theme');
+    if (theme === 'dark') document.body.classList.add('dark-mode');
+    
+    document.getElementById('theme-toggle')?.addEventListener('click', () => {
+        const isDark = document.body.classList.toggle('dark-mode');
+        localStorage.setItem('theme', isDark ? 'dark' : '');
+    });
+    
+    // Sidebar
+    const sidebar = document.getElementById('sidebar');
+    const showBtn = document.getElementById('show-sidebar');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    
+    toggleBtn?.addEventListener('click', () => {
+        const collapsed = sidebar.classList.toggle('collapsed');
+        if (showBtn) showBtn.style.display = collapsed ? 'block' : 'none';
+    });
+    
+    showBtn?.addEventListener('click', () => {
+        sidebar.classList.remove('collapsed');
+        showBtn.style.display = 'none';
+    });
+    
+    // Preload today's data
+    const today = new Date().getDate();
+    const month = document.getElementById('month')?.value;
+    if (month) {
+        setTimeout(() => {
+            fetch(`/get_checklists_for_day/${today}/?month=${month}`)
+                .then(r => r.json())
+                .then(data => cache.set(`checklists_${month}_${today}`, data));
+        }, 1000);
+    }
+});
+</script>
+
+{% endblock %}

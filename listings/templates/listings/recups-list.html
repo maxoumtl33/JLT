@@ -1,0 +1,122 @@
+{% extends 'listings/base.html' %}
+{%  load static%}
+{% block content %}
+<style>
+    .card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .card-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+  
+  .text-success {
+    color: #28a745 !important;
+  }
+  
+  .text-secondary {
+    color: #6c757d !important;
+  }
+  .bottom-navbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: #333;
+      padding: 10px 0;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+    }
+  
+    .bottom-navbar ul {
+      list-style: none;
+      display: flex;
+      justify-content: space-around;
+      margin: 0;
+      padding: 0;
+    }
+  
+    .bottom-navbar ul li {
+      flex: 1;
+      text-align: center;
+    }
+  
+    .bottom-navbar ul li a {
+      color: white;
+      text-decoration: none;
+      font-size: 16px;
+  }
+  
+  .bottom-navbar ul li a:hover {
+      text-decoration: underline;
+  }
+  
+  </style>
+
+<div class="container mt-5">
+  <h1 class="text-center mb-4">Liste des Journées</h1>
+<br>
+<br>
+  <!-- Date Filter Form -->
+  <form method="get" class="d-flex justify-content-center mb-4">
+    <div class="form-group me-2">
+      {{ form.date }}  <!-- The class is added directly in the form field -->
+    </div>
+    <button type="submit" class="btn btn-primary me-2">Filtrer</button>
+    <a href="{% url 'journees-list' %}" class="btn btn-secondary">Voir toute la liste</a>
+  </form>
+<br>
+  <!-- Display Events -->
+  <div class="row">
+    {% for journee in journees %}
+      <div class="col-md-4 col-lg-3 mb-4">
+        <a href="{% url 'journeerecupdetail' journee.id %}" class="text-decoration-none">
+          <div class="card shadow-sm h-100 {% if journee.date == today %}border-success{% else %}border-light{% endif %}">
+            <div class="card-body">
+              <h5 class="card-title text-center {% if journee.date == today %}text-success{% else %}text-secondary{% endif %}">
+                {{ journee.nom }}
+              </h5>
+            </div>
+          </div>
+        </a>
+      </div>
+    {% empty %}
+      <div class="col">
+        <p class="text-center">Aucune journée disponible</p>
+      </div>
+    {% endfor %}
+  </div>
+<br>
+<br>
+  <!-- Pagination -->
+  <div class="d-flex justify-content-center mt-4">
+    <nav aria-label="Page navigation">
+      <ul class="pagination">
+        {% if journees.has_previous %}
+          <li class="page-item"><a class="page-link" href="?page=1">1ère page</a></li>
+          <li class="page-item"><a class="page-link" href="?page={{ journees.previous_page_number }}">Précédent</a></li>
+        {% endif %}
+        <li class="page-item active"><a class="page-link" href="?page={{ journees.number }}">{{ journees.number }}</a></li>
+        {% if journees.has_next %}
+          <li class="page-item"><a class="page-link" href="?page={{ journees.next_page_number }}">Suivant</a></li>
+          <li class="page-item"><a class="page-link" href="?page={{ journees.paginator.num_pages }}">Dernière page</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </div>
+</div>
+             
+         
+
+
+
+
+
+{% endblock %}
+

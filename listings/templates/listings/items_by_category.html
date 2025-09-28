@@ -1,0 +1,19 @@
+<div class="container">
+    <h2>Items in Category: {{ category }}</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nom du Produit</th>
+                <th>Quantité</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in checklist_items %}
+            <tr>
+                <td>{{ item.product.name }}</td>
+                <td>{{ item.quantity }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

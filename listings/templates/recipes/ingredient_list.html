@@ -1,0 +1,202 @@
+{% extends "recipes/base.html" %}
+{% load static %}
+{% block title %}Ingrédients - Gestion Recettes{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <h1 class="h3 mb-0">Gestion des Ingrédients</h1>
+        <div>
+            <a href="{% url 'export_ingredients' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-download"></i> Exporter CSV
+            </a>
+            <a href="{% url 'ingredient_create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Nouvel Ingrédient
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="table-container">
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <form method="get" class="d-flex search-box">
+                <input type="text" name="search" class="form-control" placeholder="Rechercher un ingrédient..." value="{{ request.GET.search }}">
+                <button type="submit" class="btn btn-outline-secondary ms-2">
+                    <i class="bi bi-search"></i>
+                </button>
+                {% if request.GET.search %}
+                <a href="{% url 'ingredient_list' %}" class="btn btn-outline-danger ms-2">
+                    <i class="bi bi-x"></i>
+                </a>
+                {% endif %}
+            </form>
+        </div>
+        <div class="col-md-6 text-end">
+            <span class="text-muted">{{ ingredients.paginator.count }} ingrédient(s) trouvé(s)</span>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Unité de mesure</th>
+                    <th>Stock actuel</th>
+                    <th>Stock d'alerte</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ingredient in ingredients %}
+                <tr>
+                    <td>
+                        <strong>{{ ingredient.nom }}</strong>
+                        {% if ingredient.description %}
+                        <br><small class="text-muted">{{ ingredient.description|truncatewords:10 }}</small>
+                        {% endif %}
+                    </td>
+                    <td>{{ ingredient.unite_mesure.nom }} ({{ ingredient.unite_mesure.symbole }})</td>
+                    <td>{{ ingredient.stock_reel }} {{ ingredient.unite_mesure.symbole }}</td>
+                    <td>{{ ingredient.stock_alerte }} {{ ingredient.unite_mesure.symbole }}</td>
+                    <td>
+                        {% if ingredient.besoin_reappro %}
+                        <span class="badge bg-warning">
+                            <i class="bi bi-exclamation-triangle"></i> Stock bas
+                        </span>
+                        {% else %}
+                        <span class="badge bg-success">
+                            <i class="bi bi-check-circle"></i> OK
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'ingredient_update' ingredient.pk %}" class="btn btn-sm btn-outline-primary btn-action" title="Modifier">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <button type="button" class="btn btn-sm btn-outline-info btn-action" onclick="updateStock({{ ingredient.pk }}, {{ ingredient.stock_reel }})" title="Ajuster stock">
+                            <i class="bi bi-box-seam"></i>
+                        </button>
+                        <a href="{% url 'ingredient_delete' ingredient.pk %}" class="btn btn-sm btn-outline-danger btn-action" title="Supprimer">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">
+                        <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                        <p>Aucun ingrédient trouvé</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if ingredients.has_other_pages %}
+    <nav aria-label="Navigation">
+        <ul class="pagination justify-content-center">
+            {% if ingredients.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ ingredients.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                    Précédent
+                </a>
+            </li>
+            {% endif %}
+            
+            {% for num in ingredients.paginator.page_range %}
+                {% if ingredients.number == num %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% elif num > ingredients.number|add:'-3' and num < ingredients.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">{{ num }}</a>
+                </li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if ingredients.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ ingredients.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                    Suivant
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+<!-- Modal pour ajuster le stock -->
+<div class="modal fade" id="stockModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajuster le stock</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="stockForm">
+                    <input type="hidden" id="ingredientId">
+                    <div class="mb-3">
+                        <label for="newStock" class="form-label">Nouveau stock</label>
+                        <input type="number" class="form-control" id="newStock" step="0.01" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" onclick="saveStock()">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function updateStock(id, currentStock) {
+    document.getElementById('ingredientId').value = id;
+    document.getElementById('newStock').value = currentStock;
+    new bootstrap.Modal(document.getElementById('stockModal')).show();
+}
+
+function saveStock() {
+    const id = document.getElementById('ingredientId').value;
+    const newStock = document.getElementById('newStock').value;
+    
+    fetch("{% url 'api_stock_update' %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            ingredient_id: id,
+            nouveau_stock: newStock
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+</script>
+{% endblock %}

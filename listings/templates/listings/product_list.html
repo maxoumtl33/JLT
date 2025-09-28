@@ -1,0 +1,326 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s linear, color 0.3s linear;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #007BFF;
+            height: 100%;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar .sidebar-header {
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .sidebar a {
+            color: #fff;
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar a.active, .sidebar a:hover {
+            background-color: #0056b3;
+        }
+
+        .produits {
+            flex: 1;
+            padding: 20px;
+            background-color: #F0F2F5;
+            overflow-y: auto;
+            transition: margin-left 0.3s ease; /* Improves smoothness of layout change */
+        }
+
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            
+        }
+
+        .header .toggle-theme {
+            cursor: pointer;
+            color: #007BFF;
+        }
+        #produits.expanded {
+    margin-left: 0;
+}
+
+#produits.full-width {
+    transition: margin-left 0s;
+}
+
+.collapsed {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    width: 0; /* Ensure width collapses at the end */
+}
+
+.dark-mode {
+            background-color: #121212;
+            color: #e4e4e4;
+        }
+
+        .dark-mode .header, .dark-mode .card {
+            background-color: #1e1e1e;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .dark-mode .sidebar {
+            background-color: #1e1e1e;
+        }
+
+        .dark-mode .sidebar a {
+            color: #e4e4e4;
+        }
+
+        .dark-mode .sidebar a.active, .dark-mode .sidebar a:hover {
+            background-color: #333;
+            color: #fff;
+        }
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header" style="margin-top: 100px;">Menu <button class="toggle-sidebar" id="sidebar-toggle"><i class="fas fa-bars"></i></button></div>
+  <a href="{% url 'acceuilresponsables' %}"><i class="fa-solid fa-desktop"></i> Tableau de bord Admin</a>
+  <a href="{% url 'responsablelist' %}"><i class="fas fa-home"></i> Suivi journée</a>
+  <a href="{% url 'recuptoday' %}"><i class="fas fa-sync"></i> Récups</a>
+  <a href="{% url 'livraisonstomorrow' %}"><i class="fas fa-shipping-fast"></i> Dispatch</a>
+  <a href="{% url 'voir_checklist' %}"><i class="fas fa-clipboard-list"></i> Checklist</a>
+  <a href="{% url 'creerchecklist' %}"><i class="fas fa-list-check"></i> Checklist Ventes</a>
+  <a href="/admin" target="_blank"><i class="fas fa-tools"></i> Menu admin</a>
+  <button class="toggle-theme" id="theme-toggle" style="margin-top:20px;"><i class="fas fa-moon"></i> Thème</button>
+  <div style="margin-top:20px; font-size:14px; color:#ccc;">Utilisateur: {{ user.username }}</div>
+</div>
+<div class="produits" id="produits">
+       <div class="header">
+        <h2>Liste des Produits (Checklist)</h2>
+            <button id="show-sidebar" style="display:none; position: fixed; top: 12%; left: 10px;">
+                <i class="fas fa-bars fa-2xl"></i>
+            </button>
+        <div class="user-info">
+            <button id="logoutBtn" style="border:none; background:none; cursor:pointer;"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
+        </div>
+    </div>
+    <br>
+    <br>
+    <br>
+    <br>
+    <form method="get" class="d-flex justify-content-end mb-3">
+        <input type="text" name="query" value="{{ query }}" class="form-control w-25" placeholder="Rechercher un produit...">
+        <button type="submit" class="btn btn-primary ms-2">Rechercher</button>
+        <a href="{% url 'product_list' %}" class="btn btn-primary ms-2">Liste produits</a>
+    </form>
+    
+
+    <div class="row">
+        {% for product in page_obj %}
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        <div class="col-12 col-md-4 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-primary" data-field="name">{{ product.name }} / id: {{ product.id }}</h5>
+                    <p class="card-text text-muted" data-field="description">{{ product.description|truncatewords:20 }}</p>
+                    <p class="quantity" data-field="quantity"><strong>Quantité :</strong> <span id="quantity-text-{{ product.id }}">{{ product.quantity }}</span></p>
+                    <div class="d-flex justify-content-between mt-3">
+                        <button class="btn btn-outline-primary btn-sm edit-btn" data-product-id="{{ product.id }}" data-state="edit">Modifier</button>
+                        <a href="{% url 'product_qr_code' product.id %}" class="btn btn-outline-success btn-sm" target="_blank">
+                            <i class="fas fa-qrcode"></i> QR Code
+                        </a>
+                        <a href="{% url 'view_quantity_change_logs' product.id %}" class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-history"></i> Historique
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <p class="text-center text-muted">Aucun produit trouvé.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="d-flex justify-content-center mt-4">
+        {% if is_paginated %}
+        <nav>
+            <ul class="pagination">
+                <!-- Previous Page Link -->
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?query={{ query }}&page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                        &laquo;
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link" aria-label="Previous">&laquo;</span>
+                </li>
+                {% endif %}
+                
+                <!-- Page Number Links -->
+                {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+                {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                <li class="page-item">
+                    <a class="page-link" href="?query={{ query }}&page={{ num }}">{{ num }}</a>
+                </li>
+                {% elif num == 1 or num == page_obj.paginator.num_pages %}
+                <li class="page-item">
+                    <a class="page-link" href="?query={{ query }}&page={{ num }}">{{ num }}</a>
+                </li>
+                {% elif forloop.first or forloop.last %}
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+                {% endif %}
+                {% endfor %}
+                
+                <!-- Next Page Link -->
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?query={{ query }}&page={{ page_obj.next_page_number }}" aria-label="Next">
+                        &raquo;
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link" aria-label="Next">&raquo;</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+    
+    
+</div>
+
+<script>
+// Gérer le clic sur le bouton "Modifier"
+document.querySelectorAll('.edit-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const productId = btn.dataset.productId;
+      const state = btn.dataset.state; // "edit" ou "save"
+      const cardBody = btn.closest('.card-body');
+
+      // Élément quantite
+      const quantitySpan = document.getElementById(`quantity-text-${productId}`);
+
+      if (state === "edit") {
+        // Passer en mode édition
+        const currentQty = quantitySpan.textContent.trim();
+        quantitySpan.innerHTML = `<input type="number" id="qty-input-${productId}" value="${currentQty}">`;
+        btn.textContent = "Enregistrer";
+        btn.dataset.state = "save";
+      } else {
+        // Sauvegarde
+        const newQty = document.getElementById(`qty-input-${productId}`).value;
+
+        // Envoyer via fetch
+        fetch("{% url 'product_inline_update' %}", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+          },
+          body: JSON.stringify({
+            id: productId,
+            quantity: newQty
+          }),
+        }).then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Mise à jour visuelle
+            document.getElementById(`quantity-text-${productId}`).textContent = newQty;
+
+            // Retourner en mode lecture
+            const btn = document.querySelector(`.edit-btn[data-product-id="${productId}"]`);
+            btn.textContent = "Modifier";
+            btn.dataset.state = "edit";
+          } else {
+            alert("Erreur lors de la sauvegarde");
+          }
+        });
+      }
+    });
+  });
+
+// JavaScript function to filter products
+    function filterProducts() {
+        const input = document.getElementById('searchInput').value.toLowerCase();
+        const productCards = document.querySelectorAll('.card');
+        
+        productCards.forEach(card => {
+            const title = card.querySelector('.card-title').textContent.toLowerCase();
+            card.style.display = title.includes(input) ? 'block' : 'none';
+        });
+    }
+
+    const toggleBtn = document.getElementById('theme-toggle');
+        toggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+        });
+
+          document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.getElementById('sidebar');
+    const btnShowSidebar = document.getElementById('show-sidebar');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    const dashboard = document.getElementById('dashboard');
+
+    // Quand on clique sur le bouton toggle pour cacher ou réafficher
+    toggleBtn.addEventListener('click', () => {
+        if (sidebar.classList.contains('collapsed')) {
+            // La sidebar est masquée, on la remonte
+            sidebar.classList.remove('collapsed');
+            btnShowSidebar.style.display = 'none';   // cache le bouton
+            dashboard.classList.remove('full-width');
+        } else {
+            // La sidebar est visible, on la cache
+            sidebar.classList.add('collapsed');
+            btnShowSidebar.style.display = 'block';  // montre le bouton pour la réafficher
+            dashboard.classList.add('full-width');
+        }
+    });
+
+    // Quand on clique sur le bouton pour faire réapparaître la sidebar
+    btnShowSidebar.addEventListener('click', () => {
+        sidebar.classList.remove('collapsed');
+        btnShowSidebar.style.display = 'none'; // cache le bouton
+        dashboard.classList.remove('full-width');
+    });
+});
+</script>
+
+{% endblock %}

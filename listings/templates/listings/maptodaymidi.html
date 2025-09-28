@@ -1,0 +1,254 @@
+{% extends 'listings/base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    .column {
+        float: left;
+        width: 30%;
+        padding: 15px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        margin: 10px;
+        background-color: #fafafa;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: box-shadow 0.3s ease;
+    }
+    .column:hover {
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    .task {
+        padding: 12px;
+        margin: 10px 0;
+        background-color: #ffffff;
+        border-radius: 5px;
+        cursor: pointer;
+        border: 1px solid #ddd;
+        transition: background-color 0.3s ease;
+    }
+    .task:hover {
+        background-color: #f0f0f0;
+    }
+    .mapholder {
+        height: 500px;
+        width: 100%;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    #map {
+        height: 100%;
+        border-radius: 8px;
+    }
+    .bottom-navbar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #333;
+        padding: 10px 0;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+    }
+    .bottom-navbar ul {
+        list-style: none;
+        display: flex;
+        justify-content: space-around;
+        margin: 0;
+        padding: 0;
+    }
+    .bottom-navbar ul li {
+        flex: 1;
+        text-align: center;
+    }
+    .bottom-navbar ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.bottom-navbar ul li a:hover {
+    text-decoration: underline;
+}
+    .table th, .table td {
+        vertical-align: middle;
+    }
+    .form1 {
+        margin-bottom: 15px;
+    }
+</style>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+<script>
+    let map;
+
+    function initMap() {
+        const livraisons = {{ livraisons|safe }};
+        const firstLocation = livraisons[0];
+        const infoWindows = [];
+
+        map = new google.maps.Map(document.getElementById("map"), {
+            center: { lat: firstLocation.lat, lng: firstLocation.lng },
+            zoom: 10.5,
+        });
+
+        livraisons.forEach(livraison => {
+            const markerInfo = `${livraison.nom} / ${livraison.heure_livraison} / ${livraison.mode_envoi} / ${livraison.convives}`;
+            const marker = new google.maps.Marker({
+                position: { lat: livraison.lat, lng: livraison.lng },
+                map: map,
+                title: markerInfo,
+            });
+
+            const infowindow = new google.maps.InfoWindow({
+                content: markerInfo,
+            });
+
+            infoWindows.push(infowindow);
+
+            marker.addListener('click', () => {
+                infoWindows.forEach(iw => iw.close());
+                infowindow.open(map, marker);
+            });
+        });
+    }
+
+    window.initMap = initMap;
+
+    $(document).ready(function() {
+        $('[data-toggle="popover"]').popover();
+        $(".task").draggable({
+            revert: 'invalid',
+            helper: "clone"
+        });
+
+        $(".column").droppable({
+            accept: ".task",
+            drop: function(event, ui) {
+                const livraisonId = ui.draggable.data('task-id');
+                const newStatut = $(this).data('statut');
+                $.ajax({
+                    url: "{% url 'update_status' %}",
+                    method: 'POST',
+                    data: {
+                        'livraison_id': livraisonId,
+                        'new_statut_id': newStatut,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function(data) {
+                        location.reload();
+                    }
+                });
+            }
+        });
+    });
+</script>
+
+<h1 class="text-center my-4">Carte du midi</h1>
+<div class="mapholder">
+    <div id="map"></div>
+    <script async src="https://maps.googleapis.com/maps/api/js?key={{key}}&loading=async&callback=initMap"></script>
+</div>
+
+<h1 class="text-center my-4">Créer les routes</h1>
+<div class="text-center mb-4">
+    <form method="POST" action="{% url 'create_routetoday' %}">
+        {% csrf_token %}
+        <input type="hidden" name="route_name" value="1">
+        <button type="submit" class="btn btn-success">Créer route
+        </button>
+    </form><div style="display: flex; flex-wrap: wrap;">
+    {% for a in routes21 %}
+    <div class="column" data-statut="{{ a.id }}">
+        <h2>{{ a.nom }}</h2>
+        {% for task in todo_livraison %}
+        {% if task.statut.nom == a.nom and task.recuperation == True %}
+        <div class="task" data-task-id="{{ task.id }}" style="background-color: pink;">
+            <a data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a>
+        </div>
+        {% else %}
+        <div class="task" data-task-id="{{ task.id }}">
+            <a data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+    {% endfor %}
+
+    {% for a in routes %}
+    <div class="column" data-statut="{{ a.id }}">
+        <h1>Route N°{{ a.nom }}</h1>
+        <p><a href="{% url 'routedetail' a.id %}" target="_blank"><i class="fa-solid fa-pen-to-square"></i></a></p>
+        <hr>
+        <p>Livreur: {{ a.livreur }}</p>
+        <p>Heure départ: {{ a.heure_depart }}</p>
+        <hr>
+        {% for task in route1 %}
+        {% if task.statut.nom == a.nom %}
+        <div class="task" data-task-id="{{ task.id }}">
+            <a data-toggle="popover" title="{{ task.heure_livraison }} / {{ task.mode_envoi }} / {{ task.convives }}">{{ task.nom }}</a>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+    {% endfor %}
+</div>
+
+<h1 class="text-center my-4">Calculer les distances</h1>
+<table id="ourtable3" class="table table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th>De</th>
+            <th>Vers</th>
+            <th>Mode</th>
+            <th>Distance km</th>
+            <th>Durée min moyenne</th>
+            <th>Durée mins trafic actuel</th>
+            <th>Supprimer</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for distance in distances %}
+        <tr>
+            <td>{{ distance.from_location }}</td>
+            <td>{{ distance.to_location }}</td>
+            <td>{{ distance.mode }}</td>
+            <td>{{ distance.distance_km }}</td>
+            <td>{{ distance.distance_mins }}</td>
+            <td>{{ distance.distance_traffic_mins }}</td>
+            <td><a href="{% url 'deletedistance' distance.id %}">Supprimer</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<nav class="bottom-navbar">
+    <ul>
+        <li><a href="{% url 'acceuilresponsables'%}" class="nav__link"><i class="fa-solid fa-user-ninja"></i><span class="nav__name">Menu Admin</span></a></li>
+        <li><a href="{% url 'livraisonstomorrow'%}" class="nav__link"><i class="fa-solid fa-location-dot"></i><span class="nav__name">Dispatch</span></a></li>
+    </ul>
+</nav>
+
+<br><br>
+<form method="POST" class="container">
+    {% csrf_token %}
+    <div class="form1">
+        {{ form.from_location|as_crispy_field }}
+    </div>
+    <div class="form1">
+        {{ form.to_location|as_crispy_field }}
+    </div>
+    <div class="form1">
+        {{ form.mode|as_crispy_field }}
+    </div>
+    <button class="btn btn-primary" type="submit">Calculer</button>
+</form>
+
+{% endblock %}

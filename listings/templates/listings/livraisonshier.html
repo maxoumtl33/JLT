@@ -1,0 +1,136 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% block content %}
+<nav class="nav container">
+  <a href="#" class="nav__logo">Julien Leblanc Traiteur</a>
+
+  <div class="nav__menu" id="nav-menu">
+      <ul class="nav__list">
+        {% if user.is_authenticated %}
+          <li class="nav__item">
+            <form action="{% url 'logout' %}" method="post">
+              {% csrf_token %}
+              <button type="submit" class="nav__link active-link" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i>
+          </form>
+                  <span class="nav__name">Logout</span>
+        </button>
+          </li>
+          {% else %}
+
+          <li class="nav__item">
+            <a href="{% url 'login' %}" class="nav__link" style="color: green;"><i class="fa-regular fa-user"></i></i></a>
+                  <span class="nav__name">Login</span>
+              </a>
+          </li>
+          {% endif %}
+          <li class="nav__item">
+            <a type="button" class="nav__link" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
+              <i class="fa-solid fa-link"></i><span class="nav__name">Liens</span>
+            </a>
+          </li>
+          <li class="nav__item">
+            <a  href="{% url 'acceuilresponsables' %}" class="nav__link"><i class="fa-solid fa-user-ninja"></i>
+              <span class="nav__name">Retour</span>
+            </a>
+          </li>
+      </ul>
+  </div>
+
+  <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
+</nav>
+<br>
+<br>
+<div class="body">
+  <h1 style="text-align: center;">FEUILLE DE ROUTE</h1> <h1 style="text-align: center;"> {{journees}} </h1>
+  <br>
+  <br>
+  <br>
+  <br>
+  <table class="table table-striped">
+      <thead class="thead-dark">
+        <tr>
+          
+          <th scope="col" style="color: #303FBA;">Heure départ</th>
+          <th scope="col" style="color: #303FBA;">Nom du contrat</th>
+          <th scope="col" style="color: #303FBA;">Infos</th>
+          <th scope="col" style="color: #303FBA;">Heure livraison</th>
+          <th scope="col" style="color: #303FBA;">Livreur</th>
+          <th scope="col" style="color: #303FBA;">Aide livreur</th>
+          <th scope="col" style="color: #303FBA;">Route</th>
+          <th scope="col" style="color: #303FBA;">Retour traiteur</th>
+          <th scope="col" style="color: #303FBA;">lien</th>
+
+        </tr>
+      </thead>
+      <tbody>
+          {% for livraison in livraisons %}
+          {% if livraison.recuperation == True %}
+        <tr>
+          
+          <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{livraison.infodetail}}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{livraison.livreur.nom}}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{livraison.aidelivreur}}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut }}</strong></td>
+          {% if livraison.retourtraiteur == retourtraiteur %}
+          <td><strong><i class="fa-solid fa-house-chimney-window fa-xl"></i></strong></td>
+          {%  else %}
+          <td></td>
+          {% endif %}
+          <td><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+        </tr>
+
+          {% else %}
+          <tr>
+          
+            <td><strong>{{ livraison.heure_depart }}</strong></td>
+            <td><strong>{{livraison.nom}}</strong></td>
+            <td><strong>à venir</strong></td>
+            <td><strong>{{ livraison.heure_livraison }}</strong></td>
+            <td><strong>{{livraison.livreur.nom}}</strong></td>
+            <td><strong>{{livraison.aidelivreur}}</strong></td>
+            <td><strong>{{ livraison.statut }}</strong></td>
+            {% if livraison.retourtraiteur == retourtraiteur %}
+          <td><strong><i class="fa-solid fa-house-chimney-window fa-xl"></i></strong></td>
+          {%  else %}
+          <td></td>
+          {% endif %}
+            <td><a href="{% url 'livraisonrespdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+          </tr>
+          {% endif %}
+        {% endfor %}
+        
+      </tbody>
+    </table>
+  </div>
+  
+  <br>
+  <br>
+  <br>
+  
+      
+  
+  <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="offcanvasExampleLabel">Liens Formulaires</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div>
+        <p><a class="btn btn-primary" href="https://discord.com/channels/1174091428876533800/1194755233935523952" target="_blank">Photo livraison <i class="fa-brands fa-discord"></i></a></p>
+        <p><a href="https://view.forms.app/loicveyre/jeparsenlivraison" target="_blank" class="btn btn-primary">Départ <i class="fa-solid fa-truck-fast"></i></a></p>
+        <p><a href="https://view.forms.app/loicveyre/jereviensdelivraison" target="_blank" class="btn btn-primary">Retour <i class="fa-sharp fa-solid fa-truck fa-flip-horizontal"></i></a></p>
+        <p><a href="https://oakmnxgj.forms.app/recuplivreurs" target="_blank" class="btn btn-primary">Récup <i class="fa-solid fa-dolly"></i></a>
+        </p>
+        <p><a href="https://oakmnxgj.forms.app/essence" target="_blank" class="btn btn-primary">Essence <i class="fa-solid fa-gas-pump"></i></a>
+        </p>
+      </p>    
+    </div>
+    </div>
+  </div>
+  
+
+
+{% endblock %}

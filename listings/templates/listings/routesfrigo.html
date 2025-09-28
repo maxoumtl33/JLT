@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Feuille de Route</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        /* Header moderne */
+        .header {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .header h2 {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .header-subtitle {
+            color: #666;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-subtitle i {
+            color: #667eea;
+        }
+
+        /* Container principal */
+        .routes-container {
+            padding: 20px 12px;
+        }
+
+        /* Route Card moderne */
+        .route-card {
+            background: white;
+            border-radius: 20px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .route-card.expanded {
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        }
+
+        .route-card.all-checked {
+            background: linear-gradient(135deg, #4CAF50 0%, #45B049 100%);
+        }
+
+        .route-card.all-checked .route-header {
+            color: white;
+        }
+
+        /* Route Header amélioré */
+        .route-header {
+            padding: 18px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .route-header:active {
+            background: rgba(0,0,0,0.02);
+        }
+
+        .route-info {
+            flex: 1;
+        }
+
+        .route-time {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 6px;
+        }
+
+        .route-card.all-checked .route-time {
+            color: white;
+        }
+
+        .route-time i {
+            font-size: 16px;
+            color: #667eea;
+        }
+
+        .route-card.all-checked .route-time i {
+            color: white;
+        }
+
+        .route-driver {
+            font-size: 14px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .route-card.all-checked .route-driver {
+            color: rgba(255,255,255,0.9);
+        }
+
+        .route-stats {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .stat-badge {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .route-card.all-checked .stat-badge {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        .route-chevron {
+            color: #999;
+            font-size: 20px;
+            transition: transform 0.3s;
+        }
+
+        .route-card.expanded .route-chevron {
+            transform: rotate(180deg);
+        }
+
+        .route-card.all-checked .route-chevron {
+            color: rgba(255,255,255,0.8);
+        }
+
+        /* Delivery List amélioré */
+        .delivery-list {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background: #f8f9fa;
+        }
+
+        .route-card.all-checked .delivery-list {
+            background: rgba(255,255,255,0.95);
+        }
+
+        .route-card.expanded .delivery-list {
+            max-height: 2000px;
+        }
+
+        .delivery-item {
+            padding: 16px 18px;
+            border-top: 1px solid rgba(0,0,0,0.06);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            transition: background 0.2s;
+        }
+
+        .delivery-item:active {
+            background: rgba(0,0,0,0.02);
+        }
+
+        /* Checkbox moderne */
+        .delivery-checkbox {
+            position: relative;
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .delivery-checkbox input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .delivery-checkbox .checkbox-ui {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .delivery-checkbox input:checked ~ .checkbox-ui {
+            background: #4CAF50;
+            border-color: #4CAF50;
+        }
+
+        .delivery-checkbox .checkbox-ui::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            height: 12px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg) scale(0);
+            transition: transform 0.2s;
+        }
+
+        .delivery-checkbox input:checked ~ .checkbox-ui::after {
+            transform: rotate(45deg) scale(1);
+        }
+
+        /* Delivery Content */
+        .delivery-content {
+            flex: 1;
+        }
+
+        .delivery-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+
+        .delivery-time-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .delivery-icons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .icon-group {
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 6px 10px;
+            border-radius: 10px;
+            gap: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .icon-count {
+            font-size: 12px;
+            font-weight: 700;
+            color: #666;
+            margin-right: 4px;
+        }
+
+        .delivery-icons i {
+            font-size: 18px;
+        }
+
+        /* Special badges */
+        .special-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(255, 165, 0, 0.3);
+        }
+
+        /* No deliveries message */
+        .no-deliveries {
+            padding: 30px;
+            text-align: center;
+            color: #999;
+            font-style: italic;
+        }
+
+        /* Bottom Navigation moderne */
+        .bottom-navbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+            z-index: 1000;
+            padding: 8px 0;
+            padding-bottom: calc(8px + env(safe-area-inset-bottom));
+        }
+
+        .bottom-navbar ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .bottom-navbar a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 10px 30px;
+            color: #666;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .bottom-navbar a:active {
+            transform: scale(0.95);
+        }
+
+        .bottom-navbar a i {
+            font-size: 24px;
+            color: #667eea;
+        }
+
+        .bottom-navbar span {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* Progress indicator */
+        .route-progress {
+            width: 100%;
+            height: 3px;
+            background: rgba(0,0,0,0.1);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+        }
+
+        .route-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+        }
+
+        .route-card.all-checked .route-progress-bar {
+            background: white;
+        }
+
+        /* Loading animation */
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .loading {
+            animation: pulse 1.5s infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 380px) {
+            .route-time {
+                font-size: 16px;
+            }
+
+            .delivery-name {
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        {% for journe in journee %}
+        <h2>{{ journe.nom }}</h2>
+        {% endfor %}
+        <div class="header-subtitle">
+            <i class="fas fa-calendar-check"></i>
+            <span id="current-date"></span>
+        </div>
+    </div>
+
+    <!-- Routes Container -->
+    <div class="routes-container">
+        {% for route in routes %}
+        <div class="route-card" id="route-{{ route.id }}" data-route-id="{{ route.id }}">
+            <div class="route-header" onclick="toggleRoute(this)">
+                <div class="route-info">
+                    <div class="route-time">
+                        <i class="fas fa-clock"></i>
+                        <span>Départ {{ route.heure_depart }}</span>
+                    </div>
+                    <div class="route-driver">
+                        <i class="fas fa-user"></i>
+                        {% for livreur in route.livreur.all %}
+                            {{ livreur.nom }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </div>
+                    <div class="route-stats">
+                        <span class="stat-badge deliveries-count">0 livraisons</span>
+                        <span class="stat-badge checked-count">0 validées</span>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-down route-chevron"></i>
+            </div>
+
+            <div class="delivery-list">
+                {% if route.livraisons.all %}
+                    {% for livraison in route.livraisons.all %}
+                    {% if not livraison.recuperation %}
+                    <div class="delivery-item">
+                        <div class="delivery-checkbox">
+                            <input type="checkbox"
+                                   id="delivery-{{ livraison.id }}"
+                                   onchange="updateRouteStatus({{ route.id }})">
+                            <div class="checkbox-ui"></div>
+                        </div>
+
+                        <div class="delivery-content">
+                            <div class="delivery-name">{{ livraison.nom }}</div>
+                            <div class="delivery-time-badge">
+                                <i class="fas fa-clock"></i>
+                                {{ livraison.heure_livraison }}
+                            </div>
+
+                            {% if livraison.infodetail %}
+                            <div class="delivery-icons">
+                                <!-- Cambro -->
+                                {% if 'cambro' in livraison.infodetail|lower %}
+                                <div class="icon-group">
+                                    <i class="fas fa-box-archive" style="color: #a24716;"></i>
+                                </div>
+                                {% endif %}
+
+                                <!-- Glace -->
+                                {% if 'glace' in livraison.infodetail|lower %}
+                                <div class="icon-group">
+                                    <i class="fas fa-snowflake" style="color: #74C0FC;"></i>
+                                </div>
+                                {% endif %}
+
+                                <!-- Café Thermos -->
+                                {% for num in "123456789" %}
+                                    {% if num|add:" café thermos" in livraison.infodetail|lower %}
+                                    <div class="icon-group">
+                                        <span class="icon-count">{{ num }}×</span>
+                                        <i class="fas fa-mug-hot" style="color: #533018;"></i>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+
+                                <!-- Café Jetable -->
+                                {% for num in "123456789" %}
+                                    {% if num|add:" café jetable" in livraison.infodetail|lower %}
+                                    <div class="icon-group">
+                                        <span class="icon-count">{{ num }}×</span>
+                                        <i class="fas fa-coffee" style="color: #533018;"></i>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+
+                                <!-- Thé Thermos -->
+                                {% for num in "123456789" %}
+                                    {% if num|add:" thé thermos" in livraison.infodetail|lower %}
+                                    <div class="icon-group">
+                                        <span class="icon-count">{{ num }}×</span>
+                                        <i class="fas fa-mug-hot" style="color: #74C0FC;"></i>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+
+                                <!-- Thé Jetable -->
+                                {% for num in "123456789" %}
+                                    {% if num|add:" thé jetable" in livraison.infodetail|lower %}
+                                    <div class="icon-group">
+                                        <span class="icon-count">{{ num }}×</span>
+                                        <i class="fas fa-coffee" style="color: #74C0FC;"></i>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+
+                                <!-- Part Chaud -->
+                                {% if 'part chaud' in livraison.nom|lower or 'part chaud' in livraison.infodetail|lower %}
+                                <div class="special-badge">
+                                    <i class="fas fa-fire-flame-curved"></i>
+                                    Part Chaud
+                                </div>
+                                {% endif %}
+
+                                <!-- Checklist -->
+                                {% if 'checklist' in livraison.infodetail|lower or 'checklist' in livraison.nom|lower %}
+                                <div class="icon-group">
+                                    <i class="fas fa-cart-flatbed" style="color: #666;"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <div class="no-deliveries">
+                        <i class="fas fa-inbox" style="font-size: 48px; color: #ddd; margin-bottom: 10px;"></i>
+                        <p>Aucune livraison pour cette route</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="route-progress">
+                <div class="route-progress-bar" style="width: 0%;"></div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-navbar">
+        <ul>
+            <li>
+                <a href="{% url 'journees-list' %}">
+                    <i class="fas fa-calendar-days"></i>
+                    <span>Journées</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <script>
+        // Set current date
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString('fr-FR', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        // Toggle route expansion
+        function toggleRoute(element) {
+            const routeCard = element.closest('.route-card');
+            routeCard.classList.toggle('expanded');
+        }
+
+        // Update route status and progress
+        function updateRouteStatus(routeId) {
+            const routeCard = document.getElementById(`route-${routeId}`);
+            const checkboxes = routeCard.querySelectorAll('.delivery-checkbox input');
+            const totalDeliveries = checkboxes.length;
+            const checkedDeliveries = Array.from(checkboxes).filter(cb => cb.checked).length;
+
+            // Update counters
+            const deliveriesCount = routeCard.querySelector('.deliveries-count');
+            const checkedCount = routeCard.querySelector('.checked-count');
+
+            deliveriesCount.textContent = `${totalDeliveries} livraison${totalDeliveries > 1 ? 's' : ''}`;
+            checkedCount.textContent = `${checkedDeliveries} validée${checkedDeliveries > 1 ? 's' : ''}`;
+
+            // Update progress bar
+            const progressBar = routeCard.querySelector('.route-progress-bar');
+            const progress = totalDeliveries > 0 ? (checkedDeliveries / totalDeliveries * 100) : 0;
+            progressBar.style.width = `${progress}%`;
+
+            // Update card style if all checked
+            if (checkedDeliveries === totalDeliveries && totalDeliveries > 0) {
+                routeCard.classList.add('all-checked');
+
+                // Vibrate on completion (if supported)
+                if (navigator.vibrate) {
+                    navigator.vibrate(200);
+                }
+            } else {
+                routeCard.classList.remove('all-checked');
+            }
+
+            // Save to localStorage
+            saveCheckboxStates();
+        }
+
+        // Save checkbox states to localStorage
+        function saveCheckboxStates() {
+            const states = {};
+            document.querySelectorAll('.delivery-checkbox input').forEach(checkbox => {
+                states[checkbox.id] = checkbox.checked;
+            });
+            localStorage.setItem('delivery-states', JSON.stringify(states));
+        }
+
+        // Load checkbox states from localStorage
+        function loadCheckboxStates() {
+            const states = JSON.parse(localStorage.getItem('delivery-states') || '{}');
+            Object.keys(states).forEach(id => {
+                const checkbox = document.getElementById(id);
+                if (checkbox) {
+                    checkbox.checked = states[id];
+                }
+            });
+
+            // Update all route statuses
+            document.querySelectorAll('.route-card').forEach(card => {
+                const routeId = card.dataset.routeId;
+                if (routeId) {
+                    updateRouteStatus(routeId);
+                }
+            });
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCheckboxStates();
+
+            // Initialize counters for all routes
+            document.querySelectorAll('.route-card').forEach(card => {
+                const routeId = card.dataset.routeId;
+                if (routeId) {
+                    updateRouteStatus(routeId);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

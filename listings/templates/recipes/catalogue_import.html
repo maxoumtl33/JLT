@@ -1,0 +1,164 @@
+<!-- templates/recipes/import_hector.html -->
+{% extends "recipes/base.html" %}
+{% block title %}Import Hector Larivée - Gestion Recettes{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <h1 class="h3 mb-0">Import Catalogue Hector Larivée</h1>
+        <img src="https://via.placeholder.com/150x50/007bff/ffffff?text=Hector+Larivée" 
+             alt="Hector Larivée" class="img-fluid" style="max-height: 40px;">
+    </div>
+</div>
+
+<div class="content-body">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="alert alert-info">
+                            <h5 class="alert-heading">
+                                <i class="bi bi-info-circle"></i> Format attendu
+                            </h5>
+                            <p class="mb-2">Le fichier Excel doit avoir la structure suivante :</p>
+                            <ul class="mb-0">
+                                <li>Ligne 1 : En-tête du rapport (JOBSCHED / PD371)</li>
+                                <li>Ligne 2 : Informations d'impression</li>
+                                <li>Ligne 3 : <strong>En-têtes des colonnes</strong> : # produit | Description | Format | Provenance | Prix</li>
+                                <li>Ligne 4+ : Données des produits</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="fichier" class="form-label required">
+                                <i class="bi bi-file-excel"></i> Fichier Excel Hector Larivée
+                            </label>
+                            <input type="file" class="form-control" id="fichier" name="fichier" 
+                                   accept=".xlsx,.xls" required>
+                            <small class="text-muted">
+                                Format accepté : Liste prix Price list.xlsx
+                            </small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="date_debut" class="form-label">
+                                <i class="bi bi-calendar"></i> Date de début de validité
+                            </label>
+                            <input type="date" class="form-control" id="date_debut" name="date_debut" 
+                                   value="{% now 'Y-m-d' %}">
+                            <small class="text-muted">
+                                Les anciens prix seront automatiquement désactivés à cette date
+                            </small>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5><i class="bi bi-gear"></i> Traitement automatique</h5>
+                                <ul class="list-unstyled">
+                                    <li><i class="bi bi-check-circle text-success"></i> Normalisation des noms</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Détection des unités</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Gestion des doublons</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Mise à jour des prix</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h5><i class="bi bi-list-check"></i> Exemple de données</h5>
+                                <div class="bg-light p-2 small font-monospace">
+                                    <div>06314 | Boîte 19x13x10 275C | 1UN CS | CAN | 1.75</div>
+                                    <div>06715 | Enregistreur de Température | 1UN CS | USA | 63.75</div>
+                                    <div>06415 | Étiquette Blanche | 3000UN CS | USA | 66.25</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-warning mt-3">
+                            <h6 class="alert-heading">
+                                <i class="bi bi-exclamation-triangle"></i> Important
+                            </h6>
+                            <ul class="mb-0 small">
+                                <li>Les ingrédients existants seront automatiquement reconnus (insensible à la casse)</li>
+                                <li>Les nouveaux ingrédients seront créés avec l'unité détectée depuis le format</li>
+                                <li>Les codes produits seront sauvegardés comme référence fournisseur</li>
+                                <li>Le format (ex: "1000UN CS") sera sauvegardé comme conditionnement</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'catalogue_list' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Retour au catalogue
+                            </a>
+                            
+                            <div>
+                                <button type="button" class="btn btn-outline-primary me-2" 
+                                        onclick="document.getElementById('fichier').click()">
+                                    <i class="bi bi-folder-open"></i> Parcourir
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-cloud-upload"></i> Importer le catalogue
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card bg-light">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-lightbulb"></i> Aide</h5>
+                </div>
+                <div class="card-body">
+                    <h6>Processus d'import :</h6>
+                    <ol class="small">
+                        <li>Téléchargez le fichier Excel depuis Hector Larivée</li>
+                        <li>Vérifiez que le format correspond (3 lignes d'en-tête)</li>
+                        <li>Sélectionnez le fichier et la date</li>
+                        <li>Cliquez sur "Importer"</li>
+                    </ol>
+                    
+                    <hr>
+                    
+                    <h6>Normalisation des noms :</h6>
+                    <p class="small">Le système nettoie automatiquement :</p>
+                    <ul class="small">
+                        <li>Les dimensions (19x13x10)</li>
+                        <li>Les codes produits (275C)</li>
+                        <li>La casse (boite → Boîte)</li>
+                        <li>Les accents manquants</li>
+                    </ul>
+                    
+                    <hr>
+                    
+                    <h6>Unités détectées :</h6>
+                    <div class="small">
+                        <span class="badge bg-secondary me-1">CS → Caisse</span>
+                        <span class="badge bg-secondary me-1">UN → Unité</span>
+                        <span class="badge bg-secondary me-1">KG → Kilogramme</span>
+                        <span class="badge bg-secondary me-1">BTE → Boîte</span>
+                    </div>
+                    
+                
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Afficher le nom du fichier sélectionné
+document.getElementById('fichier').addEventListener('change', function(e) {
+    const fileName = e.target.files[0]?.name;
+    if (fileName) {
+        const small = e.target.nextElementSibling;
+        small.innerHTML = `<i class="bi bi-check-circle text-success"></i> Fichier sélectionné : ${fileName}`;
+    }
+});
+</script>
+{% endblock %}

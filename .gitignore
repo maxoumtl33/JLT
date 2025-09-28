@@ -1,0 +1,7 @@
+# Ignore the SQLite database file
+db.sqlite3
+
+# Ignore the Python cache
+__pycache__/
+*.py[cod]
+

@@ -1,0 +1,1169 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% block content %}
+<style>
+  .card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.card-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.text-success {
+  color: #28a745 !important;
+}
+
+.text-secondary {
+  color: #6c757d !important;
+}
+.bottom-navbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #333;
+    padding: 10px 0;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+  }
+
+  .bottom-navbar ul {
+    list-style: none;
+    display: flex;
+    justify-content: space-around;
+    margin: 0;
+    padding: 0;
+  }
+
+  .bottom-navbar ul li {
+    flex: 1;
+    text-align: center;
+  }
+
+  .bottom-navbar ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.bottom-navbar ul li a:hover {
+    text-decoration: underline;
+}
+
+
+
+</style>
+
+{% if is_chefcuisine %}
+<div style="text-align: center;">
+  <div class="body">
+    <h1 style="text-align: center;">LIVRAISONS DU JOUR</h1>
+    <br>
+    <br>
+    <p style="text-align: center;">{{ livraisonsok|length }} livraisons et {{ livraisonsrecup|length }} récupérations aujourd'hui</p>
+
+    <a href="{% url 'creerchecklist' %}" class="btn btn-primary mt-3">Voir Checklists</a>
+    <br>
+    <br>
+    <form action="{% url 'logout' %}" method="post" class="logout-form">
+      {% csrf_token %}
+      <button type="submit" class="logout-button" style="color: red;">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          Déconnexion
+      </button>
+  </form>
+    <br>
+    <br>
+    <table class="table table-hover">
+        <thead class="thead-dark">
+          <tr>
+
+            <th scope="col" style="color: #303FBA;">Heure départ</th>
+            <th scope="col" style="color: #303FBA;">Nom du contrat</th>
+            <th scope="col" style="color: #303FBA;">Infos</th>
+            <th scope="col" style="color: #303FBA;">Heure livraison</th>
+            <th scope="col" style="color: #303FBA;">Livreur</th>
+            <th scope="col" style="color: #303FBA;">Route</th>
+            <th scope="col" style="color: #303FBA;">Status</th>
+            {% if user.username == ventes %}
+            <th scope="col" style="color: #303FBA;">Modifier</th>
+            {% endif %}
+
+
+
+
+          </tr>
+        </thead>
+        <tbody>
+            {% for livraison in livraisons %}
+            {% if livraison.recuperation == True %}
+          <tr>
+
+            <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.heure_depart }}</strong></td>
+            <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
+            <td style="background-color: #F1B3DA;"><strong>{{livraison.infodetail}}</strong></td>
+            <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
+            <td style="background-color: #F1B3DA;"><strong>{% for livreur in livraison.statut.livreur.all %}
+              {{ livreur.nom }}{% if not forloop.last %}, {% endif %}
+          {% endfor %}</strong></td>
+            <td style="background-color: #F1B3DA;"><strong>{{ livraison.statut.nom }}</strong></td>
+            {% if livraison.status == True %}
+            <td><strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong></td>
+              {% else %}
+            <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
+            {% endif %}
+            {% if user.username == ventes %}
+          <td><a href="{% url 'livraisonventesdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+          {% endif %}
+            </tr>
+            {% else %}
+            <tr>
+
+            <td><strong>{{ livraison.statut.heure_depart }}</strong></td>
+            <td><strong>{{livraison.nom}}</strong></td>
+            <td><strong>{{livraison.infodetail}}</strong></td>
+            <td><strong>{{ livraison.heure_livraison }}</strong></td>
+            <td><strong>{% for livreur in livraison.statut.livreur.all %}
+              {{ livreur.nom }}{% if not forloop.last %}, {% endif %}
+          {% endfor %}</strong></td>
+            <td><strong>{{ livraison.statut.nom }}</strong></td>
+            {% if livraison.status == True %}
+            <td><strong>validée <i class="fa-solid fa-circle-check fa-xl" style="color: green;"></i></strong></td>
+              {% else %}
+            <td><strong>en cours <i class="fa-solid fa-spinner fa-spin" style="color: orange;"></i></strong></td>
+            {% endif %}
+            {% if user.username == ventes %}
+          <td><a href="{% url 'livraisonventesdetail' livraison.id %}" class="btn" ><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+          {% endif %}
+          </tr>
+          {% endif %}
+          {% endfor %}
+
+        </tbody>
+      </table>
+    </div>
+</div>
+
+
+{% endif %}
+
+<div class="button-container">
+  {% if is_md %}
+  <a href="{% url 'md_dashboard' %}" class="btn btn-primary">
+    <span class="nav__name">Aller à mon dashboard</span>
+  </a>
+  {% endif %}
+</div>
+
+
+
+
+{% if is_cuisine %}
+<style>
+  .hidden {
+      display: none;
+  }
+  .btn-toggle {
+            margin: 10px;
+            padding: 10px 15px;
+            font-size: 16px;
+            color: white;
+            background-color: #007BFF; /* Bootstrap Primary Color */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .btn-toggle:hover {
+            background-color: #0056b3; /* Darken the button on hover */
+            transform: scale(1.05); /* Slightly enlarge on hover */
+        }
+</style>
+
+
+
+
+
+<div style="text-align: center; margin-bottom: 20px;">
+  <button class="btn-toggle" onclick="toggleSection('livraisons-cuisine')">Afficher Livraisons du Jour</button>
+  <button class="btn-toggle" onclick="toggleSection('chaud')">Afficher Livraisons Part Chaud</button>
+</div>
+
+<section id="livraisons-cuisine">
+<div style="text-align: center;">
+  <div class="body">
+    <div style="text-align: center; margin-bottom: 20px;">
+      <select id="journeeSelect" onchange="filterLivraisonsByJournee()">
+        <option value="">Séléctionner une journée</option>
+        {% for journee in journees %}
+        <option value="{{ journee.id }}">{{ journee.nom }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <h1 style="text-align: center;">LIVRAISONS   <button onclick="printSection('livraisons-cuisine')"><i class="fa-solid fa-print" style="color: #74C0FC;"></i></button>
+    </h1>
+    <div id="journeeInfo" style="text-align: center; margin-top: 20px;">
+      <h2><span id="selectedJourneeDate"></span></h2>
+      <p>Total Livraisons: <span id="totalLivraisons"></span></p>
+    </div>
+    <table class="table table-hover">
+        <thead class="thead-dark">
+          <tr>
+
+            <th scope="col" style="color: #303FBA;">Heure départ</th>
+            <th scope="col" style="color: #303FBA;">Nom du contrat</th>
+            <th scope="col" style="color: #303FBA;">Heure livraison</th>
+            <th scope="col" style="color: #303FBA;">Livreur</th>
+
+
+
+
+
+          </tr>
+        </thead>
+        <tbody>
+            {% for livraison in livraisons %}
+            <tr>
+
+            <td><strong>{{ livraison.statut.heure_depart }}</strong></td>
+            <td><strong>{{livraison.nom}}</strong></td>
+            <td><strong>{{ livraison.heure_livraison }}</strong></td>
+            <td><strong>{% for livreur in livraison.statut.livreur.all %}
+              {{ livreur.nom }}{% if not forloop.last %}, {% endif %}
+          {% endfor %}</strong></td>
+          </tr>
+          {% endfor %}
+
+        </tbody>
+      </table>
+    </div>
+</div>
+</section>
+
+
+<section id="chaud" class="hidden">
+  <div style="text-align: center; margin-bottom: 20px;">
+  <select id="journeeSelectChaud" onchange="filterLivraisonsChaudByJournee()">
+    <option value="">Séléctionner une journée</option>
+    {% for journee in journees %}
+    <option value="{{ journee.id }}">{{ journee.nom }}</option>
+    {% endfor %}
+  </select>
+  </div>
+<div class="container my-4">
+  <h1 class="text-center mb-4">LIVRAISONS PART CHAUD   <button onclick="printSection('chaud')"><i class="fa-solid fa-print" style="color: #74C0FC;"></i></button>
+  </h1>
+  <div id="journeeInfo" style="text-align: center; margin-top: 20px;">
+    <h2><span id="selectedJourneeDateChaud"></span></h2>
+    <p>Total Part chaud: <span id="totalLivraisonschaud"></span></p>
+  </div>
+  <div class="row mb-3">
+  </div>
+  <div class="row">
+      {% if livraisonschaud %}
+          {% for livraison in livraisons%}
+              <div class="col-12 col-md-6 mb-3">
+                  <div class="card shadow-sm">
+                      <div class="card-body">
+                          <h5 class="card-title">{{ livraison.nom }}</h5>
+                          <p class="card-text">
+                            <strong>Chauffeur(s):</strong>
+                            {% for livreur in livraison.statut.livreur.all %}
+                                {{ livreur.nom }}
+                                (<a href="tel:{{ livreur.phone }}">{{ livreur.phone }}</a>)
+                                {% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                            <br>
+                            <strong>Heure de départ:</strong> {{ livraison.statut.heure_depart }}<br>
+                        </p>
+                      </div>
+                  </div>
+              </div>
+          {% endfor %}
+      {% endif %}
+  </div>
+</div>
+</section>
+
+<script>
+  function toggleSection(sectionId) {
+      const sections = document.querySelectorAll('section');
+      sections.forEach(section => {
+          section.classList.add('hidden');
+      });
+      document.getElementById(sectionId).classList.remove('hidden');
+  }
+
+  function printSection(sectionId) {
+      const originalContent = document.body.innerHTML;
+      const sectionContent = document.getElementById(sectionId).innerHTML;
+      document.body.innerHTML = sectionContent;
+      window.print();
+      document.body.innerHTML = originalContent;
+      window.location.reload();  // Refresh to reset the page state
+  }
+
+function filterLivraisonsByJournee() {
+    const journeeSelect = document.getElementById('journeeSelect');
+    const journeeId = journeeSelect.value;
+    const selectedOption = journeeSelect.options[journeeSelect.selectedIndex];
+    const journeeDate = selectedOption.getAttribute('data-date');
+    const journeeNom = selectedOption.textContent;
+
+    // Display the selected Journee name and date
+    document.getElementById('selectedJourneeDate').textContent = `${journeeNom}`;
+
+    if (journeeId) {
+        fetch(`/get_livraisons/${journeeId}/`)
+            .then(response => response.json())
+            .then(data => {
+                // Update the total number of livraisons
+                document.getElementById('totalLivraisons').textContent = data.livraisons.length;
+
+                const livraisonTable = document.querySelector('table tbody');
+                livraisonTable.innerHTML = ''; // Clear existing table rows
+
+                data.livraisons.forEach(livraison => {
+                    const row = `<tr>
+                        <td><strong>${livraison.heure_depart}</strong></td>
+                        <td><strong>${livraison.nom}</strong></td>
+                        <td><strong>${livraison.heure_livraison}</strong></td>
+                        <td><strong>${livraison.livreurs.join(', ')}</strong></td>
+                    </tr>`;
+                    livraisonTable.innerHTML += row;
+                });
+            });
+    } else {
+        // Clear date and count if no journee is selected
+        document.getElementById('selectedJourneeDate').textContent = "";
+        document.getElementById('totalLivraisons').textContent = "";
+        document.querySelector('table tbody').innerHTML = '';
+    }
+}
+
+function filterLivraisonsChaudByJournee() {
+    const journeeSelect = document.getElementById('journeeSelectChaud');
+    const journeeId = journeeSelect.value;
+    const selectedOption = journeeSelect.options[journeeSelect.selectedIndex];
+    const journeeNom = selectedOption.textContent;
+
+    // Display the selected Journee name
+    document.getElementById('selectedJourneeDateChaud').textContent = `${journeeNom}`;
+
+    if (journeeId) {
+        fetch(`/get_livraisons_chaud/${journeeId}/`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('totalLivraisonschaud').textContent = data.livraisons.length;
+                // Clear existing content
+                const chaudContainer = document.querySelector('#chaud .row');
+                chaudContainer.innerHTML = '';
+
+                if (data.livraisons.length > 0) {
+                    data.livraisons.forEach(livraison => {
+                        const livraisonCard = `
+                            <div class="col-12 col-md-6 mb-3">
+                                <div class="card shadow-sm">
+                                    <div class="card-body">
+                                        <h5 class="card-title">${livraison.nom}</h5>
+                                        <p class="card-text">
+                                            <strong>Chauffeur(s):</strong> ${livraison.livreurs.map(livreur => `${livreur.nom} (<a href="tel:${livreur.phone}">${livreur.phone}</a>)`).join(', ')}
+                                            <br>
+                                            <strong>Heure de départ:</strong> ${livraison.heure_depart}<br>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>`;
+                        chaudContainer.innerHTML += livraisonCard;
+                    });
+                } 
+            });
+    } else {
+        // Clear the container if no journee is selected
+        document.getElementById('selectedJourneeDateChaud').textContent = "";
+        document.querySelector('#chaud .row').innerHTML = '<div class="col-12"><div class="alert alert-warning text-center">Aucun livraison "part chaud" disponible pour aujourd\'hui.</div></div>';
+    }
+}
+
+</script>
+{% endif %}
+
+{% if is_livreur %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mes Livraisons</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Mobile Container */
+        .mobile-container {
+            max-width: 100%;
+            min-height: 100vh;
+            background: #f8f9fa;
+            position: relative;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* Header */
+        .app-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 20px 30px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+
+        .header-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .delivery-icon {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            background: white;
+            margin: -20px 15px 20px;
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            position: relative;
+            z-index: 10;
+        }
+
+        .date-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background: #f8f9fa;
+        }
+
+        .date-input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #666;
+        }
+
+        .btn-secondary:active {
+            transform: scale(0.98);
+        }
+
+        /* Journées List */
+        .journees-container {
+            padding: 0 15px 20px;
+        }
+
+        .journee-card {
+            background: white;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+            cursor: pointer;
+            overflow: hidden;
+            text-decoration: none;
+            display: block;
+            position: relative;
+        }
+
+        .journee-card:active {
+            transform: scale(0.98);
+        }
+
+        .journee-card.today {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+        }
+
+        .journee-card.today .card-content {
+            color: white;
+        }
+
+        .card-content {
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .date-badge {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .today .date-badge {
+            background: white;
+            color: #56ab2f;
+        }
+
+        .date-day {
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        .date-month {
+            font-size: 11px;
+            text-transform: uppercase;
+            opacity: 0.9;
+        }
+
+        .card-info {
+            flex: 1;
+        }
+
+        .card-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .card-subtitle {
+            font-size: 13px;
+            color: #999;
+        }
+
+        .today .card-subtitle {
+            color: rgba(255,255,255,0.9);
+        }
+
+        .card-arrow {
+            color: #ccc;
+            font-size: 18px;
+        }
+
+        .today .card-arrow {
+            color: rgba(255,255,255,0.8);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            background: #e0e0e0;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: #999;
+        }
+
+        .empty-title {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .empty-subtitle {
+            font-size: 14px;
+            color: #999;
+        }
+
+        /* Pagination */
+        .pagination-container {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            background: white;
+            margin-top: 20px;
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+
+        .page-btn {
+            padding: 10px 16px;
+            border: none;
+            background: #f0f0f0;
+            color: #666;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .page-btn:active {
+            transform: scale(0.95);
+        }
+
+        .page-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Loading animation */
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.4;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .loading {
+            animation: pulse 1.5s infinite;
+        }
+
+        /* Stats bar */
+        .stats-bar {
+            background: white;
+            padding: 15px 20px;
+            margin: -10px 15px 20px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: space-around;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-container">
+        <!-- Header -->
+        <div class="app-header">
+            <div class="header-title">
+                <div class="delivery-icon">🚚</div>
+                Mes journées
+            </div>
+            <div class="header-subtitle">Gérez vos journées de livraison</div>
+        </div>
+
+        <br>
+        <br>
+
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <form method="get">
+                <input type="date" 
+                       class="date-input" 
+                       name="date"
+                       placeholder="Sélectionner une date">
+                <div class="filter-buttons">
+                    <button type="submit" class="btn btn-primary">
+                        🔍 Filtrer
+                    </button>
+                    <a href="{% url 'journees-list' %}" class="btn btn-secondary">
+                        📋 Tout voir
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        
+
+        <!-- Journées List -->
+        <div class="journees-container">
+            {% for journee in journees %}
+                <a href="{% url 'journee-detail' journee.id %}" 
+                   class="journee-card {% if journee.date == today %}today{% endif %}">
+                    <div class="card-content">
+                        <div class="card-left">
+                            <div class="date-badge">
+                                <div class="date-day">{{ journee.date|date:"d" }}</div>
+                                <div class="date-month">{{ journee.date|date:"M" }}</div>
+                            </div>
+                            <div class="card-info">
+                                <div class="card-title">{{ journee.nom }}</div>
+                                <div class="card-subtitle">
+                                    {% if journee.date == today %}
+                                        🟢 Aujourd'hui
+                                    {% else %}
+                                        {{ journee.date|date:"l d F" }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-arrow">›</div>
+                    </div>
+                </a>
+            {% empty %}
+                <div class="empty-state">
+                    <div class="empty-icon">📦</div>
+                    <div class="empty-title">Aucune journée</div>
+                    <div class="empty-subtitle">Aucune livraison programmée</div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if journees.has_other_pages %}
+        <div class="pagination-container">
+            {% if journees.has_previous %}
+                <a href="?page=1" class="page-btn">««</a>
+                <a href="?page={{ journees.previous_page_number }}" class="page-btn">‹</a>
+            {% endif %}
+            
+            <span class="page-btn active">{{ journees.number }}</span>
+            
+            {% if journees.has_next %}
+                <a href="?page={{ journees.next_page_number }}" class="page-btn">›</a>
+                <a href="?page={{ journees.paginator.num_pages }}" class="page-btn">»»</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
+
+  {% endif %}
+  {% if is_checklist %}
+  <a href="{% url 'voir_checklist' %}" class="btn btn-primary">
+    <span class="nav__name">Aller à mon dashboard</span>
+  </a>
+  {% endif %}
+
+  {% if is_ventes %}
+
+
+<style>
+    /* Styling for the page */
+    body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s linear, color 0.3s linear;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #007BFF;
+            height: 100%;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar .sidebar-header {
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .sidebar a {
+            color: #fff;
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar a.active, .sidebar a:hover {
+            background-color: #0056b3;
+        }
+
+        .journeess {
+            flex: 1;
+            padding: 20px;
+            background-color: #F0F2F5;
+            overflow-y: auto;
+            transition: margin-left 0.3s ease; /* Improves smoothness of layout change */
+        }
+
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            
+        }
+
+        .header .toggle-theme {
+            cursor: pointer;
+            color: #007BFF;
+        }
+        #journeess.expanded {
+    margin-left: 0;
+}
+
+#journeess.full-width {
+    transition: margin-left 0s;
+}
+
+.collapsed {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    width: 0; /* Ensure width collapses at the end */
+}
+
+.dark-mode {
+            background-color: #121212;
+            color: #e4e4e4;
+        }
+
+        .dark-mode .header, .dark-mode .card {
+            background-color: #1e1e1e;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .dark-mode .sidebar {
+            background-color: #1e1e1e;
+        }
+
+        .dark-mode .sidebar a {
+            color: #e4e4e4;
+        }
+
+        .dark-mode .sidebar a.active, .dark-mode .sidebar a:hover {
+            background-color: #333;
+            color: #fff;
+        }
+
+    h1 {
+        color: #116EFD;
+    }
+
+    .form-control {
+        width: 250px;
+        display: inline-block;
+        margin-right: 10px;
+        padding: 10px;
+    }
+
+    .btn {
+        padding: 10px 15px;
+        border-radius: 5px;
+    }
+
+    .card {
+        transition: 0.3s;
+        cursor: pointer;
+    }
+
+    .card:hover {
+        transform: scale(1.05);
+    }
+
+    .page-link {
+  color: #116EFD; /* Change text color */
+}
+
+.page-link:hover {
+  background-color: rgba(0, 152, 123, 0.2); /* Lighten the background on hover */
+  color: #116EFD; /* Darker text color on hover */
+}
+
+.page-link.active {
+  background-color: #116EFD; /* Active page color */
+  color: white; /* Active text color */
+}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header" style="margin-top: 100px;">Menu <button class="toggle-sidebar" id="sidebar-toggle"><i class="fas fa-bars"></i></button></div>
+    <a href="{% url 'conseiller_dashboard' %}" class="aref"><i class="fa-solid fa-desktop me-2"></i> Tableau de bord</a>
+    <a href="{% url 'creerchecklist' %}"><i class="fas fa-list-check me-2"></i> Checklists</a>
+    <a href="{% url 'calendarsub_view' %}">
+      <i class="fa-solid fa-file-contract me-2"></i>Soumissions
+                                          </a>
+                                          <a href="{% url 'submit_request' %}" target="_blank" class="aref" >
+                                            <i class="fa-solid fa-file-signature me-2"></i>Créer Soumission
+                                                                    </a>
+    
+                              <a class="aref" href="{% url 'etiquette-tente' %}"><i class="fa-solid fa-print me-2"></i>Etiquette tente</a>
+  
+                              {% if user.username == "Audrey" or user.username == "Maxime" or user.username == "Roxanne" %}
+    <a href="{% url 'manage_submissions' %}" class="aref">
+        <i class="fa-solid fa-file-pdf me-2"></i>PDF et Recherche Soumission
+    </a>
+    
+    <a href="{% url 'calendarsubcreate_view' %}" class="aref">
+        <i class="fa-solid fa-calendar-days me-2"></i>Suivi Soumissions
+    </a>
+    
+    <!-- New Product Creation Link -->
+    <a href="#" class="aref" data-bs-toggle="modal" data-bs-target="#createProductModal">
+        <i class="fa-solid fa-box me-2"></i>Créer un Produit
+    </a>
+{% endif %}
+                                
+    <button class="toggle-theme" id="theme-toggle" style="margin-top:10px;"><i class="fas fa-moon"></i> Thème</button>
+    <div style="margin-top:20px; font-size:14px; color:#ccc;">Utilisateur: {{ user.username }}</div>
+  </div>
+<div class="journeess" id="journees">
+
+  <div class="header">
+        <h2>Liste des Journées de Livraison</h2>
+            <button id="show-sidebar" style="display:none; position: fixed; top: 12%; left: 10px;">
+                <i class="fas fa-bars fa-2xl"></i>
+            </button>
+        <div class="user-info">
+            <button id="logoutBtn" style="border:none; background:none; cursor:pointer;"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
+        </div>
+    </div>
+    <br>
+    <br>
+    <br>
+    <br>
+
+    <!-- Date Filter Form -->
+    <form method="get" class="d-flex justify-content-center mb-4">
+        {{ form.date|add_class:"form-control" }} <!-- Use the add_class filter -->
+        <button type="submit" class="btn btn-primary mx-2">Filtrer</button>
+        <a href="{% url 'journees-list' %}" class="btn btn-secondary">Voir toute la liste</a>
+    </form>
+
+    <br>
+
+    <!-- Display Events -->
+    <div class="row text-center">
+        {% for journee in journees %}
+        <div class="col-md-2 mb-4">
+    <a href="{% url 'journeedetailvente' journee.id %}" class="text-decoration-none">
+        <div class="card h-100 shadow-sm {% if journee.date == today %}border-success{% else %}border-muted{% endif %}">
+            <div class="card-body">
+                <h5 class="card-title" style="color: {% if journee.date == today %}green{% else %}gray{% endif %};">
+                    {{ journee.nom }}
+                </h5>
+            </div>
+        </div>
+    </a>
+</div>
+
+        {% empty %}
+        <div class="col">
+            <p class="text-muted">Pas de Journées</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="d-flex justify-content-center mt-4">
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                {% if journees.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1">1ère page</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ journees.previous_page_number }}">Précédent</a>
+                </li>
+                {% endif %}
+
+                <li class="page-item active">
+                    <a class="page-link" href="?page={{ journees.number }}">{{ journees.number }}</a>
+                </li>
+
+                {% if journees.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ journees.next_page_number }}">Suivant</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ journees.paginator.num_pages }}">Dernière page</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<script>
+  const toggleBtn = document.getElementById('theme-toggle');
+        toggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+        });
+
+          document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.getElementById('sidebar');
+    const btnShowSidebar = document.getElementById('show-sidebar');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    const dashboard = document.getElementById('dashboard');
+
+    // Quand on clique sur le bouton toggle pour cacher ou réafficher
+    toggleBtn.addEventListener('click', () => {
+        if (sidebar.classList.contains('collapsed')) {
+            // La sidebar est masquée, on la remonte
+            sidebar.classList.remove('collapsed');
+            btnShowSidebar.style.display = 'none';   // cache le bouton
+            dashboard.classList.remove('full-width');
+        } else {
+            // La sidebar est visible, on la cache
+            sidebar.classList.add('collapsed');
+            btnShowSidebar.style.display = 'block';  // montre le bouton pour la réafficher
+            dashboard.classList.add('full-width');
+        }
+    });
+
+    // Quand on clique sur le bouton pour faire réapparaître la sidebar
+    btnShowSidebar.addEventListener('click', () => {
+        sidebar.classList.remove('collapsed');
+        btnShowSidebar.style.display = 'none'; // cache le bouton
+        dashboard.classList.remove('full-width');
+    });
+});
+
+</script>
+
+
+{% endif %}
+
+  <br>
+  <br>
+  <br>
+
+
+{% if user.username == loic or user.username == jef or user.username == max %}
+<nav class="bottom-navbar">
+  <ul>
+      <li><a href="{% url 'routesfrigo' %}" class="nav__link" target="_blank">
+        <i class="fa-solid fa-truck"></i><span class="nav__name">routes frigo</span>
+      </a></li>
+      <li><a href="{% url 'create_recupfrigo' %}" class="nav__link" target="_blank">
+        <i class="fa-solid fa-dolly"></i><span class="nav__name">recup frigo</span>
+      </a></li>
+      <li><a href="{% url 'acceuilresponsables'%}" class="nav__link" ><i class="fa-solid fa-user-ninja"></i>
+        <span class="nav__name">Admin</span>
+    </a></li>
+    </ul>
+</nav>
+{% endif %}
+
+<script>
+  function printPage() {
+        window.print();
+    }
+</script>
+{% endblock %}

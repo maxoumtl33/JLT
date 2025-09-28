@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Bon de commande - {{ commande.numero }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12pt;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .header {
+            border-bottom: 3px solid #2c3e50;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            font-size: 24pt;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .doc-title {
+            font-size: 18pt;
+            color: #666;
+            margin: 10px 0;
+        }
+        
+        .doc-number {
+            font-size: 14pt;
+            font-weight: bold;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+        
+        .info-box {
+            border: 1px solid #ddd;
+            padding: 15px;
+            background-color: #f9f9f9;
+        }
+        
+        .info-box h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+        
+        .info-box p {
+            margin: 5px 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th {
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px;
+            text-align: left;
+        }
+        
+        td {
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .total-row {
+            font-weight: bold;
+            font-size: 14pt;
+            background-color: #ecf0f1;
+        }
+        
+        .notes {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 5px;
+        }
+        
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        
+        .signature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            margin-top: 50px;
+        }
+        
+        .signature-box {
+            text-align: center;
+        }
+        
+        .signature-line {
+            border-bottom: 1px solid #333;
+            margin-top: 50px;
+            margin-bottom: 5px;
+        }
+        
+        @media print {
+            .no-print {
+                display: none;
+            }
+            
+            body {
+                margin: 0;
+            }
+        }
+        
+        .no-print {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .btn-print {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .btn-close {
+            background-color: #6c757d;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print">
+        <button onclick="window.print()" class="btn btn-print">
+            <strong>📄 Imprimer</strong>
+        </button>
+        <button onclick="window.close()" class="btn btn-close">
+            <strong>✕ Fermer</strong>
+        </button>
+    </div>
+    
+    <div class="header">
+        <div class="logo">GESTION RECETTES</div>
+        <div class="doc-title">BON DE COMMANDE</div>
+        <div class="doc-number">N° {{ commande.numero }}</div>
+        <div>Date d'émission : {{ commande.date_creation|date:"d/m/Y" }}</div>
+    </div>
+    
+    <div class="info-grid">
+        <div class="info-box">
+            <h3>Fournisseur</h3>
+            <p><strong>{{ commande.fournisseur.nom }}</strong></p>
+            {% if commande.fournisseur.contact_principal %}
+                <p>Contact : {{ commande.fournisseur.contact_principal }}</p>
+            {% endif %}
+            {% if commande.fournisseur.adresse %}
+                <p>{{ commande.fournisseur.adresse|linebreaksbr }}</p>
+            {% endif %}
+            {% if commande.fournisseur.telephone %}
+                <p>Tél : {{ commande.fournisseur.telephone }}</p>
+            {% endif %}
+            {% if commande.fournisseur.email %}
+                <p>Email : {{ commande.fournisseur.email }}</p>
+            {% endif %}
+        </div>
+        
+        <div class="info-box">
+            <h3>Informations de livraison</h3>
+            <p><strong>Date de livraison prévue :</strong></p>
+            <p style="font-size: 16pt; color: #2c3e50;">
+                {{ commande.date_livraison_prevue|date:"l d F Y" }}
+            </p>
+            <p><strong>Statut :</strong> {{ commande.get_statut_display }}</p>
+        </div>
+    </div>
+    
+    <h3>Détail de la commande</h3>
+    <table>
+        <thead>
+            <tr>
+                <th width="10%">Réf.</th>
+                <th width="40%">Désignation</th>
+                <th width="15%">Quantité</th>
+                <th width="10%">Unité</th>
+                <th width="12%">Prix unit. HT</th>
+                <th width="13%">Total HT</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ligne in commande.lignes.all %}
+            <tr>
+                <td>{{ ligne.ingredient.id }}</td>
+                <td><strong>{{ ligne.ingredient.nom }}</strong></td>
+                <td style="text-align: center;">{{ ligne.quantite }}</td>
+                <td style="text-align: center;">{{ ligne.ingredient.unite_mesure.symbole }}</td>
+                <td style="text-align: right;">{{ ligne.prix_unitaire }} €</td>
+                <td style="text-align: right;"><strong>{{ ligne.sous_total }} €</strong></td>
+            </tr>
+            {% endfor %}
+            <tr class="total-row">
+                <td colspan="5" style="text-align: right;">TOTAL HT :</td>
+                <td style="text-align: right;">{{ commande.montant_total }} €</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    {% if commande.notes %}
+    <div class="notes">
+        <strong>Notes :</strong><br>
+        {{ commande.notes|linebreaksbr }}
+    </div>
+    {% endif %}
+    
+    <div class="signature-grid">
+        <div class="signature-box">
+            <strong>Signature et cachet du client :</strong>
+            <div class="signature-line"></div>
+            <small>Date et signature</small>
+        </div>
+        
+        <div class="signature-box">
+            <strong>Signature et cachet du fournisseur :</strong>
+            <div class="signature-line"></div>
+            <small>Date et signature</small>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <small>
+            Document généré le {{ "now"|date:"d/m/Y à H:i" }}<br>
+            Merci de confirmer la réception de cette commande par retour d'email.
+        </small>
+    </div>
+</body>
+</html>

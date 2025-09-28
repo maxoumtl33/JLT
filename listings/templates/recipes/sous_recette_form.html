@@ -1,0 +1,148 @@
+{% extends "recipes/base.html" %}
+{% block title %}{% if sous_recette %}Modifier{% else %}Créer{% endif %} une Sous-Recette{% endblock %}
+
+{% block extra_css %}
+<style>
+    .formset-row {
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 10px;
+        background: #f8f9fa;
+    }
+    .delete-row {
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h3 mb-0">{{ title }}</h1>
+            <p class="text-muted mb-0">Pour la recette: <strong>{{ recette.nom }}</strong></p>
+        </div>
+        <a href="{% url 'recette_detail' recette.pk %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Retour à la recette
+        </a>
+    </div>
+</div>
+
+<div class="content-body">
+    <form method="post" novalidate>
+        {% csrf_token %}
+        
+        <div class="row">
+            <div class="col-md-8">
+                <div class="mb-3">
+                    <label class="form-label required">Nom de la sous-recette</label>
+                    {{ form.nom }}
+                    {% if form.nom.errors %}
+                    <div class="text-danger small">{{ form.nom.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label required">Instructions de fabrication</label>
+                    {{ form.explication_fabrication }}
+                    {% if form.explication_fabrication.errors %}
+                    <div class="text-danger small">{{ form.explication_fabrication.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label class="form-label">Quantité produite</label>
+                    {{ form.quantite }}
+                    {% if form.quantite.errors %}
+                    <div class="text-danger small">{{ form.quantite.errors.0 }}</div>
+                    {% endif %}
+                    <small class="text-muted">Quantité de cette sous-recette dans la recette principale</small>
+                </div>
+            </div>
+        </div>
+        
+        <hr class="my-4">
+        
+        <h4>Ingrédients de la sous-recette</h4>
+        {{ formset.management_form }}
+        <div id="ingredient-formset">
+            {% for form in formset %}
+            <div class="formset-row">
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form.ingredient.label_tag }}
+                        {{ form.ingredient }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.quantite.label_tag }}
+                        {{ form.quantite }}
+                    </div>
+                    <div class="col-md-2">
+                        {% if formset.can_delete %}
+                        <label>&nbsp;</label>
+                        <div>
+                            {{ form.DELETE }}
+                            <label for="{{ form.DELETE.id_for_label }}" class="btn btn-sm btn-danger delete-row">
+                                <i class="bi bi-trash"></i> Supprimer
+                            </label>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {{ form.id }}
+            </div>
+            {% endfor %}
+        </div>
+        
+        <button type="button" class="btn btn-sm btn-outline-primary" id="add-ingredient">
+            <i class="bi bi-plus"></i> Ajouter un ingrédient
+        </button>
+        
+        <hr class="my-4">
+        
+        <div class="d-flex justify-content-end">
+            <a href="{% url 'recette_detail' recette.pk %}" class="btn btn-secondary me-2">Annuler</a>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-circle"></i> 
+                {% if sous_recette %}Enregistrer les modifications{% else %}Créer la sous-recette{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let ingredientCount = {{ formset.total_form_count }};
+    
+    document.getElementById('add-ingredient').addEventListener('click', function() {
+        const totalForms = document.getElementById('id_ingredients-TOTAL_FORMS');
+        const formsetDiv = document.getElementById('ingredient-formset');
+        
+        // Clone the first form
+        const newForm = document.querySelector('.formset-row').cloneNode(true);
+        
+        // Update form indices
+        const regex = /ingredients-\d+-/g;
+        newForm.innerHTML = newForm.innerHTML.replace(regex, `ingredients-${ingredientCount}-`);
+        
+        // Clear values
+        newForm.querySelectorAll('input[type="number"], select').forEach(input => {
+            input.value = '';
+        });
+        
+        formsetDiv.appendChild(newForm);
+        ingredientCount++;
+        totalForms.value = ingredientCount;
+    });
+    
+    // Make select2 work with dynamically added elements
+    $('.select2').select2({
+        theme: 'bootstrap-5',
+        width: '100%'
+    });
+});
+</script>
+{% endblock %}

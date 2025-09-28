@@ -1,0 +1,331 @@
+{% extends "listings/base.html" %}
+{% block content %}
+
+<style>
+
+body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s linear, color 0.3s linear;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #007BFF;
+            height: 100%;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar .sidebar-header {
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .sidebar a {
+            color: #fff;
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar a.active, .sidebar a:hover {
+            background-color: #0056b3;
+        }
+
+        .sansdate {
+            flex: 1;
+            padding: 20px;
+            background-color: #F0F2F5;
+            overflow-y: auto;
+            transition: margin-left 0.3s ease; /* Improves smoothness of layout change */
+            
+        }
+
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            
+        }
+
+        .header .toggle-theme {
+            cursor: pointer;
+            color: #007BFF;
+        }
+        #sansdate.expanded {
+    margin-left: 0;
+}
+
+#sansdate.full-width {
+    transition: margin-left 0s;
+}
+
+.collapsed {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    width: 0; /* Ensure width collapses at the end */
+}
+
+.dark-mode {
+            background-color: #121212;
+            color: #e4e4e4;
+        }
+
+        .dark-mode .header, .dark-mode .card {
+            background-color: #1e1e1e;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .dark-mode .sidebar {
+            background-color: #1e1e1e;
+        }
+
+        .dark-mode .sidebar a {
+            color: #e4e4e4;
+        }
+
+        .dark-mode .sidebar a.active, .dark-mode .sidebar a:hover {
+            background-color: #333;
+            color: #fff;
+        }
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header" style="margin-top: 100px;">Menu <button class="toggle-sidebar" id="sidebar-toggle"><i class="fas fa-bars"></i></button></div>
+  <a href="{% url 'acceuilresponsables' %}"><i class="fa-solid fa-desktop"></i> Tableau de bord Admin</a>
+  <a href="{% url 'responsablelist' %}"><i class="fas fa-home"></i> Suivi journée</a>
+  <a href="{% url 'dashboard_stats' %}"><i class="fas fa-chart-bar"></i> Stats</a>
+  <a href="{% url 'recuptoday' %}"><i class="fas fa-sync"></i> Récups</a>
+  <a href="{% url 'livraisonstomorrow' %}"><i class="fas fa-shipping-fast"></i> Dispatch</a>
+  <a href="{% url 'create-shift' %}"><i class="fas fa-calendar-plus"></i> Planning</a>
+  <a href="{% url 'voir_checklist' %}"><i class="fas fa-clipboard-list"></i> Checklist</a>
+  <a href="{% url 'creerchecklist' %}"><i class="fas fa-list-check"></i> Checklist Ventes</a>
+  <a href="{% url 'product_list' %}"><i class="fas fa-box-open"></i> Liste produits (checklist)</a>
+  <a href="/admin" target="_blank"><i class="fas fa-tools"></i> Menu admin</a>
+  <button class="toggle-theme" id="theme-toggle" style="margin-top:20px;"><i class="fas fa-moon"></i> Thème</button>
+  <div style="margin-top:20px; font-size:14px; color:#ccc;">Utilisateur: {{ user.username }}</div>
+</div>
+
+<div class="sansdate" id="sansdate">
+
+    <div class="header">
+    <h2>Livraisons sans date</h2>
+        <button id="show-sidebar" style="display:none; position: fixed; top: 12%; left: 10px;">
+            <i class="fas fa-bars fa-2xl"></i>
+        </button>
+    <div class="user-info">
+        <button id="logoutBtn" style="border:none; background:none; cursor:pointer;"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
+    </div>
+</div>
+<br>
+<br>
+<br>
+<br>
+    <form method="POST" action="{% url 'bulk_edit_livraisons' %}">
+        {% csrf_token %}
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+            <label for="bulk_date"><strong>📅 Date et date de livraison:</strong></label>
+            <input type="date" id="bulk_date" name="bulk_date" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
+
+            <label for="bulk_journee"><strong>🗓️ Journée:</strong></label>
+            <select id="bulk_journee" name="bulk_journee" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
+                <option value="">-- Selectionner Journée --</option>
+                {% for jour in journees reversed %}
+                    <option value="{{ jour.id }}">{{ jour.nom }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button id="group-selected" style="margin-bottom: 10px; background:#007bff; color:#fff; border:none; padding:8px 12px; border-radius:5px; cursor:pointer;">
+            Regrouper sélection
+          </button>
+          <button type="submit" name="action" value="edit" style="background: #28a745; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">
+                ✏️ Modifier la sélection
+            </button>
+            <button type="submit" name="action" value="delete" style="background: #dc3545; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">
+                🗑️ Effacer la sélection
+            </button>
+        <table class="table table-striped mt-3" style=" border-collapse: collapse;">
+            <thead class="thead-dark">
+                <tr>
+                    <th style="padding: 15px; text-align: center; font-size: 18px;">
+                        <input type="checkbox" id="select_all"> tous
+                    </th>
+                    <th style="padding: 15px; font-size: 18px;text-align: center;">Nom</th>
+                    <th style="padding: 15px; font-size: 18px;text-align: center;">Convives</th>
+                    <th style="padding: 15px; font-size: 18px;text-align: center;">Heure livraison</th>
+                    <th style="padding: 15px; font-size: 18px;text-align: center;">Adresse</th>
+                    <th style="padding: 15px; font-size: 18px;text-align: center;">Date</th>
+                    <th style="padding: 15px; font-size: 18px;text-align: center;">Date Livraison</th>
+                    <th style="padding: 15px; font-size: 18px;text-align: center;">Journée</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for livraison in livraisons %}
+                <tr style="border-bottom: 1px solid #ddd;text-align: center;">
+                    <td style="text-align: center; padding: 15px;">
+                        <input type="checkbox" name="selected_ids" value="{{ livraison.id }}" style="width: 18px; height: 18px;">
+                    </td>
+                    <td>
+                        <input type="text" name="nom_{{ livraison.id }}" value="{{ livraison.nom }}" style="width: 300px; padding: 8px; font-size: 16px;">
+                    </td>
+                    <td>
+                        <input type="number" name="convives_{{ livraison.id }}" value="{{ livraison.convives }}" style="width: 60px; padding: 8px; font-size: 16px;">
+                    </td>
+                    <td>
+                        <input type="text" name="heure_{{ livraison.id }}" value="{{ livraison.heure_livraison}}" style="width: 70px; padding: 8px; font-size: 16px;">
+                    </td>
+                    <td>
+                        <input type="text" name="adress_{{ livraison.id }}" value="{{ livraison.adress }}" style="width: 200px; padding: 8px; font-size: 16px;">
+                    </td>
+                    <td>
+                        <input type="date" name="date_{{ livraison.id }}" value="{{ livraison.date|date:'Y-m-d' }}" style="padding: 8px; font-size: 16px; width: 90px;">
+                    </td>
+                    <td>
+                        <input type="date" name="date_livraison_{{ livraison.id }}" value="{{ livraison.date_livraison|date:'Y-m-d' }}" style="padding: 8px; font-size: 16px; width: 90px;">
+                    </td>
+                    <td>
+                        <select name="journee_{{ livraison.id }}" style="padding: 8px; font-size: 16px; width: 80px;">
+                            {% for jour in journees reversed %}
+                                <option value="{{ jour.id }}" {% if livraison.journee.id == jour.id %}selected{% endif %}>
+                                    {{ jour.nom }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+            <button type="submit" name="action" value="edit" style="background: #28a745; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">
+                ✏️ Modifier la sélection
+            </button>
+            <button type="submit" name="action" value="delete" style="background: #dc3545; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">
+                🗑️ Effacer la sélection
+            </button>
+        </div>
+        
+    </form>
+</div>
+
+
+<script>
+
+document.getElementById('group-selected').addEventListener('click', () => {
+    const selectedCheckboxes = document.querySelectorAll("input[name='selected_ids']:checked");
+    if (selectedCheckboxes.length < 2) {
+        alert('Sélectionnez au moins deux livraisons pour le regroupement.');
+        return;
+    }
+
+    const ids = Array.from(selectedCheckboxes).map(cb => cb.value);
+    // Vous pouvez calculer le nouveau nom comme vous souhaitez
+    const nomLivraisons = ids.map(id => document.querySelector(`input[name='nom_${id}']`).value);
+    const groupName = nomLivraisons.join('+');
+
+    fetch('{% url "group_livraisons" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ ids: ids, groupName: groupName })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert(data.message);
+            window.location.reload();
+        } else {
+            alert('Erreur: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Erreur lors du regroupement:', error);
+        alert('Une erreur est survenue lors du regroupement.');
+    });
+});
+
+document.getElementById("select_all").addEventListener("change", function() {
+    let checkboxes = document.querySelectorAll("input[name='selected_ids']");
+    checkboxes.forEach(cb => cb.checked = this.checked);
+});
+
+// Apply bulk date and journee to selected livraisons
+document.getElementById("bulk_date").addEventListener("change", function() {
+    let selectedIds = document.querySelectorAll("input[name='selected_ids']:checked");
+    selectedIds.forEach(cb => {
+        let id = cb.value;
+        document.querySelector(`input[name='date_${id}']`).value = this.value;
+        document.querySelector(`input[name='date_livraison_${id}']`).value = this.value;
+    });
+});
+
+document.getElementById("bulk_journee").addEventListener("change", function() {
+    let selectedIds = document.querySelectorAll("input[name='selected_ids']:checked");
+    selectedIds.forEach(cb => {
+        let id = cb.value;
+        document.querySelector(`select[name='journee_${id}']`).value = this.value;
+    });
+});
+
+const toggleBtn = document.getElementById('theme-toggle');
+        toggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+        });
+
+          document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.getElementById('sidebar');
+    const btnShowSidebar = document.getElementById('show-sidebar');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    const dashboard = document.getElementById('dashboard');
+
+    // Quand on clique sur le bouton toggle pour cacher ou réafficher
+    toggleBtn.addEventListener('click', () => {
+        if (sidebar.classList.contains('collapsed')) {
+            // La sidebar est masquée, on la remonte
+            sidebar.classList.remove('collapsed');
+            btnShowSidebar.style.display = 'none';   // cache le bouton
+            dashboard.classList.remove('full-width');
+        } else {
+            // La sidebar est visible, on la cache
+            sidebar.classList.add('collapsed');
+            btnShowSidebar.style.display = 'block';  // montre le bouton pour la réafficher
+            dashboard.classList.add('full-width');
+        }
+    });
+
+    // Quand on clique sur le bouton pour faire réapparaître la sidebar
+    btnShowSidebar.addEventListener('click', () => {
+        sidebar.classList.remove('collapsed');
+        btnShowSidebar.style.display = 'none'; // cache le bouton
+        dashboard.classList.remove('full-width');
+    });
+});
+</script>
+
+
+
+
+{% endblock %}

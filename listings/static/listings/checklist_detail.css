@@ -1,0 +1,496 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #333;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    transition: background-color 0.3s linear, color 0.3s linear;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: #007BFF;
+    height: 100%;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+    overflow-y: auto;
+}
+
+.sidebar .sidebar-header {
+    font-size: 24px;
+    color: #fff;
+    margin-bottom: 20px;
+}
+
+.sidebar a {
+    color: #fff;
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    transition: background-color 0.3s;
+}
+
+.sidebar a.active, .sidebar a:hover {
+    background-color: #0056b3;
+}
+
+.checklistdet {
+    flex: 1;
+    padding: 20px;
+    background-color: #F0F2F5;
+    overflow-y: auto;
+    transition: margin-left 0.3s ease; /* Improves smoothness of layout change */
+}
+
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    
+}
+
+.header .toggle-theme {
+    cursor: pointer;
+    color: #007BFF;
+}
+#checklistdet.expanded {
+margin-left: 0;
+}
+
+#checklistdet.full-width {
+transition: margin-left 0s;
+}
+
+.collapsed {
+transform: translateX(-100%);
+transition: transform 0.3s ease;
+width: 0; /* Ensure width collapses at the end */
+}
+
+.dark-mode {
+    background-color: #121212;
+    color: #e4e4e4;
+}
+
+.dark-mode .header, .dark-mode .card {
+    background-color: #1e1e1e;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+
+.dark-mode .sidebar {
+    background-color: #1e1e1e;
+}
+
+.dark-mode .sidebar a {
+    color: #e4e4e4;
+}
+
+.dark-mode .sidebar a.active, .dark-mode .sidebar a:hover {
+    background-color: #333;
+    color: #fff;
+}
+
+    /* Styling for the document link */
+    .document-link {
+        text-decoration: none;
+        color: #007bff;
+        font-weight: 500;
+    }
+
+    /* Hover effect for links */
+    .document-link:hover {
+        color: #0056b3;
+        text-decoration: underline;
+    }
+
+    .modal-xl-custom {
+    max-width: 99%; /* Adjust percentage as needed */
+}
+
+    /* Modal header and close button styling */
+    .modal-header {
+        padding: 15px;
+        position: relative;
+        background-color: #007bff;
+    }
+    .modal-header h5 {
+        font-size: 1.25rem;
+        font-weight: bold;
+    }
+    .btn-close-white {
+        filter: invert(1);
+    }
+
+    /* No documents message styling */
+    .no-documents-message {
+        font-size: 1rem;
+        color: #6c757d;
+        padding: 15px 0;
+    }
+
+.toggle-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        margin-bottom: 10px;
+        font-weight: 600;
+        color: #0056b3;
+        border: 1px solid #0056b3;
+        border-radius: 5px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.2s;
+    }
+    .toggle-btn:hover {
+        background-color: #0056b3;
+        color: white;
+    }
+
+    .rapport-section {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        margin-top: 15px;
+        transition: max-height 0.3s ease, opacity 0.3s ease;
+        overflow: hidden;
+    }
+    .rapport-section.hidden {
+        max-height: 0;
+        opacity: 0;
+        padding: 0 15px;
+    }
+
+    .photo-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+        margin-top: 10px;
+    }
+    .photo-item img {
+        width: 100%;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s;
+    }
+    .photo-item img:hover {
+        transform: scale(1.05);
+    }
+    /* Basic Layout Styling */
+.photo-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+/* Individual Photo Item */
+.photo-item {
+    position: relative;
+    cursor: pointer;
+}
+
+.checklist-photo {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.checklist-photo:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+
+
+
+.product-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;  /* Ensures full width used */
+    }
+    .btn-danger, .btn-success {
+        font-size: 16px;
+        padding: 5px 8px; /* Adjust button size for a more compact look */
+        margin: 0 2px;
+        cursor: pointer;
+    }
+    .quantity {
+        width: 50px; /* Reduced width for the quantity input */
+        height: 34px;
+        text-align: center;
+    }
+
+    .product-name {
+        font-weight: bold;
+        margin-right: 10px; /* Space between product name and buttons */
+    }
+
+    /* Styling for the plus and minus buttons */
+    .custom-btn-plus, .custom-btn-minus {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border: none;
+        border-radius: 50%; /* Make the button round */
+        font-size: 18px;
+        font-weight: bold;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease; /* Smooth transition */
+    }
+
+    .custom-btn-minus {
+        background-color: #ff4d4d; /* Red color for minus button */
+    }
+
+    .custom-btn-plus {
+        background-color: #63E6BE; /* Green color for plus button */
+    }
+
+    .custom-btn-minus:hover {
+        background-color: #ff1a1a; /* Darker shade on hover */
+        box-shadow: 0 0 10px rgba(255, 0, 0, 0.5); /* Shadow effect */
+    }
+
+    .custom-btn-plus:hover {
+        background-color: #46c498; /* Darker shade on hover */
+        box-shadow: 0 0 10px rgba(0, 255, 0, 0.5); /* Shadow effect */
+    }
+
+    .custom-btn-minus:active, .custom-btn-plus:active {
+        transform: scale(0.9); /* Slightly reduce size when clicked */
+    }
+
+    /* Submit button styling */
+    .custom-submit-btn {
+        background-color: #007bff; /* Bootstrap primary color */
+        color: white;
+        padding: 6px 12px; /* Padding for the submit button */
+        margin-left: 10px; /* Space between the input and submit button */
+        border: none;
+        border-radius: 4px; /* Rounded corners */
+        cursor: pointer;
+        transition: background-color 0.3s; /* Smooth transition */
+    }
+
+    .custom-submit-btn:hover {
+        background-color: #0056b3; /* Darker shade on hover */
+    }
+
+    .category-card {
+        width: 150px;
+        height: 150px;
+        background-color: #f8f9fa;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, background-color 0.3s ease;
+        font-size: 1em;
+        color: #343a40;
+        cursor: pointer;
+    }
+    .category-card:hover {
+        transform: translateY(-5px);
+        background-color: #e9ecef;
+    }
+    .category-card i {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+        color: #007bff;
+    }
+    .category-card span {
+        font-weight: bold;
+    }
+    .info-card {
+        flex: 1;
+        min-width: 250px;
+        background-color: white;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        font-size: 1em;
+        color: #333;
+    }
+    .info-card p {
+        margin: 0 0 10px;
+    }
+    .info-card p strong {
+        font-weight: 600;
+        color: #0056b3;
+    }
+    .icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    margin-right: 8px;
+    color: #007bff; /* Color similar to Font Awesome */
+}
+
+.icon-label {
+    font-size: 1rem;
+    color: #4a4a4a;
+    font-weight: 500;
+}
+.modal-custom {
+    max-width: 50%; /* Adjust maximum width as needed */
+    width: auto; /* Allow auto width to fill */
+}
+
+/* Modal Background */
+#photoModal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        overflow: auto;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Modal Content Wrapper */
+    .modal-content-wrapper {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    /* Image Styling */
+    #modalImg {
+        max-width: 90%;
+        max-height: 80vh;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Close Button */
+    .close {
+        position: absolute;
+        top: 20px;
+        right: 40px;
+        color: #ffffff;
+        font-size: 40px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    /* Download Button */
+    .download-btn {
+        margin-top: 15px;
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        font-size: 18px;
+        text-decoration: none;
+        border-radius: 5px;
+        display: inline-flex;
+        align-items: center;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+        transition: background-color 0.3s;
+    }
+
+    .modal-body .form-row {
+        margin-bottom: 15px;  /* Adjust this value to increase or decrease the spacing */
+    }
+
+    .download-btn:hover {
+        background-color: #0056b3;
+    }
+
+    /* Icon in Download Button */
+    .download-btn i {
+        margin-right: 5px;
+    }
+    .small-cell {
+        padding: 1px !important; /* Adjust padding as needed */
+        vertical-align: middle !important; /* Center align content vertically */
+    }
+
+    h5 {
+    margin: 0 !important;
+    padding: 5px 0; /* Adjustable */
+    line-height: 1 !important;
+    }
+
+    table {
+        margin: 0 !important;
+        padding: 0 !important;
+        border-spacing: 0 !important;
+    }
+
+    .modal-body-verif {
+    font-size: 11px; /* Apply to all text inside modal */
+    }
+    .alert-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;  /* Ensures it stays above other elements */
+    min-width: 250px;
+    max-width: 350px;
+}
+
+.alert {
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+.modal-body {
+    padding: 20px; /* Adjust padding inside the modal */
+}
+
+.product-item {
+    margin-bottom: 10px; /* Space between product items */
+}
+
+.product-info {
+    flex-grow: 1; /* Allow product-info to take up available space */
+}
+
+.form-group {
+    flex: 0 0 auto; /* Prevents form groups from shrinking */
+}
+
+textarea.comment-textarea {
+    min-height: 60px; /* Set a minimum height for text areas */
+    resize: vertical; /* Allow vertical resizing for spaciousness */
+}
+
+@media print {
+    body * {
+      display: none !important;
+    }
+    #rapportbreuvage-section,
+    #rapportbreuvage-section * {
+      display: block !important;
+    }
+    #rapportbreuvage-section {
+      margin: 0 auto;
+      width: 100%;
+      max-width: 800px;
+    }
+  }

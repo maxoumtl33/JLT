@@ -1,0 +1,97 @@
+{% extends "recipes/base.html" %}
+{% block title %}{% if form.instance.pk %}Modifier{% else %}Créer{% endif %} un Prix Catalogue{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <h1 class="h3 mb-0">{% if form.instance.pk %}Modifier le prix{% else %}Nouveau Prix Catalogue{% endif %}</h1>
+</div>
+
+<div class="content-body">
+    <form method="post" novalidate>
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label required">Fournisseur</label>
+                    {{ form.fournisseur }}
+                    {% if form.fournisseur.errors %}
+                    <div class="text-danger small">{{ form.fournisseur.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label required">Ingrédient</label>
+                    {{ form.ingredient }}
+                    {% if form.ingredient.errors %}
+                    <div class="text-danger small">{{ form.ingredient.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label required">Prix unitaire (€)</label>
+                    {{ form.prix }}
+                    {% if form.prix.errors %}
+                    <div class="text-danger small">{{ form.prix.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label">Référence fournisseur</label>
+                    {{ form.reference_fournisseur }}
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Conditionnement</label>
+                    {{ form.conditionnement }}
+                    <small class="text-muted">Ex: Carton de 12, Sac de 25kg</small>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Délai de livraison (jours)</label>
+                    {{ form.delai_livraison }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label">Date de début</label>
+                    {{ form.date_debut }}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label">Date de fin</label>
+                    {{ form.date_fin }}
+                    <small class="text-muted">Laisser vide si toujours valide</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-check mb-3">
+            {{ form.actif }}
+            <label class="form-check-label" for="{{ form.actif.id_for_label }}">
+                Prix actif
+            </label>
+        </div>
+        
+        <div class="d-flex justify-content-end">
+            <a href="{% url 'catalogue_list' %}" class="btn btn-secondary me-2">Annuler</a>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-circle"></i> 
+                {% if form.instance.pk %}Enregistrer{% else %}Créer{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

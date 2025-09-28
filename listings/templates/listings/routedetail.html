@@ -1,0 +1,55 @@
+{% extends 'listings/base.html' %}
+{%  load static%}
+{% block content %}
+
+
+  
+             
+         
+
+<h1 style="text-align: center;">ROUTE N°{{ route.nom }}</h1>
+<br>
+<p style="text-align: center;">Livreur : {{ route.livreur }}</p>
+<p style="text-align: center;">Heure départ : {{ route.heure_depart }}</p>
+<p style="text-align: center;">Livraisons route n°{{ route.nom }} :</p>
+<ul style="text-align: center;">
+{% for a in livraison %}
+{% if route.nom == a.statut.nom %}
+  <li>{{ a.nom }} / {{ a.heure_livraison }}</li>
+  {% endif %}
+  {% endfor %}
+</ul>
+
+
+<a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
+    <i class="fa-solid fa-pen-to-square"></i><span>Editer</span>
+</a> 
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+
+
+      <!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Route N°{{ route.nom }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form action="" method=POST >
+          {% csrf_token %}
+          {{ form.as_p }}
+          <input type="submit" value="valider" class="btn btn-primary">
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
+

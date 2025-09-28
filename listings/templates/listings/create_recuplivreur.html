@@ -1,0 +1,61 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Formulaire Récup Livreur</h2>
+
+    <form method="POST" class="needs-validation" novalidate>
+        {% csrf_token %}
+        
+        <!-- RecupLivreur Form -->
+        <div class="form-group">
+            {{ recuplivreur_form.as_p }}
+        </div>
+
+        <!-- Items Formset -->
+        <h3>Items</h3>
+        {{ formset.management_form }}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Nom item</th>
+                    <th>Quantité</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for form in formset %}
+                <tr>
+                    <td>{{ form.item_name }}</td>
+                    <td>{{ form.quantity }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <input type="hidden" name="livraison_id" value="{{ livraison.id }}">
+
+        <button type="submit" class="btn btn-primary">Valider</button>
+    </form>
+</div>
+
+<!-- Bootstrap validation feedback -->
+<script>
+    (function() {
+      'use strict';
+      window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        Array.prototype.filter.call(forms, function(form) {
+          form.addEventListener('submit', function(event) {
+            if (form.checkValidity() === false) {
+              event.preventDefault();
+              event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+          }, false);
+        });
+      }, false);
+    })();
+</script>
+
+{% endblock %}

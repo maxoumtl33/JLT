@@ -1,0 +1,128 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block content %}
+
+<style>
+    body {
+        background-color: #f4f6f9;
+        font-family: 'Roboto', sans-serif;
+    }
+
+    .container {
+        margin: 30px auto;
+    }
+
+    h1, h2 {
+        text-align: center;
+        color: #343a40;
+        font-weight: 700;
+    }
+
+    .card {
+        margin-bottom: 20px;
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        transform: scale(1.02);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-header {
+        background-color: #007bff;
+        color: white;
+        padding: 10px;
+        font-size: 1.1rem;
+        text-align: center;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+    }
+
+    .btn {
+        margin: 5px 0;
+    }
+
+    .bottom-navbar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #343a40;
+        display: flex;
+        justify-content: space-around;
+        padding: 10px 0;
+        z-index: 1000;
+    }
+
+    .bottom-navbar a {
+        color: white;
+        font-size: 1.2rem;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .bottom-navbar a:hover {
+        color: #007bff;
+    }
+
+    .pagination {
+        justify-content: center;
+    }
+</style>
+
+<!-- Add Bootstrap CSS -->
+<link rel="stylesheet" href="{% static 'path/to/bootstrap.min.css' %}">
+
+<div class="container">
+    <h1>Dashboard {{ md_instance.name }}</h1>
+    <h2>Contrats</h2>
+    
+    <!-- Date Filter Form -->
+    <form method="get" class="d-flex align-items-center mb-4">
+        {{ form.date|add_class:"form-control me-2" }}
+        <button type="submit" class="btn btn-primary">Filtrer</button>
+        <a href="{% url 'md_dashboard' %}" class="btn btn-secondary ms-2">Réinitialiser</a>
+    </form>
+
+    <!-- Checklist Cards -->
+    {% for checklist in page_obj %}
+    <div class="card" onclick="window.location.href='{% url 'checklistmd_detail' checklist.id %}'">
+        <div class="card-header">
+            <h5>{{ checklist.name }}</h5>
+        </div>
+        <div class="card-body">
+            <p><strong>Lieu:</strong> {{ checklist.lieu }}</p>
+            <p><strong>Date:</strong> {{ checklist.date|date:"d F Y" }}</p>
+        </div>
+    </div>
+    {% empty %}
+    <p class="text-center text-muted">Pas de contrat à cette date.</p>
+    {% endfor %}
+
+    <!-- Pagination -->
+    <nav>
+        <ul class="pagination">
+            {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if date_filter %}&date={{ date_filter }}{% endif %}">Précédent</a></li>
+            {% endif %}
+
+            <li class="page-item active"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+
+            {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if date_filter %}&date={{ date_filter }}{% endif %}">Suivant</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+
+
+
+<!-- Add Bootstrap JS -->
+<script src="{% static 'path/to/bootstrap.bundle.min.js' %}"></script>
+
+{% endblock %}

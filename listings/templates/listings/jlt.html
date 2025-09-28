@@ -1,0 +1,406 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% block content %}
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<div class="container mt-5">
+    <h2 class="text-center">Soumission ou Contrat</h2>
+    <form method="POST" class="needs-validation" novalidate>
+        {% csrf_token %}
+
+        <!-- Submission Type -->
+        <div class="mb-3">
+            <label for="submission_type" class="form-label">Type de Soumission</label>
+            {{ form.submission_type }}
+        </div>
+
+        <!-- Company and Event Location -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="company_name" class="form-label">Nom de la compagnie <i class="fas fa-building" aria-hidden="true"></i></label>
+                {{ form.company_name }}
+                <div class="invalid-feedback">Veuillez entrer le nom de la compagnie.</div>
+            </div>
+            <div class="col-md-6">
+                
+                    <label for="event_location" class="form-label">Lieu de l'événement <i class="fas fa-map-marker-alt" aria-hidden="true"></i></label>
+                    {{ form.event_location }}
+                    <button type="button" class="btn btn-secondary btn-sm" id="copyLocation">Copier vers Adresse de facturation</button>
+                    <div class="invalid-feedback">Veuillez entrer le lieu de l'événement.</div>
+                </div>
+            
+        </div>
+
+        <!-- Contact Information -->
+        <div class="row mb-3">
+            
+                <div class="col-md-6">
+                    <label for="contact_person" class="form-label">Contact sur place <i class="fas fa-user" aria-hidden="true"></i></label>
+                    {{ form.contact_person }}
+                    <button type="button" class="btn btn-secondary btn-sm" id="copyContact">Copier vers Commandé par</button>
+                    <div class="invalid-feedback">Veuillez entrer le nom de la personne de contact.</div>
+                </div>
+   
+            <div class="col-md-6">
+                <label for="ordered_by" class="form-label">Commandé par <i class="fas fa-user-check" aria-hidden="true"></i></label>
+                {{ form.ordered_by }}
+                <div class="invalid-feedback">Veuillez entrer le nom de la personne qui a commandé.</div>
+            </div>
+        </div>
+
+        <!-- Contact Details -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="phone" class="form-label">Téléphone <i class="fas fa-phone" aria-hidden="true"></i></label>
+                {{ form.phone }}
+                <div class="invalid-feedback">Veuillez entrer un numéro de téléphone valide.</div>
+            </div>
+            <div class="col-md-6">
+                <label for="email" class="form-label">Email <i class="fas fa-envelope" aria-hidden="true"></i></label>
+                {{ form.email }}
+                <div class="invalid-feedback">Veuillez entrer une adresse e-mail valide.</div>
+            </div>
+        </div>
+
+        <!-- Billing Address and Payment Mode -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="billing_address" class="form-label">Adresse de facturation <i class="fas fa-address-card" aria-hidden="true"></i></label>
+                {{ form.billing_address }}
+                <div class="invalid-feedback">Veuillez entrer une adresse de facturation.</div>
+            </div>
+            <div class="col-md-6">
+                <label for="payment_mode" class="form-label">Mode de paiement <i class="fas fa-credit-card" aria-hidden="true"></i></label>
+                {{ form.payment_mode }}
+                <div class="invalid-feedback">Veuillez choisir un mode de paiement.</div>
+            </div>
+        </div>
+
+        <!-- Date and Event Time -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="date" class="form-label">Date <i class="fas fa-calendar-day" aria-hidden="true"></i></label>
+                {{ form.date }}
+                <div class="invalid-feedback">Veuillez sélectionner une date.</div>
+            </div>
+            <div class="col-md-6">
+                <label for="event_time" class="form-label">Heure de l'événement <i class="fas fa-clock" aria-hidden="true"></i></label>
+                {{ form.event_time }}
+                <div class="invalid-feedback">Veuillez sélectionner une heure.</div>
+            </div>
+        </div>
+
+        <!-- Guest Count and Delivery Time -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="guest_count" class="form-label">Nombre de personnes <i class="fas fa-users" aria-hidden="true"></i></label>
+                {{ form.guest_count }}
+                <div class="invalid-feedback">Veuillez entrer le nombre de personnes.</div>
+            </div>
+            <div class="col-md-6">
+                <label for="delivery_time" class="form-label">Heure de livraison <i class="fas fa-clock" aria-hidden="true"></i></label>
+                {{ form.delivery_time }}
+                <div class="invalid-feedback">Veuillez entrer une heure de livraison.</div>
+            </div>
+        </div>
+
+        <!-- Budget and Service Count -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="budget" class="form-label">Budget <i class="fas fa-dollar-sign" aria-hidden="true"></i></label>
+                {{ form.budget }}
+                <div class="invalid-feedback">Veuillez entrer un budget valide.</div>
+            </div>
+            <div class="col-md-6">
+                <label for="service_count" class="form-label">Nombre de services <i class="fas fa-clipboard-list" aria-hidden="true"></i></label>
+                {{ form.service_count }}
+                <div class="invalid-feedback">Veuillez entrer le nombre de services.</div>
+            </div>
+        </div>
+
+       <!-- Delivery Modes -->
+<div class="row mb-3">
+    <div class="col-md-6">
+        <label class="form-label">Mode d'envoi <i class="fas fa-truck" aria-hidden="true"></i></label>
+        <div id="delivery-mode-container">
+            {% for mode in delivery_modes %}
+                <div class="form-check">
+                    <input type="checkbox" id="delivery_mode_{{ mode.id }}" name="delivery_modes" value="{{ mode.id }}" class="form-check-input" onclick="toggleMenuSection();">
+                    <label for="delivery_mode_{{ mode.id }}" class="form-check-label">{{ mode.name }}</label>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="invalid-feedback">Veuillez choisir au moins un mode d'envoi.</div>
+    </div>        
+</div>
+
+<!-- Hidden Menus Section -->
+<div class="row mb-3" id="menuSection" style="display: none;">
+    <div class="col-md-6">
+        <label class="form-label">Menus <i class="fa-solid fa-utensils" aria-hidden="true"></i></label>
+        {% for menu in menus %}
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="menu_{{ menu.id }}" value="{{ menu.id }}">
+            <label class="form-check-label" for="menu_{{ menu.id }}">{{ menu.name }}</label>
+        </div>
+        {% endfor %}
+        <div class="invalid-feedback">Veuillez choisir au moins un menu.</div>
+    </div>
+</div>
+
+        
+   
+        <div class="d-flex justify-content-center my-4">  <!-- Adds margin for spacing -->
+            <button type="submit" class="btn btn-primary">Envoyer</button>
+        </div>
+        
+
+        </div>
+
+
+        
+    </form>
+</div>
+
+<br>
+<br>
+
+
+<!-- Modal for Credit Card Info -->
+<div class="modal fade" id="creditCardModal" tabindex="-1" aria-labelledby="creditCardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="creditCardModalLabel">Détails de la Carte de Crédit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="creditCardForm">
+                    <div class="mb-3">
+                        <label for="card_number" class="form-label">Numéro de Carte</label>
+                        <input type="text" class="form-control" id="card_number" placeholder="XXXX-XXXX-XXXX-XXXX" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="card_holder" class="form-label">Nom du Titulaire</label>
+                        <input type="text" class="form-control" id="card_holder" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="expiry_date" class="form-label">Date d'Expiration</label>
+                        <input type="month" class="form-control" id="expiry_date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cvv" class="form-label">CVV</label>
+                        <input type="text" class="form-control" id="cvv" placeholder="XXX" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Interac Info -->
+<div class="modal fade" id="interacModal" tabindex="-1" aria-labelledby="interacModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="interacModalLabel">Détails du Paiement Interac</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="interacForm">
+                    <div class="mb-3">
+                        <label for="interac_email" class="form-label">Email de l'Interac</label>
+                        <input type="email" class="form-control" id="interac_email" required placeholder="Entrez votre email">
+                    </div>
+                    <div class="mb-3">
+                        <label for="interac_message" class="form-label">Message de Sécurité</label>
+                        <input type="text" class="form-control" id="interac_message" placeholder="Message de Sécurité" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// JavaScript for form validation
+(function () {
+    'use strict';
+    const forms = document.querySelectorAll('.needs-validation');
+
+    Array.prototype.slice.call(forms).forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
+    });
+})();
+
+document.getElementById('id_payment_mode').addEventListener('change', function() {
+    const paymentMode = this.value;
+    if (paymentMode === 'cc') {
+        // Show Credit Card Modal
+        $('#creditCardModal').modal('show');
+    } else if (paymentMode === 'interac') {
+        // Show Interac Modal
+        $('#interacModal').modal('show');
+    }
+});
+
+// Handle Credit Card Form Submission
+document.getElementById('creditCardForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the default form submission
+
+    // Get the values from the input fields
+    const cardNumber = document.getElementById('card_number').value;
+    const cardHolder = document.getElementById('card_holder').value;
+    const expiryDate = document.getElementById('expiry_date').value;
+    const cvv = document.getElementById('cvv').value;
+    
+    // You can add an AJAX request here or handle the submission logic as required
+    console.log("Credit Card Info Submitted:", cardNumber, cardHolder, expiryDate, cvv);
+
+    // Close the modal
+    $('#creditCardModal').modal('hide');
+});
+
+// Handle Interac Form Submission
+document.getElementById('interacForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the default form submission
+
+    // Get the values from the input fields
+    const interacEmail = document.getElementById('interac_email').value;
+    const interacMessage = document.getElementById('interac_message').value;
+
+    // You can add an AJAX request here or handle the submission logic as required
+    console.log("Interac Info Submitted:", interacEmail, interacMessage);
+
+    // Close the modal after submission
+    $('#interacModal').modal('hide');
+});
+
+// Handle menu selection
+document.getElementById('addMenus').addEventListener('click', function() {
+    const selectedMenus = [];
+    const checkboxes = document.querySelectorAll('#menuSelectForm .form-check-input:checked');
+
+    checkboxes.forEach(function(checkbox) {
+        selectedMenus.push(checkbox.value);
+    });
+
+    // This could be sending to your Django form through an AJAX call,
+    // or updating a hidden input field in your form
+    console.log('Selected Menus:', selectedMenus);
+    
+    // Update a hidden form field or display the selected menus
+    // For example, you can store them in a hidden input 
+    document.getElementById('delivery_mode').value = selectedMenus.join(',');
+
+    // Hide the modal after selection
+    $('#menuModal').modal('hide');  
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Copy event listeners for contact and location
+    document.getElementById('copyLocation').addEventListener('click', function() {
+        const eventLocation = document.getElementById('id_event_location').value;
+        document.getElementById('id_billing_address').value = eventLocation;
+    });
+
+    document.getElementById('copyContact').addEventListener('click', function() {
+        const contactPerson = document.getElementById('id_contact_person').value;
+        document.getElementById('id_ordered_by').value = contactPerson;
+    });
+
+    // This function toggles the visibility of the menu section
+    function toggleMenuSection() {
+        const deliveryModes = document.querySelectorAll('#delivery-mode-container .form-check-input');
+        const menuSection = document.getElementById('menuSection');
+        
+        // Check if at least one delivery mode that is associated with menu options is checked
+        const isDeliveryModeChecked = Array.from(deliveryModes).some(input => input.checked);
+
+        // Show or hide the menu section based on the checked state
+        menuSection.style.display = isDeliveryModeChecked ? 'block' : 'none';
+    }
+
+    // Event listener for delivery mode checkboxes
+    const deliveryModeCheckboxes = document.querySelectorAll('#delivery-mode-container .form-check-input');
+    deliveryModeCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', toggleMenuSection); // Attach change event listener
+    });
+
+    // Initial toggle to hide menu section if no delivery mode is checked on load
+    toggleMenuSection();
+});
+
+
+</script>
+
+{% endblock %}
+
+function toggleMenuSection() {
+    const deliveryModes = document.querySelectorAll('#delivery-mode-container .form-check-input');
+    const menuSection = document.getElementById('menuSection');
+    
+    // Check if any 'Menus' delivery mode checkbox is checked
+    const menusChecked = Array.from(deliveryModes).some(input => input.checked && input.nextElementSibling.innerText.includes('menus'));
+
+    // Show or hide the menu section based on the checked state
+    menuSection.style.display = menusChecked ? 'block' : 'none';
+}
+
+<!-- Barre latérale -->
+
+<div id="sidebar" class="" style="display: none;">
+    <nav class="nav flex-column" style="height: 80vh; overflow-y: auto; background-color: #343a40; color: #fff;">
+      <a class="nav-link text-white" href="{% url 'journees-list' %}">
+        <i class="fa-solid fa-truck me-2"></i>Livraisons
+      </a>
+      <a class="nav-link text-white" href="{% url 'creerchecklist' %}">
+        <i class="fa-solid fa-cart-flatbed me-2"></i>Checklist
+      </a>
+      <a class="nav-link text-white" href="{% url 'etiquette-tente' %}">
+        <i class="fa-solid fa-print me-2"></i>Etiquette tente
+      </a>
+      <a class="nav-link text-white" href="{% url 'submit_request' %}" target="_blank" >
+        <i class="fa-solid fa-circle-plus me-2" style="color: #63E6BE;"></i>Créer Soumission
+      </a>
+      <button type="button" class="nav-link text-white" data-bs-toggle="modal" data-bs-target="#createChecklistModal">
+        <i class="fa-solid fa-circle-plus me-2" style="color: #63E6BE;"></i>Créer Checklist
+    </button>
+
+      {% if user.username == "Audrey" or "Maxime" %}
+          <a class="nav-link text-white" href="{% url 'manage_submissions' %}">
+            <i class="fa fa-file-pdf me-2"></i>PDF
+        </a>
+          <a class="nav-link text-white" href="{% url 'calendarsub_view' %}">
+            <i class="fa fa-calendar-days me-2"></i>Calendrier date événem
+        </a>
+          <a class="nav-link text-white" href="{% url 'calendarsubcreate_view' %}">
+            <i class="fa fa-calendar-plus me-2"></i>Calendrier date création
+        </a>
+      {% endif %}
+  
+    </nav>
+  </div>
+  <!-- Bouton menu pour ouvrir/fermer la sidebar -->
+<button id="menu-toggle" class="btn btn-primary position-fixed" style="top: 20px; left: 20px; z-index: 1100; display: none;">
+    <i class="fas fa-bars"></i>
+  </button>
+  
+  <!-- Overlay pour fermer la sidebar en cliquant -->
+  <div id="overlay"></div>

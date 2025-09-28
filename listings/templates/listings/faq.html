@@ -1,0 +1,242 @@
+{% extends 'listings/base.html' %}
+
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ Section</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .faq-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .faq-item {
+            border-bottom: 1px solid #ddd;
+            padding: 15px 0;
+        }
+
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+
+        .faq-question {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .faq-question:hover {
+            color: #127BFF;
+        }
+
+        .faq-question i {
+            transition: transform 0.3s ease;
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease, padding 0.5s ease;
+            font-size: 1em;
+            color: #555;
+        }
+
+        .faq-answer.open {
+            max-height: 500px; /* Large enough to accommodate the answer */
+            padding: 10px 0;
+        }
+
+        /* Navigation Bar Styles */
+    .bottom-navbar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #333;
+        padding: 10px 0;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+    }
+    .bottom-navbar ul {
+        list-style: none;
+        display: flex;
+        justify-content: space-around;
+        margin: 0;
+        padding: 0;
+    }
+    .bottom-navbar ul li {
+        flex: 1;
+        text-align: center;
+    }
+    .bottom-navbar ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.bottom-navbar ul li a:hover {
+    text-decoration: underline;
+}
+
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .faq-container {
+                padding: 10px;
+                margin: 20px;
+            }
+
+            h2 {
+                font-size: 1.5em;
+            }
+
+            .faq-question {
+                font-size: 1.1em;
+            }
+
+            .faq-answer {
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="bottom-navbar">
+        <ul>
+            <li><a  href="{% url 'journees-list'%}" class="nav__link"><i class="fa-solid fa-calendar-days"></i>
+              <span class="nav__name">Journées</span>
+            </a></li>
+          </ul>
+    </nav>
+<div class="faq-container">
+    <h2>Frequently Asked Questions</h2>
+
+    <div class="faq-item">
+        <div class="faq-question">
+            <span>Que faire pendant mes temps libres où je ne fais rien ?</span>
+            <i class="fa fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+            <p>Dans mon Dashboard, j'ai une section "Tâches du jour". Ce sont des tâches à effectuer obligatoirement et à valider et puis faire une/des photo(s) pour valider mes tâches</p>
+        </div>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">
+            <span>Que faire si je vois que je serai en retard pour ma livraison ?</span>
+            <i class="fa fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+            <p>J'appelle le client. Son numéro de téléphone est toujours indiqué sur l'application ou dans la feuille dans les racks bruns de ma livraison. Si le client ne réponds pas, appeler les ventes 514-937-0698 et taper 1, indiquer le nom du livreur et le nom de la commande.</p>
+        </div>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">
+            <span>Que faire si je ne trouve pas l'étage ou si je suis perdu dans le batiment du client ?</span>
+            <i class="fa fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+            <p>J'appelle le client. Son numéro de téléphone est toujours indiqué sur l'application ou dans la feuille dans les racks bruns de ma livraison. Si le client ne réponds pas, appeler les ventes 514-937-0698 et taper 1, indiquer le nom du livreur et le nom de la commande</p>
+        </div>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">
+            <span>Comment faire les boites de thés et cafés ?</span>
+            <i class="fa fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+            <p>Dans la cuisine, à coter du frigo dispatch, il y a tout le nécessaire pour faire boites de thés et cafés. Il y a aussi, une affiche avec le contenu de la boite et une photo pour reproduire exactement la même boite</p>
+        </div>
+    </div>
+    <div class="faq-item">
+        <div class="faq-question">
+            <span>Comment faire pour l'essence ?</span>
+            <i class="fa fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+            <p>Venir chercher une carte essence dans le bureau livreur (dans la boite grise) puis partir dans une station Petrocanada. A la fin, il est ultra important de remplir le formulaire essence (tu peux le retrouver dans ton dashboard dans l'onglet "liens" en bas de la barre de navigation.) Il faut la photo du kilometrage camion, photo du reçu et autres informations. IMPORTANT: bien remettre la carte essence dans la boite grise AVEC le reçu.</p>
+        </div>
+    </div>
+    <div class="faq-item">
+        <div class="faq-question">
+            <span>Comment faire si je fais tomber ma commande ?</span>
+            <i class="fa fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+            <p>Prévenir directement Loic ou Maxime afin de refaire la commande et évaluer ce qui doit être reproduit</p>
+        </div>
+    </div>
+    <div class="faq-item">
+        <div class="faq-question">
+            <span>Comment faire si je fais un accident avec le camion ?</span>
+            <i class="fa fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+            <p>Il faut prévenir Loic ou Maxime directement et prendre les informations de l'autre conducteur (Telephone, permis de conduire, assurance, plaque d'immatriculation et photo de la scene de l'accident). Chercher dans le cmaion le constat a l'amiable et le remplir. Envoyer toutes ces informations à Loic ou Maxime directement.</p>
+        </div>
+    </div>
+        <div class="faq-item">
+            <div class="faq-question">
+                <span>Comment nettoyer les machines à café ?</span>
+                <i class="fa fa-chevron-down"></i>
+            </div>
+            <div class="faq-answer">
+                <p>Tous les jours, les machines à café doivent être nettoyées, au moins avec de l'eau : interieur des recipients.Puis chaque vendredi apres midi, nettoyer avec les pastilles. Biensur, nettoyer les machines à café lorsqu'il n'y a plus de café a produire.</p>
+            </div>
+        </div>
+    
+</div>
+<br>
+<br>
+<br>
+<script>
+    // JavaScript for toggling the FAQ answers
+    document.querySelectorAll('.faq-question').forEach((question) => {
+        question.addEventListener('click', () => {
+            const answer = question.nextElementSibling;
+            answer.classList.toggle('open');
+            
+            // Toggle the arrow icon
+            const icon = question.querySelector('i');
+            icon.classList.toggle('fa-chevron-down');
+            icon.classList.toggle('fa-chevron-up');
+        });
+    });
+</script>
+
+</body>
+</html>
+
+
+{% endblock %}

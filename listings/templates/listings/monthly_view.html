@@ -1,0 +1,38 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% block content %}
+
+<h1>Monthly Agenda: {{ year }}/{{ month }}</h1>
+<table>
+    <thead>
+        <tr>
+            <th>Mon</th>
+            <th>Tue</th>
+            <th>Wed</th>
+            <th>Thu</th>
+            <th>Fri</th>
+            <th>Sat</th>
+            <th>Sun</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for week in calendar_days %}
+        <tr>
+            {% for day in week %}
+            <td>
+                <strong>{{ day.date.day }}</strong><br>
+                {% for checklist in day.checklists %}
+                    {{ checklist.name }}<br>
+                {% empty %}
+                    No checklists<br>
+                {% endfor %}
+            </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+
+{% endblock %}

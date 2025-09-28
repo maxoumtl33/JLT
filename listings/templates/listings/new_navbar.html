@@ -1,0 +1,165 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% block content %}
+
+{% if livraisons %}
+{% csrf_token %}
+<br>
+<br>
+<div class="body">
+  <h1 style="text-align: center;">FEUILLE DE ROUTE</h1> <h1 style="text-align: center;"> {{journees}} </h1>
+  <br>
+  <br>
+  <br>
+  <br>
+  <table class="table table-striped">
+      <thead class="thead-dark">
+        <tr>
+          <th scope="col" style="color: #303FBA;">ID</th>
+          <th scope="col" style="color: #303FBA;">Heure départ</th>
+          <th scope="col" style="color: #303FBA;">Nom du contrat</th>
+          <th scope="col" style="color: #303FBA;">Infos</th>
+          <th scope="col" style="color: #303FBA;">Heure livraison</th>
+          <th scope="col" style="color: #303FBA;">Livreur</th>
+          <th scope="col" style="color: #303FBA;">Aide livreur</th>
+          <th scope="col" style="color: #303FBA;">Route</th>
+          <th scope="col" style="color: #303FBA;">Retour</th>
+
+          <th scope="col" style="color: #303FBA;">supprimer</th>
+
+        </tr>
+      </thead>
+      <tbody>
+        <form class="sortable list-group" hx-trigger="end" hx-post="/sort" hx-target="#livraison-list">
+
+          {% for livraison in livraisons %}
+          {% if livraison.recuperation == recuperation %}
+          <div>
+            <input type="hidden" name="film_order" value="{{ livraison.id }}" />
+        <tr>
+          <td style="background-color: #F1B3DA;"><strong>{{ livraison.id }}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_depart }}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{livraison.nom}}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{livraison.infodetail}}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{ livraison.heure_livraison }}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{livraison.livreur.nom}}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{livraison.aidelivreur}}</strong></td>
+          <td style="background-color: #F1B3DA;"><strong>{{ livraison.route }}</strong></td>
+          <td></td>
+          <td><span class="badge badge-danger badge-pill" 
+            style="cursor: pointer;"
+            hx-delete="{% url 'delete-livraison' livraison.pk %}"
+            hx-target="#livraison-list"
+            hx-confirm="Es tu sur de vouloir supprimer ?"><i class="fa-solid fa-trash fa-2xl" style="color: #f00f0f;"></i></span></td>
+        </tr>
+          </div>
+
+          {% else %}
+          <div>
+            <input type="hidden" name="film_order" value="{{ livraison.id }}" />
+          <tr>
+            <td><strong>{{ livraison.id }}</strong></td>
+            <td><strong>{{ livraison.heure_depart }}</strong></td>
+            <td><strong>{{livraison.nom}}</strong></td>
+            <td><strong>{{livraison.infodetail}}</strong></td>
+            <td><strong>{{ livraison.heure_livraison }}</strong></td>
+            <td><strong>{{livraison.livreur.nom}}</strong></td>
+            <td><strong>{{livraison.aidelivreur}}</strong></td>
+            <td><strong>{{ livraison.route }}</strong></td>
+            <td></td>
+          <td><span class="badge badge-danger badge-pill" 
+            style="cursor: pointer;"
+            hx-delete="{% url 'delete-livraison' livraison.pk %}"
+            hx-target="#livraison-list"
+            hx-confirm="Es tu sur de vouloir supprimer ?"><i class="fa-solid fa-trash fa-2xl" style="color: #f00f0f;"></i></span></td>
+          </tr>
+          
+          {% endif %}
+        </div>
+        {% endfor %}
+    </form>
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <p>You do not have any films in your list</p>
+{% endif %}
+  <br>
+  <br>
+  <br>
+  
+      
+  
+  <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="offcanvasExampleLabel">Liens Formulaires</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div>
+        <p><a class="btn btn-primary" href="https://discord.com/channels/1174091428876533800/1194755233935523952" target="_blank">Photo livraison <i class="fa-brands fa-discord"></i></a></p>
+        <p><a href="https://view.forms.app/loicveyre/jeparsenlivraison" target="_blank" class="btn btn-primary">Départ <i class="fa-solid fa-truck-fast"></i></a></p>
+        <p><a href="https://view.forms.app/loicveyre/jereviensdelivraison" target="_blank" class="btn btn-primary">Retour <i class="fa-sharp fa-solid fa-truck fa-flip-horizontal"></i></a></p>
+        <p><a href="https://oakmnxgj.forms.app/recuplivreurs" target="_blank" class="btn btn-primary">Récup <i class="fa-solid fa-dolly"></i></a>
+        </p>
+        <p><a href="https://oakmnxgj.forms.app/essence" target="_blank" class="btn btn-primary">Essence <i class="fa-solid fa-gas-pump"></i></a>
+        </p>
+      </p>    
+    </div>
+    </div>
+  </div>
+  
+
+
+
+
+
+{% endblock %}
+
+<div id="livraison-list"> 
+  <ul id="sortable">
+      {% for livraison in livraisons %}
+      <div id="livraison-details">
+      <li id="{{ livraison.id }}">{{ livraison.heure_depart }}   {{ livraison.nom }} {{ livraison.infodetail }}  {{ livraison.livreur }}  {{ livraison.aidelivreur }}  {{ livraison.route }}  {{ livraison.retourtraiteur }}<button class="btn"
+        hx-get="{% url 'livraison-edit-form' livraison.id %}"
+        hx-target="#livraison-details">Edit</button>
+      </li>
+    </div>
+      {% endfor %}
+    </ul>
+  </div>
+
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th scope="col">Heure départ</th>
+      <th scope="col">Nom Livraison</th>
+      <th scope="col">Infos</th>
+      <th scope="col">Heure livraison</th>
+      <th scope="col">Livreur</th>
+      <th scope="col">Aidelivreur</th>
+      <th scope="col">Route</th>
+      <th scope="col">Edit</th>
+    </tr>
+  </thead>
+  <div id="livraison-list">
+  <tbody id="sortable">
+    {% for livraison in livraisons %}
+    <div id="livraison-details">
+    <tr id="{{ livraison.id }}">
+      <td>{{ livraison.heure_depart }}</td>
+      <td>{{ livraison.nom }}</td>
+      <td>{{ livraison.infodetail }}</td>
+      <td>{{ livraison.heure_livraison }}</td>
+      <td>{{ livraison.livreur }}</td>
+      <td>{{ livraison.aidelivreur }}</td>
+      <td>{{ livraison.route }}</td>
+      <td><button class="btn btn-primary"
+        hx-get="{% url 'livraison-edit-form' livraison.id %}"
+        hx-target="#livraison-details">Edit</button></td>
+    </tr>
+    </div>
+    {% endfor %}
+  </tbody>
+  </div>
+</table>

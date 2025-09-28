@@ -1,0 +1,133 @@
+{% extends "recipes/base.html" %}
+{% load static %}
+{% block title %}Catalogue Fournisseurs - Gestion Recettes{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <h1 class="h3 mb-0">Catalogue des Prix Fournisseurs</h1>
+        <div>
+            <a href="{% url 'catalogue_import' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-cloud-upload"></i> Importer
+            </a>
+            <a href="{% url 'catalogue_create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Nouveau Prix
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="table-container">
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <form method="get" id="filterForm">
+                <select name="fournisseur" class="form-select" onchange="document.getElementById('filterForm').submit()">
+                    <option value="">Tous les fournisseurs</option>
+                    {% for f in fournisseurs %}
+                    <option value="{{ f.id }}" {% if request.GET.fournisseur == f.id|stringformat:"s" %}selected{% endif %}>
+                        {{ f.nom }}
+                    </option>
+                    {% endfor %}
+                </select>
+        </div>
+        <div class="col-md-3">
+                <select name="ingredient" class="form-select" onchange="document.getElementById('filterForm').submit()">
+                    <option value="">Tous les ingrédients</option>
+                    {% for i in ingredients %}
+                    <option value="{{ i.id }}" {% if request.GET.ingredient == i.id|stringformat:"s" %}selected{% endif %}>
+                        {{ i.nom }}
+                    </option>
+                    {% endfor %}
+                </select>
+        </div>
+        <div class="col-md-3">
+                <select name="actif" class="form-select" onchange="document.getElementById('filterForm').submit()">
+                    <option value="">Tous les statuts</option>
+                    <option value="true" {% if request.GET.actif == "true" %}selected{% endif %}>Actifs</option>
+                    <option value="false" {% if request.GET.actif == "false" %}selected{% endif %}>Inactifs</option>
+                </select>
+            </form>
+        </div>
+        <div class="col-md-3 text-end">
+            <span class="text-muted">{{ catalogues.paginator.count }} prix trouvé(s)</span>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Fournisseur</th>
+                    <th>Ingrédient</th>
+                    <th>Prix</th>
+                    <th>Référence</th>
+                    <th>Conditionnement</th>
+                    <th>Délai</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for catalogue in catalogues %}
+                <tr {% if not catalogue.actif %}class="table-secondary"{% endif %}>
+                    <td><strong>{{ catalogue.fournisseur.nom }}</strong></td>
+                    <td>{{ catalogue.ingredient.nom }}</td>
+                    <td>
+                        <strong>{{ catalogue.prix }}€</strong>/{{ catalogue.ingredient.unite_mesure.symbole }}
+                    </td>
+                    <td>{{ catalogue.reference_fournisseur|default:"-" }}</td>
+                    <td>{{ catalogue.conditionnement|default:"-" }}</td>
+                    <td>{{ catalogue.delai_livraison }} jour(s)</td>
+                    <td>
+                        {% if catalogue.actif %}
+                        <span class="badge bg-success">Actif</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Inactif</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'catalogue_update' catalogue.pk %}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <a href="{% url 'catalogue_delete' catalogue.pk %}" class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center py-4">
+                        <i class="bi bi-tags text-muted" style="font-size: 2rem;"></i>
+                        <p class="mt-2 mb-0 text-muted">Aucun prix trouvé</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if catalogues.has_other_pages %}
+    <nav>
+        <ul class="pagination justify-content-center">
+            {% if catalogues.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ catalogues.previous_page_number }}&{{ request.GET.urlencode }}">Précédent</a>
+            </li>
+            {% endif %}
+            
+            {% for num in catalogues.paginator.page_range %}
+            <li class="page-item {% if catalogues.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}&{{ request.GET.urlencode }}">{{ num }}</a>
+            </li>
+            {% endfor %}
+            
+            {% if catalogues.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ catalogues.next_page_number }}&{{ request.GET.urlencode }}">Suivant</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

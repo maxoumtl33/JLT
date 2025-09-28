@@ -1,0 +1,121 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% block content %}
+<nav class="nav container">
+  <a href="#" class="nav__logo">Julien Leblanc Traiteur</a>
+
+  <div class="nav__menu" id="nav-menu">
+      <ul class="nav__list">
+        {% if user.is_authenticated %}
+          <li class="nav__item">
+            <form action="{% url 'logout' %}" method="post">
+              {% csrf_token %}
+              <button type="submit" class="nav__link active-link" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i>
+          </form>
+                  <span class="nav__name">Logout</span>
+        </button>
+          </li>
+          {% else %}
+
+          <li class="nav__item">
+            <a href="{% url 'login' %}" class="nav__link" style="color: green;"><i class="fa-regular fa-user"></i></i></a>
+                  <span class="nav__name">Login</span>
+              </a>
+          </li>
+          {% endif %}
+          <li class="nav__item">
+            <a type="button" class="nav__link" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
+              <i class="fa-solid fa-link"></i><span class="nav__name">Liens</span>
+            </a>
+          </li>
+          <li class="nav__item">
+            <a  href="{% url 'acceuilresponsables' %}" class="nav__link"><i class="fa-solid fa-user-ninja"></i>
+              <span class="nav__name">Retour</span>
+            </a>
+          </li>
+      </ul>
+  </div>
+
+  <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
+</nav>
+<br>
+<br>
+  <div id="premiereetape">
+    <h1 style="color: blue;">Ajouter les livraisons avec le fichier excel</h1>
+    <br>
+    <h3><i class="fa-solid fa-arrow-right"></i>Première etape</h3>
+    <p>Télécharger le fichier excel du lendemain <a href="https://gestion-traiteur.app/gestion" target="_blank">ici</a> JUL</p>
+    <h3><i class="fa-solid fa-arrow-right"></i>Deuxième etape</h3>
+    <p>Modifier le fichier excel:</p>
+    <p>SUpprimer les 3 premieres lignes</p>
+    <p>Ajouter une colonne id a gauche du nom de l'evenement</p>
+    <p>copier - coller le nom des colonnes <a href="https://docs.google.com/spreadsheets/d/1_J7crUcDORaiepEPyqcxXGDM5hFypEvPCmw7BEuVDKU/edit?usp=sharing" target="_blank">ici</a></p>
+    <p>Ajouter la colonne date puis mette la date du lendemain format : 2024-05-23</p>
+    <h3><i class="fa-solid fa-arrow-right"></i>Troisème etape</h3>
+    <p>importer le fichier excel <a href="https://www.julienleblanclivraisons.com/admin/listings/livraison/import/" target="_blank">ici</a></p>
+    <br>
+    <h1 style="color: blue;">Carte et attribuer les routes</h1>
+    <br>
+    <h3><i class="fa-solid fa-arrow-right"></i>Première etape</h3>
+    <p>Géocoder les livraisons <a href="https://www.julienleblanclivraisons.com/livraisonstomorrow/" target="_blank">ici</a></p>
+    <p style="color: red;">SI LE GEOCODAGE NE MARCHE PAS, PROBLEME AVEC ADRESSE OU ZIP CODE, IL FAUT L'AJOUTER VIA MENU ADMIN <a href="https://www.julienleblanclivraisons.com/admin/listings/livraison/" target="_blank">ici</a></p>
+    <h3><i class="fa-solid fa-arrow-right"></i>Deuxième etape</h3>
+    <p>Voir la carte matin <a href="https://www.julienleblanclivraisons.com/map" target="_blank">ici</a>, midi <a href="https://www.julienleblanclivraisons.com/mapmidi" target="_blank">ici</a>, aprem <a href="https://www.julienleblanclivraisons.com/mapaprem" target="_blank">ici</a></p>
+    <h3><i class="fa-solid fa-arrow-right"></i>Troisème etape</h3>
+    <p>Voir les livraisons sur la carte (cliquer sur repere pour voir plus d'infos)</p>
+    <p>Drag and drop pour attribuer la livraison à une route (cliquer sur le nom pour voir plus d'infos) puis attribuer un livreur et heure de depart à la route</p>
+    <p style="color: red;">SI LA CARTE NE S'AFFICHE PAS: IL N'Y A RIEN DANS LA CASE "INFODETAIL" DE LA LIVRAISON. MODIFIER OU AJOUTER UN POINT OU ESPACE. <a href="https://www.julienleblanclivraisons.com/admin/listings/livraison/" target="_blank">ici</a></p>
+    <br>
+    <h1 style="color: blue;">Transformer une livraison en récupération</h1>
+    <br>
+    <h3><i class="fa-solid fa-arrow-right"></i>Première etape</h3>
+    <p>Aller <a href="https://www.julienleblanclivraisons.com/recuptoday/" target="_blank">ici</a> pour voir les récups à faire le lendemain et les récups non validées, cliquer sur "creer recup" pour que la livraison devienne une recuperation pour le lendemain</p>
+    <p>La livraison devient une recuperation et va apparaitre dans ce <a href="https://www.julienleblanclivraisons.com/livraisonsdrag/" target="_blank">menu</a> (voir prochain chapitre)</p>
+<br>
+    <h1 style="color: blue;">Modifier et classer les livraisons</h1>
+    <br>
+    <h3><i class="fa-solid fa-arrow-right"></i>Première etape</h3>
+    <p><a href="https://www.julienleblanclivraisons.com/livraisonsdrag/" target="_blank">Ici</a> on peut modifier les livraisons et les ranger dans l'ordre(pour le lendemain) et <a href="https://www.julienleblanclivraisons.com/livraisonsdragtoday/">ici</a>pour le jour même </p>
+    <h3><i class="fa-solid fa-arrow-right"></i>Deuxième etape</h3>
+    <p>Cliquer sur modifier, un menu en haut va apparaitre et tu pourras modifier la livraison <strong style="color: red;">n'oublies pas de valider</strong> (le changement n'apparait pas desuite, il faut rafraichier la page, mais tu peux continuer a modifier les livraisons sans rafraichir pour aller plus vite)</p>
+    <h3><i class="fa-solid fa-arrow-right"></i>Troisème etape</h3>
+    <p>Tu peux drag and drop les livraisons pour creer l'ordre des livraisons (le drag and drop ne marche pas sur telephone et tablette malheureusement pour le moment)</p>
+    <br>
+    <h1 style="color: blue;">Changer le nom de la journée</h1>
+    <br>
+    <h3><i class="fa-solid fa-arrow-right"></i>Première etape</h3>
+    <p><a href="https://www.julienleblanclivraisons.com/admin/listings/journee/2/change/" target="_blank">Ici</a> pour changer le nom de la journée, changer la date puis cliquer sur SAVE</p>
+    <p style="color: red;">NE PAS CREER DE NOUVELLE JOURNEE OU EFFACER LA JOURNEE SINON LES LIVRAISONS NE VONT PAS APPARAITRE</p>
+
+    
+
+
+
+
+
+  </div>
+  <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="offcanvasExampleLabel">Liens Formulaires</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div>
+        <p><a class="btn btn-primary" href="https://discord.com/channels/1174091428876533800/1194755233935523952" target="_blank">Photo livraison <i class="fa-brands fa-discord"></i></a></p>
+        <p><a href="https://view.forms.app/loicveyre/jeparsenlivraison" target="_blank" class="btn btn-primary">Départ <i class="fa-solid fa-truck-fast"></i></a></p>
+        <p><a href="https://view.forms.app/loicveyre/jereviensdelivraison" target="_blank" class="btn btn-primary">Retour <i class="fa-sharp fa-solid fa-truck fa-flip-horizontal"></i></a></p>
+        <p><a href="https://oakmnxgj.forms.app/recuplivreurs" target="_blank" class="btn btn-primary">Récup <i class="fa-solid fa-dolly"></i></a>
+        </p>
+        <p><a href="https://oakmnxgj.forms.app/essence" target="_blank" class="btn btn-primary">Essence <i class="fa-solid fa-gas-pump"></i></a>
+        </p>
+      </p>    
+    </div>
+    </div>
+  </div>
+
+   
+  
+
+
+{% endblock %}
+

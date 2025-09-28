@@ -1,0 +1,1802 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s linear, color 0.3s linear;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #007BFF;
+            height: 100%;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar .sidebar-header {
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .sidebar a {
+            color: #fff;
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar a.active, .sidebar a:hover {
+            background-color: #0056b3;
+        }
+
+        .dashboard {
+            flex: 1;
+            padding: 20px;
+            background-color: #F0F2F5;
+            overflow-y: auto;
+            transition: margin-left 0.3s ease; /* Improves smoothness of layout change */
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .header .toggle-theme {
+            cursor: pointer;
+            color: #007BFF;
+        }
+
+        .card {
+            background-color: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: inline-block;
+            width: calc(33.333% - 20px);
+            margin-right: 15px;
+            vertical-align: top;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+
+            .sidebar .sidebar-header, .sidebar a {
+                font-size: 12px;
+                padding: 10px 5px;
+                text-align: center;
+            }
+
+            .card {
+                width: calc(50% - 15px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                width: 100%;
+            }
+        }
+
+        .dark-mode {
+            background-color: #121212;
+            color: #e4e4e4;
+        }
+
+        .dark-mode .header, .dark-mode .card {
+            background-color: #1e1e1e;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .dark-mode .sidebar {
+            background-color: #1e1e1e;
+        }
+
+        .dark-mode .sidebar a {
+            color: #e4e4e4;
+        }
+
+        .dark-mode .sidebar a.active, .dark-mode .sidebar a:hover {
+            background-color: #333;
+            color: #fff;
+        }
+
+
+/* Make entire table fixed layout */
+.table {
+  width: 100%;
+  table-layout: fixed; /* Enforce fixed column widths */
+  border-collapse: collapse;
+}
+
+/* Header stays normal */
+.table thead {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+.table thead tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+/* Body scrolls - set fixed height for only tbody */
+.table tbody {
+  display: block;
+  max-height: calc(80px * 3); /* 3 lines high (adjust as needed) */
+  overflow-y: auto;
+  width: 100%;
+}
+
+.table tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+#dashboard.expanded {
+    margin-left: 0;
+}
+
+#dashboard.full-width {
+    transition: margin-left 0s;
+}
+
+.collapsed {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    width: 0; /* Ensure width collapses at the end */
+}
+
+
+    </style>
+</head>
+<body>
+
+
+    <!-- Sidebar Navigation -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header" style="margin-top: 100px;">Menu <button class="toggle-sidebar" id="sidebar-toggle"><i class="fas fa-bars"></i></button></div>
+        <a href="{% url 'responsablelist' %}"><i class="fas fa-home"></i> Suivi journée</a>
+        <a href="{% url 'recuptoday' %}"><i class="fas fa-sync"></i> Récups</a>
+        <a href="{% url 'dashboard_stats' %}"><i class="fas fa-chart-bar"></i> Stats</a>
+        <a href="{% url 'livraisonstomorrow' %}"><i class="fas fa-shipping-fast"></i> Dispatch</a>
+        <a href="{% url 'create-shift' %}"><i class="fas fa-calendar-plus"></i> Planning</a>
+        <a href="{% url 'voir_checklist' %}"><i class="fas fa-clipboard-list"></i> Checklist</a>
+        <a href="{% url 'creerchecklist' %}"><i class="fas fa-list-check"></i> Checklist Ventes</a>
+        <a href="{% url 'product_list' %}"><i class="fas fa-box-open"></i> Liste produits (checklist)</a>
+        <a href="/admin" target="_blank"><i class="fas fa-tools"></i> Menu admin</a>
+        <button class="toggle-theme" id="theme-toggle" style="margin-top:20px;"><i class="fas fa-moon"></i> Thème</button>
+        <div style="margin-top:20px; font-size:14px; color:#ccc;">Utilisateur: {{ user.username }}</div>
+    </div>
+
+    <!-- Main Dashboard Content -->
+    <div class="dashboard" id="dashboard">
+        <!-- Top Header -->
+        <div class="header">
+            <h2>Tableau de Bord Administrateur</h2>
+                <button id="show-sidebar" style="display:none; position: fixed; top: 12%; left: 10px;">
+                    <i class="fas fa-bars fa-2xl"></i>
+                </button>
+            <div class="user-info">
+                <button id="logoutBtn" style="border:none; background:none; cursor:pointer;"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
+            </div>
+        </div>
+        <br>
+        <br>
+        <br>
+
+        
+    
+        
+        <hr>
+        <h2 style="text-align: center;">Utilisateurs</h2>
+        <div id="utilisateurs-section">
+        <!-- USER MANAGEMENT SECTION -->
+        <hr>
+        <br>
+<div id="users-section" style="display: none;">
+    <h3>Gestion des Utilisateurs</h3>
+    <button class="btn btn-primary mb-2" onclick="openUserModal()">+ Ajouter Utilisateur</button>
+    <input type="text" id="searchUsers" placeholder="Rechercher utilisateur" class="form-control mb-2" onkeyup="filterTable('usersTable', this.value)">
+    <table class="table table-striped" id="usersTable">
+      <thead>
+        <tr>
+          <th>Username</th><th>Email</th>      <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- User data will load here dynamically -->
+      </tbody>
+    </table>
+    </div>
+
+    <div id="livreurs-section">
+    <h3>Gestion des Livreurs</h3>
+    <button class="btn btn-primary mb-2" onclick="openLivreurModal()">+ Ajouter Livreur</button>
+    <input type="text" id="searchLivreurs" placeholder="Rechercher Livreur" class="form-control mb-2" onkeyup="filterTable('livreursTable', this.value)">
+    <table class="table table-striped" id="livreursTable">
+      <thead>
+        <tr>
+          <th>nom</th><th>téléphone</th>      <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- User data will load here dynamically -->
+      </tbody>
+    </table>
+    </div>
+
+    <div id="mds-section">
+        <h3>Gestion des MD</h3>
+        <button class="btn btn-primary mb-2" onclick="openMdModal()">+ Ajouter MD</button>
+        <input type="text" id="searchMds" placeholder="Rechercher Md" class="form-control mb-2" onkeyup="filterTable('mdsTable', this.value)">
+        <table class="table table-striped" id="mdsTable">
+          <thead>
+            <tr>
+              <th>nom</th><th>téléphone</th>      <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- User data will load here dynamically -->
+          </tbody>
+        </table>
+        </div>
+
+        <div id="conseillers-section">
+    <h3>Gestion des Conseillers</h3>
+    <button class="btn btn-primary mb-2" onclick="openConseillerModal()">+ Ajouter Conseiller</button>
+    <input type="text" id="searchConseillers" placeholder="Rechercher Conseiller" class="form-control mb-2" onkeyup="filterTable('conseillersTable', this.value)">
+    <table class="table table-striped" id="conseillersTable">
+      <thead>
+        <tr>
+          <th>nom</th><th>téléphone</th>      <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- User data will load here dynamically -->
+      </tbody>
+    </table>
+    </div>
+        </div>
+        <br>
+    <hr>
+    <h2 style="text-align: center;">Ventes</h2>
+        <div id="ventes-section">
+          <!-- Client, Product, Category, Menu CRUD -->
+          <hr>
+          <br>
+    <!-- VENTES Section -->
+    <div id="clients-section">
+    <h3>Gestion des Clients</h3>
+    <button class="btn btn-primary mb-2" onclick="openClientModal()">+ Ajouter Client</button>
+    <input type="text" id="searchClients" placeholder="Rechercher Client" class="form-control mb-2" onkeyup="filterTable('clientsTable', this.value)">
+    <table class="table table-striped" id="clientsTable">
+      <thead>
+        <tr>
+          <th>Nom de la société</th><th>Contact</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    </div>
+
+    <div id="menus-section">
+        <h3>Gestion des Menus</h3>
+        <button class="btn btn-primary mb-2" onclick="openMenuModal()">+ Ajouter Menu</button>
+        <input type="text" id="searchMenus" placeholder="Rechercher Menu" class="form-control mb-2" onkeyup="filterTable('menusTable', this.value)">
+        <table class="table table-striped" id="menusTable">
+          <thead>
+            <tr>
+              <th>nom</th><th>description</th>      <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- User data will load here dynamically -->
+          </tbody>
+        </table>
+        </div>
+
+        <div id="modeslivraison-section">
+            <h3>Gestion des Modes d'envoi</h3>
+            <button class="btn btn-primary mb-2" onclick="openModeModal()">+ Ajouter Mode</button>
+            <input type="text" id="searchModes" placeholder="Rechercher Mode d'envoi" class="form-control mb-2" onkeyup="filterTable('modesTable', this.value)">
+            <table class="table table-striped" id="modesTable">
+              <thead>
+                <tr>
+                  <th>nom</th>    <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- User data will load here dynamically -->
+              </tbody>
+            </table>
+            </div>
+
+            <div id="produits-section">
+                <h3>Gestion des Produits (checklist)</h3>
+                <button class="btn btn-primary mb-2" onclick="openProduitModal()">+ Ajouter Produit</button>
+                <input type="text" id="searchProduits" placeholder="Rechercher Produits" class="form-control mb-2" onkeyup="filterTable('produitsTable', this.value)">
+                <table class="table table-striped" id="produitsTable">
+                  <thead>
+                    <tr>
+                      <th>nom</th><th>quantité</th>      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- User data will load here dynamically -->
+                  </tbody>
+                </table>
+                </div>
+
+                <div id="categories-section">
+                    <h3>Gestion des Catégories</h3>
+                    <button class="btn btn-primary mb-2" onclick="openCategorieModal()">+ Ajouter Catégorie</button>
+                    <input type="text" id="searchCategories" placeholder="Rechercher Catégorie" class="form-control mb-2" onkeyup="filterTable('categoriesTable', this.value)">
+                    <table class="table table-striped" id="categoriesTable">
+                      <thead>
+                        <tr>
+                          <th>nom</th>     <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <!-- User data will load here dynamically -->
+                      </tbody>
+                    </table>
+                    </div>
+        </div>
+        <br>
+<hr>
+        <h2 style="text-align: center;">Livraison</h2>
+        <div id="livraison-section">
+          <!-- Tacheafaire CRUD -->
+          <hr>
+          <br>
+        
+    <!-- Taches Section -->
+    <div id="tasks-section">
+    <h3>Gestion Taches</h3>
+    <button class="btn btn-primary mb-2" onclick="openTaskModal()">+ Ajouter Tâche</button>
+    <input type="text" id="searchTaches" placeholder="Rechercher Tache" class="form-control mb-2" onkeyup="filterTable('tasksTable', this.value)">
+    <table class="table table-striped" id="tasksTable">
+      <thead>
+        <tr>
+          <th>Nom</th><th>Description</th><th>Statut</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    </div>
+</div>
+    <!-- Modals for CRUD (reuse for users, clients, tasks) -->
+    
+    <!-- User Modal -->
+    <div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header"><h5 class="modal-title" id="userModalLabel">Ajouter/Modifier Utilisateur</h5></div>
+          <div class="modal-body">
+            <form id="userForm">
+              <input type="hidden" id="userId" />
+              <div class="mb-3">
+                <label for="usernameInput" class="form-label">Username</label>
+                <input type="text" class="form-control" id="usernameInput" required />
+              </div>
+              <div class="mb-3">
+                <label for="emailInput" class="form-label">Email</label>
+                <input type="email" class="form-control" id="emailInput" required />
+              </div>
+              <button type="submit" class="btn btn-primary">Enregistrer</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Livreur Modal -->
+<div class="modal fade" id="livreurModal" tabindex="-1" aria-labelledby="livreurModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title" id="livreurModalLabel">Ajouter/Modifier Livreur</h5></div>
+        <div class="modal-body">
+          <form id="livreurForm">
+            <input type="hidden" id="livreurId" />
+            <div class="mb-3">
+              <label for="livreurNom" class="form-label">Nom</label>
+              <input type="text" class="form-control" id="livreurNom" required />
+            </div>
+            <div class="mb-3">
+              <label for="livreurPhone" class="form-label">Téléphone</label>
+              <input type="text" class="form-control" id="livreurPhone" />
+            </div>
+            <div class="mb-3">
+                <label for="livreurUser" class="form-label">Utilisateur</label>
+                <select class="form-control" id="livreurUser" required>
+                  <option value="">Sélectionner un utilisateur</option>
+                  <!-- Options will be populated dynamically -->
+                </select>
+              </div>
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+      <!-- Md Modal -->
+<div class="modal fade" id="mdModal" tabindex="-1" aria-labelledby="mdModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title" id="mdModalLabel">Ajouter/Modifier Md</h5></div>
+        <div class="modal-body">
+          <form id="mdForm">
+            <input type="hidden" id="mdId" />
+            <div class="mb-3">
+              <label for="mdNom" class="form-label">Nom</label>
+              <input type="text" class="form-control" id="mdNom" required />
+            </div>
+            <div class="mb-3">
+              <label for="mdPhone" class="form-label">Téléphone</label>
+              <input type="text" class="form-control" id="mdPhone" />
+            </div>
+            <div class="mb-3">
+                <label for="mdUser" class="form-label">Utilisateur</label>
+                <select class="form-control" id="mdUser" required>
+                  <option value="">Sélectionner un utilisateur</option>
+                  <!-- Options will be populated dynamically -->
+                </select>
+              </div>
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+      <!-- Conseiller Modal -->
+<div class="modal fade" id="conseillerModal" tabindex="-1" aria-labelledby="conseillerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title" id="conseillerModalLabel">Ajouter/Modifier Conseiller</h5></div>
+        <div class="modal-body">
+          <form id="conseillerForm">
+            <input type="hidden" id="conseillerId" />
+            <div class="mb-3">
+              <label for="conseillerNom" class="form-label">Nom</label>
+              <input type="text" class="form-control" id="conseillerNom" required />
+            </div>
+            <div class="mb-3">
+              <label for="conseillerPhone" class="form-label">Téléphone</label>
+              <input type="text" class="form-control" id="conseillerPhone" />
+            </div>
+            <div class="mb-3">
+                <label for="livreurUser" class="form-label">Utilisateur</label>
+                <select class="form-control" id="conseillerUser" required>
+                  <option value="">Sélectionner un utilisateur</option>
+                  <!-- Options will be populated dynamically -->
+                </select>
+              </div>
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+      <!-- Menu Modal -->
+<div class="modal fade" id="menuModal" tabindex="-1" aria-labelledby="menuModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="menuModalLabel">Ajouter/Modifier Menu</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+        <div class="modal-body">
+          <form id="menuForm">
+            <input type="hidden" id="menuId" />
+  
+            <!-- Nom -->
+            <div class="mb-3">
+              <label for="menuName" class="form-label">Nom</label>
+              <input type="text" class="form-control" id="menuName" required />
+            </div>
+  
+            <!-- Description -->
+            <div class="mb-3">
+              <label for="menuDescription" class="form-label">Description</label>
+              <textarea class="form-control" id="menuDescription" rows="3"></textarea>
+            </div>
+  
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+      <!-- Mode Modal -->
+<div class="modal fade" id="modeModal" tabindex="-1" aria-labelledby="modeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title" id="modeModalLabel">Ajouter/Modifier Mode</h5></div>
+        <div class="modal-body">
+          <form id="modeForm">
+            <input type="hidden" id="modeId" />
+            <div class="mb-3">
+              <label for="modeName" class="form-label">Nom</label>
+              <input type="text" class="form-control" id="modeName" required />
+            </div>
+            <!-- Add other relevant fields if needed -->
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+      <!-- Produit Modal -->
+<div class="modal fade" id="produitModal" tabindex="-1" aria-labelledby="produitModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title" id="produitModalLabel">Ajouter/Modifier Produit</h5></div>
+        <div class="modal-body">
+          <form id="produitForm">
+            <input type="hidden" id="produitId" />
+            
+            <!-- Example fields, adjust as needed -->
+            <div class="mb-3">
+              <label for="produitName" class="form-label">Nom</label>
+              <input type="text" class="form-control" id="produitName" required />
+            </div>
+            
+            <div class="mb-3">
+              <label for="produitQuantity" class="form-label">Quantité</label>
+              <input type="number" class="form-control" id="produitQuantity" step="0.01" required />
+            </div>
+            
+            <div class="mb-3">
+              <label for="produitCategory" class="form-label">Catégorie</label>
+              <select multiple class="form-control" id="produitCategory">
+                <!-- Populate categories dynamically -->
+              </select>
+            </div>
+            
+            <!-- Add other fields as needed -->
+            
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+      <!-- Categorie Modal -->
+<div class="modal fade" id="categorieModal" tabindex="-1" aria-labelledby="categorieModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title" id="categorieModalLabel">Ajouter/Modifier Catégorie</h5></div>
+        <div class="modal-body">
+          <form id="categorieForm">
+            <input type="hidden" id="categorieId" />
+            
+            <div class="mb-3">
+              <label for="categorieName" class="form-label">Nom</label>
+              <input type="text" class="form-control" id="categorieName" required />
+            </div>
+            
+            <!-- You can include extra fields if needed -->
+            
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+    
+    <!-- Client Modal -->
+    <div class="modal fade" id="clientModal" tabindex="-1" aria-labelledby="clientModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg"> <!-- Large size for many fields -->
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="clientModalLabel">Ajouter/Modifier Client</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body">
+              <form id="clientForm">
+                <input type="hidden" id="clientId" />
+      
+                <div class="mb-3">
+                  <label for="companyName" class="form-label">Nom de la société</label>
+                  <input type="text" class="form-control" id="companyName" required />
+                </div>
+      
+                <div class="mb-3">
+                  <label for="contactPerson" class="form-label">Contact</label>
+                  <input type="text" class="form-control" id="contactPerson" required />
+                </div>
+      
+                <div class="mb-3">
+                  <label for="orderedBy" class="form-label">Commandé par</label>
+                  <input type="text" class="form-control" id="orderedBy" />
+                </div>
+      
+                <div class="mb-3">
+                  <label for="phone" class="form-label">Téléphone</label>
+                  <input type="text" class="form-control" id="phone" />
+                </div>
+      
+                <div class="mb-3">
+                  <label for="email" class="form-label">Email</label>
+                  <input type="email" class="form-control" id="email" />
+                </div>
+      
+                <div class="mb-3">
+                  <label for="billingAddress" class="form-label">Adresse de facturation</label>
+                  <input type="text" class="form-control" id="billingAddress" />
+                </div>
+      
+                <div class="mb-3">
+                  <label for="etage" class="form-label">Étage</label>
+                  <input type="text" class="form-control" id="etage" />
+                </div>
+      
+                <div class="mb-3">
+                  <label for="eventLocation" class="form-label">Lieu de l'événement</label>
+                  <input type="text" class="form-control" id="eventLocation" />
+                </div>
+      
+                <div class="mb-3">
+                  <label for="dockLivraison" class="form-label">Dock Livraison</label>
+                  <input type="text" class="form-control" id="dockLivraison" />
+                </div>
+      
+                <div class="mb-3">
+                  <label class="form-label">Accessibilité</label>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="escaliers" />
+                    <label class="form-check-label" for="escaliers">Escalier</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="ascenseur" />
+                    <label class="form-check-label" for="ascenseur">Ascenseur</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="carteDock" />
+                    <label class="form-check-label" for="carteDock">Carte Dock</label>
+                  </div>
+                </div>
+      
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    
+    <!-- Tache Modal -->
+    <div class="modal fade" id="taskModal" tabindex="-1" aria-labelledby="taskModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header"><h5 class="modal-title" id="taskModalLabel">Ajouter/Modifier Tâche</h5></div>
+          <div class="modal-body">
+            <form id="taskForm">
+              <input type="hidden" id="taskId" />
+              <div class="mb-3">
+                <label for="taskName" class="form-label">Nom</label>
+                <input type="text" class="form-control" id="taskName" required />
+              </div>
+              <div class="mb-3">
+                <label for="taskDesc" class="form-label">Description</label>
+                <textarea class="form-control" id="taskDesc" required></textarea>
+              </div>
+              <div class="mb-3">
+                <label for="taskStatus" class="form-label">Statut</label>
+                <select class="form-control" id="taskStatus">
+                    <option value="False">En cours</option>
+                    <option value="True">Terminé</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+              
+        
+      
+      <!-- Include Bootstrap JS for modal functionality -->
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+      <!-- Include Axios for AJAX requests (or use fetch API) -->
+      <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+       <!-- Scripts for theme toggle, charts, and logout -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+      <script>
+
+function filterTable(tableId, query) {
+  const table = document.getElementById(tableId);
+  const tr = table.getElementsByTagName('tr');
+
+  query = query.toLowerCase();
+
+  for (let i = 1; i < tr.length; i++) { // start at 1 to skip header row
+    const tds = tr[i].getElementsByTagName('td');
+    let match = false;
+
+    for (let j = 0; j < tds.length; j++) {
+      const td = tds[j];
+      if (td) {
+        const txtValue = td.textContent || td.innerText;
+        if (txtValue.toLowerCase().indexOf(query) > -1) {
+          match = true;
+          break; // no need to check other cells in row
+        }
+      }
+    }
+    tr[i].style.display = match ? "" : "none";
+  }
+}
+
+
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i=0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length+1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length+1));
+                break;
+            }
+            }
+        }
+        return cookieValue;
+        }
+
+        axios.defaults.headers.common['X-CSRFToken'] = getCookie('csrftoken');
+        axios.defaults.headers.common['Authorization'] = 'Token {{ key }}';
+        axios.defaults.withCredentials = true; // if using session auth
+
+      // ================== Data loading functions ==================
+
+      function loadUsers() {
+        axios.get('/api/users/') // Your API endpoint
+            .then(res => {
+            const select = document.getElementById('livreurUser');
+            select.innerHTML = '<option value="">Sélectionner un utilisateur</option>';
+            res.data.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.text = user.username;  // or user.email, as desired
+                select.appendChild(option);
+            });
+            });
+        }
+
+        loadUsers();
+        function loadUsersConseiller() {
+        axios.get('/api/users/') // Your API endpoint
+            .then(res => {
+            const select = document.getElementById('conseillerUser');
+            select.innerHTML = '<option value="">Sélectionner un utilisateur</option>';
+            res.data.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.text = user.username;  // or user.email, as desired
+                select.appendChild(option);
+            });
+            });
+        }
+        loadUsersConseiller()
+
+        function loadUsersMd() {
+        axios.get('/api/users/') // Your API endpoint
+            .then(res => {
+            const select = document.getElementById('mdUser');
+            select.innerHTML = '<option value="">Sélectionner un utilisateur</option>';
+            res.data.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.text = user.username;  // or user.email, as desired
+                select.appendChild(option);
+            });
+            });
+        }
+        loadUsersMd()
+      
+      function fetchAndRenderUsers() {
+        axios.get('/api/users/')
+          .then(res => {
+            const tbody = document.querySelector('#usersTable tbody');
+            tbody.innerHTML = '';
+            res.data.forEach(user => {
+              const row = document.createElement('tr');
+              row.dataset.id = user.id;
+              row.innerHTML = `
+                <td>${user.username}</td>
+                <td>${user.email}</td>
+                <td>
+                  <button class="btn btn-sm btn-warning" onclick="editUser(${user.id})"><i class="fas fa-edit"></i></button>
+                  <button class="btn btn-sm btn-danger" onclick="deleteUser(${user.id})"><i class="fas fa-trash"></i></button>
+                </td>
+              `;
+              tbody.appendChild(row);
+            });
+          });
+      }
+
+      function fetchAndRenderLivreurs() {
+        axios.get('/api/livreurs/')
+          .then(res => {
+            const tbody = document.querySelector('#livreursTable tbody');
+            tbody.innerHTML = '';
+            res.data.forEach(livreur => {
+              const row = document.createElement('tr');
+              row.dataset.id = livreur.id;
+              row.innerHTML = `
+                <td>${livreur.nom}</td>
+                <td>${livreur.phone}</td>
+                <td>
+                  <button class="btn btn-sm btn-warning" onclick="editLivreur(${livreur.id})"><i class="fas fa-edit"></i></button>
+                  <button class="btn btn-sm btn-danger" onclick="deleteLivreur(${livreur.id})"><i class="fas fa-trash"></i></button>
+                </td>
+              `;
+              tbody.appendChild(row);
+            });
+          });
+      }
+
+      function fetchAndRenderConseillers() {
+        axios.get('/api/conseillers/')
+          .then(res => {
+            const tbody = document.querySelector('#conseillersTable tbody');
+            tbody.innerHTML = '';
+            res.data.forEach(conseiller => {
+              const row = document.createElement('tr');
+              row.dataset.id = conseiller.id;
+              row.innerHTML = `
+                <td>${conseiller.name}</td>
+                <td>${conseiller.phone}</td>
+                <td>
+                  <button class="btn btn-sm btn-warning" onclick="editConseiller(${conseiller.id})"><i class="fas fa-edit"></i></button>
+                  <button class="btn btn-sm btn-danger" onclick="deleteConseiller(${conseiller.id})"><i class="fas fa-trash"></i></button>
+                </td>
+              `;
+              tbody.appendChild(row);
+            });
+          });
+      }
+
+      function fetchAndRenderMd() {
+        axios.get('/api/mds/')
+          .then(res => {
+            const tbody = document.querySelector('#mdsTable tbody');
+            tbody.innerHTML = '';
+            res.data.forEach(md => {
+              const row = document.createElement('tr');
+              row.dataset.id = md.id;
+              row.innerHTML = `
+                <td>${md.name}</td>
+                <td>${md.phone}</td>
+                <td>
+                  <button class="btn btn-sm btn-warning" onclick="editMd(${md.id})"><i class="fas fa-edit"></i></button>
+                  <button class="btn btn-sm btn-danger" onclick="deleteMd(${md.id})"><i class="fas fa-trash"></i></button>
+                </td>
+              `;
+              tbody.appendChild(row);
+            });
+          });
+      }
+
+      function fetchAndRenderMenus() {
+        axios.get('/api/menus/')
+          .then(res => {
+            const tbody = document.querySelector('#menusTable tbody');
+            tbody.innerHTML = '';
+            res.data.forEach(menu => {
+              const row = document.createElement('tr');
+              row.dataset.id = menu.id;
+              row.innerHTML = `
+                <td>${menu.name}</td>
+                <td>${menu.description}</td>
+                <td>
+                  <button class="btn btn-sm btn-warning" onclick="editMenu(${menu.id})"><i class="fas fa-edit"></i></button>
+                  <button class="btn btn-sm btn-danger" onclick="deleteMenu(${menu.id})"><i class="fas fa-trash"></i></button>
+                </td>
+              `;
+              tbody.appendChild(row);
+            });
+          });
+      }
+
+      function fetchAndRenderModes() {
+        axios.get('/api/modes/')
+          .then(res => {
+            const tbody = document.querySelector('#modesTable tbody');
+            tbody.innerHTML = '';
+            res.data.forEach(mode => {
+              const row = document.createElement('tr');
+              row.dataset.id = mode.id;
+              row.innerHTML = `
+                <td>${mode.name}</td>
+                <td>
+                  <button class="btn btn-sm btn-warning" onclick="editMode(${mode.id})"><i class="fas fa-edit"></i></button>
+                  <button class="btn btn-sm btn-danger" onclick="deleteMode(${mode.id})"><i class="fas fa-trash"></i></button>
+                </td>
+              `;
+              tbody.appendChild(row);
+            });
+          });
+      }
+
+      function fetchAndRenderProduits() {
+        axios.get('/api/produits/')
+          .then(res => {
+            const tbody = document.querySelector('#produitsTable tbody');
+            tbody.innerHTML = '';
+            res.data.forEach(produit => {
+              const row = document.createElement('tr');
+              row.dataset.id = produit.id;
+              row.innerHTML = `
+                <td>${produit.name}</td>
+                <td>${produit.quantity}</td>
+                <td>
+                  <button class="btn btn-sm btn-warning" onclick="editProduit(${produit.id})"><i class="fas fa-edit"></i></button>
+                  <button class="btn btn-sm btn-danger" onclick="deleteProduit(${produit.id})"><i class="fas fa-trash"></i></button>
+                </td>
+              `;
+              tbody.appendChild(row);
+            });
+          });
+      }
+
+      function fetchAndRenderCategories() {
+        axios.get('/api/categories/')
+          .then(res => {
+            const tbody = document.querySelector('#categoriesTable tbody');
+            tbody.innerHTML = '';
+            res.data.forEach(categorie => {
+              const row = document.createElement('tr');
+              row.dataset.id = categorie.id;
+              row.innerHTML = `
+                <td>${categorie.name}</td>
+                <td>
+                  <button class="btn btn-sm btn-warning" onclick="editCategorie(${categorie.id})"><i class="fas fa-edit"></i></button>
+                  <button class="btn btn-sm btn-danger" onclick="deleteCategorie(${categorie.id})"><i class="fas fa-trash"></i></button>
+                </td>
+              `;
+              tbody.appendChild(row);
+            });
+          });
+      }
+      
+      // Similar functions for clients and tasks
+      function fetchAndRenderClients() {
+        axios.get('/api/clients/') // your API URL
+          .then(res => {
+            const tbody = document.querySelector('#clientsTable tbody');
+            tbody.innerHTML = '';
+            res.data.forEach(client => {
+              const row = document.createElement('tr');
+              row.dataset.id = client.id;
+              row.innerHTML = `
+                <td>${client.company_name}</td>
+                <td>${client.contact_person}</td>
+                <td>
+                  <button class="btn btn-sm btn-warning" onclick="editClient(${client.id})"><i class="fas fa-edit"></i></button>
+                  <button class="btn btn-sm btn-danger" onclick="deleteClient(${client.id})"><i class="fas fa-trash"></i></button>
+                </td>
+              `;
+              tbody.appendChild(row);
+            });
+          });
+      }
+      
+      function fetchAndRenderTaches() {
+        axios.get('/api/taches/') // your API URL
+          .then(res => {
+            const tbody = document.querySelector('#tasksTable tbody');
+            tbody.innerHTML = '';
+            res.data.forEach(tache => {
+              const row = document.createElement('tr');
+              row.dataset.id = tache.id;
+              row.innerHTML = `
+                <td>${tache.nom}</td>
+                <td>${tache.description}</td>
+                <td>${tache.status ? 'Terminé' : 'En cours'}</td>
+                <td>
+                  <button class="btn btn-sm btn-warning" onclick="editTache(${tache.id})"><i class="fas fa-edit"></i></button>
+                  <button class="btn btn-sm btn-danger" onclick="deleteTache(${tache.id})"><i class="fas fa-trash"></i></button>
+                </td>
+              `;
+              tbody.appendChild(row);
+            });
+          });
+      }
+      
+      // Load data on page load
+      document.addEventListener('DOMContentLoaded', () => {
+        fetchAndRenderUsers();
+        fetchAndRenderClients();
+        fetchAndRenderTaches();
+        fetchAndRenderLivreurs();
+        fetchAndRenderMd();
+        fetchAndRenderConseillers();
+        fetchAndRenderMenus();
+        fetchAndRenderCategories();
+        fetchAndRenderModes();
+        fetchAndRenderProduits();
+      });
+      
+      // ================== CRUD functions ==================
+
+      // Open modal for new Conseiller
+function openConseillerModal() {
+  clearConseillerForm();
+  document.getElementById('conseillerId').value = '';
+  document.getElementById('conseillerModalLabel').innerText = 'Ajouter Conseiller';
+  new bootstrap.Modal(document.getElementById('conseillerModal')).show();
+}
+
+// Open modal to edit Conseiller
+function editConseiller(id) {
+  axios.get(`/api/conseillers/${id}/`)  // Adjust API URL accordingly
+    .then(res => {
+      document.getElementById('conseillerId').value = res.data.id;
+      document.getElementById('conseillerNom').value = res.data.name; // assuming field name is 'name'
+      document.getElementById('conseillerPhone').value = res.data.phone;
+      document.getElementById('conseillerUser').value = res.data.user.id || '';
+      document.getElementById('conseillerModalLabel').innerText = 'Modifier Conseiller';
+      new bootstrap.Modal(document.getElementById('conseillerModal')).show();
+    });
+}
+
+// Delete Conseiller
+function deleteConseiller(id) {
+  if (confirm('Confirmer suppression ?')) {
+    axios.delete(`/api/conseillers/${id}/`)
+      .then(() => {
+        fetchAndRenderConseillers(); // Implement similar fetch function
+      });
+  }
+}
+
+// Handle form submit
+document.getElementById('conseillerForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const id = document.getElementById('conseillerId').value;
+  const userId = document.getElementById('conseillerUser').value;
+  const data = {
+    name: document.getElementById('conseillerNom').value,
+    phone: document.getElementById('conseillerPhone').value,
+    user: parseInt(document.getElementById('conseillerUser').value) || null
+  };
+  if (id) {
+    // Update
+    axios.put(`/api/conseillers/${id}/`, data).then(() => {
+      bootstrap.Modal.getInstance(document.getElementById('conseillerModal')).hide();
+      fetchAndRenderConseillers();
+    });
+  } else {
+    // Create
+    axios.post('/api/conseillers/', data).then(() => {
+      bootstrap.Modal.getInstance(document.getElementById('conseillerModal')).hide();
+      fetchAndRenderConseillers();
+    });
+  }
+});
+
+// Clear form
+function clearConseillerForm() {
+  document.getElementById('conseillerForm').reset();
+  document.getElementById('conseillerId').value = '';
+}
+// Open modal for new Md
+function openMdModal() {
+  clearMdForm();
+  document.getElementById('mdId').value = '';
+  document.getElementById('mdModalLabel').innerText = 'Ajouter Md';
+  new bootstrap.Modal(document.getElementById('mdModal')).show();
+}
+
+// Open modal to edit Md
+function editMd(id) {
+  axios.get(`/api/mds/${id}/`)  // Adjust API URL accordingly
+    .then(res => {
+      document.getElementById('mdId').value = res.data.id;
+      document.getElementById('mdNom').value = res.data.name; // assuming field 'name'
+      document.getElementById('mdPhone').value = res.data.phone;
+      document.getElementById('mdUser').value = res.data.user.id || '';
+      document.getElementById('mdModalLabel').innerText = 'Modifier Md';
+      new bootstrap.Modal(document.getElementById('mdModal')).show();
+    });
+}
+
+// Delete Md
+function deleteMd(id) {
+  if (confirm('Confirmer suppression ?')) {
+    axios.delete(`/api/mds/${id}/`)
+      .then(() => {
+        fetchAndRenderMd(); // Implement similar fetch function
+      });
+  }
+}
+
+// Handle form submit
+document.getElementById('mdForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const id = document.getElementById('mdId').value;
+  const data = {
+    name: document.getElementById('mdNom').value,
+    phone: document.getElementById('mdPhone').value,
+    user: parseInt(document.getElementById('mdUser').value) || null
+  };
+  if (id) {
+    // Update Md
+    axios.put(`/api/mds/${id}/`, data).then(() => {
+      bootstrap.Modal.getInstance(document.getElementById('mdModal')).hide();
+      fetchAndRenderMd();
+    });
+  } else {
+    // Create Md
+    axios.post('/api/mds/', data).then(() => {
+      bootstrap.Modal.getInstance(document.getElementById('mdModal')).hide();
+      fetchAndRenderMd();
+    });
+  }
+});
+
+// Clear form function
+function clearMdForm() {
+  document.getElementById('mdForm').reset();
+  document.getElementById('mdId').value = '';
+}
+      // Open modal for new Livreur
+function openLivreurModal() {
+  clearLivreurForm();
+  document.getElementById('livreurId').value = '';
+  document.getElementById('livreurModalLabel').innerText = 'Ajouter Livreur';
+  new bootstrap.Modal(document.getElementById('livreurModal')).show();
+}
+
+// Open modal to edit Livreur
+function editLivreur(id) {
+  axios.get(`/api/livreurs/${id}/`) // adapt to your API URL
+    .then(res => {
+      document.getElementById('livreurId').value = res.data.id;
+      document.getElementById('livreurNom').value = res.data.nom;
+      document.getElementById('livreurPhone').value = res.data.phone;
+      document.getElementById('livreurUser').value = res.data.user.id || '';
+      document.getElementById('livreurModalLabel').innerText = 'Modifier Livreur';
+      new bootstrap.Modal(document.getElementById('livreurModal')).show();
+    });
+}
+
+// Delete Livreur
+function deleteLivreur(id) {
+  if (confirm('Confirmer suppression ?')) {
+    axios.delete(`/api/livreurs/${id}/`)
+      .then(() => {
+        fetchAndRenderLivreurs();
+      });
+  }
+}
+
+// Handle form submission
+document.getElementById('livreurForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const id = document.getElementById('livreurId').value;
+  const nom = document.getElementById('livreurNom').value;
+  const phone = document.getElementById('livreurPhone').value;
+  const userId = document.getElementById('livreurUser').value; // selected user
+
+  const data = {
+    nom: nom,
+    phone: phone,
+    user: parseInt(document.getElementById('livreurUser').value) || null
+  };
+
+  if (id) {
+    // update
+    axios.put(`/api/livreurs/${id}/`, data).then(() => {
+      bootstrap.Modal.getInstance(document.getElementById('livreurModal')).hide();
+      fetchAndRenderLivreurs();
+    });
+  } else {
+    // create
+    axios.post('/api/livreurs/', data).then(() => {
+      bootstrap.Modal.getInstance(document.getElementById('livreurModal')).hide();
+      fetchAndRenderLivreurs();
+    });
+  }
+});
+
+
+function clearLivreurForm() {
+  document.getElementById('livreurForm').reset();
+  document.getElementById('livreurId').value = '';
+}
+
+      // User
+      function openUserModal() {
+        clearUserForm();
+        document.getElementById('userId').value = '';
+        document.getElementById('userModalLabel').innerText = 'Ajouter Utilisateur';
+        new bootstrap.Modal(document.getElementById('userModal')).show();
+      }
+      
+      function editUser(id) {
+        axios.get(`/api/users/${id}/`)
+          .then(res => {
+            document.getElementById('userId').value = res.data.id;
+            document.getElementById('usernameInput').value = res.data.username;
+            document.getElementById('emailInput').value = res.data.email;
+            document.getElementById('userModalLabel').innerText = 'Modifier Utilisateur';
+            new bootstrap.Modal(document.getElementById('userModal')).show();
+          });
+      }
+      
+      function deleteUser(id) {
+        if (confirm('Confirmer suppression ?')) {
+          axios.delete(`/api/users/${id}/`)
+            .then(() => {
+              fetchAndRenderUsers();
+            });
+        }
+      }
+      
+      // Save User
+      document.getElementById('userForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const id = document.getElementById('userId').value;
+        const username = document.getElementById('usernameInput').value;
+        const email = document.getElementById('email');
+          const data = {
+    username: username,
+    email: email
+  };
+  if (id) {
+    // Update existing user
+    axios.put(`/api/users/${id}/`, data)
+      .then(() => {
+        bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
+        fetchAndRenderUsers();
+      });
+  } else {
+    // Create new user
+    axios.post('/api/users/', data)
+      .then(() => {
+        bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
+        fetchAndRenderUsers();
+      });
+  }
+});
+
+function clearUserForm() {
+  document.getElementById('userForm').reset();
+  document.getElementById('userId').value = '';
+}
+
+// Open modal for new Menu
+function openMenuModal() {
+  clearMenuForm();
+  document.getElementById('menuId').value = '';
+  document.getElementById('menuModalLabel').innerText = 'Ajouter Menu';
+  new bootstrap.Modal(document.getElementById('menuModal')).show();
+}
+
+// Open modal to edit Menu
+function editMenu(id) {
+  axios.get(`/api/menus/${id}/`) // Adjust URL to your API
+    .then(res => {
+      document.getElementById('menuId').value = res.data.id;
+      document.getElementById('menuName').value = res.data.name;
+      document.getElementById('menuDescription').value = res.data.description || '';
+      
+
+      document.getElementById('menuModalLabel').innerText = 'Modifier Menu';
+      new bootstrap.Modal(document.getElementById('menuModal')).show();
+    });
+}
+
+// Delete Menu
+function deleteMenu(id) {
+  if (confirm('Confirmer suppression ?')) {
+    axios.delete(`/api/menus/${id}/`) // Adjust URL
+      .then(() => {
+        fetchAndRenderMenus(); // Implement your fetch function
+      });
+  }
+}
+
+// Handle form submit
+document.getElementById('menuForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  const id = document.getElementById('menuId').value;
+  const name = document.getElementById('menuName').value;
+  const description = document.getElementById('menuDescription').value;
+
+
+  const data = {
+    name,
+    description,
+  };
+
+  if (id) {
+    // Update
+    axios.put(`/api/menus/${id}/`, data).then(() => {
+      bootstrap.Modal.getInstance(document.getElementById('menuModal')).hide();
+      fetchAndRenderMenus();
+    });
+  } else {
+    // Create
+    axios.post('/api/menus/', data).then(() => {
+      bootstrap.Modal.getInstance(document.getElementById('menuModal')).hide();
+      fetchAndRenderMenus();
+    });
+  }
+});
+
+// Clear form
+function clearMenuForm() {
+  document.getElementById('menuForm').reset();
+  document.getElementById('menuId').value = '';
+  // Optionally clear delivery modes selection
+  
+  
+}
+
+// Open modal for new Mode
+function openModeModal() {
+  clearModeForm();
+  document.getElementById('modeId').value = '';
+  document.getElementById('modeModalLabel').innerText = 'Ajouter Mode';
+  new bootstrap.Modal(document.getElementById('modeModal')).show();
+}
+
+// Open modal to edit Mode
+function editMode(id) {
+  axios.get(`/api/modes/${id}/`) // Adjust API URL accordingly
+    .then(res => {
+      document.getElementById('modeId').value = res.data.id;
+      document.getElementById('modeName').value = res.data.name;  // assuming 'name' field
+      // Populate other fields if any
+      document.getElementById('modeModalLabel').innerText = 'Modifier Mode';
+      new bootstrap.Modal(document.getElementById('modeModal')).show();
+    });
+}
+
+// Delete Mode
+function deleteMode(id) {
+  if (confirm('Confirmer suppression ?')) {
+    axios.delete(`/api/modes/${id}/`)  // Adjust URL to match your API
+      .then(() => {
+        fetchAndRenderModes(); // Implement your fetch function
+      });
+  }
+}
+
+// Handle form submission
+document.getElementById('modeForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const id = document.getElementById('modeId').value;
+  const name = document.getElementById('modeName').value;
+
+  const data = { name }; // add other fields if needed
+
+  if (id) {
+    // Update existing
+    axios.put(`/api/modes/${id}/`, data).then(() => {
+      bootstrap.Modal.getInstance(document.getElementById('modeModal')).hide();
+      fetchAndRenderModes();
+    });
+  } else {
+    // Create new
+    axios.post('/api/modes/', data).then(() => {
+      bootstrap.Modal.getInstance(document.getElementById('modeModal')).hide();
+      fetchAndRenderModes();
+    });
+  }
+});
+
+// Clear the form
+function clearModeForm() {
+  document.getElementById('modeForm').reset();
+  document.getElementById('modeId').value = '';
+}
+
+// Open modal for new Produit
+function openProduitModal() {
+  clearProduitForm();
+  document.getElementById('produitId').value = '';
+  document.getElementById('produitModalLabel').innerText = 'Ajouter Produit';
+  new bootstrap.Modal(document.getElementById('produitModal')).show();
+
+  // Optionally, load categories here
+  fetchCategories();
+}
+
+// Open modal to edit Produit
+function editProduit(id) {
+  axios.get(`/api/produits/${id}/`) // Adjust URL
+    .then(res => {
+      const data = res.data;
+      document.getElementById('produitId').value = data.id;
+      document.getElementById('produitName').value = data.name;
+      document.getElementById('produitQuantity').value = data.quantity;
+      
+      // Set categories (assuming it's a multiple select with options)
+      const categoriesSelect = document.getElementById('produitCategory');
+      Array.from(categoriesSelect.options).forEach(opt => {
+        opt.selected = data.category.some(cat => cat.id == opt.value);
+      });
+      
+      document.getElementById('produitModalLabel').innerText = 'Modifier Produit';
+      new bootstrap.Modal(document.getElementById('produitModal')).show();
+    });
+}
+
+// Delete Produit
+function deleteProduit(id) {
+  if (confirm('Confirmer suppression ?')) {
+    axios.delete(`/api/produits/${id}/`)
+      .then(() => {
+        fetchAndRenderProduits(); // Implement fetch function
+      });
+  }
+}
+
+// Handle form submit
+document.getElementById('produitForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  const id = document.getElementById('produitId').value;
+  const name = document.getElementById('produitName').value;
+  const quantity = document.getElementById('produitQuantity').value;
+
+  // Get selected categories
+  const categories = Array.from(document.getElementById('produitCategory').selectedOptions).map(opt => opt.value);
+
+  const data = {
+    name,
+    quantity,
+    category: categories // Adjust based on your API format
+  };
+
+  if (id) {
+    // Update
+    axios.put(`/api/produits/${id}/`, data).then(() => {
+      bootstrap.Modal.getInstance(document.getElementById('produitModal')).hide();
+      fetchAndRenderProduits();
+    });
+  } else {
+    // Create
+    axios.post('/api/produits/', data).then(() => {
+      bootstrap.Modal.getInstance(document.getElementById('produitModal')).hide();
+      fetchAndRenderProduits();
+    });
+  }
+});
+
+// Clear form
+function clearProduitForm() {
+  document.getElementById('produitForm').reset();
+  document.getElementById('produitId').value = '';
+}
+
+// Fetch categories for select dropdown
+function fetchCategories() {
+  axios.get('/api/categories/') // Adjust URL
+    .then(res => {
+        const select = document.getElementById('produitCategory');
+      select.innerHTML = ''; // Clear existing options
+      res.data.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat.id; // assuming your category objects have 'id'
+        option.text = cat.name; // and 'name'
+        select.appendChild(option);
+      });
+    });
+}
+
+// Open modal for new Categorie
+function openCategorieModal() {
+  clearCategorieForm();
+  document.getElementById('categorieId').value = '';
+  document.getElementById('categorieModalLabel').innerText = 'Ajouter Catégorie';
+  new bootstrap.Modal(document.getElementById('categorieModal')).show();
+}
+
+// Open modal to edit Categorie
+function editCategorie(id) {
+  axios.get(`/api/categories/${id}/`) // Adjust URL
+    .then(res => {
+      document.getElementById('categorieId').value = res.data.id;
+      document.getElementById('categorieName').value = res.data.name;
+      document.getElementById('categorieModalLabel').innerText = 'Modifier Catégorie';
+      new bootstrap.Modal(document.getElementById('categorieModal')).show();
+    });
+}
+
+// Delete Categorie
+function deleteCategorie(id) {
+  if (confirm('Confirmer suppression ?')) {
+    axios.delete(`/api/categories/${id}/`) // Adjust URL
+      .then(() => {
+        fetchAndRenderCategories(); // Implement your fetch function
+      });
+  }
+}
+
+// Handle form submit
+document.getElementById('categorieForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const id = document.getElementById('categorieId').value;
+  const name = document.getElementById('categorieName').value;
+
+  const data = { name }; // Adjust if there are more fields
+
+  if (id) {
+    // Update
+    axios.put(`/api/categories/${id}/`, data).then(() => {
+      bootstrap.Modal.getInstance(document.getElementById('categorieModal')).hide();
+      fetchAndRenderCategories();
+    });
+  } else {
+    // Create
+    axios.post('/api/categories/', data).then(() => {
+      bootstrap.Modal.getInstance(document.getElementById('categorieModal')).hide();
+      fetchAndRenderCategories();
+    });
+  }
+});
+
+// Clear form
+function clearCategorieForm() {
+  document.getElementById('categorieForm').reset();
+  document.getElementById('categorieId').value = '';
+}
+
+
+// ================== Similar functions for Clients ==================
+
+function openClientModal() {
+  document.getElementById('clientForm').reset();
+  document.getElementById('clientId').value = '';
+  new bootstrap.Modal(document.getElementById('clientModal')).show();
+}
+
+function editClient(id) {
+  axios.get(`/api/clients/${id}/`)
+    .then(res => {
+      document.getElementById('clientId').value = res.data.id;
+      document.getElementById('companyName').value = res.data.company_name;
+      document.getElementById('contactPerson').value = res.data.contact_person;
+      
+      // Fill in additional fields
+      document.getElementById('orderedBy').value = res.data.ordered_by || '';
+      document.getElementById('phone').value = res.data.phone || '';
+      document.getElementById('email').value = res.data.email || '';
+      document.getElementById('billingAddress').value = res.data.billing_address || '';
+      document.getElementById('etage').value = res.data.etage || '';
+      document.getElementById('eventLocation').value = res.data.event_location || '';
+      document.getElementById('dockLivraison').value = res.data.dock_livraison || '';
+
+      // Checkboxes
+      document.getElementById('escaliers').checked = res.data.escaler || false;
+      document.getElementById('ascenseur').checked = res.data.ascenseur || false;
+      document.getElementById('carteDock').checked = res.data.carte_dock || false;
+
+      // Show the modal
+      new bootstrap.Modal(document.getElementById('clientModal')).show();
+    });
+}
+
+
+function deleteClient(id) {
+  if (confirm('Confirmer suppression ?')) {
+    axios.delete(`/api/clients/${id}/`)
+      .then(() => {
+        fetchAndRenderClients();
+      });
+  }
+}
+
+document.getElementById('clientForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  const id = document.getElementById('clientId').value;
+
+  // Collect existing fields
+  let data = {
+    company_name: document.getElementById('companyName').value,
+    contact_person: document.getElementById('contactPerson').value,
+    ordered_by: document.getElementById('orderedBy').value,
+    phone: document.getElementById('phone').value,
+    email: document.getElementById('email').value,
+    billing_address: document.getElementById('billingAddress').value,
+    etage: document.getElementById('etage').value,
+    event_location: document.getElementById('eventLocation').value,
+    dock_livraison: document.getElementById('dockLivraison').value,
+    
+    // Checkbox fields: check if checked, set to true/false
+    escalier: document.getElementById('escaliers').checked,
+    ascenseur: document.getElementById('ascenseur').checked,
+    carte_dock: document.getElementById('carteDock').checked
+  };
+
+  if (id) {
+    // Update
+    axios.put(`/api/clients/${id}/`, data).then(() => {
+      bootstrap.Modal.getInstance(document.getElementById('clientModal')).hide();
+      fetchAndRenderClients();
+    });
+  } else {
+    // Create
+    axios.post('/api/clients/', data).then(() => {
+      bootstrap.Modal.getInstance(document.getElementById('clientModal')).hide();
+      fetchAndRenderClients();
+    });
+  }
+});
+
+
+// ================== Similar functions for Taches ==================
+
+function openTaskModal() {
+  document.getElementById('taskForm').reset();
+  document.getElementById('taskId').value = '';
+  new bootstrap.Modal(document.getElementById('taskModal')).show();
+}
+
+function editTask(id) {
+  axios.get(`/api/taches/${id}/`)
+    .then(res => {
+      document.getElementById('taskId').value = res.data.id;
+      document.getElementById('taskName').value = res.data.nom;
+      document.getElementById('taskDesc').value = res.data.description;
+      document.getElementById('taskStatus').value = res.data.status.toString();
+      new bootstrap.Modal(document.getElementById('taskModal')).show();
+    });
+}
+
+function deleteTask(id) {
+  if (confirm('Confirmer suppression ?')) {
+    axios.delete(`/api/taches/${id}/`)
+      .then(() => {
+        fetchAndRenderTasks();
+      });
+  }
+}
+
+document.getElementById('taskForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const id = document.getElementById('taskId').value;
+  const data = {
+    nom: document.getElementById('taskName').value,
+    description: document.getElementById('taskDesc').value,
+    status: document.getElementById('taskStatus').value === 'True'
+  };
+  if (id) {
+    axios.put(`/api/taches/${id}/`, data).then(() => {
+      bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
+      fetchAndRenderTasks();
+    });
+  } else {
+    axios.post('/api/taches/', data).then(() => {
+      bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
+      fetchAndRenderTasks();
+    });
+  }
+});
+
+
+
+// Theme toggle
+        const toggleBtn = document.getElementById('theme-toggle');
+        toggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+        });
+
+        // Logout button
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            if(confirm('Voulez-vous vraiment vous déconnecter?')){
+                document.querySelector('.logout-form').submit();
+            }
+        });
+
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.getElementById('sidebar');
+    const btnShowSidebar = document.getElementById('show-sidebar');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    const dashboard = document.getElementById('dashboard');
+
+    // Quand on clique sur le bouton toggle pour cacher ou réafficher
+    toggleBtn.addEventListener('click', () => {
+        if (sidebar.classList.contains('collapsed')) {
+            // La sidebar est masquée, on la remonte
+            sidebar.classList.remove('collapsed');
+            btnShowSidebar.style.display = 'none';   // cache le bouton
+            dashboard.classList.remove('full-width');
+        } else {
+            // La sidebar est visible, on la cache
+            sidebar.classList.add('collapsed');
+            btnShowSidebar.style.display = 'block';  // montre le bouton pour la réafficher
+            dashboard.classList.add('full-width');
+        }
+    });
+
+    // Quand on clique sur le bouton pour faire réapparaître la sidebar
+    btnShowSidebar.addEventListener('click', () => {
+        sidebar.classList.remove('collapsed');
+        btnShowSidebar.style.display = 'none'; // cache le bouton
+        dashboard.classList.remove('full-width');
+    });
+});
+
+</script>
+
+</body>
+</html>
+
+
+           
+
+
+
+
+        
+
+    
+
+
+
+{% endblock %}
+
+

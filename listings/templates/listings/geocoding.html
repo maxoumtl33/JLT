@@ -1,0 +1,110 @@
+{% extends 'listings/base.html' %}
+
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block content %}
+<nav class="nav container">
+    <a href="#" class="nav__logo">Julien Leblanc Traiteur</a>
+  
+    <div class="nav__menu" id="nav-menu">
+        <ul class="nav__list">
+          {% if user.is_authenticated %}
+            <li class="nav__item">
+              <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="nav__link active-link" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i></i>
+            </form>
+                    <span class="nav__name">Logout</span>
+          </button>
+            </li>
+            {% else %}
+            <li class="nav__item">
+              <a href="{% url 'login' %}" class="nav__link" style="color: green;"><i class="fa-regular fa-user"></i></i>
+                    <span class="nav__name">Login</span>
+                </a>
+            </li>
+            {% endif %}
+            <li class="nav__item">
+              <a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                <i class="fa-solid fa-link"></i><span class="nav__name">Liens</span>
+              </a>
+            </li>
+            <li class="nav__item">
+              <a  href="{% url 'livraisonstomorrow' %}" class="nav__link"><i class="fa-solid fa-user-ninja"></i>
+                <span class="nav__name">Retour</span>
+              </a>
+  
+            </li>
+        </ul>
+    </div>
+  
+    <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
+  </nav>
+
+
+<br>
+<br>
+<br>
+
+<h1 style="text-align: center;">Geocode {{livraison.nom}}</h1>
+  <br>
+
+  <br>
+  
+            
+            <table class="table table-striped">
+              <thead class="thead-dark">
+                <tr>
+                  <th scope="col" style="color: #303FBA;">ID</th>
+                  <th scope="col" style="color: #303FBA;">Nom</th>
+                  <th scope="col" style="color: #303FBA;">Adresse</th>
+                  <th scope="col" style="color: #303FBA;">Zipcode</th>
+                  <th scope="col" style="color: #303FBA;">City</th>
+                  <th scope="col" style="color: #303FBA;">Country</th>
+                  <th scope="col" style="color: #303FBA;">lat</th>
+                  <th scope="col" style="color: #303FBA;">lng</th>
+                  <th scope="col" style="color: #303FBA;">place_id</th>
+
+
+        
+                </tr>
+              </thead>
+              <tbody>
+                
+                {% if livraison.recuperation == True %}
+          
+                
+                <tr>
+                    <td style="color: #F1B3DA;"><strong>{{ livraison.id }}</strong></td>
+                    <td style="color: #F1B3DA;"><strong>{{ livraison.nom }}</strong></td>
+                    <td style="color: #F1B3DA;"><strong>{{livraison.adress}}</strong></td>
+                    <td style="color: #F1B3DA;"><strong>{{ livraison.zipcode }}</strong></td>
+                    <td style="color: #F1B3DA;"><strong>{{ livraison.city }}</strong></td>
+                    <td style="color: #F1B3DA;"><strong>{{ livraison.country }}</strong></td>
+                    <td style="color: #F1B3DA;"><strong>{{ livraison.country }}</strong></td>
+                    <td style="color: #F1B3DA;"><strong>{{ livraison.country }}</strong></td>
+                    <td style="color: #F1B3DA;"><strong>{{ livraison.country }}</strong></td>
+
+                  </tr>
+                {% else %}
+                <tr>
+                  <td ><strong>{{ livraison.id }}</strong></td>
+                  <td><strong>{{ livraison.nom }}</strong></td>
+                  <td ><strong>{{livraison.adress}}</strong></td>
+                  <td ><strong>{{ livraison.zipcode }}</strong></td>
+                  <td ><strong>{{ livraison.city }}</strong></td>
+                  <td ><strong>{{ livraison.country }}</strong></td>
+                  <td ><strong>{{ lat }}</strong></td>
+                  <td ><strong>{{ lng }}</strong></td>
+                  <td ><strong>{{ place_id }}</strong></td>
+
+
+                </tr>
+                  {% endif %}
+                
+              </tbody>
+            </table>
+
+
+  {% endblock %}

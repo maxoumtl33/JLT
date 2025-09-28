@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Feuille de Route</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            padding-bottom: 70px;
+        }
+
+        /* Header fixe */
+        .app-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 15px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            text-align: center;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .header-date {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        /* Stats Cards */
+        .stats-container {
+            display: flex;
+            gap: 12px;
+            padding: 15px;
+            margin-top: -10px;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: white;
+            border-radius: 16px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .stat-card.livraisons .stat-number {
+            color: #667eea;
+        }
+
+        .stat-card.recuperations .stat-number {
+            color: #F1B3DA;
+        }
+
+        /* Planning Toggle */
+        .planning-toggle {
+            margin: 0 15px 15px;
+            background: white;
+            border-radius: 16px;
+            padding: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .toggle-button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .toggle-button:active {
+            transform: scale(0.98);
+        }
+
+        /* Planning Section */
+        .planning-section {
+            margin: 0 15px 15px;
+            background: white;
+            border-radius: 16px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            display: none;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .shift-item {
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .shift-item:last-child {
+            border-bottom: none;
+        }
+
+        .shift-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .shift-item.repos .shift-avatar {
+            background: #FFEB3B;
+            color: #333;
+        }
+
+        .shift-info {
+            flex: 1;
+        }
+
+        .shift-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .shift-time {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .shift-badge {
+            background: #f0f0f0;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .shift-item.repos .shift-badge {
+            background: #FFEB3B;
+            color: #333;
+        }
+
+        /* Filter Tabs */
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            padding: 0 15px 15px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .filter-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .filter-tab {
+            flex-shrink: 0;
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-tab:active {
+            transform: scale(0.95);
+        }
+
+        .filter-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        /* Delivery Cards */
+        .deliveries-container {
+            padding: 0 15px 20px;
+        }
+
+        .delivery-card {
+            background: white;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .delivery-card:active {
+            transform: scale(0.98);
+        }
+
+        .delivery-card.recuperation {
+            background: linear-gradient(135deg, #F1B3DA 0%, #FFB6D9 100%);
+        }
+
+        .delivery-card.recuperation .card-content {
+            color: white;
+        }
+
+        .delivery-card.recuperation .info-text {
+            color: rgba(255,255,255,0.9);
+        }
+
+        .card-content {
+            padding: 15px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .client-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            flex: 1;
+        }
+
+        .status-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .status-icon.done {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .status-icon.pending {
+            background: #FFD43B;
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .card-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .info-icon {
+            width: 20px;
+            color: #667eea;
+        }
+
+        .info-text {
+            color: #666;
+            flex: 1;
+        }
+
+        .info-highlight {
+            color: #FF6B6B;
+            font-weight: 500;
+        }
+
+        .user-tag {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #4CAF50;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .delivery-card.recuperation .user-tag {
+            background: white;
+            color: #F1B3DA;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 -2px 15px rgba(0,0,0,0.1);
+            z-index: 1000;
+            border-radius: 20px 20px 0 0;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .nav-items {
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            color: #999;
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .nav-item:active {
+            transform: scale(0.95);
+        }
+
+        .nav-item.active {
+            color: #667eea;
+        }
+
+        .nav-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .nav-label {
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f0f0f0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="app-header">
+        <div class="header-content">
+            <div class="header-title">Feuille de Route</div>
+            <div class="header-date">{{ journees }}</div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-container">
+        <div class="stat-card livraisons">
+            <div class="stat-number">{{ livraisonsok|length }}</div>
+            <div class="stat-label">Livraisons</div>
+        </div>
+        <div class="stat-card recuperations">
+            <div class="stat-number">{{ recuperationes|length }}</div>
+            <div class="stat-label">Récupérations</div>
+        </div>
+    </div>
+
+    <!-- Planning Toggle -->
+    <div class="planning-toggle">
+        <button class="toggle-button" onclick="togglePlanning()">
+            <i class="fas fa-calendar-alt"></i>
+            <span id="toggle-text">Afficher le Planning</span>
+        </button>
+    </div>
+
+    <!-- Planning Section -->
+    <div class="planning-section" id="planning-section">
+        {% if shifts %}
+            {% for shift in shifts %}
+                <div class="shift-item {% if shift.notes and 'Repos' in shift.notes %}repos{% endif %}">
+                    <div class="shift-avatar">
+                        {{ shift.livreur.nom|slice:":1" }}
+                    </div>
+                    <div class="shift-info">
+                        <div class="shift-name">{{ shift.livreur.nom }}</div>
+                        <div class="shift-time">
+                            {% if shift.start_time %}
+                                <i class="fas fa-clock"></i> {{ shift.start_time }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if shift.notes %}
+                        <div class="shift-badge">{{ shift.notes }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon"><i class="fas fa-calendar-times"></i></div>
+                <div>Aucun planning disponible</div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+        <div class="filter-tab active" onclick="filterDeliveries('matin', this)">
+            <i class="fas fa-sun"></i> Matin
+        </div>
+        <div class="filter-tab" onclick="filterDeliveries('midi', this)">
+            <i class="fas fa-utensils"></i> Midi
+        </div>
+        <div class="filter-tab" onclick="filterDeliveries('aprem', this)">
+            <i class="fas fa-moon"></i> Après-midi
+        </div>
+        <div class="filter-tab" onclick="filterDeliveries('', this)">
+            <i class="fas fa-globe"></i> Tous
+        </div>
+    </div>
+
+    <!-- Deliveries Container -->
+    <div class="deliveries-container" id="deliveries-container">
+        <!-- Cards will be inserted here by JavaScript -->
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <div class="nav-items">
+            <a href="{% url 'journees-list' %}" class="nav-item">
+                <i class="fas fa-calendar-days nav-icon"></i>
+                <span class="nav-label">Journées</span>
+            </a>
+            <a href="{% url 'dashboard' journees.id request.user.id %}" class="nav-item active">
+                <i class="fas fa-id-badge nav-icon"></i>
+                <span class="nav-label">Dashboard</span>
+            </a>
+            <a href="{% url 'faq' %}" class="nav-item" target="_blank">
+                <i class="fas fa-circle-question nav-icon"></i>
+                <span class="nav-label">FAQ</span>
+            </a>
+            {% if user.username == loic or user.username == maxime %}
+            <a href="{% url 'acceuilresponsables' %}" class="nav-item">
+                <i class="fas fa-user-ninja nav-icon"></i>
+                <span class="nav-label">Admin</span>
+            </a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <script>
+        // Data from Django
+        const livraisons = JSON.parse('{{ livraisonss|escapejs }}');
+        const currentUser = "{{ user.username }}";
+        
+        // Time periods
+        const matin = ['05h00', '05h15', '05h30', '05h45', '06h00', '06h15', '06h30', '06h45', 
+                      '07h00', '07h15', '07h30', '07h45', '08h00', '08h15', '08h30', '08h45', 
+                      '09h00', '09h15', '09h30', '09h45'];
+        
+        const midi = ['10h00', '10h15', '10h30', '10h45', '11h00', '11h15', '11h30', '11h45', 
+                     '12h00', '12h15', '12h30'];
+        
+        const aprem = ['12h45','13h00', '13h15', '13h30', '13h45', '14h00', '14h15', '14h30', '14h45', 
+                       '15h00', '15h15', '15h30', '15h45', '16h00', '16h15', '16h30', '16h45', 
+                       '17h00', '17h15', '17h30', '17h45', '18h00', '18h15', '18h30', '18h45', 
+                       '19h00'];
+
+        // Toggle Planning
+        function togglePlanning() {
+            const section = document.getElementById('planning-section');
+            const toggleText = document.getElementById('toggle-text');
+            
+            if (section.style.display === 'none' || section.style.display === '') {
+                section.style.display = 'block';
+                toggleText.textContent = 'Masquer le Planning';
+            } else {
+                section.style.display = 'none';
+                toggleText.textContent = 'Afficher le Planning';
+            }
+        }
+
+        // Render deliveries
+        function renderDeliveries(filter = null) {
+            const container = document.getElementById('deliveries-container');
+            container.innerHTML = '';
+            
+            if (!livraisons.length) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon"><i class="fas fa-box-open"></i></div>
+                        <div>Aucune livraison</div>
+                    </div>
+                `;
+                return;
+            }
+
+            livraisons.forEach(livraison => {
+                // Apply filter if provided
+                if (filter && !filter.includes(livraison.heure_depart)) return;
+
+                // Check if user is assigned
+                const isUserLivreur = livraison.livreurs.includes(currentUser);
+                
+                // Create card
+                const card = document.createElement('div');
+                card.className = 'delivery-card';
+                
+                // Add recuperation class if needed
+                if (livraison.recuperation === true || livraison.recuperation === "True") {
+                    card.classList.add('recuperation');
+                }
+                
+                // Status icon
+                const statusClass = livraison.status ? 'done' : 'pending';
+                const statusIcon = livraison.status ? 
+                    '<i class="fas fa-check"></i>' : 
+                    '<i class="fas fa-spinner fa-spin"></i>';
+                
+                // User tag
+                const userTag = isUserLivreur ? 
+                    '<div class="user-tag"><i class="fas fa-user-check"></i></div>' : '';
+                
+                card.innerHTML = `
+                    ${userTag}
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="client-name">${livraison.nom || 'N/A'}</div>
+                            <div class="status-icon ${statusClass}">${statusIcon}</div>
+                        </div>
+                        <div class="card-info">
+                            <div class="info-row">
+                                <i class="fas fa-clock info-icon"></i>
+                                <span class="info-text">Départ: <strong>${livraison.heure_depart || 'N/A'}</strong></span>
+                            </div>
+                            <div class="info-row">
+                                <i class="fas fa-truck info-icon"></i>
+                                <span class="info-text">Livraison: <strong>${livraison.heure_livraison || 'N/A'}</strong></span>
+                            </div>
+                            ${livraison.infodetail ? `
+                            <div class="info-row">
+                                <i class="fas fa-info-circle info-icon"></i>
+                                <span class="info-text info-highlight">${livraison.infodetail}</span>
+                            </div>` : ''}
+                            <div class="info-row">
+                                <i class="fas fa-user info-icon"></i>
+                                <span class="info-text">${livraison.livreurs.join(', ') || 'Aucun'}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Add click handler
+                card.addEventListener('click', () => {
+                    window.location.href = `{% url 'livraison-detail' 0 %}`.replace('0', livraison.id);
+                });
+                
+                container.appendChild(card);
+            });
+        }
+
+        // Filter deliveries
+        function filterDeliveries(period, btn) {
+            let filterArray = null;
+            
+            if (period === 'matin') {
+                filterArray = matin;
+            } else if (period === 'midi') {
+                filterArray = midi;
+            } else if (period === 'aprem') {
+                filterArray = aprem;
+            }
+            
+            renderDeliveries(filterArray);
+            
+            // Update active tab
+            if (btn) {
+                document.querySelectorAll('.filter-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                btn.classList.add('active');
+            }
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Render morning deliveries by default
+            filterDeliveries('matin', document.querySelector('.filter-tab.active'));
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,963 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% load custom_filters %}
+{% block content %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.css" rel="stylesheet">
+<!-- Custom CSS -->
+<style>
+body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s linear, color 0.3s linear;
+        }
+
+.clickable-row {
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .clickable-row:hover {
+        filter: brightness(95%);
+    }
+    .status-valide {
+        background-color: #d4edda; /* Light green */
+    }
+
+    .statusro-verifié {
+        background-color: #d4edda; /* Light green */
+    }
+
+    .status-en_cours {
+        background-color: #fff3cd; /* Light orange */
+    }
+
+    .statusro-modifié {
+        background-color: #fff3cd; /* Light orange */
+    }
+
+    .statusro-nouveau {
+        background-color: #19baf5; /* Light blue */
+    }
+
+    .status-refuse {
+        background-color: #f8d7da; /* Light red */
+    }
+
+h1, h2 {
+    color: #343a40;
+}
+
+/* General page styles */
+.agenda-title {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #333;
+}
+
+/* Month selection styles */
+.month-selection {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+.month-label {
+    font-size: 1rem;
+    margin-right: 10px;
+    align-self: center;
+}
+.month-dropdown {
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+.month-dropdown:hover {
+    border-color: #007bff;
+}
+
+/* General layout styling */
+.agenda-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 20px;
+}
+
+/* Calendar section */
+.calendar-section {
+        width: 100%;
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        max-width: 50%; /* Restrict width on large screens */
+        transition: width 0.3s ease; /* Smooth transition */
+    }
+
+.calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 7 equal columns */
+    grid-gap: 10px;
+}
+
+.day {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.day-btn {
+    position: relative;
+    padding: 10px;
+    font-size: 0.9rem;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+    height: 60px;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+.day-btn:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+/* Checklist section */
+.checklist-section {
+    width: 55%;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.checklist-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.checklist-table th, .checklist-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.checklist-table th {
+    background-color: #007bff;
+    color: white;
+}
+
+.checklist-table td a {
+    text-decoration: none;
+    color: #007bff;
+}
+
+.checklist-table td a:hover {
+    text-decoration: underline;
+}
+
+
+/* Toggle form button */
+#toggleFormButton {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+#toggleFormButton:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
+
+
+/* Selected day button style */
+.day-btn.selected {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+    border-color: #0056b3;
+}
+
+
+
+
+        .sidebar {
+            width: 250px;
+            background-color: #007BFF;
+            height: 100%;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar .sidebar-header {
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .aref {
+            color: #fff;
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .aref.active, .aref:hover {
+            background-color: #0056b3;
+            color: #fff;
+            text-decoration: none;
+            
+        }
+
+        .checklistss {
+            flex: 1;
+            padding: 20px;
+            background-color: #F0F2F5;
+            overflow-y: auto;
+            transition: margin-left 0.3s ease; /* Improves smoothness of layout change */
+        }
+
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            
+        }
+
+        .header .toggle-theme {
+            cursor: pointer;
+            color: #007BFF;
+        }
+        #checklistss.expanded {
+    margin-left: 0;
+}
+
+#checklistss.full-width {
+    transition: margin-left 0s;
+}
+
+.collapsed {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    width: 0; /* Ensure width collapses at the end */
+}
+
+.dark-mode {
+            background-color: #121212;
+            color: #e4e4e4;
+        }
+
+        .dark-mode .header, .dark-mode .card {
+            background-color: #1e1e1e;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .dark-mode .sidebar {
+            background-color: #1e1e1e;
+        }
+
+        .dark-mode .sidebar a {
+            color: #e4e4e4;
+        }
+
+        .dark-mode .sidebar a.active, .dark-mode .sidebar a:hover {
+            background-color: #333;
+            color: #fff;
+        }
+
+            @media (max-width: 1200px) {
+    .agenda-container {
+        flex-direction: column; /* Change layout to column */
+        align-items: stretch; /* Ensure children stretch to available width */
+    }
+    .calendar-section,
+    .checklist-section {
+        width: 100%; /* Allow elements to take full width */
+        max-width: none;
+    }
+
+}
+    /* Responsive adjustments */
+    @media (max-width: 932px) {
+    .agenda-container {
+        flex-direction: column; /* Change layout to column */
+        align-items: stretch; /* Ensure children stretch to available width */
+    }
+    .calendar-section,
+    .checklist-section {
+        width: 100%; /* Allow elements to take full width */
+        max-width: none;
+    }
+
+}
+    @media (max-width: 768px) {
+    .agenda-container {
+        flex-direction: column; /* Change layout to column */
+        align-items: stretch; /* Ensure children stretch to available width */
+    }
+    .calendar-section,
+    .checklist-section {
+        width: 100%; /* Allow elements to take full width */
+        max-width: none;
+    }
+
+}
+@media (max-width: 480px) {
+    .calendar-section {
+        grid-template-columns: repeat(2, 1fr); /* Adjust columns further for smallest screens */
+        gap: 5px; /* Smaller gap */
+    }
+    
+    /* Ensure both sections stack and adjust fully in mobile view */
+    .agenda-container {
+        align-items: stretch; /* Makes sure sections take full width even in the stack */
+    }
+    .calendar-section,
+    .checklist-section
+     {
+        width: 100%;
+        max-width: none;
+    }
+
+    .day-btn {
+        font-size: 0.7rem; /* Smaller button font */
+        height: 28px; /* Shorter button height */
+        padding: 4px; /* Smaller padding */
+    }
+    
+    .agenda-title {
+        font-size: 1.5rem; /* Smaller title font */
+    }
+    
+    .month-dropdown {
+        font-size: 0.9rem; /* Adjust dropdown font size */
+        padding: 8px; /* Adjust padding */
+    }
+
+}
+
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header" style="margin-top: 100px;">Menu <button class="toggle-sidebar" id="sidebar-toggle"><i class="fas fa-bars"></i></button></div>
+    <a href="{% url 'conseiller_dashboard' %}" class="aref"><i class="fa-solid fa-desktop me-2"></i> Tableau de bord</a>
+    <a href="{% url 'journees-list' %}" class="aref"><i class="fa-solid fa-truck me-2"></i> Livraisons</a>
+    <a href="{% url 'calendarsub_view' %}" class="aref">
+        <i class="fa-solid fa-file-contract me-2"></i>Soumissions
+                                          </a>
+    
+    <a href="{% url 'submit_request' %}" target="_blank" class="aref" >
+      <i class="fa-solid fa-file-signature me-2"></i>Créer Soumission
+                              </a>
+                              <a class="aref" href="{% url 'etiquette-tente' %}" class="aref"><i class="fa-solid fa-print me-2"></i>Etiquette tente</a>
+  
+                              {% if user.username == "Audrey" or user.username == "Maxime" or user.username == "Roxanne" %}
+    <a href="{% url 'manage_submissions' %}" class="aref">
+        <i class="fa-solid fa-file-pdf me-2"></i>PDF et Recherche Soumission
+    </a>
+    
+    <a href="{% url 'calendarsubcreate_view' %}" class="aref">
+        <i class="fa-solid fa-calendar-days me-2"></i>Suivi Soumissions
+    </a>
+    
+    <!-- New Product Creation Link -->
+    <a href="#" class="aref" data-bs-toggle="modal" data-bs-target="#createProductModal">
+        <i class="fa-solid fa-box me-2"></i>Créer un Produit
+    </a>
+{% endif %}
+                                
+    <button class="toggle-theme" id="theme-toggle" style="margin-top:10px;"><i class="fas fa-moon"></i> Thème</button>
+    <div style="margin-top:20px; font-size:14px; color:#ccc;">Utilisateur: {{ user.username }}</div>
+  </div>
+
+
+  <div class="modal fade" id="createProductModal" tabindex="-1" aria-labelledby="createProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createProductModalLabel">Créer un Nouveau Produit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <!-- Formulaire SANS JavaScript - soumission normale -->
+            <form method="POST" action="{% url 'create_product' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="productName" class="form-label">Nom du Produit</label>
+                        <input type="text" class="form-control" id="productName" name="name" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="productQuantity" class="form-label">Quantité</label>
+                        <input type="number" class="form-control" id="productQuantity" name="quantity" 
+                               step="0.01" min="0" value="0.00" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="productCategory" class="form-label">Catégories</label>
+                        <select class="form-select" id="productCategory" name="category" multiple>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-muted">Maintenez Ctrl/Cmd pour sélectionner plusieurs catégories</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Créer le Produit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<div class="checklistss" id="checklistss">
+
+    <div class="header">
+        <h2>Liste Checklist</h2>
+            <button id="show-sidebar" style="display:none; position: fixed; top: 12%; left: 10px;">
+                <i class="fas fa-bars fa-2xl"></i>
+            </button>
+        <div class="user-info">
+            <button id="logoutBtn" style="border:none; background:none; cursor:pointer;"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
+        </div>
+    </div>
+    <br>
+    <br>
+    <br>
+    <br>
+
+
+
+<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productModalLabel">Créer nouveau produit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    {{ product_form.as_p }}
+                    <button type="submit" name="product-form" class="btn btn-primary">Créer produit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr>
+{% if request.user.username == "Roxanne" %}
+<div class="agenda-container">
+    <!-- Calendar Section -->
+    <div id="calendar-section" class="calendar-section">
+        <div class="month-selection">
+            <label for="month" class="month-label">Sélectionnez le mois :</label>
+            <select id="month" name="month" onchange="updateAgenda()" class="month-dropdown">
+                {% for month_name in french_months %}
+                    <option value="{{ forloop.counter0|add:1 }}" {% if forloop.counter0|add:1 == selected_month %}selected{% endif %}>
+                        {{ month_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div id="calendar" class="calendar">
+            <div class="day">
+                <strong>Dim</strong>
+            </div>
+            <div class="day">
+                <strong>Lun</strong>
+            </div>
+            <div class="day">
+                <strong>Mar</strong>
+            </div>
+            <div class="day">
+                <strong>Mer</strong>
+            </div>
+            <div class="day">
+                <strong>Jeu</strong>
+            </div>
+            <div class="day">
+                <strong>Ven</strong>
+            </div>
+            <div class="day">
+                <strong>Sam</strong>
+            </div>
+
+        
+        </div>
+        <div class="calendar">
+            {% for day in days %}
+                <div class="day">
+                    {% with day_counts=days_counts|dict_key:day %}
+                        <button class="day-btn" data-day="{{ day }}" onclick="getChecklistsRoxanne({{ day }})">
+                            {% if day_counts.modified_count > 0 %}
+                                <span class="badge badge-warning" style="position: absolute; top: 5px; left: 5px;">
+                                    {{ day_counts.modified_count }}
+                                </span>
+                            {% endif %}
+                            {% if day_counts.created_count > 0 %}
+                                <span class="badge badge-info" style="position: absolute; top: 5px; right: 5px;">
+                                    {{ day_counts.created_count }}
+                                </span>
+                            {% endif %}
+                            {{ day }}
+                        </button>
+                    {% endwith %}
+                </div>
+            {% endfor %}
+        </div>
+        
+
+    
+        
+        
+        
+        
+        
+        
+        
+    </div>
+
+
+    <!-- Checklist Section -->
+    <div id="checklist-section" class="checklist-section">
+        <table class="checklist-table">
+            <thead>
+                <tr>
+                    <th>Heure</th>
+                    <th>Nom</th>
+                    <th>Convives</th>
+                    <th>Ajouté par</th>
+                    <th>Ajouté le</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="checklist-list" data-detail-url="{% url 'checklist-detail' checklist_id=0 %}">
+                <!-- Checklists will appear dynamically here -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% else %}
+
+
+<div class="agenda-container">
+    <!-- Calendar Section -->
+    <div id="calendar-section" class="calendar-section">
+        <div class="month-selection">
+            <label for="month" class="month-label">Sélectionnez le mois :</label>
+            <select id="month" name="month" onchange="updateAgenda()" class="month-dropdown">
+                {% for month_name in french_months %}
+                    <option value="{{ forloop.counter0|add:1 }}" {% if forloop.counter0|add:1 == selected_month %}selected{% endif %}>
+                        {{ month_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div id="calendar" class="calendar">
+            <div class="day">
+                <strong>Dim</strong>
+            </div>
+            <div class="day">
+                <strong>Lun</strong>
+            </div>
+            <div class="day">
+                <strong>Mar</strong>
+            </div>
+            <div class="day">
+                <strong>Mer</strong>
+            </div>
+            <div class="day">
+                <strong>Jeu</strong>
+            </div>
+            <div class="day">
+                <strong>Ven</strong>
+            </div>
+            <div class="day">
+                <strong>Sam</strong>
+            </div>
+
+            {% for day in days %}
+                <div class="day">
+                    <button class="day-btn" data-day="{{ day }}" onclick="getChecklists({{ day }})" {% if day == '' %}disabled{% endif %}>
+                        {{ day }}
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Checklist Section -->
+    <div id="checklist-section" class="checklist-section">
+        <table class="checklist-table">
+            <thead>
+                <tr>
+                    <th>Heure</th>
+                    <th>Nom</th>
+                    <th>Ajouté par</th>
+                    <th>Ajouté le</th>
+                </tr>
+            </thead>
+            <tbody id="checklist-list" data-detail-url="{% url 'checklist-detail' checklist_id=0 %}">
+                <!-- Checklists will appear dynamically here -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endif %}
+
+</div>
+{% if is_chefcuisine %}
+<h1 class="text-center">Liste Checklist</h1>
+
+
+
+
+<a href="{% url 'journees-list' %}" class="btn btn-primary mt-3">Voir Livraisons</a>
+
+<hr>
+
+
+
+<div class="agenda-container">
+    <!-- Calendar Section -->
+    <div id="calendar-section" class="calendar-section">
+        <div class="month-selection">
+            <label for="month" class="month-label">Sélectionnez le mois :</label>
+            <select id="month" name="month" onchange="updateAgenda()" class="month-dropdown">
+                {% for month_name in french_months %}
+                    <option value="{{ forloop.counter0|add:1 }}" {% if forloop.counter0|add:1 == selected_month %}selected{% endif %}>
+                        {{ month_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div id="calendar" class="calendar">
+            {% for day in days %}
+                <div class="day">
+                    <button class="day-btn" data-day="{{ day }}" onclick="getChecklistsCuisine({{ day }})">
+                        {{ day }}
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Checklist Section -->
+    <div id="checklist-section" class="checklist-section">
+        <table class="checklist-table">
+            <thead>
+                <tr>
+                    <th>Heure</th>
+                    <th>Nom</th>
+                    <th>Convives</th>
+                    <th>Ajouté par</th>
+                    <th>Ajouté le</th>
+                </tr>
+            </thead>
+            <tbody id="checklist-list" data-detail-url="{% url 'checklist-detail' checklist_id=0 %}">
+                <!-- Checklists will appear dynamically here -->
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+
+
+
+<!-- Include jQuery and Bootstrap Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.js"></script>
+
+
+<script>
+  function getCSRFToken() {
+    const cookieValue = document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)')?.pop() || '';
+    return cookieValue;
+}
+
+
+    setTimeout(function(){
+       window.location.reload(1);
+    }, 300000); // 300000 milliseconds = 5 minutes
+
+    function updateAgenda() {
+        const month = document.getElementById('month').value;
+        window.location.href = '?month=' + month + '&day=1';  // Reload page with selected month and day set to 1
+    }
+
+    function getChecklists(day) {
+    
+    const month = document.getElementById('month').value;
+    fetch(`/get_checklists_for_day/${day}/?month=${month}`)
+        .then(response => response.json())
+        .then(data => {
+            const checklistList = document.getElementById('checklist-list');
+            const baseUrl = checklistList.dataset.detailUrl.replace(/0\/$/, '');
+            checklistList.innerHTML = '';
+
+            // Clear any previously selected date
+            const allDayButtons = document.querySelectorAll('.day-btn');
+            allDayButtons.forEach(button => button.classList.remove('selected'));
+
+            // Highlight the selected date button
+            const selectedButton = document.querySelector(`.day-btn[data-day='${day}']`);
+            if (selectedButton) {
+                selectedButton.classList.add('selected');
+            }
+
+            if (data.checklists && data.checklists.length > 0) {
+                data.checklists.forEach(checklist => {
+                    const row = document.createElement('tr');
+                    row.classList.add('clickable-row');
+                    row.classList.add(`status-${checklist.status}`); // Add status class
+                    row.dataset.href = `${baseUrl}${checklist.id}/`;
+                        // Parse the date and add 5 hours
+                    const originalDate = new Date(checklist.added_on);
+                    const updatedDate = new Date(originalDate.getTime() + 5 * 60 * 60 * 1000); // Add 5 hours in milliseconds
+                    row.innerHTML = `
+                        <td>${formatTimeWithoutSeconds(checklist.heure_livraison)}</td>
+                        <td>${checklist.name}</td>
+                        <td>${checklist.conseillere || 'N/A'}</td>
+                        <td>${formatDateTime(updatedDate)}</td>
+
+                        
+                    `;
+                    row.addEventListener('click', function() {
+                        window.location.href = this.dataset.href;
+                    });
+                    checklistList.appendChild(row);
+                });
+            } else {
+                checklistList.innerHTML = `
+                    <tr>
+                        <td colspan="4">Aucune checklist disponible pour ce jour.</td>
+                    </tr>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching checklists:', error);
+        });
+}
+
+
+
+function getChecklistsRoxanne(day) {
+    // Remove 'selected' class from all buttons
+    document.querySelectorAll('.day-btn').forEach(btn => btn.classList.remove('selected'));
+
+    // Add 'selected' class to the clicked button
+    const selectedButton = document.querySelector(`.day-btn[data-day="${day}"]`);
+    if (selectedButton) {
+        selectedButton.classList.add('selected');
+    }
+
+    // Fetch checklists for the selected day
+    const monthElement = document.getElementById('month');
+    const month = monthElement.value;
+
+    fetch(`/get_checklists_for_day/${day}/?month=${month}`)
+        .then(response => response.json())
+        .then(data => {
+            const checklistList = document.getElementById('checklist-list');
+            checklistList.innerHTML = '';
+
+            if (data.checklists.length > 0) {
+                data.checklists.forEach(checklist => {
+                    const row = document.createElement('tr');
+                    row.className = `clickable-row statusro-${checklist.statusro}`;
+                    const checklistId = checklist.id; // Store ID for later use
+                    row.dataset.href = `/checklist/${checklist.id}/`;  // Example path, adjust as necessary
+                    const originalDate = new Date(checklist.added_on);
+                    const updatedDate = new Date(originalDate.getTime() + 5 * 60 * 60 * 1000);
+
+                    // Populate table row with checklist data
+                    row.innerHTML = `
+                        <td>${formatTimeWithoutSeconds(checklist.heure_livraison)}</td>
+                        <td>${checklist.name}</td>
+                        <td>${checklist.nb_convive}</td>
+                        <td>${checklist.conseillere || 'N/A'}</td>
+                        <td>${formatDateTime(updatedDate)}</td>
+                        <td>${checklist.statusro}</td>                       
+                    `;
+
+                    checklistList.appendChild(row);
+
+                    // Add click event listener for this row to update status and navigate to detail
+                    row.addEventListener('click', function() {
+                        updateChecklistStatus(checklistId); // Update the status to 'verifié' and redirect
+                    });
+                });
+            } else {
+                checklistList.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center">Aucune checklist disponible pour ce jour.</td>
+                    </tr>
+                `;
+            }
+        })
+        .catch(error => console.error('Erreur lors de la récupération des checklists:', error));
+}
+function updateChecklistStatus(checklistId) {
+    // AJAX request to update checklist status to 'verifié'
+    fetch(`/update_checklist_status/${checklistId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken(),
+        },
+        body: JSON.stringify({ statusro: 'verifié' })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to update checklist status');
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Redirect to the checklist detail page after successful status update
+        window.location.href = `/checklist/${checklistId}/`;
+    })
+    .catch(error => console.error('Error updating checklist status:', error));
+}
+
+
+function formatDateTime(isoDateString) {
+    const date = new Date(isoDateString); // Parse ISO date
+    const options = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false, // Use 24-hour format
+    };
+    return date.toLocaleString('fr-FR', options); // Format for French locale
+}
+
+function formatTimeWithoutSeconds(timeString) {
+    if (timeString.includes(':')) {
+        const parts = timeString.split(':');
+        return `${parts[0]}:${parts[1]}`; // Include only hours and minutes
+    }
+    return timeString; // Return as is if format is unexpected
+}
+
+
+
+const toggleBtn = document.getElementById('theme-toggle');
+        toggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+        });
+
+          document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.getElementById('sidebar');
+    const btnShowSidebar = document.getElementById('show-sidebar');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    const dashboard = document.getElementById('dashboard');
+
+    // Quand on clique sur le bouton toggle pour cacher ou réafficher
+    toggleBtn.addEventListener('click', () => {
+        if (sidebar.classList.contains('collapsed')) {
+            // La sidebar est masquée, on la remonte
+            sidebar.classList.remove('collapsed');
+            btnShowSidebar.style.display = 'none';   // cache le bouton
+            dashboard.classList.remove('full-width');
+        } else {
+            // La sidebar est visible, on la cache
+            sidebar.classList.add('collapsed');
+            btnShowSidebar.style.display = 'block';  // montre le bouton pour la réafficher
+            dashboard.classList.add('full-width');
+        }
+    });
+
+    // Quand on clique sur le bouton pour faire réapparaître la sidebar
+    btnShowSidebar.addEventListener('click', () => {
+        sidebar.classList.remove('collapsed');
+        btnShowSidebar.style.display = 'none'; // cache le bouton
+        dashboard.classList.remove('full-width');
+    });
+});
+
+
+
+document.getElementById('createProductForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    fetch(this.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('createProductModal'));
+            modal.hide();
+            
+            // Reset form
+            this.reset();
+            
+            // Show success message
+            alert('Produit créé avec succès!');
+            
+            // Optionally reload page or update UI
+            // location.reload();
+        } else {
+            alert('Erreur: ' + (data.message || 'Une erreur est survenue'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Une erreur est survenue lors de la création du produit');
+    });
+});
+</script>
+
+{% endblock %}

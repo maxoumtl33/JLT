@@ -1,0 +1,133 @@
+{% extends 'listings/base.html' %}
+
+{% block content %}
+
+  <div style="background-color: #F1B3DA;">
+  <h1 style="text-align: center;">RECUP {{recuperations.nom|upper}}</h1>
+  </div>
+  <br>
+  
+  <div class="accordion" id="accordionPanelsStayOpenExample">
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseSeven" aria-expanded="false" aria-controls="panelsStayOpen-collapseSeven">
+            <div>
+                <p>
+                    FORMULAIRES
+                
+                <i class="fa-regular fa-circle-left fa-beat fa-xl" style="color: #FFD43B;"></i>
+            </p>
+            </div>
+          </button>
+        </h2>
+        <div id="panelsStayOpen-collapseSeven" class="accordion-collapse">
+          <div class="accordion-body">
+            <p style="text-align: center;">Départ livraison : <a href="https://view.forms.app/loicveyre/jeparsenlivraison" target="_blank"><i class="fa-solid fa-truck-fast" style="font-size: xx-large;"></i></a></p>
+            <p style="text-align: center;">Formulaire Récup : <a href="https://oakmnxgj.forms.app/recuplivreurs" target="_blank"><i class="fa-solid fa-dolly" style="font-size: xx-large;"></i></a></p>
+            <p style="text-align: center;">Retour livraison : <a href="https://view.forms.app/loicveyre/jereviensdelivraison" target="_blank"><i class="fa-sharp fa-solid fa-truck fa-flip-horizontal" style="font-size: xx-large;"></i></a></p>
+          </div>
+        </div>
+  </div>
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
+            HEURE DEPART
+        </button>
+      </h2>
+      <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show">
+        <div class="accordion-body">
+          <strong>{{recuperations.heure_depart}}
+        </div>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false" aria-controls="panelsStayOpen-collapseTwo">
+            HEURE RECUPERATION
+        </button>
+      </h2>
+      <div id="panelsStayOpen-collapseTwo" class="accordion-collapse">
+        <div class="accordion-body">
+          <strong>{{recuperations.heure_livraison}}
+        </div>
+      </div>
+    </div>
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseFive" aria-expanded="false" aria-controls="panelsStayOpen-collapseFive">
+              Route n°
+          </button>
+        </h2>
+        <div id="panelsStayOpen-collapseFive" class="accordion-collapse">
+          <div class="accordion-body">
+            <strong>{{recuperations.route}}
+          </div>
+        </div>
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="false" aria-controls="panelsStayOpen-collapseThree">
+            <div>
+                <p>
+                    Important
+                
+                    <i class="fa-solid fa-triangle-exclamation fa-xl" style="color: #fa0000;"></i>
+            </p>
+            </div>
+        </button>
+      </h2>
+      <div id="panelsStayOpen-collapseThree" class="accordion-collapse">
+        <div class="accordion-body">
+          <strong>{{recuperations.commentaire}}
+        </div>
+      </div>
+    </div>
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseFour" aria-expanded="false" aria-controls="panelsStayOpen-collapseFour">
+              Détails commande
+          </button>
+        </h2>
+        <div id="panelsStayOpen-collapseFour" class="accordion-collapse">
+          <div class="accordion-body">
+            <strong>{{recuperations.details_commande}}
+          </div>
+        </div>
+      </div>
+      </div>
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseSix" aria-expanded="false" aria-controls="panelsStayOpen-collapseSix">
+              Infos Client
+          </button>
+        </h2>
+        <div id="panelsStayOpen-collapseSix" class="accordion-collapse">
+          <div class="accordion-body">
+            <p>{{recuperations.client.nom}}</p>
+            <p>{{recuperations.client.adresse_lieux}}</p>
+            <p><a href="{{recuperations.client.adresse_dock}}" target="_blank">Adresse Dock</a></p>
+            <p>{{recuperations.client.contact}}</p>
+          </div>
+        </div>
+        
+      </div>
+
+  </div>
+    </div>
+  </div>
+  <br>
+
+  <nav class="navbar fixed-bottom navbar-light bg-light">
+    <div class="container-fluid">
+      {% if user.is_authenticated %}
+      <form action="{% url 'logout' %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn navbar-brand" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i></i></button>    </form>
+    {% else %}
+    <a href="{% url 'login' %}" class="btn btn-outline-success" ><i class="fa-solid fa-user"></i></a>
+    {% endif %}
+    </div>
+  </nav>
+  
+
+
+{% endblock %}

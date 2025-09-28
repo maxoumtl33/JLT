@@ -1,0 +1,16 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+{% block content %}
+
+<h1>Daily Agenda: {{ date }}</h1>
+    <ul>
+        {% for checklist in checklists %}
+        <li>{{ checklist.name }}</li>
+        {% empty %}
+        <li>No checklists for this day</li>
+        {% endfor %}
+    </ul>
+
+
+{% endblock %}
+

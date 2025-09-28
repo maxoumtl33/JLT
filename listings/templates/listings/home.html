@@ -1,0 +1,56 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    .content-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 80vh;
+        flex-direction: column;
+        text-align: center;
+    }
+    h1 {
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+        color: #333;
+    }
+    .btn-primary, .btn-secondary {
+        padding: 12px 24px;
+        font-size: 1.2rem;
+        border-radius: 8px;
+    }
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: white;
+    }
+    .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #0056b3;
+    }
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        color: white;
+        margin-top: 20px;
+    }
+    .btn-secondary:hover {
+        background-color: #5a6268;
+        border-color: #545b62;
+    }
+</style>
+
+<div class="content-container">
+    {% if user.is_authenticated %}
+        <h1 id="dejaco">Tu es déjà connecté</h1>
+        <a class="btn btn-primary" href="{% url 'journees-list'  %}" aria-current="page">Voir les journées</a>
+    {% else %}
+        <h1>Connecte-toi pour continuer</h1>
+        <a class="btn btn-primary" href="{% url 'login' %}">Se connecter</a>
+    {% endif %}
+</div>
+
+{% endblock %}

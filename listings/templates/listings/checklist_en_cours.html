@@ -1,0 +1,124 @@
+<style>
+    /* General style for the page */
+    body {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        background-color: #f4f4f9;
+        padding: 30px;
+        color: #333;
+    }
+    .validation-message {
+        text-align: center;
+        font-size: 1.8rem;
+        color: #27ae60; /* green color */
+        font-weight: bold;
+        margin-top: 30px;
+    }
+    /* Title style */
+    .modern-title {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        text-align: center;
+        letter-spacing: 1px;
+    }
+    
+    /* List styles */
+    .modern-list {
+        list-style: none;
+        padding: 0;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    /* Items with hover effect and transitions */
+    .modern-item {
+        background-color: #fff;
+        margin-bottom: 10px;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .modern-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+    
+    /* Product name styling */
+    .product-name {
+        font-weight: 600;
+        font-size: 1.2rem;
+        color: #34495e;
+    }
+    
+    /* Quantity styling */
+    .product-quantity {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #16a085;
+        background-color: #ecf0f1;
+        padding: 5px 12px;
+        border-radius: 20px;
+    }
+    
+    /* Media Queries for mobile responsiveness */
+    @media (max-width: 768px) {  /* Adjust for devices with width <= 768px */
+        body {
+            padding: 20px; /* Increase padding for more breathing room */
+        }
+    
+        .modern-title {
+            font-size: 2.5rem; /* Increase font size */
+        }
+    
+        .modern-item {
+            padding: 15px; /* More padding for easier interaction */
+            flex-direction: column;  /* Stack items vertically on small screens */
+            align-items: flex-start; /* Left-align items */
+        }
+    
+        .product-name, .product-quantity {
+            flex: auto;  /* Allow each to take full line on its own row if needed */
+            font-size: 1.5rem; /* Larger font size for better visibility */
+        }
+    
+        .product-quantity {
+            margin-top: 10px;
+        }
+    }
+</style>
+
+
+<h1 class="modern-title">Produits en cours pour la checklist {{ checklist.name }} du {{ checklist.date }}</h1>
+<br>
+{% if items_en_cours or sac_de_glace_items %}
+<ul class="modern-list">
+  {% for item in sac_de_glace_items %}
+    <li class="modern-item">
+      <span class="product-name">{{ item.product.name }}</span>
+      <span class="product-quantity">{{ item.quantity }}</span>
+    </li>
+  {% endfor %}
+
+  {% for item in items_en_cours %}
+    {% if item.product.name != "SAC DE GLACE" %}
+
+      <li class="modern-item">
+        <span class="product-name">{{ item.product.name }}</span>
+        <span class="product-quantity">{{ item.quantity }}</span>
+      </li>
+    {% endif %}
+  {% endfor %}
+</ul>
+{% else %}
+<p class="validation-message">Checklist validée</p>
+{% endif %}
+
+
+
+

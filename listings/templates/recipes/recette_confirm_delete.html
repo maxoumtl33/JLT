@@ -1,0 +1,44 @@
+{% extends "recipes/base.html" %}
+{% block title %}Supprimer Recette{% endblock %}
+
+{% block content %}
+<div class="content-body">
+    <div class="text-center py-5">
+        <i class="bi bi-exclamation-triangle text-warning" style="font-size: 4rem;"></i>
+        
+        <h2 class="mt-4">Confirmer la suppression</h2>
+        
+        <p class="lead mt-3">
+            Êtes-vous sûr de vouloir supprimer la recette <strong>{{ recette.nom }}</strong> ?
+        </p>
+        
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-6">
+                <div class="alert alert-warning">
+                    <h5>Cette recette contient:</h5>
+                    <ul class="mb-0">
+                        <li>{{ recette.recette_ingredients.count }} ingrédient(s)</li>
+                        <li>{{ recette.sous_recettes.count }} sous-recette(s)</li>
+                    </ul>
+                </div>
+                
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-octagon"></i>
+                    <strong>Attention!</strong> Cette action est irréversible.
+                    Toutes les données associées seront définitivement supprimées.
+                </div>
+            </div>
+        </div>
+        
+        <form method="post" class="mt-4">
+            {% csrf_token %}
+            <a href="{% url 'recette_list' %}" class="btn btn-secondary">
+                <i class="bi bi-x-circle"></i> Annuler
+            </a>
+            <button type="submit" class="btn btn-danger ms-2">
+                <i class="bi bi-trash"></i> Supprimer définitivement
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

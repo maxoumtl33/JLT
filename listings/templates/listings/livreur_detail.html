@@ -1,0 +1,75 @@
+{% extends 'listings/base.html' %}
+
+{% block content %}
+
+
+<div style="text-align: center;">
+    <h2>Salut {{ livreur.nom }}, </h2>
+    <br>
+
+    <p>N'oublies pas de regarder le détail de ta livraison pour plus d'informations</p>
+    <h2>Ton programme pour aujourd'hui :</h2>
+</div>
+<br>
+  <h2 style="text-align: center;" id="listlivraisons">LIVRAISONS :</h2>
+<div style="text-align: center;" >
+    {% for livraison in livraisons %}
+    {% if livraison.date == livraison.journee.date %}
+
+    <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+        <div class="card-body">
+          <h5 class="card-title">{{livraison}}</h5>
+          <p class="card-text">Heure de départ : {{livraison.heure_depart}}</p>
+          <p class="card-text">Heure de livraison : {{livraison.heure_livraison}}</p>
+          <p class="card-text">Route : {{livraison.route}}</p>
+          <a href="{% url 'livraison-detail' livraison.id %}" class="btn btn-primary" >Voir détail</a>
+        </div>
+      </div>
+      {% endif %}
+      {% endfor %}
+      <br>
+      <h2 style="text-align: center;" id="listrecup">RECUPERATIONS:</h2>
+      <div style="text-align: center;" id="listlivraisons">
+        {% for recuperation in recuperations %}
+        <div class="d-inline-grid card text-center mb-3" style="width: 18rem;">
+            <div class="card-body">
+              <h5 class="card-title">{{recuperation}}</h5>
+              <p class="card-text">Heure de départ : {{recuperation.heure_depart}}</p>
+              <p class="card-text">Heure de récuperation : {{recuperation.heure_livraison}}</p>
+              <p class="card-text">Route : {{recuperation.route}}</p>
+              <a href="{% url 'recuperation-detail' recuperation.id %}" class="btn btn-primary" >Voir détail</a>
+            </div>
+          </div>
+          {% endfor %}
+</div>
+<br>
+<br>
+<br>
+<div id="tachesafaire" style="text-align: center;" >
+<h2>Tes tâches à faire aujourd'hui :</h2>
+<br>
+<div class="card d-inline-grid" style="width: 18rem;">
+    <ul class="list-group list-group-flush">
+        {% for tache in livreur.tacheafaire.all %}
+      <li class="list-group-item">{{tache.description}}</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+    
+<nav class="navbar fixed-bottom navbar-light bg-light">
+  <div class="container-fluid">
+    {% if user.is_authenticated %}
+    <form action="{% url 'logout' %}" method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn navbar-brand"><i class="fa-solid fa-arrow-right-from-bracket"></i></i></button>  </form>
+  {% else %}
+  <a href="{% url 'login' %}" class="navbar-brand" ><i class="fa-solid fa-user"></i></a>
+  {% endif %}
+  </div>
+</nav>
+
+
+
+
+{% endblock %}

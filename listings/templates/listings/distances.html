@@ -1,0 +1,89 @@
+{% extends 'listings/base.html' %}
+
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block content %}
+<nav class="nav container">
+    <a href="#" class="nav__logo">Julien Leblanc Traiteur</a>
+  
+    <div class="nav__menu" id="nav-menu">
+        <ul class="nav__list">
+          {% if user.is_authenticated %}
+            <li class="nav__item">
+              <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="nav__link active-link" style="color: red;"><i class="fa-solid fa-arrow-right-from-bracket"></i></i>
+            </form>
+                    <span class="nav__name">Logout</span>
+          </button>
+            </li>
+            {% else %}
+            <li class="nav__item">
+              <a href="{% url 'login' %}" class="nav__link" style="color: green;"><i class="fa-regular fa-user"></i></i>
+                    <span class="nav__name">Login</span>
+                </a>
+            </li>
+            {% endif %}
+            <li class="nav__item">
+              <a type="button" class="nav__link" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                <i class="fa-solid fa-link"></i><span class="nav__name">Liens</span>
+              </a>
+            </li>
+            <li class="nav__item">
+              <a  href="{% url 'acceuilresponsables' %}" class="nav__link"><i class="fa-solid fa-user-ninja"></i>
+                <span class="nav__name">Retour</span>
+              </a>
+  
+            </li>
+        </ul>
+    </div>
+  
+    <img src="{% static 'listings/julien-leblanc-continuumcommunication.jpg'  %}" alt="" class="nav__img">
+  </nav>
+<br>
+<br>
+<br>
+<table id="ourtable3" class="table table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th>De</th>
+            <th>Vers</th>
+            <th>Mode</th>
+            <th>Distance km</th>
+            <th>Durée min moyenne</th>
+            <th>Durée mins traffic actuel</th>
+            <th>Supprimer</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for distance in distances %}
+        <tr>
+            <td>{{ distance.from_location }}</td>
+            <td>{{ distance.to_location }}</td>
+            <td>{{ distance.mode }}</td>
+            <td>{{ distance.distance_km }}</td>
+            <td>{{ distance.distance_mins }}</td>
+            <td>{{ distance.distance_traffic_mins }}</td>
+            <td><a href="{% url 'deletedistance' distance.id %}">supprimer</a></td>
+
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<form method="POST">
+    {% csrf_token %}
+    <div id="linkholder">
+        <div class="form1 ml-3"> {{ form.from_location|as_crispy_field }}</div>
+        <div class="form1 ml-3"> {{ form.to_location|as_crispy_field }}</div>
+        <div class="form1 ml-3"> {{ form.mode|as_crispy_field }}</div>
+        <br>
+        <button  class="btn btn-primary" type="submit">Calculer</button>
+    </div>
+</form>
+
+{% endblock %}
+
+                  

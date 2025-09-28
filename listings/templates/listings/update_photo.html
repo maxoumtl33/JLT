@@ -1,0 +1,23 @@
+<h1>Update Photos for {{ livraison.nom }}</h1>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ photo_formset.management_form }}
+    
+    <table>
+        {% for form in photo_formset %}
+            <tr>
+                <td>{{ form.image.label_tag }}</td>
+                <td>{{ form.image }}</td>
+                <td>
+                    {% if form.DELETE %}
+                        {{ form.DELETE.label_tag }} {{ form.DELETE }}
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    
+    <button type="submit">Update Photos</button>
+</form>
+

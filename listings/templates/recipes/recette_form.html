@@ -1,0 +1,247 @@
+{% extends "recipes/base.html" %}
+{% load static %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .formset-row {
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 10px;
+        background: #f8f9fa;
+        position: relative;
+    }
+    .delete-row {
+        cursor: pointer;
+    }
+    .formset-row.to-delete {
+        background-color: #ffebee;
+        opacity: 0.6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <h1 class="h3 mb-0">{{ title }}</h1>
+        <a href="{% url 'recette_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Retour à la liste
+        </a>
+    </div>
+</div>
+
+<div class="content-body">
+    <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+        
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Informations principales</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label required">Nom de la recette</label>
+                            {{ form.nom }}
+                            {% if form.nom.errors %}
+                            <div class="text-danger small">{{ form.nom.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                            <div class="text-danger small">{{ form.description.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label required">Instructions de fabrication</label>
+                            {{ form.explication_fabrication }}
+                            {% if form.explication_fabrication.errors %}
+                            <div class="text-danger small">{{ form.explication_fabrication.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Détails</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Photo</label>
+                            {{ form.photo }}
+                            {% if recette and recette.photo %}
+                            <div class="mt-2">
+                                <img src="{{ recette.photo.url }}" class="img-thumbnail" style="max-height: 150px;">
+                                <p class="small text-muted mt-1">Photo actuelle</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Département</label>
+                            {{ form.departement }}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Temps préparation</label>
+                                    <div class="input-group">
+                                        {{ form.temps_preparation }}
+                                        <span class="input-group-text">min</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Temps cuisson</label>
+                                    <div class="input-group">
+                                        {{ form.temps_cuisson }}
+                                        <span class="input-group-text">min</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Nombre de portions</label>
+                            {{ form.portions }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Ingrédients</h5>
+            </div>
+            <div class="card-body">
+                {{ formset.management_form }}
+                
+                {% if formset.non_form_errors %}
+                <div class="alert alert-danger">
+                    {{ formset.non_form_errors }}
+                </div>
+                {% endif %}
+                
+                <div id="ingredient-formset">
+                    {% for ingredient_form in formset %}
+                    <div class="formset-row">
+                        {% for hidden in ingredient_form.hidden_fields %}
+                            {{ hidden }}
+                        {% endfor %}
+                        
+                        <div class="row align-items-end">
+                            <div class="col-md-5">
+                                <label class="form-label">Ingrédient</label>
+                                {{ ingredient_form.ingredient }}
+                                {% if ingredient_form.ingredient.errors %}
+                                <div class="text-danger small">{{ ingredient_form.ingredient.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Quantité</label>
+                                {{ ingredient_form.quantite }}
+                                {% if ingredient_form.quantite.errors %}
+                                <div class="text-danger small">{{ ingredient_form.quantite.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    {{ ingredient_form.DELETE }}
+                                    <label class="form-check-label text-danger" for="{{ ingredient_form.DELETE.id_for_label }}">
+                                        <i class="bi bi-trash"></i> Supprimer
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <button type="button" class="btn btn-sm btn-outline-primary mt-3" id="add-ingredient">
+                    <i class="bi bi-plus-circle"></i> Ajouter un ingrédient
+                </button>
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-end mt-4">
+            <a href="{% url 'recette_list' %}" class="btn btn-secondary me-2">
+                <i class="bi bi-x-circle"></i> Annuler
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-circle"></i> 
+                {% if recette %}Enregistrer les modifications{% else %}Créer la recette{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Gestion du formset d'ingrédients
+    let totalForms = document.querySelector('#id_ingredients-TOTAL_FORMS');
+    let ingredientCount = parseInt(totalForms.value);
+    
+    document.getElementById('add-ingredient').addEventListener('click', function() {
+        const formsetDiv = document.getElementById('ingredient-formset');
+        
+        // Cloner le template vide
+        const emptyFormTemplate = document.querySelector('.formset-row').cloneNode(true);
+        
+        // Remplacer les indices
+        const formHtml = emptyFormTemplate.innerHTML.replace(/ingredients-\d+-/g, `ingredients-${ingredientCount}-`);
+        emptyFormTemplate.innerHTML = formHtml;
+        
+        // Réinitialiser les valeurs
+        emptyFormTemplate.querySelectorAll('input[type="number"], input[type="text"], select').forEach(input => {
+            if (input.type !== 'checkbox') {
+                input.value = '';
+            }
+        });
+        
+        // Décocher la case de suppression
+        const deleteCheckbox = emptyFormTemplate.querySelector('input[type="checkbox"]');
+        if (deleteCheckbox) {
+            deleteCheckbox.checked = false;
+        }
+        
+        // Ajouter au formset
+        formsetDiv.appendChild(emptyFormTemplate);
+        
+        // Mettre à jour le compteur
+        ingredientCount++;
+        totalForms.value = ingredientCount;
+    });
+    
+    // Marquer visuellement les lignes à supprimer
+    document.querySelectorAll('input[type="checkbox"][name$="DELETE"]').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const row = this.closest('.formset-row');
+            if (this.checked) {
+                row.classList.add('to-delete');
+            } else {
+                row.classList.remove('to-delete');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends 'listings/base.html' %}
+{% load custom_filters %}
+
+{% block content %}
+{% if user.is_authenticated %}
+<div class="container mt-5">
+    <!-- Heading -->
+    <h2 class="text-center mb-4">Qu'est-ce que je prends et quelle quantité ?</h2>
+
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-6">
+            <form method="post" class="card p-4 shadow-sm">
+                {% csrf_token %}
+                
+                <!-- Product Selection -->
+                <div class="mb-3">
+                    <label for="product" class="form-label">Produit</label>
+                    {{ form.product|add_class:"select2 form-control" }}
+                </div>
+
+                <!-- Quantity Input -->
+                <div class="mb-3">
+                    <label for="quantity" class="form-label">Quantité</label>
+                    {{ form.quantity|add_class:"form-control" }}
+                </div>
+
+                <!-- Submit Button -->
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg">Valider</button>
+                </div>
+            </form>
+        </div>
+        {% else %}
+        <div class="container py-5">
+            <div class="alert alert-danger text-center">
+                <p>Vous devez être connecté pour accéder à cette fonctionnalité.</p>
+                <a href="{% url 'home' %}" class="btn btn-primary">Se connecter</a>
+            </div>
+        </div>
+        {% endif %}
+        </div>
+        </div>
+
+        <!-- Success or Error Messages -->
+        {% if messages %}
+        <div class="container mt-4">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} text-center" role="alert">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+<!-- Include Select2 Initialization -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.select2').select2({
+            placeholder: "Trouver un produit",
+            allowClear: true,
+            width: '100%' // Ensures the Select2 dropdown matches the parent width
+        });
+    });
+</script>
+
+{% endblock %}
