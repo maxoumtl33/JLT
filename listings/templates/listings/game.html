@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Free Kick Master Mobile</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .game-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(to bottom, #87CEEB 0%, #98D8E8 40%, #90EE90 100%);
+        }
+
+        /* Header compact */
+        .game-header {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 8px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .player-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: gold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .player-name {
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .currency {
+            display: flex;
+            gap: 10px;
+        }
+
+        .currency-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        /* Zone de jeu */
+        .game-canvas {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Terrain */
+        .stadium {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #6FCC6F 0%, #5FAF5F 100%);
+        }
+
+        .stadium::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: repeating-linear-gradient(
+                0deg,
+                rgba(255,255,255,0.1) 0px,
+                transparent 2px,
+                transparent 48px,
+                rgba(255,255,255,0.1) 50px
+            );
+        }
+
+        /* Cage de but AGRANDIE */
+        .goal-container {
+            position: absolute;
+            top: 8%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 320px;
+            height: 200px;
+            z-index: 2;
+        }
+
+        .goal {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .goal-frame {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 6px solid white;
+            border-radius: 3px;
+            background: rgba(0,0,0,0.1);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
+        }
+
+        .goal-net {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                repeating-linear-gradient(0deg, 
+                    rgba(200,200,200,0.2) 0px, 
+                    transparent 2px, 
+                    transparent 13px, 
+                    rgba(200,200,200,0.2) 15px),
+                repeating-linear-gradient(90deg, 
+                    rgba(200,200,200,0.2) 0px, 
+                    transparent 2px, 
+                    transparent 13px, 
+                    rgba(200,200,200,0.2) 15px);
+        }
+
+        /* Cibles animées */
+        .target {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+            z-index: 3;
+            border: 2px solid white;
+            transition: all 0.3s ease;
+        }
+
+        .target:nth-child(1) { 
+            background: linear-gradient(135deg, #FF6B6B, #FF4444);
+            top: 10%; 
+            left: 10%;
+        }
+        .target:nth-child(2) { 
+            background: linear-gradient(135deg, #4ECDC4, #44A08D);
+            top: 10%; 
+            right: 10%;
+        }
+        .target:nth-child(3) { 
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            bottom: 15%; 
+            left: 15%;
+        }
+        .target:nth-child(4) { 
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            bottom: 15%; 
+            right: 15%;
+        }
+        .target:nth-child(5) { 
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            top: 40%; 
+            left: 42%;
+        }
+
+        .target.moving {
+            animation: moveTarget 2s ease-in-out infinite;
+        }
+
+        @keyframes moveTarget {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(20px); }
+        }
+
+        .target.hit {
+            animation: targetHit 0.6s forwards;
+        }
+
+        @keyframes targetHit {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.3) rotate(180deg); opacity: 0.5; }
+            100% { transform: scale(0) rotate(360deg); opacity: 0; }
+        }
+
+        /* Joueur REPOSITIONNÉ PLUS HAUT */
+        .player {
+            position: absolute;
+            bottom: 180px;  /* Augmenté de 120px à 180px pour mobile */
+            left: calc(50% + 45px); /* Décalé vers la droite */
+            width: 150px;  /* Augmenté encore plus */
+            height: 190px;  /* Augmenté encore plus */
+            z-index: 4;
+            transform: translateX(-50%);
+        }
+
+        .player-sprite {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+        
+        .player-sprite img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            object-position: center bottom;
+        }
+
+        .player.kicking .player-sprite {
+            animation: playerKick 0.5s ease-out;
+        }
+
+        @keyframes playerKick {
+            0% { transform: rotate(0deg); }
+            30% { transform: rotate(-15deg) translateY(-5px); }
+            100% { transform: rotate(0deg); }
+        }
+
+        /* Ballon positionné différemment et plus haut */
+        .ball {
+            position: absolute;
+            bottom: 300px;  /* Augmenté de 240px à 300px */
+            left: calc(50% - 20px); /* Légèrement à gauche pour être devant le joueur */
+            width: 30px;
+            height: 30px;
+            transform: translateX(-50%);
+            background: radial-gradient(circle at 30% 30%, white 20%, #ddd 40%, #333 80%);
+            border-radius: 50%;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+            z-index: 10;
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* Gardien */
+        .goalkeeper {
+            position: absolute;
+            top: 35%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 70px;
+            transition: left 0.5s ease;
+            z-index: 3;
+        }
+
+        .goalkeeper-body {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #FFD700, #FFA500);
+            border-radius: 25px 25px 5px 5px;
+            position: relative;
+        }
+
+        .goalkeeper-body::before {
+            content: '🧤';
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 25px;
+        }
+
+        /* Contrôles compacts en haut */
+        .game-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 10px;
+        }
+
+        .controls-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Angle et puissance sur la même ligne */
+        .control-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .angle-control, .power-control {
+            flex: 1;
+        }
+
+        .control-label {
+            color: white;
+            font-size: 11px;
+            margin-bottom: 5px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        /* Slider d'angle compact */
+        .angle-slider {
+            position: relative;
+            height: 40px;
+            background: linear-gradient(90deg, #3498db 0%, #2ecc71 50%, #3498db 100%);
+            border-radius: 20px;
+        }
+
+        .angle-handle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 35px;
+            height: 35px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        /* Barre de puissance compacte */
+        .power-bar {
+            height: 40px;
+            background: #1a1a1a;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .power-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #2ecc71 0%, #f1c40f 50%, #e74c3c 100%);
+            transition: width 0.02s linear;
+        }
+
+        .power-text {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* Bouton de tir */
+        .shoot-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #FF6B6B, #FF4444);
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 3px 10px rgba(255, 107, 107, 0.4);
+        }
+
+        .shoot-button:active {
+            transform: scale(0.95);
+        }
+
+        /* Score et infos REPOSITIONNÉS PLUS HAUT */
+        .score-display {
+            position: absolute;
+            top: 15px;  /* Remonté de 50px à 15px */
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 15px;
+            border-radius: 10px;
+            color: white;
+            z-index: 50;
+        }
+
+        .score-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: gold;
+        }
+
+        .lives-display {
+            position: absolute;
+            top: 15px;  /* Remonté de 50px à 15px */
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 15px;
+            border-radius: 10px;
+            color: white;
+            font-size: 18px;
+            z-index: 50;
+        }
+
+        /* Popup de score */
+        .score-popup {
+            position: absolute;
+            font-size: 24px;
+            font-weight: bold;
+            color: gold;
+            pointer-events: none;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            animation: scorePopup 1.2s forwards;
+            z-index: 1000;
+        }
+
+        @keyframes scorePopup {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-60px) scale(1.3); opacity: 0; }
+        }
+
+        /* Game Over amélioré */
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            color: white;
+            z-index: 1000;
+            display: none;
+        }
+
+        .game-over h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #ff4444;
+        }
+
+        .game-over p {
+            font-size: 20px;
+            margin: 5px 0;
+        }
+
+        .gains-section {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .gains-section h3 {
+            color: gold;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .restart-button {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        /* Experience popup */
+        .exp-popup {
+            position: absolute;
+            font-size: 20px;
+            font-weight: bold;
+            color: #4ECDC4;
+            pointer-events: none;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            animation: expPopup 1.5s forwards;
+            z-index: 1000;
+        }
+
+        @keyframes expPopup {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-40px) scale(1.2); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Header -->
+        <div class="game-header">
+            <div class="player-info" onclick="goToHome()">
+                <div class="player-avatar">⚽</div>
+                <div class="player-name" id="playerName">Chargement...</div>
+            </div>
+            <div class="currency">
+                <div class="currency-item">
+                    <span>🪙</span>
+                    <span id="coins">0</span>
+                </div>
+                <div class="currency-item">
+                    <span>💎</span>
+                    <span id="gems">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Zone de jeu -->
+        <div class="game-canvas" id="gameCanvas">
+            <div class="stadium"></div>
+            
+            <!-- Cage de but -->
+            <div class="goal-container">
+                <div class="goal" id="goal">
+                    <div class="goal-net"></div>
+                    <div class="goal-frame"></div>
+                    <!-- Les cibles seront ajoutées ici -->
+                </div>
+            </div>
+            
+            <!-- Gardien -->
+            <div class="goalkeeper" id="goalkeeper">
+                <div class="goalkeeper-body"></div>
+            </div>
+            
+            <!-- Joueur -->
+            <div class="player" id="player">
+                <div class="player-sprite"></div>
+            </div>
+            
+            <!-- Ballon -->
+            <div class="ball" id="ball"></div>
+            
+            <!-- Score -->
+            <div class="score-display">
+                <div style="font-size: 12px;">SCORE</div>
+                <div class="score-value" id="score">0</div>
+            </div>
+
+            <!-- Vies -->
+            <div class="lives-display">
+                ❤️ <span id="lives">3</span>
+            </div>
+
+            <!-- Game Over amélioré -->
+            <div class="game-over" id="gameOver">
+                <h2>GAME OVER!</h2>
+                <p>Score Final: <span id="finalScore">0</span></p>
+                
+                <div class="gains-section">
+                    <h3>Gains de la partie</h3>
+                    <p style="font-size: 18px; margin: 5px 0;">
+                        🪙 Coins gagnés: <span id="coinsEarned" style="color: gold;">0</span>
+                    </p>
+                    <p style="font-size: 18px; margin: 5px 0;">
+                        💎 Gems gagnés: <span id="gemsEarned" style="color: cyan;">0</span>
+                    </p>
+                    <p style="font-size: 18px; margin: 5px 0;">
+                        ⭐ Exp gagnée: <span id="expEarned" style="color: #4ECDC4;">0</span>
+                    </p>
+                </div>
+                
+                <button class="restart-button" onclick="restartGame()">REJOUER</button>
+            </div>
+        </div>
+
+        <!-- Contrôles -->
+        <div class="game-controls">
+            <div class="controls-wrapper">
+                <div class="control-row">
+                    <div class="angle-control">
+                        <div class="control-label">Courbe</div>
+                        <div class="angle-slider" id="angleSlider">
+                            <div class="angle-handle" id="angleHandle">↔️</div>
+                        </div>
+                    </div>
+                    
+                    <div class="power-control">
+                        <div class="control-label">Puissance</div>
+                        <div class="power-bar" id="powerBar">
+                            <div class="power-fill" id="powerFill"></div>
+                            <div class="power-text" id="powerText">0%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="shoot-button" id="shootButton">⚽ TIRER !</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // État du jeu
+        let gameState = {
+            score: 0,
+            lives: 3,
+            misses: 0,
+            currentAngle: 0,
+            currentPower: 0,
+            isPowerCharging: false,
+            powerDirection: 1,
+            isShootingEnabled: true,
+            baseCoins: 500,  // Nouveau joueur commence avec 500 coins
+            baseGems: 0,   // Nouveau joueur commence avec 0 gems
+            sessionCoins: 0,
+            sessionGems: 0,
+            sessionExp: 0,  // Experience gagnée dans cette partie
+            gameOver: false,
+            targetSpeed: 0,
+            username: 'Joueur',
+            successStreak: 0,  // Compteur de tirs réussis consécutifs
+            // Statistiques du personnage
+            characterStats: {
+                power: 50,      // Puissance de tir (0-100)
+                precision: 50,  // Précision (0-100)
+                luck: 50,       // Chance (0-100)
+                curve: 50       // Capacité de courbe (0-100)
+            },
+            // Statistiques pour la sauvegarde
+            totalShots: 0,
+            successfulShots: 0,
+            targetsHit: 0,
+            perfectShots: 0,
+            maxCombo: 1,
+            currentCombo: 1
+        };
+
+        // Charger le profil depuis le serveur
+        function loadUserProfile() {
+            console.log('Chargement du profil utilisateur...');
+            
+            fetch('/api/profile/')
+                .then(response => {
+                    console.log('Réponse reçue:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Données complètes du profil:', data);
+                    
+                    if (data.success) {
+                        // Mettre à jour le nom d'utilisateur
+                        gameState.username = data.username || 'Joueur';
+                        document.getElementById('playerName').textContent = gameState.username;
+                        
+                        // Sauvegarder les coins et gems de base
+                        gameState.baseCoins = data.coins !== undefined ? data.coins : 500;
+                        gameState.baseGems = data.gems || 0;
+                        
+                        // Afficher les totaux du profil
+                        document.getElementById('coins').textContent = gameState.baseCoins;
+                        document.getElementById('gems').textContent = gameState.baseGems;
+                        
+                        // Debug - Afficher toutes les propriétés liées aux skins
+                        console.log('=== DEBUG SKINS ===');
+                        console.log('selected_character:', data.selected_character);
+                        console.log('selected_player_skin:', data.selected_player_skin);
+                        console.log('selected_ball_skin:', data.selected_ball_skin);
+                        console.log('selected_character_image:', data.selected_character_image);
+                        console.log('selected_player_skin_image:', data.selected_player_skin_image);
+                        console.log('selected_ball_skin_image:', data.selected_ball_skin_image);
+                        
+                        // Charger les stats du personnage si disponibles
+                        if (data.selected_character) {
+                            gameState.characterStats.power = data.selected_character.power || 50;
+                            gameState.characterStats.precision = data.selected_character.precision || 50;
+                            gameState.characterStats.luck = data.selected_character.luck || 50;
+                            gameState.characterStats.curve = data.selected_character.curve || 50;
+                            console.log('Stats du personnage chargées:', gameState.characterStats);
+                            
+                            // AFFICHAGE TEST DES STATS (temporaire pour debug)
+                            console.log('=== TEST STATS ACTIVES ===');
+                            console.log('Power:', gameState.characterStats.power, '→ Multiplicateur force:', (0.7 + (gameState.characterStats.power / 100) * 0.6));
+                            console.log('Precision:', gameState.characterStats.precision, '→ Déviation max:', ((100 - gameState.characterStats.precision) / 200) * 10 + '°');
+                            console.log('Luck:', gameState.characterStats.luck + '%', 'de chance de marquer malgré le gardien');
+                            console.log('Curve:', gameState.characterStats.curve, '→ Angle max:', (30 + (30 * gameState.characterStats.curve / 100)) + '°');
+                        }
+                        
+                        // LOGIQUE FINALE : Vérifier la correspondance personnage/skin
+                        let playerImageUrl = null;
+                        
+                        console.log('=== LOGIQUE SÉLECTION IMAGE ===');
+                        
+                        // Récupérer l'ID du personnage sélectionné
+                        const characterId = data.selected_character_id;
+                        console.log('ID du personnage sélectionné:', characterId);
+                        
+                        // Déterminer si le skin appartient au personnage actuel
+                        // Le skin avec l'ID 'liftapp_4.png' appartient au personnage 1
+                        // Vous devrez adapter cette logique selon votre système de nommage
+                        
+                        let skinBelongsToCharacter = false;
+                        
+                        // Si on a un skin et un personnage
+                        if (data.selected_player_skin_image && characterId) {
+                            // Extraire l'ID du skin depuis l'URL (exemple: /media/player_skins/liftapp_4.png)
+                            const skinUrl = data.selected_player_skin_image;
+                            
+                            // LOGIQUE DE VÉRIFICATION BASÉE SUR VOTRE STRUCTURE
+                            // Exemple : Si le skin liftapp_4 appartient au personnage 1
+                            // Adapter selon votre logique réelle
+                            
+                            // Méthode 1 : Si vous avez une convention de nommage
+                            // Par exemple, liftapp_4 pourrait être pour le personnage 1
+                            // liftapp_5, liftapp_6 pour le personnage 2, etc.
+                            
+                            // Pour l'instant, on va supposer que vous devez mapper manuellement
+                            // ou avoir une logique côté serveur qui envoie cette info
+                            
+                            // SOLUTION TEMPORAIRE : Désactiver le skin si on change de personnage
+                            // Le skin ne s'affiche que si c'est le bon personnage
+                            
+                            // Mapping manuel exemple (à adapter selon vos vrais IDs)
+                            const skinToCharacterMap = {
+                                '/media/player_skins/liftapp_4.png': 1,  // Ce skin appartient au personnage 1
+                                '/media/player_skins/liftapp_5.png': 2,  // Exemple pour personnage 2
+                                // Ajoutez vos mappings ici
+                            };
+                            
+                            const expectedCharacterId = skinToCharacterMap[skinUrl];
+                            skinBelongsToCharacter = (expectedCharacterId === characterId);
+                            
+                            if (skinBelongsToCharacter) {
+                                console.log('✅ Le skin appartient au personnage actuel');
+                            } else {
+                                console.log('❌ Le skin ne correspond pas au personnage actuel');
+                                console.log('Skin prévu pour personnage:', expectedCharacterId, 'Personnage actuel:', characterId);
+                            }
+                        }
+                        
+                        // Décider quelle image utiliser
+                        if (skinBelongsToCharacter && data.selected_player_skin_image) {
+                            playerImageUrl = data.selected_player_skin_image;
+                            console.log('→ Utilisation du SKIN du personnage:', playerImageUrl);
+                        } else {
+                            // Pas de skin ou skin incompatible, utiliser l'image du personnage
+                            playerImageUrl = data.selected_character_image;
+                            console.log('→ Utilisation de l\'IMAGE du personnage (pas de skin compatible):', playerImageUrl);
+                        }
+                        
+                        // Charger l'image du joueur
+                        if (playerImageUrl) {
+                            loadPlayerImage(playerImageUrl);
+                        } else {
+                            console.log('Aucune image de personnage trouvée, utilisation du défaut');
+                            loadPlayerImage(null);
+                        }
+                        
+                        // Essayer tous les formats possibles pour le ballon
+                        let ballImageUrl = null;
+                        
+                        if (data.selected_ball_skin && data.selected_ball_skin.image) {
+                            ballImageUrl = data.selected_ball_skin.image;
+                        } else if (data.selected_ball_skin && data.selected_ball_skin.image_url) {
+                            ballImageUrl = data.selected_ball_skin.image_url;
+                        } else if (data.selected_ball_skin && typeof data.selected_ball_skin === 'string') {
+                            ballImageUrl = data.selected_ball_skin;
+                        } else if (data.selected_ball_skin_image) {
+                            ballImageUrl = data.selected_ball_skin_image;
+                        } else if (data.ball_skin_image) {
+                            ballImageUrl = data.ball_skin_image;
+                        } else if (data.ball_skin) {
+                            ballImageUrl = data.ball_skin;
+                        }
+                        
+                        // Charger le skin de ballon
+                        if (ballImageUrl) {
+                            console.log('Chargement du skin de ballon:', ballImageUrl);
+                            loadBallSkin(ballImageUrl);
+                        } else {
+                            console.log('Aucun skin de ballon trouvé dans:', {
+                                selected_ball_skin: data.selected_ball_skin,
+                                selected_ball_skin_image: data.selected_ball_skin_image,
+                                ball_skin_image: data.ball_skin_image,
+                                ball_skin: data.ball_skin
+                            });
+                        }
+                        
+                        console.log(`Profil chargé: ${gameState.username}, Coins: ${gameState.baseCoins}, Gems: ${gameState.baseGems}`);
+                    } else {
+                        console.error('Erreur dans la réponse:', data.error);
+                        document.getElementById('playerName').textContent = 'Joueur';
+                        document.getElementById('coins').textContent = '500';
+                        document.getElementById('gems').textContent = '0';
+                        loadPlayerImage(null);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur lors du chargement du profil:', error);
+                    document.getElementById('playerName').textContent = 'Joueur';
+                    document.getElementById('coins').textContent = '500';
+                    document.getElementById('gems').textContent = '0';
+                    loadPlayerImage(null);
+                });
+        }
+
+        // Charger l'image du joueur/personnage
+        function loadPlayerImage(imageUrl) {
+            const playerSprite = document.querySelector('.player-sprite');
+            
+            // Si une URL d'image est fournie
+            if (imageUrl) {
+                console.log('Tentative de chargement de l\'image:', imageUrl);
+                
+                // S'assurer que l'URL est complète
+                let fullImageUrl = imageUrl;
+                if (imageUrl.startsWith('/media/')) {
+                    // Si c'est un chemin relatif, on suppose qu'il est sur le même domaine
+                    fullImageUrl = imageUrl;
+                }
+                
+                // Créer une nouvelle image
+                const img = new Image();
+                img.onload = function() {
+                    // Supprimer toute image existante
+                    playerSprite.innerHTML = '';
+                    
+                    // Créer et ajouter la nouvelle image
+                    const playerImg = document.createElement('img');
+                    playerImg.src = fullImageUrl;
+                    playerImg.style.width = '100%';
+                    playerImg.style.height = '100%';
+                    playerImg.style.objectFit = 'contain';
+                    playerImg.style.objectPosition = 'center bottom';
+                    playerSprite.appendChild(playerImg);
+                    
+                    console.log('Image du joueur appliquée avec succès:', fullImageUrl);
+                };
+                img.onerror = function() {
+                    // Erreur de chargement, utiliser le fallback
+                    console.error('Impossible de charger l\'image du joueur:', fullImageUrl);
+                    loadDefaultPlayerImage();
+                };
+                img.src = fullImageUrl;
+            } else {
+                // Pas d'image fournie, charger l'image par défaut
+                console.log('Aucune URL fournie, chargement de l\'image par défaut');
+                loadDefaultPlayerImage();
+            }
+        }
+
+        // Charger l'image par défaut du joueur
+        function loadDefaultPlayerImage() {
+            const playerSprite = document.querySelector('.player-sprite');
+            playerSprite.innerHTML = '';
+            
+            // Créer un SVG par défaut avec l'initiale du joueur
+            const initial = gameState.username ? gameState.username.charAt(0).toUpperCase() : "J";
+            const svgElement = document.createElement('div');
+            svgElement.style.width = '100%';
+            svgElement.style.height = '100%';
+            svgElement.style.backgroundImage = `url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 80"><defs><linearGradient id="shirt" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:%23FF4444;stop-opacity:1" /><stop offset="100%" style="stop-color:%23CC0000;stop-opacity:1" /></linearGradient></defs><circle cx="30" cy="15" r="10" fill="%23FFD4B2"/><rect x="20" y="25" width="20" height="25" fill="url(%23shirt)" rx="3"/><text x="30" y="40" text-anchor="middle" fill="white" font-size="12" font-weight="bold">${initial}</text><rect x="20" y="50" width="8" height="20" fill="%23333" rx="2"/><rect x="32" y="50" width="8" height="20" fill="%23333" rx="2"/><circle cx="24" cy="70" r="5" fill="%23000"/><circle cx="36" cy="70" r="5" fill="%23000"/></svg>')`;
+            svgElement.style.backgroundSize = 'contain';
+            svgElement.style.backgroundRepeat = 'no-repeat';
+            svgElement.style.backgroundPosition = 'center bottom';
+            playerSprite.appendChild(svgElement);
+        }
+
+       // Charger le skin de ballon avec taille correcte
+        function loadBallSkin(imageUrl) {
+            const ball = document.getElementById('ball');
+            
+            if (imageUrl) {
+                // Créer une nouvelle image pour tester le chargement
+                const img = new Image();
+                img.onload = function() {
+                    // Réinitialiser tous les styles du ballon
+                    ball.style.background = 'none';
+                    // Garder la taille de base du ballon pour ne pas affecter le layout
+                    ball.style.width = '30px';
+                    ball.style.height = '30px';
+                    ball.style.backgroundImage = `url('${imageUrl}')`;
+                    // Agrandir uniquement l'image de fond sans changer la taille de l'élément
+                    ball.style.backgroundSize = '60px 60px';  // Image plus grande que le conteneur
+                    ball.style.backgroundPosition = 'center';
+                    ball.style.backgroundRepeat = 'no-repeat';
+                    ball.style.borderRadius = '50%';  // Maintenir la forme ronde
+                    // Utiliser transform pour agrandir visuellement sans affecter le layout
+                    ball.style.transform = 'translateX(-50%) scale(2)';
+                    console.log('Skin de ballon appliqué avec succès (visuellement agrandi sans affecter le layout):', imageUrl);
+                };
+                img.onerror = function() {
+                    console.error('Impossible de charger le skin de ballon:', imageUrl);
+                    // Réappliquer le style par défaut en cas d'erreur
+                    resetBallToDefault();
+                };
+                img.src = imageUrl;
+            } else {
+                // Pas de skin, utiliser le style par défaut
+                resetBallToDefault();
+            }
+        }
+        
+        // Fonction pour réinitialiser le ballon au style par défaut
+        function resetBallToDefault() {
+            const ball = document.getElementById('ball');
+            ball.style.width = '30px';
+            ball.style.height = '30px';
+            ball.style.backgroundImage = 'none';
+            ball.style.background = 'radial-gradient(circle at 30% 30%, white 20%, #ddd 40%, #333 80%)';
+            ball.style.borderRadius = '50%';
+            ball.style.transform = 'translateX(-50%)';  // Reset du transform
+        }
+        
+        // Retour à l'accueil
+        function goToHome() {
+            window.location.href = '/homegame/';
+        }
+
+        // Créer les cibles avec points aléatoires
+        function createTargets() {
+            const goal = document.getElementById('goal');
+            const existingTargets = goal.querySelectorAll('.target');
+            existingTargets.forEach(t => t.remove());
+            
+            const possiblePoints = [20, 30, 40, 50, 75, 100];
+            
+            for (let i = 0; i < 5; i++) {
+                const target = document.createElement('div');
+                target.className = 'target';
+                const randomPoints = possiblePoints[Math.floor(Math.random() * possiblePoints.length)];
+                target.textContent = randomPoints;
+                target.dataset.points = randomPoints;
+                target.dataset.index = i;
+                
+                // Animation si score élevé
+                if (gameState.score > 100) {
+                    target.classList.add('moving');
+                }
+                
+                goal.appendChild(target);
+            }
+        }
+
+        // Régénérer une cible touchée
+        function regenerateTarget(index) {
+            setTimeout(() => {
+                const possiblePoints = [20, 30, 40, 50, 75, 100];
+                const targets = document.querySelectorAll('.target');
+                const target = Array.from(targets).find(t => t.dataset.index == index);
+                
+                if (target && !target.classList.contains('hit')) {
+                    const randomPoints = possiblePoints[Math.floor(Math.random() * possiblePoints.length)];
+                    target.textContent = randomPoints;
+                    target.dataset.points = randomPoints;
+                    
+                    const positions = [
+                        { top: `${10 + Math.random() * 20}%`, left: `${10 + Math.random() * 15}%` },
+                        { top: `${10 + Math.random() * 20}%`, right: `${10 + Math.random() * 15}%` },
+                        { bottom: `${10 + Math.random() * 20}%`, left: `${10 + Math.random() * 15}%` },
+                        { bottom: `${10 + Math.random() * 20}%`, right: `${10 + Math.random() * 15}%` },
+                        { top: `${35 + Math.random() * 20}%`, left: `${35 + Math.random() * 20}%` }
+                    ];
+                    
+                    const newPosition = positions[index] || positions[Math.floor(Math.random() * positions.length)];
+                    
+                    target.style.top = '';
+                    target.style.bottom = '';
+                    target.style.left = '';
+                    target.style.right = '';
+                    
+                    Object.keys(newPosition).forEach(key => {
+                        target.style[key] = newPosition[key];
+                    });
+                    
+                    target.style.transform = 'scale(0)';
+                    target.style.opacity = '0';
+                    setTimeout(() => {
+                        target.style.transition = 'all 0.5s ease';
+                        target.style.transform = 'scale(1)';
+                        target.style.opacity = '1';
+                    }, 100);
+                }
+            }, 20000);
+        }
+
+        // Mouvement du gardien
+        function startGoalkeeperMovement() {
+            const goalkeeper = document.getElementById('goalkeeper');
+            const goalWidth = 320;
+            const keeperWidth = 50;
+            const maxPosition = (goalWidth - keeperWidth) / 2;
+            
+            if (gameState.score < 1000) {
+                const randomInitialPosition = (Math.random() - 0.5) * maxPosition * 2;
+                goalkeeper.style.left = `calc(50% + ${randomInitialPosition}px)`;
+            }
+            
+            setInterval(() => {
+                if (!gameState.isShootingEnabled || gameState.gameOver) return;
+                
+                if (gameState.score >= 1000) {
+                    const randomPosition = (Math.random() - 0.5) * maxPosition * 2;
+                    goalkeeper.style.left = `calc(50% + ${randomPosition}px)`;
+                }
+            }, 1500);
+        }
+        
+        function repositionGoalkeeper() {
+            if (gameState.score < 1000) {
+                const goalkeeper = document.getElementById('goalkeeper');
+                const goalWidth = 320;
+                const keeperWidth = 50;
+                const maxPosition = (goalWidth - keeperWidth) / 2;
+                const randomPosition = (Math.random() - 0.5) * maxPosition * 2;
+                goalkeeper.style.left = `calc(50% + ${randomPosition}px)`;
+            }
+        }
+
+        // Contrôle de l'angle avec stats du personnage
+        function initAngleControl() {
+            const slider = document.getElementById('angleSlider');
+            const handle = document.getElementById('angleHandle');
+            let isDragging = false;
+            
+            function updateAngle(clientX) {
+                const rect = slider.getBoundingClientRect();
+                const x = clientX - rect.left;
+                const percentage = Math.max(0, Math.min(1, x / rect.width));
+                
+                // Utiliser la stat 'curve' du personnage pour modifier l'amplitude de la courbe
+                const curveMultiplier = gameState.characterStats.curve / 100; // 0 à 1
+                const maxAngle = 30 + (30 * curveMultiplier); // Entre 30° et 60° selon la stat
+                const angle = (percentage - 0.5) * maxAngle;
+                
+                gameState.currentAngle = angle;
+                handle.style.left = `${percentage * 100}%`;
+            }
+            
+            slider.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                if (e.touches[0]) updateAngle(e.touches[0].clientX);
+                e.preventDefault();
+            });
+            
+            document.addEventListener('touchmove', (e) => {
+                if (isDragging && e.touches[0]) {
+                    updateAngle(e.touches[0].clientX);
+                    e.preventDefault();
+                }
+            });
+            
+            document.addEventListener('touchend', () => {
+                isDragging = false;
+            });
+            
+            slider.addEventListener('mousedown', () => isDragging = true);
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging) updateAngle(e.clientX);
+            });
+            document.addEventListener('mouseup', () => isDragging = false);
+        }
+
+        // Contrôle de puissance AUGMENTÉE
+        function initPowerControl() {
+            const shootButton = document.getElementById('shootButton');
+            const powerFill = document.getElementById('powerFill');
+            const powerText = document.getElementById('powerText');
+            let powerInterval;
+            let isCharging = false;
+            
+            function startPowerCharge(e) {
+                e.preventDefault();
+                if (!gameState.isShootingEnabled || isCharging || gameState.gameOver) return;
+                
+                isCharging = true;
+                gameState.isPowerCharging = true;
+                gameState.currentPower = 0;
+                gameState.powerDirection = 1;
+                
+                powerInterval = setInterval(() => {
+                    gameState.currentPower += gameState.powerDirection * 3; // Augmenté de 2 à 3
+                    
+                    if (gameState.currentPower >= 100) {
+                        gameState.currentPower = 100;
+                        gameState.powerDirection = -1;
+                    } else if (gameState.currentPower <= 0) {
+                        gameState.currentPower = 0;
+                        gameState.powerDirection = 1;
+                    }
+                    
+                    powerFill.style.width = `${gameState.currentPower}%`;
+                    powerText.textContent = `${Math.round(gameState.currentPower)}%`;
+                }, 20);
+            }
+            
+            function shoot(e) {
+                e.preventDefault();
+                if (!gameState.isPowerCharging || !gameState.isShootingEnabled) return;
+                
+                clearInterval(powerInterval);
+                gameState.isPowerCharging = false;
+                isCharging = false;
+                
+                performShot();
+                
+                setTimeout(() => {
+                    powerFill.style.width = '0%';
+                    powerText.textContent = '0%';
+                }, 500);
+            }
+            
+            shootButton.addEventListener('touchstart', startPowerCharge);
+            shootButton.addEventListener('touchend', shoot);
+            shootButton.addEventListener('mousedown', startPowerCharge);
+            shootButton.addEventListener('mouseup', shoot);
+            shootButton.addEventListener('mouseleave', () => {
+                if (isCharging) {
+                    clearInterval(powerInterval);
+                    gameState.isPowerCharging = false;
+                    isCharging = false;
+                    powerFill.style.width = '0%';
+                    powerText.textContent = '0%';
+                }
+            });
+        }
+
+        // Afficher popup d'expérience
+        function showExpPopup(exp, x, y) {
+            const popup = document.createElement('div');
+            popup.className = 'exp-popup';
+            popup.textContent = `+${exp} EXP`;
+            popup.style.left = `${x}px`;
+            popup.style.top = `${y}px`;
+            
+            document.getElementById('gameCanvas').appendChild(popup);
+            
+            setTimeout(() => popup.remove(), 1500);
+        }
+
+        // Effectuer le tir avec stats du personnage
+        function performShot() {
+            if (gameState.gameOver) return;
+            
+            gameState.isShootingEnabled = false;
+            gameState.totalShots++;
+            
+            const ball = document.getElementById('ball');
+            const player = document.getElementById('player');
+            
+            player.classList.add('kicking');
+            setTimeout(() => player.classList.remove('kicking'), 500);
+            
+            // Modifier la puissance selon les stats du personnage
+            const powerMultiplier = 0.7 + (gameState.characterStats.power / 100) * 0.6; // Entre 0.7 et 1.3
+            const power = (gameState.currentPower / 100) * powerMultiplier;
+            
+            // Modifier la précision selon les stats
+            const precisionModifier = (100 - gameState.characterStats.precision) / 200; // 0 à 0.5
+            const randomOffset = (Math.random() - 0.5) * 10 * precisionModifier; // Déviation aléatoire
+            
+            const angle = gameState.currentAngle + randomOffset;
+            
+            const duration = 800;
+            const startTime = Date.now();
+            const startBottom = 300;
+            const startLeft = 47;
+            
+            const targetBottom = 350 + (power * 550); // Augmenté pour tenir compte du multiplicateur
+            const targetLeft = 50 + (angle * 2.5);
+            
+            // Calculer si c'est un tir chanceux
+            const isLuckyShot = Math.random() * 100 < gameState.characterStats.luck;
+            
+            function animateBall() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                const heightProgress = 1 - Math.pow(1 - progress, 2);
+                const lateralProgress = progress;
+                const curveEffect = Math.sin(progress * Math.PI * 0.5) * angle * 0.5;
+                
+                const currentBottom = startBottom + (targetBottom - startBottom) * heightProgress;
+                const currentLeft = startLeft + (targetLeft - startLeft) * lateralProgress + curveEffect;
+                
+                const ballXPixels = (currentLeft / 100) * document.getElementById('gameCanvas').getBoundingClientRect().width;
+                const ballYPixels = document.getElementById('gameCanvas').getBoundingClientRect().height - currentBottom;
+                
+                const goalkeeper = document.getElementById('goalkeeper');
+                const keeperRect = goalkeeper.getBoundingClientRect();
+                const canvasRect = document.getElementById('gameCanvas').getBoundingClientRect();
+                
+                // Si le gardien bloque MAIS que c'est un tir chanceux
+                if (ballXPixels >= keeperRect.left - canvasRect.left &&
+                    ballXPixels <= keeperRect.right - canvasRect.left &&
+                    ballYPixels >= keeperRect.top - canvasRect.top &&
+                    ballYPixels <= keeperRect.bottom - canvasRect.top) {
+                    
+                    if (isLuckyShot) {
+                        // Tir chanceux - passe quand même!
+                        showScorePopup('🍀 TIR CHANCEUX!', canvasRect.width/2, keeperRect.top - canvasRect.top - 50);
+                        // Continue l'animation normalement
+                    } else {
+                        // Arrêt normal du gardien
+                        const keeperCenterX = (keeperRect.left + keeperRect.width/2 - canvasRect.left) / canvasRect.width * 100;
+                        const keeperCenterY = canvasRect.height - (keeperRect.top + keeperRect.height/2 - canvasRect.top);
+                        
+                        ball.style.transition = 'all 0.2s ease-out';
+                        ball.style.left = `${keeperCenterX}%`;
+                        ball.style.bottom = `${keeperCenterY}px`;
+                        ball.style.transform = 'translateX(-50%) scale(1.2)';
+                        
+                        setTimeout(() => {
+                            ball.style.transform = 'translateX(-50%) scale(0.8) rotate(90deg)';
+                        }, 200);
+                        
+                        setTimeout(() => {
+                            ball.style.bottom = `${keeperCenterY - 60}px`;
+                            ball.style.transform = 'translateX(-50%) scale(0.6) rotate(180deg)';
+                        }, 400);
+                        
+                        gameState.misses++;
+                        gameState.lives--;
+                        gameState.successStreak = 0;
+                        document.getElementById('lives').textContent = gameState.lives;
+                        showScorePopup('ARRÊT! 🧤', canvasRect.width/2, keeperRect.top - canvasRect.top);
+                        
+                        setTimeout(() => {
+                            ball.style.transition = 'none';
+                            ball.style.bottom = '300px';
+                            ball.style.left = 'calc(50% - 20px)';
+                            ball.style.transform = 'translateX(-50%)';
+                            gameState.isShootingEnabled = true;
+                            repositionGoalkeeper();
+                        }, 1200);
+                        
+                        if (gameState.lives <= 0) {
+                            setTimeout(() => endGame(), 1200);
+                        }
+                        
+                        return;
+                    }
+                }
+                
+                ball.style.bottom = `${currentBottom}px`;
+                ball.style.left = `${currentLeft}%`;
+                ball.style.transform = `translateX(-50%) rotate(${progress * 720}deg) scale(${1 - progress * 0.2})`;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animateBall);
+                } else {
+                    checkShotResult(currentLeft, currentBottom, isLuckyShot);
+                    
+                    setTimeout(() => {
+                        repositionGoalkeeper();
+                    }, 100);
+                    
+                    setTimeout(() => {
+                        ball.style.bottom = '300px';
+                        ball.style.left = 'calc(50% - 20px)';
+                        ball.style.transform = 'translateX(-50%)';
+                        gameState.isShootingEnabled = true;
+                    }, 500);
+                }
+            }
+            
+            animateBall();
+        }
+
+        // Vérifier le résultat du tir avec stats
+        function checkShotResult(ballX, ballY, isLuckyShot = false) {
+            const canvasRect = document.getElementById('gameCanvas').getBoundingClientRect();
+            const goalElement = document.querySelector('.goal-container');
+            const goalRect = goalElement.getBoundingClientRect();
+            
+            const ballXPixels = (ballX / 100) * canvasRect.width;
+            const ballYPixels = canvasRect.height - ballY;
+            
+            const goalkeeper = document.getElementById('goalkeeper');
+            const keeperRect = goalkeeper.getBoundingClientRect();
+            
+            // Si le gardien bloque mais c'est pas un tir chanceux (déjà géré dans performShot)
+            if (!isLuckyShot && 
+                ballXPixels >= keeperRect.left - canvasRect.left &&
+                ballXPixels <= keeperRect.right - canvasRect.left &&
+                ballYPixels >= keeperRect.top - canvasRect.top &&
+                ballYPixels <= keeperRect.bottom - canvasRect.top) {
+                
+                const ball = document.getElementById('ball');
+                const keeperCenterX = (keeperRect.left + keeperRect.width/2 - canvasRect.left) / canvasRect.width * 100;
+                const keeperCenterY = canvasRect.height - (keeperRect.top + keeperRect.height/2 - canvasRect.top);
+                
+                ball.style.left = `${keeperCenterX}%`;
+                ball.style.bottom = `${keeperCenterY}px`;
+                ball.style.transform = 'translateX(-50%) scale(0.8)';
+                
+                ball.style.transition = 'all 0.3s ease-out';
+                setTimeout(() => {
+                    ball.style.transform = 'translateX(-50%) scale(1.1)';
+                }, 100);
+                setTimeout(() => {
+                    ball.style.transform = 'translateX(-50%) scale(0.9)';
+                }, 200);
+                setTimeout(() => {
+                    ball.style.bottom = `${keeperCenterY - 50}px`;
+                    ball.style.transform = 'translateX(-50%) scale(0.7) rotate(180deg)';
+                }, 300);
+                
+                gameState.misses++;
+                gameState.lives--;
+                gameState.successStreak = 0;
+                document.getElementById('lives').textContent = gameState.lives;
+                showScorePopup('ARRÊT! 🧤', canvasRect.width/2, keeperRect.top - canvasRect.top);
+                
+                setTimeout(() => {
+                    ball.style.transition = 'none';
+                    ball.style.bottom = '300px';
+                    ball.style.left = 'calc(50% - 20px)';
+                    ball.style.transform = 'translateX(-50%)';
+                    gameState.isShootingEnabled = true;
+                }, 1000);
+                
+                if (gameState.lives <= 0) {
+                    endGame();
+                }
+                return;
+            }
+            
+            let scored = false;
+            let points = 0;
+            
+            if (ballXPixels >= goalRect.left - canvasRect.left &&
+                ballXPixels <= goalRect.right - canvasRect.left &&
+                ballYPixels >= goalRect.top - canvasRect.top &&
+                ballYPixels <= goalRect.bottom - canvasRect.top) {
+                
+                scored = true;
+                points = 10;
+                
+                // Bonus de points si tir chanceux
+                if (isLuckyShot) {
+                    points += 15;
+                    showScorePopup('+15 BONUS CHANCE!', canvasRect.width/2, 80);
+                }
+                
+                gameState.successfulShots++;
+                gameState.successStreak++;
+                gameState.currentCombo++;
+                
+                if (gameState.currentCombo > gameState.maxCombo) {
+                    gameState.maxCombo = gameState.currentCombo;
+                }
+                
+                // Bonus d'expérience tous les 10 tirs réussis
+                if (gameState.successStreak % 10 === 0) {
+                    gameState.sessionExp += 75;
+                    showExpPopup(75, canvasRect.width/2, 150);
+                }
+                
+                const targets = document.querySelectorAll('.target:not(.hit)');
+                targets.forEach(target => {
+                    const targetRect = target.getBoundingClientRect();
+                    const targetCenterX = targetRect.left + targetRect.width/2 - canvasRect.left;
+                    const targetCenterY = targetRect.top + targetRect.height/2 - canvasRect.top;
+                    
+                    const distance = Math.sqrt(
+                        Math.pow(ballXPixels - targetCenterX, 2) +
+                        Math.pow(ballYPixels - targetCenterY, 2)
+                    );
+                    
+                    if (distance < 35) {
+                        target.classList.add('hit');
+                        gameState.targetsHit++;
+                        const targetPoints = parseInt(target.dataset.points);
+                        
+                        // Bonus de précision selon les stats
+                        const precisionBonus = Math.floor(targetPoints * (gameState.characterStats.precision / 200));
+                        const totalTargetPoints = targetPoints + precisionBonus;
+                        
+                        points += totalTargetPoints;
+                        showScorePopup(`+${totalTargetPoints}`, targetCenterX, targetCenterY);
+                        
+                        regenerateTarget(target.dataset.index);
+                    }
+                });
+                
+                // Vérifier s'il reste des cibles actives
+                const remainingTargets = document.querySelectorAll('.target:not(.hit)');
+                if (remainingTargets.length === 0) {
+                    setTimeout(() => {
+                        createTargets();
+                        showScorePopup('🎯 NOUVELLES CIBLES!', canvasRect.width/2, 100);
+                    }, 100);
+                }
+                
+                if (gameState.currentPower >= 60 && gameState.currentPower <= 80) {
+                    gameState.perfectShots++;
+                }
+                
+                updateScore(points);
+                gameState.misses = 0;
+            } else {
+                gameState.misses++;
+                gameState.lives--;
+                gameState.successStreak = 0;
+                gameState.currentCombo = 1;
+                document.getElementById('lives').textContent = gameState.lives;
+                showScorePopup('RATÉ!', canvasRect.width/2, 200);
+                
+                if (gameState.lives <= 0) {
+                    endGame();
+                }
+            }
+            
+            if (gameState.score > 100 && gameState.score % 50 === 0) {
+                createTargets();
+            }
+        }
+
+        // Mettre à jour le score (NE PAS toucher aux coins/gems pendant la partie)
+        function updateScore(points) {
+            gameState.score += points;
+            document.getElementById('score').textContent = gameState.score;
+            
+            // Calculer les gains de session
+            gameState.sessionCoins = Math.floor(gameState.score / 10);  // 10 points = 1 coin
+            gameState.sessionGems = Math.floor(gameState.score / 500);  // 500 points = 1 gem
+        }
+
+        // Afficher popup de score
+        function showScorePopup(text, x, y) {
+            const popup = document.createElement('div');
+            popup.className = 'score-popup';
+            popup.textContent = text;
+            popup.style.left = `${x}px`;
+            popup.style.top = `${y}px`;
+            
+            document.getElementById('gameCanvas').appendChild(popup);
+            
+            setTimeout(() => popup.remove(), 1200);
+        }
+
+        // Fin du jeu - afficher et sauvegarder les gains
+        function endGame() {
+            gameState.gameOver = true;
+            gameState.isShootingEnabled = false;
+            
+            // Afficher le score et les gains
+            document.getElementById('finalScore').textContent = gameState.score;
+            document.getElementById('coinsEarned').textContent = gameState.sessionCoins;
+            document.getElementById('gemsEarned').textContent = gameState.sessionGems;
+            document.getElementById('expEarned').textContent = gameState.sessionExp;
+            document.getElementById('gameOver').style.display = 'block';
+            
+            // Animation pour afficher les nouveaux totaux
+            setTimeout(() => {
+                const newCoinsTotal = gameState.baseCoins + gameState.sessionCoins;
+                const newGemsTotal = gameState.baseGems + gameState.sessionGems;
+                
+                // Animation de comptage pour les coins
+                let currentCoinDisplay = gameState.baseCoins;
+                const coinInterval = setInterval(() => {
+                    if (currentCoinDisplay < newCoinsTotal) {
+                        currentCoinDisplay++;
+                        document.getElementById('coins').textContent = currentCoinDisplay;
+                    } else {
+                        clearInterval(coinInterval);
+                    }
+                }, 50);
+                
+                // Animation de comptage pour les gems
+                if (gameState.sessionGems > 0) {
+                    let currentGemDisplay = gameState.baseGems;
+                    const gemInterval = setInterval(() => {
+                        if (currentGemDisplay < newGemsTotal) {
+                            currentGemDisplay++;
+                            document.getElementById('gems').textContent = currentGemDisplay;
+                        } else {
+                            clearInterval(gemInterval);
+                        }
+                    }, 200);
+                }
+            }, 1000);
+            
+            // Sauvegarder les données
+            saveGameData();
+        }
+        
+        // Sauvegarder les données de la partie
+        function saveGameData() {
+            const coinsEarned = Math.floor(gameState.score / 10);
+            const gemsEarned = Math.floor(gameState.score / 500);
+            const expEarned = gameState.sessionExp;
+            
+            console.log('Sauvegarde - Score:', gameState.score, 'Coins:', coinsEarned, 'Gems:', gemsEarned, 'Exp:', expEarned);
+            
+            const csrftoken = getCookie('csrftoken');
+            
+            fetch('/api/save-score/', {  
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({
+                    score: gameState.score,
+                    coins_earned: coinsEarned,
+                    gems_earned: gemsEarned,
+                    exp_earned: expEarned,
+                    total_shots: gameState.totalShots,
+                    successful_shots: gameState.successfulShots,
+                    targets_hit: gameState.targetsHit,
+                    perfect_shots: gameState.perfectShots,
+                    max_combo: gameState.maxCombo
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Score sauvegardé avec succès');
+                    
+                    // Mettre à jour les totaux
+                    if (data.total_coins !== undefined) {
+                        gameState.baseCoins = data.total_coins;
+                        document.getElementById('coins').textContent = gameState.baseCoins;
+                    }
+                    if (data.total_gems !== undefined) {
+                        gameState.baseGems = data.total_gems;
+                        document.getElementById('gems').textContent = gameState.baseGems;
+                    }
+                    
+                    if (data.level_up) {
+                        showScorePopup(`🎉 NIVEAU ${data.new_level}! 🎉`, 
+                            document.getElementById('gameCanvas').offsetWidth/2, 100);
+                    }
+                } else {
+                    console.error('Erreur lors de la sauvegarde:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Erreur réseau:', error);
+            });
+        }
+        
+        // Fonction pour obtenir le cookie CSRF
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Redémarrer le jeu
+        function restartGame() {
+            // Recharger les données du profil
+            fetch('/api/profile/')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        gameState.baseCoins = data.coins !== undefined ? data.coins : 500;
+                        gameState.baseGems = data.gems || 0;
+                        document.getElementById('coins').textContent = gameState.baseCoins;
+                        document.getElementById('gems').textContent = gameState.baseGems;
+                    }
+                    
+                    // Réinitialiser le jeu
+                    gameState.score = 0;
+                    gameState.lives = 3;
+                    gameState.misses = 0;
+                    gameState.currentAngle = 0;
+                    gameState.currentPower = 0;
+                    gameState.isPowerCharging = false;
+                    gameState.powerDirection = 1;
+                    gameState.isShootingEnabled = true;
+                    gameState.gameOver = false;
+                    gameState.targetSpeed = 0;
+                    gameState.totalShots = 0;
+                    gameState.successfulShots = 0;
+                    gameState.targetsHit = 0;
+                    gameState.perfectShots = 0;
+                    gameState.maxCombo = 1;
+                    gameState.currentCombo = 1;
+                    gameState.sessionCoins = 0;
+                    gameState.sessionGems = 0;
+                    gameState.sessionExp = 0;
+                    gameState.successStreak = 0;
+                    
+                    document.getElementById('score').textContent = '0';
+                    document.getElementById('lives').textContent = '3';
+                    document.getElementById('gameOver').style.display = 'none';
+                    
+                    const angleHandle = document.getElementById('angleHandle');
+                    angleHandle.style.left = '50%';
+                    
+                    createTargets();
+                })
+                .catch(error => {
+                    console.error('Erreur lors du rechargement:', error);
+                    location.reload();
+                });
+        }
+
+        // Initialiser le jeu
+        function initGame() {
+            console.log('Initialisation du jeu...');
+            loadUserProfile();
+            createTargets();
+            startGoalkeeperMovement();
+            initAngleControl();
+            initPowerControl();
+            
+            document.addEventListener('gesturestart', (e) => e.preventDefault());
+            document.addEventListener('gesturechange', (e) => e.preventDefault());
+            document.addEventListener('gestureend', (e) => e.preventDefault());
+        }
+
+        document.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>

@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Boutique - Free Kick Master</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .shop-header {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-button {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #FF6B6B, #FF4444);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: white;
+            font-size: 24px;
+            transition: transform 0.3s;
+        }
+
+        .back-button:active {
+            transform: scale(0.95);
+        }
+
+        .shop-title {
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .currency-display {
+            display: flex;
+            gap: 15px;
+        }
+
+        .currency-item {
+            background: rgba(255,255,255,0.1);
+            padding: 8px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .currency-icon {
+            font-size: 20px;
+        }
+
+        .currency-amount {
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        /* Category Tabs */
+        .category-tabs {
+            background: rgba(0,0,0,0.7);
+            padding: 10px;
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .category-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .category-tab {
+            background: rgba(255,255,255,0.1);
+            padding: 10px 20px;
+            border-radius: 25px;
+            color: white;
+            font-size: 14px;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .category-tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: white;
+            transform: scale(1.05);
+        }
+
+        /* Shop Container */
+        .shop-container {
+            padding: 15px;
+            min-height: calc(100vh - 200px);
+        }
+
+        /* Items Grid */
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Shop Item */
+        .shop-item {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 10px;
+            position: relative;
+            transition: all 0.3s;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .shop-item:active {
+            transform: scale(0.95);
+        }
+
+        .shop-item.owned {
+            background: linear-gradient(135deg, #90EE90, #7FDD7F);
+        }
+
+        .shop-item.equipped {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            box-shadow: 0 0 20px rgba(255,215,0,0.5);
+        }
+
+        .item-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: linear-gradient(135deg, #FF6B6B, #FF4444);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: bold;
+            z-index: 1;
+        }
+
+        .shop-item.owned .item-badge {
+            background: linear-gradient(135deg, #4ECDC4, #44A08D);
+        }
+
+        .shop-item.equipped .item-badge {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+        }
+
+        .item-image {
+            width: 100%;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+        .item-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .item-image span {
+            font-size: 60px;
+        }
+
+        .item-rarity {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            color: white;
+        }
+
+        .rarity-common {
+            background: #808080;
+        }
+
+        .rarity-rare {
+            background: #4169E1;
+        }
+
+        .rarity-epic {
+            background: #9400D3;
+        }
+
+        .rarity-legendary {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+        }
+
+        .item-name {
+            font-weight: bold;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .item-description {
+            font-size: 11px;
+            text-align: center;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .item-stats {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+
+        .stat-badge {
+            background: rgba(0,0,0,0.1);
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .item-price {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            padding: 5px 10px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        /* Powerup Grid */
+        .powerup-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+        }
+
+        .powerup-item {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .powerup-item:active {
+            transform: scale(0.95);
+        }
+
+        .powerup-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .powerup-name {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .powerup-duration {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            font-size: 18px;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0% { content: '.'; }
+            33% { content: '..'; }
+            66% { content: '...'; }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            font-size: 16px;
+        }
+
+        /* Responsive */
+        @media (max-width: 400px) {
+            .items-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .shop-title {
+                font-size: 20px;
+            }
+            
+            .category-tab {
+                padding: 8px 15px;
+                font-size: 12px;
+            }
+        }
+
+        /* Purchase Modal */
+        .purchase-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 90%;
+            animation: modalPop 0.3s ease;
+        }
+
+        @keyframes modalPop {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .modal-button:active {
+            transform: scale(0.95);
+        }
+
+        .modal-button.confirm {
+            background: linear-gradient(135deg, #4ECDC4, #44A08D);
+            color: white;
+        }
+
+        .modal-button.cancel {
+            background: #ddd;
+            color: #333;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            z-index: 2000;
+            animation: slideUp 0.3s ease;
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, #4ECDC4, #44A08D);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, #FF6B6B, #FF4444);
+        }
+
+        .notification.info {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateX(-50%) translateY(100px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="shop-header">
+        <a href="/homegame/" class="back-button">←</a>
+        <h1 class="shop-title">🛍️ BOUTIQUE</h1>
+        <div class="currency-display">
+            <div class="currency-item">
+                <span class="currency-icon">🪙</span>
+                <span class="currency-amount" id="coins">0</span>
+            </div>
+            <div class="currency-item">
+                <span class="currency-icon">💎</span>
+                <span class="currency-amount" id="gems">0</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="category-tabs">
+        <div class="category-tab active" onclick="showCategory('characters', this)">⚽ Personnages</div>
+        <div class="category-tab" onclick="showCategory('balls', this)">🏀 Ballons</div>
+        <div class="category-tab" onclick="showCategory('skins', this)">👕 Skins</div>
+        <div class="category-tab" onclick="showCategory('powerups', this)">⭐ Power-ups</div>
+    </div>
+
+    <div class="shop-container">
+        <!-- Characters Section -->
+        <div id="characters-section" class="items-grid">
+            <div class="loading">Chargement des personnages</div>
+        </div>
+
+        <!-- Balls Section -->
+        <div id="balls-section" class="items-grid" style="display: none;">
+            <div class="loading">Chargement des ballons</div>
+        </div>
+
+        <!-- Skins Section -->
+        <div id="skins-section" class="items-grid" style="display: none;">
+            <div class="loading">Chargement des skins</div>
+        </div>
+
+        <!-- Powerups Section -->
+        <div id="powerups-section" class="powerup-grid" style="display: none;">
+            <div class="loading">Chargement des power-ups</div>
+        </div>
+    </div>
+
+    <!-- Purchase Modal -->
+    <div class="purchase-modal" id="purchaseModal">
+        <div class="modal-content">
+            <h3 id="modalTitle">Confirmer l'achat</h3>
+            <p id="modalMessage">Voulez-vous acheter cet item?</p>
+            <div class="modal-buttons">
+                <button class="modal-button cancel" onclick="closeModal()">Annuler</button>
+                <button class="modal-button confirm" onclick="confirmPurchase()">Acheter</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // État de la boutique
+        const shopState = {
+            currentCategory: 'characters',
+            profile: null,
+            characters: [],
+            ballSkins: [],
+            playerSkins: [],
+            powerups: [],
+            ownedItems: {
+                characters: [],
+                balls: [],
+                skins: []
+            },
+            equippedItems: {
+                character: null,
+                ball: null,
+                skin: null
+            },
+            pendingPurchase: null
+        };
+
+        // Fonction pour obtenir le cookie CSRF
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Charger les données du profil
+        async function loadProfile() {
+            try {
+                const response = await fetch('/api/profile/');
+                const data = await response.json();
+                
+                if (data.success) {
+                    shopState.profile = data;
+                    document.getElementById('coins').textContent = data.coins || 0;
+                    document.getElementById('gems').textContent = data.gems || 0;
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement du profil:', error);
+                showNotification('Erreur de chargement du profil', 'error');
+            }
+        }
+
+        // Charger les données de la boutique
+        async function loadShopData() {
+            try {
+                const response = await fetch('/api/shop-data/');
+                const data = await response.json();
+                
+                if (data.success) {
+                    shopState.characters = data.characters || [];
+                    shopState.ballSkins = data.ball_skins || [];
+                    shopState.playerSkins = data.player_skins || [];
+                    shopState.powerups = data.powerups || [];
+                    shopState.ownedItems.characters = data.owned_characters || [];
+                    shopState.ownedItems.balls = data.owned_balls || [];
+                    shopState.ownedItems.skins = data.owned_skins || [];
+                    shopState.equippedItems = data.equipped_items || {};
+                    
+                    // Afficher la catégorie actuelle
+                    displayCategory(shopState.currentCategory);
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement de la boutique:', error);
+                showNotification('Erreur de chargement de la boutique', 'error');
+            }
+        }
+
+        // Afficher une catégorie
+        function displayCategory(category) {
+            const sectionId = category + '-section';
+            const section = document.getElementById(sectionId);
+            
+            if (!section) return;
+            
+            section.innerHTML = '';
+            
+            switch(category) {
+                case 'characters':
+                    displayCharacters(section);
+                    break;
+                case 'balls':
+                    displayBallSkins(section);
+                    break;
+                case 'skins':
+                    displayPlayerSkins(section);
+                    break;
+                case 'powerups':
+                    displayPowerups(section);
+                    break;
+            }
+        }
+
+        // Afficher les personnages
+        function displayCharacters(container) {
+            if (shopState.characters.length === 0) {
+                container.innerHTML = '<div class="empty-state">Aucun personnage disponible</div>';
+                return;
+            }
+            
+            shopState.characters.forEach(character => {
+                const isOwned = shopState.ownedItems.characters.includes(character.id) || character.price === 0;
+                const isEquipped = shopState.equippedItems.character === character.id;
+                
+                const item = document.createElement('div');
+                item.className = 'shop-item';
+                item.dataset.id = character.id;
+                item.dataset.type = 'character';
+                item.dataset.price = character.price;
+                
+                if (isOwned) item.classList.add('owned');
+                if (isEquipped) item.classList.add('equipped');
+                
+                // Déterminer la rareté
+                let rarity = 'common';
+                let rarityLetter = 'C';
+                if (character.overall_rating >= 90) {
+                    rarity = 'legendary';
+                    rarityLetter = 'L';
+                } else if (character.overall_rating >= 75) {
+                    rarity = 'epic';
+                    rarityLetter = 'E';
+                } else if (character.overall_rating >= 60) {
+                    rarity = 'rare';
+                    rarityLetter = 'R';
+                }
+                
+                item.innerHTML = `
+                    ${isEquipped ? '<div class="item-badge">ÉQUIPÉ</div>' : 
+                      isOwned ? '<div class="item-badge">POSSÉDÉ</div>' : ''}
+                    <div class="item-image">
+                        ${character.image ? 
+                          `<img src="${character.image}" alt="${character.name}">` :
+                          `<span>${character.emoji || '⚽'}</span>`}
+                        <div class="item-rarity rarity-${rarity}">${rarityLetter}</div>
+                    </div>
+                    <div class="item-name">${character.name}</div>
+                    <div class="item-stats">
+                        <div class="stat-badge">⚡ ${character.power}</div>
+                        <div class="stat-badge">🎯 ${character.precision}</div>
+                        <div class="stat-badge">🍀 ${character.luck}</div>
+                        <div class="stat-badge">🌀 ${character.curve}</div>
+                    </div>
+                    ${!isOwned ? `
+                        <div class="item-price">
+                            <span>🪙</span>
+                            <span>${character.price}</span>
+                        </div>
+                    ` : ''}
+                `;
+                
+                item.onclick = () => handleItemClick(item);
+                container.appendChild(item);
+            });
+        }
+
+        // Afficher les skins de ballon
+        function displayBallSkins(container) {
+            if (shopState.ballSkins.length === 0) {
+                container.innerHTML = '<div class="empty-state">Aucun ballon disponible</div>';
+                return;
+            }
+            
+            shopState.ballSkins.forEach(ball => {
+                const isOwned = shopState.ownedItems.balls.includes(ball.id);
+                const isEquipped = shopState.equippedItems.ball === ball.id;
+                
+                const item = document.createElement('div');
+                item.className = 'shop-item';
+                item.dataset.id = ball.id;
+                item.dataset.type = 'ball';
+                item.dataset.price = ball.price;
+                
+                if (isOwned) item.classList.add('owned');
+                if (isEquipped) item.classList.add('equipped');
+                
+                item.innerHTML = `
+                    ${isEquipped ? '<div class="item-badge">ÉQUIPÉ</div>' : 
+                      isOwned ? '<div class="item-badge">POSSÉDÉ</div>' : ''}
+                    <div class="item-image">
+                        ${ball.image ? 
+                          `<img src="${ball.image}" alt="${ball.name}">` :
+                          `<span>${ball.emoji || '⚽'}</span>`}
+                    </div>
+                    <div class="item-name">${ball.name}</div>
+                    <div class="item-description">${ball.description || ''}</div>
+                    ${!isOwned ? `
+                        <div class="item-price">
+                            <span>🪙</span>
+                            <span>${ball.price}</span>
+                        </div>
+                    ` : ''}
+                `;
+                
+                item.onclick = () => handleItemClick(item);
+                container.appendChild(item);
+            });
+        }
+
+        // Afficher les skins de joueur
+        function displayPlayerSkins(container) {
+            if (shopState.playerSkins.length === 0) {
+                container.innerHTML = '<div class="empty-state">Aucun skin disponible</div>';
+                return;
+            }
+            
+            shopState.playerSkins.forEach(skin => {
+                const isOwned = shopState.ownedItems.skins.includes(skin.id);
+                const isEquipped = shopState.equippedItems.skin === skin.id;
+                
+                const item = document.createElement('div');
+                item.className = 'shop-item';
+                item.dataset.id = skin.id;
+                item.dataset.type = 'skin';
+                item.dataset.price = skin.price;
+                
+                if (isOwned) item.classList.add('owned');
+                if (isEquipped) item.classList.add('equipped');
+                
+                item.innerHTML = `
+                    ${isEquipped ? '<div class="item-badge">ÉQUIPÉ</div>' : 
+                      isOwned ? '<div class="item-badge">POSSÉDÉ</div>' : ''}
+                    <div class="item-image">
+                        ${skin.image ? 
+                          `<img src="${skin.image}" alt="${skin.name}">` :
+                          `<span>${skin.emoji || '👕'}</span>`}
+                    </div>
+                    <div class="item-name">${skin.name}</div>
+                    <div class="item-description">${skin.description || ''}</div>
+                    ${!isOwned ? `
+                        <div class="item-price">
+                            <span>🪙</span>
+                            <span>${skin.price}</span>
+                        </div>
+                    ` : ''}
+                `;
+                
+                item.onclick = () => handleItemClick(item);
+                container.appendChild(item);
+            });
+        }
+
+        // Afficher les power-ups
+        function displayPowerups(container) {
+            if (shopState.powerups.length === 0) {
+                container.innerHTML = '<div class="empty-state">Aucun power-up disponible</div>';
+                return;
+            }
+            
+            container.className = 'powerup-grid';
+            
+            shopState.powerups.forEach(powerup => {
+                const item = document.createElement('div');
+                item.className = 'powerup-item';
+                item.dataset.id = powerup.id;
+                item.dataset.type = 'powerup';
+                item.dataset.price = powerup.price;
+                
+                item.innerHTML = `
+                    <div class="powerup-icon">${powerup.emoji || '⭐'}</div>
+                    <div class="powerup-name">${powerup.name}</div>
+                    <div class="powerup-duration">${powerup.duration}s</div>
+                    <div class="item-price">
+                        <span>🪙</span>
+                        <span>${powerup.price}</span>
+                    </div>
+                `;
+                
+                item.onclick = () => handleItemClick(item);
+                container.appendChild(item);
+            });
+        }
+
+        // Changer de catégorie
+        function showCategory(category, tabElement) {
+            // Masquer toutes les sections
+            document.querySelectorAll('.items-grid, .powerup-grid').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Afficher la section sélectionnée
+            const sectionId = category + '-section';
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.style.display = category === 'powerups' ? 'grid' : 'grid';
+                section.className = category === 'powerups' ? 'powerup-grid' : 'items-grid';
+            }
+            
+            // Mettre à jour les onglets
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            if (tabElement) {
+                tabElement.classList.add('active');
+            }
+            
+            shopState.currentCategory = category;
+            displayCategory(category);
+        }
+
+        // Gérer les clics sur les items
+        function handleItemClick(item) {
+            const itemId = parseInt(item.dataset.id);
+            const itemType = item.dataset.type;
+            const price = parseInt(item.dataset.price) || 0;
+            const isOwned = item.classList.contains('owned');
+            const isEquipped = item.classList.contains('equipped');
+            
+            let itemData;
+            let itemName;
+            
+            // Trouver l'item dans les données
+            switch(itemType) {
+                case 'character':
+                    itemData = shopState.characters.find(c => c.id === itemId);
+                    itemName = itemData?.name;
+                    break;
+                case 'ball':
+                    itemData = shopState.ballSkins.find(b => b.id === itemId);
+                    itemName = itemData?.name;
+                    break;
+                case 'skin':
+                    itemData = shopState.playerSkins.find(s => s.id === itemId);
+                    itemName = itemData?.name;
+                    break;
+                case 'powerup':
+                    itemData = shopState.powerups.find(p => p.id === itemId);
+                    itemName = itemData?.name;
+                    break;
+            }
+            
+            if (itemType === 'powerup') {
+                // Les power-ups s'achètent directement
+                if (shopState.profile.coins >= price) {
+                    showPurchaseModal(itemId, itemType, price, itemName);
+                } else {
+                    showNotification('Pièces insuffisantes!', 'error');
+                }
+            } else if (!isOwned) {
+                // Acheter l'item
+                if (shopState.profile.coins >= price) {
+                    showPurchaseModal(itemId, itemType, price, itemName);
+                } else {
+                    showNotification('Pièces insuffisantes!', 'error');
+                }
+            } else if (isOwned && !isEquipped) {
+                // Équiper l'item
+                equipItem(itemId, itemType);
+            } else if (isEquipped) {
+                showNotification('Déjà équipé!', 'info');
+            }
+        }
+
+        // Afficher la modal d'achat
+        function showPurchaseModal(itemId, itemType, price, itemName) {
+            const modal = document.getElementById('purchaseModal');
+            const title = document.getElementById('modalTitle');
+            const message = document.getElementById('modalMessage');
+            
+            title.textContent = 'Confirmer l\'achat';
+            message.textContent = `Acheter ${itemName} pour ${price} 🪙?`;
+            
+            shopState.pendingPurchase = { id: itemId, type: itemType, price, name: itemName };
+            
+            modal.style.display = 'flex';
+        }
+
+        // Fermer la modal
+        function closeModal() {
+            document.getElementById('purchaseModal').style.display = 'none';
+            shopState.pendingPurchase = null;
+        }
+
+        // Confirmer l'achat
+        async function confirmPurchase() {
+            if (!shopState.pendingPurchase) return;
+            
+            const { id, type, price, name } = shopState.pendingPurchase;
+            
+            try {
+                const response = await fetch('/api/purchase-item/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        type: type,
+                        id: id
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Mettre à jour les coins
+                    shopState.profile.coins = data.coins;
+                    document.getElementById('coins').textContent = data.coins;
+                    
+                    // Mettre à jour l'état local
+                    if (type !== 'powerup') {
+                        const categoryMap = {
+                            'character': 'characters',
+                            'ball': 'balls',
+                            'skin': 'skins'
+                        };
+                        const category = categoryMap[type];
+                        if (category && !shopState.ownedItems[category].includes(id)) {
+                            shopState.ownedItems[category].push(id);
+                        }
+                    }
+                    
+                    // Rafraîchir l'affichage
+                    displayCategory(shopState.currentCategory);
+                    
+                    showNotification(data.message || 'Achat réussi!', 'success');
+                } else {
+                    showNotification(data.message || 'Erreur lors de l\'achat', 'error');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showNotification('Erreur de connexion', 'error');
+            }
+            
+            closeModal();
+        }
+
+        // Équiper un item
+        async function equipItem(itemId, itemType) {
+            try {
+                const response = await fetch('/api/equip-item/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        type: itemType,
+                        id: itemId
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Mettre à jour l'état local
+                    shopState.equippedItems[itemType] = itemId;
+                    
+                    // Rafraîchir l'affichage
+                    displayCategory(shopState.currentCategory);
+                    
+                    showNotification(data.message || 'Item équipé!', 'success');
+                } else {
+                    showNotification(data.message || 'Erreur', 'error');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showNotification('Erreur de connexion', 'error');
+            }
+        }
+
+        // Afficher une notification
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadProfile();
+            await loadShopData();
+        });
+    </script>
+</body>
+</html>

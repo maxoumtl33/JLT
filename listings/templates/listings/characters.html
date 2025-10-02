@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Personnages - Free Kick Master</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .characters-header {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-button {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #FF6B6B, #FF4444);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: white;
+            font-size: 24px;
+            transition: transform 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .back-button:active {
+            transform: scale(0.95);
+        }
+
+        .header-title {
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* Selected Character Display */
+        .selected-character {
+            background: rgba(255, 255, 255, 0.95);
+            margin: 15px;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .selected-header {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #333;
+        }
+
+        .selected-display {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .selected-image {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .selected-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .equipped-badge {
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #4ECDC4, #44A08D);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .selected-info {
+            flex: 1;
+        }
+
+        .selected-name {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .selected-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stat-icon {
+            font-size: 18px;
+            width: 25px;
+        }
+
+        .stat-bar {
+            flex: 1;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .stat-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ECDC4, #44A08D);
+            transition: width 0.5s ease;
+        }
+
+        .stat-number {
+            width: 35px;
+            text-align: right;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* Container */
+        .characters-container {
+            padding: 15px;
+        }
+
+        /* Filter Buttons */
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            padding: 5px 0;
+            scrollbar-width: none;
+        }
+
+        .filter-buttons::-webkit-scrollbar {
+            display: none;
+        }
+
+        .filter-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid transparent;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .filter-btn.active {
+            background: white;
+            color: #764ba2;
+            transform: scale(1.05);
+        }
+
+        /* Section Titles */
+        .section-title {
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Characters Grid */
+        .characters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        /* Character Card */
+        .character-card {
+            background: white;
+            border-radius: 15px;
+            padding: 10px;
+            position: relative;
+            transition: all 0.3s;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .character-card:active {
+            transform: scale(0.95);
+        }
+
+        .character-card.owned {
+            background: linear-gradient(135deg, #90EE90, #7FDD7F);
+        }
+
+        .character-card.selected {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            box-shadow: 0 0 20px rgba(255,215,0,0.5);
+        }
+
+        .character-card.locked {
+            background: rgba(255,255,255,0.7);
+            opacity: 0.8;
+        }
+
+        .character-image {
+            width: 100%;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-bottom: 10px;
+            font-size: 60px;
+        }
+
+        .character-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .character-rarity {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            color: white;
+        }
+
+        .rarity-common {
+            background: #808080;
+        }
+
+        .rarity-rare {
+            background: #4169E1;
+        }
+
+        .rarity-epic {
+            background: #9400D3;
+        }
+
+        .rarity-legendary {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+        }
+
+        .character-name {
+            font-weight: bold;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .character-overall {
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .character-price {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            padding: 5px 10px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .select-button {
+            width: 100%;
+            padding: 8px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .select-button:active {
+            transform: scale(0.95);
+        }
+
+        .select-button.selected {
+            background: linear-gradient(135deg, #4ECDC4, #44A08D);
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            font-size: 18px;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #4ECDC4, #44A08D);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 18px;
+            z-index: 10000;
+            animation: fadeInOut 2s ease;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, #FF6B6B, #FF4444);
+        }
+
+        /* Compare Section */
+        .compare-section {
+            position: fixed;
+            bottom: -400px;
+            left: 0;
+            right: 0;
+            height: 400px;
+            background: white;
+            border-radius: 30px 30px 0 0;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.2);
+            transition: bottom 0.3s ease;
+            z-index: 200;
+        }
+
+        .compare-section.active {
+            bottom: 0;
+        }
+
+        .compare-header {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #eee;
+        }
+
+        .compare-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .compare-close {
+            width: 35px;
+            height: 35px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .compare-content {
+            padding: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            height: calc(100% - 80px);
+        }
+
+        .compare-character {
+            flex: 1;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 15px;
+            text-align: center;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .compare-vs {
+            font-size: 30px;
+            font-weight: bold;
+            color: #ff4444;
+            padding: 0 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 400px) {
+            .characters-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .selected-display {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .selected-image {
+                margin: 0 auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="characters-header">
+        <a href="/homegame/" class="back-button">←</a>
+        <h1 class="header-title">👤 PERSONNAGES</h1>
+        <button class="back-button" onclick="toggleCompare()" title="Comparer">⚖️</button>
+    </div>
+
+    <!-- Selected Character Display -->
+    <div class="selected-character">
+        <div class="selected-header">Personnage Actuel</div>
+        <div class="selected-display">
+            <div class="selected-image" id="selectedImage">
+                <span>⚽</span>
+                <div class="equipped-badge">ÉQUIPÉ</div>
+            </div>
+            <div class="selected-info">
+                <div class="selected-name" id="selectedName">Chargement...</div>
+                <div class="selected-stats">
+                    <div class="stat-item">
+                        <span class="stat-icon">⚡</span>
+                        <div class="stat-bar">
+                            <div class="stat-fill" id="powerBar" style="width: 0%"></div>
+                        </div>
+                        <span class="stat-number" id="powerValue">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">🎯</span>
+                        <div class="stat-bar">
+                            <div class="stat-fill" id="precisionBar" style="width: 0%"></div>
+                        </div>
+                        <span class="stat-number" id="precisionValue">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">🍀</span>
+                        <div class="stat-bar">
+                            <div class="stat-fill" id="luckBar" style="width: 0%"></div>
+                        </div>
+                        <span class="stat-number" id="luckValue">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">🌀</span>
+                        <div class="stat-bar">
+                            <div class="stat-fill" id="curveBar" style="width: 0%"></div>
+                        </div>
+                        <span class="stat-number" id="curveValue">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="characters-container">
+        <!-- Filter Buttons -->
+        <div class="filter-buttons">
+            <button class="filter-btn active" onclick="filterCharacters('all', this)">Tous</button>
+            <button class="filter-btn" onclick="filterCharacters('owned', this)">Possédés</button>
+            <button class="filter-btn" onclick="filterCharacters('legendary', this)">Légendaires</button>
+            <button class="filter-btn" onclick="filterCharacters('epic', this)">Épiques</button>
+            <button class="filter-btn" onclick="filterCharacters('rare', this)">Rares</button>
+            <button class="filter-btn" onclick="filterCharacters('common', this)">Communs</button>
+        </div>
+
+        <!-- Owned Characters -->
+        <div class="section-title" id="owned-title">⭐ Mes Personnages</div>
+        <div class="characters-grid" id="ownedCharacters">
+            <div class="loading">Chargement...</div>
+        </div>
+
+        <!-- Available Characters -->
+        <div class="section-title" id="available-title">🛍️ Disponibles à l'achat</div>
+        <div class="characters-grid" id="availableCharacters">
+            <div class="loading">Chargement...</div>
+        </div>
+    </div>
+
+    <!-- Compare Section -->
+    <div class="compare-section" id="compareSection">
+        <div class="compare-header">
+            <div class="compare-title">Comparer les Personnages</div>
+            <button class="compare-close" onclick="toggleCompare()">✖</button>
+        </div>
+        <div class="compare-content">
+            <div class="compare-character" id="compare1">
+                <div>Sélectionner un personnage</div>
+            </div>
+            <div class="compare-vs">VS</div>
+            <div class="compare-character" id="compare2">
+                <div>Sélectionner un personnage</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // État de l'application
+        const appState = {
+            characters: [],
+            ownedCharacters: [],
+            selectedCharacterId: null,
+            compareMode: false,
+            compareSlots: [null, null],
+            currentFilter: 'all'
+        };
+
+        // Fonction pour obtenir le cookie CSRF
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Charger les données depuis l'API
+        async function loadCharactersData() {
+            try {
+                const response = await fetch('/api/characters-data/');
+                const data = await response.json();
+                
+                if (data.success) {
+                    appState.characters = data.characters || [];
+                    appState.ownedCharacters = data.owned_characters || [];
+                    appState.selectedCharacterId = data.selected_character_id;
+                    
+                    renderCharacters();
+                    updateSelectedDisplay();
+                } else {
+                    showNotification('Erreur de chargement', 'error');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showNotification('Erreur de connexion', 'error');
+            }
+        }
+
+        // Déterminer la rareté basée sur les stats
+        function getRarity(overall) {
+            if (overall >= 90) return 'legendary';
+            if (overall >= 75) return 'epic';
+            if (overall >= 60) return 'rare';
+            return 'common';
+        }
+
+        function getRarityLetter(rarity) {
+            switch(rarity) {
+                case 'legendary': return 'L';
+                case 'epic': return 'E';
+                case 'rare': return 'R';
+                default: return 'C';
+            }
+        }
+
+        // Rendre les personnages
+        function renderCharacters() {
+            const ownedGrid = document.getElementById('ownedCharacters');
+            const availableGrid = document.getElementById('availableCharacters');
+            
+            ownedGrid.innerHTML = '';
+            availableGrid.innerHTML = '';
+            
+            appState.characters.forEach(character => {
+                const overall = character.overall_rating || Math.floor((character.power + character.precision + character.luck + character.curve) / 4);
+                const rarity = getRarity(overall);
+                const isOwned = appState.ownedCharacters.includes(character.id) || character.price === 0;
+                const isSelected = character.id === appState.selectedCharacterId;
+                
+                const card = document.createElement('div');
+                card.className = `character-card ${isOwned ? 'owned' : 'locked'} ${isSelected ? 'selected' : ''}`;
+                card.dataset.id = character.id;
+                card.dataset.owned = isOwned;
+                card.dataset.rarity = rarity;
+                
+                card.innerHTML = `
+                    <div class="character-image">
+                        ${character.image ? 
+                          `<img src="${character.image}" alt="${character.name}">` :
+                          `<span>${character.emoji || '⚽'}</span>`}
+                        <div class="character-rarity rarity-${rarity}">
+                            ${getRarityLetter(rarity)}
+                        </div>
+                    </div>
+                    <div class="character-name">${character.name}</div>
+                    <div class="character-overall">OVR ${overall}</div>
+                    ${isOwned ? 
+                        `<button class="select-button ${isSelected ? 'selected' : ''}" 
+                                 onclick="selectCharacter(${character.id})">
+                            ${isSelected ? 'Sélectionné ✓' : 'Sélectionner'}
+                        </button>` :
+                        `<div class="character-price">
+                            <span>🪙</span>
+                            <span>${character.price}</span>
+                        </div>`
+                    }
+                `;
+                
+                card.onclick = (e) => {
+                    if (!e.target.classList.contains('select-button')) {
+                        handleCharacterClick(character);
+                    }
+                };
+                
+                if (isOwned) {
+                    ownedGrid.appendChild(card);
+                } else {
+                    availableGrid.appendChild(card);
+                }
+            });
+
+            // Vérifier si les sections sont vides
+            if (ownedGrid.children.length === 0) {
+                ownedGrid.innerHTML = '<div style="color: white; text-align: center; padding: 20px;">Aucun personnage possédé</div>';
+            }
+            if (availableGrid.children.length === 0) {
+                availableGrid.innerHTML = '<div style="color: white; text-align: center; padding: 20px;">Aucun personnage disponible</div>';
+            }
+        }
+
+        // Sélectionner un personnage (l'équiper)
+        async function selectCharacter(characterId) {
+            try {
+                const response = await fetch('/api/equip-item/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        type: 'character',
+                        id: characterId
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    appState.selectedCharacterId = characterId;
+                    renderCharacters();
+                    updateSelectedDisplay();
+                    showNotification('Personnage équipé!');
+                } else {
+                    showNotification(data.message || 'Erreur', 'error');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showNotification('Erreur de connexion', 'error');
+            }
+        }
+
+        // Mettre à jour l'affichage du personnage sélectionné
+        function updateSelectedDisplay() {
+            const character = appState.characters.find(c => c.id === appState.selectedCharacterId);
+            if (!character) {
+                // Essayer de trouver le premier personnage possédé
+                const firstOwned = appState.characters.find(c => 
+                    appState.ownedCharacters.includes(c.id) || c.price === 0
+                );
+                if (firstOwned) {
+                    selectCharacter(firstOwned.id);
+                }
+                return;
+            }
+            
+            const selectedImage = document.getElementById('selectedImage');
+            if (character.image) {
+                selectedImage.innerHTML = `
+                    <img src="${character.image}" alt="${character.name}">
+                    <div class="equipped-badge">ÉQUIPÉ</div>
+                `;
+            } else {
+                selectedImage.innerHTML = `
+                    <span>${character.emoji || '⚽'}</span>
+                    <div class="equipped-badge">ÉQUIPÉ</div>
+                `;
+            }
+            
+            document.getElementById('selectedName').textContent = character.name;
+            
+            document.getElementById('powerBar').style.width = `${character.power}%`;
+            document.getElementById('powerValue').textContent = character.power;
+            
+            document.getElementById('precisionBar').style.width = `${character.precision}%`;
+            document.getElementById('precisionValue').textContent = character.precision;
+            
+            document.getElementById('luckBar').style.width = `${character.luck}%`;
+            document.getElementById('luckValue').textContent = character.luck;
+            
+            document.getElementById('curveBar').style.width = `${character.curve}%`;
+            document.getElementById('curveValue').textContent = character.curve;
+        }
+
+        // Gérer le clic sur un personnage
+        function handleCharacterClick(character) {
+            const isOwned = appState.ownedCharacters.includes(character.id) || character.price === 0;
+            
+            if (appState.compareMode) {
+                // Mode comparaison
+                if (!appState.compareSlots[0]) {
+                    appState.compareSlots[0] = character;
+                    updateCompareSlot(0, character);
+                } else if (!appState.compareSlots[1]) {
+                    appState.compareSlots[1] = character;
+                    updateCompareSlot(1, character);
+                } else {
+                    appState.compareSlots[0] = character;
+                    updateCompareSlot(0, character);
+                }
+            } else if (!isOwned) {
+                // Afficher les détails pour achat
+                const overall = character.overall_rating || Math.floor((character.power + character.precision + character.luck + character.curve) / 4);
+                
+                let message = `${character.name}\n`;
+                message += `${character.description || 'Aucune description'}\n\n`;
+                message += `Overall: ${overall}\n\n`;
+                message += `Statistiques:\n`;
+                message += `⚡ Puissance: ${character.power}\n`;
+                message += `🎯 Précision: ${character.precision}\n`;
+                message += `🍀 Chance: ${character.luck}\n`;
+                message += `🌀 Courbe: ${character.curve}\n\n`;
+                message += `Prix: 🪙 ${character.price}`;
+                
+                if (confirm(message + '\n\nAller à la boutique pour acheter?')) {
+                    window.location.href = '/shop/';
+                }
+            }
+        }
+
+        // Filtrer les personnages
+        function filterCharacters(filter, button) {
+            appState.currentFilter = filter;
+            
+            // Mettre à jour les boutons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            if (button) button.classList.add('active');
+            
+            // Filtrer les cartes
+            const cards = document.querySelectorAll('.character-card');
+            cards.forEach(card => {
+                const isOwned = card.dataset.owned === 'true';
+                const rarity = card.dataset.rarity;
+                
+                let show = false;
+                
+                switch(filter) {
+                    case 'all':
+                        show = true;
+                        break;
+                    case 'owned':
+                        show = isOwned;
+                        break;
+                    case 'legendary':
+                    case 'epic':
+                    case 'rare':
+                    case 'common':
+                        show = rarity === filter;
+                        break;
+                }
+                
+                card.style.display = show ? 'block' : 'none';
+            });
+            
+            // Masquer les sections vides
+            const ownedSection = document.getElementById('ownedCharacters');
+            const availableSection = document.getElementById('availableCharacters');
+            
+            const ownedVisible = Array.from(ownedSection.children).some(c => 
+                c.style.display !== 'none' && !c.classList.contains('loading')
+            );
+            const availableVisible = Array.from(availableSection.children).some(c => 
+                c.style.display !== 'none' && !c.classList.contains('loading')
+            );
+            
+            document.getElementById('owned-title').style.display = ownedVisible ? 'flex' : 'none';
+            document.getElementById('available-title').style.display = availableVisible ? 'flex' : 'none';
+        }
+
+        // Toggle compare mode
+        function toggleCompare() {
+            appState.compareMode = !appState.compareMode;
+            const section = document.getElementById('compareSection');
+            section.classList.toggle('active');
+            
+            if (!appState.compareMode) {
+                appState.compareSlots = [null, null];
+            }
+        }
+
+        // Mettre à jour un slot de comparaison
+        function updateCompareSlot(slot, character) {
+            const element = document.getElementById(`compare${slot + 1}`);
+            const overall = character.overall_rating || Math.floor((character.power + character.precision + character.luck + character.curve) / 4);
+            
+            element.innerHTML = `
+                <div style="font-size: 30px; margin-bottom: 10px;">
+                    ${character.image ? 
+                      `<img src="${character.image}" style="width: 60px; height: 60px; object-fit: contain;">` :
+                      character.emoji || '⚽'}
+                </div>
+                <div style="font-weight: bold; margin-bottom: 10px;">${character.name}</div>
+                <div style="font-size: 14px; margin-bottom: 10px;">OVR: ${overall}</div>
+                <div style="text-align: left; font-size: 12px;">
+                    <div>⚡ ${character.power}</div>
+                    <div>🎯 ${character.precision}</div>
+                    <div>🍀 ${character.luck}</div>
+                    <div>🌀 ${character.curve}</div>
+                </div>
+            `;
+        }
+
+        // Afficher une notification
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.remove(), 2000);
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCharactersData();
+        });
+    </script>
+</body>
+</html>

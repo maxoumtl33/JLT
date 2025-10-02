@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Classement - Free Kick Master</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .leaderboard-header {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-button {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #FF6B6B, #FF4444);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: white;
+            font-size: 24px;
+            transition: transform 0.3s;
+        }
+
+        .back-button:active {
+            transform: scale(0.95);
+        }
+
+        .header-title {
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* Period Tabs */
+        .period-tabs {
+            background: rgba(0,0,0,0.7);
+            padding: 10px;
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+        }
+
+        .period-tab {
+            flex: 1;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            text-align: center;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .period-tab.active {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            border-color: white;
+            transform: scale(1.05);
+        }
+
+        /* Podium Section */
+        .podium-section {
+            background: rgba(255,255,255,0.95);
+            margin: 15px;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .podium-title {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .podium {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 10px;
+            padding: 20px 0;
+            min-height: 200px;
+        }
+
+        .podium-place {
+            flex: 1;
+            max-width: 120px;
+            text-align: center;
+            animation: slideUp 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .podium-place.first {
+            animation-delay: 0.1s;
+        }
+
+        .podium-place.second {
+            animation-delay: 0.2s;
+        }
+
+        .podium-place.third {
+            animation-delay: 0.3s;
+        }
+
+        .podium-medal {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .podium-place.first .podium-medal {
+            font-size: 50px;
+            filter: drop-shadow(0 0 10px gold);
+        }
+
+        .podium-avatar {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            border: 3px solid gold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .podium-place.first .podium-avatar {
+            width: 80px;
+            height: 80px;
+            border-width: 4px;
+        }
+
+        .podium-name {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .podium-score {
+            font-size: 18px;
+            font-weight: bold;
+            color: #FFD700;
+        }
+
+        .podium-place.first .podium-score {
+            font-size: 22px;
+        }
+
+        /* Player Rank Card */
+        .player-rank-card {
+            background: rgba(255,255,255,0.95);
+            margin: 15px;
+            padding: 15px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .player-rank-card.current-player {
+            background: linear-gradient(135deg, #4ECDC4, #44A08D);
+            color: white;
+        }
+
+        .rank-number {
+            width: 50px;
+            height: 50px;
+            background: white;
+            color: #333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .player-rank-card.current-player .rank-number {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+        }
+
+        .player-avatar-small {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .player-info {
+            flex: 1;
+        }
+
+        .my-rank {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .my-stats {
+            display: flex;
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        /* Rewards Section */
+        .rewards-section {
+            background: rgba(255,255,255,0.95);
+            margin: 15px;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .rewards-title {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .rewards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+        }
+
+        .reward-item {
+            background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .reward-rank {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .reward-prize {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* Leaderboard List */
+        .leaderboard-list {
+            padding: 15px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .leaderboard-entry {
+            background: rgba(255,255,255,0.95);
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .leaderboard-entry.highlight {
+            background: linear-gradient(135deg, #4ECDC4, #44A08D);
+            color: white;
+            transform: scale(1.02);
+        }
+
+        .rank-number.gold {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: white;
+        }
+
+        .rank-number.silver {
+            background: linear-gradient(135deg, #C0C0C0, #808080);
+            color: white;
+        }
+
+        .rank-number.bronze {
+            background: linear-gradient(135deg, #CD7F32, #8B4513);
+            color: white;
+        }
+
+        .player-name {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .player-level {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .player-score {
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .score-value {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .score-label {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            font-size: 18px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: white;
+        }
+
+        .empty-state p {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        /* Scrollbar */
+        .leaderboard-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .leaderboard-list::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+        }
+
+        .leaderboard-list::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 4px;
+        }
+
+        /* Responsive */
+        @media (max-width: 400px) {
+            .rewards-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .my-stats {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="leaderboard-header">
+        <a href="/homegame/" class="back-button">←</a>
+        <h1 class="header-title">🏆 CLASSEMENT</h1>
+        <div style="width: 40px;"></div>
+    </div>
+
+    <div class="period-tabs">
+        <div class="period-tab active" onclick="changePeriod('daily', this)">Jour</div>
+        <div class="period-tab" onclick="changePeriod('weekly', this)">Semaine</div>
+        <div class="period-tab" onclick="changePeriod('monthly', this)">Mois</div>
+        <div class="period-tab" onclick="changePeriod('alltime', this)">Global</div>
+    </div>
+
+    <!-- Podium Section -->
+    <div class="podium-section">
+        <div class="podium-title">🏆 Top 3 Joueurs</div>
+        <div class="podium" id="podiumContainer">
+            <div class="loading">Chargement...</div>
+        </div>
+    </div>
+
+    <!-- Current Player Rank -->
+    <div class="player-rank-card current-player" id="myRankCard" style="display: none;">
+        <div class="rank-number" id="myRank">-</div>
+        <div class="player-avatar-small" id="myAvatar">👤</div>
+        <div class="player-info" style="flex: 1;">
+            <div class="my-rank">Ma Position</div>
+            <div class="my-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="myScore">0</div>
+                    <div class="stat-label">Points</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="myAccuracy">0%</div>
+                    <div class="stat-label">Précision</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="myGames">0</div>
+                    <div class="stat-label">Parties</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rewards Section -->
+    <div class="rewards-section">
+        <div class="rewards-title">🎁 Récompenses de Fin de Période</div>
+        <div class="rewards-grid">
+            <div class="reward-item">
+                <div class="reward-rank">Top 1</div>
+                <div class="reward-prize">
+                    <span>💎</span>
+                    <span>100</span>
+                </div>
+            </div>
+            <div class="reward-item">
+                <div class="reward-rank">Top 2-3</div>
+                <div class="reward-prize">
+                    <span>💎</span>
+                    <span>50</span>
+                </div>
+            </div>
+            <div class="reward-item">
+                <div class="reward-rank">Top 4-10</div>
+                <div class="reward-prize">
+                    <span>💎</span>
+                    <span>25</span>
+                </div>
+            </div>
+            <div class="reward-item">
+                <div class="reward-rank">Top 11-50</div>
+                <div class="reward-prize">
+                    <span>🪙</span>
+                    <span>500</span>
+                </div>
+            </div>
+            <div class="reward-item">
+                <div class="reward-rank">Top 51-100</div>
+                <div class="reward-prize">
+                    <span>🪙</span>
+                    <span>200</span>
+                </div>
+            </div>
+            <div class="reward-item">
+                <div class="reward-rank">Top 101+</div>
+                <div class="reward-prize">
+                    <span>🪙</span>
+                    <span>50</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaderboard List -->
+    <div class="leaderboard-list" id="leaderboardList">
+        <div class="loading">Chargement du classement...</div>
+    </div>
+
+    <script>
+        // État de l'application
+        let currentPeriod = 'daily';
+        let leaderboardData = null;
+        let currentUserData = null;
+        let refreshInterval = null;
+
+        // Charger les données du classement
+        async function loadLeaderboardData() {
+            try {
+                const response = await fetch(`/api/leaderboard/?period=${currentPeriod}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    leaderboardData = data.leaderboard;
+                    currentUserData = data.user_stats;
+                    
+                    updatePodium();
+                    updateLeaderboard();
+                    updateMyStats();
+                    
+                    // Afficher la carte du joueur si des données existent
+                    if (currentUserData && currentUserData.rank) {
+                        document.getElementById('myRankCard').style.display = 'flex';
+                    }
+                } else {
+                    showEmptyState();
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement:', error);
+                showEmptyState();
+            }
+        }
+
+        // Changer de période
+        function changePeriod(period, button) {
+            currentPeriod = period;
+            
+            // Mettre à jour les tabs
+            document.querySelectorAll('.period-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            button.classList.add('active');
+            
+            // Recharger les données
+            loadLeaderboardData();
+        }
+
+        // Mettre à jour le podium
+        function updatePodium() {
+            const podiumContainer = document.getElementById('podiumContainer');
+            
+            if (!leaderboardData || leaderboardData.length === 0) {
+                podiumContainer.innerHTML = '<div class="empty-state">Aucun score pour cette période</div>';
+                return;
+            }
+            
+            // Prendre les 3 premiers
+            const top3 = leaderboardData.slice(0, 3);
+            
+            if (top3.length >= 3) {
+                podiumContainer.innerHTML = `
+                    <div class="podium-place second">
+                        <div class="podium-medal">🥈</div>
+                        <div class="podium-avatar">${getInitials(top3[1].username)}</div>
+                        <div class="podium-name">${top3[1].username}</div>
+                        <div class="podium-score">${top3[1].total_score.toLocaleString()}</div>
+                    </div>
+                    <div class="podium-place first">
+                        <div class="podium-medal">🥇</div>
+                        <div class="podium-avatar">${getInitials(top3[0].username)}</div>
+                        <div class="podium-name">${top3[0].username}</div>
+                        <div class="podium-score">${top3[0].total_score.toLocaleString()}</div>
+                    </div>
+                    <div class="podium-place third">
+                        <div class="podium-medal">🥉</div>
+                        <div class="podium-avatar">${getInitials(top3[2].username)}</div>
+                        <div class="podium-name">${top3[2].username}</div>
+                        <div class="podium-score">${top3[2].total_score.toLocaleString()}</div>
+                    </div>
+                `;
+            } else if (top3.length === 2) {
+                podiumContainer.innerHTML = `
+                    <div class="podium-place first">
+                        <div class="podium-medal">🥇</div>
+                        <div class="podium-avatar">${getInitials(top3[0].username)}</div>
+                        <div class="podium-name">${top3[0].username}</div>
+                        <div class="podium-score">${top3[0].total_score.toLocaleString()}</div>
+                    </div>
+                    <div class="podium-place second">
+                        <div class="podium-medal">🥈</div>
+                        <div class="podium-avatar">${getInitials(top3[1].username)}</div>
+                        <div class="podium-name">${top3[1].username}</div>
+                        <div class="podium-score">${top3[1].total_score.toLocaleString()}</div>
+                    </div>
+                `;
+            } else if (top3.length === 1) {
+                podiumContainer.innerHTML = `
+                    <div class="podium-place first">
+                        <div class="podium-medal">🥇</div>
+                        <div class="podium-avatar">${getInitials(top3[0].username)}</div>
+                        <div class="podium-name">${top3[0].username}</div>
+                        <div class="podium-score">${top3[0].total_score.toLocaleString()}</div>
+                    </div>
+                `;
+            }
+        }
+
+        // Mettre à jour le classement
+        function updateLeaderboard() {
+            const leaderboardList = document.getElementById('leaderboardList');
+            
+            if (!leaderboardData || leaderboardData.length === 0) {
+                showEmptyState();
+                return;
+            }
+            
+            let html = '';
+            
+            // Commencer à partir de la 4ème position (index 3)
+            for (let i = 3; i < Math.min(leaderboardData.length, 50); i++) {
+                const entry = leaderboardData[i];
+                const isCurrentUser = currentUserData && entry.user_id === currentUserData.user_id;
+                
+                // Pas de classes spéciales car le podium gère déjà les médailles
+                html += `
+                    <div class="leaderboard-entry ${isCurrentUser ? 'highlight' : ''}">
+                        <div class="rank-number">${i + 1}</div>
+                        <div class="player-avatar-small">${getInitials(entry.username)}</div>
+                        <div class="player-info">
+                            <div class="player-name">${entry.username}${isCurrentUser ? ' (Vous)' : ''}</div>
+                            <div class="player-level">${entry.games_played} parties</div>
+                        </div>
+                        <div class="player-score">
+                            <div class="score-value">${(entry.total_score || 0).toLocaleString()}</div>
+                            <div class="score-label">points</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            leaderboardList.innerHTML = html || '<div class="empty-state"><p>Aucune entrée dans le classement</p></div>';
+        }
+
+        // Mettre à jour mes statistiques (maintenant en dehors de updateLeaderboard)
+        function updateMyStats() {
+            if (!currentUserData) {
+                document.getElementById('myRankCard').style.display = 'none';
+                return;
+            }
+            
+            document.getElementById('myRank').textContent = currentUserData.rank || '-';
+            document.getElementById('myScore').textContent = (currentUserData.total_score || 0).toLocaleString();
+            document.getElementById('myAccuracy').textContent = `${currentUserData.avg_accuracy || 0}%`;
+            document.getElementById('myGames').textContent = currentUserData.games_played || 0;
+            document.getElementById('myAvatar').textContent = getInitials(currentUserData.username);
+        }
+
+        // Obtenir les initiales d'un nom
+        function getInitials(name) {
+            if (!name) return '👤';
+            const parts = name.split(' ');
+            if (parts.length >= 2) {
+                return parts[0][0].toUpperCase() + parts[1][0].toUpperCase();
+            }
+            return name[0].toUpperCase();
+        }
+
+        // Afficher l'état vide
+        function showEmptyState() {
+            const leaderboardList = document.getElementById('leaderboardList');
+            leaderboardList.innerHTML = `
+                <div class="empty-state">
+                    <p>🎯 Aucun score pour cette période</p>
+                    <p>Soyez le premier à marquer des points!</p>
+                </div>
+            `;
+            
+            const podiumContainer = document.getElementById('podiumContainer');
+            podiumContainer.innerHTML = `
+                <div class="empty-state">
+                    <p>En attente de joueurs...</p>
+                </div>
+            `;
+        }
+
+        // Auto-refresh
+        function startAutoRefresh() {
+            // Rafraîchir toutes les 30 secondes
+            refreshInterval = setInterval(() => {
+                loadLeaderboardData();
+            }, 30000);
+        }
+
+        function stopAutoRefresh() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+                refreshInterval = null;
+            }
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            loadLeaderboardData();
+            startAutoRefresh();
+        });
+
+        // Nettoyer l'interval au déchargement de la page
+        window.addEventListener('beforeunload', function() {
+            stopAutoRefresh();
+        });
+    </script>
+</body>
+</html>

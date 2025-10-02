@@ -1,0 +1,342 @@
+{% extends 'listings/basegame.html' %}
+
+{% block title %}Inscription - Free Kick Master{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .auth-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 40px;
+        width: 100%;
+        max-width: 400px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .auth-title {
+        text-align: center;
+        font-size: 32px;
+        margin-bottom: 10px;
+        color: #333;
+    }
+
+    .auth-subtitle {
+        text-align: center;
+        color: #666;
+        margin-bottom: 30px;
+    }
+
+    .game-logo {
+        text-align: center;
+        font-size: 60px;
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 5px;
+        color: #333;
+        font-weight: bold;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 16px;
+        transition: all 0.3s;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-input.error {
+        border-color: #F44336;
+    }
+
+    .form-help {
+        font-size: 12px;
+        color: #666;
+        margin-top: 5px;
+    }
+
+    .password-strength {
+        height: 5px;
+        background: #e0e0e0;
+        border-radius: 3px;
+        margin-top: 5px;
+        overflow: hidden;
+    }
+
+    .password-strength-bar {
+        height: 100%;
+        width: 0;
+        transition: all 0.3s;
+        border-radius: 3px;
+    }
+
+    .strength-weak { background: #F44336; width: 33%; }
+    .strength-medium { background: #FFC107; width: 66%; }
+    .strength-strong { background: #4CAF50; width: 100%; }
+
+    .btn-primary {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .auth-links {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .auth-link {
+        color: #667eea;
+        text-decoration: none;
+        transition: color 0.3s;
+    }
+
+    .auth-link:hover {
+        color: #764ba2;
+    }
+
+    .terms-checkbox {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .terms-checkbox input {
+        margin-top: 5px;
+    }
+
+    .terms-text {
+        font-size: 14px;
+        color: #666;
+    }
+
+    .error-message {
+        background: #FFEBEE;
+        color: #C62828;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="game-logo">⚽</div>
+        <h1 class="auth-title">Free Kick Master</h1>
+        <p class="auth-subtitle">Créez votre compte pour jouer</p>
+
+        {% if messages %}
+        <div class="error-message">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="{% url 'register' %}" onsubmit="return validateForm()">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label" for="username">Nom d'utilisateur</label>
+                <input type="text" id="username" name="username" class="form-input" required minlength="3" maxlength="20">
+                <div class="form-help">Entre 3 et 20 caractères, lettres et chiffres uniquement</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="email">Email</label>
+                <input type="email" id="email" name="email" class="form-input" required>
+                <div class="form-help">Utilisé pour récupérer votre compte si nécessaire</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password1">Mot de passe</label>
+                <input type="password" id="password1" name="password1" class="form-input" required minlength="8" onkeyup="checkPasswordStrength()">
+                <div class="password-strength">
+                    <div class="password-strength-bar" id="strengthBar"></div>
+                </div>
+                <div class="form-help">Au moins 8 caractères</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password2">Confirmer le mot de passe</label>
+                <input type="password" id="password2" name="password2" class="form-input" required onkeyup="checkPasswordMatch()">
+                <div class="form-help" id="passwordMatchHelp"></div>
+            </div>
+
+            <div class="terms-checkbox">
+                <input type="checkbox" id="terms" required>
+                <label for="terms" class="terms-text">
+                    J'accepte les conditions d'utilisation et je comprends que ce jeu est à but de divertissement
+                </label>
+            </div>
+
+            <button type="submit" class="btn-primary" id="submitBtn">S'inscrire</button>
+        </form>
+
+        <div class="auth-links">
+            <p>Déjà un compte ? <a href="{% url 'login' %}" class="auth-link">Se connecter</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Vérifier la force du mot de passe
+    function checkPasswordStrength() {
+        const password = document.getElementById('password1').value;
+        const strengthBar = document.getElementById('strengthBar');
+        
+        let strength = 0;
+        if (password.length >= 8) strength++;
+        if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
+        if (password.match(/[0-9]/)) strength++;
+        if (password.match(/[^a-zA-Z0-9]/)) strength++;
+        
+        strengthBar.className = 'password-strength-bar';
+        if (password.length > 0) {
+            if (strength <= 1) {
+                strengthBar.classList.add('strength-weak');
+            } else if (strength === 2) {
+                strengthBar.classList.add('strength-medium');
+            } else {
+                strengthBar.classList.add('strength-strong');
+            }
+        }
+        
+        checkPasswordMatch();
+    }
+    
+    // Vérifier la correspondance des mots de passe
+    function checkPasswordMatch() {
+        const password1 = document.getElementById('password1').value;
+        const password2 = document.getElementById('password2').value;
+        const helpText = document.getElementById('passwordMatchHelp');
+        const password2Input = document.getElementById('password2');
+        
+        if (password2.length > 0) {
+            if (password1 === password2) {
+                helpText.textContent = '✓ Les mots de passe correspondent';
+                helpText.style.color = '#4CAF50';
+                password2Input.classList.remove('error');
+            } else {
+                helpText.textContent = '✗ Les mots de passe ne correspondent pas';
+                helpText.style.color = '#F44336';
+                password2Input.classList.add('error');
+            }
+        } else {
+            helpText.textContent = '';
+            password2Input.classList.remove('error');
+        }
+    }
+    
+    // Valider le formulaire avant envoi
+    function validateForm() {
+        const username = document.getElementById('username').value;
+        const password1 = document.getElementById('password1').value;
+        const password2 = document.getElementById('password2').value;
+        const terms = document.getElementById('terms').checked;
+        
+        // Vérifier le nom d'utilisateur
+        if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+            alert('Le nom d\'utilisateur ne peut contenir que des lettres, chiffres et underscore');
+            return false;
+        }
+        
+        // Vérifier les mots de passe
+        if (password1 !== password2) {
+            alert('Les mots de passe ne correspondent pas');
+            return false;
+        }
+        
+        if (password1.length < 8) {
+            alert('Le mot de passe doit contenir au moins 8 caractères');
+            return false;
+        }
+        
+        // Vérifier les conditions
+        if (!terms) {
+            alert('Vous devez accepter les conditions d\'utilisation');
+            return false;
+        }
+        
+        return true;
+    }
+    
+    // Animation d'entrée
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputs = document.querySelectorAll('.form-input');
+        inputs.forEach((input, index) => {
+            input.style.animation = `slideIn 0.5s ${index * 0.1}s ease-out forwards`;
+            input.style.opacity = '0';
+        });
+    });
+</script>
+
+<style>
+    @keyframes slideIn {
+        from {
+            transform: translateX(-20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+</style>
+{% endblock %}

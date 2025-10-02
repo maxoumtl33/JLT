@@ -1,0 +1,335 @@
+<!-- templates/listings/homegame.html -->
+{% extends 'listings/basegame.html' %}
+{% load static %}
+
+{% block title %}Accueil - Free Kick Master{% endblock %}
+
+{% block extra_css %}
+<style>
+    .home-container {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .game-logo {
+        font-size: 100px;
+        animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-20px); }
+    }
+
+    .game-title {
+        color: white;
+        font-size: 48px;
+        font-weight: bold;
+        text-align: center;
+        margin: 20px 0;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .game-subtitle {
+        color: rgba(255,255,255,0.9);
+        font-size: 20px;
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .menu-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .menu-btn {
+        padding: 15px 30px;
+        background: rgba(255,255,255,0.95);
+        border: none;
+        border-radius: 15px;
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        text-decoration: none;
+    }
+
+    .menu-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    .menu-btn.primary {
+        background: linear-gradient(135deg, #FFD700, #FFA500);
+        color: white;
+        font-size: 22px;
+    }
+
+    .user-info {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(0,0,0,0.7);
+        padding: 10px 20px;
+        border-radius: 10px;
+        color: white;
+    }
+
+    .stats-preview {
+        margin-top: 40px;
+        background: rgba(255,255,255,0.1);
+        padding: 20px;
+        border-radius: 15px;
+        display: flex;
+        gap: 30px;
+        backdrop-filter: blur(10px);
+    }
+
+    .stat-item {
+        text-align: center;
+        color: white;
+    }
+
+    .stat-value {
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    .stat-label {
+        font-size: 14px;
+        opacity: 0.8;
+    }
+
+    /* Modal pour nouveau joueur */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-overlay.show {
+        display: flex;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        max-width: 400px;
+        text-align: center;
+        animation: modalSlide 0.3s ease;
+    }
+
+    @keyframes modalSlide {
+        from { transform: translateY(-50px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-icon {
+        font-size: 60px;
+        margin-bottom: 20px;
+    }
+
+    .modal-title {
+        font-size: 24px;
+        color: #333;
+        margin-bottom: 15px;
+        font-weight: bold;
+    }
+
+    .modal-text {
+        color: #666;
+        margin-bottom: 20px;
+        line-height: 1.5;
+    }
+
+    .modal-coins {
+        background: linear-gradient(135deg, #FFD700, #FFA500);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 10px;
+        display: inline-block;
+        margin-bottom: 20px;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .modal-buttons {
+        display: flex;
+        gap: 10px;
+    }
+
+    .modal-btn {
+        flex: 1;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 10px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .modal-btn.primary {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+    }
+
+    .modal-btn.secondary {
+        background: #f0f0f0;
+        color: #333;
+    }
+
+    .modal-btn:hover {
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="home-container">
+    {% if user.is_authenticated %}
+    <div class="user-info">
+        <div>👤 {{ user.username }}</div>
+        <div>Niveau {{ user.game_profile.level }}</div>
+    </div>
+    {% endif %}
+
+    <div class="game-logo">⚽</div>
+    <h1 class="game-title">Free Kick Master</h1>
+    <p class="game-subtitle">Devenez le maître des coups francs!</p>
+
+    <div class="menu-buttons">
+        {% if user.is_authenticated %}
+            <button onclick="checkAndPlay()" class="menu-btn primary">
+                <span>🎮</span> Jouer
+            </button>
+            <a href="{% url 'shop' %}" class="menu-btn">
+                <span>🛍️</span> Boutique
+            </a>
+            <a href="{% url 'characters' %}" class="menu-btn">
+                <span>👤</span> Personnages
+            </a>
+            <a href="{% url 'leaderboard' %}" class="menu-btn">
+                <span>🏆</span> Classement
+            </a>
+            <a href="{% url 'logout' %}" class="menu-btn">
+                <span>🚪</span> Déconnexion
+            </a>
+        {% else %}
+            <a href="{% url 'logingame' %}" class="menu-btn primary">
+                <span>🔑</span> Se connecter
+            </a>
+            <a href="{% url 'registergame' %}" class="menu-btn">
+                <span>✨</span> S'inscrire
+            </a>
+        {% endif %}
+    </div>
+
+    {% if user.is_authenticated %}
+    <div class="stats-preview">
+        <div class="stat-item">
+            <div class="stat-value">{{ user.game_profile.coins }}</div>
+            <div class="stat-label">🪙 Pièces</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">{{ user.game_profile.gems }}</div>
+            <div class="stat-label">💎 Gemmes</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">{{ user.game_profile.best_score }}</div>
+            <div class="stat-label">🏆 Meilleur Score</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">{{ user.game_profile.total_games }}</div>
+            <div class="stat-label">🎮 Parties</div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modal pour joueur sans personnage -->
+<div class="modal-overlay" id="noCharacterModal">
+    <div class="modal-content">
+        <div class="modal-icon">🎭</div>
+        <h2 class="modal-title">Choisissez votre Personnage!</h2>
+        <p class="modal-text">
+            Bienvenue dans Free Kick Master! Avant de commencer votre aventure, 
+            vous devez choisir votre premier personnage dans la boutique.
+        </p>
+        <div class="modal-coins">
+            🪙 Vous avez {{ user.game_profile.coins }} pièces
+        </div>
+        <p class="modal-text" style="font-size: 14px; color: #888;">
+            Utilisez vos pièces pour acheter votre premier personnage et commencer à jouer!
+        </p>
+        <div class="modal-buttons">
+            <button class="modal-btn secondary" onclick="closeModal()">Plus tard</button>
+            <button class="modal-btn primary" onclick="goToShop()">
+                Aller à la Boutique 🛍️
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Vérifier si le joueur a un personnage
+    let hasCharacter = {{ user.game_profile.selected_character|yesno:"true,false" }};
+    
+    function checkAndPlay() {
+        // Vérifier via l'API si le joueur a un personnage
+        fetch('/api/profile/')
+            .then(response => response.json())
+            .then(data => {
+                if (data.has_character) {
+                    // Le joueur a un personnage, aller au jeu
+                    window.location.href = "{% url 'game' %}";
+                } else {
+                    // Afficher la modal
+                    document.getElementById('noCharacterModal').classList.add('show');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                // En cas d'erreur, essayer quand même d'aller au jeu
+                window.location.href = "{% url 'game' %}";
+            });
+    }
+    
+    function closeModal() {
+        document.getElementById('noCharacterModal').classList.remove('show');
+    }
+    
+    function goToShop() {
+        window.location.href = "{% url 'shop' %}";
+    }
+    
+    // Vérifier au chargement si c'est un nouveau joueur
+    {% if user.is_authenticated and not user.game_profile.selected_character %}
+    window.addEventListener('DOMContentLoaded', function() {
+        // Afficher automatiquement la modal pour les nouveaux joueurs
+        setTimeout(() => {
+            document.getElementById('noCharacterModal').classList.add('show');
+        }, 1000);
+    });
+    {% endif %}
+</script>
+{% endblock %}

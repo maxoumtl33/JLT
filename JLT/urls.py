@@ -96,7 +96,7 @@ path('livraisonshier/', views.livraisonshier, name='livraisonshier'),
 path('geocode-all-livraisons/', GeocodeAllLivraisonsView.as_view(), name='geocode_all_livraisons'),path('geocodingtoday/<int:pk>/', GeocodingTodayView.as_view(), name='geocodingtoday'),
 path('api/submission/<int:submission_id>/delete-submenu/<int:submenu_id>/', views.delete_menu_submission, name='delete_submenu'),
 path('recuptoday/', views.recuptoday, name='recuptoday'),
-path('save_score/', views.save_score, name='save_score'),
+path('save_score/', views.save_score1, name='save_score'),
 path('scores/top/', views.top_scores, name='top_scores'),
 path('generate-multiple-pdfs/', views.generate_multiple_pdfs, name='generate_multiple_pdfs'),
 path('generate-multiple-pdfs-en/', views.generate_multiple_pdfs_en, name='generate_multiple_pdfs_en'),
@@ -307,6 +307,28 @@ path('route/delete/<int:route_id>/', delete_route, name='delete_route'),
 
     path('catalogue/import/hector/', views.import_hector_larivee, name='import_hector_larivee'),
 
+
+    path('homegame/', views.home_view, name='homegame'),
+    path('game/', views.game_view, name='game'),
+    path('shop/', views.shop_view, name='shop'),
+    path('characters/', views.characters_view, name='characters'),
+    path('leaderboard/', views.leaderboard_view, name='leaderboard'),
+    
+    # Authentification
+    path('logingame/', views.login_view, name='logingame'),
+    path('registergame/', views.register_view, name='registergame'),
+    path('logout/', views.logout_view, name='logout'),
+    
+    # API Endpoints
+    path('api/profile/', views.get_profile_data, name='api_profile'),
+    path('api/save-score/', views.save_score, name='api_save_score'),
+    path('api/purchase-item/', views.purchase_item, name='api_purchase'),
+    path('api/equip-item/', views.equip_item, name='api_equip'),
+    path('api/daily-bonus/', views.claim_daily_bonus, name='api_daily_bonus'),
+    path('api/shop-data/', views.shop_data_api, name='shop_data'),
+    path('api/characters-data/', views.characters_data_api, name='characters_data'),
+    path('api/leaderboard/', views.leaderboard_api, name='leaderboard_api'),
+    path('test-profile/', views.test_profile, name='test_profile'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 

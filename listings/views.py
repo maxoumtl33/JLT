@@ -1225,129 +1225,116 @@ from datetime import date, datetime, timedelta
 @require_GET
 def voir_checklist(request):
     today = date.today()
-    current_year = today.year
+
+    # Préchargement des checklists actives
+    checklists = Checklist.objects.filter(is_active=True)
+
+    encours = "en_cours"
+    valide = "valide"
+    refuse = "refuse"
     tomorrow = timezone.now().date() + timedelta(days=1)
-    
-    # Sélection du mois et jour
-    selected_day = int(request.GET.get('day', 1))
-    selected_month = int(request.GET.get('month', today.month))
-    
-    # Pour les requêtes AJAX des totaux uniquement
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        selected_date_str = request.GET.get('selected_datee')
-        if selected_date_str:
-            selected_datee = datetime.strptime(selected_date_str, '%Y-%m-%d').date()
-        else:
-            selected_datee = tomorrow
-            
-        # Utiliser le cache pour les totaux
-        cache_key = f'checklist_item_totals_{selected_datee}'
-        checklist_item_totals = cache.get(cache_key)
-        
-        if checklist_item_totals is None:
-            checklist_items_qs = ChecklistItem.objects.filter(
-                checklist__date=selected_datee,
-                checklist__is_active=True
-            ).select_related('product')
-            
-            checklist_item_totals = list(
-                checklist_items_qs
-                .values('product__name', 'product__category')
-                .annotate(total_quantity=Sum('quantity'))
-                .filter(total_quantity__gt=0)
-                .order_by('product__category', 'product__name')
-            )
-            cache.set(cache_key, checklist_item_totals, timeout=900)
-        
-        return JsonResponse({
-            'checklist_item_totals': checklist_item_totals,
-            'selected_datee': selected_datee,
-        })
-    
-    # === OPTIMISATIONS PRINCIPALES ===
-    
-    # 1. Utiliser select_related et prefetch_related pour éviter les requêtes N+1
-    checklists_month = Checklist.objects.filter(
-        date__month=selected_month,
-        date__year=current_year
-    ).select_related(
-        'conseillere'  # Si c'est une ForeignKey
-    ).only(
-        'id', 'name', 'date', 'heure_livraison', 'notechecklist', 'is_active',
-        'conseillere__name'  # Ajuster selon le modèle User
-    )
-    
-    # 2. Filtrer les checklists actives une seule fois
-    checklists_active = list(checklists_month.filter(is_active=True))
-    
-    # 3. Optimiser la requête des livraisons
-    livraisons = Livraison.objects.filter(
-        recuperation=False,
-        date__month=selected_month,  # Filtrer par mois si pertinent
-        date__year=current_year
-    ).only(
-        'id', 'date', 'journee', 'nom', 'heure_livraison', 'infodetail'
-    )[:100]  # Limiter le nombre si nécessaire
-    
-    # 4. Ne pas charger TOUS les logs - pagination ou limite
-    # Ces logs semblent ne pas être utilisés dans le template, les retirer si possible
-    # change_logs = ChecklistItemChangeLog.objects.all().order_by('-timestamp')[:50]
-    # change_logs_checklist = ChecklistChangeLog.objects.all().order_by('-timestamp')[:50]
-    
-    # 5. Préparer les données du calendrier
-    _, num_days_in_month = calendar.monthrange(current_year, selected_month)
-    days_in_month = list(range(1, num_days_in_month + 1))
-    
-    # 6. Génération des QR codes en batch (plus efficace)
-    base_url = request.build_absolute_uri('/')
-    for checklist in checklists_active:
-        # Générer l'URL une seule fois
-        url = f"{base_url}checklist-en-cours/{checklist.id}/"
-        checklist.qr_code_uri = generate_qr_code_base64(url)
-        checklist.formatted_heure_livraison = format_time_without_seconds(checklist.heure_livraison)
-    
-    # 7. Formater les heures de livraison une seule fois
+
+    # Checklists du jour
+    checklists_of_the_day = Checklist.objects.filter(date=today, is_active=True)
+
+    # Années pour le filtre
+    current_year = today.year
+    years = [year for year in range(current_year - 5, current_year + 1)]
+
+    # Livraison
+    livraisons = Livraison.objects.filter(recuperation=False)
     for livraison in livraisons:
         livraison.formatted_heure_livraison = format_time_without_seconds(livraison.heure_livraison)
-    
-    # Constantes
+
+    # Séléction du mois
+    selected_day = int(request.GET.get('day', 1))
+    selected_month = int(request.GET.get('month', today.month))
+    _, num_days_in_month = calendar.monthrange(current_year, selected_month)
+    days_in_month = [day for day in range(1, num_days_in_month + 1)]
+
+    # Listes de noms de mois en français
     french_months = [
         "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
         "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
     ]
-    
-    years = list(range(current_year - 5, current_year + 1))
-    
-    # 8. Checklists du jour - requête séparée optimisée
-    checklists_of_the_day = Checklist.objects.filter(
-        date=today, 
-        is_active=True
-    ).select_related('conseillere').only(
-        'id', 'name', 'heure_livraison'
-    )[:20]  # Limiter si nécessaire
-    
+
+    # Requêtes pour checklists du mois
+    checklists = Checklist.objects.filter(date__month=selected_month)
+
+    # Logs
+    change_logs = ChecklistItemChangeLog.objects.all().order_by('-timestamp')
+    change_logs_checklist = ChecklistChangeLog.objects.all().order_by('-timestamp')
+
+    # Date sélectionnée
+    selected_date_str = request.GET.get('selected_datee')
+    if selected_date_str:
+        selected_datee = datetime.strptime(selected_date_str, '%Y-%m-%d').date()
+    else:
+        selected_datee = tomorrow
+
+    # --- Optimisation de la requête checklist_item_totals avec cache ---
+    cache_key = f'checklist_item_totals_{selected_datee}'
+    checklist_item_totals = cache.get(cache_key)
+
+    if checklist_item_totals is None:
+        # Si pas dans le cache, faire la requête
+        checklist_items_qs = ChecklistItem.objects.filter(
+            checklist__date=selected_datee,
+            checklist__is_active=True
+        ).select_related('product')  # Précharger 'product' pour éviter N+1
+
+        checklist_item_totals = (
+            checklist_items_qs
+            .values('product__name', 'product__category')
+            .annotate(total_quantity=Sum('quantity'))
+            .filter(total_quantity__gt=0)
+            .order_by('product__category', 'product__name')
+        )
+
+        # Stocker dans le cache (15 min par exemple)
+        cache.set(cache_key, list(checklist_item_totals), timeout=900)
+    else:
+        # Si en cache, convertir en liste
+        checklist_item_totals = checklist_item_totals
+
+    # Préparer les données JSON pour la requête AJAX
+    data = {
+        'checklist_item_totals': list(checklist_item_totals),
+        'selected_datee': selected_datee,
+    }
+
+    # Si requête AJAX, renvoyer JSON
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse(data)
+
+    # Générez les QR Codes
+    for checklist in checklists:
+        url = request.build_absolute_uri(reverse('checklist_en_cours', args=[checklist.id]))
+        checklist.qr_code_uri = generate_qr_code_base64(url)
+        checklist.formatted_heure_livraison = format_time_without_seconds(checklist.heure_livraison)
+
+    # Contexte pour le rendu
     context = {
-        'checklists': checklists_active,  # Seulement les actives
-        'encours': "en_cours",
-        'valide': "valide",
-        'refuse': "refuse",
+        'checklists': checklists,
+        'encours': encours,
+        'valide': valide,
+        'refuse': refuse,
         'today': today,
-        # 'change_logs': change_logs,  # Retirer si non utilisé
-        # 'change_logs_checklist': change_logs_checklist,  # Retirer si non utilisé
+        'change_logs': change_logs,
+        'change_logs_checklist': change_logs_checklist,
+                'months': list(range(1, 13)),  # Mois sous forme de liste
         'selected_month': selected_month,
         'days': days_in_month,
         'checklists_of_the_day': checklists_of_the_day,
-        'months': list(range(1, 13)),
+        'months': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
         'french_months': french_months,
         'selected_day': selected_day,
         'selected_date': date(current_year, selected_month, selected_day).strftime('%d %B %Y'),
         'years': years,
-        'checklist_item_totals': [],  # Sera chargé en AJAX
+        'checklist_item_totals': checklist_item_totals,
         'selected_year': current_year,
         'livraisons': livraisons,
-        'selected_datee': tomorrow,
     }
-    
     return render(request, 'listings/voir-checklist.html', context)
 
 @login_required
@@ -3445,13 +3432,13 @@ def journees_list(request):
 
 @login_required
 def jeux(request):
-    top_scores = Score.objects.order_by('-score')[:5]
+    top_scores = Score1.objects.order_by('-score')[:5]
     return render(request, 'listings/jeux.html', {
         'top_scores': top_scores,
     })
 
 def top_scores(request):
-    scores = Score.objects.order_by('-score')[:5]
+    scores = Score1.objects.order_by('-score')[:5]
     data = {
         'scores': [
             {'user': s.user.username, 'score': s.score}
@@ -3461,12 +3448,12 @@ def top_scores(request):
     return JsonResponse(data)
 
 @login_required
-def save_score(request):
+def save_score1(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             score_value = int(data.get('score', 0))
-            Score.objects.create(user=request.user, score=score_value)
+            Score1.objects.create(user=request.user, score=score_value)
             return JsonResponse({'status': 'ok'})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
@@ -8363,17 +8350,7 @@ from .forms import (
 # ===============================================
 # Dashboard
 # ===============================================
-@login_required
-def dashboard(request):
-    context = {
-        'total_recettes': Recette.objects.count(),
-        'total_ingredients': Ingredient.objects.count(),
-        'total_fournisseurs': Fournisseur.objects.count(),
-        'commandes_en_cours': Commande.objects.filter(statut='EN_COURS').count(),
-        'ingredients_alerte': Ingredient.objects.filter(stock_reel__lte=F('stock_alerte')).count(),
-        'commandes_recentes': Commande.objects.all()[:5],
-    }
-    return render(request, 'recipes/dashboard.html', context)
+
 
 # ===============================================
 # Vues CRUD pour UniteMesure
@@ -9975,3 +9952,942 @@ def create_units_for_hector():
             symbole=symbole,
             defaults={'nom': nom}
         )
+
+
+# views.py
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth.models import User
+from django.contrib import messages
+from django.db.models import Q, Sum, Count, Avg
+from django.utils import timezone
+from datetime import timedelta
+import json
+
+from .models import (
+    Character, BallSkin, PlayerSkin, PowerUp, DifficultyLevel,
+    UserProfile, Purchase, Score, Leaderboard
+)
+
+# ==================== Game Views ====================
+
+def home_view(request):
+    """Page d'accueil du jeu"""
+    context = {
+        'user': request.user if request.user.is_authenticated else None
+    }
+    return render(request, 'listings/homegame.html', context)
+
+
+# views.py - Modifier la vue game_view pour vérifier le personnage
+@login_required
+def game_view(request):
+    """Vue principale du jeu"""
+    profile, created = UserProfileFoot.objects.get_or_create(user=request.user)
+    
+    # Vérifier si le joueur a un personnage sélectionné
+    if not profile.selected_character:
+        messages.warning(request, "Vous devez d'abord acheter et sélectionner un personnage!")
+        return redirect('game:shop')
+    
+    context = {
+        'profile': profile,
+        'character': profile.selected_character,
+    }
+    return render(request, 'listings/game.html', context)
+
+
+# ==================== Shop Views ====================
+
+@login_required
+def shop_view(request):
+    """Vue de la boutique"""
+    profile = UserProfileFoot.objects.get(user=request.user)
+    
+    # Récupérer tous les items disponibles
+    characters = Character.objects.filter(is_active=True).order_by('order')
+    ball_skins = BallSkin.objects.filter(is_active=True).order_by('order')
+    player_skins = PlayerSkin.objects.filter(is_active=True).order_by('order')
+    powerups = PowerUp.objects.filter(is_active=True).order_by('order')
+    
+    # Récupérer les achats de l'utilisateur
+    user_purchases = Purchase.objects.filter(user=request.user)
+    owned_characters = user_purchases.filter(character__isnull=False).values_list('character_id', flat=True)
+    owned_balls = user_purchases.filter(ball_skin__isnull=False).values_list('ball_skin_id', flat=True)
+    owned_skins = user_purchases.filter(player_skin__isnull=False).values_list('player_skin_id', flat=True)
+    
+    context = {
+        'profile': profile,
+        'characters': characters,
+        'ball_skins': ball_skins,
+        'player_skins': player_skins,
+        'powerups': powerups,
+        'owned_characters': list(owned_characters),
+        'owned_balls': list(owned_balls),
+        'owned_skins': list(owned_skins),
+    }
+    return render(request, 'listings/shop.html', context)
+
+
+@login_required
+@csrf_exempt
+def purchase_item(request):
+    """API pour acheter un item"""
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        item_type = data.get('type')
+        item_id = data.get('id')
+        
+        profile = UserProfileFoot.objects.get(user=request.user)
+        
+        try:
+            if item_type == 'character':
+                item = Character.objects.get(id=item_id)
+                # Vérifier si déjà possédé
+                if Purchase.objects.filter(user=request.user, character=item).exists():
+                    return JsonResponse({'success': False, 'message': 'Déjà possédé'})
+                
+                # Vérifier les fonds
+                if profile.coins >= item.price:
+                    profile.coins -= item.price
+                    profile.save()
+                    Purchase.objects.create(
+                        user=request.user,
+                        character=item,
+                        price=item.price,
+                        currency='coins'
+                    )
+                    return JsonResponse({
+                        'success': True, 
+                        'message': f'{item.name} acheté avec succès!',
+                        'coins': profile.coins
+                    })
+                else:
+                    return JsonResponse({'success': False, 'message': 'Fonds insuffisants'})
+                    
+            elif item_type == 'ball':
+                item = BallSkin.objects.get(id=item_id)
+                if Purchase.objects.filter(user=request.user, ball_skin=item).exists():
+                    return JsonResponse({'success': False, 'message': 'Déjà possédé'})
+                
+                if profile.coins >= item.price:
+                    profile.coins -= item.price
+                    profile.save()
+                    Purchase.objects.create(
+                        user=request.user,
+                        ball_skin=item,
+                        price=item.price,
+                        currency='coins'
+                    )
+                    return JsonResponse({
+                        'success': True,
+                        'message': f'{item.name} acheté avec succès!',
+                        'coins': profile.coins
+                    })
+                else:
+                    return JsonResponse({'success': False, 'message': 'Fonds insuffisants'})
+                    
+            elif item_type == 'skin':
+                item = PlayerSkin.objects.get(id=item_id)
+                if Purchase.objects.filter(user=request.user, player_skin=item).exists():
+                    return JsonResponse({'success': False, 'message': 'Déjà possédé'})
+                
+                if profile.coins >= item.price:
+                    profile.coins -= item.price
+                    profile.save()
+                    Purchase.objects.create(
+                        user=request.user,
+                        player_skin=item,
+                        price=item.price,
+                        currency='coins'
+                    )
+                    return JsonResponse({
+                        'success': True,
+                        'message': f'{item.name} acheté avec succès!',
+                        'coins': profile.coins
+                    })
+                else:
+                    return JsonResponse({'success': False, 'message': 'Fonds insuffisants'})
+                    
+            elif item_type == 'powerup':
+                item = PowerUp.objects.get(id=item_id)
+                if profile.coins >= item.price:
+                    profile.coins -= item.price
+                    profile.save()
+                    Purchase.objects.create(
+                        user=request.user,
+                        powerup=item,
+                        price=item.price,
+                        currency='coins'
+                    )
+                    return JsonResponse({
+                        'success': True,
+                        'message': f'{item.name} acheté avec succès!',
+                        'coins': profile.coins
+                    })
+                else:
+                    return JsonResponse({'success': False, 'message': 'Fonds insuffisants'})
+                    
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    
+    return JsonResponse({'success': False, 'message': 'Méthode non autorisée'})
+
+
+@login_required
+@csrf_exempt
+def equip_item(request):
+    """API pour équiper un item"""
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        item_type = data.get('type')
+        item_id = data.get('id')
+        
+        profile = UserProfileFoot.objects.get(user=request.user)
+        
+        try:
+            if item_type == 'character':
+                character = Character.objects.get(id=item_id)
+                # Vérifier la possession
+                if not Purchase.objects.filter(user=request.user, character=character).exists():
+                    if character.price > 0:  # Pas gratuit
+                        return JsonResponse({'success': False, 'message': 'Non possédé'})
+                
+                # NOUVEAU : Désélectionner le skin s'il ne correspond pas au nouveau personnage
+                if profile.selected_player_skin:
+                    if profile.selected_player_skin.character and profile.selected_player_skin.character != character:
+                        profile.selected_player_skin = None
+                
+                profile.selected_character = character
+                profile.save()
+                return JsonResponse({'success': True, 'message': f'{character.name} équipé!'})
+                
+            elif item_type == 'ball':
+                ball = BallSkin.objects.get(id=item_id)
+                if not Purchase.objects.filter(user=request.user, ball_skin=ball).exists():
+                    if ball.price > 0:
+                        return JsonResponse({'success': False, 'message': 'Non possédé'})
+                
+                profile.selected_ball_skin = ball
+                profile.save()
+                return JsonResponse({'success': True, 'message': f'{ball.name} équipé!'})
+                
+            elif item_type == 'skin':
+                skin = PlayerSkin.objects.get(id=item_id)
+                if not Purchase.objects.filter(user=request.user, player_skin=skin).exists():
+                    if skin.price > 0:
+                        return JsonResponse({'success': False, 'message': 'Non possédé'})
+                
+                # NOUVEAU : Vérifier que le skin correspond au personnage actuel
+                if skin.character:
+                    if not profile.selected_character:
+                        return JsonResponse({'success': False, 'message': 'Sélectionnez d\'abord un personnage!'})
+                    
+                    if skin.character != profile.selected_character:
+                        return JsonResponse({
+                            'success': False, 
+                            'message': f'Ce skin appartient à {skin.character.name}, pas à {profile.selected_character.name}!'
+                        })
+                
+                profile.selected_player_skin = skin
+                profile.save()
+                return JsonResponse({'success': True, 'message': f'{skin.name} équipé!'})
+                
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    
+    return JsonResponse({'success': False, 'message': 'Méthode non autorisée'})
+
+# ==================== Character Views ====================
+
+@login_required
+def characters_view(request):
+    """Vue de sélection des personnages"""
+    profile = UserProfileFoot.objects.get(user=request.user)
+    characters = Character.objects.filter(is_active=True).order_by('order')
+    
+    # Récupérer les personnages possédés
+    owned = Purchase.objects.filter(
+        user=request.user,
+        character__isnull=False
+    ).values_list('character_id', flat=True)
+    
+    # Ajouter les personnages gratuits
+    free_characters = Character.objects.filter(price=0).values_list('id', flat=True)
+    owned_characters = list(set(list(owned) + list(free_characters)))
+    
+    context = {
+        'profile': profile,
+        'characters': characters,
+        'owned_characters': owned_characters,
+        'selected_character': profile.selected_character,
+    }
+    return render(request, 'listings/characters.html', context)
+
+
+# ==================== Leaderboard Views ====================
+
+@login_required
+def leaderboard_view(request):
+    """Vue du classement"""
+    period = request.GET.get('period', 'daily')
+    
+    # Calculer les dates selon la période
+    now = timezone.now()
+    if period == 'daily':
+        start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    elif period == 'weekly':
+        start_date = now - timedelta(days=now.weekday())
+        start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+    elif period == 'monthly':
+        start_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    else:  # all-time
+        start_date = None
+    
+    # Récupérer les scores
+    scores_query = Score.objects.all()
+    if start_date:
+        scores_query = scores_query.filter(date__gte=start_date)
+    
+    # Agréger par joueur
+    leaderboard = scores_query.values('player__username', 'player__id').annotate(
+        total_score=Sum('score'),
+        games_played=Count('id'),
+        avg_accuracy=Avg('successful_shots') * 100 / Avg('total_shots')
+    ).order_by('-total_score')[:100]
+    
+    # Position du joueur actuel
+    user_rank = None
+    user_stats = None
+    for idx, entry in enumerate(leaderboard):
+        if entry['player__id'] == request.user.id:
+            user_rank = idx + 1
+            user_stats = entry
+            break
+    
+    context = {
+        'leaderboard': leaderboard[:50],  # Top 50
+        'period': period,
+        'user_rank': user_rank,
+        'user_stats': user_stats,
+    }
+    return render(request, 'listings/leaderboard.html', context)
+
+
+# ==================== Score API ====================
+
+
+@login_required
+@csrf_exempt
+def save_score(request):
+    """Sauvegarde le score et met à jour le profil avec les gains"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            score_value = int(data.get('score', 0))
+            exp_earned = int(data.get('exp_earned', 0))
+            
+            # Calculer les gains côté serveur pour la sécurité
+            coins_to_add = score_value // 10
+            gems_to_add = score_value // 500
+            
+            print(f"Score: {score_value}, Coins: {coins_to_add}, Gems: {gems_to_add}, Exp: {exp_earned}")
+            
+            # Créer le score
+            score_obj = Score.objects.create(
+                player=request.user,
+                score=score_value,
+                total_shots=data.get('total_shots', 0),
+                successful_shots=data.get('successful_shots', 0),
+                targets_hit=data.get('targets_hit', 0),
+                perfect_shots=data.get('perfect_shots', 0),
+                max_combo=data.get('max_combo', 1),
+                coins_earned=coins_to_add,
+                exp_earned=exp_earned
+            )
+            
+            # Récupérer ou créer le profil avec 500 coins de départ
+            profile, created = UserProfileFoot.objects.get_or_create(
+                user=request.user,
+                defaults={
+                    'coins': 500,  # Nouveau joueur = 500 coins
+                    'gems': 0,
+                    'level': 1,
+                    'experience': 0
+                }
+            )
+            
+            # Mettre à jour le profil
+            profile.coins += coins_to_add
+            profile.gems += gems_to_add
+            profile.experience += exp_earned
+            profile.total_games += 1
+            profile.total_goals += score_obj.successful_shots
+            
+            # Si meilleur score
+            if score_value > profile.best_score:
+                profile.best_score = score_value
+            
+            # Calculer le nouveau niveau (500 XP = 1 niveau)
+            new_level = (profile.experience // 500) + 1
+            level_up = False
+            
+            if new_level > profile.level:
+                profile.level = new_level
+                level_up = True
+                # Bonus de niveau
+                profile.coins += 100 * new_level
+                profile.gems += 5
+                print(f"Level up! Nouveau niveau: {new_level}")
+            
+            profile.save()
+            
+            print(f"Profil mis à jour - Coins: {profile.coins}, Gems: {profile.gems}, Level: {profile.level}, Exp: {profile.experience}")
+            
+            # Retourner les nouvelles valeurs
+            return JsonResponse({
+                'success': True,
+                'total_coins': profile.coins,
+                'total_gems': profile.gems,
+                'new_level': profile.level if level_up else None,
+                'experience': profile.experience,
+                'coins_earned': coins_to_add,
+                'gems_earned': gems_to_add,
+                'exp_earned': exp_earned,
+                'level_up': level_up
+            })
+            
+        except Exception as e:
+            print(f"Erreur lors de la sauvegarde: {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)
+    
+    return JsonResponse({
+        'success': False,
+        'error': 'Method not allowed'
+    }, status=405)
+# ==================== Profile API ====================
+
+@login_required
+def get_profile_data(request):
+    try:
+        profile, created = UserProfileFoot.objects.get_or_create(
+            user=request.user,
+            defaults={
+                'coins': 500,
+                'gems': 0,
+                'level': 1,
+                'experience': 0,
+                'selected_character': None
+            }
+        )
+        
+        # Vérifier si le skin appartient au personnage
+        skin_image = None
+        if profile.selected_player_skin and profile.selected_character:
+            # Si le skin appartient au personnage actuel
+            if profile.selected_player_skin.character == profile.selected_character:
+                skin_image = profile.selected_player_skin.image.url
+            # Sinon, désélectionner le skin
+            else:
+                profile.selected_player_skin = None
+                profile.save()
+        
+        return JsonResponse({
+            'success': True,
+            'username': request.user.username,
+            'coins': profile.coins,
+            'gems': profile.gems,
+            'level': profile.level,
+            'experience': profile.experience,
+            'has_character': profile.selected_character is not None,
+            'selected_character_id': profile.selected_character.id if profile.selected_character else None,
+            'selected_character_image': profile.selected_character.image.url if profile.selected_character and profile.selected_character.image else None,
+            'selected_player_skin_image': skin_image,  # None si pas de skin compatible
+            'selected_ball_skin_image': profile.selected_ball_skin.image.url if profile.selected_ball_skin and profile.selected_ball_skin.image else None,
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+# ==================== Authentication Views ====================
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth.models import User
+from django.contrib import messages
+from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_protect
+
+@csrf_protect
+@never_cache
+def login_view(request):
+    """Vue de connexion"""
+    # Si l'utilisateur est déjà connecté, rediriger vers le jeu
+    if request.user.is_authenticated:
+        return redirect('homegame')
+    
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        remember_me = request.POST.get('remember')
+        
+        # Authentifier l'utilisateur
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            login(request, user)
+            
+            # Gérer "Se souvenir de moi"
+            if not remember_me:
+                # Session expire à la fermeture du navigateur
+                request.session.set_expiry(0)
+            else:
+                # Session expire après 30 jours
+                request.session.set_expiry(60 * 60 * 24 * 30)
+            
+            # Créer le profil de jeu si nécessaire
+            from .models import UserProfileFoot
+            profile, created = UserProfileFoot.objects.get_or_create(
+                user=user,
+                defaults={
+                    'coins': 500,  # Nouveau joueur = 500 coins
+                    'gems': 0,
+                    'level': 1,
+                    'experience': 0
+                }
+            )
+            
+            if created:
+                messages.success(request, f'Bienvenue {user.username}! Votre compte a été créé avec 500 pièces de départ!')
+            else:
+                messages.success(request, f'Bon retour {user.username}!')
+            
+            # Redirection après connexion
+            next_url = request.GET.get('next', 'homegame')
+            return redirect(next_url)
+        else:
+            # Vérifier si l'utilisateur existe
+            try:
+                User.objects.get(username=username)
+                messages.error(request, 'Mot de passe incorrect.')
+            except User.DoesNotExist:
+                messages.error(request, 'Nom d\'utilisateur ou mot de passe incorrect.')
+    
+    return render(request, 'listings/logingame.html')
+
+def register_view(request):
+    """Vue d'inscription"""
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password1 = request.POST.get('password1')
+        password2 = request.POST.get('password2')
+        
+        if password1 != password2:
+            messages.error(request, 'Les mots de passe ne correspondent pas.')
+            return render(request, 'listings/register.html')
+        
+        if User.objects.filter(username=username).exists():
+            messages.error(request, 'Ce nom d\'utilisateur existe déjà.')
+            return render(request, 'listings/register.html')
+        
+        if User.objects.filter(email=email).exists():
+            messages.error(request, 'Cet email est déjà utilisé.')
+            return render(request, 'listings/register.html')
+        
+        # Créer l'utilisateur
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password1
+        )
+        
+        # Créer le profil
+        UserProfileFoot.objects.create(user=user)
+        
+        # Connecter l'utilisateur
+        login(request, user)
+        messages.success(request, 'Inscription réussie! Bienvenue dans Free Kick Master!')
+        
+        return redirect('game:home')
+    
+    return render(request, 'listings/registergame.html')
+
+
+def logout_view(request):
+    """Vue de déconnexion"""
+    logout(request)
+    messages.success(request, 'Vous êtes déconnecté.')
+    return redirect('logingame')
+
+
+# ==================== Daily Bonus ====================
+
+@login_required
+def claim_daily_bonus(request):
+    """API pour réclamer le bonus quotidien"""
+    profile = UserProfileFoot.objects.get(user=request.user)
+    now = timezone.now()
+    
+    # Vérifier si le bonus peut être réclamé
+    if profile.last_daily_bonus:
+        time_since = now - profile.last_daily_bonus
+        if time_since < timedelta(hours=24):
+            remaining = timedelta(hours=24) - time_since
+            hours = int(remaining.total_seconds() // 3600)
+            minutes = int((remaining.total_seconds() % 3600) // 60)
+            return JsonResponse({
+                'success': False,
+                'message': f'Prochain bonus dans {hours}h {minutes}m'
+            })
+    
+    # Donner le bonus
+    bonus_coins = 100
+    profile.coins += bonus_coins
+    profile.last_daily_bonus = now
+    profile.save()
+    
+    return JsonResponse({
+        'success': True,
+        'coins_earned': bonus_coins,
+        'total_coins': profile.coins,
+        'message': f'Vous avez reçu {bonus_coins} pièces!'
+    })
+
+@login_required
+def test_profile(request):
+    """Vue de test pour vérifier le profil"""
+    from django.http import HttpResponse
+    
+    profile_exists = UserProfileFoot.objects.filter(user=request.user).exists()
+    scores_count = Score1.objects.filter(user=request.user).count()
+    
+    html = f"""
+    <h1>Test Profil pour {request.user.username}</h1>
+    <p>Profil existe: {profile_exists}</p>
+    <p>Nombre de scores: {scores_count}</p>
+    """
+    
+    if profile_exists:
+        profile = UserProfileFoot.objects.get(user=request.user)
+        html += f"""
+        <p>Coins: {profile.coins}</p>
+        <p>Gems: {profile.gems}</p>
+        <p>Level: {profile.level}</p>
+        <p>Experience: {profile.experience}</p>
+        """
+    
+    return HttpResponse(html)
+
+# views.py - Ajouter cette fonction
+
+from django.db.models import Max
+
+@login_required
+def shop_data_api(request):
+    """API pour récupérer toutes les données de la boutique"""
+    try:
+        profile, created = UserProfileFoot.objects.get_or_create(
+            user=request.user,
+            defaults={'coins': 100, 'gems': 0, 'level': 1}
+        )
+        
+        # Récupérer tous les items
+        characters = Character.objects.filter(is_active=True).order_by('order')
+        ball_skins = BallSkin.objects.filter(is_active=True).order_by('order')
+        player_skins = PlayerSkin.objects.filter(is_active=True).order_by('order')
+        powerups = PowerUp.objects.filter(is_active=True).order_by('order')
+        
+        # Récupérer les achats de l'utilisateur
+        user_purchases = Purchase.objects.filter(user=request.user)
+        owned_characters = list(user_purchases.filter(
+            character__isnull=False
+        ).values_list('character_id', flat=True))
+        owned_balls = list(user_purchases.filter(
+            ball_skin__isnull=False
+        ).values_list('ball_skin_id', flat=True))
+        owned_skins = list(user_purchases.filter(
+            player_skin__isnull=False
+        ).values_list('player_skin_id', flat=True))
+        
+        # Ajouter les personnages gratuits aux possessions
+        free_chars = Character.objects.filter(price=0, is_active=True).values_list('id', flat=True)
+        owned_characters.extend(free_chars)
+        owned_characters = list(set(owned_characters))
+        
+        # Préparer les données
+        characters_data = []
+        for char in characters:
+            char_data = {
+                'id': char.id,
+                'name': char.name,
+                'description': char.description,
+                'emoji': char.emoji,
+                'image': char.image.url if char.image else None,
+                'power': char.power,
+                'precision': char.precision,
+                'luck': char.luck,
+                'curve': char.curve,
+                'price': char.price,
+                'overall_rating': char.overall_rating
+            }
+            characters_data.append(char_data)
+        
+        ball_skins_data = []
+        for ball in ball_skins:
+            ball_data = {
+                'id': ball.id,
+                'name': ball.name,
+                'description': ball.description,
+                'emoji': ball.emoji,
+                'image': ball.image.url if ball.image else None,
+                'price': ball.price,
+                'trail_color': ball.trail_color,
+                'has_particles': ball.has_particles
+            }
+            ball_skins_data.append(ball_data)
+        
+        player_skins_data = []
+        for skin in player_skins:
+            skin_data = {
+                'id': skin.id,
+                'name': skin.name,
+                'description': skin.description,
+                'emoji': skin.emoji,
+                'image': skin.image.url if skin.image else None,
+                'price': skin.price,
+                'primary_color': skin.primary_color,
+                'secondary_color': skin.secondary_color
+            }
+            player_skins_data.append(skin_data)
+        
+        powerups_data = []
+        for powerup in powerups:
+            powerup_data = {
+                'id': powerup.id,
+                'name': powerup.name,
+                'powerup_type': powerup.powerup_type,
+                'description': powerup.description,
+                'emoji': powerup.emoji,
+                'image': powerup.image.url if powerup.image else None,
+                'price': powerup.price,
+                'duration': powerup.duration,
+                'effect_value': powerup.effect_value
+            }
+            powerups_data.append(powerup_data)
+        
+        # Items équipés
+        equipped_items = {
+            'character': profile.selected_character.id if profile.selected_character else None,
+            'ball': profile.selected_ball_skin.id if profile.selected_ball_skin else None,
+            'skin': profile.selected_player_skin.id if profile.selected_player_skin else None
+        }
+        
+        return JsonResponse({
+            'success': True,
+            'characters': characters_data,
+            'ball_skins': ball_skins_data,
+            'player_skins': player_skins_data,
+            'powerups': powerups_data,
+            'owned_characters': owned_characters,
+            'owned_balls': owned_balls,
+            'owned_skins': owned_skins,
+            'equipped_items': equipped_items,
+            'profile': {
+                'coins': profile.coins,
+                'gems': profile.gems,
+                'level': profile.level
+            }
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+    
+# views.py - Ajouter cette fonction
+
+@login_required
+def characters_data_api(request):
+    """API pour récupérer les données des personnages"""
+    try:
+        profile, created = UserProfileFoot.objects.get_or_create(
+            user=request.user,
+            defaults={'coins': 100, 'gems': 0, 'level': 1}
+        )
+        
+        # Récupérer tous les personnages
+        characters = Character.objects.filter(is_active=True).order_by('order')
+        
+        # Récupérer les personnages possédés
+        user_purchases = Purchase.objects.filter(user=request.user)
+        owned_characters = list(user_purchases.filter(
+            character__isnull=False
+        ).values_list('character_id', flat=True))
+        
+        # Ajouter les personnages gratuits
+        free_chars = Character.objects.filter(price=0, is_active=True).values_list('id', flat=True)
+        owned_characters.extend(free_chars)
+        owned_characters = list(set(owned_characters))
+        
+        # Personnage sélectionné
+        selected_character_id = profile.selected_character.id if profile.selected_character else None
+        
+        # Si aucun personnage sélectionné, sélectionner le premier gratuit
+        if not selected_character_id and len(owned_characters) > 0:
+            first_owned = characters.filter(id__in=owned_characters).first()
+            if first_owned:
+                profile.selected_character = first_owned
+                profile.save()
+                selected_character_id = first_owned.id
+        
+        # Préparer les données des personnages
+        characters_data = []
+        for char in characters:
+            char_data = {
+                'id': char.id,
+                'name': char.name,
+                'description': char.description,
+                'emoji': char.emoji,
+                'image': char.image.url if char.image else None,
+                'power': char.power,
+                'precision': char.precision,
+                'luck': char.luck,
+                'curve': char.curve,
+                'price': char.price,
+                'overall_rating': char.overall_rating,
+                'strengths': char.strengths,
+                'weaknesses': char.weaknesses
+            }
+            characters_data.append(char_data)
+        
+        return JsonResponse({
+            'success': True,
+            'characters': characters_data,
+            'owned_characters': owned_characters,
+            'selected_character_id': selected_character_id
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+    
+# views.py - Ajouter cette fonction améliorée
+
+from django.db.models import Q, Sum, Count, Avg, F, Max
+from datetime import datetime, timedelta
+
+@login_required
+def leaderboard_api(request):
+    """API pour récupérer les données du classement"""
+    period = request.GET.get('period', 'daily')
+    
+    try:
+        # Calculer les dates selon la période
+        now = timezone.now()
+        if period == 'daily':
+            start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        elif period == 'weekly':
+            start_date = now - timedelta(days=now.weekday())
+            start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        elif period == 'monthly':
+            start_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        else:  # alltime
+            start_date = None
+        
+        # Récupérer les scores
+        scores_query = Score.objects.exclude(player__isnull=True)
+        if start_date:
+            scores_query = scores_query.filter(date__gte=start_date)
+        
+        # Agréger par joueur - ajuster selon votre modèle
+        leaderboard = scores_query.values(
+            'player__username', 
+            'player__id'
+        ).annotate(
+            total_score=Sum('score'),
+            games_played=Count('id'),
+            avg_accuracy=Avg(
+                F('successful_shots') * 100.0 / F('total_shots'),
+                output_field=models.FloatField()
+            )
+        ).order_by('-total_score')[:100]
+        
+        # Formater les données du classement
+        leaderboard_data = []
+        user_rank = None
+        user_stats = None
+        
+        for idx, entry in enumerate(leaderboard):
+            player_data = {
+                'rank': idx + 1,
+                'user_id': entry['player__id'],
+                'username': entry['player__username'],
+                'total_score': entry['total_score'] or 0,
+                'games_played': entry['games_played'] or 0,
+                'avg_accuracy': round(entry['avg_accuracy'] or 0, 1)
+            }
+            leaderboard_data.append(player_data)
+            
+            # Vérifier si c'est le joueur actuel
+            if entry['player__id'] == request.user.id:
+                user_rank = idx + 1
+                user_stats = {
+                    'rank': user_rank,
+                    'user_id': request.user.id,
+                    'username': request.user.username,
+                    'total_score': entry['total_score'] or 0,
+                    'games_played': entry['games_played'] or 0,
+                    'avg_accuracy': round(entry['avg_accuracy'] or 0, 1)
+                }
+        
+        # Si le joueur n'est pas dans le top 100, récupérer ses stats
+        if not user_stats:
+            user_scores = scores_query.filter(player=request.user)
+            if user_scores.exists():
+                user_data = user_scores.aggregate(
+                    total_score=Sum('score'),
+                    games_played=Count('id'),
+                    avg_accuracy=Avg(
+                        F('successful_shots') * 100.0 / F('total_shots'),
+                        output_field=models.FloatField()
+                    )
+                )
+                
+                # Calculer le rang
+                better_scores = scores_query.values('player').annotate(
+                    total=Sum('score')
+                ).filter(total__gt=user_data['total_score']).count()
+                
+                user_stats = {
+                    'rank': better_scores + 1,
+                    'user_id': request.user.id,
+                    'username': request.user.username,
+                    'total_score': user_data['total_score'] or 0,
+                    'games_played': user_data['games_played'] or 0,
+                    'avg_accuracy': round(user_data['avg_accuracy'] or 0, 1)
+                }
+        
+        return JsonResponse({
+            'success': True,
+            'leaderboard': leaderboard_data,
+            'user_stats': user_stats,
+            'period': period
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)

@@ -773,9 +773,7 @@ class Submission(models.Model):
             except Submission.DoesNotExist:
                 pass
         
-        # Si guest_count est rempli mais pas nombre_personnes, copier la valeur
-        if self.guest_count and not self.nombre_personnes:
-            self.nombre_personnes = self.guest_count
+       
         
         # Logique existante pour le client
         if not self.client:
@@ -866,8 +864,8 @@ class ChecklistDocument(models.Model):
 
 
 
-class Score(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+class Score1(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     score = models.IntegerField()
     date = models.DateTimeField(auto_now_add=True)
 
@@ -1550,3 +1548,602 @@ class ProductionPrevue(models.Model):
     class Meta:
         verbose_name = "Production prévue"
         verbose_name_plural = "Productions prévues"
+
+
+# models.py
+from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.contrib.auth.models import User
+from django.db.models import Sum
+
+class Character(models.Model):
+    """Modèle pour les personnages jouables"""
+    name = models.CharField(max_length=100, verbose_name="Nom du personnage")
+    description = models.TextField(verbose_name="Description")
+    emoji = models.CharField(max_length=5, default="⚽", verbose_name="Emoji représentatif")
+    
+    # Image du personnage
+    image = models.ImageField(
+        upload_to='characters/', 
+        null=True, 
+        blank=True,
+        verbose_name="Image du personnage",
+        help_text="Image du personnage (format recommandé: 200x200px)"
+    )
+    
+    # Statistiques du personnage (0-100)
+    power = models.IntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        verbose_name="Puissance de tir",
+        help_text="Force du tir (0-100)"
+    )
+    precision = models.IntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        verbose_name="Précision",
+        help_text="Précision du tir (0-100)"
+    )
+    luck = models.IntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        verbose_name="Chance",
+        help_text="Probabilité de marquer malgré le gardien (0-100)"
+    )
+    curve = models.IntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        verbose_name="Effet/Courbe",
+        help_text="Capacité à donner de l'effet au ballon (0-100)",
+        default=50
+    )
+    
+    # Prix et disponibilité
+    price = models.IntegerField(
+        default=0,
+        verbose_name="Prix en pièces",
+        help_text="0 = Gratuit/Débloqué par défaut"
+    )
+    is_premium = models.BooleanField(
+        default=False,
+        verbose_name="Premium",
+        help_text="Personnage premium nécessitant un achat"
+    )
+    
+    # Atouts et défauts
+    strengths = models.TextField(
+        verbose_name="Atouts",
+        help_text="Points forts du personnage",
+        blank=True
+    )
+    weaknesses = models.TextField(
+        verbose_name="Défauts", 
+        help_text="Points faibles du personnage",
+        blank=True
+    )
+    
+    # Métadonnées
+    is_active = models.BooleanField(default=True, verbose_name="Actif")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    order = models.IntegerField(default=0, verbose_name="Ordre d'affichage")
+    
+    class Meta:
+        verbose_name = "Personnage"
+        verbose_name_plural = "Personnages"
+        ordering = ['order', 'name']
+    
+    def __str__(self):
+        return f"{self.emoji} {self.name}"
+    
+    @property
+    def overall_rating(self):
+        """Calcule la note globale du personnage"""
+        return (self.power + self.precision + self.luck + self.curve) // 4
+
+
+class BallSkin(models.Model):
+    """Skins pour les ballons"""
+    name = models.CharField(max_length=100, verbose_name="Nom du skin")
+    description = models.TextField(blank=True, verbose_name="Description")
+    image = models.ImageField(
+        upload_to='ball_skins/',
+        verbose_name="Image du ballon",
+        help_text="Image du skin de ballon"
+    )
+    price = models.IntegerField(
+        default=100,
+        verbose_name="Prix en pièces"
+    )
+    emoji = models.CharField(max_length=5, default="⚽", verbose_name="Emoji")
+    
+    # Effets visuels
+    trail_color = models.CharField(
+        max_length=7,
+        default="#FFFFFF",
+        verbose_name="Couleur de la traînée",
+        help_text="Code couleur hexadécimal"
+    )
+    has_particles = models.BooleanField(
+        default=False,
+        verbose_name="Effets de particules"
+    )
+    
+    is_active = models.BooleanField(default=True, verbose_name="Actif")
+    order = models.IntegerField(default=0, verbose_name="Ordre d'affichage")
+    
+    class Meta:
+        verbose_name = "Skin de ballon"
+        verbose_name_plural = "Skins de ballons"
+        ordering = ['order', 'price']
+    
+    def __str__(self):
+        return f"{self.emoji} {self.name} - {self.price} pièces"
+
+
+class PlayerSkin(models.Model):
+    """Skins pour les joueurs"""
+    name = models.CharField(max_length=100, verbose_name="Nom du skin")
+    description = models.TextField(blank=True, verbose_name="Description")
+    character = models.ForeignKey(
+        Character,
+        on_delete=models.CASCADE,
+        related_name='skins',
+        verbose_name="Personnage associé",
+        null=True,  # Temporaire pour la migration
+        blank=True
+    )
+    
+    image = models.ImageField(
+        upload_to='player_skins/',
+        verbose_name="Image du skin",
+        help_text="Image du skin de joueur"
+    )
+    price = models.IntegerField(
+        default=200,
+        verbose_name="Prix en pièces"
+    )
+    emoji = models.CharField(max_length=5, default="👕", verbose_name="Emoji")
+    
+    # Couleurs du maillot
+    primary_color = models.CharField(
+        max_length=7,
+        default="#FF0000",
+        verbose_name="Couleur principale",
+        help_text="Code couleur hexadécimal"
+    )
+    secondary_color = models.CharField(
+        max_length=7,
+        default="#FFFFFF",
+        verbose_name="Couleur secondaire",
+        help_text="Code couleur hexadécimal"
+    )
+    
+    is_active = models.BooleanField(default=True, verbose_name="Actif")
+    order = models.IntegerField(default=0, verbose_name="Ordre d'affichage")
+
+    
+    
+    class Meta:
+        verbose_name = "Skin de joueur"
+        verbose_name_plural = "Skins de joueurs"
+        ordering = ['order', 'price']
+    
+    def __str__(self):
+        return f"{self.emoji} {self.name} - {self.price} pièces"
+
+
+class PowerUp(models.Model):
+    """Power-ups et objets bonus"""
+    POWERUP_TYPES = [
+        ('precision', 'Précision améliorée'),
+        ('power', 'Puissance accrue'),
+        ('slowmo', 'Ralenti'),
+        ('multiball', 'Multi-ballon'),
+        ('giant_target', 'Cibles géantes'),
+        ('freeze_keeper', 'Gardien figé'),
+        ('golden_ball', 'Ballon doré (x2 points)'),
+    ]
+    
+    name = models.CharField(max_length=100, verbose_name="Nom du power-up")
+    powerup_type = models.CharField(
+        max_length=20,
+        choices=POWERUP_TYPES,
+        verbose_name="Type de power-up"
+    )
+    description = models.TextField(verbose_name="Description")
+    emoji = models.CharField(max_length=5, default="⭐", verbose_name="Emoji")
+    
+    # Image
+    image = models.ImageField(
+        upload_to='powerups/',
+        null=True,
+        blank=True,
+        verbose_name="Image du power-up"
+    )
+    
+    # Prix et durée
+    price = models.IntegerField(
+        default=50,
+        verbose_name="Prix en pièces"
+    )
+    duration = models.IntegerField(
+        default=30,
+        verbose_name="Durée (secondes)",
+        help_text="Durée de l'effet en secondes"
+    )
+    
+    # Effets
+    effect_value = models.FloatField(
+        default=1.5,
+        verbose_name="Valeur de l'effet",
+        help_text="Multiplicateur ou valeur de l'effet"
+    )
+    
+    is_active = models.BooleanField(default=True, verbose_name="Actif")
+    order = models.IntegerField(default=0, verbose_name="Ordre d'affichage")
+    
+    class Meta:
+        verbose_name = "Power-up"
+        verbose_name_plural = "Power-ups"
+        ordering = ['order', 'price']
+    
+    def __str__(self):
+        return f"{self.emoji} {self.name} - {self.price} pièces"
+
+
+class UserProfileFoot(models.Model):
+    """Profil étendu de l'utilisateur pour le jeu"""
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='game_profile'
+    )
+    
+    # Monnaie du jeu
+    coins = models.IntegerField(
+        default=100,
+        verbose_name="Pièces",
+        validators=[MinValueValidator(0)]
+    )
+    gems = models.IntegerField(
+        default=0,
+        verbose_name="Gemmes",
+        validators=[MinValueValidator(0)]
+    )
+    
+    # Niveau et expérience
+    level = models.IntegerField(default=1, verbose_name="Niveau")
+    experience = models.IntegerField(default=0, verbose_name="Expérience")
+    
+    # Personnage sélectionné
+    selected_character = models.ForeignKey(
+        Character,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Personnage sélectionné"
+    )
+    selected_ball_skin = models.ForeignKey(
+        BallSkin,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Skin de ballon sélectionné"
+    )
+    selected_player_skin = models.ForeignKey(
+        PlayerSkin,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Skin de joueur sélectionné"
+    )
+    
+    # Statistiques globales
+    total_goals = models.IntegerField(default=0, verbose_name="Buts totaux")
+    total_games = models.IntegerField(default=0, verbose_name="Parties jouées")
+    best_score = models.IntegerField(default=0, verbose_name="Meilleur score")
+    total_targets_hit = models.IntegerField(default=0, verbose_name="Cibles touchées")
+    
+    # Achievements
+    achievements = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name="Succès débloqués"
+    )
+    
+    # Dernière connexion
+    last_daily_bonus = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Dernier bonus quotidien"
+    )
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Profil de joueur"
+        verbose_name_plural = "Profils de joueurs"
+    
+    def __str__(self):
+        return f"Profil de {self.user.username} - Niveau {self.level}"
+    
+    @property
+    def win_rate(self):
+        """Calcule le taux de réussite"""
+        if self.total_games == 0:
+            return 0
+        return round((self.total_goals / (self.total_games * 5)) * 100, 1)  # Assuming 5 shots per game
+
+
+class Purchase(models.Model):
+    """Historique des achats"""
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='purchases'
+    )
+    
+    # Type d'achat (polymorphique)
+    character = models.ForeignKey(
+        Character,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    ball_skin = models.ForeignKey(
+        BallSkin,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    player_skin = models.ForeignKey(
+        PlayerSkin,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    powerup = models.ForeignKey(
+        PowerUp,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    
+    # Prix et monnaie
+    price = models.IntegerField(verbose_name="Prix payé")
+    currency = models.CharField(
+        max_length=10,
+        choices=[('coins', 'Pièces'), ('gems', 'Gemmes')],
+        default='coins',
+        verbose_name="Monnaie utilisée"
+    )
+    
+    purchased_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name = "Achat"
+        verbose_name_plural = "Achats"
+        ordering = ['-purchased_at']
+    
+    def __str__(self):
+        item = self.character or self.ball_skin or self.player_skin or self.powerup
+        return f"{self.user.username} - {item} - {self.price} {self.currency}"
+
+
+class DifficultyLevel(models.Model):
+    """Modèle pour les niveaux de difficulté"""
+    DIFFICULTY_CHOICES = [
+        ('easy', 'Facile'),
+        ('medium', 'Moyen'),
+        ('hard', 'Difficile'),
+        ('extreme', 'Extrême'),
+        ('impossible', 'Impossible'),
+    ]
+    
+    difficulty_id = models.CharField(
+        max_length=20,
+        choices=DIFFICULTY_CHOICES,
+        unique=True,
+        verbose_name="Type de difficulté"
+    )
+    name = models.CharField(max_length=100, verbose_name="Nom")
+    description = models.TextField(blank=True, verbose_name="Description")
+    emoji = models.CharField(max_length=5, default="⚽", verbose_name="Emoji")
+    
+    # Configuration du gardien
+    goalkeeper_speed = models.IntegerField(
+        default=500,
+        verbose_name="Vitesse du gardien (ms)",
+        help_text="Temps entre chaque mouvement du gardien en millisecondes"
+    )
+    goalkeeper_size = models.FloatField(
+        default=1.0,
+        validators=[MinValueValidator(0.5), MaxValueValidator(3.0)],
+        verbose_name="Taille du gardien",
+        help_text="Multiplicateur de taille (1.0 = normal)"
+    )
+    
+    # Distance du coup franc
+    distance = models.IntegerField(
+        default=20,
+        validators=[MinValueValidator(10), MaxValueValidator(50)],
+        verbose_name="Distance (mètres)",
+        help_text="Distance du coup franc en mètres"
+    )
+    
+    # Mur de défenseurs
+    wall_enabled = models.BooleanField(
+        default=False,
+        verbose_name="Mur de défenseurs",
+        help_text="Active le mur de défenseurs"
+    )
+    wall_players = models.IntegerField(
+        default=0,
+        validators=[MinValueValidator(0), MaxValueValidator(6)],
+        verbose_name="Nombre de joueurs dans le mur"
+    )
+    wall_jump_probability = models.FloatField(
+        default=0.5,
+        validators=[MinValueValidator(0), MaxValueValidator(1)],
+        verbose_name="Probabilité de saut du mur",
+        help_text="Probabilité que le mur saute (0-1)"
+    )
+    
+    # Cibles bonus
+    target_count = models.IntegerField(
+        default=3,
+        validators=[MinValueValidator(0), MaxValueValidator(9)],
+        verbose_name="Nombre de cibles",
+        help_text="Nombre de cibles bonus dans le but"
+    )
+    target_size = models.FloatField(
+        default=1.0,
+        validators=[MinValueValidator(0.5), MaxValueValidator(2.0)],
+        verbose_name="Taille des cibles",
+        help_text="Multiplicateur de taille des cibles"
+    )
+    
+    # Bonus de score et récompenses
+    score_multiplier = models.FloatField(
+        default=1.0,
+        validators=[MinValueValidator(0.5), MaxValueValidator(10.0)],
+        verbose_name="Multiplicateur de score",
+        help_text="Bonus de points pour cette difficulté"
+    )
+    coin_multiplier = models.FloatField(
+        default=1.0,
+        validators=[MinValueValidator(0.5), MaxValueValidator(5.0)],
+        verbose_name="Multiplicateur de pièces",
+        help_text="Bonus de pièces pour cette difficulté"
+    )
+    
+    # Configuration visuelle
+    background_color = models.CharField(
+        max_length=7,
+        default="#90EE90",
+        verbose_name="Couleur de fond",
+        help_text="Code couleur hexadécimal"
+    )
+    
+    # AJOUTEZ CE CHAMP
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name="Actif",
+        help_text="Difficulté disponible pour les joueurs"
+    )
+    
+    # Ordre d'affichage
+    order = models.IntegerField(default=0, verbose_name="Ordre d'affichage")
+    
+    class Meta:
+        verbose_name = "Niveau de difficulté"
+        verbose_name_plural = "Niveaux de difficulté"
+        ordering = ['order', 'difficulty_id']
+    
+    def __str__(self):
+        return f"{self.emoji} {self.name} ({self.get_difficulty_id_display()})"
+
+
+class Score(models.Model):
+    """Modèle pour enregistrer les scores"""
+    player = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name="Joueur",
+        related_name='game_scores',
+        null=True,  # Ajoutez temporairement null=True
+        blank=True  # Ajoutez blank=True pour l'admin
+    )
+    character = models.ForeignKey(
+        Character,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Personnage utilisé"
+    )
+    difficulty = models.ForeignKey(
+        DifficultyLevel,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Difficulté"
+    )
+    
+    # Score et récompenses
+    score = models.IntegerField(verbose_name="Score", default=0)
+    coins_earned = models.IntegerField(default=0, verbose_name="Pièces gagnées")
+    exp_earned = models.IntegerField(default=0, verbose_name="Expérience gagnée")
+    
+    # Statistiques détaillées
+    total_shots = models.IntegerField(default=0, verbose_name="Tirs totaux")
+    successful_shots = models.IntegerField(default=0, verbose_name="Tirs réussis")
+    targets_hit = models.IntegerField(default=0, verbose_name="Cibles touchées")
+    perfect_shots = models.IntegerField(default=0, verbose_name="Tirs parfaits")
+    max_combo = models.IntegerField(default=0, verbose_name="Combo maximum")
+    
+    # Power-ups utilisés
+    powerups_used = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name="Power-ups utilisés"
+    )
+    
+    date = models.DateTimeField(auto_now_add=True, verbose_name="Date")
+    
+    class Meta:
+        verbose_name = "Score"
+        verbose_name_plural = "Scores"
+        ordering = ['-score', '-date']
+    
+    def __str__(self):
+        player_name = self.player.username if self.player else "Anonyme"
+        return f"{player_name} - {self.score} pts ({self.difficulty.name if self.difficulty else 'N/A'})"
+    
+    @property
+    def accuracy(self):
+        """Calcule le pourcentage de réussite"""
+        if self.total_shots == 0:
+            return 0
+        return round((self.successful_shots / self.total_shots) * 100, 1)
+
+class Leaderboard(models.Model):
+    """Classement global"""
+    PERIOD_CHOICES = [
+        ('daily', 'Quotidien'),
+        ('weekly', 'Hebdomadaire'),
+        ('monthly', 'Mensuel'),
+        ('alltime', 'Tous les temps'),
+    ]
+    
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='leaderboard_entries'
+    )
+    period = models.CharField(
+        max_length=10,
+        choices=PERIOD_CHOICES,
+        verbose_name="Période"
+    )
+    score = models.IntegerField(verbose_name="Score total")
+    rank = models.IntegerField(verbose_name="Rang")
+    games_played = models.IntegerField(default=0, verbose_name="Parties jouées")
+    
+    # Récompenses de classement
+    reward_claimed = models.BooleanField(
+        default=False,
+        verbose_name="Récompense réclamée"
+    )
+    
+    period_start = models.DateTimeField(verbose_name="Début de la période")
+    period_end = models.DateTimeField(verbose_name="Fin de la période")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Classement"
+        verbose_name_plural = "Classements"
+        ordering = ['period', 'rank']
+        unique_together = ['user', 'period', 'period_start']
+    
+    def __str__(self):
+        return f"{self.user.username} - Rang {self.rank} ({self.get_period_display()})"
