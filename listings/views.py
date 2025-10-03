@@ -9224,12 +9224,51 @@ def api_recettes_departements(request):
 def api_stock_update(request):
     """Mise à jour rapide du stock d'un ingrédient"""
     if request.method == 'POST':
-        data = json.loads(request.body)
-        ingredient = get_object_or_404(Ingredient, id=data['ingredient_id'])
-        ingredient.stock_reel = data['nouveau_stock']
-        ingredient.save()
-        return JsonResponse({'success': True, 'nouveau_stock': ingredient.stock_reel})
-    return JsonResponse({'success': False})
+        try:
+            data = json.loads(request.body)
+            
+            # Validation et nettoyage des données
+            ingredient_id = data.get('ingredient_id')
+            nouveau_stock = data.get('nouveau_stock')
+            
+            # Convertir en nombre et valider
+            try:
+                nouveau_stock = float(str(nouveau_stock).replace(',', '.').strip())
+            except (ValueError, TypeError):
+                return JsonResponse({
+                    'success': False, 
+                    'error': 'Le stock doit être un nombre valide'
+                }, status=400)
+            
+            # Vérifier que le stock n'est pas négatif
+            if nouveau_stock < 0:
+                return JsonResponse({
+                    'success': False, 
+                    'error': 'Le stock ne peut pas être négatif'
+                }, status=400)
+            
+            # Récupérer et mettre à jour l'ingrédient
+            ingredient = get_object_or_404(Ingredient, id=ingredient_id)
+            ingredient.stock_reel = nouveau_stock
+            ingredient.save()
+            
+            return JsonResponse({
+                'success': True, 
+                'nouveau_stock': float(ingredient.stock_reel)
+            })
+            
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'success': False, 
+                'error': 'Données JSON invalides'
+            }, status=400)
+        except Exception as e:
+            return JsonResponse({
+                'success': False, 
+                'error': str(e)
+            }, status=500)
+    
+    return JsonResponse({'success': False, 'error': 'Méthode non autorisée'}, status=405)
 
 # ===============================================
 # Exports

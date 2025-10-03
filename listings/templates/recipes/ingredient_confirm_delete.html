@@ -2,39 +2,55 @@
 {% block title %}Supprimer Ingrédient{% endblock %}
 
 {% block content %}
-<div class="content-body">
-    <div class="text-center py-5">
-        <i class="bi bi-exclamation-triangle text-warning" style="font-size: 4rem;"></i>
+<div class="content-body px-3 px-sm-4">
+    <div class="text-center py-3 py-md-5">
+        <i class="bi bi-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
         
-        <h2 class="mt-4">Confirmer la suppression</h2>
+        <h2 class="mt-3 fs-4 fs-md-3">Confirmer la suppression</h2>
         
-        <p class="lead mt-3">
+        <p class="lead mt-3 fs-6 fs-md-5">
             Êtes-vous sûr de vouloir supprimer l'ingrédient <strong>{{ ingredient.nom }}</strong> ?
         </p>
         
         {% if ingredient.recette_ingredients.exists or ingredient.sousrecette_ingredients.exists %}
-        <div class="alert alert-danger">
+        <div class="alert alert-danger mx-auto" style="max-width: 500px;">
             <i class="bi bi-exclamation-octagon"></i>
-            Cet ingrédient est utilisé dans des recettes et ne peut pas être supprimé.
+            <p class="mb-0 small">Cet ingrédient est utilisé dans des recettes et ne peut pas être supprimé.</p>
         </div>
         {% else %}
-        <div class="alert alert-warning">
+        <div class="alert alert-warning mx-auto" style="max-width: 500px;">
             <i class="bi bi-info-circle"></i>
-            Cette action est irréversible et supprimera toutes les données associées.
+            <p class="mb-0 small">Cette action est irréversible et supprimera toutes les données associées.</p>
         </div>
         {% endif %}
         
         <form method="post" class="mt-4">
             {% csrf_token %}
-            <a href="{% url 'ingredient_list' %}" class="btn btn-secondary">
-                <i class="bi bi-x-circle"></i> Annuler
-            </a>
-            {% if not ingredient.recette_ingredients.exists and not ingredient.sousrecette_ingredients.exists %}
-            <button type="submit" class="btn btn-danger ms-2">
-                <i class="bi bi-trash"></i> Supprimer définitivement
-            </button>
-            {% endif %}
+            <div class="d-flex flex-column flex-sm-row justify-content-center gap-2">
+                <a href="{% url 'ingredient_list' %}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i> Annuler
+                </a>
+                {% if not ingredient.recette_ingredients.exists and not ingredient.sousrecette_ingredients.exists %}
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-trash"></i> Supprimer définitivement
+                </button>
+                {% endif %}
+            </div>
         </form>
     </div>
 </div>
+
+<style>
+@media (max-width: 576px) {
+    .btn {
+        width: 100%;
+        max-width: 200px;
+        margin: 0 auto;
+    }
+    
+    .lead {
+        padding: 0 1rem;
+    }
+}
+</style>
 {% endblock %}

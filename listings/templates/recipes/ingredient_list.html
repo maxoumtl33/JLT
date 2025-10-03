@@ -2,26 +2,182 @@
 {% load static %}
 {% block title %}Ingrédients - Gestion Recettes{% endblock %}
 
+{% block extra_css %}
+<style>
+/* Styles responsive pour mobile */
+@media (max-width: 576px) {
+    .table {
+        font-size: 0.875rem;
+    }
+    
+    .btn-group-sm .btn {
+        padding: 0.25rem 0.4rem;
+        font-size: 0.8rem;
+    }
+    
+    .pagination-sm .page-link {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .content-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .search-box input {
+        font-size: 16px; /* Empêche le zoom sur iOS */
+    }
+    
+    .table td, .table th {
+        padding: 0.5rem 0.25rem;
+    }
+    
+    /* Bouton stock mobile plus visible */
+    .btn-stock-mobile {
+        width: 100%;
+        padding: 0.5rem;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+        background-color: #17a2b8;
+        color: white;
+        border: none;
+        border-radius: 0.25rem;
+    }
+    
+    .btn-stock-mobile:active {
+        background-color: #138496;
+    }
+    
+    /* Style pour la zone d'actions mobile */
+    .mobile-actions {
+        display: flex;
+        gap: 0.25rem;
+        margin-top: 0.5rem;
+    }
+    
+    .mobile-actions .btn {
+        flex: 1;
+        padding: 0.4rem;
+        font-size: 0.85rem;
+    }
+    
+    /* Carte mobile pour chaque ingrédient */
+    .ingredient-card-mobile {
+        background: #f8f9fa;
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
+        border: 1px solid #dee2e6;
+    }
+    
+    .ingredient-name-mobile {
+        font-weight: bold;
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .ingredient-info-mobile {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stock-display-mobile {
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+}
+
+@media (max-width: 768px) {
+    .search-box input {
+        font-size: 16px;
+    }
+    
+    .btn-action {
+        margin: 0 2px;
+    }
+    
+    /* Affichage en cartes sur mobile */
+    .mobile-card-view {
+        display: block;
+    }
+    
+    .desktop-table-view {
+        display: none;
+    }
+}
+
+/* Desktop - garder l'affichage tableau */
+@media (min-width: 769px) {
+    .mobile-card-view {
+        display: none;
+    }
+    
+    .desktop-table-view {
+        display: block;
+    }
+}
+
+/* Masquer certaines colonnes sur mobile */
+@media (max-width: 767px) {
+    .col-unit, .col-alert {
+        display: none !important;
+    }
+}
+
+/* Style pour le bouton stock rapide */
+.btn-stock-quick {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s;
+}
+
+.btn-stock-quick:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    color: white;
+}
+
+/* Badge de statut amélioré */
+.status-badge-mobile {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="content-header">
-    <div class="d-flex justify-content-between align-items-center">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
         <h1 class="h3 mb-0">Gestion des Ingrédients</h1>
-        <div>
-            <a href="{% url 'export_ingredients' %}" class="btn btn-outline-secondary">
-                <i class="bi bi-download"></i> Exporter CSV
+        <div class="d-flex gap-2 w-100 w-sm-auto">
+            <a href="{% url 'export_ingredients' %}" class="btn btn-outline-secondary flex-fill flex-sm-grow-0">
+                <i class="bi bi-download"></i> 
+                <span class="d-none d-lg-inline">Exporter CSV</span>
             </a>
-            <a href="{% url 'ingredient_create' %}" class="btn btn-primary">
-                <i class="bi bi-plus-circle"></i> Nouvel Ingrédient
+            <a href="{% url 'ingredient_create' %}" class="btn btn-primary flex-fill flex-sm-grow-0">
+                <i class="bi bi-plus-circle"></i> 
+                <span class="d-none d-sm-inline">Nouvel Ingrédient</span>
+                <span class="d-inline d-sm-none">Ajouter</span>
             </a>
         </div>
     </div>
 </div>
 
-<div class="table-container">
+<div class="table-container mt-3">
     <div class="row mb-3">
-        <div class="col-md-6">
+        <div class="col-12 col-md-6 mb-2 mb-md-0">
             <form method="get" class="d-flex search-box">
-                <input type="text" name="search" class="form-control" placeholder="Rechercher un ingrédient..." value="{{ request.GET.search }}">
+                <input type="text" name="search" class="form-control" 
+                       placeholder="Rechercher un ingrédient..." 
+                       value="{{ request.GET.search }}">
                 <button type="submit" class="btn btn-outline-secondary ms-2">
                     <i class="bi bi-search"></i>
                 </button>
@@ -32,77 +188,172 @@
                 {% endif %}
             </form>
         </div>
-        <div class="col-md-6 text-end">
+        <div class="col-12 col-md-6 text-start text-md-end">
             <span class="text-muted">{{ ingredients.paginator.count }} ingrédient(s) trouvé(s)</span>
         </div>
     </div>
 
-    <div class="table-responsive">
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>Nom</th>
-                    <th>Unité de mesure</th>
-                    <th>Stock actuel</th>
-                    <th>Stock d'alerte</th>
-                    <th>Statut</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for ingredient in ingredients %}
-                <tr>
-                    <td>
-                        <strong>{{ ingredient.nom }}</strong>
-                        {% if ingredient.description %}
-                        <br><small class="text-muted">{{ ingredient.description|truncatewords:10 }}</small>
-                        {% endif %}
-                    </td>
-                    <td>{{ ingredient.unite_mesure.nom }} ({{ ingredient.unite_mesure.symbole }})</td>
-                    <td>{{ ingredient.stock_reel }} {{ ingredient.unite_mesure.symbole }}</td>
-                    <td>{{ ingredient.stock_alerte }} {{ ingredient.unite_mesure.symbole }}</td>
-                    <td>
-                        {% if ingredient.besoin_reappro %}
-                        <span class="badge bg-warning">
-                            <i class="bi bi-exclamation-triangle"></i> Stock bas
+    <!-- Vue mobile en cartes -->
+    <div class="mobile-card-view">
+        {% for ingredient in ingredients %}
+        <div class="ingredient-card-mobile">
+            <div class="ingredient-name-mobile">
+                {{ ingredient.nom }}
+            </div>
+            
+            <div class="text-muted small mb-2">
+                {{ ingredient.unite_mesure.nom }} ({{ ingredient.unite_mesure.symbole }})
+                <!-- Debug: Symbole=[{{ ingredient.unite_mesure.symbole }}] -->
+            </div>
+            
+            <div class="ingredient-info-mobile">
+                <div>
+                    <div class="stock-display-mobile">
+                        <span class="stock-value" data-value="{{ ingredient.stock_reel }}" data-unit="{{ ingredient.unite_mesure.symbole }}">
+                            {{ ingredient.stock_reel }} {{ ingredient.unite_mesure.symbole }}
                         </span>
-                        {% else %}
-                        <span class="badge bg-success">
-                            <i class="bi bi-check-circle"></i> OK
-                        </span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <a href="{% url 'ingredient_update' ingredient.pk %}" class="btn btn-sm btn-outline-primary btn-action" title="Modifier">
-                            <i class="bi bi-pencil"></i>
-                        </a>
-                        <button type="button" class="btn btn-sm btn-outline-info btn-action" onclick="updateStock({{ ingredient.pk }}, {{ ingredient.stock_reel }})" title="Ajuster stock">
-                            <i class="bi bi-box-seam"></i>
-                        </button>
-                        <a href="{% url 'ingredient_delete' ingredient.pk %}" class="btn btn-sm btn-outline-danger btn-action" title="Supprimer">
-                            <i class="bi bi-trash"></i>
-                        </a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6" class="text-center text-muted py-4">
-                        <i class="bi bi-inbox" style="font-size: 2rem;"></i>
-                        <p>Aucun ingrédient trouvé</p>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                    </div>
+                    <div class="text-muted small">Stock actuel</div>
+                </div>
+                
+                <div>
+                    {% if ingredient.besoin_reappro %}
+                    <span class="status-badge-mobile badge bg-warning">
+                        <i class="bi bi-exclamation-triangle me-1"></i> Stock bas
+                    </span>
+                    {% else %}
+                    <span class="status-badge-mobile badge bg-success">
+                        <i class="bi bi-check-circle me-1"></i> OK
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Bouton ajuster stock mis en avant pour mobile -->
+            <button type="button" 
+                    class="btn btn-stock-quick btn-stock-mobile" 
+                    data-ingredient-id="{{ ingredient.pk }}"
+                    data-stock="{{ ingredient.stock_reel }}"
+                    data-unit="{{ ingredient.unite_mesure.symbole }}"
+                    data-name="{{ ingredient.nom }}"
+                    data-alert="{{ ingredient.stock_alerte }}"
+                    onclick="updateStockFromData(this)">
+                <i class="bi bi-box-seam me-2"></i>
+                Ajuster le stock
+            </button>
+            
+            <!-- Autres actions -->
+            <div class="mobile-actions">
+                <a href="{% url 'ingredient_update' ingredient.pk %}" 
+                   class="btn btn-outline-primary">
+                    <i class="bi bi-pencil"></i> Modifier
+                </a>
+                <a href="{% url 'ingredient_delete' ingredient.pk %}" 
+                   class="btn btn-outline-danger">
+                    <i class="bi bi-trash"></i> Suppr.
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center text-muted py-4">
+            <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+            <p>Aucun ingrédient trouvé</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Vue desktop en tableau -->
+    <div class="desktop-table-view">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th class="col-unit">Unité de mesure</th>
+                        <th>Stock actuel</th>
+                        <th class="col-alert">Stock d'alerte</th>
+                        <th>Statut</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ingredient in ingredients %}
+                    <tr>
+                        <td>
+                            <strong>{{ ingredient.nom }}</strong>
+                            {% if ingredient.description %}
+                            <br><small class="text-muted">{{ ingredient.description|truncatewords:10 }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ ingredient.unite_mesure.nom }} ({{ ingredient.unite_mesure.symbole }})
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark">
+                                <span class="stock-value" data-value="{{ ingredient.stock_reel }}" data-unit="{{ ingredient.unite_mesure.symbole }}">
+                                    {{ ingredient.stock_reel }} {{ ingredient.unite_mesure.symbole }}
+                                </span>
+                            </span>
+                        </td>
+                        <td>
+                            {{ ingredient.stock_alerte }} {{ ingredient.unite_mesure.symbole }}
+                        </td>
+                        <td>
+                            {% if ingredient.besoin_reappro %}
+                            <span class="badge bg-warning">
+                                <i class="bi bi-exclamation-triangle"></i> Stock bas
+                            </span>
+                            {% else %}
+                            <span class="badge bg-success">
+                                <i class="bi bi-check-circle"></i> OK
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="button" 
+                                        class="btn btn-outline-info btn-action" 
+                                        data-ingredient-id="{{ ingredient.pk }}"
+                                        data-stock="{{ ingredient.stock_reel }}"
+                                        data-unit="{{ ingredient.unite_mesure.symbole }}"
+                                        data-name="{{ ingredient.nom }}"
+                                        data-alert="{{ ingredient.stock_alerte }}"
+                                        onclick="updateStockFromData(this)" 
+                                        title="Ajuster stock">
+                                    <i class="bi bi-box-seam"></i>
+                                </button>
+                                <a href="{% url 'ingredient_update' ingredient.pk %}" 
+                                   class="btn btn-outline-primary btn-action" title="Modifier">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'ingredient_delete' ingredient.pk %}" 
+                                   class="btn btn-outline-danger btn-action" title="Supprimer">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                            <p>Aucun ingrédient trouvé</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
     {% if ingredients.has_other_pages %}
     <nav aria-label="Navigation">
-        <ul class="pagination justify-content-center">
+        <ul class="pagination pagination-sm justify-content-center flex-wrap">
             {% if ingredients.has_previous %}
             <li class="page-item">
                 <a class="page-link" href="?page={{ ingredients.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
-                    Précédent
+                    <span class="d-none d-sm-inline">Précédent</span>
+                    <span class="d-sm-none">‹</span>
                 </a>
             </li>
             {% endif %}
@@ -110,8 +361,12 @@
             {% for num in ingredients.paginator.page_range %}
                 {% if ingredients.number == num %}
                 <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                {% elif num > ingredients.number|add:'-3' and num < ingredients.number|add:'3' %}
-                <li class="page-item">
+                {% elif num > ingredients.number|add:'-2' and num < ingredients.number|add:'2' %}
+                <li class="page-item d-none d-sm-inline-block">
+                    <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">{{ num }}</a>
+                </li>
+                {% elif num > ingredients.number|add:'-1' and num < ingredients.number|add:'1' %}
+                <li class="page-item d-sm-none">
                     <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">{{ num }}</a>
                 </li>
                 {% endif %}
@@ -120,7 +375,8 @@
             {% if ingredients.has_next %}
             <li class="page-item">
                 <a class="page-link" href="?page={{ ingredients.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
-                    Suivant
+                    <span class="d-none d-sm-inline">Suivant</span>
+                    <span class="d-sm-none">›</span>
                 </a>
             </li>
             {% endif %}
@@ -129,26 +385,97 @@
     {% endif %}
 </div>
 
-<!-- Modal pour ajuster le stock -->
+<!-- Modal pour ajuster le stock (amélioré pour mobile) -->
 <div class="modal fade" id="stockModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Ajuster le stock</h5>
+                <h5 class="modal-title" id="stockModalTitle">Ajuster le stock</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <form id="stockForm">
                     <input type="hidden" id="ingredientId">
+                    <input type="hidden" id="ingredientUnit">
+                    <input type="hidden" id="stockAlerte">
                     <div class="mb-3">
-                        <label for="newStock" class="form-label">Nouveau stock</label>
-                        <input type="number" class="form-control" id="newStock" step="0.01" required>
+                        <label for="newStock" class="form-label">
+                            Nouveau stock <span id="stockUnit" class="text-muted"></span>
+                        </label>
+                        <div class="input-group">
+                            <button type="button" class="btn btn-outline-secondary" onclick="decrementStock()">
+                                <i class="bi bi-dash"></i>
+                            </button>
+                            <input type="number" 
+                                   class="form-control text-center" 
+                                   id="newStock" 
+                                   step="0.01" 
+                                   required
+                                   oninput="validateStock(); updateLiveDisplay()"
+                                   onchange="updateLiveDisplay()"
+                                   style="font-size: 1.2rem;">
+                            <button type="button" class="btn btn-outline-secondary" onclick="incrementStock()">
+                                <i class="bi bi-plus"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Affichage live de la conversion -->
+                        <div id="liveConversion" class="text-center mt-2 p-2 bg-light rounded d-none">
+                            <small class="text-muted">Équivaut à:</small><br>
+                            <strong id="conversionText"></strong>
+                        </div>
+                        
+                        <!-- Message d'alerte stock bas -->
+                        <div id="stockAlert" class="alert alert-warning mt-2 d-none" role="alert">
+                            <i class="bi bi-exclamation-triangle me-1"></i>
+                            <small>Attention: stock en dessous du seuil d'alerte (<span id="alertThreshold"></span>)</small>
+                        </div>
+                        
+                        <!-- Boutons standard -->
+                        <div class="d-flex gap-2 mt-2" id="standardButtons">
+                            <button type="button" class="btn btn-sm btn-outline-secondary flex-fill" onclick="quickAdjust(-10)">-10</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary flex-fill" onclick="quickAdjust(-5)">-5</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary flex-fill" onclick="quickAdjust(5)">+5</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary flex-fill" onclick="quickAdjust(10)">+10</button>
+                        </div>
+                        
+                        <!-- Boutons de conversion pour grammes -->
+                        <div class="d-none gap-2 mt-2" id="gramButtons">
+                            <button type="button" class="btn btn-sm btn-outline-primary flex-fill" onclick="quickAdjust(-1000)">-1 kg</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary flex-fill" onclick="quickAdjust(-500)">-500g</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary flex-fill" onclick="quickAdjust(500)">+500g</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary flex-fill" onclick="quickAdjust(1000)">+1 kg</button>
+                        </div>
+                        
+                        <!-- Boutons de conversion pour millilitres -->
+                        <div class="d-none gap-2 mt-2" id="milliliterButtons">
+                            <button type="button" class="btn btn-sm btn-outline-primary flex-fill" onclick="quickAdjust(-1000)">-1 L</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary flex-fill" onclick="quickAdjust(-500)">-500ml</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary flex-fill" onclick="quickAdjust(500)">+500ml</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary flex-fill" onclick="quickAdjust(1000)">+1 L</button>
+                        </div>
+                        
+                        <!-- Boutons pour grandes quantités (kg) -->
+                        <div class="d-none gap-2 mt-1" id="largeGramButtons">
+                            <button type="button" class="btn btn-sm btn-outline-warning flex-fill" onclick="quickAdjust(5000)">+5 kg</button>
+                            <button type="button" class="btn btn-sm btn-outline-warning flex-fill" onclick="quickAdjust(10000)">+10 kg</button>
+                            <button type="button" class="btn btn-sm btn-outline-warning flex-fill" onclick="quickAdjust(25000)">+25 kg</button>
+                        </div>
+                        
+                        <!-- Boutons pour grandes quantités (litres) -->
+                        <div class="d-none gap-2 mt-1" id="largeLiterButtons">
+                            <button type="button" class="btn btn-sm btn-outline-warning flex-fill" onclick="quickAdjustLiters(5)">+5 L</button>
+                            <button type="button" class="btn btn-sm btn-outline-warning flex-fill" onclick="quickAdjustLiters(10)">+10 L</button>
+                            <button type="button" class="btn btn-sm btn-outline-warning flex-fill" onclick="quickAdjustLiters(25)">+25 L</button>
+                        </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                <button type="button" class="btn btn-primary" onclick="saveStock()">Enregistrer</button>
+                <button type="button" class="btn btn-primary" id="saveStockBtn" onclick="saveStock()">
+                    <i class="bi bi-check-circle"></i> Enregistrer
+                </button>
             </div>
         </div>
     </div>
@@ -170,15 +497,259 @@ function getCookie(name) {
     return cookieValue;
 }
 
-function updateStock(id, currentStock) {
+// Nouvelle fonction qui récupère les données depuis les attributs data-
+function updateStockFromData(button) {
+    const id = button.dataset.ingredientId;
+    const currentStock = button.dataset.stock;
+    const unit = button.dataset.unit || '';
+    const name = button.dataset.name || 'Ingrédient';
+    const stockAlerte = button.dataset.alert || 0;
+    
+    console.log('Données récupérées:', {
+        id: id,
+        stock: currentStock,
+        unit: unit,
+        name: name,
+        alert: stockAlerte
+    });
+    
+    updateStock(id, currentStock, unit, name, stockAlerte);
+}
+
+function updateStock(id, currentStock, unit, name, stockAlerte) {
+    // Vérification et conversion de sécurité pour l'unité
+    unit = unit ? String(unit) : '';
+    name = name ? String(name) : 'Ingrédient';
+    stockAlerte = stockAlerte !== undefined ? stockAlerte : 0;
+    
+    // Debug: afficher l'unité reçue
+    console.log('Unité reçue:', unit);
+    
     document.getElementById('ingredientId').value = id;
     document.getElementById('newStock').value = currentStock;
+    document.getElementById('ingredientUnit').value = unit;
+    document.getElementById('stockUnit').textContent = unit ? '(' + unit + ')' : '';
+    document.getElementById('stockAlerte').value = stockAlerte;
+    document.getElementById('alertThreshold').textContent = stockAlerte + ' ' + unit;
+    
+    // Mettre à jour le titre de la modal avec le nom de l'ingrédient
+    document.getElementById('stockModalTitle').textContent = 'Ajuster le stock - ' + name;
+    
+    // Masquer tous les boutons de conversion
+    document.getElementById('standardButtons').classList.add('d-none');
+    document.getElementById('gramButtons').classList.add('d-none');
+    document.getElementById('milliliterButtons').classList.add('d-none');
+    document.getElementById('largeGramButtons').classList.add('d-none');
+    document.getElementById('largeLiterButtons').classList.add('d-none');
+    
+    // Afficher les boutons appropriés selon l'unité
+    // Nettoyer l'unité (enlever les espaces, parenthèses et mettre en minuscules)
+    const cleanUnit = unit.toLowerCase().replace(/[()]/g, '').replace(/\s/g, '').trim();
+    
+    console.log('Unité nettoyée:', cleanUnit);
+    
+    if (cleanUnit === 'g' || cleanUnit === 'gr' || cleanUnit === 'gramme' || cleanUnit === 'grammes') {
+        console.log('Détecté: grammes');
+        document.getElementById('gramButtons').classList.remove('d-none');
+        document.getElementById('gramButtons').classList.add('d-flex');
+        document.getElementById('largeGramButtons').classList.remove('d-none');
+        document.getElementById('largeGramButtons').classList.add('d-flex');
+    } else if (cleanUnit === 'ml' || cleanUnit === 'millilitre' || cleanUnit === 'millilitres') {
+        console.log('Détecté: millilitres');
+        document.getElementById('milliliterButtons').classList.remove('d-none');
+        document.getElementById('milliliterButtons').classList.add('d-flex');
+        document.getElementById('largeLiterButtons').classList.remove('d-none');
+        document.getElementById('largeLiterButtons').classList.add('d-flex');
+    } else if (cleanUnit === 'kg' || cleanUnit === 'kilogramme' || cleanUnit === 'kilogrammes') {
+        console.log('Détecté: kilogrammes');
+        // Pour les kg, on propose des ajouts en kg directs
+        document.getElementById('standardButtons').classList.remove('d-none');
+        document.getElementById('standardButtons').innerHTML = `
+            <button type="button" class="btn btn-sm btn-outline-primary flex-fill" onclick="quickAdjust(-1)">-1 kg</button>
+            <button type="button" class="btn btn-sm btn-outline-primary flex-fill" onclick="quickAdjust(-0.5)">-500g</button>
+            <button type="button" class="btn btn-sm btn-outline-primary flex-fill" onclick="quickAdjust(0.5)">+500g</button>
+            <button type="button" class="btn btn-sm btn-outline-primary flex-fill" onclick="quickAdjust(1)">+1 kg</button>
+        `;
+        // Ajouter aussi les gros boutons pour kg
+        document.getElementById('largeGramButtons').classList.remove('d-none');
+        document.getElementById('largeGramButtons').classList.add('d-flex');
+    } else if (cleanUnit === 'l' || cleanUnit === 'litre' || cleanUnit === 'litres') {
+        console.log('Détecté: litres');
+        // Pour les litres, on propose des ajouts en litres directs
+        document.getElementById('standardButtons').classList.remove('d-none');
+        document.getElementById('standardButtons').innerHTML = `
+            <button type="button" class="btn btn-sm btn-outline-primary flex-fill" onclick="quickAdjust(-1)">-1 L</button>
+            <button type="button" class="btn btn-sm btn-outline-primary flex-fill" onclick="quickAdjust(-0.5)">-500ml</button>
+            <button type="button" class="btn btn-sm btn-outline-primary flex-fill" onclick="quickAdjust(0.5)">+500ml</button>
+            <button type="button" class="btn btn-sm btn-outline-primary flex-fill" onclick="quickAdjust(1)">+1 L</button>
+        `;
+        // Ajouter aussi les gros boutons pour litres
+        document.getElementById('largeLiterButtons').classList.remove('d-none');
+        document.getElementById('largeLiterButtons').classList.add('d-flex');
+    } else {
+        console.log('Unité non reconnue, affichage standard');
+        // Pour les autres unités, afficher les boutons standard
+        document.getElementById('standardButtons').classList.remove('d-none');
+        document.getElementById('standardButtons').innerHTML = `
+            <button type="button" class="btn btn-sm btn-outline-secondary flex-fill" onclick="quickAdjust(-10)">-10</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary flex-fill" onclick="quickAdjust(-5)">-5</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary flex-fill" onclick="quickAdjust(5)">+5</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary flex-fill" onclick="quickAdjust(10)">+10</button>
+        `;
+    }
+    
+    // Valider le stock initial et afficher la conversion
+    validateStock();
+    updateLiveDisplay();
+    
     new bootstrap.Modal(document.getElementById('stockModal')).show();
+}
+
+function validateStock() {
+    const input = document.getElementById('newStock');
+    const stockAlerte = parseFloat(document.getElementById('stockAlerte').value);
+    const value = parseFloat(input.value);
+    const alertDiv = document.getElementById('stockAlert');
+    
+    if (value <= stockAlerte) {
+        input.classList.add('border-warning');
+        alertDiv.classList.remove('d-none');
+    } else {
+        input.classList.remove('border-warning');
+        alertDiv.classList.add('d-none');
+    }
+}
+
+// Fonction pour afficher la conversion en temps réel
+function updateLiveDisplay() {
+    const value = parseFloat(document.getElementById('newStock').value) || 0;
+    const unit = String(document.getElementById('ingredientUnit').value || '').toLowerCase().replace(/[()]/g, '').trim();
+    const conversionDiv = document.getElementById('liveConversion');
+    const conversionText = document.getElementById('conversionText');
+    
+    if (value > 0) {
+        let displayText = '';
+        
+        // Afficher les conversions selon l'unité
+        if (unit === 'g') {
+            if (value >= 1000) {
+                const kg = (value / 1000).toFixed(2);
+                displayText = `${kg} kg`;
+            } else {
+                displayText = `${value.toFixed(0)} grammes`;
+            }
+        } else if (unit === 'ml') {
+            if (value >= 1000) {
+                const litres = (value / 1000).toFixed(2);
+                displayText = `${litres} L`;
+            } else {
+                displayText = `${value.toFixed(0)} millilitres`;
+            }
+        } else if (unit === 'kg') {
+            const grammes = (value * 1000).toFixed(0);
+            displayText = `${grammes} g`;
+        } else if (unit === 'l') {
+            const ml = (value * 1000).toFixed(0);
+            displayText = `${ml} ml`;
+        }
+        
+        if (displayText) {
+            conversionText.textContent = displayText;
+            conversionDiv.classList.remove('d-none');
+        } else {
+            conversionDiv.classList.add('d-none');
+        }
+    } else {
+        conversionDiv.classList.add('d-none');
+    }
+}
+
+function incrementStock() {
+    const input = document.getElementById('newStock');
+    const unit = String(document.getElementById('ingredientUnit').value || '');
+    const cleanUnit = unit.toLowerCase().replace(/[()]/g, '').trim();
+    
+    // Incrément adapté selon l'unité
+    let increment = 1;
+    if (cleanUnit === 'g' || cleanUnit === 'ml') {
+        increment = 100; // +100g ou +100ml
+    } else if (cleanUnit === 'kg' || cleanUnit === 'l') {
+        increment = 0.1; // +0.1kg ou +0.1L
+    }
+    
+    input.value = (parseFloat(input.value || 0) + increment).toFixed(2);
+    validateStock();
+    updateLiveDisplay();
+}
+
+function decrementStock() {
+    const input = document.getElementById('newStock');
+    const unit = String(document.getElementById('ingredientUnit').value || '');
+    const cleanUnit = unit.toLowerCase().replace(/[()]/g, '').trim();
+    
+    // Décrément adapté selon l'unité
+    let decrement = 1;
+    if (cleanUnit === 'g' || cleanUnit === 'ml') {
+        decrement = 100; // -100g ou -100ml
+    } else if (cleanUnit === 'kg' || cleanUnit === 'l') {
+        decrement = 0.1; // -0.1kg ou -0.1L
+    }
+    
+    const newValue = parseFloat(input.value || 0) - decrement;
+    if (newValue >= 0) {
+        input.value = newValue.toFixed(2);
+        validateStock();
+        updateLiveDisplay();
+    }
+}
+
+function quickAdjust(amount) {
+    const input = document.getElementById('newStock');
+    const currentValue = parseFloat(input.value || 0);
+    const newValue = currentValue + amount;
+    
+    if (newValue >= 0) {
+        input.value = newValue.toFixed(2);
+        validateStock();
+        updateLiveDisplay();
+    }
+}
+
+// Fonction spéciale pour les ajouts en litres (toujours convertir en ml)
+function quickAdjustLiters(liters) {
+    const input = document.getElementById('newStock');
+    
+    // Toujours convertir les litres en millilitres (1L = 1000ml)
+    const amount = liters * 1000;
+    
+    const currentValue = parseFloat(input.value || 0);
+    const newValue = currentValue + amount;
+    
+    if (newValue >= 0) {
+        input.value = newValue.toFixed(2);
+        validateStock();
+        updateLiveDisplay();
+    }
 }
 
 function saveStock() {
     const id = document.getElementById('ingredientId').value;
-    const newStock = document.getElementById('newStock').value;
+    const newStockInput = document.getElementById('newStock').value;
+    
+    // Nettoyer la valeur : enlever les espaces et caractères invisibles
+    const newStock = newStockInput.replace(/\s/g, '').replace(/\u00a0/g, '').trim();
+    
+    // Vérifier que c'est un nombre valide
+    if (!newStock || isNaN(newStock)) {
+        alert('Veuillez entrer un nombre valide');
+        return;
+    }
+    
+    // Afficher un indicateur de chargement sur le bouton
+    const saveBtn = document.getElementById('saveStockBtn');
+    const originalContent = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Enregistrement...';
+    saveBtn.disabled = true;
     
     fetch("{% url 'api_stock_update' %}", {
         method: 'POST',
@@ -187,16 +758,114 @@ function saveStock() {
             'X-CSRFToken': getCookie('csrftoken')
         },
         body: JSON.stringify({
-            ingredient_id: id,
-            nouveau_stock: newStock
+            ingredient_id: parseInt(id),
+            nouveau_stock: parseFloat(newStock)
         })
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
+            // Fermer la modal et recharger
+            bootstrap.Modal.getInstance(document.getElementById('stockModal')).hide();
             location.reload();
+        } else {
+            // Restaurer le bouton en cas d'erreur
+            saveBtn.innerHTML = originalContent;
+            saveBtn.disabled = false;
+            alert('Erreur lors de la mise à jour du stock');
+        }
+    })
+    .catch(error => {
+        // Restaurer le bouton en cas d'erreur
+        saveBtn.innerHTML = originalContent;
+        saveBtn.disabled = false;
+        alert('Erreur de connexion: ' + error);
+        console.error('Erreur:', error);
+    });
+}
+
+// Fonction pour formater l'affichage du stock
+function formatStock(value, unit) {
+    const numValue = parseFloat(value);
+    const cleanUnit = unit.toLowerCase().replace(/[()]/g, '').trim();
+    
+    let displayValue = '';
+    let displayUnit = unit;
+    
+    // Conversion intelligente selon l'unité
+    if (cleanUnit === 'g') {
+        if (numValue >= 1000) {
+            // Convertir en kg
+            displayValue = (numValue / 1000);
+            displayUnit = 'kg';
+        } else {
+            displayValue = numValue;
+            displayUnit = 'g';
+        }
+    } else if (cleanUnit === 'ml') {
+        if (numValue >= 1000) {
+            // Convertir en litres
+            displayValue = (numValue / 1000);
+            displayUnit = 'L';
+        } else {
+            displayValue = numValue;
+            displayUnit = 'ml';
+        }
+    } else {
+        displayValue = numValue;
+    }
+    
+    // Formater le nombre : supprimer les .00
+    if (displayValue % 1 === 0) {
+        // C'est un nombre entier
+        displayValue = displayValue.toFixed(0);
+    } else {
+        // Garder jusqu'à 2 décimales, mais supprimer les zéros inutiles
+        displayValue = parseFloat(displayValue.toFixed(2)).toString();
+    }
+    
+    return displayValue + ' ' + displayUnit;
+}
+
+// Formater tous les stocks au chargement de la page
+document.addEventListener('DOMContentLoaded', function() {
+    // Formater les valeurs de stock dans le tableau et les cartes
+    document.querySelectorAll('.stock-value').forEach(function(element) {
+        const value = element.dataset.value;
+        const unit = element.dataset.unit;
+        if (value && unit) {
+            element.textContent = formatStock(value, unit);
         }
     });
+    
+    // Reste du code existant pour la modal...
+    const modal = document.getElementById('stockModal');
+    
+    modal.addEventListener('shown.bs.modal', function() {
+        // Focus sur l'input quand la modal s'ouvre
+        document.getElementById('newStock').focus();
+        
+        // Ajouter les raccourcis clavier
+        modal.addEventListener('keydown', handleModalKeyboard);
+    });
+    
+    modal.addEventListener('hidden.bs.modal', function() {
+        // Retirer les raccourcis clavier quand la modal se ferme
+        modal.removeEventListener('keydown', handleModalKeyboard);
+    });
+});
+
+function handleModalKeyboard(e) {
+    if (e.key === 'Enter' && e.ctrlKey) {
+        e.preventDefault();
+        saveStock();
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        incrementStock();
+    } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        decrementStock();
+    }
 }
 </script>
 {% endblock %}

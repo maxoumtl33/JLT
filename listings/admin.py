@@ -106,6 +106,19 @@ admin.site.register(Score1)
 admin.site.register(PaymentMode)
 admin.site.register(Notification)
 admin.site.register(Commande)
+from .ressources import IngredientResource, UniteMesureResource
+
+@admin.register(Ingredient)
+class IngredientAdmin(ImportExportModelAdmin):
+    resource_class = IngredientResource
+    list_display = ('nom', 'unite_mesure', 'stock_reel', 'stock_alerte', 'description')
+    search_fields = ('nom',)
+
+@admin.register(UniteMesure)
+class UniteMesureAdmin(ImportExportModelAdmin):
+    resource_class = UniteMesureResource
+    list_display = ('nom', 'symbole')
+    search_fields = ('nom', 'symbole')
 
 
 # admin.py
