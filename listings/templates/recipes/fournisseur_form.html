@@ -23,10 +23,9 @@
                 <div class="mb-3">
                     <label class="form-label">Contact principal</label>
                     {{ form.contact_principal }}
+                    <small class="text-muted">Ex: Daniel: 514-655-0355, Benoit: 514-710-1148</small>
                 </div>
-            </div>
-            
-            <div class="col-md-6">
+                
                 <div class="mb-3">
                     <label class="form-label">Email</label>
                     {{ form.email }}
@@ -34,26 +33,77 @@
                     <div class="text-danger small">{{ form.email.errors.0 }}</div>
                     {% endif %}
                 </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label">Téléphone principal</label>
+                    {{ form.telephone }}
+                    <small class="text-muted">Numéro principal de contact</small>
+                </div>
                 
                 <div class="mb-3">
-                    <label class="form-label">Téléphone</label>
-                    {{ form.telephone }}
+                    <label class="form-label">Adresse</label>
+                    {{ form.adresse }}
                 </div>
             </div>
         </div>
         
-        <div class="mb-3">
-            <label class="form-label">Adresse</label>
-            {{ form.adresse }}
+        <div class="row">
+            <div class="col-md-12">
+                <div class="mb-3">
+                    <label class="form-label">Types de produits</label>
+                    {{ form.type_produits }}
+                    <small class="text-muted">Décrivez les catégories de produits fournis (fruits, légumes, viande, épicerie, etc.)</small>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Procédure de commande</label>
+                    {{ form.procedure_commande }}
+                    <small class="text-muted">Horaires, délais, méthode de commande (téléphone, en ligne, etc.)</small>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Notes et informations supplémentaires</label>
+                    {{ form.notes }}
+                    <small class="text-muted">Spécialités, avantages, points d'attention particuliers</small>
+                </div>
+            </div>
         </div>
         
         <div class="d-flex justify-content-end">
-            <a href="{% url 'fournisseur_list' %}" class="btn btn-secondary me-2">Annuler</a>
+            <a href="{% url 'fournisseur_list' %}" class="btn btn-secondary me-2">
+                <i class="bi bi-arrow-left"></i> Annuler
+            </a>
             <button type="submit" class="btn btn-primary">
                 <i class="bi bi-check-circle"></i> 
-                {% if fournisseur %}Enregistrer{% else %}Créer{% endif %}
+                {% if fournisseur %}Enregistrer les modifications{% else %}Créer le fournisseur{% endif %}
             </button>
         </div>
     </form>
 </div>
+
+{% if fournisseur %}
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="mb-0">Informations supplémentaires</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Créé le:</strong> {{ fournisseur.created_at|date:"d/m/Y H:i" }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Dernière modification:</strong> {{ fournisseur.updated_at|date:"d/m/Y H:i" }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Nombre de produits au catalogue:</strong> {{ fournisseur.catalogues.count }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Nombre de commandes:</strong> {{ fournisseur.commandes.count }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}

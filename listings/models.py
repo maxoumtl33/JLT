@@ -1190,12 +1190,20 @@ class Departement(models.Model):
     def __str__(self):
         return self.nom
 
+# models.py - Version étendue (optionnel)
+
 class Fournisseur(models.Model):
     nom = models.CharField(max_length=200, unique=True)
     email = models.EmailField(blank=True)
     telephone = models.CharField(max_length=20, blank=True)
     adresse = models.TextField(blank=True)
     contact_principal = models.CharField(max_length=100, blank=True)
+    
+    # Champs supplémentaires pour stocker plus d'infos
+    type_produits = models.TextField(blank=True, help_text="Types de produits fournis")
+    procedure_commande = models.TextField(blank=True, help_text="Procédure et horaires de commande")
+    notes = models.TextField(blank=True, help_text="Informations supplémentaires")
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -1689,7 +1697,7 @@ class PlayerSkin(models.Model):
         null=True,  # Temporaire pour la migration
         blank=True
     )
-    
+
     image = models.ImageField(
         upload_to='player_skins/',
         verbose_name="Image du skin",

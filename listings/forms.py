@@ -571,16 +571,53 @@ class DepartementForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
+# recipes/forms.py
+
+from django import forms
+from .models import Fournisseur
+
 class FournisseurForm(forms.ModelForm):
     class Meta:
         model = Fournisseur
-        fields = ['nom', 'email', 'telephone', 'adresse', 'contact_principal']
+        fields = ['nom', 'contact_principal', 'email', 'telephone', 
+                  'adresse', 'type_produits', 'procedure_commande', 'notes']
         widgets = {
-            'nom': forms.TextInput(attrs={'class': 'form-control'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control'}),
-            'telephone': forms.TextInput(attrs={'class': 'form-control'}),
-            'adresse': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            'contact_principal': forms.TextInput(attrs={'class': 'form-control'}),
+            'nom': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ex: Gordon GFS'
+            }),
+            'contact_principal': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ex: Marc-Antoine: 438-332-0343'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'contact@fournisseur.com'
+            }),
+            'telephone': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '514-XXX-XXXX'
+            }),
+            'adresse': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 2,
+                'placeholder': 'Adresse complète du fournisseur'
+            }),
+            'type_produits': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Ex: Produits épicerie, viande, fruits de mer, emballage'
+            }),
+            'procedure_commande': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Ex: Commander avant 16h via plateforme en ligne'
+            }),
+            'notes': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Ex: Fournisseur principal d\'épicerie, bon pour dépannage'
+            }),
         }
 
 class IngredientForm(forms.ModelForm):
