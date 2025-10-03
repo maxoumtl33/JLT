@@ -109,7 +109,10 @@
                                     {% for sri in sous_recette.sousrecette_ingredients.all %}
                                     <li>
                                         <i class="bi bi-check-circle text-success"></i>
-                                        {{ sri.ingredient.nom }}: {{ sri.quantite }} {{ sri.ingredient.unite_mesure.symbole }}
+                                        {{ sri.ingredient.nom }}: 
+                                        <span class="quantite-ingredient" data-value="{{ sri.quantite }}" data-unite="{{ sri.ingredient.unite_mesure.symbole }}">
+                                            <!-- Sera formaté par JavaScript -->
+                                        </span>
                                     </li>
                                     {% endfor %}
                                 </ul>
@@ -148,7 +151,9 @@
                     {% for ri in recette.recette_ingredients.all %}
                     <tr>
                         <td>{{ ri.ingredient.nom }}</td>
-                        <td>{{ ri.quantite }} {{ ri.ingredient.unite_mesure.symbole }}</td>
+                        <td class="quantite-ingredient" data-value="{{ ri.quantite }}" data-unite="{{ ri.ingredient.unite_mesure.symbole }}">
+                            <!-- Sera formaté par JavaScript -->
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -182,4 +187,47 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Fonction de formatage des quantités
+function formatQuantiteAvecConversion(quantite, unite) {
+    // Conversion pour les grammes vers kilogrammes
+    if (unite && unite.toLowerCase() === 'g') {
+        if (quantite >= 10000) {
+            return (quantite / 1000).toFixed(2).replace(/\.?0+$/, '') + ' kg';
+        } else if (quantite < 1000) {
+            return quantite.toFixed(2).replace(/\.?0+$/, '') + ' g';
+        } else {
+            // Entre 1000g et 9999g, on affiche en kg
+            return (quantite / 1000).toFixed(2).replace(/\.?0+$/, '') + ' kg';
+        }
+    }
+    
+    // Conversion pour les millilitres vers litres
+    if (unite && unite.toLowerCase() === 'ml') {
+        if (quantite >= 10000) {
+            return (quantite / 1000).toFixed(2).replace(/\.?0+$/, '') + ' L';
+        } else if (quantite < 1000) {
+            return quantite.toFixed(2).replace(/\.?0+$/, '') + ' ml';
+        } else {
+            // Entre 1000ml et 9999ml, on affiche en L
+            return (quantite / 1000).toFixed(2).replace(/\.?0+$/, '') + ' L';
+        }
+    }
+    
+    // Pour les autres unités, pas de conversion
+    return quantite.toFixed(2).replace(/\.?0+$/, '') + ' ' + unite;
+}
+
+// Formater toutes les quantités au chargement de la page
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.quantite-ingredient').forEach(element => {
+        const value = parseFloat(element.dataset.value);
+        const unite = element.dataset.unite;
+        element.textContent = formatQuantiteAvecConversion(value, unite);
+    });
+});
+</script>
 {% endblock %}

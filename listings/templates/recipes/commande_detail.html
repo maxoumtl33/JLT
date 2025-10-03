@@ -4,80 +4,27 @@
 {% block extra_css %}
 <style>
     .status-badge {
-        font-size: 1.1rem;
-        padding: 6px 15px;
-        border-radius: 20px;
+        font-size: 1rem;
+        padding: 4px 12px;
+        border-radius: 15px;
         font-weight: 500;
     }
     
-    .table-commande {
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    
-    .table-commande thead {
-        background-color: #f8f9fa;
-    }
-    
-    .table-commande tfoot {
-        background-color: #f8f9fa;
-        font-weight: 600;
-    }
-    
-    .total-row {
-        font-size: 1.2rem;
-        color: #2c3e50;
-    }
-    
+    /* Styles généraux */
     .info-card {
         background-color: #f8f9fa;
         border-left: 4px solid #007bff;
         padding: 15px;
         margin-bottom: 20px;
+        border-radius: 4px;
     }
     
     .contact-card {
         background-color: #fff;
         border: 1px solid #e3e6ea;
         border-radius: 8px;
-        padding: 20px;
-    }
-    
-    /* Styles pour la modal de validation */
-    .validation-table td input {
-        max-width: 120px;
-    }
-    
-    .quality-check {
-        display: flex;
-        gap: 15px;
-        align-items: center;
-    }
-    
-    .quality-check label {
-        margin-bottom: 0;
-        cursor: pointer;
-    }
-    
-    /* Canvas pour signature */
-    #signatureCanvas {
-        border: 2px solid #dee2e6;
-        border-radius: 4px;
-        background-color: white;
-        cursor: crosshair;
-        width: 100%;
-        touch-action: none;
-    }
-    
-    .signature-controls {
-        margin-top: 10px;
-        display: flex;
-        justify-content: space-between;
-    }
-    
-    .difference-badge {
-        font-size: 0.85rem;
-        padding: 2px 6px;
-        margin-left: 5px;
+        padding: 15px;
+        margin-bottom: 20px;
     }
     
     .notes-section {
@@ -87,205 +34,475 @@
         border-radius: 4px;
     }
     
-    /* Style pour indiquer que le champ est optionnel */
-    .quantite-recue::placeholder {
+    /* Tableau mobile-friendly */
+    .table-responsive-stack {
+        width: 100%;
+    }
+    
+    /* Style mobile pour les cartes d'articles */
+    .article-card {
+        background: #fff;
+        border: 1px solid #e3e6ea;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 10px;
+        transition: box-shadow 0.3s;
+    }
+    
+    .article-card:hover {
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .article-header {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 10px;
+    }
+    
+    .article-details {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    
+    .detail-item {
+        flex: 1 1 45%;
+        min-width: 100px;
+    }
+    
+    .detail-label {
+        font-size: 0.85rem;
         color: #6c757d;
-        font-style: italic;
+        margin-bottom: 2px;
+    }
+    
+    .detail-value {
+        font-weight: 500;
+        color: #2c3e50;
+    }
+    
+    .total-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 20px;
+        text-align: center;
+    }
+    
+    .total-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin-bottom: 5px;
+    }
+    
+    .total-amount {
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+    
+    /* Boutons mobile-friendly */
+    .mobile-actions {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: white;
+        padding: 15px;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        z-index: 100;
+        display: none;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .action-buttons .btn {
+        flex: 1;
+        min-width: 120px;
+    }
+    
+    /* Modal améliorée pour mobile */
+    .validation-item {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 15px;
+    }
+    
+    .validation-item-header {
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #2c3e50;
+    }
+    
+    .validation-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .quantity-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .quantity-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+        min-width: 80px;
+    }
+    
+    .quality-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    
+    .quality-btn {
+        flex: 1;
+        padding: 8px;
+        border: 2px solid #dee2e6;
+        border-radius: 6px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: center;
+    }
+    
+    .quality-btn.active-ok {
+        background: #d4edda;
+        border-color: #28a745;
+        color: #155724;
+    }
+    
+    .quality-btn.active-problem {
+        background: #fff3cd;
+        border-color: #ffc107;
+        color: #856404;
+    }
+    
+    /* Canvas signature mobile */
+    #signatureCanvas {
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        background-color: white;
+        cursor: crosshair;
+        width: 100%;
+        max-width: 100%;
+        touch-action: none;
+    }
+    
+    /* Media queries pour mobile */
+    @media (max-width: 768px) {
+        .content-header h1 {
+            font-size: 1.25rem;
+        }
+        
+        .status-badge {
+            font-size: 0.85rem;
+            padding: 3px 8px;
+        }
+        
+        /* Masquer le tableau desktop */
+        .table-commande {
+            display: none;
+        }
+        
+        /* Afficher les cartes mobile */
+        .mobile-articles {
+            display: block !important;
+        }
+        
+        /* Actions fixes en bas */
+        .mobile-actions {
+            display: block;
+        }
+        
+        /* Ajuster le padding du contenu pour les actions fixes */
+        .main-content {
+            padding-bottom: 100px;
+        }
+        
+        /* Masquer les boutons du header sur mobile */
+        .header-actions {
+            display: none;
+        }
+        
+        /* Modal plein écran sur mobile */
+        .modal-dialog {
+            margin: 0;
+            max-width: 100%;
+            height: 100%;
+        }
+        
+        .modal-content {
+            height: 100%;
+            border-radius: 0;
+        }
+        
+        .modal-body {
+            overflow-y: auto;
+        }
+        
+        /* Signature canvas hauteur réduite sur mobile */
+        #signatureCanvas {
+            height: 120px !important;
+        }
+        
+        /* Colonnes empilées */
+        .row {
+            margin-left: 0;
+            margin-right: 0;
+        }
+        
+        .col-md-8, .col-md-4 {
+            padding-left: 0;
+            padding-right: 0;
+        }
+    }
+    
+    @media (min-width: 769px) {
+        .mobile-articles {
+            display: none !important;
+        }
+    }
+    
+    /* Amélioration de l'accessibilité */
+    .btn:focus, 
+    .form-control:focus,
+    .quality-btn:focus {
+        outline: 3px solid rgba(0,123,255,0.25);
+        outline-offset: 2px;
+    }
+    
+    /* Animation pour les cartes */
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .article-card {
+        animation: slideIn 0.3s ease-out;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="content-header">
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <h1 class="h3 mb-2">Commande {{ commande.numero }}</h1>
-            {% if commande.statut == 'BROUILLON' %}
-                <span class="badge status-badge bg-secondary">Brouillon</span>
-            {% elif commande.statut == 'CONFIRMEE' %}
-                <span class="badge status-badge bg-primary">Confirmée</span>
-            {% elif commande.statut == 'EN_COURS' %}
-                <span class="badge status-badge bg-info">En cours</span>
-            {% elif commande.statut == 'LIVREE' %}
-                <span class="badge status-badge bg-success">Livrée</span>
-            {% else %}
-                <span class="badge status-badge bg-danger">Annulée</span>
-            {% endif %}
-        </div>
-        <div>
-            <a href="{% url 'commande_print' commande.pk %}" class="btn btn-outline-secondary" target="_blank">
-                <i class="bi bi-printer"></i> Imprimer
-            </a>
-            {% if commande.statut not in 'LIVREE,ANNULEE' %}
-            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#validateModal">
-                <i class="bi bi-check-circle"></i> Valider réception
-            </button>
-            {% endif %}
-            <a href="{% url 'commande_list' %}" class="btn btn-outline-primary">
-                <i class="bi bi-arrow-left"></i> Retour
-            </a>
+<div class="main-content">
+    <div class="content-header">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div class="mb-2">
+                <h1 class="h3 mb-1">{{ commande.numero }}</h1>
+                {% if commande.statut == 'BROUILLON' %}
+                    <span class="badge status-badge bg-secondary">Brouillon</span>
+                {% elif commande.statut == 'CONFIRMEE' %}
+                    <span class="badge status-badge bg-primary">Confirmée</span>
+                {% elif commande.statut == 'EN_COURS' %}
+                    <span class="badge status-badge bg-info">En cours</span>
+                {% elif commande.statut == 'LIVREE' %}
+                    <span class="badge status-badge bg-success">Livrée</span>
+                {% else %}
+                    <span class="badge status-badge bg-danger">Annulée</span>
+                {% endif %}
+            </div>
+            <div class="header-actions">
+                <a href="{% url 'commande_print' commande.pk %}" class="btn btn-sm btn-outline-secondary" target="_blank">
+                    <i class="bi bi-printer"></i> Imprimer
+                </a>
+                {% if commande.statut not in 'LIVREE,ANNULEE' %}
+                <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#validateModal">
+                    <i class="bi bi-check-circle"></i> Valider
+                </button>
+                {% endif %}
+                <a href="{% url 'commande_list' %}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-arrow-left"></i> Retour
+                </a>
+            </div>
         </div>
     </div>
-</div>
 
-<div class="row mt-4">
-    <div class="col-md-8">
-        <!-- Détails de la commande -->
-        <div class="card">
-            <div class="card-header">
-                <h4 class="mb-0">Articles commandés</h4>
+    <!-- Info fournisseur mobile first -->
+    <div class="info-card mb-3">
+        <h6 class="mb-2"><i class="bi bi-building"></i> {{ commande.fournisseur.nom }}</h6>
+        <div class="row">
+            <div class="col-6">
+                <small class="text-muted">Livraison prévue</small><br>
+                <strong>{{ commande.date_livraison_prevue|date:"d/m/Y" }}</strong>
+                {% if commande.jours_restants <= 0 and commande.statut != "LIVREE" %}
+                    <span class="badge bg-danger ms-1">Retard</span>
+                {% elif commande.jours_restants <= 2 and commande.statut != "LIVREE" %}
+                    <span class="badge bg-warning ms-1">{{ commande.jours_restants }}j</span>
+                {% endif %}
             </div>
-            <div class="card-body p-0">
-                <table class="table table-commande mb-0">
-                    <thead>
-                        <tr>
-                            <th style="width: 40%">Ingrédient</th>
-                            <th style="width: 20%">Quantité</th>
-                            <th style="width: 20%" class="text-end">Prix unitaire</th>
-                            <th style="width: 20%" class="text-end">Sous-total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for ligne in commande.lignes.all %}
-                        <tr>
-                            <td>
-                                <strong>{{ ligne.ingredient.nom }}</strong>
-                                {% if ligne.ingredient.reference %}
-                                <br><small class="text-muted">Réf: {{ ligne.ingredient.reference }}</small>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <span class="badge bg-light text-dark">
+            <div class="col-6">
+                <small class="text-muted">Créée le</small><br>
+                <strong>{{ commande.date_creation|date:"d/m/Y" }}</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Version desktop : tableau -->
+            <div class="card d-none d-md-block">
+                <div class="card-header">
+                    <h5 class="mb-0">Articles commandés</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-commande mb-0">
+                        <thead>
+                            <tr>
+                                <th>Ingrédient</th>
+                                <th>Quantité</th>
+                                <th class="text-end">Prix unit.</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ligne in commande.lignes.all %}
+                            <tr>
+                                <td>
+                                    <strong>{{ ligne.ingredient.nom }}</strong>
+                                </td>
+                                <td>
+                                    <span class="quantite-format" data-value="{{ ligne.quantite }}" data-unite="{{ ligne.ingredient.unite_mesure.symbole }}">
+                                        {{ ligne.quantite|floatformat:"-2" }} {{ ligne.ingredient.unite_mesure.symbole }}
+                                    </span>
+                                </td>
+                                <td class="text-end">{{ ligne.prix_unitaire|floatformat:2 }}€</td>
+                                <td class="text-end"><strong>{{ ligne.sous_total|floatformat:2 }}€</strong></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="3" class="text-end">Total HT:</th>
+                                <th class="text-end">{{ commande.montant_total|floatformat:2 }}€</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Version mobile : cartes -->
+            <div class="mobile-articles">
+                <h5 class="mb-3">Articles commandés</h5>
+                {% for ligne in commande.lignes.all %}
+                <div class="article-card">
+                    <div class="article-header">
+                        {{ ligne.ingredient.nom }}
+                    </div>
+                    <div class="article-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Quantité</div>
+                            <div class="detail-value">
+                                <span class="quantite-format" data-value="{{ ligne.quantite }}" data-unite="{{ ligne.ingredient.unite_mesure.symbole }}">
                                     {{ ligne.quantite|floatformat:"-2" }} {{ ligne.ingredient.unite_mesure.symbole }}
                                 </span>
-                            </td>
-                            <td class="text-end">{{ ligne.prix_unitaire|floatformat:2 }} €</td>
-                            <td class="text-end"><strong>{{ ligne.sous_total|floatformat:2 }} €</strong></td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="4" class="text-center text-muted py-3">
-                                Aucun article dans cette commande
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                    <tfoot>
-                        <tr class="total-row">
-                            <th colspan="3" class="text-end">Total HT :</th>
-                            <th class="text-end">{{ commande.montant_total|floatformat:2 }} €</th>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-        </div>
-        
-        {% if commande.notes %}
-        <div class="card mt-3">
-            <div class="card-body">
-                <h5 class="card-title"><i class="bi bi-sticky"></i> Notes</h5>
-                <div class="notes-section">
-                    {{ commande.notes|linebreaks }}
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Prix unitaire</div>
+                            <div class="detail-value">{{ ligne.prix_unitaire|floatformat:2 }}€</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Sous-total</div>
+                            <div class="detail-value text-primary">{{ ligne.sous_total|floatformat:2 }}€</div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted text-center py-3">
+                    Aucun article dans cette commande
+                </p>
+                {% endfor %}
+                
+                <div class="total-card">
+                    <div class="total-label">Total HT</div>
+                    <div class="total-amount">{{ commande.montant_total|floatformat:2 }}€</div>
                 </div>
             </div>
+            
+            {% if commande.notes %}
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h6><i class="bi bi-sticky"></i> Notes</h6>
+                    <div class="notes-section">
+                        {{ commande.notes|linebreaks }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if commande.notes_validation %}
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h6><i class="bi bi-check-circle text-success"></i> Rapport de validation</h6>
+                    <pre style="white-space: pre-wrap; font-size: 0.85rem;">{{ commande.notes_validation }}</pre>
+                </div>
+            </div>
+            {% endif %}
         </div>
-        {% endif %}
         
-        {% if commande.notes_validation %}
-        <div class="card mt-3">
-            <div class="card-body">
-                <h5 class="card-title"><i class="bi bi-check-circle text-success"></i> Rapport de validation</h5>
-                <div class="alert alert-light border-success" style="background-color: #f0f9ff;">
-                    <pre style="white-space: pre-wrap; font-family: 'Courier New', monospace; font-size: 0.9rem; margin: 0; color: #2c3e50;">{{ commande.notes_validation }}</pre>
-                </div>
-                {% if commande.signature|slice:":5" == "data:" %}
-                <div class="mt-3 text-center">
-                    <p class="text-muted mb-2">Signature électronique :</p>
-                    <img src="{{ commande.signature }}" alt="Signature" style="max-height: 100px; border: 2px solid #dee2e6; border-radius: 4px; background: white; padding: 10px;">
-                </div>
+        <div class="col-md-4 mt-3 mt-md-0">
+            <!-- Contact fournisseur -->
+            <div class="contact-card">
+                <h6 class="mb-3"><i class="bi bi-person"></i> Contact</h6>
+                {% if commande.fournisseur.contact_principal %}
+                <p class="mb-2">{{ commande.fournisseur.contact_principal }}</p>
+                {% endif %}
+                {% if commande.fournisseur.telephone %}
+                <p class="mb-2">
+                    <a href="tel:{{ commande.fournisseur.telephone }}" class="btn btn-sm btn-outline-primary w-100">
+                        <i class="bi bi-telephone"></i> {{ commande.fournisseur.telephone }}
+                    </a>
+                </p>
+                {% endif %}
+                {% if commande.fournisseur.email %}
+                <p class="mb-0">
+                    <a href="mailto:{{ commande.fournisseur.email }}" class="btn btn-sm btn-outline-info w-100">
+                        <i class="bi bi-envelope"></i> Email
+                    </a>
+                </p>
                 {% endif %}
             </div>
-        </div>
-        {% endif %}
-    </div>
-    
-    <div class="col-md-4">
-        <!-- Informations -->
-        <div class="card info-card">
-            <h5 class="mb-3"><i class="bi bi-info-circle"></i> Informations</h5>
-            <dl class="row mb-0">
-                <dt class="col-6">Fournisseur:</dt>
-                <dd class="col-6"><strong>{{ commande.fournisseur.nom }}</strong></dd>
-                
-                <dt class="col-6">Créée le:</dt>
-                <dd class="col-6">{{ commande.date_creation|date:"d/m/Y H:i" }}</dd>
-                
-                <dt class="col-6">Livraison prévue:</dt>
-                <dd class="col-6">
-                    {{ commande.date_livraison_prevue|date:"d/m/Y" }}
-                    {% if commande.jours_restants <= 0 and commande.statut != "LIVREE" %}
-                        <span class="badge bg-danger ms-1">En retard</span>
-                    {% elif commande.jours_restants <= 2 and commande.statut != "LIVREE" %}
-                        <span class="badge bg-warning ms-1">{{ commande.jours_restants }}j</span>
-                    {% endif %}
-                </dd>
-                
-                {% if commande.date_livraison_reelle %}
-                <dt class="col-6">Livrée le:</dt>
-                <dd class="col-6">{{ commande.date_livraison_reelle|date:"d/m/Y" }}</dd>
-                {% endif %}
-                
-                {% if commande.validee_par %}
-                <dt class="col-6">Validée par:</dt>
-                <dd class="col-6">{{ commande.validee_par.username }}</dd>
-                {% endif %}
-                
-                {% if commande.signature %}
-                <dt class="col-6">Signature:</dt>
-                <dd class="col-6">
-                    {% if commande.signature|slice:":5" == "data:" %}
-                        <img src="{{ commande.signature }}" alt="Signature" style="max-width: 150px; border: 1px solid #dee2e6;">
-                    {% else %}
-                        {{ commande.signature }}
-                    {% endif %}
-                </dd>
-                {% endif %}
-            </dl>
-        </div>
-        
-        <!-- Contact fournisseur -->
-        <div class="contact-card">
-            <h5 class="mb-3"><i class="bi bi-building"></i> Contact Fournisseur</h5>
-            <p class="mb-2">
-                <strong>{{ commande.fournisseur.nom }}</strong>
-            </p>
-            {% if commande.fournisseur.contact_principal %}
-            <p class="mb-2">
-                <i class="bi bi-person text-muted"></i> {{ commande.fournisseur.contact_principal }}
-            </p>
-            {% endif %}
-            {% if commande.fournisseur.telephone %}
-            <p class="mb-2">
-                <i class="bi bi-telephone text-muted"></i> 
-                <a href="tel:{{ commande.fournisseur.telephone }}">{{ commande.fournisseur.telephone }}</a>
-            </p>
-            {% endif %}
-            {% if commande.fournisseur.email %}
-            <p class="mb-0">
-                <i class="bi bi-envelope text-muted"></i> 
-                <a href="mailto:{{ commande.fournisseur.email }}">{{ commande.fournisseur.email }}</a>
-            </p>
-            {% endif %}
         </div>
     </div>
 </div>
 
-<!-- Modal de validation améliorée -->
+<!-- Actions mobiles fixes -->
+<div class="mobile-actions">
+    <div class="action-buttons">
+        {% if commande.statut not in 'LIVREE,ANNULEE' %}
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#validateModal">
+            <i class="bi bi-check-circle"></i> Valider
+        </button>
+        {% endif %}
+        <a href="{% url 'commande_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+    </div>
+</div>
+
+<!-- Modal de validation améliorée pour mobile -->
 <div class="modal fade" id="validateModal" tabindex="-1" data-bs-backdrop="static">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-fullscreen-sm-down">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><i class="bi bi-check-circle"></i> Valider la réception de la commande</h5>
+                <h5 class="modal-title">Valider la réception</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form method="post" id="validationForm">
@@ -295,102 +512,75 @@
                 
                 <div class="modal-body">
                     <div class="alert alert-info">
-                        <i class="bi bi-info-circle"></i>
-                        Vérifiez les quantités reçues et la qualité des produits avant de valider.
-                        <br><small>Laissez vide la quantité reçue si elle correspond à la quantité commandée.</small>
+                        <small>Vérifiez les quantités reçues. Laissez vide si OK.</small>
                     </div>
                     
-                    <!-- Tableau de validation des lignes -->
-                    <h6 class="mb-3">Vérification des articles</h6>
-                    <div class="table-responsive">
-                        <table class="table validation-table">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Ingrédient</th>
-                                    <th>Qté commandée</th>
-                                    <th>Qté reçue</th>
-                                    <th>Qualité</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for ligne in commande.lignes.all %}
-                                <tr>
-                                    <td>
-                                        <strong>{{ ligne.ingredient.nom }}</strong>
-                                        <input type="hidden" name="ligne_id_{{ forloop.counter0 }}" value="{{ ligne.id }}">
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-secondary">
-                                            {{ ligne.quantite|floatformat:"-2" }} {{ ligne.ingredient.unite_mesure.symbole }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <input type="number" 
-                                               step="0.01" 
-                                               name="quantite_recue_{{ forloop.counter0 }}" 
-                                               class="form-control form-control-sm quantite-recue"
-                                               data-quantite-commandee="{{ ligne.quantite }}"
-                                               placeholder="Vide = {{ ligne.quantite|floatformat:"-2" }}">
-                                    </td>
-                                    <td>
-                                        <div class="quality-check">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" 
-                                                       name="qualite_{{ forloop.counter0 }}" 
-                                                       id="qualite_ok_{{ forloop.counter0 }}"
-                                                       value="OK" checked>
-                                                <label class="form-check-label text-success" for="qualite_ok_{{ forloop.counter0 }}">
-                                                    <i class="bi bi-check-circle"></i> OK
-                                                </label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" 
-                                                       name="qualite_{{ forloop.counter0 }}" 
-                                                       id="qualite_probleme_{{ forloop.counter0 }}"
-                                                       value="PROBLEME">
-                                                <label class="form-check-label text-warning" for="qualite_probleme_{{ forloop.counter0 }}">
-                                                    <i class="bi bi-exclamation-triangle"></i> Problème
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <!-- Remarques optionnelles -->
-                    <div class="mb-3">
-                        <label class="form-label">Remarques (optionnel)</label>
-                        <textarea name="remarques" class="form-control" rows="2" 
-                                  placeholder="Notez ici tout problème ou observation..."></textarea>
-                    </div>
-                    
-                    <!-- Signature électronique -->
-                    <div class="mb-3">
-                        <label class="form-label">Signature électronique *</label>
-                        <canvas id="signatureCanvas" width="450" height="150"></canvas>
-                        <div class="signature-controls">
-                            <small class="text-muted">Signez avec votre souris ou votre doigt</small>
-                            <button type="button" class="btn btn-sm btn-outline-secondary" id="clearSignature">
-                                <i class="bi bi-arrow-clockwise"></i> Effacer
-                            </button>
+                    <!-- Articles à valider -->
+                    <h6 class="mb-3">Articles</h6>
+                    {% for ligne in commande.lignes.all %}
+                    <div class="validation-item">
+                        <div class="validation-item-header">
+                            {{ ligne.ingredient.nom }}
+                            <input type="hidden" name="ligne_id_{{ forloop.counter0 }}" value="{{ ligne.id }}">
+                        </div>
+                        <div class="validation-controls">
+                            <div class="quantity-group">
+                                <span class="quantity-label">Commandé:</span>
+                                <strong>
+                                    <span class="quantite-format" data-value="{{ ligne.quantite }}" data-unite="{{ ligne.ingredient.unite_mesure.symbole }}">
+                                        {{ ligne.quantite|floatformat:"-2" }} {{ ligne.ingredient.unite_mesure.symbole }}
+                                    </span>
+                                </strong>
+                            </div>
+                            <div class="quantity-group">
+                                <span class="quantity-label">Reçu:</span>
+                                <input type="number" 
+                                       step="0.01" 
+                                       name="quantite_recue_{{ forloop.counter0 }}" 
+                                       class="form-control form-control-sm"
+                                       placeholder="{{ ligne.quantite|floatformat:"-2" }}">
+                            </div>
+                            <div class="quality-buttons">
+                                <label class="quality-btn active-ok">
+                                    <input type="radio" name="qualite_{{ forloop.counter0 }}" value="OK" checked hidden>
+                                    <i class="bi bi-check-circle"></i> OK
+                                </label>
+                                <label class="quality-btn">
+                                    <input type="radio" name="qualite_{{ forloop.counter0 }}" value="PROBLEME" hidden>
+                                    <i class="bi bi-exclamation-triangle"></i> Problème
+                                </label>
+                            </div>
                         </div>
                     </div>
+                    {% endfor %}
                     
-                    <!-- Nom du signataire -->
+                    <!-- Remarques -->
                     <div class="mb-3">
-                        <label class="form-label">Nom et prénom du signataire *</label>
+                        <label class="form-label">Remarques</label>
+                        <textarea name="remarques" class="form-control" rows="2"></textarea>
+                    </div>
+                    
+                    <!-- Signature -->
+                    <div class="mb-3">
+                        <label class="form-label">Signature *</label>
+                        <canvas id="signatureCanvas" width="300" height="120"></canvas>
+                        <button type="button" class="btn btn-sm btn-outline-secondary mt-2" id="clearSignature">
+                            <i class="bi bi-arrow-clockwise"></i> Effacer
+                        </button>
+                    </div>
+                    
+                    <!-- Nom -->
+                    <div class="mb-3">
+                        <label class="form-label">Nom du signataire *</label>
                         <input type="text" name="nom_signataire" class="form-control" required 
-                               placeholder="Nom et prénom" value="{{ request.user.get_full_name|default:request.user.username }}">
+                               value="{{ request.user.get_full_name|default:request.user.username }}">
                     </div>
                 </div>
                 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="submit" class="btn btn-success" id="btnValider">
-                        <i class="bi bi-check-circle"></i> Valider la réception
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle"></i> Valider
                     </button>
                 </div>
             </form>
@@ -402,176 +592,127 @@
 
 {% block extra_js %}
 <script>
+// Fonction de formatage des quantités (même fonction que précédemment)
+function formatQuantiteAvecConversion(quantite, unite) {
+    if (unite && unite.toLowerCase() === 'g') {
+        if (quantite >= 10000) {
+            return (quantite / 1000).toFixed(2).replace(/\.?0+$/, '') + ' kg';
+        } else if (quantite < 1000) {
+            return quantite.toFixed(2).replace(/\.?0+$/, '') + ' g';
+        } else {
+            return (quantite / 1000).toFixed(2).replace(/\.?0+$/, '') + ' kg';
+        }
+    }
+    
+    if (unite && unite.toLowerCase() === 'ml') {
+        if (quantite >= 10000) {
+            return (quantite / 1000).toFixed(2).replace(/\.?0+$/, '') + ' L';
+        } else if (quantite < 1000) {
+            return quantite.toFixed(2).replace(/\.?0+$/, '') + ' ml';
+        } else {
+            return (quantite / 1000).toFixed(2).replace(/\.?0+$/, '') + ' L';
+        }
+    }
+    
+    return quantite.toFixed(2).replace(/\.?0+$/, '') + ' ' + unite;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Gestion de la signature électronique
+    // Formater toutes les quantités
+    document.querySelectorAll('.quantite-format').forEach(element => {
+        const value = parseFloat(element.dataset.value);
+        const unite = element.dataset.unite;
+        element.textContent = formatQuantiteAvecConversion(value, unite);
+    });
+    
+    // Gestion des boutons qualité
+    document.querySelectorAll('.quality-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const parent = this.parentElement;
+            parent.querySelectorAll('.quality-btn').forEach(b => {
+                b.classList.remove('active-ok', 'active-problem');
+            });
+            
+            const radio = this.querySelector('input[type="radio"]');
+            if (radio.value === 'OK') {
+                this.classList.add('active-ok');
+            } else {
+                this.classList.add('active-problem');
+            }
+        });
+    });
+    
+    // Gestion signature tactile
     const canvas = document.getElementById('signatureCanvas');
     if (canvas) {
         const ctx = canvas.getContext('2d');
         let isDrawing = false;
-        let lastX = 0;
-        let lastY = 0;
         
-        // Configuration du canvas
+        // Configuration
         ctx.strokeStyle = '#000';
         ctx.lineWidth = 2;
         ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
         
-        // Fonction pour obtenir les coordonnées
-        function getCoordinates(e) {
+        function startDrawing(e) {
+            isDrawing = true;
             const rect = canvas.getBoundingClientRect();
             const x = (e.clientX || e.touches[0].clientX) - rect.left;
             const y = (e.clientY || e.touches[0].clientY) - rect.top;
-            return [x, y];
+            ctx.beginPath();
+            ctx.moveTo(x, y);
         }
         
-        // Événements souris
-        canvas.addEventListener('mousedown', (e) => {
-            isDrawing = true;
-            [lastX, lastY] = getCoordinates(e);
-        });
-        
-        canvas.addEventListener('mousemove', (e) => {
+        function draw(e) {
             if (!isDrawing) return;
-            const [currentX, currentY] = getCoordinates(e);
-            
-            ctx.beginPath();
-            ctx.moveTo(lastX, lastY);
-            ctx.lineTo(currentX, currentY);
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX || e.touches[0].clientX) - rect.left;
+            const y = (e.clientY || e.touches[0].clientY) - rect.top;
+            ctx.lineTo(x, y);
             ctx.stroke();
-            
-            lastX = currentX;
-            lastY = currentY;
-        });
+        }
         
-        canvas.addEventListener('mouseup', () => {
+        function stopDrawing() {
             isDrawing = false;
-        });
+        }
         
-        canvas.addEventListener('mouseout', () => {
-            isDrawing = false;
-        });
+        // Événements tactiles et souris
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('touchend', stopDrawing);
         
-        // Événements tactiles
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            isDrawing = true;
-            [lastX, lastY] = getCoordinates(e);
-        });
-        
-        canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            if (!isDrawing) return;
-            const [currentX, currentY] = getCoordinates(e);
-            
-            ctx.beginPath();
-            ctx.moveTo(lastX, lastY);
-            ctx.lineTo(currentX, currentY);
-            ctx.stroke();
-            
-            lastX = currentX;
-            lastY = currentY;
-        });
-        
-        canvas.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            isDrawing = false;
-        });
-        
-        // Bouton effacer
+        // Effacer
         document.getElementById('clearSignature').addEventListener('click', () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         });
         
-        // Validation du formulaire
+        // Validation
         document.getElementById('validationForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            // Remplir automatiquement les quantités reçues vides avec les quantités commandées
-            document.querySelectorAll('.quantite-recue').forEach(input => {
-                if (input.value === '' || input.value === null || input.value.trim() === '') {
-                    const quantiteCommandee = input.dataset.quantiteCommandee;
-                    input.value = quantiteCommandee;
+            // Auto-compléter les quantités vides
+            document.querySelectorAll('input[name^="quantite_recue_"]').forEach(input => {
+                if (!input.value) {
+                    input.value = input.placeholder;
                 }
             });
             
-            // Vérifier que la signature n'est pas vide
+            // Vérifier signature
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const pixels = imageData.data;
-            let isEmpty = true;
+            const hasSignature = imageData.data.some((v, i) => i % 4 === 3 && v > 0);
             
-            for (let i = 0; i < pixels.length; i += 4) {
-                if (pixels[i + 3] > 0) {
-                    isEmpty = false;
-                    break;
-                }
-            }
-            
-            if (isEmpty) {
+            if (!hasSignature) {
                 alert('Veuillez signer avant de valider.');
                 return;
             }
             
-            // Convertir la signature en base64
             document.getElementById('signatureData').value = canvas.toDataURL();
-            
-            // Soumettre le formulaire
             this.submit();
         });
     }
-    
-    // Gestion des quantités reçues et badges de différence
-    document.querySelectorAll('.quantite-recue').forEach(input => {
-        // Au focus, si le champ est vide, on ne met pas de valeur par défaut
-        input.addEventListener('focus', function() {
-            if (this.value === this.dataset.quantiteCommandee) {
-                // Optionnel : effacer la valeur si elle correspond à la quantité commandée
-                // pour faciliter la modification
-            }
-        });
-        
-        // Au blur, mettre à jour le placeholder
-        input.addEventListener('blur', function() {
-            const commandee = this.dataset.quantiteCommandee;
-            if (this.value === '' || this.value === null) {
-                this.placeholder = `Vide = ${parseFloat(commandee).toFixed(2)}`;
-            }
-        });
-        
-        // Sur changement, gérer les badges de différence
-        input.addEventListener('input', function() {
-            const commandee = parseFloat(this.dataset.quantiteCommandee);
-            const recue = this.value === '' ? commandee : parseFloat(this.value);
-            
-            // Retirer tout badge existant
-            const existingBadge = this.parentElement.querySelector('.difference-badge');
-            if (existingBadge) {
-                existingBadge.remove();
-            }
-            
-            // Si le champ est vide ou égal à la quantité commandée, pas de badge
-            if (this.value === '' || recue === commandee) {
-                return;
-            }
-            
-            // Ajouter un badge de différence si nécessaire
-            if (recue !== commandee && !isNaN(recue)) {
-                const badge = document.createElement('span');
-                badge.className = 'badge difference-badge';
-                
-                const diff = recue - commandee;
-                if (diff > 0) {
-                    badge.className = 'badge difference-badge bg-success';
-                    badge.textContent = '+' + diff.toFixed(2);
-                } else {
-                    badge.className = 'badge difference-badge bg-danger';
-                    badge.textContent = diff.toFixed(2);
-                }
-                
-                this.parentElement.appendChild(badge);
-            }
-        });
-    });
 });
 </script>
 {% endblock %}

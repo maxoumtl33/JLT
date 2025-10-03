@@ -8594,63 +8594,212 @@ class CatalogueFournisseurDeleteView(LoginRequiredMixin, DeleteView):
         messages.success(self.request, 'Catalogue fournisseur supprimé avec succès.')
         return super().delete(request, *args, **kwargs)
 
+import pandas as pd
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.db import transaction
+from datetime import datetime
+from decimal import Decimal
+import re
+
 @login_required
 def import_catalogue(request):
-    """Import en masse du catalogue fournisseur depuis CSV/Excel"""
+    """Import en masse du catalogue fournisseur depuis Excel"""
+    
     if request.method == 'POST':
-        form = ImportCatalogueForm(request.POST, request.FILES)
-        if form.is_valid():
-            fichier = request.FILES['fichier']
-            fournisseur = form.cleaned_data['fournisseur']
-            date_debut = form.cleaned_data['date_debut']
+        # Étape 1: Sélection du fournisseur et upload du fichier
+        if 'analyze' in request.POST:
+            fournisseur_id = request.POST.get('fournisseur')
+            if not fournisseur_id:
+                messages.error(request, 'Veuillez sélectionner un fournisseur')
+                return redirect('import_catalogue')
+            
+            fichier = request.FILES.get('fichier')
+            if not fichier:
+                messages.error(request, 'Veuillez sélectionner un fichier Excel')
+                return redirect('import_catalogue')
             
             try:
-                # Lire le fichier selon son extension
-                if fichier.name.endswith('.csv'):
-                    df = pd.read_csv(fichier)
-                else:  # Excel
-                    df = pd.read_excel(fichier)
+                # Lire le fichier Excel
+                df = pd.read_excel(fichier)
                 
-                # Colonnes attendues: nom_ingredient, prix, reference, conditionnement
-                created_count = 0
-                updated_count = 0
+                # Normaliser les noms de colonnes
+                df.columns = df.columns.str.strip().str.lower()
                 
-                with transaction.atomic():
-                    for index, row in df.iterrows():
-                        # Chercher ou créer l'ingrédient
-                        ingredient, _ = Ingredient.objects.get_or_create(
-                            nom=row['nom_ingredient'],
-                            defaults={'unite_mesure_id': 1}  # Par défaut
-                        )
-                        
-                        # Désactiver les anciens prix
-                        CatalogueFournisseur.objects.filter(
-                            fournisseur=fournisseur,
-                            ingredient=ingredient,
-                            actif=True
-                        ).update(actif=False, date_fin=date_debut)
-                        
-                        # Créer le nouveau prix
-                        CatalogueFournisseur.objects.create(
-                            fournisseur=fournisseur,
-                            ingredient=ingredient,
-                            prix=row['prix'],
-                            date_debut=date_debut,
-                            reference_fournisseur=row.get('reference', ''),
-                            conditionnement=row.get('conditionnement', ''),
-                            actif=True
-                        )
-                        created_count += 1
+                # Vérifier les colonnes obligatoires
+                required_columns = ['nom', 'prix']
+                missing_columns = [col for col in required_columns if col not in df.columns]
+                if missing_columns:
+                    messages.error(request, f'Colonnes manquantes: {", ".join(missing_columns)}')
+                    return redirect('import_catalogue')
                 
-                messages.success(request, f'{created_count} prix importés avec succès.')
-                return redirect('catalogue_list')
+                # Nettoyer les données
+                df['nom'] = df['nom'].str.strip()
+                df['prix'] = pd.to_numeric(df['prix'], errors='coerce')
+                
+                # Colonnes optionnelles
+                if 'quantite' in df.columns:
+                    df['quantite'] = pd.to_numeric(df['quantite'], errors='coerce').fillna(1)
+                else:
+                    df['quantite'] = 1
+                
+                if 'unite' in df.columns:
+                    df['unite'] = df['unite'].str.strip()
+                else:
+                    df['unite'] = ''
+                
+                if 'reference' in df.columns:
+                    df['reference'] = df['reference'].astype(str).str.strip()
+                else:
+                    df['reference'] = ''
+                
+                # Analyser les correspondances avec les ingrédients existants
+                ingredients_db = {ing.nom.lower(): ing for ing in Ingredient.objects.all()}
+                unites_db = {unite.symbole.lower(): unite for unite in UniteMesure.objects.all()}
+                
+                analysis_data = []
+                for idx, row in df.iterrows():
+                    nom_lower = row['nom'].lower()
+                    ingredient_match = ingredients_db.get(nom_lower)
+                    unite_match = unites_db.get(str(row['unite']).lower()) if pd.notna(row['unite']) else None
+                    
+                    analysis_data.append({
+                        'index': idx,
+                        'nom': row['nom'],
+                        'prix': row['prix'],
+                        'quantite': row['quantite'],
+                        'unite': row['unite'] if pd.notna(row['unite']) else '',
+                        'reference': row['reference'],
+                        'ingredient_existe': ingredient_match is not None,
+                        'ingredient_id': ingredient_match.id if ingredient_match else None,
+                        'unite_existe': unite_match is not None,
+                        'unite_id': unite_match.id if unite_match else None,
+                        'status': 'ok' if ingredient_match else 'nouveau'
+                    })
+                
+                # Stocker en session pour l'étape suivante
+                request.session['import_data'] = analysis_data
+                request.session['fournisseur_id'] = fournisseur_id
+                
+                # Préparer le contexte pour l'étape de validation
+                fournisseur = Fournisseur.objects.get(id=fournisseur_id)
+                nouveaux_ingredients = [d for d in analysis_data if not d['ingredient_existe']]
+                ingredients_existants = [d for d in analysis_data if d['ingredient_existe']]
+                unites_manquantes = list(set([d['unite'] for d in analysis_data if d['unite'] and not d['unite_existe']]))
+                
+                context = {
+                    'fournisseur': fournisseur,
+                    'analysis_data': analysis_data,
+                    'nouveaux_ingredients': nouveaux_ingredients,
+                    'ingredients_existants': ingredients_existants,
+                    'unites_manquantes': unites_manquantes,
+                    'total_lignes': len(analysis_data),
+                    'ingredients': Ingredient.objects.all(),
+                    'unites': UniteMesure.objects.filter(type_usage__in=['ACHAT', 'BOTH']),
+                    'step': 'validation'
+                }
+                
+                return render(request, 'recipes/catalogue_import_validation.html', context)
                 
             except Exception as e:
-                messages.error(request, f'Erreur lors de l\'import: {str(e)}')
-    else:
-        form = ImportCatalogueForm()
+                messages.error(request, f'Erreur lors de la lecture du fichier: {str(e)}')
+                return redirect('import_catalogue')
+        
+        # Étape 2: Validation et import
+        elif 'import' in request.POST:
+            import_data = request.session.get('import_data', [])
+            fournisseur_id = request.session.get('fournisseur_id')
+            date_debut = request.POST.get('date_debut', datetime.now().date())
+            devise = request.POST.get('devise', 'CAD')
+            
+            if not import_data or not fournisseur_id:
+                messages.error(request, 'Session expirée. Veuillez recommencer.')
+                return redirect('import_catalogue')
+            
+            fournisseur = Fournisseur.objects.get(id=fournisseur_id)
+            
+            created_count = 0
+            updated_count = 0
+            errors = []
+            
+            with transaction.atomic():
+                # Désactiver les anciens catalogues
+                if request.POST.get('desactiver_anciens') == 'on':
+                    CatalogueFournisseur.objects.filter(
+                        fournisseur=fournisseur,
+                        actif=True
+                    ).update(actif=False, date_fin=date_debut)
+                
+                for item in import_data:
+                    try:
+                        # Récupérer les mappings depuis le formulaire
+                        ingredient_id = request.POST.get(f'ingredient_{item["index"]}')
+                        unite_id = request.POST.get(f'unite_{item["index"]}')
+                        
+                        if not ingredient_id:
+                            # Créer un nouvel ingrédient si nécessaire
+                            nom_nouveau = request.POST.get(f'nom_nouveau_{item["index"]}', item['nom'])
+                            unite_defaut_id = request.POST.get(f'unite_defaut_{item["index"]}')
+                            
+                            if not unite_defaut_id:
+                                errors.append(f"Ligne {item['index']+1}: Unité manquante pour {nom_nouveau}")
+                                continue
+                            
+                            ingredient = Ingredient.objects.create(
+                                nom=nom_nouveau,
+                                unite_mesure_id=unite_defaut_id,
+                                unite_achat_id=unite_id if unite_id else unite_defaut_id
+                            )
+                        else:
+                            ingredient = Ingredient.objects.get(id=ingredient_id)
+                            # Mettre à jour l'unité d'achat si elle n'est pas définie
+                            if unite_id and not ingredient.unite_achat_id:
+                                ingredient.unite_achat_id = unite_id
+                                ingredient.save()
+                        
+                        # Créer ou mettre à jour le catalogue
+                        catalogue, created = CatalogueFournisseur.objects.update_or_create(
+                            fournisseur=fournisseur,
+                            ingredient=ingredient,
+                            actif=True,
+                            defaults={
+                                'prix': Decimal(str(item['prix'])),
+                                'unite_id': unite_id,
+                                'quantite_par_unite': Decimal(str(item['quantite'])),
+                                'date_debut': date_debut,
+                                'reference_fournisseur': item['reference'],
+                                'devise': devise,
+                                'actif': True
+                            }
+                        )
+                        
+                        if created:
+                            created_count += 1
+                        else:
+                            updated_count += 1
+                    
+                    except Exception as e:
+                        errors.append(f"Ligne {item['index']+1}: {str(e)}")
+                
+                # Nettoyer la session
+                del request.session['import_data']
+                del request.session['fournisseur_id']
+                
+                if errors:
+                    messages.warning(request, f'{created_count} créés, {updated_count} mis à jour. Erreurs: ' + '; '.join(errors[:5]))
+                else:
+                    messages.success(request, f'{created_count} prix créés, {updated_count} mis à jour avec succès.')
+                
+                return redirect('catalogue_list')
     
-    return render(request, 'recipes/catalogue_import.html', {'form': form})
+    # GET - Afficher le formulaire initial
+    fournisseurs = Fournisseur.objects.all().order_by('nom')
+    return render(request, 'recipes/catalogue_import.html', {
+        'fournisseurs': fournisseurs,
+        'step': 'upload'
+    })
+
+
 
 # ===============================================
 # Vues CRUD pour Recette avec gestion des ingrédients
@@ -9414,18 +9563,12 @@ class FournisseurIngredientsAPIView(View):
 
 from decimal import Decimal
 
+from decimal import Decimal
 from django.views.generic import UpdateView
 from django.db.models import Sum
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.contrib import messages
-from decimal import Decimal
-from .models import (
-    Commande, 
-    Fournisseur, 
-    LigneCommande,
-    CatalogueFournisseur
-)
 
 class CommandeUpdateView(UpdateView):
     model = Commande
@@ -9458,270 +9601,96 @@ class CommandeUpdateView(UpdateView):
         
         self.object.save()
         
-        # Traiter les lignes de commande
-        processed_lignes = set()
+        # Dictionnaire pour stocker les lignes traitées
+        lignes_traitees = set()
+        lignes_a_supprimer = set()
         
-        # Parcourir toutes les données POST
+        # D'abord, identifier toutes les lignes existantes
+        lignes_existantes = {str(ligne.id): ligne for ligne in self.object.lignes.all()}
+        
+        # Parcourir toutes les données POST pour identifier les lignes
         for key in request.POST:
             if key.startswith('ingredient_'):
                 ligne_id = key.replace('ingredient_', '')
-                ingredient_id = request.POST.get(key)
+                
+                # Récupérer les données de la ligne
+                ingredient_id = request.POST.get(f'ingredient_{ligne_id}')
                 quantite_str = request.POST.get(f'quantite_{ligne_id}')
                 
-                if ingredient_id and quantite_str:
-                    # Convertir la quantité en Decimal
-                    try:
-                        quantite = Decimal(str(quantite_str).strip())
-                    except:
-                        quantite = Decimal('0')
-                    
-                    # Récupérer le prix depuis CatalogueFournisseur
-                    prix_unitaire = Decimal('0')
-                    
-                    # Chercher le prix actif
+                # Vérifier si la ligne doit être traitée
+                if not ingredient_id or not quantite_str:
+                    # Si c'est une ligne existante sans données, la marquer pour suppression
+                    if ligne_id in lignes_existantes:
+                        lignes_a_supprimer.add(ligne_id)
+                    continue
+                
+                try:
+                    quantite = Decimal(str(quantite_str).strip())
+                except:
+                    quantite = Decimal('0')
+                
+                # Si quantité = 0, marquer pour suppression
+                if quantite <= 0:
+                    if ligne_id in lignes_existantes:
+                        lignes_a_supprimer.add(ligne_id)
+                    continue
+                
+                # Récupérer le prix depuis CatalogueFournisseur
+                prix_unitaire = Decimal('0')
+                catalogue = CatalogueFournisseur.objects.filter(
+                    fournisseur=self.object.fournisseur,
+                    ingredient_id=ingredient_id,
+                    actif=True
+                ).first()
+                
+                if not catalogue:
+                    # Si pas de prix actif, chercher le plus récent
                     catalogue = CatalogueFournisseur.objects.filter(
                         fournisseur=self.object.fournisseur,
-                        ingredient_id=ingredient_id,
-                        actif=True
-                    ).first()
-                    
-                    if not catalogue:
-                        # Si pas de prix actif, prendre le plus récent
-                        catalogue = CatalogueFournisseur.objects.filter(
-                            fournisseur=self.object.fournisseur,
-                            ingredient_id=ingredient_id
-                        ).order_by('-date_debut').first()
-                    
-                    if catalogue:
-                        # Le prix est déjà un Decimal grâce à DecimalField
-                        prix_unitaire = catalogue.prix
-                    
-                    if ligne_id.startswith('new_'):
-                        # Créer une nouvelle ligne
-                        # Le modèle LigneCommande calculera sous_total automatiquement
-                        LigneCommande.objects.create(
-                            commande=self.object,
-                            ingredient_id=ingredient_id,
-                            quantite=quantite,
-                            prix_unitaire=prix_unitaire
-                        )
-                    else:
-                        # Mettre à jour une ligne existante
-                        try:
-                            ligne = LigneCommande.objects.get(
-                                id=int(ligne_id),
-                                commande=self.object
-                            )
-                            ligne.ingredient_id = ingredient_id
-                            ligne.quantite = quantite
-                            ligne.prix_unitaire = prix_unitaire
-                            # save() recalculera sous_total automatiquement
-                            ligne.save()
-                            
-                            processed_lignes.add(int(ligne_id))
-                        except (LigneCommande.DoesNotExist, ValueError):
-                            # Si la ligne n'existe pas, l'ignorer
-                            pass
-        
-        # Supprimer les lignes non traitées
-        self.object.lignes.exclude(id__in=processed_lignes).delete()
-        
-        # Recalculer le total de la commande
-        self.object.calculer_total()
-        
-        messages.success(request, 'Commande mise à jour avec succès!')
-        return redirect(self.success_url)
-    model = Commande
-    template_name = 'recipes/commande_edit.html'
-    fields = []
-    success_url = reverse_lazy('commande_list')
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['fournisseurs'] = Fournisseur.objects.all().order_by('nom')
-        
-        # Calculer le total pour l'affichage
-        self.object.total = self.object.lignes.aggregate(
-            total=Sum('sous_total')
-        )['total'] or Decimal('0')
-        
-        return context
-    
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        
-        # Mise à jour des informations générales
-        self.object.fournisseur_id = request.POST.get('fournisseur')
-        self.object.statut = request.POST.get('statut')
-        self.object.notes = request.POST.get('notes')
-        
-        date_livraison = request.POST.get('date_livraison_prevue')
-        if date_livraison:
-            self.object.date_livraison_prevue = date_livraison
-        
-        self.object.save()
-        
-        # Traiter les lignes de commande
-        processed_lignes = set()
-        
-        # Parcourir toutes les données POST
-        for key in request.POST:
-            if key.startswith('ingredient_'):
-                ligne_id = key.replace('ingredient_', '')
-                ingredient_id = request.POST.get(key)
-                quantite_str = request.POST.get(f'quantite_{ligne_id}')
+                        ingredient_id=ingredient_id
+                    ).order_by('-date_debut').first()
                 
-                if ingredient_id and quantite_str:
-                    # IMPORTANT: Convertir en Decimal, pas en float
-                    quantite = Decimal(str(quantite_str))
-                    
-                    # Récupérer le prix depuis CatalogueFournisseur
-                    prix_unitaire = Decimal('0')
+                if catalogue:
+                    prix_unitaire = catalogue.prix
+                
+                # Traiter selon le type de ligne
+                if ligne_id.startswith('new_'):
+                    # Nouvelle ligne à créer
                     try:
-                        # Chercher le prix actif pour ce fournisseur et cet ingrédient
-                        catalogue = CatalogueFournisseur.objects.filter(
-                            fournisseur=self.object.fournisseur,
-                            ingredient_id=ingredient_id,
-                            actif=True
-                        ).first()
-                        
-                        if catalogue:
-                            # S'assurer que le prix est un Decimal
-                            prix_unitaire = Decimal(str(catalogue.prix))
-                        else:
-                            # Si pas de prix actif, essayer de trouver n'importe quel prix
-                            catalogue = CatalogueFournisseur.objects.filter(
-                                fournisseur=self.object.fournisseur,
-                                ingredient_id=ingredient_id
-                            ).order_by('-date_debut').first()
-                            
-                            if catalogue:
-                                prix_unitaire = Decimal(str(catalogue.prix))
-                    except Exception as e:
-                        print(f"Erreur récupération prix: {e}")
-                        prix_unitaire = Decimal('0')
-                    
-                    if ligne_id.startswith('new_'):
-                        # Nouvelle ligne
                         LigneCommande.objects.create(
                             commande=self.object,
                             ingredient_id=ingredient_id,
                             quantite=quantite,
                             prix_unitaire=prix_unitaire
-                            # sous_total sera calculé automatiquement dans save()
                         )
-                    else:
-                        # Ligne existante
-                        try:
-                            ligne = LigneCommande.objects.get(
-                                id=ligne_id,
-                                commande=self.object
-                            )
-                            ligne.ingredient_id = ingredient_id
-                            ligne.quantite = quantite
-                            ligne.prix_unitaire = prix_unitaire
-                            
-                            # NE PAS calculer manuellement prix_total ou sous_total
-                            # La méthode save() de LigneCommande le fait automatiquement
-                            ligne.save()
-                            
-                            processed_lignes.add(int(ligne_id))
-                        except (LigneCommande.DoesNotExist, ValueError) as e:
-                            print(f"Erreur ligne existante: {e}")
-                            pass
+                    except Exception as e:
+                        messages.warning(request, f"Erreur lors de l'ajout de la ligne: {str(e)}")
+                
+                elif ligne_id in lignes_existantes:
+                    # Ligne existante à mettre à jour
+                    try:
+                        ligne = lignes_existantes[ligne_id]
+                        ligne.ingredient_id = ingredient_id
+                        ligne.quantite = quantite
+                        ligne.prix_unitaire = prix_unitaire
+                        ligne.save()  # La méthode save() recalculera sous_total
+                        lignes_traitees.add(ligne_id)
+                    except Exception as e:
+                        messages.warning(request, f"Erreur lors de la mise à jour de la ligne {ligne_id}: {str(e)}")
         
-        # Supprimer les lignes qui ne sont plus dans le formulaire
-        self.object.lignes.exclude(id__in=processed_lignes).delete()
+        # Supprimer les lignes qui n'ont pas été traitées ou qui sont marquées pour suppression
+        for ligne_id, ligne in lignes_existantes.items():
+            if ligne_id not in lignes_traitees or ligne_id in lignes_a_supprimer:
+                try:
+                    ligne.delete()
+                except Exception as e:
+                    messages.warning(request, f"Erreur lors de la suppression de la ligne {ligne_id}: {str(e)}")
         
         # Recalculer le montant total de la commande
         self.object.calculer_total()
         
         messages.success(request, 'Commande mise à jour avec succès!')
-        return redirect(self.success_url)
-    model = Commande
-    template_name = 'recipes/commande_edit.html'
-    fields = []  # On gère manuellement
-    success_url = reverse_lazy('commande_list')
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['fournisseurs'] = Fournisseur.objects.all().order_by('nom')
-        
-        # Calculer le total pour l'affichage
-        self.object.total = self.object.lignes.aggregate(
-            total=Sum('sous_total')
-        )['total'] or 0
-        
-        return context
-    
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        
-        # Mise à jour des informations générales
-        self.object.fournisseur_id = request.POST.get('fournisseur')
-        self.object.statut = request.POST.get('statut')
-        self.object.notes = request.POST.get('notes')
-        
-        date_livraison = request.POST.get('date_livraison_prevue')
-        if date_livraison:
-            self.object.date_livraison_prevue = date_livraison
-        
-        self.object.save()
-        
-        # Traiter les lignes de commande
-        processed_lignes = set()
-        
-        # Parcourir toutes les données POST
-        for key in request.POST:
-            if key.startswith('ingredient_'):
-                ligne_id = key.replace('ingredient_', '')
-                ingredient_id = request.POST.get(key)
-                quantite = request.POST.get(f'quantite_{ligne_id}')
-                
-                if ingredient_id and quantite:
-                    quantite = float(quantite)
-                    
-                    # Récupérer le prix depuis FournisseurIngredient
-                    try:
-                        fi = CatalogueFournisseur.objects.get(
-                            fournisseur=self.object.fournisseur,
-                            ingredient_id=ingredient_id
-                        )
-                        prix_unitaire = fi.prix
-                    except CatalogueFournisseur.DoesNotExist:
-                        # Prix par défaut si non trouvé
-                        prix_unitaire = 0
-                    
-                    if ligne_id.startswith('new_'):
-                        # Nouvelle ligne
-                        LigneCommande.objects.create(
-                            commande=self.object,
-                            ingredient_id=ingredient_id,
-                            quantite=quantite,
-                            prix_unitaire=prix_unitaire,
-                            prix_total=prix_unitaire * quantite
-                        )
-                    else:
-                        # Ligne existante
-                        try:
-                            ligne = LigneCommande.objects.get(
-                                id=ligne_id,
-                                commande=self.object
-                            )
-                            ligne.ingredient_id = ingredient_id
-                            ligne.quantite = quantite
-                            ligne.prix_unitaire = prix_unitaire
-                            ligne.save()
-                            processed_lignes.add(int(ligne_id))
-                        except LigneCommande.DoesNotExist:
-                            pass
-        
-        # Supprimer les lignes qui ne sont plus dans le formulaire
-        self.object.lignes.exclude(id__in=processed_lignes).delete()
-        
-        messages.success(request, 'Commande mise à jour avec succès!')
-        return redirect(self.success_url)
-    
+        return redirect(self.success_url)  
 
 
 # views.py - Import spécifique Hector Larivée

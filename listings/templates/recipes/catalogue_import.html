@@ -1,164 +1,384 @@
-<!-- templates/recipes/import_hector.html -->
 {% extends "recipes/base.html" %}
-{% block title %}Import Hector Larivée - Gestion Recettes{% endblock %}
+{% block title %}Importer Catalogue Fournisseur{% endblock %}
+
+{% block extra_css %}
+<style>
+    .loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+    }
+    
+    .loading-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        text-align: center;
+        min-width: 300px;
+    }
+    
+    .progress {
+        height: 25px;
+        margin-top: 20px;
+    }
+    
+    .loading-spinner {
+        margin-bottom: 15px;
+    }
+    
+    .upload-icon {
+        font-size: 4rem;
+        color: #0d6efd;
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+    
+    .file-info {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 5px;
+        margin-top: 10px;
+        display: none;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="content-header">
-    <div class="d-flex justify-content-between align-items-center">
-        <h1 class="h3 mb-0">Import Catalogue Hector Larivée</h1>
-        <img src="https://via.placeholder.com/150x50/007bff/ffffff?text=Hector+Larivée" 
-             alt="Hector Larivée" class="img-fluid" style="max-height: 40px;">
+<div class="container">
+    <h1>Importer un Catalogue Fournisseur</h1>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    {% if step == 'upload' %}
+    <div class="card">
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data" id="uploadForm">
+                {% csrf_token %}
+                <!-- IMPORTANT: Ajouter un champ hidden pour l'action -->
+                <input type="hidden" name="analyze" value="1">
+                
+                <div class="mb-3">
+                    <label for="fournisseur" class="form-label">Fournisseur *</label>
+                    <select name="fournisseur" id="fournisseur" class="form-select" required>
+                        <option value="">-- Sélectionnez --</option>
+                        {% for f in fournisseurs %}
+                        <option value="{{ f.id }}">{{ f.nom }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="fichier" class="form-label">Fichier Excel *</label>
+                    <input type="file" name="fichier" id="fichier" class="form-control" 
+                           accept=".xlsx,.xls" required>
+                    <small class="text-muted">
+                        Format attendu: nom, prix, quantite (optionnel), unite (optionnel), reference (optionnel)
+                    </small>
+                    
+                    <div class="file-info" id="fileInfo">
+                        <i class="bi bi-file-earmark-excel text-success"></i>
+                        <span id="fileName"></span>
+                        <span class="badge bg-secondary ms-2" id="fileSize"></span>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info">
+                    <h6><i class="bi bi-info-circle"></i> Format du fichier Excel:</h6>
+                    <ul class="mb-0">
+                        <li><strong>nom</strong>: Nom de l'ingrédient (obligatoire)</li>
+                        <li><strong>prix</strong>: Prix unitaire en CAD (obligatoire)</li>
+                        <li><strong>quantite</strong>: Quantité par unité d'achat (défaut: 1)</li>
+                        <li><strong>unite</strong>: Unité de mesure (kg, L, etc.)</li>
+                        <li><strong>reference</strong>: Référence fournisseur</li>
+                    </ul>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg" id="analyzeBtn">
+                        <i class="bi bi-upload"></i> Analyser le fichier
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
+    {% endif %}
 </div>
 
-<div class="content-body">
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-body">
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        
-                        <div class="alert alert-info">
-                            <h5 class="alert-heading">
-                                <i class="bi bi-info-circle"></i> Format attendu
-                            </h5>
-                            <p class="mb-2">Le fichier Excel doit avoir la structure suivante :</p>
-                            <ul class="mb-0">
-                                <li>Ligne 1 : En-tête du rapport (JOBSCHED / PD371)</li>
-                                <li>Ligne 2 : Informations d'impression</li>
-                                <li>Ligne 3 : <strong>En-têtes des colonnes</strong> : # produit | Description | Format | Provenance | Prix</li>
-                                <li>Ligne 4+ : Données des produits</li>
-                            </ul>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="fichier" class="form-label required">
-                                <i class="bi bi-file-excel"></i> Fichier Excel Hector Larivée
-                            </label>
-                            <input type="file" class="form-control" id="fichier" name="fichier" 
-                                   accept=".xlsx,.xls" required>
-                            <small class="text-muted">
-                                Format accepté : Liste prix Price list.xlsx
-                            </small>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="date_debut" class="form-label">
-                                <i class="bi bi-calendar"></i> Date de début de validité
-                            </label>
-                            <input type="date" class="form-control" id="date_debut" name="date_debut" 
-                                   value="{% now 'Y-m-d' %}">
-                            <small class="text-muted">
-                                Les anciens prix seront automatiquement désactivés à cette date
-                            </small>
-                        </div>
-                        
-                        <hr>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h5><i class="bi bi-gear"></i> Traitement automatique</h5>
-                                <ul class="list-unstyled">
-                                    <li><i class="bi bi-check-circle text-success"></i> Normalisation des noms</li>
-                                    <li><i class="bi bi-check-circle text-success"></i> Détection des unités</li>
-                                    <li><i class="bi bi-check-circle text-success"></i> Gestion des doublons</li>
-                                    <li><i class="bi bi-check-circle text-success"></i> Mise à jour des prix</li>
-                                </ul>
-                            </div>
-                            
-                            <div class="col-md-6">
-                                <h5><i class="bi bi-list-check"></i> Exemple de données</h5>
-                                <div class="bg-light p-2 small font-monospace">
-                                    <div>06314 | Boîte 19x13x10 275C | 1UN CS | CAN | 1.75</div>
-                                    <div>06715 | Enregistreur de Température | 1UN CS | USA | 63.75</div>
-                                    <div>06415 | Étiquette Blanche | 3000UN CS | USA | 66.25</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="alert alert-warning mt-3">
-                            <h6 class="alert-heading">
-                                <i class="bi bi-exclamation-triangle"></i> Important
-                            </h6>
-                            <ul class="mb-0 small">
-                                <li>Les ingrédients existants seront automatiquement reconnus (insensible à la casse)</li>
-                                <li>Les nouveaux ingrédients seront créés avec l'unité détectée depuis le format</li>
-                                <li>Les codes produits seront sauvegardés comme référence fournisseur</li>
-                                <li>Le format (ex: "1000UN CS") sera sauvegardé comme conditionnement</li>
-                            </ul>
-                        </div>
-                        
-                        <div class="d-flex justify-content-between mt-4">
-                            <a href="{% url 'catalogue_list' %}" class="btn btn-outline-secondary">
-                                <i class="bi bi-arrow-left"></i> Retour au catalogue
-                            </a>
-                            
-                            <div>
-                                <button type="button" class="btn btn-outline-primary me-2" 
-                                        onclick="document.getElementById('fichier').click()">
-                                    <i class="bi bi-folder-open"></i> Parcourir
-                                </button>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-cloud-upload"></i> Importer le catalogue
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+        <div class="upload-icon">
+            <i class="bi bi-cloud-arrow-up"></i>
+        </div>
+        <div class="loading-spinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Chargement...</span>
+            </div>
+        </div>
+        <h5>Analyse du fichier en cours...</h5>
+        <p class="text-muted mb-0" id="loadingMessage">Lecture du fichier Excel</p>
+        
+        <div class="progress">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                 role="progressbar" 
+                 id="progressBar"
+                 style="width: 0%">
+                <span id="progressText">0%</span>
             </div>
         </div>
         
-        <div class="col-md-4">
-            <div class="card bg-light">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-lightbulb"></i> Aide</h5>
-                </div>
-                <div class="card-body">
-                    <h6>Processus d'import :</h6>
-                    <ol class="small">
-                        <li>Téléchargez le fichier Excel depuis Hector Larivée</li>
-                        <li>Vérifiez que le format correspond (3 lignes d'en-tête)</li>
-                        <li>Sélectionnez le fichier et la date</li>
-                        <li>Cliquez sur "Importer"</li>
-                    </ol>
-                    
-                    <hr>
-                    
-                    <h6>Normalisation des noms :</h6>
-                    <p class="small">Le système nettoie automatiquement :</p>
-                    <ul class="small">
-                        <li>Les dimensions (19x13x10)</li>
-                        <li>Les codes produits (275C)</li>
-                        <li>La casse (boite → Boîte)</li>
-                        <li>Les accents manquants</li>
-                    </ul>
-                    
-                    <hr>
-                    
-                    <h6>Unités détectées :</h6>
-                    <div class="small">
-                        <span class="badge bg-secondary me-1">CS → Caisse</span>
-                        <span class="badge bg-secondary me-1">UN → Unité</span>
-                        <span class="badge bg-secondary me-1">KG → Kilogramme</span>
-                        <span class="badge bg-secondary me-1">BTE → Boîte</span>
-                    </div>
-                    
-                
-                </div>
-            </div>
+        <div class="mt-3">
+            <small class="text-muted">
+                <i class="bi bi-info-circle"></i> Ne fermez pas cette page
+            </small>
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
-// Afficher le nom du fichier sélectionné
-document.getElementById('fichier').addEventListener('change', function(e) {
-    const fileName = e.target.files[0]?.name;
-    if (fileName) {
-        const small = e.target.nextElementSibling;
-        small.innerHTML = `<i class="bi bi-check-circle text-success"></i> Fichier sélectionné : ${fileName}`;
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadForm = document.getElementById('uploadForm');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const loadingMessage = document.getElementById('loadingMessage');
+    const fileInput = document.getElementById('fichier');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    
+    // Variable pour éviter la double soumission
+    let isSubmitting = false;
+    
+    // Afficher les infos du fichier sélectionné
+    fileInput.addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            const file = e.target.files[0];
+            fileName.textContent = file.name;
+            
+            // Formater la taille du fichier
+            const size = file.size;
+            let sizeText = '';
+            if (size < 1024) {
+                sizeText = size + ' B';
+            } else if (size < 1024 * 1024) {
+                sizeText = (size / 1024).toFixed(2) + ' KB';
+            } else {
+                sizeText = (size / (1024 * 1024)).toFixed(2) + ' MB';
+            }
+            fileSize.textContent = sizeText;
+            
+            fileInfo.style.display = 'block';
+            
+            // Vérifier l'extension
+            const allowedExtensions = ['xlsx', 'xls'];
+            const fileExtension = file.name.split('.').pop().toLowerCase();
+            
+            if (!allowedExtensions.includes(fileExtension)) {
+                alert('Format de fichier non supporté. Veuillez utiliser un fichier Excel (.xlsx ou .xls)');
+                e.target.value = '';
+                fileInfo.style.display = 'none';
+                return;
+            }
+            
+            // Vérifier la taille (max 10MB)
+            const maxSize = 10 * 1024 * 1024; // 10MB
+            if (file.size > maxSize) {
+                alert('Le fichier est trop volumineux. Taille maximum: 10MB');
+                e.target.value = '';
+                fileInfo.style.display = 'none';
+                return;
+            }
+        } else {
+            fileInfo.style.display = 'none';
+        }
+    });
+    
+    // Fonction pour obtenir le CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
     }
+    
+    // Gestion du formulaire avec AJAX
+    analyzeBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Éviter la double soumission
+        if (isSubmitting) {
+            return false;
+        }
+        
+        const fournisseur = document.getElementById('fournisseur').value;
+        const fichier = fileInput.files[0];
+        
+        if (!fournisseur) {
+            alert('Veuillez sélectionner un fournisseur');
+            return false;
+        }
+        
+        if (!fichier) {
+            alert('Veuillez sélectionner un fichier Excel');
+            return false;
+        }
+        
+        isSubmitting = true;
+        
+        // Afficher l'overlay de chargement
+        loadingOverlay.style.display = 'block';
+        
+        // Animation du bouton
+        analyzeBtn.disabled = true;
+        analyzeBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Analyse en cours...';
+        
+        // Préparer les données du formulaire
+        const formData = new FormData(uploadForm);
+        
+        // Initialiser la barre de progression
+        progressBar.style.width = '10%';
+        progressText.textContent = '10%';
+        progressBar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-info';
+        loadingMessage.textContent = 'Envoi du fichier...';
+        
+        // Utiliser XMLHttpRequest pour suivre la progression
+        const xhr = new XMLHttpRequest();
+        
+        // Suivre la progression de l'upload
+        xhr.upload.addEventListener('progress', function(e) {
+            if (e.lengthComputable) {
+                const uploadProgress = Math.round((e.loaded / e.total) * 40); // 0-40%
+                progressBar.style.width = uploadProgress + '%';
+                progressText.textContent = uploadProgress + '%';
+                
+                if (uploadProgress < 20) {
+                    loadingMessage.textContent = 'Envoi du fichier...';
+                } else if (uploadProgress < 40) {
+                    loadingMessage.textContent = 'Fichier reçu par le serveur...';
+                }
+            }
+        });
+        
+        // Gestion de la réponse
+        xhr.addEventListener('load', function() {
+            if (xhr.status === 200) {
+                // Succès - remplacer le contenu de la page
+                progressBar.style.width = '100%';
+                progressText.textContent = '100%';
+                progressBar.className = 'progress-bar progress-bar-striped bg-success';
+                loadingMessage.textContent = 'Chargement de la page de validation...';
+                
+                setTimeout(function() {
+                    // Remplacer le contenu de la page par la réponse
+                    document.open();
+                    document.write(xhr.responseText);
+                    document.close();
+                }, 500);
+            } else {
+                // Erreur
+                alert('Erreur lors de l\'analyse du fichier');
+                loadingOverlay.style.display = 'none';
+                analyzeBtn.disabled = false;
+                analyzeBtn.innerHTML = '<i class="bi bi-upload"></i> Analyser le fichier';
+                isSubmitting = false;
+            }
+        });
+        
+        // Gestion des erreurs réseau
+        xhr.addEventListener('error', function() {
+            alert('Erreur de connexion au serveur');
+            loadingOverlay.style.display = 'none';
+            analyzeBtn.disabled = false;
+            analyzeBtn.innerHTML = '<i class="bi bi-upload"></i> Analyser le fichier';
+            isSubmitting = false;
+        });
+        
+        // Simuler la progression du traitement côté serveur
+        xhr.addEventListener('loadstart', function() {
+            let serverProgress = 40;
+            const messages = [
+                "Lecture du fichier Excel...",
+                "Analyse des colonnes...",
+                "Vérification des données...",
+                "Identification des ingrédients...",
+                "Comparaison avec la base de données...",
+                "Préparation de l'aperçu..."
+            ];
+            let messageIndex = 0;
+            
+            // Progression simulée pendant le traitement serveur
+            const serverInterval = setInterval(function() {
+                if (serverProgress < 95) {
+                    serverProgress += Math.random() * 10 + 2;
+                    if (serverProgress > 95) serverProgress = 95;
+                    
+                    progressBar.style.width = serverProgress + '%';
+                    progressText.textContent = Math.round(serverProgress) + '%';
+                    
+                    // Changer les messages
+                    const newMessageIndex = Math.floor((serverProgress - 40) / 10);
+                    if (newMessageIndex !== messageIndex && newMessageIndex < messages.length) {
+                        messageIndex = newMessageIndex;
+                        loadingMessage.textContent = messages[messageIndex];
+                    }
+                    
+                    // Changer la couleur
+                    if (serverProgress < 60) {
+                        progressBar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-warning';
+                    } else if (serverProgress < 85) {
+                        progressBar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-info';
+                    } else {
+                        progressBar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-success';
+                    }
+                }
+            }, 300);
+            
+            // Arrêter l'intervalle quand la réponse arrive
+            xhr.addEventListener('loadend', function() {
+                clearInterval(serverInterval);
+            });
+        });
+        
+        // Configurer et envoyer la requête
+        xhr.open('POST', uploadForm.action || window.location.href);
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        xhr.send(formData);
+        
+        return false;
+    });
 });
 </script>
 {% endblock %}

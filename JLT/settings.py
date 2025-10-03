@@ -138,8 +138,7 @@ TIME_ZONE = 'America/Montreal'
 USE_I18N = True
 
 USE_TZ = True
-
-
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 100000
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 

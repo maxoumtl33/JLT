@@ -1,0 +1,289 @@
+{% extends "recipes/base.html" %}
+{% block title %}Validation Import Catalogue{% endblock %}
+
+{% block extra_css %}
+<style>
+    .table-import td { vertical-align: middle; }
+    .status-nouveau { background-color: #fff3cd; }
+    .status-ok { background-color: #d4edda; }
+    .mapping-select { width: 200px; }
+    .optional-field { border: 2px dashed #dee2e6; }
+    .required-badge { color: red; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1>Validation de l'import - {{ fournisseur.nom }}</h1>
+    
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <div class="alert alert-info">
+                <strong>Total:</strong> {{ total_lignes }} lignes<br>
+                <strong>Nouveaux ingrédients:</strong> {{ nouveaux_ingredients|length }}<br>
+                <strong>Ingrédients existants:</strong> {{ ingredients_existants|length }}
+            </div>
+        </div>
+        <div class="col-md-8">
+            {% if unites_manquantes %}
+            <div class="alert alert-warning">
+                <strong>Unités non reconnues:</strong> {{ unites_manquantes|join:", " }}
+                <br><small>Vous pouvez les mapper ci-dessous ou laisser vide</small>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <form method="post" id="importForm">
+        {% csrf_token %}
+        <input type="hidden" name="import" value="1">
+        
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <label>Date de début du catalogue <span class="required-badge">*</span></label>
+                <input type="date" name="date_debut" class="form-control" 
+                       value="{% now 'Y-m-d' %}" required>
+            </div>
+            <div class="col-md-2">
+                <label>Devise <span class="required-badge">*</span></label>
+                <select name="devise" class="form-select">
+                    <option value="CAD" selected>$CAD</option>
+                    <option value="USD">$USD</option>
+                    <option value="EUR">€EUR</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label>&nbsp;</label>
+                <div class="form-check">
+                    <input type="checkbox" name="desactiver_anciens" 
+                           class="form-check-input" id="desactiver" checked>
+                    <label class="form-check-label" for="desactiver">
+                        Désactiver les anciens prix
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="alert alert-info mb-3">
+            <i class="bi bi-info-circle"></i> 
+            <strong>Instructions:</strong>
+            <ul class="mb-0 mt-2">
+                <li>Les champs avec <span class="required-badge">*</span> sont obligatoires</li>
+                <li>Pour créer un nouvel ingrédient, laissez "Ingrédient (système)" sur "Créer nouveau"</li>
+                <li>L'unité peut être laissée vide si non applicable</li>
+                <li>Vous pouvez modifier le nom des nouveaux ingrédients avant l'import</li>
+            </ul>
+        </div>
+        <div class="mt-4 d-flex justify-content-between">
+            <a href="{% url 'catalogue_import' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Retour
+            </a>
+            <button type="submit" class="btn btn-success btn-lg" id="submitBtn">
+                <i class="bi bi-check-circle"></i> Importer le catalogue ({{ total_lignes }} lignes)
+            </button>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm table-import">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Nom (fichier)</th>
+                        <th>Prix</th>
+                        <th>Qté/Unité</th>
+                        <th>Unité fichier</th>
+                        <th>Ingrédient (système) <small class="text-info">(optionnel)</small></th>
+                        <th>Unité (système) <small class="text-info">(optionnel)</small></th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in analysis_data %}
+                    <tr class="status-{{ item.status }}">
+                        <td>
+                            {% if not item.ingredient_existe %}
+                            <input type="text" 
+                                   name="nom_nouveau_{{ item.index }}" 
+                                   value="{{ item.nom }}" 
+                                   class="form-control form-control-sm"
+                                   placeholder="Nom de l'ingrédient"
+                                   required>
+                            {% else %}
+                            <strong>{{ item.nom }}</strong>
+                            <input type="hidden" 
+                                   name="nom_nouveau_{{ item.index }}" 
+                                   value="{{ item.nom }}">
+                            {% endif %}
+                        </td>
+                        <td>
+                            <strong>${{ item.prix|floatformat:2 }}</strong>
+                        </td>
+                        <td>{{ item.quantite|floatformat:"-3" }}</td>
+                        <td>
+                            {% if item.unite %}
+                                <span class="badge bg-secondary">{{ item.unite }}</span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.ingredient_existe %}
+                                <input type="hidden" name="ingredient_{{ item.index }}" 
+                                       value="{{ item.ingredient_id }}">
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle"></i> Existant
+                                </span>
+                                <br>
+                                <small class="text-muted">ID: #{{ item.ingredient_id }}</small>
+                            {% else %}
+                                <select name="ingredient_{{ item.index }}" 
+                                        class="form-select form-select-sm mapping-select optional-field">
+                                    <option value="" selected>➕ Créer nouveau</option>
+                                    <optgroup label="Mapper à un existant">
+                                        {% for ing in ingredients %}
+                                        <option value="{{ ing.id }}">{{ ing.nom }}</option>
+                                        {% endfor %}
+                                    </optgroup>
+                                </select>
+                                
+                                <!-- Unité par défaut pour les nouveaux ingrédients uniquement -->
+                                <div class="mt-2" id="unite_defaut_div_{{ item.index }}">
+                                    <small class="text-muted">Si nouveau, unité par défaut:</small>
+                                    <select name="unite_defaut_{{ item.index }}" 
+                                            class="form-select form-select-sm optional-field">
+                                        <option value="">-- Aucune --</option>
+                                        {% for u in unites %}
+                                        <option value="{{ u.id }}"
+                                            {% if item.unite and u.symbole|lower == item.unite|lower %}selected{% endif %}>
+                                            {{ u.nom }} ({{ u.symbole }})
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <select name="unite_{{ item.index }}" 
+                                    class="form-select form-select-sm optional-field">
+                                <option value="">-- Aucune --</option>
+                                {% for u in unites %}
+                                <option value="{{ u.id }}" 
+                                    {% if item.unite_existe and item.unite_id == u.id %}selected{% endif %}
+                                    {% if not item.unite_existe and item.unite and u.symbole|lower == item.unite|lower %}selected{% endif %}>
+                                    {{ u.nom }} ({{ u.symbole }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">Pour l'achat</small>
+                        </td>
+                        <td class="text-center">
+                            {% if item.ingredient_existe %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check"></i> OK
+                                </span>
+                            {% else %}
+                                <span class="badge bg-warning">
+                                    <i class="bi bi-plus-circle"></i> Nouveau
+                                </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        
+    </form>
+</div>
+
+<!-- Modal de confirmation -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmer l'import</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Vous êtes sur le point d'importer:</p>
+                <ul>
+                    <li><strong id="confirmTotal">0</strong> prix au catalogue</li>
+                    <li><strong id="confirmNew">0</strong> nouveaux ingrédients à créer</li>
+                    <li><strong id="confirmExisting">0</strong> ingrédients existants à mettre à jour</li>
+                </ul>
+                <p class="text-warning">Cette action ne peut pas être annulée.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-success" id="confirmImport">
+                    <i class="bi bi-check-circle"></i> Confirmer l'import
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Gérer l'affichage conditionnel des champs
+    document.querySelectorAll('select[name^="ingredient_"]').forEach(select => {
+        select.addEventListener('change', function() {
+            const index = this.name.replace('ingredient_', '');
+            const uniteDefautDiv = document.getElementById('unite_defaut_div_' + index);
+            
+            if (uniteDefautDiv) {
+                if (this.value === '') {
+                    // Créer nouveau - afficher le champ unité par défaut
+                    uniteDefautDiv.style.display = 'block';
+                } else {
+                    // Mapper à existant - cacher le champ unité par défaut
+                    uniteDefautDiv.style.display = 'none';
+                }
+            }
+        });
+    });
+    
+    // Confirmation avant import
+    document.getElementById('importForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Compter les éléments
+        let totalNew = 0;
+        let totalExisting = {{ ingredients_existants|length }};
+        
+        document.querySelectorAll('select[name^="ingredient_"]').forEach(select => {
+            if (select.value === '') {
+                totalNew++;
+            }
+        });
+        
+        // Mettre à jour la modal
+        document.getElementById('confirmTotal').textContent = {{ total_lignes }};
+        document.getElementById('confirmNew').textContent = totalNew;
+        document.getElementById('confirmExisting').textContent = totalExisting;
+        
+        // Afficher la modal
+        const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+        modal.show();
+        
+        // Gérer la confirmation
+        document.getElementById('confirmImport').onclick = function() {
+            modal.hide();
+            document.getElementById('importForm').submit();
+        };
+    });
+    
+    // Indicateur visuel pour les champs optionnels
+    document.querySelectorAll('.optional-field').forEach(field => {
+        field.addEventListener('focus', function() {
+            this.classList.add('border-primary');
+        });
+        field.addEventListener('blur', function() {
+            this.classList.remove('border-primary');
+        });
+    });
+});
+</script>
+{% endblock %}

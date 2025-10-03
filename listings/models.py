@@ -1167,6 +1167,15 @@ from decimal import Decimal
 class UniteMesure(models.Model):
     nom = models.CharField(max_length=50, unique=True)
     symbole = models.CharField(max_length=10)
+    TYPE_CHOICES = [
+        ('ACHAT', 'Achat (Fournisseur)'),
+        ('RECETTE', 'Recette (Production)'),
+        ('BOTH', 'Les deux'),
+    ]
+    type_usage = models.CharField(max_length=10, choices=TYPE_CHOICES, default='BOTH')
+    # Pour les conversions (ex: 1 kg = 1000 g)
+    unite_base = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True)
+    facteur_conversion = models.DecimalField(max_digits=10, decimal_places=4, default=1)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -1177,7 +1186,6 @@ class UniteMesure(models.Model):
     
     def __str__(self):
         return f"{self.nom} ({self.symbole})"
-
 class Departement(models.Model):
     nom = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
@@ -1215,7 +1223,8 @@ class Fournisseur(models.Model):
 
 class Ingredient(models.Model):
     nom = models.CharField(max_length=200, unique=True)
-    unite_mesure = models.ForeignKey(UniteMesure, on_delete=models.PROTECT, related_name='ingredients')
+    unite_mesure = models.ForeignKey(UniteMesure, on_delete=models.PROTECT, related_name='ingredients_recette')
+    unite_achat = models.ForeignKey(UniteMesure, on_delete=models.PROTECT, related_name='ingredients_achat', null=True, blank=True)
     stock_reel = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     stock_alerte = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     description = models.TextField(blank=True)
@@ -1231,27 +1240,27 @@ class Ingredient(models.Model):
     @property
     def besoin_reappro(self):
         return self.stock_reel <= self.stock_alerte
-
 class CatalogueFournisseur(models.Model):
     fournisseur = models.ForeignKey(Fournisseur, on_delete=models.CASCADE, related_name='catalogues')
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE, related_name='catalogues')
-    prix = models.DecimalField(max_digits=10, decimal_places=2)
+    prix = models.DecimalField(max_digits=10, decimal_places=4)  # Plus de précision pour les petits prix
+    unite = models.ForeignKey(UniteMesure, on_delete=models.PROTECT, null=True, blank=True)
+    quantite_par_unite = models.DecimalField(max_digits=10, decimal_places=3, default=1, help_text="Quantité par unité d'achat (ex: 5kg par sac)")
     date_debut = models.DateField(default=timezone.now)
     date_fin = models.DateField(null=True, blank=True)
     reference_fournisseur = models.CharField(max_length=100, blank=True)
     conditionnement = models.CharField(max_length=100, blank=True)
     delai_livraison = models.IntegerField(default=1, help_text="Délai en jours")
     actif = models.BooleanField(default=True)
+    devise = models.CharField(max_length=3, default='CAD', choices=[('CAD', '$CAD'), ('EUR', '€EUR'), ('USD', '$USD')])
     
     class Meta:
         verbose_name = "Catalogue fournisseur"
         verbose_name_plural = "Catalogues fournisseurs"
         ordering = ['-date_debut']
-        unique_together = [['fournisseur', 'ingredient', 'date_debut']]
     
     def __str__(self):
-        return f"{self.fournisseur.nom} - {self.ingredient.nom} - {self.prix}€"
-
+        return f"{self.fournisseur.nom} - {self.ingredient.nom} - {self.prix} {self.devise}"
 class Recette(models.Model):
     nom = models.CharField(max_length=200, unique=True)
     description = models.TextField(blank=True)

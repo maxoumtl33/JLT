@@ -1,4 +1,3 @@
-<!-- templates/recipes/commande_create.html -->
 {% extends "recipes/base.html" %}
 {% load static %}
 {% block title %}Créer une Commande - Gestion Recettes{% endblock %}
@@ -256,6 +255,19 @@
         font-size: 0.75rem;
         margin-left: 5px;
     }
+    #etape2 .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+    transition: all 0.3s ease;
+}
+
+#etape2 .card.border-3 {
+    border-width: 3px !important;
+}
+
+.navigation-hierarchique {
+    transition: all 0.3s ease;
+}
 </style>
 {% endblock %}
 
@@ -333,15 +345,18 @@
                          data-name="{{ ingredient.nom|lower }}"
                          data-stock-low="{% if ingredient.besoin_reappro %}true{% else %}false{% endif %}">
                         <div class="card ingredient-card h-100 {% if ingredient.besoin_reappro %}stock-low{% endif %}" 
-                             data-id="{{ ingredient.id }}">
+                             data-id="{{ ingredient.id }}"
+                             data-unite="{{ ingredient.unite_mesure.symbole }}">
                             <div class="card-body">
                                 <h6 class="card-title">{{ ingredient.nom }}</h6>
                                 <p class="card-text mb-1">
                                     <small class="text-muted">Stock actuel:</small><br>
-                                    <strong>{{ ingredient.stock_reel }} {{ ingredient.unite_mesure.symbole }}</strong>
+                                    <strong class="stock-display" data-value="{{ ingredient.stock_reel }}" data-unite="{{ ingredient.unite_mesure.symbole }}">
+                                        <!-- Sera formaté par JavaScript -->
+                                    </strong>
                                 </p>
                                 <p class="card-text">
-                                    <small class="text-muted">Stock d'alerte: {{ ingredient.stock_alerte }} {{ ingredient.unite_mesure.symbole }}</small>
+                                    <small class="text-muted">Stock d'alerte: <span class="stock-alerte-display" data-value="{{ ingredient.stock_alerte }}" data-unite="{{ ingredient.unite_mesure.symbole }}"></span></small>
                                 </p>
                                 {% if ingredient.besoin_reappro %}
                                 <span class="badge bg-warning">
@@ -369,12 +384,54 @@
     </div>
 
     <!-- Étape 2: Navigation hiérarchique Ingrédients → Départements → Recettes -->
-    <div id="etape2" class="etape-content">
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title mb-4">
+<!-- Étape 2: Choix du mode de commande -->
+<div id="etape2" class="etape-content">
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title mb-4">
+                <i class="bi bi-signpost-split"></i> Choisir le mode de commande
+            </h4>
+            
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card h-100 border-primary" style="cursor: pointer;" onclick="choixModeDirecte()">
+                        <div class="card-body text-center">
+                            <i class="bi bi-box-seam" style="font-size: 3rem; color: #0d6efd;"></i>
+                            <h5 class="card-title mt-3">Commande Directe</h5>
+                            <p class="card-text">
+                                Commander directement les ingrédients sélectionnés sans passer par les recettes
+                            </p>
+                            <div class="mt-3">
+                                <span class="badge bg-info">Plus rapide</span>
+                                <span class="badge bg-success">Stock uniquement</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card h-100 border-success" style="cursor: pointer;" onclick="choixModeRecettes()">
+                        <div class="card-body text-center">
+                            <i class="bi bi-journal-text" style="font-size: 3rem; color: #28a745;"></i>
+                            <h5 class="card-title mt-3">Commande via Recettes</h5>
+                            <p class="card-text">
+                                Sélectionner des recettes à produire pour calculer automatiquement les besoins
+                            </p>
+                            <div class="mt-3">
+                                <span class="badge bg-warning">Production planifiée</span>
+                                <span class="badge bg-primary">Calcul automatique</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="recetteSelectionSection" style="display: none;">
+                <hr class="my-4">
+                
+                <h5 class="mb-3">
                     <i class="bi bi-diagram-3"></i> Sélection hiérarchique des recettes
-                </h4>
+                </h5>
                 
                 <div class="alert alert-info">
                     <i class="bi bi-info-circle"></i>
@@ -423,18 +480,19 @@
                 <div id="recettesSelectedContainer">
                     <p class="text-muted">Aucune recette sélectionnée.</p>
                 </div>
-                
-                <div class="d-flex justify-content-between mt-4">
-                    <button class="btn btn-secondary" onclick="goToStep1()">
-                        <i class="bi bi-arrow-left"></i> Retour
-                    </button>
-                    <button class="btn btn-primary btn-lg" onclick="goToStep3()" disabled id="btnStep3">
-                        Suivant <i class="bi bi-arrow-right"></i>
-                    </button>
-                </div>
+            </div>
+            
+            <div class="d-flex justify-content-between mt-4">
+                <button class="btn btn-secondary" onclick="goToStep1()">
+                    <i class="bi bi-arrow-left"></i> Retour
+                </button>
+                <button class="btn btn-primary btn-lg" onclick="proceedToNextStep()" disabled id="btnStep3">
+                    Suivant <i class="bi bi-arrow-right"></i>
+                </button>
             </div>
         </div>
     </div>
+</div>
 
     <!-- Étape 3: Quantités de production -->
     <div id="etape3" class="etape-content">
@@ -595,7 +653,7 @@
 // Variables globales
 let selectedIngredients = new Set();
 let ingredientsData = new Map();
-let selectedDepartements = new Map(); // Map: ingredientId -> Set of departmentIds
+let selectedDepartements = new Map();
 let departementsData = new Map();
 let allRecettes = new Map();
 let selectedRecettes = new Map();
@@ -603,7 +661,7 @@ let productionQuantites = new Map();
 let besoinsIngredients = new Map();
 let fournisseurSelections = new Map();
 let fournisseurNotes = new Map();
-let prixModifies = new Map(); // Pour stocker les prix modifiés
+let prixModifies = new Map();
 
 // Fonction pour obtenir le CSRF token
 function getCookie(name) {
@@ -621,12 +679,60 @@ function getCookie(name) {
     return cookieValue;
 }
 
+/**
+ * Formate une quantité avec conversion automatique des unités
+ * @param {number} quantite - La quantité à formater
+ * @param {string} unite - L'unité de mesure (g, ml, kg, L, etc.)
+ * @returns {string} - La quantité formatée avec l'unité appropriée
+ */
+function formatQuantiteAvecConversion(quantite, unite) {
+    // Conversion pour les grammes vers kilogrammes
+    if (unite && unite.toLowerCase() === 'g') {
+        if (quantite >= 10000) {
+            return (quantite / 1000).toFixed(2).replace(/\.?0+$/, '') + ' kg';
+        } else if (quantite < 1000) {
+            return quantite.toFixed(2).replace(/\.?0+$/, '') + ' g';
+        } else {
+            // Entre 1000g et 9999g, on affiche en kg
+            return (quantite / 1000).toFixed(2).replace(/\.?0+$/, '') + ' kg';
+        }
+    }
+    
+    // Conversion pour les millilitres vers litres  
+    if (unite && unite.toLowerCase() === 'ml') {
+        if (quantite >= 10000) {
+            return (quantite / 1000).toFixed(2).replace(/\.?0+$/, '') + ' L';
+        } else if (quantite < 1000) {
+            return quantite.toFixed(2).replace(/\.?0+$/, '') + ' ml';
+        } else {
+            // Entre 1000ml et 9999ml, on affiche en L
+            return (quantite / 1000).toFixed(2).replace(/\.?0+$/, '') + ' L';
+        }
+    }
+    
+    // Pour les autres unités, pas de conversion
+    return quantite.toFixed(2).replace(/\.?0+$/, '') + ' ' + unite;
+}
+
 // Initialisation
 document.addEventListener('DOMContentLoaded', function() {
     // Date par défaut: J+2
     const dateLivraison = new Date();
     dateLivraison.setDate(dateLivraison.getDate() + 2);
     document.getElementById('dateLivraison').valueAsDate = dateLivraison;
+    
+    // Formater toutes les quantités au chargement de la page
+    document.querySelectorAll('.stock-display').forEach(element => {
+        const value = parseFloat(element.dataset.value);
+        const unite = element.dataset.unite;
+        element.textContent = formatQuantiteAvecConversion(value, unite);
+    });
+    
+    document.querySelectorAll('.stock-alerte-display').forEach(element => {
+        const value = parseFloat(element.dataset.value);
+        const unite = element.dataset.unite;
+        element.textContent = formatQuantiteAvecConversion(value, unite);
+    });
     
     // Recherche d'ingrédients
     document.getElementById('ingredientSearch').addEventListener('keyup', function(e) {
@@ -658,6 +764,7 @@ document.addEventListener('DOMContentLoaded', function() {
         card.addEventListener('click', function() {
             const id = parseInt(this.dataset.id);
             const nom = this.querySelector('.card-title').textContent;
+            const unite = this.dataset.unite;
             
             if (selectedIngredients.has(id)) {
                 selectedIngredients.delete(id);
@@ -665,7 +772,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.classList.remove('selected');
             } else {
                 selectedIngredients.add(id);
-                ingredientsData.set(id, {nom: nom});
+                ingredientsData.set(id, {nom: nom, unite: unite});
                 this.classList.add('selected');
             }
             
@@ -1116,10 +1223,10 @@ function updateBesoinsTable() {
         
         row.innerHTML = `
             <td>${besoin.nom}</td>
-            <td>${besoin.quantite.toFixed(2)} ${besoin.unite}</td>
-            <td>${besoin.stock_actuel.toFixed(2)} ${besoin.unite}</td>
+            <td>${formatQuantiteAvecConversion(besoin.quantite, besoin.unite)}</td>
+            <td>${formatQuantiteAvecConversion(besoin.stock_actuel, besoin.unite)}</td>
             <td>
-                <strong>${besoin.quantite_commander.toFixed(2)} ${besoin.unite}</strong>
+                <strong>${formatQuantiteAvecConversion(besoin.quantite_commander, besoin.unite)}</strong>
                 <br><small class="text-muted">(modifiable à l'étape suivante)</small>
             </td>
             <td>
@@ -1274,13 +1381,18 @@ function createIngredientRow(besoin, ingId, fournisseursUniques, isSelected) {
                 <label>Quantité:</label>
                 <input type="number" 
                        class="form-control form-control-sm d-inline-block" 
-                       style="width: 80px;"
+                       style="width: 100px;"
                        id="qte_${ingId}"
                        value="${quantiteCommander.toFixed(2)}" 
                        min="0"
                        step="0.01"
+                       data-unite="${besoin.unite}"
                        onchange="updateQuantiteCommande('${ingId}', this.value)">
-                <span class="text-muted">${besoin.unite}</span>
+                <div class="mt-1">
+                    <span class="text-muted" id="unite_display_${ingId}">
+                        ${formatQuantiteAvecConversion(quantiteCommander, besoin.unite)}
+                    </span>
+                </div>
             </div>
             ${besoin.quantite_commander > 0 ? 
                 '<span class="badge bg-warning mt-2">Stock bas</span>' : 
@@ -1465,7 +1577,8 @@ function updatePrixTotal(ingId, fournisseurId, quantite, prix) {
 // Mise à jour tous les prix
 function updateAllPrixTotaux() {
     besoinsIngredients.forEach((besoin, ingId) => {
-        const quantite = parseFloat(document.getElementById(`qte_${ingId}`).value) || 0;
+        const quantite = parseFloat(document.getElementById(`qte_${ingId}`).
+        value) || 0;
         if (besoin.fournisseurs) {
             besoin.fournisseurs.forEach(f => {
                 const key = `${ingId}_${f.fournisseur__id}`;
@@ -1516,7 +1629,7 @@ function toggleSkipIngredient(ingId, skip) {
     updateRecapitulatif();
 }
 
-// Mise à jour quantité
+// Mise à jour quantité avec formatage
 function updateQuantiteCommande(ingId, quantite) {
     const qte = parseFloat(quantite) || 0;
     
@@ -1527,6 +1640,14 @@ function updateQuantiteCommande(ingId, quantite) {
     const skipCheckbox = document.getElementById(`skip_${ingId}`);
     if (skipCheckbox) {
         skipCheckbox.checked = (qte === 0);
+    }
+    
+    // Mettre à jour l'affichage de l'unité formatée
+    const qteInput = document.getElementById(`qte_${ingId}`);
+    const uniteDisplay = document.getElementById(`unite_display_${ingId}`);
+    if (qteInput && uniteDisplay) {
+        const unite = qteInput.dataset.unite;
+        uniteDisplay.textContent = formatQuantiteAvecConversion(qte, unite);
     }
     
     updateAllPrixTotaux();
@@ -1669,7 +1790,7 @@ function creerCommandes() {
             commandesParFournisseur.get(selection.fournisseur_id).lignes.push({
                 ingredient_id: parseInt(ingId),
                 quantite: selection.quantite,
-                prix_unitaire: prixFinal,  // Inclure le prix modifié
+                prix_unitaire: prixFinal,
                 note: note
             });
         }
@@ -1728,6 +1849,147 @@ function showToast(message, type = 'info') {
     
     const bsToast = new bootstrap.Toast(toast);
     bsToast.show();
+}
+
+// Variable pour stocker le mode choisi
+let modeCommande = null; // 'direct' ou 'recettes'
+
+// Fonction pour choisir le mode direct
+function choixModeDirecte() {
+    modeCommande = 'direct';
+    
+    // Masquer la section de sélection des recettes
+    document.getElementById('recetteSelectionSection').style.display = 'none';
+    
+    // Activer le bouton suivant
+    document.getElementById('btnStep3').disabled = false;
+    
+    // Mettre en évidence le choix
+    document.querySelectorAll('#etape2 .card').forEach(card => {
+        card.classList.remove('border-3', 'shadow');
+    });
+    event.currentTarget.classList.add('border-3', 'shadow');
+    
+    // Préparer les besoins pour les ingrédients sélectionnés uniquement
+    prepareDirectOrder();
+    
+    showToast('Mode commande directe sélectionné', 'info');
+}
+
+// Fonction pour choisir le mode avec recettes
+function choixModeRecettes() {
+    modeCommande = 'recettes';
+    
+    // Afficher la section de sélection des recettes
+    document.getElementById('recetteSelectionSection').style.display = 'block';
+    
+    // Le bouton suivant reste désactivé jusqu'à sélection de recettes
+    document.getElementById('btnStep3').disabled = true;
+    
+    // Mettre en évidence le choix
+    document.querySelectorAll('#etape2 .card').forEach(card => {
+        card.classList.remove('border-3', 'shadow');
+    });
+    event.currentTarget.classList.add('border-3', 'shadow');
+    
+    // Charger la navigation des ingrédients
+    loadIngredientNavigation();
+    
+    showToast('Mode commande via recettes sélectionné', 'info');
+}
+
+// Préparer la commande directe
+function prepareDirectOrder() {
+    besoinsIngredients.clear();
+    
+    // Pour chaque ingrédient sélectionné, créer une entrée de besoin
+    selectedIngredients.forEach(ingId => {
+        const ingData = ingredientsData.get(ingId);
+        const card = document.querySelector(`.ingredient-card[data-id="${ingId}"]`);
+        
+        if (card) {
+            const stockActuel = parseFloat(card.querySelector('.stock-display').dataset.value) || 0;
+            const stockAlerte = parseFloat(card.querySelector('.stock-alerte-display').dataset.value) || 0;
+            
+            // Calculer une quantité suggérée (ex: stock alerte * 2 - stock actuel)
+            let quantiteSuggeree = Math.max(0, (stockAlerte * 2) - stockActuel);
+            if (quantiteSuggeree === 0) {
+                quantiteSuggeree = stockAlerte || 10; // Quantité par défaut
+            }
+            
+            besoinsIngredients.set(ingId.toString(), {
+                nom: ingData.nom,
+                unite: ingData.unite,
+                quantite: quantiteSuggeree,
+                stock_actuel: stockActuel,
+                quantite_commander: quantiteSuggeree,
+                fournisseurs: [] // Sera chargé à l'étape 4
+            });
+        }
+    });
+}
+
+// Fonction modifiée pour passer à l'étape suivante
+function proceedToNextStep() {
+    if (modeCommande === 'direct') {
+        // Aller directement à l'étape 4 (attribution fournisseurs)
+        updateStepIndicator(4);
+        
+        // Charger les fournisseurs pour les ingrédients sélectionnés
+        loadFournisseursForDirectOrder();
+    } else if (modeCommande === 'recettes') {
+        // Continuer normalement avec l'étape 3
+        if (selectedRecettes.size === 0) {
+            showToast('Veuillez sélectionner au moins une recette', 'warning');
+            return;
+        }
+        goToStep3();
+    }
+}
+
+// Charger les fournisseurs pour commande directe
+function loadFournisseursForDirectOrder() {
+    // Pour chaque ingrédient, récupérer les fournisseurs disponibles
+    const promises = [];
+    
+    besoinsIngredients.forEach((besoin, ingId) => {
+        const promise = fetch(`/api/ingredients/${ingId}/fournisseurs/`)
+            .then(response => response.json())
+            .then(fournisseurs => {
+                besoin.fournisseurs = fournisseurs.map(f => ({
+                    fournisseur__id: f.fournisseur_id,
+                    fournisseur__nom: f.fournisseur_nom,
+                    prix: parseFloat(f.prix)
+                }));
+            })
+            .catch(error => {
+                console.error(`Erreur chargement fournisseurs pour ${besoin.nom}:`, error);
+                besoin.fournisseurs = [];
+            });
+        promises.push(promise);
+    });
+    
+    // Une fois tous les fournisseurs chargés, afficher le tableau
+    Promise.all(promises).then(() => {
+        loadFournisseursTableFormat();
+        showToast('Vous pouvez maintenant attribuer les fournisseurs et ajuster les quantités', 'success');
+    });
+}
+
+// Modifier la fonction goToStep2 existante
+function goToStep2() {
+    if (selectedIngredients.size === 0) return;
+    updateStepIndicator(2);
+    
+    // Réinitialiser le mode
+    modeCommande = null;
+    document.getElementById('btnStep3').disabled = true;
+    document.getElementById('recetteSelectionSection').style.display = 'none';
+    
+    // Retirer les mises en évidence
+    document.querySelectorAll('#etape2 .card').forEach(card => {
+        card.classList.remove('border-3', 'shadow');
+    });
 }
 </script>
 {% endblock %}
